@@ -1,7 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.14;
 
-contract OrderStructs {
+library OrderStructs {
+    // keccak256("MultipleMakerAskOrders(SingleMakerAskOrder[] makerAskOrders,BaseMakerOrder baseMakerOrder,bytes signature)")
+    bytes32 internal constant _MULTIPLE_MAKER_ASK_ORDERS =
+        0xd64ff02cfb72eb79ff0952c037f152e6ad36fc5008a8fdaa2513bde0e1fcf15d;
+
+    // keccak256("MultipleMakerBidOrders(SingleMakerBidOrder[] makerBidOrders,BaseMakerOrder baseMakerOrder,bytes signature)")
+    bytes32 internal constant _MULTIPLE_MAKER_BID_ORDERS =
+        0xbe879ec8e2b2320a9bfc29ff67b2f89f8854e91b0b64acf0be9ddaf9a510903d;
+
     struct BaseMakerOrder {
         uint112 userBidAskNonce;
         uint112 userSubsetNonce;

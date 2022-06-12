@@ -10,6 +10,14 @@ library OrderStructs {
     bytes32 internal constant _MULTIPLE_MAKER_BID_ORDERS =
         0xbe879ec8e2b2320a9bfc29ff67b2f89f8854e91b0b64acf0be9ddaf9a510903d;
 
+    function hash(MultipleMakerAskOrders calldata orders) internal pure returns (bytes32) {
+        return keccak256(abi.encode(_MULTIPLE_MAKER_ASK_ORDERS, orders.makerAskOrders, orders.baseMakerOrder));
+    }
+
+    function hash(MultipleMakerBidOrders calldata orders) internal pure returns (bytes32) {
+        return keccak256(abi.encode(_MULTIPLE_MAKER_BID_ORDERS, orders.makerBidOrders, orders.baseMakerOrder));
+    }
+
     struct BaseMakerOrder {
         uint112 userBidAskNonce;
         uint112 userSubsetNonce;

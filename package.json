@@ -7,7 +7,8 @@
   "license": "MIT",
   "private": true,
   "keywords": [
-    "looksrare"
+    "looksrare",
+    "solidity"
   ],
   "homepage": "https://looksrare.org/",
   "bugs": "https://github.com/LooksRare/solidity-template/issues",
@@ -64,5 +65,9 @@
     "ts-node": "^10.1.0",
     "typechain": "^5.1.2",
     "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "@looksrare/contract-libs": "LooksRare/contracts-libs",
+    "@looksrare/contracts-exchange-v1": "^1.1.0"
   }
 }

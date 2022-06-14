@@ -6,6 +6,8 @@ import {IERC2981} from "@looksrare/contract-libs/contracts/interfaces/IERC2981.s
 import {OwnableTwoSteps} from "@looksrare/contract-libs/contracts/OwnableTwoSteps.sol";
 
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
+import {IERC721} from "./interfaces/IERC721.sol";
+import {IERC1155} from "./interfaces/IERC1155.sol";
 
 /**
  * @title TransferManager
@@ -249,7 +251,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         address to,
         uint256 itemId
     ) internal {
-        //
+        IERC721(collection).transferFrom(from, to, itemId);
     }
 
     /**
@@ -267,7 +269,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256 itemId,
         uint256 amount
     ) internal {
-        //
+        IERC1155(collection).safeTransferFrom(from, to, itemId, amount, "");
     }
 
     /**
@@ -285,6 +287,6 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256[] calldata itemIds,
         uint256[] calldata amounts
     ) internal {
-        //
+        IERC1155(collection).safeBatchTransferFrom(from, to, itemIds, amounts, "");
     }
 }

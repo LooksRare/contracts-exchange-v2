@@ -30,7 +30,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
     error NotWhitelisted();
     error TransferCallerInvalid();
     error WrongAssetType(uint8 assetType);
-    error WrongLengthes();
+    error WrongLengths();
 
     // Events
     event ApprovalsGranted(address user, address[] operators);
@@ -86,7 +86,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256[] calldata amounts
     ) external override {
         if (itemIds.length == 0 || itemIds.length != amounts.length) {
-            revert WrongLengthes();
+            revert WrongLengths();
         }
 
         if (!_isTransferValid(from, msg.sender)) {
@@ -155,7 +155,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
      */
     function grantApprovals(address[] calldata operators) external {
         if (operators.length == 0) {
-            revert WrongLengthes();
+            revert WrongLengths();
         }
 
         for (uint256 i; i < operators.length; ) {
@@ -184,7 +184,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
      */
     function revokeApprovals(address[] calldata operators) external {
         if (operators.length == 0) {
-            revert WrongLengthes();
+            revert WrongLengths();
         }
 
         for (uint256 i; i < operators.length; ) {

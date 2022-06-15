@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.14;
+pragma solidity ^0.8.14;
 
 import {IERC165} from "@looksrare/contract-libs/contracts/interfaces/IERC165.sol";
 import {IERC2981} from "@looksrare/contract-libs/contracts/interfaces/IERC2981.sol";
@@ -34,8 +34,8 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
 
     // Events
     event ApprovalsGranted(address user, address[] operators);
-    event ApprovalsRemoved(address user, address[] operators);
-    event OperatorRemoved(address operator);
+    event ApprovalsDeprecated(address user, address[] operators);
+    event OperatorDeprecated(address operator);
     event OperatorWhitelisted(address operator);
 
     /**
@@ -159,8 +159,8 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         }
 
         for (uint256 i; i < operators.length; ) {
-            if (_whitelistedOperators[operators[i]]) {
-                revert AlreadyWhitelisted();
+            if (!_whitelistedOperators[operators[i]]) {
+                revert NotWhitelisted();
             }
 
             if (_hasUserApprovedOperator[msg.sender][operators[i]]) {
@@ -198,7 +198,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
             }
         }
 
-        emit ApprovalsRemoved(msg.sender, operators);
+        emit ApprovalsDeprecated(msg.sender, operators);
     }
 
     /**
@@ -216,17 +216,17 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Remove an operator from the system
-     * @param operator address of the operator to remove
+     * @notice Deprecate an operator from the system
+     * @param operator address of the operator to deprecate
      */
-    function removeOperator(address operator) external onlyOwner {
+    function deprecateOperator(address operator) external onlyOwner {
         if (!_whitelistedOperators[operator]) {
             revert NotWhitelisted();
         }
 
         delete _whitelistedOperators[operator];
 
-        emit OperatorRemoved(operator);
+        emit OperatorDeprecated(operator);
     }
 
     /**

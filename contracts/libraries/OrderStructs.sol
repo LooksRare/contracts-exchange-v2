@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.14;
+pragma solidity ^0.8.14;
 
+/**
+ * @title OrderStructs
+ * @notice This library contains all order struct types for the LooksRare protocol (v2).
+ * @author LooksRare protocol team (👀,💎)
+ */
 library OrderStructs {
     // keccak256("MultipleMakerAskOrders(SingleMakerAskOrder[] makerAskOrders,BaseMakerOrder baseMakerOrder,bytes signature)")
     bytes32 internal constant _MULTIPLE_MAKER_ASK_ORDERS =
@@ -19,8 +24,8 @@ library OrderStructs {
     }
 
     struct BaseMakerOrder {
-        uint112 userBidAskNonce;
-        uint112 userSubsetNonce;
+        uint112 bidAskNonce;
+        uint112 subsetNonce;
         uint16 strategyId; // 0: Standard; 1: Collection; 2. etc.
         uint8 assetType; // 0: ERC721; 1: ERC1155
         address collection;
@@ -29,6 +34,7 @@ library OrderStructs {
         address signer;
         uint256 startTime;
         uint256 endTime;
+        uint256 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
     }
 
     struct SingleMakerAskOrder {
@@ -36,7 +42,7 @@ library OrderStructs {
         uint256[] itemIds;
         uint256[] amounts; // length = 1 if single sale // length > 1 if batch sale
         uint112 orderNonce;
-        uint256 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
+        bool autoCancel;
         bytes additionalParameters;
     }
 
@@ -63,21 +69,31 @@ library OrderStructs {
     }
 
     struct TakerBidOrder {
-        address recipient;
-        address referrer;
         uint256 maxPrice;
+        address recipient;
         uint256[] itemIds;
         uint256[] amounts;
         bytes additionalParameters;
     }
 
+    struct MultipleTakerBidOrders {
+        address referrer;
+        address currency;
+        TakerBidOrder[] takerBidOrders;
+    }
+
     struct TakerAskOrder {
         address recipient;
-        address referrer;
         uint256 minPrice;
         uint256[] itemIds;
         uint256[] amounts;
         uint256 minNetRatio;
         bytes additionalParameters;
+    }
+
+    struct MultipleTakerAskOrders {
+        address referrer;
+        address currency;
+        TakerAskOrder[] takerAskOrders;
     }
 }

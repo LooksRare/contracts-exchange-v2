@@ -1,19 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+// LooksRare generalist libraries
 import {SignatureChecker} from "@looksrare/contract-libs/contracts/SignatureChecker.sol";
 import {ReentrancyGuard} from "@looksrare/contract-libs/contracts/ReentrancyGuard.sol";
 
+// Order structs
+import {OrderStructs} from "./libraries/OrderStructs.sol";
+
+// Interfaces
+import {ITransferManager} from "./interfaces/ITransferManager.sol";
+
+// Peripheral contracts
 import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
 import {NonceManager} from "./NonceManager.sol";
-import {TransferManager} from "./TransferManager.sol";
-import {LowLevelETH} from "./lowLevelCallers/LowLevelETH.sol";
-
-import {OrderStructs} from "./libraries/OrderStructs.sol";
-import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {IERC20} from "./interfaces/IERC20.sol";
 import {ReferralManager} from "./ReferralManager.sol";
+import {TransferManager} from "./TransferManager.sol";
+
+// Low-level callers
+import {LowLevelETH} from "./lowLevelCallers/LowLevelETH.sol";
+import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
 
 /**
  * @title LooksRareProtocol
@@ -27,12 +34,13 @@ contract LooksRareProtocol is
     ReferralManager,
     ReentrancyGuard,
     LowLevelETH,
+    LowLevelERC20,
     SignatureChecker
 {
     using OrderStructs for OrderStructs.MultipleMakerAskOrders;
     using OrderStructs for OrderStructs.MultipleMakerBidOrders;
 
-    // Keeps track of transfer managers
+    // Keep track of transfer managers
     mapping(uint16 => address) internal _transferManagers;
 
     // Initial domain separator
@@ -443,34 +451,6 @@ contract LooksRareProtocol is
                 unchecked {
                     ++i;
                 }
-            }
-        }
-    }
-
-    /**
-     * @notice Execute ERC20 Transfer
-     * @param currency address of the currency
-     * @param from address of the sender
-     * @param to address of the recipient
-     * @param amount amount to transfer
-     */
-    function _executeERC20Transfer(
-        address currency,
-        address from,
-        address to,
-        uint256 amount
-    ) internal {
-        (bool status, bytes memory data) = currency.call(
-            abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, amount)
-        );
-
-        if (!status) {
-            revert();
-        }
-
-        if (data.length != 0 && data.length >= 32) {
-            if (!abi.decode(data, (bool))) {
-                revert();
             }
         }
     }

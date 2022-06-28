@@ -23,7 +23,7 @@ contract ReferralManager is OwnableTwoSteps {
     event ReferrerRemoved(address referrer);
 
     modifier onlyController() {
-        if (msg.sender == referralController) {
+        if (msg.sender != referralController) {
             revert NotController();
         }
         _;

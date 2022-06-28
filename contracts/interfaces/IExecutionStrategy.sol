@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.14;
+pragma solidity ^0.8.14;
 
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
@@ -19,8 +19,8 @@ interface IExecutionStrategy {
         external
         returns (
             uint256 price,
-            uint256[] memory itemIds,
-            uint256[] memory amounts
+            uint256[] calldata itemIds,
+            uint256[] calldata amounts
         );
 
     function executeStrategyWithTakerAsk(
@@ -33,7 +33,7 @@ interface IExecutionStrategy {
         external
         returns (
             uint256 price,
-            uint256[] memory itemIds,
-            uint256[] memory amounts
+            uint256[] calldata itemIds,
+            uint256[] calldata amounts
         );
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.14;
+pragma solidity ^0.8.14;
 
 import {IERC165} from "@looksrare/contract-libs/contracts/interfaces/IERC165.sol";
 import {IERC2981} from "@looksrare/contract-libs/contracts/interfaces/IERC2981.sol";
@@ -159,8 +159,8 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         }
 
         for (uint256 i; i < operators.length; ) {
-            if (_whitelistedOperators[operators[i]]) {
-                revert AlreadyWhitelisted();
+            if (!_whitelistedOperators[operators[i]]) {
+                revert NotWhitelisted();
             }
 
             if (_hasUserApprovedOperator[msg.sender][operators[i]]) {

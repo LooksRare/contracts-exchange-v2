@@ -15,7 +15,7 @@ contract CurrencyManager is OwnableTwoSteps {
     error CurrencyNotWhitelisted(address currency);
 
     // Events
-    event CurrencyDeprecated(address currency);
+    event CurrencyRemoved(address currency);
     event CurrencyWhitelisted(address currency);
 
     // Whether the currency is whitelisted
@@ -39,15 +39,15 @@ contract CurrencyManager is OwnableTwoSteps {
     }
 
     /**
-     * @notice Deprecate currency for execution
+     * @notice Remove currency for execution
      * @param currency address of the currency (address(0) for ETH)
      */
-    function deprecateCurrency(address currency) external onlyOwner {
+    function removeCurrency(address currency) external onlyOwner {
         if (!_isCurrencyWhitelisted[currency]) {
             revert CurrencyNotWhitelisted(currency);
         }
 
         delete _isCurrencyWhitelisted[currency];
-        emit CurrencyDeprecated(currency);
+        emit CurrencyRemoved(currency);
     }
 }

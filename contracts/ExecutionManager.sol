@@ -27,7 +27,7 @@ contract ExecutionManager is OwnableTwoSteps {
     event NewProtocolFeeRecipient(address protocolFeeRecipient);
     event NewStrategy(uint16 strategyId, address implementation);
     event StrategyReactivated(uint16 strategyId);
-    event StrategyDeprecated(uint16 strategyId);
+    event StrategyRemoved(uint16 strategyId);
 
     uint8 private immutable _COUNT_INTERNAL_STRATEGIES = 2;
 
@@ -393,10 +393,10 @@ contract ExecutionManager is OwnableTwoSteps {
     }
 
     /**
-     * @notice Deprecate strategy
+     * @notice Remove strategy
      * @param strategyId id of the strategy
      */
-    function deprecateStrategy(uint16 strategyId) external onlyOwner {
+    function removeStrategy(uint16 strategyId) external onlyOwner {
         if (
             strategyId < _COUNT_INTERNAL_STRATEGIES ||
             _strategies[strategyId].implementation == address(0) ||
@@ -407,11 +407,11 @@ contract ExecutionManager is OwnableTwoSteps {
 
         _strategies[strategyId].isActive = false;
 
-        emit StrategyDeprecated(strategyId);
+        emit StrategyRemoved(strategyId);
     }
 
     /**
-     * @notice Reactivate deprecated strategy
+     * @notice Reactivate removed strategy
      * @param strategyId id of the strategy
      */
     function reactivateStrategy(uint16 strategyId) external onlyOwner {

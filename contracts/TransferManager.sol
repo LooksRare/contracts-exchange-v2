@@ -34,8 +34,8 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
 
     // Events
     event ApprovalsGranted(address user, address[] operators);
-    event ApprovalsDeprecated(address user, address[] operators);
-    event OperatorDeprecated(address operator);
+    event ApprovalsRemoved(address user, address[] operators);
+    event OperatorRemoved(address operator);
     event OperatorWhitelisted(address operator);
 
     /**
@@ -198,7 +198,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
             }
         }
 
-        emit ApprovalsDeprecated(msg.sender, operators);
+        emit ApprovalsRemoved(msg.sender, operators);
     }
 
     /**
@@ -216,17 +216,17 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Deprecate an operator from the system
-     * @param operator address of the operator to deprecate
+     * @notice Remove an operator from the system
+     * @param operator address of the operator to remove
      */
-    function deprecateOperator(address operator) external onlyOwner {
+    function removeOperator(address operator) external onlyOwner {
         if (!_whitelistedOperators[operator]) {
             revert NotWhitelisted();
         }
 
         delete _whitelistedOperators[operator];
 
-        emit OperatorDeprecated(operator);
+        emit OperatorRemoved(operator);
     }
 
     /**

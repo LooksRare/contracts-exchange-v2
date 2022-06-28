@@ -29,6 +29,8 @@ contract ExecutionManager is OwnableTwoSteps {
     event StrategyReactivated(uint16 strategyId);
     event StrategyDeprecated(uint16 strategyId);
 
+    uint8 private immutable _COUNT_INTERNAL_STRATEGIES = 2;
+
     // Royalty fee registry
     IRoyaltyFeeRegistry internal _royaltyFeeRegistry;
 
@@ -376,7 +378,7 @@ contract ExecutionManager is OwnableTwoSteps {
         uint8 protocolFee,
         address implementation
     ) external onlyOwner {
-        if (strategyId < 2 || _strategies[strategyId].implementation != address(0)) {
+        if (strategyId < _COUNT_INTERNAL_STRATEGIES || _strategies[strategyId].implementation != address(0)) {
             revert StrategyUsed(strategyId);
         }
 
@@ -396,7 +398,9 @@ contract ExecutionManager is OwnableTwoSteps {
      */
     function deprecateStrategy(uint16 strategyId) external onlyOwner {
         if (
-            strategyId < 2 || _strategies[strategyId].implementation == address(0) || !_strategies[strategyId].isActive
+            strategyId < _COUNT_INTERNAL_STRATEGIES ||
+            _strategies[strategyId].implementation == address(0) ||
+            !_strategies[strategyId].isActive
         ) {
             revert StrategyNotUsed(strategyId);
         }
@@ -412,7 +416,9 @@ contract ExecutionManager is OwnableTwoSteps {
      */
     function reactivateStrategy(uint16 strategyId) external onlyOwner {
         if (
-            strategyId < 2 || _strategies[strategyId].implementation == address(0) || _strategies[strategyId].isActive
+            strategyId < _COUNT_INTERNAL_STRATEGIES ||
+            _strategies[strategyId].implementation == address(0) ||
+            _strategies[strategyId].isActive
         ) {
             revert StrategyNotUsed(strategyId);
         }

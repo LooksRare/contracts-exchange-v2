@@ -42,7 +42,6 @@ library OrderStructs {
         uint256[] itemIds;
         uint256[] amounts; // length = 1 if single sale // length > 1 if batch sale
         uint112 orderNonce;
-        bool autoCancel;
         bytes additionalParameters;
     }
 

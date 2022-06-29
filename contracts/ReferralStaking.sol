@@ -10,10 +10,11 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
     error NotEnoughFundsStaked();
     error TierRateTooHigh();
     error AmountCannotBeZero();
+    error NoFundsStaked();
 
     // Events
-    event Withdraw(address user);
     event Deposit(address user, uint256 amount);
+    event Withdraw(address user);
     event TierUpdate(uint8 index, uint16 rate, uint256 stake);
 
     struct Tier {
@@ -45,12 +46,30 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
      * @notice Deposit LOOKS for staking
      * @param amount Amount to deposit
      */
-    function deposit(uint256 amount) external nonReentrant {}
+    function deposit(uint256 amount) external nonReentrant {
+        if (amount == 0) {
+            revert AmountCannotBeZero();
+        }
+
+        _executeERC20Transfer(looksRareTokenAddress, msg.sender, address(this), amount);
+        stake[msg.sender] += amount;
+
+        emit Deposit(msg.sender, amount);
+    }
 
     /**
      * @notice Withdraw all staked LOOKS for a user
      */
-    function withdraw() external nonReentrant {}
+    function withdraw() external nonReentrant {
+        if (stake[msg.sender] == 0) {
+            revert NoFundsStaked();
+        }
+
+        _executeERC20Transfer(looksRareTokenAddress, address(this), msg.sender, stake[msg.sender]);
+        stake[msg.sender] = 0;
+
+        emit Withdraw(msg.sender);
+    }
 
     /**
      * @notice Retrieve a user tier based on his stake

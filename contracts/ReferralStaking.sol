@@ -9,8 +9,9 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
     // Errors
     error NotEnoughFundsStaked();
     error TierRateTooHigh();
-    error AmountCannotBeZero();
+    error WrongDepositAmount();
     error NoFundsStaked();
+    error StakingTierDoesntExist();
 
     // Events
     event Deposit(address user, uint256 amount);
@@ -44,11 +45,16 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
 
     /**
      * @notice Deposit LOOKS for staking
+     * @param tier Tier index the user wants to reach with the new deposit
      * @param amount Amount to deposit
      */
-    function deposit(uint256 amount) external nonReentrant {
-        if (amount == 0) {
-            revert AmountCannotBeZero();
+    function deposit(uint8 tier, uint256 amount) external nonReentrant {
+        if (tier > numberOfTiers) {
+            revert StakingTierDoesntExist();
+        }
+        // If the amount added is not exactly the amount needed to climb to the next tier, reverts
+        if (tiers[tier].stake - stake[msg.sender] != amount) {
+            revert WrongDepositAmount();
         }
 
         _executeERC20Transfer(looksRareTokenAddress, msg.sender, address(this), amount);
@@ -66,16 +72,10 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
         }
 
         _executeERC20Transfer(looksRareTokenAddress, address(this), msg.sender, stake[msg.sender]);
-        stake[msg.sender] = 0;
+        delete stake[msg.sender];
 
         emit Withdraw(msg.sender);
     }
-
-    /**
-     * @notice Retrieve a user tier based on his stake
-     * @param user User address
-     */
-    function getUserTier(address user) external view returns (Tier memory) {}
 
     function setTier(uint8 index, Tier calldata tier) external onlyOwner {}
 }

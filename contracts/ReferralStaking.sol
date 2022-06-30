@@ -4,6 +4,7 @@ pragma solidity ^0.8.14;
 import {OwnableTwoSteps} from "@looksrare/contract-libs/contracts/OwnableTwoSteps.sol";
 import {ReentrancyGuard} from "@looksrare/contract-libs/contracts/ReentrancyGuard.sol";
 import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
+import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
 contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
     // Errors
@@ -34,13 +35,15 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
 
     // LOOKS token address
     address public immutable looksRareTokenAddress;
+    LooksRareProtocol public immutable looksRareProtocol;
 
     /**
      * @notice Constructor
      * @param _looksRareTokenAddress LOOKS token address
      */
-    constructor(address _looksRareTokenAddress) {
+    constructor(address _looksRareProtocol, address _looksRareTokenAddress) {
         looksRareTokenAddress = _looksRareTokenAddress;
+        looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
     }
 
     /**
@@ -59,6 +62,7 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
 
         _executeERC20Transfer(looksRareTokenAddress, msg.sender, address(this), amount);
         stake[msg.sender] += amount;
+        looksRareProtocol.registerReferrer(msg.sender, tiers[tier].rate);
 
         emit Deposit(msg.sender, amount);
     }
@@ -73,6 +77,7 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
 
         _executeERC20Transfer(looksRareTokenAddress, address(this), msg.sender, stake[msg.sender]);
         delete stake[msg.sender];
+        looksRareProtocol.unregisterReferrer(msg.sender);
 
         emit Withdraw(msg.sender);
     }

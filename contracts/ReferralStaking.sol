@@ -52,7 +52,7 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
      * @param amount Amount to deposit
      */
     function deposit(uint8 tier, uint256 amount) external nonReentrant {
-        if (tier > numberOfTiers) {
+        if (tier >= numberOfTiers) {
             revert StakingTierDoesntExist();
         }
         // If the amount added is not exactly the amount needed to climb to the next tier, reverts
@@ -82,5 +82,21 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
         emit Withdraw(msg.sender);
     }
 
-    function setTier(uint8 index, Tier calldata tier) external onlyOwner {}
+    /* Owner only functions */
+
+    function registerReferrer(address user, uint8 tier) external onlyOwner {
+        if (tier >= numberOfTiers) {
+            revert StakingTierDoesntExist();
+        }
+        looksRareProtocol.registerReferrer(user, tiers[tier].rate);
+    }
+
+    function unregisterReferrer(address user) external onlyOwner {
+        looksRareProtocol.unregisterReferrer(user);
+    }
+
+    function setTier(uint8 index, Tier calldata tier) external onlyOwner {
+        require(index <= numberOfTiers, "You skipped a tier");
+        tiers[index] = tier;
+    }
 }

@@ -1,6 +1,11 @@
-# Solidity template
+# Contracts Exchange V2
 
-This is a template for GitHub repos with Solidity smart contracts using Forge and Hardhat. This template is used by the LooksRare team for Solidity-based repos. Feel free to use or get inspired to build your own templates!
+## Setup
+
+- Run `yarn`
+- Install [Forge](https://book.getfoundry.sh/getting-started/installation.html)
+- Run `forge update`
+- Run `git submodule update`
 
 ## About this repo
 

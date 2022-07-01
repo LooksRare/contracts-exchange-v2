@@ -1,7 +1,7 @@
 {
   "name": "contracts-exchange-v2",
   "version": "1.0.0",
-  "description": "LooksRare exchange protocol smart contracts(v2)",
+  "description": "LooksRare exchange protocol smart contracts (v2)",
   "author": "LooksRare",
   "license": "MIT",
   "private": true,
@@ -10,13 +10,14 @@
     "solidity"
   ],
   "homepage": "https://looksrare.org/",
-  "bugs": "https://github.com/LooksRare/solidity-template/issues",
+  "bugs": "https://github.com/LooksRare/contracts-exchange-v2/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LooksRare/solidity-template.git"
+    "url": "https://github.com/LooksRare/contracts-exchange-v2.git"
   },
   "scripts": {
     "compile": "hardhat compile",
+    "compile:forge": "forge compile",
     "compile:force": "hardhat compile --force",
     "format:check": "prettier --check '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "format:write": "prettier --write '**/*.{js,jsx,ts,tsx,json,yaml,md}'",
@@ -67,7 +68,7 @@
     "typescript": "^4.5.2"
   },
   "dependencies": {
-    "@looksrare/contracts-libs": "^1.0.0",
-    "@looksrare/contracts-exchange-v1": "^1.1.0"
+    "@looksrare/contracts-exchange-v1": "^1.1.0",
+    "@looksrare/contracts-libs": "^1.0.0"
   }
 }

@@ -67,7 +67,7 @@
     "typescript": "^4.5.2"
   },
   "dependencies": {
-    "@looksrare/contract-libs": "LooksRare/contracts-libs",
+    "@looksrare/contracts-libs": "^1.0.0",
     "@looksrare/contracts-exchange-v1": "^1.1.0"
   }
 }

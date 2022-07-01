@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import {IERC165} from "@looksrare/contract-libs/contracts/interfaces/IERC165.sol";
-import {IERC2981} from "@looksrare/contract-libs/contracts/interfaces/IERC2981.sol";
-import {OwnableTwoSteps} from "@looksrare/contract-libs/contracts/OwnableTwoSteps.sol";
+import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/IERC165.sol";
+import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/IERC2981.sol";
+import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {IERC721} from "./interfaces/IERC721.sol";

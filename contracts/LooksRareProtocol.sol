@@ -2,8 +2,8 @@
 pragma solidity ^0.8.14;
 
 // LooksRare generalist libraries
-import {SignatureChecker} from "@looksrare/contract-libs/contracts/SignatureChecker.sol";
-import {ReentrancyGuard} from "@looksrare/contract-libs/contracts/ReentrancyGuard.sol";
+import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
+import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
 
 // Order structs
 import {OrderStructs} from "./libraries/OrderStructs.sol";

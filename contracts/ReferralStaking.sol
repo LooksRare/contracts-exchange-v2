@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import {OwnableTwoSteps} from "@looksrare/contract-libs/contracts/OwnableTwoSteps.sol";
-import {ReentrancyGuard} from "@looksrare/contract-libs/contracts/ReentrancyGuard.sol";
+import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
 import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
@@ -16,7 +16,7 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
 
     // Events
     event Deposit(address user, uint256 amount);
-    event Withdraw(address user);
+    event WithdrawAll(address user);
     event TierUpdate(uint8 index, uint16 rate, uint256 stake);
 
     struct Tier {
@@ -27,11 +27,11 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
     }
 
     // List of tiers, simulate an array behavior
-    mapping(uint8 => Tier) public tiers;
+    mapping(uint8 => Tier) internal tiers;
     uint8 public numberOfTiers;
 
     // Amount of LOOKS staked per address
-    mapping(address => uint256) public stake;
+    mapping(address => uint256) internal stake;
 
     // LOOKS token address
     address public immutable looksRareTokenAddress;
@@ -70,7 +70,7 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
     /**
      * @notice Withdraw all staked LOOKS for a user
      */
-    function withdraw() external nonReentrant {
+    function withdrawAll() external nonReentrant {
         if (stake[msg.sender] == 0) {
             revert NoFundsStaked();
         }
@@ -79,7 +79,17 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
         delete stake[msg.sender];
         looksRareProtocol.unregisterReferrer(msg.sender);
 
-        emit Withdraw(msg.sender);
+        emit WithdrawAll(msg.sender);
+    }
+
+    /* Getters */
+
+    function viewUserStake(address user) external view returns (uint256) {
+        return stake[user];
+    }
+
+    function viewTier(uint8 tier) external view returns (Tier memory) {
+        return tiers[tier];
     }
 
     /* Owner only functions */

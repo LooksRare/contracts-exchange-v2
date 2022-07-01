@@ -2,9 +2,9 @@
 pragma solidity ^0.8.14;
 
 import {IRoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/interfaces/IRoyaltyFeeRegistry.sol";
-import {IERC165} from "@looksrare/contract-libs/contracts/interfaces/IERC165.sol";
-import {IERC2981} from "@looksrare/contract-libs/contracts/interfaces/IERC2981.sol";
-import {OwnableTwoSteps} from "@looksrare/contract-libs/contracts/OwnableTwoSteps.sol";
+import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/IERC165.sol";
+import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/IERC2981.sol";
+import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";

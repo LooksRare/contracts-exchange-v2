@@ -120,8 +120,13 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         looksRareProtocol.unregisterReferrer(user);
     }
 
-    function setTier(uint8 index, Tier calldata tier) external onlyOwner {
+    function setTier(
+        uint8 index,
+        uint16 _rate,
+        uint256 _stake
+    ) external onlyOwner {
         require(index <= numberOfTiers, "You skipped a tier");
-        tiers[index] = tier;
+        tiers[index] = Tier(_rate, _stake);
+        numberOfTiers++;
     }
 }

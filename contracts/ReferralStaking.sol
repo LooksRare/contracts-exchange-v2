@@ -2,17 +2,15 @@
 pragma solidity ^0.8.14;
 
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
-import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
 import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
-contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
+contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
     // Errors
-    error NotEnoughFundsStaked();
-    error TierRateTooHigh();
     error WrongDepositAmount();
     error NoFundsStaked();
     error StakingTierDoesntExist();
+    error TierTooHigh();
 
     // Events
     event Deposit(address user, uint256 amount);
@@ -51,7 +49,7 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
      * @param tier Tier index the user wants to reach with the new deposit
      * @param amount Amount to deposit
      */
-    function deposit(uint8 tier, uint256 amount) external nonReentrant {
+    function deposit(uint8 tier, uint256 amount) external {
         if (tier >= numberOfTiers) {
             revert StakingTierDoesntExist();
         }
@@ -70,7 +68,7 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
     /**
      * @notice Withdraw all staked LOOKS for a user
      */
-    function withdrawAll() external nonReentrant {
+    function withdrawAll() external {
         if (stake[msg.sender] == 0) {
             revert NoFundsStaked();
         }
@@ -80,6 +78,23 @@ contract ReferralStaking is OwnableTwoSteps, ReentrancyGuard, LowLevelERC20 {
         looksRareProtocol.unregisterReferrer(msg.sender);
 
         emit WithdrawAll(msg.sender);
+    }
+
+    /**
+     * @notice Downgrade to a lower staking tier
+     * @param tier Tier index the user wants to reach
+     */
+    function downgrade(uint8 tier) external {
+        if (tier >= numberOfTiers) {
+            revert StakingTierDoesntExist();
+        }
+        if (tiers[tier].stake >= stake[msg.sender]) {
+            revert TierTooHigh();
+        }
+
+        _executeERC20Transfer(looksRareTokenAddress, address(this), msg.sender, stake[msg.sender] - tiers[tier].stake);
+        looksRareProtocol.unregisterReferrer(msg.sender);
+        looksRareProtocol.registerReferrer(msg.sender, tiers[tier].rate);
     }
 
     /* Getters */

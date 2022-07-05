@@ -61,4 +61,14 @@ contract ReferralStakingTest is TestHelpers {
         vm.expectRevert("Use an existing index to update a tier, or use numberOfTiers to create a new tier");
         referralStaking.setTier(4, 1000, 30 ether);
     }
+
+    function testDeposit() public asPrankedUser(user) {
+        // Deposit on non existing tier
+        vm.expectRevert(ReferralStaking.StakingTierDoesntExist.selector);
+        referralStaking.deposit(100, 1 ether);
+
+        // Deposit invalid amount
+        vm.expectRevert(ReferralStaking.WrongDepositAmount.selector);
+        referralStaking.deposit(0, 1 ether);
+    }
 }

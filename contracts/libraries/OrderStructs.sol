@@ -49,7 +49,7 @@ library OrderStructs {
         uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
-        uint128 orderNonce;
+        uint112 orderNonce;
         bytes additionalParameters;
     }
 

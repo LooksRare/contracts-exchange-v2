@@ -13,7 +13,8 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
     error TierTooHigh();
 
     // Events
-    event Deposit(address user, uint256 amount);
+    event Deposit(address user, uint8 tier);
+    event Downgrade(address user, uint8 tier);
     event WithdrawAll(address user);
     event TierUpdate(uint8 index, uint16 rate, uint256 stake);
 
@@ -24,19 +25,19 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         uint256 stake;
     }
 
-    // List of tiers, simulate an array behavior
-    mapping(uint8 => Tier) internal tiers;
-    uint8 public numberOfTiers;
-
-    // Amount of LOOKS staked per address
-    mapping(address => uint256) internal stake;
-
-    // LOOKS token address
     address public immutable looksRareTokenAddress;
     LooksRareProtocol public immutable looksRareProtocol;
 
+    // List of tiers, simulate an array behavior
+    mapping(uint8 => Tier) internal _tiers;
+    uint8 public numberOfTiers;
+
+    // Amount of LOOKS staked per address
+    mapping(address => uint256) internal _userStakes;
+
     /**
      * @notice Constructor
+     * @param _looksRareProtocol LooksRare protocol address
      * @param _looksRareTokenAddress LOOKS token address
      */
     constructor(address _looksRareProtocol, address _looksRareTokenAddress) {
@@ -54,27 +55,27 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
             revert StakingTierDoesntExist();
         }
         // If the amount added is not exactly the amount needed to climb to the next tier, reverts
-        if (tiers[tier].stake - stake[msg.sender] != amount) {
+        if (_tiers[tier].stake - _userStakes[msg.sender] != amount) {
             revert WrongDepositAmount();
         }
 
         _executeERC20Transfer(looksRareTokenAddress, msg.sender, address(this), amount);
-        stake[msg.sender] += amount;
-        looksRareProtocol.registerReferrer(msg.sender, tiers[tier].rate);
+        _userStakes[msg.sender] += amount;
+        looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
 
-        emit Deposit(msg.sender, amount);
+        emit Deposit(msg.sender, tier);
     }
 
     /**
      * @notice Withdraw all staked LOOKS for a user
      */
     function withdrawAll() external {
-        if (stake[msg.sender] == 0) {
+        if (_userStakes[msg.sender] == 0) {
             revert NoFundsStaked();
         }
 
-        _executeERC20Transfer(looksRareTokenAddress, address(this), msg.sender, stake[msg.sender]);
-        delete stake[msg.sender];
+        _executeERC20Transfer(looksRareTokenAddress, address(this), msg.sender, _userStakes[msg.sender]);
+        delete _userStakes[msg.sender];
         looksRareProtocol.unregisterReferrer(msg.sender);
 
         emit WithdrawAll(msg.sender);
@@ -88,23 +89,20 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         if (tier >= numberOfTiers) {
             revert StakingTierDoesntExist();
         }
-        if (tiers[tier].stake >= stake[msg.sender]) {
+        if (_tiers[tier].stake >= _userStakes[msg.sender]) {
             revert TierTooHigh();
         }
 
-        _executeERC20Transfer(looksRareTokenAddress, address(this), msg.sender, stake[msg.sender] - tiers[tier].stake);
+        _executeERC20Transfer(
+            looksRareTokenAddress,
+            address(this),
+            msg.sender,
+            _userStakes[msg.sender] - _tiers[tier].stake
+        );
         looksRareProtocol.unregisterReferrer(msg.sender);
-        looksRareProtocol.registerReferrer(msg.sender, tiers[tier].rate);
-    }
+        looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
 
-    /* Getters */
-
-    function viewUserStake(address user) external view returns (uint256) {
-        return stake[user];
-    }
-
-    function viewTier(uint8 tier) external view returns (Tier memory) {
-        return tiers[tier];
+        emit Downgrade(msg.sender, tier);
     }
 
     /* Owner only functions */
@@ -113,7 +111,7 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         if (tier >= numberOfTiers) {
             revert StakingTierDoesntExist();
         }
-        looksRareProtocol.registerReferrer(user, tiers[tier].rate);
+        looksRareProtocol.registerReferrer(user, _tiers[tier].rate);
     }
 
     function unregisterReferrer(address user) external onlyOwner {
@@ -125,8 +123,23 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         uint16 _rate,
         uint256 _stake
     ) external onlyOwner {
-        require(index <= numberOfTiers, "You skipped a tier");
-        tiers[index] = Tier(_rate, _stake);
-        numberOfTiers++;
+        require(
+            index <= numberOfTiers,
+            "Use an existing index to update a tier, or use numberOfTiers to create a new tier"
+        );
+        _tiers[index] = Tier(_rate, _stake);
+        if (index == numberOfTiers) {
+            numberOfTiers++;
+        }
+    }
+
+    /* Getter functions */
+
+    function viewUserStake(address user) external view returns (uint256) {
+        return _userStakes[user];
+    }
+
+    function viewTier(uint8 tier) external view returns (Tier memory) {
+        return _tiers[tier];
     }
 }

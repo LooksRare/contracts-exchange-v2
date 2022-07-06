@@ -38,4 +38,28 @@ contract LowLevelERC20 {
             }
         }
     }
+
+    /**
+     * @notice Execute ERC20 Direct Transfer
+     * @param currency address of the currency
+     * @param to address of the recipient
+     * @param amount amount to transfer
+     */
+    function _executeERC20DirectTransfer(
+        address currency,
+        address to,
+        uint256 amount
+    ) internal {
+        (bool status, bytes memory data) = currency.call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
+
+        if (!status) {
+            revert TransferERC20Fail();
+        }
+
+        if (data.length != 0 && data.length >= 32) {
+            if (!abi.decode(data, (bool))) {
+                revert TransferERC20Fail();
+            }
+        }
+    }
 }

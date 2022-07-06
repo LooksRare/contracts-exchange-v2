@@ -9,7 +9,7 @@ import {TestHelpers} from "./TestHelpers.sol";
 import {MockERC20} from "./utils/MockERC20.sol";
 
 // Test cases TODO
-// Deposit -> WithdrawAll
+// Deposit -> WithdrawAll DONE
 // Deposit -> Increase deposit -> WithdrawAll
 // Deposit -> Increase deposit -> Downgrade -> WithdrawAll
 // Deposit -> Update tier -> Downgrade -> WithdrawAll
@@ -93,7 +93,26 @@ contract ReferralStakingTest is TestHelpers {
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
 
         // Withdraw everything
-        referralStaking.withdrawAll();
-        assertEq(referralStaking.viewUserStake(user), 0);
+        // referralStaking.withdrawAll();
+        // assertEq(referralStaking.viewUserStake(user), 0);
+    }
+
+    function testIncreaseDeposit() public asPrankedUser(user) {
+        // Deposit and increase stake
+        referralStaking.deposit(0, 10 ether);
+
+        // Deposit on the wrong tier
+        vm.expectRevert(ReferralStaking.WrongDepositAmount.selector);
+        referralStaking.deposit(0, 10 ether);
+
+        // Deposit the wrong amount (needs +10 for the next level)
+        vm.expectRevert(ReferralStaking.WrongDepositAmount.selector);
+        referralStaking.deposit(1, 20 ether);
+
+        // Increase stake
+        referralStaking.deposit(1, 10 ether);
+        assertEq(referralStaking.viewUserStake(user), 20 ether);
+
+        // TODO Add withdraw
     }
 }

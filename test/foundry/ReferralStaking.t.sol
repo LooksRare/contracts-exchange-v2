@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/royaltyFeeRegistry.sol";
+import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
@@ -9,12 +10,7 @@ import {TestHelpers} from "./TestHelpers.sol";
 import {MockERC20} from "./utils/MockERC20.sol";
 
 // Test cases TODO
-// Deposit -> WithdrawAll DONE
-// Deposit -> Increase deposit -> WithdrawAll DONE
-// Deposit -> Downgrade -> WithdrawAll
 // Deposit -> Update tier -> Downgrade -> WithdrawAll
-// registerReferrer -> unregisterReferrer
-// Owner only
 
 contract ReferralStakingTest is TestHelpers {
     MockERC20 public mockERC20;
@@ -50,6 +46,18 @@ contract ReferralStakingTest is TestHelpers {
         vm.stopPrank();
     }
 
+    function testOwnerOnly() public asPrankedUser(user) {
+        // Make sure that owner functions can't be used by a user
+        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        referralStaking.registerReferrer(user, 0);
+
+        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        referralStaking.unregisterReferrer(user);
+
+        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        referralStaking.setTier(1, 1000, 10 ether);
+    }
+
     function testSetTierAndGetTier() public asPrankedUser(owner) {
         // Test initial state after setup
         assertEq(referralStaking.numberOfTiers(), 2, "Wrong number of tiers");
@@ -73,6 +81,16 @@ contract ReferralStakingTest is TestHelpers {
         // Add tier at invalid index
         vm.expectRevert("Use an existing index to update a tier, or use numberOfTiers to create a new tier");
         referralStaking.setTier(4, 1000, 30 ether);
+    }
+
+    function testRegisterUnregister() public asPrankedUser(owner) {
+        // Use wrong tier id
+        vm.expectRevert(ReferralStaking.StakingTierDoesntExist.selector);
+        referralStaking.registerReferrer(user, 2);
+
+        // Register and unregister
+        referralStaking.registerReferrer(user, 0);
+        referralStaking.unregisterReferrer(user);
     }
 
     function testDepositWithdraw() public asPrankedUser(user) {

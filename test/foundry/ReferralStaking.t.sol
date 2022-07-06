@@ -8,6 +8,13 @@ import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {TestHelpers} from "./TestHelpers.sol";
 import {MockERC20} from "./utils/MockERC20.sol";
 
+// Test cases TODO
+// Deposit -> WithdrawAll
+// Deposit -> Increase deposit -> WithdrawAll
+// Deposit -> Increase deposit -> Downgrade -> WithdrawAll
+// Deposit -> Update tier -> Downgrade -> WithdrawAll
+// registerReferrer -> unregisterReferrer
+
 contract ReferralStakingTest is TestHelpers {
     MockERC20 public mockERC20;
     RoyaltyFeeRegistry public royaltyFeeRegistry;
@@ -29,12 +36,17 @@ contract ReferralStakingTest is TestHelpers {
 
         referralStaking.setTier(0, 1000, 10 ether);
         referralStaking.setTier(1, 2000, 20 ether);
+        looksRareProtocol.updateReferralController(address(referralStaking));
 
         vm.stopPrank();
 
+        vm.startPrank(user);
+
         uint256 amountErc20 = 100 ether;
-        mockERC20.mint(address(1), amountErc20);
+        mockERC20.mint(user, amountErc20);
         mockERC20.approve(address(referralStaking), amountErc20);
+
+        vm.stopPrank();
     }
 
     function testSetTierAndGetTier() public asPrankedUser(owner) {
@@ -62,13 +74,26 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.setTier(4, 1000, 30 ether);
     }
 
-    function testDeposit() public asPrankedUser(user) {
-        // Deposit on non existing tier
+    function testDepositWithdraw() public asPrankedUser(user) {
+        // Withdraw without depositing first
+        vm.expectRevert(ReferralStaking.NoFundsStaked.selector);
+        referralStaking.withdrawAll();
+
+        // Deposit for non existing tier
         vm.expectRevert(ReferralStaking.StakingTierDoesntExist.selector);
         referralStaking.deposit(100, 1 ether);
 
         // Deposit invalid amount
         vm.expectRevert(ReferralStaking.WrongDepositAmount.selector);
         referralStaking.deposit(0, 1 ether);
+
+        // Deposit valid amount
+        referralStaking.deposit(0, 10 ether);
+        assertEq(referralStaking.viewUserStake(user), 10 ether);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
+
+        // Withdraw everything
+        referralStaking.withdrawAll();
+        assertEq(referralStaking.viewUserStake(user), 0);
     }
 }

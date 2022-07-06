@@ -11,9 +11,10 @@ import {MockERC20} from "./utils/MockERC20.sol";
 // Test cases TODO
 // Deposit -> WithdrawAll DONE
 // Deposit -> Increase deposit -> WithdrawAll DONE
-// Deposit -> Increase deposit -> Downgrade -> WithdrawAll
+// Deposit -> Downgrade -> WithdrawAll
 // Deposit -> Update tier -> Downgrade -> WithdrawAll
 // registerReferrer -> unregisterReferrer
+// Owner only
 
 contract ReferralStakingTest is TestHelpers {
     MockERC20 public mockERC20;
@@ -92,10 +93,9 @@ contract ReferralStakingTest is TestHelpers {
         assertEq(referralStaking.viewUserStake(user), 10 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
 
-        // TODO
         // Withdraw everything
-        // referralStaking.withdrawAll();
-        // assertEq(referralStaking.viewUserStake(user), 0);
+        referralStaking.withdrawAll();
+        assertEq(referralStaking.viewUserStake(user), 0);
     }
 
     function testIncreaseDeposit() public asPrankedUser(user) {
@@ -114,10 +114,9 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.deposit(1, 10 ether);
         assertEq(referralStaking.viewUserStake(user), 20 ether);
 
-        // TODO
         // Withdraw everything
-        // referralStaking.withdrawAll();
-        // assertEq(referralStaking.viewUserStake(user), 0);
+        referralStaking.withdrawAll();
+        assertEq(referralStaking.viewUserStake(user), 0);
     }
 
     function testDowngrade() public {
@@ -142,13 +141,12 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.downgrade(1);
 
         // Downgrade
-        // referralStaking.downgrade(0);
-        // assertEq(referralStaking.viewUserStake(user), 10 ether);
+        referralStaking.downgrade(0);
+        assertEq(referralStaking.viewUserStake(user), 10 ether);
 
-        // TODO
         // Withdraw everything
-        // referralStaking.withdrawAll();
-        // assertEq(referralStaking.viewUserStake(user), 0);
+        referralStaking.withdrawAll();
+        assertEq(referralStaking.viewUserStake(user), 0);
 
         vm.stopPrank();
     }

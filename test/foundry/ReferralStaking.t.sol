@@ -9,9 +9,6 @@ import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {TestHelpers} from "./TestHelpers.sol";
 import {MockERC20} from "./utils/MockERC20.sol";
 
-// Test cases TODO
-// Deposit -> Update tier -> Downgrade -> WithdrawAll
-
 contract ReferralStakingTest is TestHelpers {
     MockERC20 public mockERC20;
     RoyaltyFeeRegistry public royaltyFeeRegistry;
@@ -166,6 +163,24 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.withdrawAll();
         assertEq(referralStaking.viewUserStake(user), 0);
 
+        vm.stopPrank();
+    }
+
+    function testUpdateTierAndDowngrade() public {
+        // Initial deposit
+        vm.startPrank(user);
+        referralStaking.deposit(1, 20 ether);
+        vm.stopPrank();
+
+        // Reduce staking requirements
+        vm.startPrank(owner);
+        referralStaking.setTier(1, 2000, 15 ether);
+        vm.stopPrank();
+
+        // Withdraw unused tokens
+        vm.startPrank(user);
+        referralStaking.downgrade(1);
+        assertEq(referralStaking.viewUserStake(user), 15 ether);
         vm.stopPrank();
     }
 }

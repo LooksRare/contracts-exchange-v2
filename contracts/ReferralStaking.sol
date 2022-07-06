@@ -94,7 +94,7 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         }
 
         _executeERC20DirectTransfer(looksRareTokenAddress, msg.sender, _userStakes[msg.sender] - _tiers[tier].stake);
-        _userStakes[msg.sender] -= (_userStakes[msg.sender] - _tiers[tier].stake);
+        _userStakes[msg.sender] = _userStakes[msg.sender] - (_userStakes[msg.sender] - _tiers[tier].stake);
         looksRareProtocol.unregisterReferrer(msg.sender);
         looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
 

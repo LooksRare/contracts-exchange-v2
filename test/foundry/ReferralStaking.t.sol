@@ -10,7 +10,7 @@ import {MockERC20} from "./utils/MockERC20.sol";
 
 // Test cases TODO
 // Deposit -> WithdrawAll DONE
-// Deposit -> Increase deposit -> WithdrawAll
+// Deposit -> Increase deposit -> WithdrawAll DONE
 // Deposit -> Increase deposit -> Downgrade -> WithdrawAll
 // Deposit -> Update tier -> Downgrade -> WithdrawAll
 // registerReferrer -> unregisterReferrer
@@ -92,6 +92,7 @@ contract ReferralStakingTest is TestHelpers {
         assertEq(referralStaking.viewUserStake(user), 10 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
 
+        // TODO
         // Withdraw everything
         // referralStaking.withdrawAll();
         // assertEq(referralStaking.viewUserStake(user), 0);
@@ -113,6 +114,42 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.deposit(1, 10 ether);
         assertEq(referralStaking.viewUserStake(user), 20 ether);
 
-        // TODO Add withdraw
+        // TODO
+        // Withdraw everything
+        // referralStaking.withdrawAll();
+        // assertEq(referralStaking.viewUserStake(user), 0);
+    }
+
+    function testDowngrade() public {
+        // Add a new tier for the purpose of this test
+        vm.startPrank(owner);
+        referralStaking.setTier(2, 3000, 30 ether);
+        vm.stopPrank();
+
+        vm.startPrank(user);
+        referralStaking.deposit(1, 20 ether);
+
+        // Downgrade to a non existing tier
+        vm.expectRevert(ReferralStaking.StakingTierDoesntExist.selector);
+        referralStaking.downgrade(3);
+
+        // Downgrade to a higher tier
+        vm.expectRevert(ReferralStaking.TierTooHigh.selector);
+        referralStaking.downgrade(2);
+
+        // Downgrade to the current tier
+        vm.expectRevert(ReferralStaking.TierTooHigh.selector);
+        referralStaking.downgrade(1);
+
+        // Downgrade
+        // referralStaking.downgrade(0);
+        // assertEq(referralStaking.viewUserStake(user), 10 ether);
+
+        // TODO
+        // Withdraw everything
+        // referralStaking.withdrawAll();
+        // assertEq(referralStaking.viewUserStake(user), 0);
+
+        vm.stopPrank();
     }
 }

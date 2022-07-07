@@ -11,6 +11,7 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
     error NoFundsStaked();
     error StakingTierDoesntExist();
     error TierTooHigh();
+    error UserAlreadyStaking();
 
     // Events
     event Deposit(address user, uint8 tier);
@@ -106,6 +107,9 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
     function registerReferrer(address user, uint8 tier) external onlyOwner {
         if (tier >= numberOfTiers) {
             revert StakingTierDoesntExist();
+        }
+        if (_userStakes[user] > 0) {
+            revert UserAlreadyStaking();
         }
         looksRareProtocol.registerReferrer(user, _tiers[tier].rate);
     }

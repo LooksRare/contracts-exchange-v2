@@ -80,7 +80,9 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.setTier(4, 1000, 30 ether);
     }
 
-    function testRegisterUnregister() public asPrankedUser(owner) {
+    function testRegisterUnregister() public {
+        vm.startPrank(owner);
+
         // Use wrong tier id
         vm.expectRevert(ReferralStaking.StakingTierDoesntExist.selector);
         referralStaking.registerReferrer(user, 2);
@@ -88,6 +90,18 @@ contract ReferralStakingTest is TestHelpers {
         // Register and unregister
         referralStaking.registerReferrer(user, 0);
         referralStaking.unregisterReferrer(user);
+
+        vm.stopPrank();
+
+        // User deposit first, and can't be registered after
+        vm.startPrank(user);
+        referralStaking.deposit(0, 10 ether);
+        vm.stopPrank();
+
+        vm.startPrank(owner);
+        vm.expectRevert(ReferralStaking.UserAlreadyStaking.selector);
+        referralStaking.registerReferrer(user, 0);
+        vm.stopPrank();
     }
 
     function testDepositWithdraw() public asPrankedUser(user) {

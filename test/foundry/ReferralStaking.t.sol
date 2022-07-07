@@ -5,11 +5,11 @@ import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/roy
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
+import {ReferralStaking, IReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {TestHelpers} from "./TestHelpers.sol";
 import {MockERC20} from "./utils/MockERC20.sol";
 
-contract ReferralStakingTest is TestHelpers {
+contract ReferralStakingTest is TestHelpers, IReferralStaking {
     MockERC20 public mockERC20;
     RoyaltyFeeRegistry public royaltyFeeRegistry;
     TransferManager public transferManager;
@@ -71,6 +71,8 @@ contract ReferralStakingTest is TestHelpers {
         assertEq(referralStaking.viewTier(1).stake, 20 ether, "Wrong tier value");
 
         // Add a new tier
+        vm.expectEmit(false, false, false, true);
+        emit NewTier(2, 3000, 30 ether);
         referralStaking.setTier(2, 3000, 30 ether);
         assertEq(referralStaking.numberOfTiers(), 3, "Wrong number of tiers");
         assertEq(referralStaking.viewTier(2).rate, 3000, "Wrong tier value");
@@ -118,6 +120,8 @@ contract ReferralStakingTest is TestHelpers {
 
         // Assert previous timelock, and the setter
         assertEq(referralStaking.timelockPeriod(), timelock);
+        vm.expectEmit(false, false, false, true);
+        emit NewTimelock(60);
         referralStaking.setTimelockPeriod(60);
         assertEq(referralStaking.timelockPeriod(), 60);
 
@@ -143,6 +147,8 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.deposit(0, 1 ether);
 
         // Deposit valid amount
+        vm.expectEmit(false, false, false, true);
+        emit Deposit(user, 0);
         referralStaking.deposit(0, 10 ether);
         assertEq(referralStaking.viewUserStake(user), 10 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
@@ -158,6 +164,8 @@ contract ReferralStakingTest is TestHelpers {
 
         // Withdraw everything
         vm.warp(block.timestamp + timelock);
+        vm.expectEmit(false, false, false, true);
+        emit WithdrawAll(user);
         referralStaking.withdrawAll();
         assertEq(referralStaking.viewUserStake(user), 0);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
@@ -211,6 +219,8 @@ contract ReferralStakingTest is TestHelpers {
 
         // Downgrade
         vm.warp(block.timestamp + timelock);
+        vm.expectEmit(false, false, false, true);
+        emit Downgrade(user, 0);
         referralStaking.downgrade(0);
         assertEq(referralStaking.viewUserStake(user), 10 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);

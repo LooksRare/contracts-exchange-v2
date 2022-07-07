@@ -5,7 +5,17 @@ import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSte
 import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
-contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
+interface IReferralStaking {
+    // Events
+    event Deposit(address user, uint8 tier);
+    event Downgrade(address user, uint8 tier);
+    event WithdrawAll(address user);
+    event TierUpdate(uint8 index, uint16 rate, uint256 stake);
+    event NewTier(uint8 index, uint256 rate, uint256 stake);
+    event NewTimelock(uint256 timelockPeriod);
+}
+
+contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     // Errors
     error WrongDepositAmount();
     error NoFundsStaked();
@@ -13,12 +23,6 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
     error TierTooHigh();
     error UserAlreadyStaking();
     error FundsTimelocked();
-
-    // Events
-    event Deposit(address user, uint8 tier);
-    event Downgrade(address user, uint8 tier);
-    event WithdrawAll(address user);
-    event TierUpdate(uint8 index, uint16 rate, uint256 stake);
 
     struct Tier {
         // Referral share relative to the protocol fees (per 10000)
@@ -151,11 +155,13 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         if (index == numberOfTiers) {
             numberOfTiers++;
         }
+        emit NewTier(index, _rate, _stake);
     }
 
     function setTimelockPeriod(uint256 _timelockPeriod) external onlyOwner {
         require(_timelockPeriod <= MAX_TIMELOCK_PERIOD, "Time lock too high");
         timelockPeriod = _timelockPeriod;
+        emit NewTimelock(_timelockPeriod);
     }
 
     /* Getter functions */

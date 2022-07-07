@@ -25,7 +25,8 @@
     "prepare": "husky install",
     "test": "hardhat test",
     "test:gas": "REPORT_GAS=true hardhat test",
-    "test:forge": "forge test",
+    "test:forge": "forge test -vv",
+    "test:forge:watch": "forge test -vvv --watch",
     "test:coverage": "hardhat coverage && hardhat compile --force"
   },
   "devDependencies": {

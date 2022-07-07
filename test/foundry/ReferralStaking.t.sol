@@ -111,6 +111,7 @@ contract ReferralStakingTest is TestHelpers {
         // Withdraw everything
         referralStaking.withdrawAll();
         assertEq(referralStaking.viewUserStake(user), 0);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
     }
 
     function testIncreaseDeposit() public asPrankedUser(user) {
@@ -128,10 +129,12 @@ contract ReferralStakingTest is TestHelpers {
         // Increase stake
         referralStaking.deposit(1, 10 ether);
         assertEq(referralStaking.viewUserStake(user), 20 ether);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 20 ether);
 
         // Withdraw everything
         referralStaking.withdrawAll();
         assertEq(referralStaking.viewUserStake(user), 0);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
     }
 
     function testDowngrade() public {
@@ -158,10 +161,12 @@ contract ReferralStakingTest is TestHelpers {
         // Downgrade
         referralStaking.downgrade(0);
         assertEq(referralStaking.viewUserStake(user), 10 ether);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
 
         // Withdraw everything
         referralStaking.withdrawAll();
         assertEq(referralStaking.viewUserStake(user), 0);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
 
         vm.stopPrank();
     }
@@ -177,10 +182,18 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.setTier(1, 2000, 15 ether);
         vm.stopPrank();
 
-        // Withdraw unused tokens
         vm.startPrank(user);
+
+        // Withdraw unused tokens
         referralStaking.downgrade(1);
         assertEq(referralStaking.viewUserStake(user), 15 ether);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 15 ether);
+
+        // Withdraw everything
+        referralStaking.withdrawAll();
+        assertEq(referralStaking.viewUserStake(user), 0);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
+
         vm.stopPrank();
     }
 }

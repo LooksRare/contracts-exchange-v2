@@ -12,6 +12,7 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
     error StakingTierDoesntExist();
     error TierTooHigh();
     error UserAlreadyStaking();
+    error FundsTimelocked();
 
     // Events
     event Deposit(address user, uint8 tier);
@@ -26,8 +27,14 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         uint256 stake;
     }
 
+    uint256 public constant MAX_TIMELOCK_PERIOD = 30 days;
+
     address public immutable looksRareTokenAddress;
     LooksRareProtocol public immutable looksRareProtocol;
+
+    // Lockup after deposit
+    uint256 public timelockPeriod;
+    mapping(address => uint256) internal _lastDepositTimestamp;
 
     // List of tiers, simulate an array behavior
     mapping(uint8 => Tier) internal _tiers;
@@ -40,10 +47,16 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
      * @notice Constructor
      * @param _looksRareProtocol LooksRare protocol address
      * @param _looksRareTokenAddress LOOKS token address
+     * @param _timelockPeriod Lockup period after deposit, in seconds
      */
-    constructor(address _looksRareProtocol, address _looksRareTokenAddress) {
+    constructor(
+        address _looksRareProtocol,
+        address _looksRareTokenAddress,
+        uint256 _timelockPeriod
+    ) {
         looksRareTokenAddress = _looksRareTokenAddress;
         looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
+        timelockPeriod = _timelockPeriod;
     }
 
     /**
@@ -63,6 +76,7 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         _executeERC20Transfer(looksRareTokenAddress, msg.sender, address(this), amount);
         _userStakes[msg.sender] += amount;
         looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
+        _lastDepositTimestamp[msg.sender] = block.timestamp;
 
         emit Deposit(msg.sender, tier);
     }
@@ -73,6 +87,9 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
     function withdrawAll() external {
         if (_userStakes[msg.sender] == 0) {
             revert NoFundsStaked();
+        }
+        if (_lastDepositTimestamp[msg.sender] + timelockPeriod > block.timestamp) {
+            revert FundsTimelocked();
         }
 
         _executeERC20DirectTransfer(looksRareTokenAddress, msg.sender, _userStakes[msg.sender]);
@@ -92,6 +109,9 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         }
         if (_tiers[tier].stake >= _userStakes[msg.sender]) {
             revert TierTooHigh();
+        }
+        if (_lastDepositTimestamp[msg.sender] + timelockPeriod > block.timestamp) {
+            revert FundsTimelocked();
         }
 
         _executeERC20DirectTransfer(looksRareTokenAddress, msg.sender, _userStakes[msg.sender] - _tiers[tier].stake);
@@ -133,6 +153,11 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
         }
     }
 
+    function setTimelockPeriod(uint256 _timelockPeriod) external onlyOwner {
+        require(_timelockPeriod <= MAX_TIMELOCK_PERIOD, "Time lock too high");
+        timelockPeriod = _timelockPeriod;
+    }
+
     /* Getter functions */
 
     function viewUserStake(address user) external view returns (uint256) {
@@ -141,5 +166,9 @@ contract ReferralStaking is OwnableTwoSteps, LowLevelERC20 {
 
     function viewTier(uint8 tier) external view returns (Tier memory) {
         return _tiers[tier];
+    }
+
+    function viewUserTimelock(address user) external view returns (uint256, uint256) {
+        return (_lastDepositTimestamp[user], timelockPeriod);
     }
 }

@@ -19,6 +19,8 @@ contract ReferralStakingTest is TestHelpers {
     address owner = address(1);
     address user = address(2);
 
+    uint256 constant timelock = 120;
+
     function setUp() public {
         vm.startPrank(owner);
 
@@ -26,7 +28,7 @@ contract ReferralStakingTest is TestHelpers {
         transferManager = new TransferManager();
         looksRareProtocol = new LooksRareProtocol(address(transferManager), address(royaltyFeeRegistry));
         mockERC20 = new MockERC20();
-        referralStaking = new ReferralStaking(address(looksRareProtocol), address(mockERC20));
+        referralStaking = new ReferralStaking(address(looksRareProtocol), address(mockERC20), timelock);
 
         referralStaking.setTier(0, 1000, 10 ether);
         referralStaking.setTier(1, 2000, 20 ether);
@@ -43,6 +45,8 @@ contract ReferralStakingTest is TestHelpers {
         vm.stopPrank();
     }
 
+    // Owner functions
+
     function testOwnerOnly() public asPrankedUser(user) {
         // Make sure that owner functions can't be used by a user
         vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
@@ -53,6 +57,9 @@ contract ReferralStakingTest is TestHelpers {
 
         vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
         referralStaking.setTier(1, 1000, 10 ether);
+
+        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        referralStaking.setTimelockPeriod(60);
     }
 
     function testSetTierAndGetTier() public asPrankedUser(owner) {
@@ -104,6 +111,24 @@ contract ReferralStakingTest is TestHelpers {
         vm.stopPrank();
     }
 
+    function testSetTimelock() public asPrankedUser(owner) {
+        // Set a timelock out of boundaries
+        vm.expectRevert("Time lock too high");
+        referralStaking.setTimelockPeriod(31 days);
+
+        // Assert previous timelock, and the setter
+        assertEq(referralStaking.timelockPeriod(), timelock);
+        referralStaking.setTimelockPeriod(60);
+        assertEq(referralStaking.timelockPeriod(), 60);
+
+        // Test the getter returning the timelock
+        (uint256 lastDepositTimestamp, uint256 timelockPeriod) = referralStaking.viewUserTimelock(user);
+        assertEq(lastDepositTimestamp, 0);
+        assertEq(timelockPeriod, 60);
+    }
+
+    // Public functions
+
     function testDepositWithdraw() public asPrankedUser(user) {
         // Withdraw without depositing first
         vm.expectRevert(ReferralStaking.NoFundsStaked.selector);
@@ -121,8 +146,18 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.deposit(0, 10 ether);
         assertEq(referralStaking.viewUserStake(user), 10 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
+        (uint256 lastDepositTimestamp, ) = referralStaking.viewUserTimelock(user);
+        assertEq(lastDepositTimestamp, block.timestamp);
+
+        // Withdraw before the end of the timelock
+        vm.expectRevert(ReferralStaking.FundsTimelocked.selector);
+        referralStaking.withdrawAll();
+        vm.warp(block.timestamp + timelock - 1);
+        vm.expectRevert(ReferralStaking.FundsTimelocked.selector);
+        referralStaking.withdrawAll();
 
         // Withdraw everything
+        vm.warp(block.timestamp + timelock);
         referralStaking.withdrawAll();
         assertEq(referralStaking.viewUserStake(user), 0);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
@@ -144,11 +179,6 @@ contract ReferralStakingTest is TestHelpers {
         referralStaking.deposit(1, 10 ether);
         assertEq(referralStaking.viewUserStake(user), 20 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 20 ether);
-
-        // Withdraw everything
-        referralStaking.withdrawAll();
-        assertEq(referralStaking.viewUserStake(user), 0);
-        assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
     }
 
     function testDowngrade() public {
@@ -172,15 +202,18 @@ contract ReferralStakingTest is TestHelpers {
         vm.expectRevert(ReferralStaking.TierTooHigh.selector);
         referralStaking.downgrade(1);
 
+        // Downgrade before the end of the timelock
+        vm.expectRevert(ReferralStaking.FundsTimelocked.selector);
+        referralStaking.downgrade(0);
+        vm.warp(block.timestamp + timelock - 1);
+        vm.expectRevert(ReferralStaking.FundsTimelocked.selector);
+        referralStaking.downgrade(0);
+
         // Downgrade
+        vm.warp(block.timestamp + timelock);
         referralStaking.downgrade(0);
         assertEq(referralStaking.viewUserStake(user), 10 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
-
-        // Withdraw everything
-        referralStaking.withdrawAll();
-        assertEq(referralStaking.viewUserStake(user), 0);
-        assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
 
         vm.stopPrank();
     }
@@ -199,14 +232,10 @@ contract ReferralStakingTest is TestHelpers {
         vm.startPrank(user);
 
         // Withdraw unused tokens
+        vm.warp(block.timestamp + timelock);
         referralStaking.downgrade(1);
         assertEq(referralStaking.viewUserStake(user), 15 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 15 ether);
-
-        // Withdraw everything
-        referralStaking.withdrawAll();
-        assertEq(referralStaking.viewUserStake(user), 0);
-        assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
 
         vm.stopPrank();
     }

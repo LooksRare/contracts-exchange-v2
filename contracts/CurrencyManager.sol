@@ -2,22 +2,14 @@
 pragma solidity ^0.8.14;
 
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
 
 /**
  * @title CurrencyManager
  * @notice This contract is the contract that manages the whitelist of valid currencies for exchanging NFTs on the exchange.
  * @author LooksRare protocol team (👀,💎)
  */
-contract CurrencyManager is OwnableTwoSteps {
-    // Custom errors
-    error CurrencyAlreadyWhitelisted(address currency);
-    error CurrencyNotContract(address currency);
-    error CurrencyNotWhitelisted(address currency);
-
-    // Events
-    event CurrencyRemoved(address currency);
-    event CurrencyWhitelisted(address currency);
-
+contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
     // Whether the currency is whitelisted
     mapping(address => bool) internal _isCurrencyWhitelisted;
 

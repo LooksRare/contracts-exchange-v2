@@ -7,6 +7,7 @@ import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/IERC2981.
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 import {OrderStructs} from "./libraries/OrderStructs.sol";
+import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
 
 /**
@@ -14,21 +15,7 @@ import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
  * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain when off-chain maker orders is matched by on-chain taker orders of a different kind (i.e., taker ask with maker bid or taker bid with maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
-contract ExecutionManager is OwnableTwoSteps {
-    // Custom errors
-    error AskSlippage();
-    error OrderInvalid();
-    error OutsideOfTimeRange();
-    error StrategyNotAvailable(uint16 strategyId);
-    error StrategyUsed(uint16 strategyId);
-    error StrategyNotUsed(uint16 strategyId);
-
-    // Events
-    event NewProtocolFeeRecipient(address protocolFeeRecipient);
-    event NewStrategy(uint16 strategyId, address implementation);
-    event StrategyReactivated(uint16 strategyId);
-    event StrategyRemoved(uint16 strategyId);
-
+contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     uint8 private immutable _COUNT_INTERNAL_STRATEGIES = 2;
 
     // Royalty fee registry

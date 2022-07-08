@@ -2,25 +2,16 @@
 pragma solidity ^0.8.14;
 
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+import {IReferralManager} from "./interfaces/IReferralManager.sol";
 
 /**
  * @title ReferralManager
  * @notice This contract handles the list of referrers for the LooksRare protocol.
  * @author LooksRare protocol team (👀,💎)
  */
-contract ReferralManager is OwnableTwoSteps {
+contract ReferralManager is IReferralManager, OwnableTwoSteps {
     // Address of the referral controller
     address public referralController;
-
-    // Custom errors
-    error NotController();
-    error NotReferrer();
-    error PercentageTooHigh();
-
-    // Events
-    event NewReferralController(address referralController);
-    event NewReferrer(address referrer, uint16 percentage);
-    event ReferrerRemoved(address referrer);
 
     modifier onlyController() {
         if (msg.sender != referralController) {

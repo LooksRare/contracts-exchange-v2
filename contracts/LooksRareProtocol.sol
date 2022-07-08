@@ -9,6 +9,7 @@ import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGua
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
+import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 
 // Peripheral contracts
@@ -28,6 +29,7 @@ import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract LooksRareProtocol is
+    ILooksRareProtocol,
     CurrencyManager,
     ExecutionManager,
     NonceManager,
@@ -54,43 +56,6 @@ contract LooksRareProtocol is
 
     // Current chainId
     uint256 internal _chainId;
-
-    // Custom errors
-    error NoTransferManagerForAssetType(uint16 assetType);
-    error WrongNonces();
-    error WrongAssetType(uint16 assetType);
-    error WrongCurrency();
-    error WrongCaller();
-
-    // Events
-    event TakerBid(
-        uint128 orderNonce,
-        address bidUser,
-        address bidRecipient,
-        address askUser,
-        uint256 strategyId,
-        address currency,
-        address collection,
-        uint256[] itemIds,
-        uint256[] amounts,
-        address[] feeRecipients,
-        uint256[] feeAmounts
-    );
-
-    event TakerAsk(
-        uint128 orderNonce,
-        address bidUser,
-        address bidRecipient,
-        address askUser,
-        address askRecipient,
-        uint256 strategyId,
-        address currency,
-        address collection,
-        uint256[] itemIds,
-        uint256[] amounts,
-        address[] feeRecipients,
-        uint256[] feeAmounts
-    );
 
     /**
      * @notice Constructor

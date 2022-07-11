@@ -148,12 +148,17 @@ contract LooksRareProtocol is
         uint256 totalReferralFee;
 
         if (multipleTakerBids.referrer == address(0)) {
-            _transferFungibleToken(address(0), msg.sender, _protocolFeeRecipient, totalProtocolFee);
+            _transferFungibleToken(multipleTakerBids.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
         } else {
             totalReferralFee = (totalProtocolFee * _referrers[multipleTakerBids.referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(address(0), msg.sender, _protocolFeeRecipient, totalProtocolFee);
-            _transferFungibleToken(address(0), msg.sender, multipleTakerBids.referrer, totalReferralFee);
+            _transferFungibleToken(multipleTakerBids.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
+            _transferFungibleToken(
+                multipleTakerBids.currency,
+                msg.sender,
+                multipleTakerBids.referrer,
+                totalReferralFee
+            );
         }
 
         _returnETHIfAny();
@@ -222,12 +227,17 @@ contract LooksRareProtocol is
         uint256 totalReferralFee;
 
         if (multipleTakerAsks.referrer == address(0)) {
-            _transferFungibleToken(address(0), msg.sender, _protocolFeeRecipient, totalProtocolFee);
+            _transferFungibleToken(multipleTakerAsks.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
         } else {
             totalReferralFee = (totalProtocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(address(0), msg.sender, _protocolFeeRecipient, totalProtocolFee);
-            _transferFungibleToken(address(0), msg.sender, multipleTakerAsks.referrer, totalReferralFee);
+            _transferFungibleToken(multipleTakerAsks.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
+            _transferFungibleToken(
+                multipleTakerAsks.currency,
+                msg.sender,
+                multipleTakerAsks.referrer,
+                totalReferralFee
+            );
         }
     }
 

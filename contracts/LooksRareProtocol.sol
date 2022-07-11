@@ -145,14 +145,9 @@ contract LooksRareProtocol is
             }
         }
 
-        uint256 totalReferralFee;
-
-        if (multipleTakerBids.referrer == address(0)) {
-            _transferFungibleToken(multipleTakerBids.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
-        } else {
-            totalReferralFee = (totalProtocolFee * _referrers[multipleTakerBids.referrer]) / 10000;
+        if (multipleTakerBids.referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[multipleTakerBids.referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(multipleTakerBids.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
             _transferFungibleToken(
                 multipleTakerBids.currency,
                 msg.sender,
@@ -160,6 +155,7 @@ contract LooksRareProtocol is
                 totalReferralFee
             );
         }
+        _transferFungibleToken(multipleTakerBids.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
 
         _returnETHIfAny();
     }
@@ -224,14 +220,9 @@ contract LooksRareProtocol is
             }
         }
 
-        uint256 totalReferralFee;
-
-        if (multipleTakerAsks.referrer == address(0)) {
-            _transferFungibleToken(multipleTakerAsks.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
-        } else {
-            totalReferralFee = (totalProtocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
+        if (multipleTakerAsks.referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(multipleTakerAsks.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
             _transferFungibleToken(
                 multipleTakerAsks.currency,
                 msg.sender,
@@ -239,6 +230,7 @@ contract LooksRareProtocol is
                 totalReferralFee
             );
         }
+        _transferFungibleToken(multipleTakerAsks.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
     }
 
     /**

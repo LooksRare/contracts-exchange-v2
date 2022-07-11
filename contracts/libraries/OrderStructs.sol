@@ -34,7 +34,6 @@ library OrderStructs {
         address signer;
         uint256 startTime;
         uint256 endTime;
-        uint256 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
     }
 
     struct SingleMakerAskOrder {
@@ -42,6 +41,7 @@ library OrderStructs {
         uint256[] itemIds;
         uint256[] amounts; // length = 1 if single sale // length > 1 if batch sale
         uint112 orderNonce;
+        uint16 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
         bytes additionalParameters;
     }
 
@@ -83,10 +83,10 @@ library OrderStructs {
 
     struct TakerAskOrder {
         address recipient;
+        uint16 minNetRatio;
         uint256 minPrice;
         uint256[] itemIds;
         uint256[] amounts;
-        uint256 minNetRatio;
         bytes additionalParameters;
     }
 

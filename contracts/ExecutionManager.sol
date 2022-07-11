@@ -135,7 +135,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         protocolFeeAmount = (price * _strategies[baseMaker.strategyId].protocolFee) / 10000;
         netPrice = price - royaltyFeeAmount - protocolFeeAmount;
 
-        if (netPrice < (price * baseMaker.minNetRatio) / 10000) {
+        if (netPrice < (price * makerAsk.minNetRatio) / 10000) {
             revert AskSlippage();
         }
     }

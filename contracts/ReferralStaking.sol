@@ -4,26 +4,9 @@ pragma solidity ^0.8.14;
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
-
-interface IReferralStaking {
-    // Events
-    event Deposit(address user, uint8 tier);
-    event Downgrade(address user, uint8 tier);
-    event WithdrawAll(address user);
-    event TierUpdate(uint8 index, uint16 rate, uint256 stake);
-    event NewTier(uint8 index, uint256 rate, uint256 stake);
-    event NewTimelock(uint256 timelockPeriod);
-}
+import {IReferralStaking} from "./interfaces/IReferralStaking.sol";
 
 contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
-    // Errors
-    error WrongDepositAmount();
-    error NoFundsStaked();
-    error StakingTierDoesntExist();
-    error TierTooHigh();
-    error UserAlreadyStaking();
-    error FundsTimelocked();
-
     struct Tier {
         // Referral share relative to the protocol fees (per 10000)
         uint16 rate;

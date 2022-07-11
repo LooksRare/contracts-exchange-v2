@@ -10,6 +10,21 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 interface ITransferManager {
+    // Custom errors
+    error AlreadyApproved();
+    error AlreadyWhitelisted();
+    error NotApproved();
+    error NotWhitelisted();
+    error TransferCallerInvalid();
+    error WrongAssetType(uint8 assetType);
+    error WrongLengths();
+
+    // Events
+    event ApprovalsGranted(address user, address[] operators);
+    event ApprovalsRemoved(address user, address[] operators);
+    event OperatorRemoved(address operator);
+    event OperatorWhitelisted(address operator);
+
     /**
      * @notice Transfer a single item
      * @param collection collection address

@@ -13,7 +13,6 @@ import {MockERC721} from "./utils/MockERC721.sol";
 abstract contract TestParameters is TestHelpers {
     address internal _owner = address(42);
     address internal _collectionOwner = address(22);
-
     uint256 internal makerUserPK = 1;
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);
@@ -151,11 +150,11 @@ contract LooksRareProtocolTest is TestParameters {
             mockERC721.mint(makerUser, i);
             OrderStructs.SingleMakerAskOrder memory makerAskOrder = _createSimpleMakerAskOrder(1 ether, i);
             makerAskOrders[i] = makerAskOrder;
+            makerAskOrder.minNetRatio = 9700;
         }
 
         multiMakerAskOrders.baseMakerOrder.strategyId = 0;
         multiMakerAskOrders.baseMakerOrder.assetType = 0; // ERC721
-        multiMakerAskOrders.baseMakerOrder.minNetRatio = 9700; // 1% royalty + 2% protocol = 3%
         multiMakerAskOrders.baseMakerOrder.collection = address(mockERC721);
         multiMakerAskOrders.baseMakerOrder.currency = address(0);
         multiMakerAskOrders.makerAskOrders = makerAskOrders;
@@ -188,12 +187,14 @@ contract LooksRareProtocolTest is TestParameters {
         takerBidOrders[0] = takerBidOrder;
         multipleTakerBidOrders.takerBidOrders = takerBidOrders;
 
+        // uint256 gasLeft = gasleft();
         looksRareProtocol.matchMultipleAsksWithTakerBids{value: 1 ether}(
             multipleTakerBidOrders,
             multipleMakerAskOrders,
             makerArraySlots,
             true
         );
+        // emit log_uint(gasLeft - gasleft());
 
         vm.stopPrank();
 

@@ -1,21 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+import {INonceManager} from "./interfaces/INonceManager.sol";
+
 /**
  * @title NonceManager
  * @notice This contract handles the nonce logic that is used for invalidating orders. The nonce logic revolves around 3 components on the user level: subset (orders grouped under a same subset), bid/ask (all order can be executed only if bidNonce matches the current one on-chain), and order nonce (orders sharing an order nonce are conditional, OCO-like).
  * @author LooksRare protocol team (👀,💎)
  */
-contract NonceManager {
-    // Custom errors
-    error NoNonceToIncrement();
-    error WrongLengths();
-
-    // Events
-    event NewBidAskNonces(uint112 bidNonce, uint112 askNonce);
-    event OrderNoncesCancelled(uint112[] orderNonces);
-    event SubsetNoncesCancelled(uint112[] subsetNonces);
-
+contract NonceManager is INonceManager {
     struct UserBidAskNonces {
         uint112 bidNonce;
         uint112 askNonce;

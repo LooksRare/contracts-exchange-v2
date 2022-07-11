@@ -23,21 +23,6 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
     // Whether the operator is in the whitelist
     mapping(address => bool) internal _whitelistedOperators;
 
-    // Custom errors
-    error AlreadyApproved();
-    error AlreadyWhitelisted();
-    error NotApproved();
-    error NotWhitelisted();
-    error TransferCallerInvalid();
-    error WrongAssetType(uint8 assetType);
-    error WrongLengths();
-
-    // Events
-    event ApprovalsGranted(address user, address[] operators);
-    event ApprovalsRemoved(address user, address[] operators);
-    event OperatorRemoved(address operator);
-    event OperatorWhitelisted(address operator);
-
     /**
      * @notice Transfer a single item
      * @param collection collection address

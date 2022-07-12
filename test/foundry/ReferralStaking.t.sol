@@ -5,7 +5,8 @@ import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/roy
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-import {ReferralStaking, IReferralStaking} from "../../contracts/ReferralStaking.sol";
+import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
+import {IReferralStaking} from "../../contracts/interfaces/IReferralStaking.sol";
 import {TestHelpers} from "./TestHelpers.sol";
 import {MockERC20} from "./utils/MockERC20.sol";
 
@@ -93,7 +94,7 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
         vm.startPrank(owner);
 
         // Use wrong tier id
-        vm.expectRevert(ReferralStaking.StakingTierDoesntExist.selector);
+        vm.expectRevert(IReferralStaking.StakingTierDoesntExist.selector);
         referralStaking.registerReferrer(user, 2);
 
         // Register and unregister
@@ -108,7 +109,7 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
         vm.stopPrank();
 
         vm.startPrank(owner);
-        vm.expectRevert(ReferralStaking.UserAlreadyStaking.selector);
+        vm.expectRevert(IReferralStaking.UserAlreadyStaking.selector);
         referralStaking.registerReferrer(user, 0);
         vm.stopPrank();
     }
@@ -135,15 +136,15 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
 
     function testDepositWithdraw() public asPrankedUser(user) {
         // Withdraw without depositing first
-        vm.expectRevert(ReferralStaking.NoFundsStaked.selector);
+        vm.expectRevert(IReferralStaking.NoFundsStaked.selector);
         referralStaking.withdrawAll();
 
         // Deposit for non existing tier
-        vm.expectRevert(ReferralStaking.StakingTierDoesntExist.selector);
+        vm.expectRevert(IReferralStaking.StakingTierDoesntExist.selector);
         referralStaking.deposit(100, 1 ether);
 
         // Deposit invalid amount
-        vm.expectRevert(ReferralStaking.WrongDepositAmount.selector);
+        vm.expectRevert(IReferralStaking.WrongDepositAmount.selector);
         referralStaking.deposit(0, 1 ether);
 
         // Deposit valid amount
@@ -156,10 +157,10 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
         assertEq(lastDepositTimestamp, block.timestamp);
 
         // Withdraw before the end of the timelock
-        vm.expectRevert(ReferralStaking.FundsTimelocked.selector);
+        vm.expectRevert(IReferralStaking.FundsTimelocked.selector);
         referralStaking.withdrawAll();
         vm.warp(block.timestamp + timelock - 1);
-        vm.expectRevert(ReferralStaking.FundsTimelocked.selector);
+        vm.expectRevert(IReferralStaking.FundsTimelocked.selector);
         referralStaking.withdrawAll();
 
         // Withdraw everything
@@ -176,11 +177,11 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
         referralStaking.deposit(0, 10 ether);
 
         // Deposit on the wrong tier
-        vm.expectRevert(ReferralStaking.WrongDepositAmount.selector);
+        vm.expectRevert(IReferralStaking.WrongDepositAmount.selector);
         referralStaking.deposit(0, 10 ether);
 
         // Deposit the wrong amount (needs +10 for the next level)
-        vm.expectRevert(ReferralStaking.WrongDepositAmount.selector);
+        vm.expectRevert(IReferralStaking.WrongDepositAmount.selector);
         referralStaking.deposit(1, 20 ether);
 
         // Increase stake
@@ -199,22 +200,22 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
         referralStaking.deposit(1, 20 ether);
 
         // Downgrade to a non existing tier
-        vm.expectRevert(ReferralStaking.StakingTierDoesntExist.selector);
+        vm.expectRevert(IReferralStaking.StakingTierDoesntExist.selector);
         referralStaking.downgrade(3);
 
         // Downgrade to a higher tier
-        vm.expectRevert(ReferralStaking.TierTooHigh.selector);
+        vm.expectRevert(IReferralStaking.TierTooHigh.selector);
         referralStaking.downgrade(2);
 
         // Downgrade to the current tier
-        vm.expectRevert(ReferralStaking.TierTooHigh.selector);
+        vm.expectRevert(IReferralStaking.TierTooHigh.selector);
         referralStaking.downgrade(1);
 
         // Downgrade before the end of the timelock
-        vm.expectRevert(ReferralStaking.FundsTimelocked.selector);
+        vm.expectRevert(IReferralStaking.FundsTimelocked.selector);
         referralStaking.downgrade(0);
         vm.warp(block.timestamp + timelock - 1);
-        vm.expectRevert(ReferralStaking.FundsTimelocked.selector);
+        vm.expectRevert(IReferralStaking.FundsTimelocked.selector);
         referralStaking.downgrade(0);
 
         // Downgrade

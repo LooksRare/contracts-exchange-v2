@@ -61,6 +61,9 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
 
         vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
         referralStaking.setTimelockPeriod(60);
+
+        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        referralStaking.removeLastTier();
     }
 
     function testSetTierAndGetTier() public asPrankedUser(owner) {
@@ -84,6 +87,12 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
         assertEq(referralStaking.numberOfTiers(), 3, "Wrong number of tiers");
         assertEq(referralStaking.viewTier(2).rate, 3500, "Wrong tier value");
         assertEq(referralStaking.viewTier(2).stake, 35 ether, "Wrong tier value");
+
+        // Remove last tier
+        vm.expectEmit(false, false, false, true);
+        emit LastTierRemoved();
+        referralStaking.removeLastTier();
+        assertEq(referralStaking.numberOfTiers(), 2, "Wrong number of tiers");
 
         // Add tier at invalid index
         vm.expectRevert("Use an existing index to update a tier, or use numberOfTiers to create a new tier");
@@ -122,7 +131,7 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
         // Assert previous timelock, and the setter
         assertEq(referralStaking.timelockPeriod(), timelock);
         vm.expectEmit(false, false, false, true);
-        emit NewTimelock(60);
+        emit UpdateTimelock(60);
         referralStaking.setTimelockPeriod(60);
         assertEq(referralStaking.timelockPeriod(), 60);
 

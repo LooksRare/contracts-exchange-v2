@@ -6,11 +6,11 @@ interface IReferralStaking {
     event Deposit(address user, uint8 tier);
     event Downgrade(address user, uint8 tier);
     event WithdrawAll(address user);
-    event TierUpdate(uint8 index, uint16 rate, uint256 stake);
     event NewTier(uint8 index, uint256 rate, uint256 stake);
-    event NewTimelock(uint256 timelockPeriod);
+    event LastTierRemoved();
+    event UpdateTimelock(uint256 timelockPeriod);
 
-    // Custom Errors
+    // Errors
     error WrongDepositAmount();
     error NoFundsStaked();
     error StakingTierDoesntExist();

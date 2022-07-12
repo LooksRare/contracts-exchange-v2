@@ -3,8 +3,8 @@ pragma solidity ^0.8.14;
 
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
-import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 import {IReferralStaking} from "./interfaces/IReferralStaking.sol";
+import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
 contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     struct Tier {
@@ -141,10 +141,17 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
         emit NewTier(index, _rate, _stake);
     }
 
+    function removeLastTier() external onlyOwner {
+        require(numberOfTiers > 0, "No tiers left");
+        delete _tiers[numberOfTiers - 1];
+        numberOfTiers--;
+        emit LastTierRemoved();
+    }
+
     function setTimelockPeriod(uint256 _timelockPeriod) external onlyOwner {
         require(_timelockPeriod <= MAX_TIMELOCK_PERIOD, "Time lock too high");
         timelockPeriod = _timelockPeriod;
-        emit NewTimelock(_timelockPeriod);
+        emit UpdateTimelock(_timelockPeriod);
     }
 
     /* Getter functions */

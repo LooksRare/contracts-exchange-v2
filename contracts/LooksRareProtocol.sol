@@ -85,8 +85,14 @@ contract LooksRareProtocol is
         _transferManagers[1] = transferManager;
     }
 
+    /**
+     * @notice Match maker ask with single taker bid
+     * @param singleTakerBidOrder single taker bid order
+     * @param multipleMakerAsk multiple maker ask order
+     * @param makerArraySlot maker array slot
+     */
     function matchAskWithTakerBid(
-        OrderStructs.SingleTakerBidOrder calldata takerBidOrder,
+        OrderStructs.SingleTakerBidOrder calldata singleTakerBidOrder,
         OrderStructs.MultipleMakerAskOrders calldata multipleMakerAsk,
         uint256 makerArraySlot
     ) external payable nonReentrant {
@@ -96,19 +102,19 @@ contract LooksRareProtocol is
         }
 
         uint256 totalProtocolFee = _matchAskWithTakerBid(
-            takerBidOrder.takerBidOrder,
+            singleTakerBidOrder.takerBidOrder,
             msg.sender,
             multipleMakerAsk.makerAskOrders[makerArraySlot],
             multipleMakerAsk.baseMakerOrder
         );
 
-        if (takerBidOrder.referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[takerBidOrder.referrer]) / 10000;
+        if (singleTakerBidOrder.referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[singleTakerBidOrder.referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
             _transferFungibleToken(
                 multipleMakerAsk.baseMakerOrder.currency,
                 msg.sender,
-                takerBidOrder.referrer,
+                singleTakerBidOrder.referrer,
                 totalReferralFee
             );
         }
@@ -122,8 +128,14 @@ contract LooksRareProtocol is
         _returnETHIfAny();
     }
 
+    /**
+     * @notice Match maker bid with single taker ask
+     * @param singleTakerAskOrder single taker ask order
+     * @param multipleMakerBid multiple maker bid order
+     * @param makerArraySlot maker array slot
+     */
     function matchBidWithTakerAsk(
-        OrderStructs.SingleTakerAskOrder calldata takerAskOrder,
+        OrderStructs.SingleTakerAskOrder calldata singleTakerAskOrder,
         OrderStructs.MultipleMakerBidOrders calldata multipleMakerBid,
         uint256 makerArraySlot
     ) external payable nonReentrant {
@@ -133,19 +145,19 @@ contract LooksRareProtocol is
         }
 
         uint256 totalProtocolFee = _matchBidWithTakerAsk(
-            takerAskOrder.takerAskOrder,
+            singleTakerAskOrder.takerAskOrder,
             msg.sender,
             multipleMakerBid.makerBidOrders[makerArraySlot],
             multipleMakerBid.baseMakerOrder
         );
 
-        if (takerAskOrder.referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[takerAskOrder.referrer]) / 10000;
+        if (singleTakerAskOrder.referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[singleTakerAskOrder.referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
             _transferFungibleToken(
                 multipleMakerBid.baseMakerOrder.currency,
                 msg.sender,
-                takerAskOrder.referrer,
+                singleTakerAskOrder.referrer,
                 totalReferralFee
             );
         }

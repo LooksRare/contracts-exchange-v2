@@ -85,6 +85,78 @@ contract LooksRareProtocol is
         _transferManagers[1] = transferManager;
     }
 
+    function matchAskWithTakerBid(
+        OrderStructs.SingleTakerBidOrder calldata takerBidOrder,
+        OrderStructs.MultipleMakerAskOrders calldata multipleMakerAsk,
+        uint256 makerArraySlot
+    ) external payable nonReentrant {
+        {
+            bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, multipleMakerAsk.hash()));
+            _verify(digest, multipleMakerAsk.baseMakerOrder.signer, multipleMakerAsk.signature);
+        }
+
+        uint256 totalProtocolFee = _matchAskWithTakerBid(
+            takerBidOrder.takerBidOrder,
+            msg.sender,
+            multipleMakerAsk.makerAskOrders[makerArraySlot],
+            multipleMakerAsk.baseMakerOrder
+        );
+
+        if (takerBidOrder.referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[takerBidOrder.referrer]) / 10000;
+            totalProtocolFee -= totalReferralFee;
+            _transferFungibleToken(
+                multipleMakerAsk.baseMakerOrder.currency,
+                msg.sender,
+                takerBidOrder.referrer,
+                totalReferralFee
+            );
+        }
+        _transferFungibleToken(
+            multipleMakerAsk.baseMakerOrder.currency,
+            msg.sender,
+            _protocolFeeRecipient,
+            totalProtocolFee
+        );
+
+        _returnETHIfAny();
+    }
+
+    function matchBidWithTakerAsk(
+        OrderStructs.SingleTakerAskOrder calldata takerAskOrder,
+        OrderStructs.MultipleMakerBidOrders calldata multipleMakerBid,
+        uint256 makerArraySlot
+    ) external payable nonReentrant {
+        {
+            bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, multipleMakerBid.hash()));
+            _verify(digest, multipleMakerBid.baseMakerOrder.signer, multipleMakerBid.signature);
+        }
+
+        uint256 totalProtocolFee = _matchBidWithTakerAsk(
+            takerAskOrder.takerAskOrder,
+            msg.sender,
+            multipleMakerBid.makerBidOrders[makerArraySlot],
+            multipleMakerBid.baseMakerOrder
+        );
+
+        if (takerAskOrder.referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[takerAskOrder.referrer]) / 10000;
+            totalProtocolFee -= totalReferralFee;
+            _transferFungibleToken(
+                multipleMakerBid.baseMakerOrder.currency,
+                msg.sender,
+                takerAskOrder.referrer,
+                totalReferralFee
+            );
+        }
+        _transferFungibleToken(
+            multipleMakerBid.baseMakerOrder.currency,
+            msg.sender,
+            _protocolFeeRecipient,
+            totalProtocolFee
+        );
+    }
+
     /**
      * @notice Match multiple maker asks with taker bids
      * @param multipleTakerBids multiple taker bid orders

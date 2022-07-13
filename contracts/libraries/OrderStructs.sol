@@ -23,6 +23,9 @@ library OrderStructs {
         return keccak256(abi.encode(_MULTIPLE_MAKER_BID_ORDERS, orders.makerBidOrders, orders.baseMakerOrder));
     }
 
+    /**
+     * MAKER ORDERS
+     */
     struct BaseMakerOrder {
         uint112 bidAskNonce;
         uint112 subsetNonce;
@@ -67,12 +70,20 @@ library OrderStructs {
         bytes signature;
     }
 
+    /**
+     * TAKER ORDERS
+     */
     struct TakerBidOrder {
         uint256 maxPrice;
         address recipient;
         uint256[] itemIds;
         uint256[] amounts;
         bytes additionalParameters;
+    }
+
+    struct SingleTakerBidOrder {
+        address referrer;
+        TakerBidOrder takerBidOrder;
     }
 
     struct MultipleTakerBidOrders {
@@ -88,6 +99,11 @@ library OrderStructs {
         uint256[] itemIds;
         uint256[] amounts;
         bytes additionalParameters;
+    }
+
+    struct SingleTakerAskOrder {
+        address referrer;
+        TakerAskOrder takerAskOrder;
     }
 
     struct MultipleTakerAskOrders {

@@ -245,13 +245,13 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Match multiple maker asks with taker bids
+     * @notice Match multiple maker bids with taker asks
      * @param multipleTakerAsks multiple taker ask orders
      * @param multipleMakerBids multiple maker bid orders
      * @param makerArraySlots array of maker array slot
      * @param isExecutionAtomic whether the execution should revert if one of the transaction fails. If it is true, the execution must be atomic. Any revertion will make the transaction fail.
      */
-    function matchMultipleAsksWithTakerBids(
+    function matchMultipleBidsWithTakerAsks(
         OrderStructs.MultipleTakerAskOrders calldata multipleTakerAsks,
         OrderStructs.MultipleMakerBidOrders[] calldata multipleMakerBids,
         uint256[] calldata makerArraySlots,

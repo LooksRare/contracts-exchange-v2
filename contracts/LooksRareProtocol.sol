@@ -213,7 +213,7 @@ contract LooksRareProtocol is
                 totalProtocolFee += protocolFee;
             } else {
                 try
-                    this.matchAskWithTakerBid(
+                    this.restrictedMatchAskWithTakerBid(
                         multipleTakerBids.takerBidOrders[i],
                         msg.sender,
                         multipleMakerAsks[i].makerAskOrders[makerArraySlots[i]],
@@ -288,7 +288,7 @@ contract LooksRareProtocol is
                 totalProtocolFee += protocolFee;
             } else {
                 try
-                    this.matchBidWithTakerAsk(
+                    this.restrictedMatchBidWithTakerAsk(
                         multipleTakerAsks.takerAskOrders[i],
                         msg.sender,
                         multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
@@ -321,7 +321,7 @@ contract LooksRareProtocol is
      * @notice Match makerAsk with takerBid
      * This function is solely used by this contract when atomicity is not required for batch-selling
      */
-    function matchAskWithTakerBid(
+    function restrictedMatchAskWithTakerBid(
         OrderStructs.TakerBidOrder calldata takerBid,
         address sender,
         OrderStructs.SingleMakerAskOrder calldata makerAsk,
@@ -338,7 +338,7 @@ contract LooksRareProtocol is
      * @notice Match makerBid with takerAsk
      * This function is solely used by this contract when atomicity is not required for batch-buying
      */
-    function matchBidWithTakerAsk(
+    function restrictedMatchBidWithTakerAsk(
         OrderStructs.TakerAskOrder calldata takerAsk,
         address sender,
         OrderStructs.SingleMakerBidOrder calldata makerBid,

@@ -115,7 +115,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
 
         for (uint256 i; i < collections.length; ) {
             if (assetTypes[i] == 0) {
-                for (uint256 j; i < amounts.length; ) {
+                for (uint256 j; i < amounts[i].length; ) {
                     _executeERC721Transfer(collections[i], from, to, itemIds[i][j]);
                     unchecked {
                         ++j;

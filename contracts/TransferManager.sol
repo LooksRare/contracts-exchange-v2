@@ -220,7 +220,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
      * @param operator address of the operator
      */
     function _isTransferValid(address user, address operator) internal view returns (bool) {
-        return _whitelistedOperators[operator] && _hasUserApprovedOperator[user][operator];
+        return user == operator || (_whitelistedOperators[operator] && _hasUserApprovedOperator[user][operator]);
     }
 
     /**

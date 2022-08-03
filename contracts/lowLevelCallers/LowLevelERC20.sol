@@ -32,7 +32,7 @@ contract LowLevelERC20 {
             revert TransferERC20Fail();
         }
 
-        if (data.length != 0 && data.length >= 32) {
+        if (data.length >= 32) {
             if (!abi.decode(data, (bool))) {
                 revert TransferERC20Fail();
             }
@@ -56,7 +56,7 @@ contract LowLevelERC20 {
             revert TransferERC20Fail();
         }
 
-        if (data.length != 0 && data.length >= 32) {
+        if (data.length >= 32) {
             if (!abi.decode(data, (bool))) {
                 revert TransferERC20Fail();
             }

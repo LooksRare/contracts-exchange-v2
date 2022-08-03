@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/royaltyFeeRegistry.sol";
+import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
 
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
@@ -135,7 +135,7 @@ contract LooksRareProtocolTest is TestParameters {
         vm.deal(_collectionOwner, 100 ether);
     }
 
-    function testStandardSaleWithRoyalties() public {
+    function testStandardSaleWithRoyaltiesArray() public {
         _setUpUsers();
         uint256 numberOrders = 1;
 
@@ -187,14 +187,68 @@ contract LooksRareProtocolTest is TestParameters {
         takerBidOrders[0] = takerBidOrder;
         multipleTakerBidOrders.takerBidOrders = takerBidOrders;
 
-        // uint256 gasLeft = gasleft();
         looksRareProtocol.matchMultipleAsksWithTakerBids{value: 1 ether}(
             multipleTakerBidOrders,
             multipleMakerAskOrders,
             makerArraySlots,
             true
         );
-        // emit log_uint(gasLeft - gasleft());
+        vm.stopPrank();
+
+        assertEq(mockERC721.ownerOf(0), takerUser);
+        assertEq(address(looksRareProtocol).balance, 0);
+    }
+
+    function testStandardSaleWithRoyaltiesNoArray() public {
+        _setUpUsers();
+        uint256 numberOrders = 1;
+
+        // Maker user actions
+        vm.startPrank(makerUser);
+
+        OrderStructs.MultipleMakerAskOrders memory multiMakerAskOrders;
+        multiMakerAskOrders.baseMakerOrder.signer = makerUser;
+        OrderStructs.SingleMakerAskOrder[] memory makerAskOrders = new OrderStructs.SingleMakerAskOrder[](numberOrders);
+
+        for (uint256 i; i < numberOrders; i++) {
+            mockERC721.mint(makerUser, i);
+            OrderStructs.SingleMakerAskOrder memory makerAskOrder = _createSimpleMakerAskOrder(1 ether, i);
+            makerAskOrders[i] = makerAskOrder;
+            makerAskOrder.minNetRatio = 9700;
+        }
+
+        multiMakerAskOrders.baseMakerOrder.strategyId = 0;
+        multiMakerAskOrders.baseMakerOrder.assetType = 0; // ERC721
+        multiMakerAskOrders.baseMakerOrder.collection = address(mockERC721);
+        multiMakerAskOrders.baseMakerOrder.currency = address(0);
+        multiMakerAskOrders.makerAskOrders = makerAskOrders;
+
+        multiMakerAskOrders.signature = _signMakerAsksOrder(multiMakerAskOrders, makerUserPK);
+        vm.stopPrank();
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        OrderStructs.TakerBidOrder memory takerBidOrder;
+        takerBidOrder = OrderStructs.TakerBidOrder(
+            1 ether,
+            takerUser,
+            makerAskOrders[0].itemIds,
+            makerAskOrders[0].amounts,
+            abi.encode()
+        );
+
+        uint256 makerArraySlot = 0;
+
+        OrderStructs.SingleTakerBidOrder memory singleTakerBidOrder;
+        singleTakerBidOrder.takerBidOrder = takerBidOrder;
+        singleTakerBidOrder.referrer = address(0);
+
+        looksRareProtocol.matchAskWithTakerBid{value: 1 ether}(
+            singleTakerBidOrder,
+            multiMakerAskOrders,
+            makerArraySlot
+        );
 
         vm.stopPrank();
 

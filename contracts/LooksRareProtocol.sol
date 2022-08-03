@@ -86,6 +86,90 @@ contract LooksRareProtocol is
     }
 
     /**
+     * @notice Match maker ask with single taker bid
+     * @param singleTakerBidOrder single taker bid order
+     * @param multipleMakerAsk multiple maker ask order
+     * @param makerArraySlot maker array slot
+     */
+    function matchAskWithTakerBid(
+        OrderStructs.SingleTakerBidOrder calldata singleTakerBidOrder,
+        OrderStructs.MultipleMakerAskOrders calldata multipleMakerAsk,
+        uint256 makerArraySlot
+    ) external payable nonReentrant {
+        {
+            bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, multipleMakerAsk.hash()));
+            _verify(digest, multipleMakerAsk.baseMakerOrder.signer, multipleMakerAsk.signature);
+        }
+
+        uint256 totalProtocolFee = _matchAskWithTakerBid(
+            singleTakerBidOrder.takerBidOrder,
+            msg.sender,
+            multipleMakerAsk.makerAskOrders[makerArraySlot],
+            multipleMakerAsk.baseMakerOrder
+        );
+
+        if (singleTakerBidOrder.referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[singleTakerBidOrder.referrer]) / 10000;
+            totalProtocolFee -= totalReferralFee;
+            _transferFungibleToken(
+                multipleMakerAsk.baseMakerOrder.currency,
+                msg.sender,
+                singleTakerBidOrder.referrer,
+                totalReferralFee
+            );
+        }
+        _transferFungibleToken(
+            multipleMakerAsk.baseMakerOrder.currency,
+            msg.sender,
+            _protocolFeeRecipient,
+            totalProtocolFee
+        );
+
+        _returnETHIfAny();
+    }
+
+    /**
+     * @notice Match maker bid with single taker ask
+     * @param singleTakerAskOrder single taker ask order
+     * @param multipleMakerBid multiple maker bid order
+     * @param makerArraySlot maker array slot
+     */
+    function matchBidWithTakerAsk(
+        OrderStructs.SingleTakerAskOrder calldata singleTakerAskOrder,
+        OrderStructs.MultipleMakerBidOrders calldata multipleMakerBid,
+        uint256 makerArraySlot
+    ) external payable nonReentrant {
+        {
+            bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, multipleMakerBid.hash()));
+            _verify(digest, multipleMakerBid.baseMakerOrder.signer, multipleMakerBid.signature);
+        }
+
+        uint256 totalProtocolFee = _matchBidWithTakerAsk(
+            singleTakerAskOrder.takerAskOrder,
+            msg.sender,
+            multipleMakerBid.makerBidOrders[makerArraySlot],
+            multipleMakerBid.baseMakerOrder
+        );
+
+        if (singleTakerAskOrder.referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[singleTakerAskOrder.referrer]) / 10000;
+            totalProtocolFee -= totalReferralFee;
+            _transferFungibleToken(
+                multipleMakerBid.baseMakerOrder.currency,
+                msg.sender,
+                singleTakerAskOrder.referrer,
+                totalReferralFee
+            );
+        }
+        _transferFungibleToken(
+            multipleMakerBid.baseMakerOrder.currency,
+            msg.sender,
+            _protocolFeeRecipient,
+            totalProtocolFee
+        );
+    }
+
+    /**
      * @notice Match multiple maker asks with taker bids
      * @param multipleTakerBids multiple taker bid orders
      * @param multipleMakerAsks multiple maker ask orders
@@ -129,7 +213,7 @@ contract LooksRareProtocol is
                 totalProtocolFee += protocolFee;
             } else {
                 try
-                    this.matchAskWithTakerBid(
+                    this.restrictedMatchAskWithTakerBid(
                         multipleTakerBids.takerBidOrders[i],
                         msg.sender,
                         multipleMakerAsks[i].makerAskOrders[makerArraySlots[i]],
@@ -161,13 +245,13 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Match multiple maker asks with taker bids
+     * @notice Match multiple maker bids with taker asks
      * @param multipleTakerAsks multiple taker ask orders
      * @param multipleMakerBids multiple maker bid orders
      * @param makerArraySlots array of maker array slot
      * @param isExecutionAtomic whether the execution should revert if one of the transaction fails. If it is true, the execution must be atomic. Any revertion will make the transaction fail.
      */
-    function matchMultipleAsksWithTakerBids(
+    function matchMultipleBidsWithTakerAsks(
         OrderStructs.MultipleTakerAskOrders calldata multipleTakerAsks,
         OrderStructs.MultipleMakerBidOrders[] calldata multipleMakerBids,
         uint256[] calldata makerArraySlots,
@@ -204,7 +288,7 @@ contract LooksRareProtocol is
                 totalProtocolFee += protocolFee;
             } else {
                 try
-                    this.matchBidWithTakerAsk(
+                    this.restrictedMatchBidWithTakerAsk(
                         multipleTakerAsks.takerAskOrders[i],
                         msg.sender,
                         multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
@@ -237,7 +321,7 @@ contract LooksRareProtocol is
      * @notice Match makerAsk with takerBid
      * This function is solely used by this contract when atomicity is not required for batch-selling
      */
-    function matchAskWithTakerBid(
+    function restrictedMatchAskWithTakerBid(
         OrderStructs.TakerBidOrder calldata takerBid,
         address sender,
         OrderStructs.SingleMakerAskOrder calldata makerAsk,
@@ -254,7 +338,7 @@ contract LooksRareProtocol is
      * @notice Match makerBid with takerAsk
      * This function is solely used by this contract when atomicity is not required for batch-buying
      */
-    function matchBidWithTakerAsk(
+    function restrictedMatchBidWithTakerAsk(
         OrderStructs.TakerAskOrder calldata takerAsk,
         address sender,
         OrderStructs.SingleMakerBidOrder calldata makerBid,

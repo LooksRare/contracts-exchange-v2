@@ -1,0 +1,1 @@
+@looksrare/contracts-exchange-v1/=node_modules/@looksrare/contracts-exchange-v1/

@@ -1,1 +1,2 @@
-@looksrare/contracts-exchange-v1/=node_modules/@looksrare/contracts-exchange-v1/
+@looksrare/=node_modules/@looksrare/
+hardhat/=node_modules/hardhat/

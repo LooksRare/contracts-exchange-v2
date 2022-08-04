@@ -190,7 +190,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
                 revert NotApproved();
             }
 
-            _hasUserApprovedOperator[msg.sender][operators[i]] = false;
+            delete _hasUserApprovedOperator[msg.sender][operators[i]];
             unchecked {
                 ++i;
             }

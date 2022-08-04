@@ -74,7 +74,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
             revert WrongLengths();
         }
 
-        if (!_isTransferValid(from, msg.sender)) {
+        if (from != msg.sender && !_isTransferValid(from, msg.sender)) {
             revert TransferCallerInvalid();
         }
 

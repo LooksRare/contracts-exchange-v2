@@ -40,7 +40,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256 itemId,
         uint256 amount
     ) external override {
-        if (!_isTransferValid(from, msg.sender)) {
+        if (!_isDelegatedTransferValid(from, msg.sender)) {
             revert TransferCallerInvalid();
         }
 
@@ -74,7 +74,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
             revert WrongLengths();
         }
 
-        if (from != msg.sender && !_isTransferValid(from, msg.sender)) {
+        if (from != msg.sender && !_isDelegatedTransferValid(from, msg.sender)) {
             revert TransferCallerInvalid();
         }
 
@@ -118,7 +118,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
             revert WrongLengths();
         }
 
-        if (from != msg.sender && !_isTransferValid(from, msg.sender)) {
+        if (from != msg.sender && !_isDelegatedTransferValid(from, msg.sender)) {
             revert TransferCallerInvalid();
         }
 
@@ -224,11 +224,11 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Check whether transfer is valid
+     * @notice Check whether delegated transfer (by an operator) is valid
      * @param user address of the user
      * @param operator address of the operator
      */
-    function _isTransferValid(address user, address operator) internal view returns (bool) {
+    function _isDelegatedTransferValid(address user, address operator) internal view returns (bool) {
         return _whitelistedOperators[operator] && _hasUserApprovedOperator[user][operator];
     }
 

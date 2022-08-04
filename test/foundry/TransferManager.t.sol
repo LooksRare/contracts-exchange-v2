@@ -90,4 +90,84 @@ contract TransferManagerTest is TestParameters {
 
         assertEq(mockERC1155.balanceOf(recipient, tokenId), amount);
     }
+
+    function testTransferBatchItemsSameERC721() public {
+        address sender = address(88);
+        address recipient = address(90);
+        address transferrer = address(100);
+        uint256 tokenId1 = 1;
+        uint256 tokenId2 = 2;
+
+        _setUpUser(transferrer);
+        _setUpUser(sender);
+
+        vm.startPrank(_owner);
+        transferManager.whitelistOperator(transferrer);
+        vm.stopPrank();
+
+        vm.startPrank(sender);
+        mockERC721.setApprovalForAll(address(transferManager), true);
+        address[] memory approvedOperators = new address[](1);
+        approvedOperators[0] = transferrer;
+        transferManager.grantApprovals(approvedOperators);
+        mockERC721.mint(sender, tokenId1);
+        mockERC721.mint(sender, tokenId2);
+        vm.stopPrank();
+
+        uint256[] memory tokenIds = new uint256[](2);
+        tokenIds[0] = tokenId1;
+        tokenIds[1] = tokenId2;
+
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 1;
+        amounts[1] = 1;
+
+        vm.startPrank(transferrer);
+        transferManager.transferBatchItems(address(mockERC721), 0, sender, recipient, tokenIds, amounts);
+        vm.stopPrank();
+
+        assertEq(mockERC721.ownerOf(tokenId1), recipient);
+        assertEq(mockERC721.ownerOf(tokenId2), recipient);
+    }
+
+    function testTransferBatchItemsSameERC1155() public {
+        address sender = address(88);
+        address recipient = address(90);
+        address transferrer = address(100);
+        uint256 tokenId1 = 1;
+        uint256 amount1 = 2;
+        uint256 tokenId2 = 2;
+        uint256 amount2 = 5;
+
+        _setUpUser(transferrer);
+        _setUpUser(sender);
+
+        vm.startPrank(_owner);
+        transferManager.whitelistOperator(transferrer);
+        vm.stopPrank();
+
+        vm.startPrank(sender);
+        mockERC1155.setApprovalForAll(address(transferManager), true);
+        address[] memory approvedOperators = new address[](1);
+        approvedOperators[0] = transferrer;
+        transferManager.grantApprovals(approvedOperators);
+        mockERC1155.mint(sender, tokenId1, amount1);
+        mockERC1155.mint(sender, tokenId2, amount2);
+        vm.stopPrank();
+
+        uint256[] memory tokenIds = new uint256[](2);
+        tokenIds[0] = tokenId1;
+        tokenIds[1] = tokenId2;
+
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = amount1;
+        amounts[1] = amount2;
+
+        vm.startPrank(transferrer);
+        transferManager.transferBatchItems(address(mockERC1155), 1, sender, recipient, tokenIds, amounts);
+        vm.stopPrank();
+
+        assertEq(mockERC1155.balanceOf(recipient, tokenId1), amount1);
+        assertEq(mockERC1155.balanceOf(recipient, tokenId2), amount2);
+    }
 }

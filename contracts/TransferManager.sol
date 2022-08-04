@@ -109,7 +109,16 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256[][] calldata itemIds,
         uint256[][] calldata amounts
     ) external override {
-        if (from != msg.sender || !_isTransferValid(from, msg.sender)) {
+        if (
+            itemIds.length == 0 ||
+            itemIds.length != assetTypes.length ||
+            itemIds.length != collections.length ||
+            itemIds.length != amounts.length
+        ) {
+            revert WrongLengths();
+        }
+
+        if (from != msg.sender && !_isTransferValid(from, msg.sender)) {
             revert TransferCallerInvalid();
         }
 

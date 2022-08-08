@@ -410,6 +410,10 @@ contract LooksRareProtocol is
         uint256[] memory itemIds;
         uint256[] memory amounts;
 
+        // Adjust if address(0) are recipients
+        baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
+        takerBid.recipient == address(0) ? sender : takerBid.recipient;
+
         (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerBid(
             takerBid,
             makerAsk,
@@ -419,13 +423,11 @@ contract LooksRareProtocol is
         _transferNFT(
             baseMakerOrder.collection,
             baseMakerOrder.assetType,
-            takerBid.recipient == address(0) ? sender : takerBid.recipient,
             baseMakerOrder.signer,
+            takerBid.recipient,
             itemIds,
             amounts
         );
-
-        recipients[0] = baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
 
         for (uint256 i; i < recipients.length; ) {
             if (recipients[i] != address(0) && fees[i] != 0) {
@@ -475,6 +477,10 @@ contract LooksRareProtocol is
             _userOrderNonce[baseMakerOrder.signer][makerBid.orderNonce] = true;
         }
 
+        // Adjust if address(0) are recipients
+        baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
+        takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
+
         uint256[] memory fees = new uint256[](2);
         address[] memory recipients = new address[](2);
         uint256[] memory itemIds;
@@ -495,13 +501,11 @@ contract LooksRareProtocol is
             }
         }
 
-        baseMakerOrder.recipient == address(0) ? sender : baseMakerOrder.recipient;
-
         _transferNFT(
             baseMakerOrder.collection,
             baseMakerOrder.assetType,
             sender,
-            baseMakerOrder.recipient,
+            baseMakerOrder.signer,
             itemIds,
             amounts
         );
@@ -536,8 +540,8 @@ contract LooksRareProtocol is
     function _transferNFT(
         address collection,
         uint8 assetType,
-        address recipient,
         address transferrer,
+        address recipient,
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {

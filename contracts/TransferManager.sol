@@ -40,7 +40,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256 itemId,
         uint256 amount
     ) external override {
-        if (!_isTransferValid(from, msg.sender)) {
+        if (!isOperatorValidForTransfer(from, msg.sender)) {
             revert TransferCallerInvalid();
         }
 
@@ -74,7 +74,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
             revert WrongLengths();
         }
 
-        if (!_isTransferValid(from, msg.sender)) {
+        if (from != msg.sender && !isOperatorValidForTransfer(from, msg.sender)) {
             revert TransferCallerInvalid();
         }
 
@@ -109,11 +109,24 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256[][] calldata itemIds,
         uint256[][] calldata amounts
     ) external override {
-        if (from != msg.sender || !_isTransferValid(from, msg.sender)) {
+        if (
+            itemIds.length == 0 ||
+            itemIds.length != assetTypes.length ||
+            itemIds.length != collections.length ||
+            itemIds.length != amounts.length
+        ) {
+            revert WrongLengths();
+        }
+
+        if (from != msg.sender && !isOperatorValidForTransfer(from, msg.sender)) {
             revert TransferCallerInvalid();
         }
 
         for (uint256 i; i < collections.length; ) {
+            if (itemIds[i].length == 0 || itemIds[i].length != amounts[i].length) {
+                revert WrongLengths();
+            }
+
             if (assetTypes[i] == 0) {
                 for (uint256 j; j < amounts[i].length; ) {
                     _executeERC721Transfer(collections[i], from, to, itemIds[i][j]);
@@ -177,7 +190,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
                 revert NotApproved();
             }
 
-            _hasUserApprovedOperator[msg.sender][operators[i]] = false;
+            delete _hasUserApprovedOperator[msg.sender][operators[i]];
             unchecked {
                 ++i;
             }
@@ -215,11 +228,11 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Check whether transfer is valid
+     * @notice Check whether transfer (by an operator) is valid
      * @param user address of the user
      * @param operator address of the operator
      */
-    function _isTransferValid(address user, address operator) internal view returns (bool) {
+    function isOperatorValidForTransfer(address user, address operator) internal view returns (bool) {
         return _whitelistedOperators[operator] && _hasUserApprovedOperator[user][operator];
     }
 

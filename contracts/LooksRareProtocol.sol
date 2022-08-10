@@ -552,15 +552,15 @@ contract LooksRareProtocol is
      * @notice Transfer funds and tokens
      * @param collection address of the collection
      * @param assetType asset type
+     * @param sender address of the sender
      * @param recipient address of the recipient
-     * @param transferrer address of the transferrer
      * @param itemIds array of itemIds
      * @param amounts array of amounts
      */
     function _transferNFT(
         address collection,
         uint8 assetType,
-        address transferrer,
+        address sender,
         address recipient,
         uint256[] memory itemIds,
         uint256[] memory amounts
@@ -575,7 +575,7 @@ contract LooksRareProtocol is
             ITransferManager(transferManager).transferSingleItem(
                 collection,
                 assetType,
-                transferrer,
+                sender,
                 recipient,
                 itemIds[0],
                 amounts[0]
@@ -584,7 +584,7 @@ contract LooksRareProtocol is
             ITransferManager(transferManager).transferBatchItems(
                 collection,
                 assetType,
-                transferrer,
+                sender,
                 recipient,
                 itemIds,
                 amounts

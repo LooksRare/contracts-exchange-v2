@@ -32,17 +32,11 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         address implementation;
     }
 
-    // Strategy struct
-    struct Collection {
-        bool hasDifferentFee;
-        uint16 adjustmentFactor; // 100 = no adjustment; 70 = -30% discount vs. baseFee, 130 = 30% premium vs. baseFee
-    }
+    // Track collection discount ratios (e.g., 100 = 1%, 5000 = 50%) relative to strategy fee
+    mapping(address => uint16) internal _collectionDiscountRatios;
 
     // Track strategy status and implementation
     mapping(uint16 => Strategy) internal _strategies;
-
-    // Track collection status and implementation
-    mapping(address => Collection) internal _collections;
 
     /**
      * @notice Constructor
@@ -377,6 +371,20 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         });
 
         emit NewStrategy(strategyId, implementation);
+    }
+
+    /**
+     * @notice Add custom discount for collection
+     * @param collection address of the collection
+     * @param discountRatio discount ratio
+     */
+    function adjustDiscountRatioCollection(address collection, uint16 discountRatio) external onlyOwner {
+        if (discountRatio >= 10000) {
+            revert CollectionDiscountRatioTooLow();
+        }
+
+        _collectionDiscountRatios[collection] = discountRatio;
+        emit NewCollectionDiscountRatio(collection, discountRatio);
     }
 
     /**

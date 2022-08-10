@@ -410,9 +410,7 @@ contract LooksRareProtocol is
         uint256[] memory itemIds;
         uint256[] memory amounts;
 
-        // Adjust if address(0) are recipients
-        baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
-        takerBid.recipient == address(0) ? sender : takerBid.recipient;
+        recipients[0] = baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
 
         (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerBid(
             takerBid,
@@ -424,7 +422,7 @@ contract LooksRareProtocol is
             baseMakerOrder.collection,
             baseMakerOrder.assetType,
             baseMakerOrder.signer,
-            takerBid.recipient,
+            takerBid.recipient == address(0) ? sender : takerBid.recipient,
             itemIds,
             amounts
         );
@@ -441,7 +439,7 @@ contract LooksRareProtocol is
         emit TakerBid(
             makerAsk.orderNonce,
             sender,
-            takerBid.recipient,
+            takerBid.recipient == address(0) ? sender : takerBid.recipient,
             baseMakerOrder.signer,
             baseMakerOrder.strategyId,
             baseMakerOrder.currency,
@@ -477,14 +475,12 @@ contract LooksRareProtocol is
             _userOrderNonce[baseMakerOrder.signer][makerBid.orderNonce] = true;
         }
 
-        // Adjust if address(0) are recipients
-        baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
-        takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
-
         uint256[] memory fees = new uint256[](2);
         address[] memory recipients = new address[](2);
         uint256[] memory itemIds;
         uint256[] memory amounts;
+
+        recipients[0] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
 
         (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerAsk(
             takerAsk,
@@ -505,7 +501,7 @@ contract LooksRareProtocol is
             baseMakerOrder.collection,
             baseMakerOrder.assetType,
             sender,
-            baseMakerOrder.signer,
+            baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient,
             itemIds,
             amounts
         );
@@ -513,7 +509,7 @@ contract LooksRareProtocol is
         emit TakerAsk(
             makerBid.orderNonce,
             baseMakerOrder.signer,
-            baseMakerOrder.recipient,
+            baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient,
             sender,
             takerAsk.recipient,
             baseMakerOrder.strategyId,

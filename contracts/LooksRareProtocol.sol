@@ -156,14 +156,14 @@ contract LooksRareProtocol is
             totalProtocolFee -= totalReferralFee;
             _transferFungibleToken(
                 multipleMakerBid.baseMakerOrder.currency,
-                msg.sender,
+                multipleMakerBid.baseMakerOrder.signer,
                 singleTakerAskOrder.referrer,
                 totalReferralFee
             );
         }
         _transferFungibleToken(
             multipleMakerBid.baseMakerOrder.currency,
-            msg.sender,
+            multipleMakerBid.baseMakerOrder.signer,
             _protocolFeeRecipient,
             totalProtocolFee
         );
@@ -263,8 +263,6 @@ contract LooksRareProtocol is
             revert WrongLengths();
         }
 
-        uint256 totalProtocolFee;
-
         // Fire the trades
         for (uint256 i; i < multipleMakerBids.length; ) {
             {
@@ -285,17 +283,55 @@ contract LooksRareProtocol is
                     multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
                     multipleMakerBids[i].baseMakerOrder
                 );
-                totalProtocolFee += protocolFee;
+
+                if (multipleTakerAsks.referrer != address(0)) {
+                    uint256 totalReferralFee = (protocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
+                    protocolFee -= totalReferralFee;
+                    _transferFungibleToken(
+                        multipleTakerAsks.currency,
+                        multipleMakerBids[i].baseMakerOrder.signer,
+                        multipleTakerAsks.referrer,
+                        totalReferralFee
+                    );
+                }
+                _transferFungibleToken(
+                    multipleTakerAsks.currency,
+                    multipleMakerBids[i].baseMakerOrder.signer,
+                    _protocolFeeRecipient,
+                    protocolFee
+                );
             } else {
                 try
                     this.restrictedMatchBidWithTakerAsk(
                         multipleTakerAsks.takerAskOrders[i],
-                        msg.sender,
+                        multipleMakerBids[i].baseMakerOrder.signer,
                         multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
                         multipleMakerBids[i].baseMakerOrder
                     )
                 returns (uint256 protocolFee) {
-                    totalProtocolFee += protocolFee;
+                    protocolFee = _matchBidWithTakerAsk(
+                        multipleTakerAsks.takerAskOrders[i],
+                        msg.sender,
+                        multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
+                        multipleMakerBids[i].baseMakerOrder
+                    );
+
+                    if (multipleTakerAsks.referrer != address(0)) {
+                        uint256 totalReferralFee = (protocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
+                        protocolFee -= totalReferralFee;
+                        _transferFungibleToken(
+                            multipleTakerAsks.currency,
+                            multipleMakerBids[i].baseMakerOrder.signer,
+                            multipleTakerAsks.referrer,
+                            totalReferralFee
+                        );
+                    }
+                    _transferFungibleToken(
+                        multipleTakerAsks.currency,
+                        multipleMakerBids[i].baseMakerOrder.signer,
+                        _protocolFeeRecipient,
+                        protocolFee
+                    );
                 } catch {}
             }
 
@@ -303,18 +339,6 @@ contract LooksRareProtocol is
                 ++i;
             }
         }
-
-        if (multipleTakerAsks.referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
-            totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(
-                multipleTakerAsks.currency,
-                msg.sender,
-                multipleTakerAsks.referrer,
-                totalReferralFee
-            );
-        }
-        _transferFungibleToken(multipleTakerAsks.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
     }
 
     /**
@@ -490,7 +514,7 @@ contract LooksRareProtocol is
 
         for (uint256 i; i < recipients.length; ) {
             if (recipients[i] != address(0) && fees[i] != 0) {
-                _transferFungibleToken(baseMakerOrder.currency, sender, recipients[i], fees[i]);
+                _transferFungibleToken(baseMakerOrder.currency, baseMakerOrder.signer, recipients[i], fees[i]);
             }
             unchecked {
                 ++i;

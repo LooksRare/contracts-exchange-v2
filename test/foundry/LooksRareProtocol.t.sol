@@ -414,6 +414,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         vm.stopPrank();
 
         assertEq(mockERC721.ownerOf(0), makerUser);
+        assertEq(weth.balanceOf(makerUser), 9 ether); // 10 - 1 = 9
         assertEq(address(looksRareProtocol).balance, 0);
     }
 
@@ -490,5 +491,6 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         }
 
         assertEq(address(looksRareProtocol).balance, 0);
+        assertEq(weth.balanceOf(makerUser), 4 ether); // 10 - 6 = 4
     }
 }

@@ -32,8 +32,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         address implementation;
     }
 
-    // Track collection discount ratios (e.g., 100 = 1%, 5000 = 50%) relative to strategy fee
-    mapping(address => uint16) internal _collectionDiscountRatios;
+    // Track collection discount factors (e.g., 100 = 1%, 5000 = 50%) relative to strategy fee
+    mapping(address => uint256) internal _collectionDiscountFactors;
 
     // Track strategy status and implementation
     mapping(uint16 => Strategy) internal _strategies;
@@ -83,7 +83,11 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             ? _getRoyaltyRecipientAndAmount(baseMaker.collection, itemIds, price)
             : (address(0), 0);
 
-        protocolFeeAmount = (price * _strategies[baseMaker.strategyId].protocolFee) / 10000;
+        protocolFeeAmount =
+            (((price * _strategies[baseMaker.strategyId].protocolFee) / 10000) *
+                (10000 - _collectionDiscountFactors[baseMaker.collection])) /
+            10000;
+
         netPrice = price - protocolFeeAmount - royaltyFeeAmount;
 
         if (netPrice < (price * takerAsk.minNetRatio) / 10000) {
@@ -126,7 +130,11 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             ? _getRoyaltyRecipientAndAmount(baseMaker.collection, itemIds, price)
             : (address(0), 0);
 
-        protocolFeeAmount = (price * _strategies[baseMaker.strategyId].protocolFee) / 10000;
+        protocolFeeAmount =
+            (((price * _strategies[baseMaker.strategyId].protocolFee) / 10000) *
+                (10000 - _collectionDiscountFactors[baseMaker.collection])) /
+            10000;
+
         netPrice = price - royaltyFeeAmount - protocolFeeAmount;
 
         if (netPrice < (price * makerAsk.minNetRatio) / 10000) {
@@ -376,15 +384,15 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     /**
      * @notice Add custom discount for collection
      * @param collection address of the collection
-     * @param discountRatio discount ratio
+     * @param discountFactor discount factor (e.g., 1000 = -10% relative to the protocol fee)
      */
-    function adjustDiscountRatioCollection(address collection, uint16 discountRatio) external onlyOwner {
-        if (discountRatio >= 10000) {
-            revert CollectionDiscountRatioTooLow();
+    function adjustDiscountFactorCollection(address collection, uint256 discountFactor) external onlyOwner {
+        if (discountFactor >= 10000) {
+            revert CollectionDiscountFactorTooHigh();
         }
 
-        _collectionDiscountRatios[collection] = discountRatio;
-        emit NewCollectionDiscountRatio(collection, discountRatio);
+        _collectionDiscountFactors[collection] = discountFactor;
+        emit NewCollectionDiscountFactor(collection, discountFactor);
     }
 
     /**

@@ -156,14 +156,14 @@ contract LooksRareProtocol is
             totalProtocolFee -= totalReferralFee;
             _transferFungibleToken(
                 multipleMakerBid.baseMakerOrder.currency,
-                msg.sender,
+                multipleMakerBid.baseMakerOrder.signer,
                 singleTakerAskOrder.referrer,
                 totalReferralFee
             );
         }
         _transferFungibleToken(
             multipleMakerBid.baseMakerOrder.currency,
-            msg.sender,
+            multipleMakerBid.baseMakerOrder.signer,
             _protocolFeeRecipient,
             totalProtocolFee
         );
@@ -263,8 +263,6 @@ contract LooksRareProtocol is
             revert WrongLengths();
         }
 
-        uint256 totalProtocolFee;
-
         // Fire the trades
         for (uint256 i; i < multipleMakerBids.length; ) {
             {
@@ -285,17 +283,55 @@ contract LooksRareProtocol is
                     multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
                     multipleMakerBids[i].baseMakerOrder
                 );
-                totalProtocolFee += protocolFee;
+
+                if (multipleTakerAsks.referrer != address(0)) {
+                    uint256 totalReferralFee = (protocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
+                    protocolFee -= totalReferralFee;
+                    _transferFungibleToken(
+                        multipleTakerAsks.currency,
+                        multipleMakerBids[i].baseMakerOrder.signer,
+                        multipleTakerAsks.referrer,
+                        totalReferralFee
+                    );
+                }
+                _transferFungibleToken(
+                    multipleTakerAsks.currency,
+                    multipleMakerBids[i].baseMakerOrder.signer,
+                    _protocolFeeRecipient,
+                    protocolFee
+                );
             } else {
                 try
                     this.restrictedMatchBidWithTakerAsk(
                         multipleTakerAsks.takerAskOrders[i],
-                        msg.sender,
+                        multipleMakerBids[i].baseMakerOrder.signer,
                         multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
                         multipleMakerBids[i].baseMakerOrder
                     )
                 returns (uint256 protocolFee) {
-                    totalProtocolFee += protocolFee;
+                    protocolFee = _matchBidWithTakerAsk(
+                        multipleTakerAsks.takerAskOrders[i],
+                        msg.sender,
+                        multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
+                        multipleMakerBids[i].baseMakerOrder
+                    );
+
+                    if (multipleTakerAsks.referrer != address(0)) {
+                        uint256 totalReferralFee = (protocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
+                        protocolFee -= totalReferralFee;
+                        _transferFungibleToken(
+                            multipleTakerAsks.currency,
+                            multipleMakerBids[i].baseMakerOrder.signer,
+                            multipleTakerAsks.referrer,
+                            totalReferralFee
+                        );
+                    }
+                    _transferFungibleToken(
+                        multipleTakerAsks.currency,
+                        multipleMakerBids[i].baseMakerOrder.signer,
+                        _protocolFeeRecipient,
+                        protocolFee
+                    );
                 } catch {}
             }
 
@@ -303,18 +339,6 @@ contract LooksRareProtocol is
                 ++i;
             }
         }
-
-        if (multipleTakerAsks.referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
-            totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(
-                multipleTakerAsks.currency,
-                msg.sender,
-                multipleTakerAsks.referrer,
-                totalReferralFee
-            );
-        }
-        _transferFungibleToken(multipleTakerAsks.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
     }
 
     /**
@@ -410,6 +434,8 @@ contract LooksRareProtocol is
         uint256[] memory itemIds;
         uint256[] memory amounts;
 
+        recipients[0] = baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
+
         (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerBid(
             takerBid,
             makerAsk,
@@ -419,13 +445,11 @@ contract LooksRareProtocol is
         _transferNFT(
             baseMakerOrder.collection,
             baseMakerOrder.assetType,
-            takerBid.recipient == address(0) ? sender : takerBid.recipient,
             baseMakerOrder.signer,
+            takerBid.recipient == address(0) ? sender : takerBid.recipient,
             itemIds,
             amounts
         );
-
-        recipients[0] = baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
 
         for (uint256 i; i < recipients.length; ) {
             if (recipients[i] != address(0) && fees[i] != 0) {
@@ -439,7 +463,7 @@ contract LooksRareProtocol is
         emit TakerBid(
             makerAsk.orderNonce,
             sender,
-            takerBid.recipient,
+            takerBid.recipient == address(0) ? sender : takerBid.recipient,
             baseMakerOrder.signer,
             baseMakerOrder.strategyId,
             baseMakerOrder.currency,
@@ -480,6 +504,8 @@ contract LooksRareProtocol is
         uint256[] memory itemIds;
         uint256[] memory amounts;
 
+        recipients[0] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
+
         (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerAsk(
             takerAsk,
             makerBid,
@@ -488,20 +514,18 @@ contract LooksRareProtocol is
 
         for (uint256 i; i < recipients.length; ) {
             if (recipients[i] != address(0) && fees[i] != 0) {
-                _transferFungibleToken(baseMakerOrder.currency, sender, recipients[i], fees[i]);
+                _transferFungibleToken(baseMakerOrder.currency, baseMakerOrder.signer, recipients[i], fees[i]);
             }
             unchecked {
                 ++i;
             }
         }
 
-        baseMakerOrder.recipient == address(0) ? sender : baseMakerOrder.recipient;
-
         _transferNFT(
             baseMakerOrder.collection,
             baseMakerOrder.assetType,
             sender,
-            baseMakerOrder.recipient,
+            baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient,
             itemIds,
             amounts
         );
@@ -509,7 +533,7 @@ contract LooksRareProtocol is
         emit TakerAsk(
             makerBid.orderNonce,
             baseMakerOrder.signer,
-            baseMakerOrder.recipient,
+            baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient,
             sender,
             takerAsk.recipient,
             baseMakerOrder.strategyId,
@@ -528,16 +552,16 @@ contract LooksRareProtocol is
      * @notice Transfer funds and tokens
      * @param collection address of the collection
      * @param assetType asset type
+     * @param sender address of the sender
      * @param recipient address of the recipient
-     * @param transferrer address of the transferrer
      * @param itemIds array of itemIds
      * @param amounts array of amounts
      */
     function _transferNFT(
         address collection,
         uint8 assetType,
+        address sender,
         address recipient,
-        address transferrer,
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
@@ -551,7 +575,7 @@ contract LooksRareProtocol is
             ITransferManager(transferManager).transferSingleItem(
                 collection,
                 assetType,
-                transferrer,
+                sender,
                 recipient,
                 itemIds[0],
                 amounts[0]
@@ -560,7 +584,7 @@ contract LooksRareProtocol is
             ITransferManager(transferManager).transferBatchItems(
                 collection,
                 assetType,
-                transferrer,
+                sender,
                 recipient,
                 itemIds,
                 amounts

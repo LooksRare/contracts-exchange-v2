@@ -441,4 +441,22 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             revert OutsideOfTimeRange();
         }
     }
+
+    /**
+     * @notice View collection discount factor
+     * @param collection address of the collection
+     * @return collectionDiscountFactor collection discount factor (e.g., 500 --> 5% relative to protocol fee)
+     */
+    function viewCollectionDiscountFactor(address collection) external view returns (uint256 collectionDiscountFactor) {
+        return _collectionDiscountFactors[collection];
+    }
+
+    /**
+     * @notice View strategy information
+     * @param strategyId id of the strategy
+     * @return strategy parameters of the strategy (e.g., implementation address, protocol fee)
+     */
+    function viewStrategy(uint16 strategyId) external view returns (Strategy memory strategy) {
+        return _strategies[strategyId];
+    }
 }

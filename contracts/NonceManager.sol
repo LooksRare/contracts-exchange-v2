@@ -84,4 +84,33 @@ contract NonceManager is INonceManager {
 
         emit NewBidAskNonces(_userBidAskNonces[msg.sender].bidNonce, _userBidAskNonces[msg.sender].askNonce);
     }
+
+    /**
+     * @notice Check the bid/ask nonce
+     * @param user address of the user
+     * @return bidAskNonces user bid ask nonce
+     */
+    function viewUserBidAskNonces(address user) external view returns (UserBidAskNonces memory bidAskNonces) {
+        return _userBidAskNonces[user];
+    }
+
+    /**
+     * @notice Check whether user order nonce is executed and cancelled
+     * @param user address of the user
+     * @param nonce order nonce
+     * @return isNonceExecutedOrCancelled whether the nonce is cancelled or executed
+     */
+    function viewUserOrderNonce(address user, uint112 nonce) external view returns (bool isNonceExecutedOrCancelled) {
+        return _userOrderNonce[user][nonce];
+    }
+
+    /**
+     * @notice Check whether user subset nonce is executed and cancelled
+     * @param user address of the user
+     * @param nonce subset nonce
+     * @return isNonceExecutedOrCancelled whether the nonce is cancelled or executed
+     */
+    function viewUserSubsetNonce(address user, uint112 nonce) external view returns (bool isNonceExecutedOrCancelled) {
+        return _userSubsetNonce[user][nonce];
+    }
 }

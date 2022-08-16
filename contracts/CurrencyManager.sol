@@ -42,4 +42,13 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
         delete _isCurrencyWhitelisted[currency];
         emit CurrencyRemoved(currency);
     }
+
+    /**
+     * @notice Is currency whitelisted
+     * @param currency address of the currency (address(0) for ETH)
+     * @return isWhitelisted whether the currency is whitelisted
+     */
+    function isCurrencyWhitelisted(address currency) external view returns (bool isWhitelisted) {
+        return _isCurrencyWhitelisted[currency];
+    }
 }

@@ -148,13 +148,15 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         vm.deal(_owner, 100 ether);
         vm.deal(_collectionOwner, 100 ether);
 
+        // Verify interfaceId of ERC-2981 is not supported
+        assertFalse(mockERC721.supportsInterface(0x2a55205a));
+
         // Update registry info
         royaltyFeeRegistry.updateRoyaltyInfoForCollection(address(mockERC721), _collectionOwner, _collectionOwner, 100);
 
         (address recipient, uint256 amount) = royaltyFeeRegistry.royaltyInfo(address(mockERC721), 1 ether);
         assertEq(recipient, _collectionOwner);
         assertEq(amount, 1 ether / 100);
-        assertTrue(mockERC721.supportsInterface(0x2a55205a));
 
         // Operations
         transferManager.whitelistOperator(address(looksRareProtocol));
@@ -165,6 +167,32 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         // Fetch domain separator
         (_domainSeparator, , , ) = looksRareProtocol.information();
         operators.push(address(looksRareProtocol));
+    }
+
+    function testInitialStates() public {
+        (
+            bytes32 initialDomainSeparator,
+            uint256 initialChainId,
+            bytes32 currentDomainSeparator,
+            uint256 currentChainId
+        ) = looksRareProtocol.information();
+
+        bytes32 expectedDomainSeparator = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256("LooksRareProtocol"),
+                keccak256(bytes("2")),
+                block.chainid,
+                address(looksRareProtocol)
+            )
+        );
+
+        assertEq(initialDomainSeparator, expectedDomainSeparator);
+        assertEq(initialChainId, block.chainid);
+        assertEq(initialDomainSeparator, currentDomainSeparator);
+        assertEq(initialChainId, currentChainId);
+
+        assertEq(initialChainId, currentChainId);
     }
 
     /**

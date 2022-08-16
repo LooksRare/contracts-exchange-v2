@@ -32,17 +32,11 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         address implementation;
     }
 
-    // Strategy struct
-    struct Collection {
-        bool hasDifferentFee;
-        uint16 adjustmentFactor; // 100 = no adjustment; 70 = -30% discount vs. baseFee, 130 = 30% premium vs. baseFee
-    }
+    // Track collection discount factors (e.g., 100 = 1%, 5000 = 50%) relative to strategy fee
+    mapping(address => uint256) internal _collectionDiscountFactors;
 
     // Track strategy status and implementation
     mapping(uint16 => Strategy) internal _strategies;
-
-    // Track collection status and implementation
-    mapping(address => Collection) internal _collections;
 
     /**
      * @notice Constructor
@@ -89,7 +83,11 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             ? _getRoyaltyRecipientAndAmount(baseMaker.collection, itemIds, price)
             : (address(0), 0);
 
-        protocolFeeAmount = (price * _strategies[baseMaker.strategyId].protocolFee) / 10000;
+        protocolFeeAmount =
+            (((price * _strategies[baseMaker.strategyId].protocolFee) / 10000) *
+                (10000 - _collectionDiscountFactors[baseMaker.collection])) /
+            10000;
+
         netPrice = price - protocolFeeAmount - royaltyFeeAmount;
 
         if (netPrice < (price * takerAsk.minNetRatio) / 10000) {
@@ -132,7 +130,11 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             ? _getRoyaltyRecipientAndAmount(baseMaker.collection, itemIds, price)
             : (address(0), 0);
 
-        protocolFeeAmount = (price * _strategies[baseMaker.strategyId].protocolFee) / 10000;
+        protocolFeeAmount =
+            (((price * _strategies[baseMaker.strategyId].protocolFee) / 10000) *
+                (10000 - _collectionDiscountFactors[baseMaker.collection])) /
+            10000;
+
         netPrice = price - royaltyFeeAmount - protocolFeeAmount;
 
         if (netPrice < (price * makerAsk.minNetRatio) / 10000) {
@@ -380,6 +382,20 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     }
 
     /**
+     * @notice Add custom discount for collection
+     * @param collection address of the collection
+     * @param discountFactor discount factor (e.g., 1000 = -10% relative to the protocol fee)
+     */
+    function adjustDiscountFactorCollection(address collection, uint256 discountFactor) external onlyOwner {
+        if (discountFactor >= 10000) {
+            revert CollectionDiscountFactorTooHigh();
+        }
+
+        _collectionDiscountFactors[collection] = discountFactor;
+        emit NewCollectionDiscountFactor(collection, discountFactor);
+    }
+
+    /**
      * @notice Remove strategy
      * @param strategyId id of the strategy
      */
@@ -424,5 +440,23 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         if (startTime > block.timestamp || endTime < block.timestamp) {
             revert OutsideOfTimeRange();
         }
+    }
+
+    /**
+     * @notice View collection discount factor
+     * @param collection address of the collection
+     * @return collectionDiscountFactor collection discount factor (e.g., 500 --> 5% relative to protocol fee)
+     */
+    function viewCollectionDiscountFactor(address collection) external view returns (uint256 collectionDiscountFactor) {
+        return _collectionDiscountFactors[collection];
+    }
+
+    /**
+     * @notice View strategy information
+     * @param strategyId id of the strategy
+     * @return strategy parameters of the strategy (e.g., implementation address, protocol fee)
+     */
+    function viewStrategy(uint16 strategyId) external view returns (Strategy memory strategy) {
+        return _strategies[strategyId];
     }
 }

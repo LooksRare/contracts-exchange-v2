@@ -7,13 +7,6 @@ import {IReferralStaking} from "./interfaces/IReferralStaking.sol";
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
 contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
-    struct Tier {
-        // Referral share relative to the protocol fees (per 10000)
-        uint16 rate;
-        // Amount of LOOKS to stake to enable this tier
-        uint256 stake;
-    }
-
     uint256 public constant MAX_TIMELOCK_PERIOD = 30 days;
 
     address public immutable looksRareTokenAddress;

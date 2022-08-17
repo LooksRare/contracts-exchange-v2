@@ -10,4 +10,10 @@ interface INonceManager {
     event NewBidAskNonces(uint112 bidNonce, uint112 askNonce);
     event OrderNoncesCancelled(uint112[] orderNonces);
     event SubsetNoncesCancelled(uint112[] subsetNonces);
+
+    // Custom structs
+    struct UserBidAskNonces {
+        uint112 bidNonce;
+        uint112 askNonce;
+    }
 }

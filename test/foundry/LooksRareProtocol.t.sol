@@ -6,6 +6,7 @@ import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/roy
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 
 import {TestHelpers} from "./TestHelpers.sol";
 import {MockERC721} from "./utils/MockERC721.sol";
@@ -20,7 +21,7 @@ abstract contract TestParameters is TestHelpers {
     address internal takerUser = vm.addr(takerUserPK);
 }
 
-contract ProtocolHelpers is TestParameters {
+contract ProtocolHelpers is TestParameters, IExecutionManager {
     receive() external payable {}
 
     bytes32 internal _domainSeparator;
@@ -191,6 +192,14 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         assertEq(initialChainId, block.chainid);
         assertEq(initialDomainSeparator, currentDomainSeparator);
         assertEq(initialChainId, currentChainId);
+
+        for (uint16 i = 0; i < 2; i++) {
+            Strategy memory strategy = looksRareProtocol.viewStrategy(i);
+            assertTrue(strategy.isActive);
+            assertTrue(strategy.hasRoyalties);
+            assertEq(strategy.protocolFee, uint8(200));
+            assertEq(strategy.implementation, address(0));
+        }
     }
 
     /**

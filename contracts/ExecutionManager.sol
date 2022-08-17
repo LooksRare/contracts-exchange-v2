@@ -24,14 +24,6 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     // Protocol fee recipient
     address internal _protocolFeeRecipient;
 
-    // Strategy struct
-    struct Strategy {
-        bool isActive;
-        bool hasRoyalties;
-        uint8 protocolFee;
-        address implementation;
-    }
-
     // Track collection discount factors (e.g., 100 = 1%, 5000 = 50%) relative to strategy fee
     mapping(address => uint256) internal _collectionDiscountFactors;
 

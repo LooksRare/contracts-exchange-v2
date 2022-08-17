@@ -17,4 +17,12 @@ interface IReferralStaking {
     error TierTooHigh();
     error UserAlreadyStaking();
     error FundsTimelocked();
+
+    // Custom structs
+    struct Tier {
+        // Referral share relative to the protocol fees (per 10000)
+        uint16 rate;
+        // Amount of LOOKS to stake to enable this tier
+        uint256 stake;
+    }
 }

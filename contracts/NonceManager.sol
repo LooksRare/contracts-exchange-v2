@@ -9,11 +9,6 @@ import {INonceManager} from "./interfaces/INonceManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract NonceManager is INonceManager {
-    struct UserBidAskNonces {
-        uint112 bidNonce;
-        uint112 askNonce;
-    }
-
     // Track bid and ask nonces for a user
     mapping(address => UserBidAskNonces) internal _userBidAskNonces;
 

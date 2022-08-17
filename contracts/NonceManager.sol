@@ -88,14 +88,14 @@ contract NonceManager is INonceManager {
     /**
      * @notice Check the bid/ask nonce
      * @param user address of the user
-     * @return bidAskNonces user bid ask nonce
+     * @return bidAskNonces user bid ask nonces
      */
     function viewUserBidAskNonces(address user) external view returns (UserBidAskNonces memory bidAskNonces) {
         return _userBidAskNonces[user];
     }
 
     /**
-     * @notice Check whether user order nonce is executed and cancelled
+     * @notice Check whether user order nonce is executed or cancelled
      * @param user address of the user
      * @param nonce order nonce
      * @return isNonceExecutedOrCancelled whether the nonce is cancelled or executed
@@ -105,7 +105,7 @@ contract NonceManager is INonceManager {
     }
 
     /**
-     * @notice Check whether user subset nonce is executed and cancelled
+     * @notice Check whether user subset nonce is executed or cancelled
      * @param user address of the user
      * @param nonce subset nonce
      * @return isNonceExecutedOrCancelled whether the nonce is cancelled or executed

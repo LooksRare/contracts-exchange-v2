@@ -26,6 +26,7 @@
     "test": "hardhat test",
     "test:gas": "REPORT_GAS=true hardhat test",
     "test:forge": "forge test -vv",
+    "test:forge:coverage": "forge test --gas-report",
     "test:forge:watch": "forge test -vvv --watch",
     "test:coverage": "hardhat coverage && hardhat compile --force"
   },

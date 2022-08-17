@@ -17,4 +17,12 @@ interface IExecutionManager {
     event NewStrategy(uint16 strategyId, address implementation);
     event StrategyReactivated(uint16 strategyId);
     event StrategyRemoved(uint16 strategyId);
+
+    // Custom structs
+    struct Strategy {
+        bool isActive;
+        bool hasRoyalties;
+        uint8 protocolFee;
+        address implementation;
+    }
 }

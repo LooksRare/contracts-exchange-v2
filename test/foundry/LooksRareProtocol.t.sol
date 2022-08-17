@@ -191,8 +191,6 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         assertEq(initialChainId, block.chainid);
         assertEq(initialDomainSeparator, currentDomainSeparator);
         assertEq(initialChainId, currentChainId);
-
-        assertEq(initialChainId, currentChainId);
     }
 
     /**
@@ -325,7 +323,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         vm.stopPrank();
 
         for (uint256 i; i < numberOrders; i++) {
-            assertEq(mockERC721.ownerOf(i), makerUser);
+            assertEq(mockERC721.ownerOf(i), takerUser);
         }
         assertEq(address(looksRareProtocol).balance, 0);
     }

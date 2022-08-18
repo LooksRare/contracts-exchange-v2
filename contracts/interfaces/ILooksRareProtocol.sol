@@ -4,6 +4,7 @@ pragma solidity ^0.8.14;
 interface ILooksRareProtocol {
     // Custom errors
     error NoTransferManagerForAssetType(uint16 assetType);
+    error SameDomainSeparator();
     error WrongNonces();
     error WrongAssetType(uint16 assetType);
     error WrongCurrency();
@@ -38,4 +39,6 @@ interface ILooksRareProtocol {
         address[] feeRecipients,
         uint256[] feeAmounts
     );
+
+    event NewDomainSeparator();
 }

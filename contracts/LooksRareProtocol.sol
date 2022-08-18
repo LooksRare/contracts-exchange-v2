@@ -405,6 +405,29 @@ contract LooksRareProtocol is
     }
 
     /**
+     * @notice Update the domain separator
+     * @dev If there is a fork of the network with a new chainId, it allows the owner to reset the domain separator for
+     *      the chain with the new id. Anyone can call this function.
+     */
+    function updateDomainSeparator() external {
+        if (block.chainid != _chainId) {
+            _domainSeparator = keccak256(
+                abi.encode(
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                    keccak256("LooksRareExchange"),
+                    keccak256(bytes("2")),
+                    block.chainid,
+                    address(this)
+                )
+            );
+            _chainId = block.chainid;
+            emit NewDomainSeparator();
+        } else {
+            revert SameDomainSeparator();
+        }
+    }
+
+    /**
      * @notice Match takerBids with makerAsk
      */
     function _matchAskWithTakerBid(

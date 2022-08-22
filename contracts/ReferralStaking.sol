@@ -6,18 +6,31 @@ import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
 import {IReferralStaking} from "./interfaces/IReferralStaking.sol";
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
+/**
+ * @title ReferralStaking
+ * @notice This contract handles the staking process for referrals.
+ * @author LooksRare protocol team (👀,💎)
+ */
 contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
+    // Maximum timelock period that can be set by this contract owner
     uint256 public constant MAX_TIMELOCK_PERIOD = 30 days;
 
+    // Address of the LOOKS token
     address public immutable looksRareTokenAddress;
+
+    // Address of the LooksRare protocol
     LooksRareProtocol public immutable looksRareProtocol;
 
     // Lockup after deposit
     uint256 public timelockPeriod;
+
+    // Tracks the last deposit timestamp of a user
     mapping(address => uint256) internal _lastDepositTimestamp;
 
     // List of tiers, simulate an array behavior
     mapping(uint8 => Tier) internal _tiers;
+
+    // Current number of available tiers
     uint8 public numberOfTiers;
 
     // Amount of LOOKS staked per address

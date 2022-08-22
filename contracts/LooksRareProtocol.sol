@@ -25,7 +25,8 @@ import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
 
 /**
  * @title LooksRareProtocol
- * @notice This contract is the primary contract of the LooksRare protocol (v2). It inherits from other core contracts, such as CurrencyManager, ExecutionManager, and NonceManager.
+ * @notice This contract is the primary contract of the LooksRare protocol (v2).
+ *         It inherits from other core contracts such as CurrencyManager, ExecutionManager, and NonceManager.
  * @author LooksRare protocol team (👀,💎)
  */
 contract LooksRareProtocol is

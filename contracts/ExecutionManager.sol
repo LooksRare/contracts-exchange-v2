@@ -12,10 +12,13 @@ import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
 
 /**
  * @title ExecutionManager
- * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain when off-chain maker orders is matched by on-chain taker orders of a different kind (i.e., taker ask with maker bid or taker bid with maker ask).
+ * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain
+ *         when off-chain maker orders is matched by on-chain taker orders of a different kind.
+ *         For instance, a taker ask is executed against a maker bid (and a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
 contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
+    // Number of internal strategies
     uint8 private immutable _COUNT_INTERNAL_STRATEGIES = 2;
 
     // Royalty fee registry
@@ -24,7 +27,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     // Protocol fee recipient
     address internal _protocolFeeRecipient;
 
-    // Track collection discount factors (e.g., 100 = 1%, 5000 = 50%) relative to strategy fee
+    // Track collection discount factors (e.g., 100 = 1%, 5,000 = 50%) relative to strategy fee
     mapping(address => uint256) internal _collectionDiscountFactors;
 
     // Track strategy status and implementation
@@ -36,8 +39,20 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      */
     constructor(address royaltyFeeRegistry) {
         _royaltyFeeRegistry = IRoyaltyFeeRegistry(royaltyFeeRegistry);
-        _strategies[0] = Strategy({isActive: true, hasRoyalties: true, protocolFee: 200, implementation: address(0)});
-        _strategies[1] = Strategy({isActive: true, hasRoyalties: true, protocolFee: 200, implementation: address(0)});
+        _strategies[0] = Strategy({
+            isActive: true,
+            hasRoyalties: true,
+            protocolFee: 200,
+            maxProtocolFee: 300,
+            implementation: address(0)
+        });
+        _strategies[1] = Strategy({
+            isActive: true,
+            hasRoyalties: true,
+            protocolFee: 200,
+            maxProtocolFee: 300,
+            implementation: address(0)
+        });
     }
 
     /**
@@ -351,22 +366,29 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @param strategyId id of the new strategy
      * @param hasRoyalties whether the strategy has royalties
      * @param protocolFee protocol fee
+     * @param maxProtocolFee protocol fee
      * @param implementation address of the implementation
      */
     function addStrategy(
         uint16 strategyId,
         bool hasRoyalties,
-        uint8 protocolFee,
+        uint16 protocolFee,
+        uint16 maxProtocolFee,
         address implementation
     ) external onlyOwner {
         if (strategyId < _COUNT_INTERNAL_STRATEGIES || _strategies[strategyId].implementation != address(0)) {
             revert StrategyUsed(strategyId);
         }
 
+        if (maxProtocolFee < protocolFee) {
+            revert StrategyProtocolFeeTooHigh(strategyId);
+        }
+
         _strategies[strategyId] = Strategy({
             isActive: true,
             hasRoyalties: hasRoyalties,
             protocolFee: protocolFee,
+            maxProtocolFee: maxProtocolFee,
             implementation: implementation
         });
 
@@ -388,50 +410,35 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Remove strategy
+     * @notice Update strategy
      * @param strategyId id of the strategy
+     * @param hasRoyalties whether the strategy should distribute royalties
+     * @param protocolFee protocol fee
+     * @param isActive whether the strategy is active
      */
-    function removeStrategy(uint16 strategyId) external onlyOwner {
-        if (
-            strategyId < _COUNT_INTERNAL_STRATEGIES ||
-            _strategies[strategyId].implementation == address(0) ||
-            !_strategies[strategyId].isActive
-        ) {
+    function updateStrategy(
+        uint16 strategyId,
+        bool hasRoyalties,
+        uint16 protocolFee,
+        bool isActive
+    ) external onlyOwner {
+        if (strategyId > _COUNT_INTERNAL_STRATEGIES && _strategies[strategyId].implementation == address(0)) {
             revert StrategyNotUsed(strategyId);
         }
 
-        _strategies[strategyId].isActive = false;
-
-        emit StrategyRemoved(strategyId);
-    }
-
-    /**
-     * @notice Reactivate removed strategy
-     * @param strategyId id of the strategy
-     */
-    function reactivateStrategy(uint16 strategyId) external onlyOwner {
-        if (
-            strategyId < _COUNT_INTERNAL_STRATEGIES ||
-            _strategies[strategyId].implementation == address(0) ||
-            _strategies[strategyId].isActive
-        ) {
-            revert StrategyNotUsed(strategyId);
+        if (protocolFee > _strategies[strategyId].maxProtocolFee) {
+            revert StrategyProtocolFeeTooHigh(strategyId);
         }
 
-        _strategies[strategyId].isActive = true;
+        _strategies[strategyId] = Strategy({
+            isActive: true,
+            hasRoyalties: hasRoyalties,
+            protocolFee: protocolFee,
+            maxProtocolFee: _strategies[strategyId].maxProtocolFee,
+            implementation: _strategies[strategyId].implementation
+        });
 
-        emit StrategyReactivated(strategyId);
-    }
-
-    /**
-     * @notice Verify order timestamp validity
-     * @param startTime start timestamp
-     * @param endTime end timestamp
-     */
-    function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) internal view {
-        if (startTime > block.timestamp || endTime < block.timestamp) {
-            revert OutsideOfTimeRange();
-        }
+        emit StrategyUpdated(strategyId, isActive, hasRoyalties, protocolFee);
     }
 
     /**
@@ -450,5 +457,16 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      */
     function viewStrategy(uint16 strategyId) external view returns (Strategy memory strategy) {
         return _strategies[strategyId];
+    }
+
+    /**
+     * @notice Verify order timestamp validity
+     * @param startTime start timestamp
+     * @param endTime end timestamp
+     */
+    function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) internal view {
+        if (startTime > block.timestamp || endTime < block.timestamp) {
+            revert OutsideOfTimeRange();
+        }
     }
 }

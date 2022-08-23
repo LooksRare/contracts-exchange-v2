@@ -431,7 +431,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         }
 
         _strategies[strategyId] = Strategy({
-            isActive: true,
+            isActive: isActive,
             hasRoyalties: hasRoyalties,
             protocolFee: protocolFee,
             maxProtocolFee: _strategies[strategyId].maxProtocolFee,

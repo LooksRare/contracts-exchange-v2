@@ -21,6 +21,9 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     // Number of internal strategies
     uint8 private immutable _COUNT_INTERNAL_STRATEGIES = 2;
 
+    // Maximum protocol fee
+    uint16 private immutable _MAX_PROTOCOL_FEE = 5000;
+
     // Royalty fee registry
     IRoyaltyFeeRegistry internal _royaltyFeeRegistry;
 
@@ -380,7 +383,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             revert StrategyUsed(strategyId);
         }
 
-        if (maxProtocolFee < protocolFee) {
+        if (maxProtocolFee < protocolFee || maxProtocolFee > _MAX_PROTOCOL_FEE) {
             revert StrategyProtocolFeeTooHigh(strategyId);
         }
 

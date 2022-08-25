@@ -83,7 +83,7 @@ contract ExecutionManagerTest is IExecutionManager, ProtocolHelpers {
 
         Strategy memory strategy = looksRareProtocol.viewStrategy(strategyId);
         assertTrue(strategy.isActive);
-        assertTrue(!strategy.hasRoyalties);
+        assertFalse(strategy.hasRoyalties);
         assertEq(strategy.protocolFee, protocolFee);
         assertEq(strategy.implementation, address(0));
     }
@@ -102,7 +102,7 @@ contract ExecutionManagerTest is IExecutionManager, ProtocolHelpers {
         looksRareProtocol.updateStrategy(strategyId, hasRoyalties, protocolFee, isActive);
 
         Strategy memory strategy = looksRareProtocol.viewStrategy(strategyId);
-        assertTrue(!strategy.isActive);
+        assertFalse(strategy.isActive);
         assertTrue(strategy.hasRoyalties);
         assertEq(strategy.protocolFee, protocolFee);
         assertEq(strategy.implementation, address(0));

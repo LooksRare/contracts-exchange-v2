@@ -32,7 +32,7 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
 
         makerAskOrder.minPrice = price;
         makerAskOrder.itemIds = itemIds;
-        makerAskOrder.amounts = itemIds;
+        makerAskOrder.amounts = amounts;
     }
 
     function _createSimpleMakerBidOrder(uint256 price, uint256 itemId)
@@ -47,7 +47,7 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
 
         makerBidOrder.maxPrice = price;
         makerBidOrder.itemIds = itemIds;
-        makerBidOrder.amounts = itemIds;
+        makerBidOrder.amounts = amounts;
     }
 
     function _createMultipleItemsMakerAskOrder(uint256 price, uint256[] calldata _itemIds)
@@ -66,7 +66,7 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
         }
 
         makerAskOrder.itemIds = itemIds;
-        makerAskOrder.amounts = itemIds;
+        makerAskOrder.amounts = amounts;
 
         return makerAskOrder;
     }

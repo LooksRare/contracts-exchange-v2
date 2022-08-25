@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
+import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
@@ -10,7 +11,6 @@ import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.so
 
 import {ProtocolHelpers} from "./utils/ProtocolHelpers.sol";
 import {MockERC721} from "./utils/MockERC721.sol";
-import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 
 contract LooksRareProtocolTest is ProtocolHelpers {
     using OrderStructs for OrderStructs.MultipleMakerAskOrders;

@@ -5,7 +5,12 @@ import {INonceManager} from "./interfaces/INonceManager.sol";
 
 /**
  * @title NonceManager
- * @notice This contract handles the nonce logic that is used for invalidating orders. The nonce logic revolves around 3 components on the user level: subset (orders grouped under a same subset), bid/ask (all order can be executed only if bidNonce matches the current one on-chain), and order nonce (orders sharing an order nonce are conditional, OCO-like).
+ * @notice This contract handles the nonce logic that is used for invalidating maker orders that exist offchain.
+ *         The nonce logic revolves around three parts at the user level:
+ *         - order nonce (orders sharing an order nonce are conditional, OCO-like)
+ *         - subset (orders can be grouped under a same subset)
+ *         - bid/ask (all orders can be executed only if the bid/ask nonce matches the user's one on-chain)
+ *         Only the order nonce is invalidated at the time of the execution of a maker order that contains it.
  * @author LooksRare protocol team (👀,💎)
  */
 contract NonceManager is INonceManager {

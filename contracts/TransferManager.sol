@@ -12,8 +12,9 @@ import {IERC1155} from "./interfaces/IERC1155.sol";
 /**
  * @title TransferManager
  * @notice Core functions of TransferManager contracts for ERC721/ERC1155.
- * @dev Asset type "0" refers to ERC721 transfer functions. Asset type "1" refers to ERC1155 transfer functions.
- * "Safe" transfer functions for ERC721 are not implemented since they introduce added costs to verify if the recipient is a contract that it implements the receiver interface.
+ *         Asset type "0" refers to ERC721 transfer functions.
+ *         Asset type "1" refers to ERC1155 transfer functions.
+ *         "Safe" transfer functions for ERC721 are not implemented; these functions introduce added gas costs to verify if the recipient is a contract as it requires verifying the receiver interface is valid.
  * @author LooksRare protocol team (👀,💎)
  */
 contract TransferManager is ITransferManager, OwnableTwoSteps {

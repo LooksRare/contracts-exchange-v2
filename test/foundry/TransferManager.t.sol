@@ -7,7 +7,7 @@ import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
-import {TestHelpers} from "./TestHelpers.sol";
+import {TestHelpers} from "./utils/TestHelpers.sol";
 import {MockERC721} from "./utils/MockERC721.sol";
 import {MockERC1155} from "./utils/MockERC1155.sol";
 

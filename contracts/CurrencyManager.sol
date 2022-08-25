@@ -6,7 +6,7 @@ import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
 
 /**
  * @title CurrencyManager
- * @notice This contract is the contract that manages the whitelist of valid currencies for exchanging NFTs on the exchange.
+ * @notice This contract manages the whitelist of valid currencies for exchanging NFTs on the exchange.
  * @author LooksRare protocol team (👀,💎)
  */
 contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {

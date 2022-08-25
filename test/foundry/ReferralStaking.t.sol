@@ -7,7 +7,7 @@ import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {IReferralStaking} from "../../contracts/interfaces/IReferralStaking.sol";
-import {TestHelpers} from "./TestHelpers.sol";
+import {TestHelpers} from "./utils/TestHelpers.sol";
 import {MockERC20} from "./utils/MockERC20.sol";
 
 contract ReferralStakingTest is TestHelpers, IReferralStaking {

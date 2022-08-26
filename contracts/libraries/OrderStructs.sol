@@ -36,7 +36,7 @@ library OrderStructs {
         return (
             keccak256(
                 abi.encode(
-                    initialEncode,
+                    initialEncodingBytes,
                     makerAsk.collection,
                     makerAsk.currency,
                     makerAsk.signer,

@@ -21,17 +21,22 @@ library OrderStructs {
      * @param makerAsk struct for maker ask order
      * @return makerAskHash hash of the struct
      */
-    function hash(MakerAsk calldata makerAsk) internal pure returns (bytes32 makerAskHash) {
+    function hash(MakerAsk memory makerAsk) internal pure returns (bytes32 makerAskHash) {
+        // Encoding is done into two parts to avoid stack too deep issues
+        bytes memory initialEncodingBytes = abi.encode(
+            _MAKER_ASK_HASH,
+            makerAsk.askNonce,
+            makerAsk.subsetNonce,
+            makerAsk.strategyId,
+            makerAsk.assetType,
+            makerAsk.orderNonce,
+            makerAsk.minNetRatio
+        );
+
         return (
             keccak256(
                 abi.encode(
-                    _MAKER_ASK_HASH,
-                    makerAsk.askNonce,
-                    makerAsk.subsetNonce,
-                    makerAsk.strategyId,
-                    makerAsk.assetType,
-                    makerAsk.orderNonce,
-                    makerAsk.minNetRatio,
+                    initialEncode,
                     makerAsk.collection,
                     makerAsk.currency,
                     makerAsk.signer,
@@ -51,17 +56,22 @@ library OrderStructs {
      * @param makerBid struct for maker bid order
      * @return makerBidHash hash of the struct
      */
-    function hash(MakerBid calldata makerBid) internal pure returns (bytes32 makerBidHash) {
+    function hash(MakerBid memory makerBid) internal pure returns (bytes32 makerBidHash) {
+        // Encoding is done into two parts to avoid stack too deep issues
+        bytes memory initialEncodingBytes = abi.encode(
+            _MAKER_BID_HASH,
+            makerBid.bidNonce,
+            makerBid.subsetNonce,
+            makerBid.strategyId,
+            makerBid.assetType,
+            makerBid.orderNonce,
+            makerBid.minNetRatio
+        );
+
         return (
             keccak256(
                 abi.encode(
-                    _MAKER_BID_HASH,
-                    makerBid.bidNonce,
-                    makerBid.subsetNonce,
-                    makerBid.strategyId,
-                    makerBid.assetType,
-                    makerBid.orderNonce,
-                    makerBid.minNetRatio,
+                    initialEncodingBytes,
                     makerBid.collection,
                     makerBid.currency,
                     makerBid.signer,
@@ -94,7 +104,7 @@ library OrderStructs {
         uint112 askNonce;
         uint112 subsetNonce;
         uint16 strategyId; // 0: Standard; 1: Collection; 2. etc.
-        uint16 assetType;
+        uint8 assetType;
         uint112 orderNonce;
         uint16 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
         address collection;
@@ -114,7 +124,7 @@ library OrderStructs {
         uint112 bidNonce;
         uint112 subsetNonce;
         uint16 strategyId; // 0: Standard; 1: Collection; 2. etc.
-        uint16 assetType;
+        uint8 assetType;
         uint112 orderNonce;
         uint16 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
         address collection;

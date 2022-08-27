@@ -62,12 +62,10 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @notice Execute strategy for taker ask
      * @param takerAsk takerAsk struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
-     * @param baseMaker baseMaker struct (contains base parameters for the maker side of the transaction)
      */
     function _executeStrategyForTakerAsk(
-        OrderStructs.TakerAskOrder calldata takerAsk,
-        OrderStructs.SingleMakerBidOrder calldata makerBid,
-        OrderStructs.BaseMakerOrder calldata baseMaker
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid
     )
         internal
         returns (
@@ -80,28 +78,23 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         )
     {
         uint256 price;
-        (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(
-            takerAsk,
-            makerBid,
-            baseMaker.collection,
-            baseMaker.strategyId,
-            baseMaker.startTime,
-            baseMaker.endTime
-        );
+        (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
-        (royaltyRecipient, royaltyFeeAmount) = _strategies[baseMaker.strategyId].hasRoyalties
-            ? _getRoyaltyRecipientAndAmount(baseMaker.collection, itemIds, price)
+        (royaltyRecipient, royaltyFeeAmount) = _strategies[makerBid.strategyId].hasRoyalties
+            ? _getRoyaltyRecipientAndAmount(makerBid.collection, itemIds, price)
             : (address(0), 0);
 
         protocolFeeAmount =
-            (((price * _strategies[baseMaker.strategyId].protocolFee) / 10000) *
-                (10000 - _collectionDiscountFactors[baseMaker.collection])) /
+            (((price * _strategies[makerBid.strategyId].protocolFee) / 10000) *
+                (10000 - _collectionDiscountFactors[makerBid.collection])) /
             10000;
 
         netPrice = price - protocolFeeAmount - royaltyFeeAmount;
 
         if (netPrice < (price * takerAsk.minNetRatio) / 10000) {
-            revert AskSlippage();
+            revert SlippageAsk();
+        } else if (netPrice < (price * makerBid.minNetRatio) / 10000) {
+            revert SlippageBid();
         }
     }
 
@@ -109,12 +102,10 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @notice Execute strategy for taker bid
      * @param takerBid takerBid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk makerAsk struct (contains ask-specific parameter for the maker side of the transaction)
-     * @param baseMaker baseMaker struct (contains base parameters for the maker side of the transaction)
      */
     function _executeStrategyForTakerBid(
-        OrderStructs.TakerBidOrder calldata takerBid,
-        OrderStructs.SingleMakerAskOrder calldata makerAsk,
-        OrderStructs.BaseMakerOrder calldata baseMaker
+        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.MakerAsk calldata makerAsk
     )
         internal
         returns (
@@ -127,28 +118,23 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         )
     {
         uint256 price;
-        (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(
-            takerBid,
-            makerAsk,
-            baseMaker.collection,
-            baseMaker.strategyId,
-            baseMaker.startTime,
-            baseMaker.endTime
-        );
+        (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
-        (royaltyRecipient, royaltyFeeAmount) = _strategies[baseMaker.strategyId].hasRoyalties
-            ? _getRoyaltyRecipientAndAmount(baseMaker.collection, itemIds, price)
+        (royaltyRecipient, royaltyFeeAmount) = _strategies[makerAsk.strategyId].hasRoyalties
+            ? _getRoyaltyRecipientAndAmount(makerAsk.collection, itemIds, price)
             : (address(0), 0);
 
         protocolFeeAmount =
-            (((price * _strategies[baseMaker.strategyId].protocolFee) / 10000) *
-                (10000 - _collectionDiscountFactors[baseMaker.collection])) /
+            (((price * _strategies[makerAsk.strategyId].protocolFee) / 10000) *
+                (10000 - _collectionDiscountFactors[makerAsk.collection])) /
             10000;
 
         netPrice = price - royaltyFeeAmount - protocolFeeAmount;
 
         if (netPrice < (price * makerAsk.minNetRatio) / 10000) {
-            revert AskSlippage();
+            revert SlippageAsk();
+        } else if (netPrice < (price * takerBid.minNetRatio) / 10000) {
+            revert SlippageBid();
         }
     }
 
@@ -156,18 +142,10 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @notice Execute strategy hooks for takerBid
      * @param takerBid takerBid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk makerAsk struct (contains ask-specific parameter for the maker side of the transaction)
-     * @param collection address of the collection
-     * @param strategyId id of the strategy
-     * @param startTime start timestamp
-     * @param endTime end timestamp
      */
     function _executeStrategyHooksForTakerBid(
-        OrderStructs.TakerBidOrder calldata takerBid,
-        OrderStructs.SingleMakerAskOrder calldata makerAsk,
-        address collection,
-        uint16 strategyId,
-        uint256 startTime,
-        uint256 endTime
+        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.MakerAsk calldata makerAsk
     )
         internal
         returns (
@@ -177,19 +155,19 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         )
     {
         // Verify the order validity for timestamps
-        _verifyOrderTimestampValidity(startTime, endTime);
+        _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
 
-        if (strategyId == 0) {
+        if (makerAsk.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
-        } else if (strategyId == 1) {
+        } else if (makerAsk.strategyId == 1) {
             // Collection offer is not available for taker bid
-            revert StrategyNotAvailable(strategyId);
+            revert StrategyNotAvailable(makerAsk.strategyId);
         } else {
-            if (_strategies[strategyId].isActive) {
-                (price, itemIds, amounts) = IExecutionStrategy(_strategies[strategyId].implementation)
-                    .executeStrategyWithTakerBid(takerBid, makerAsk, collection, startTime, endTime);
+            if (_strategies[makerAsk.strategyId].isActive) {
+                (price, itemIds, amounts) = IExecutionStrategy(_strategies[makerAsk.strategyId].implementation)
+                    .executeStrategyWithTakerBid(takerBid, makerAsk);
             } else {
-                revert StrategyNotAvailable(strategyId);
+                revert StrategyNotAvailable(makerAsk.strategyId);
             }
         }
     }
@@ -198,18 +176,10 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @notice Execute strategy hooks for takerAsk
      * @param takerAsk takerAsk struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
-     * @param collection address of the collection
-     * @param strategyId id of the strategy
-     * @param startTime start timestamp
-     * @param endTime end timestamp
      */
     function _executeStrategyHooksForTakerAsk(
-        OrderStructs.TakerAskOrder calldata takerAsk,
-        OrderStructs.SingleMakerBidOrder calldata makerBid,
-        address collection,
-        uint16 strategyId,
-        uint256 startTime,
-        uint256 endTime
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid
     )
         internal
         returns (
@@ -219,18 +189,18 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         )
     {
         // Verify the order validity for timestamps
-        _verifyOrderTimestampValidity(startTime, endTime);
+        _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
 
-        if (strategyId == 0) {
+        if (makerBid.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
-        } else if (strategyId == 1) {
+        } else if (makerBid.strategyId == 1) {
             (price, itemIds, amounts) = _executeCollectionStrategyWithTakerAsk(takerAsk, makerBid);
         } else {
-            if (_strategies[strategyId].isActive) {
-                (price, itemIds, amounts) = IExecutionStrategy(_strategies[strategyId].implementation)
-                    .executeStrategyWithTakerAsk(takerAsk, makerBid, collection, startTime, endTime);
+            if (_strategies[makerBid.strategyId].isActive) {
+                (price, itemIds, amounts) = IExecutionStrategy(_strategies[makerBid.strategyId].implementation)
+                    .executeStrategyWithTakerAsk(takerAsk, makerBid);
             } else {
-                revert StrategyNotAvailable(strategyId);
+                revert StrategyNotAvailable(makerBid.strategyId);
             }
         }
     }
@@ -242,8 +212,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @dev It doesn't verify the items for takerBids match the ones from makerAsk
      */
     function _executeStandardSaleStrategyWithTakerBid(
-        OrderStructs.TakerBidOrder calldata takerBid,
-        OrderStructs.SingleMakerAskOrder calldata makerAsk
+        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.MakerAsk calldata makerAsk
     )
         internal
         pure
@@ -275,8 +245,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @dev It doesn't verify the items for takerAsk match the ones from makerBid
      */
     function _executeStandardSaleStrategyWithTakerAsk(
-        OrderStructs.TakerAskOrder calldata takerAsk,
-        OrderStructs.SingleMakerBidOrder calldata makerBid
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid
     )
         internal
         pure
@@ -307,8 +277,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
      */
     function _executeCollectionStrategyWithTakerAsk(
-        OrderStructs.TakerAskOrder calldata takerAsk,
-        OrderStructs.SingleMakerBidOrder calldata makerBid
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid
     )
         internal
         pure

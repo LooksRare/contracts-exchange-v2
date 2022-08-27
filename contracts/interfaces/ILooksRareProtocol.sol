@@ -6,11 +6,13 @@ interface ILooksRareProtocol {
     error NoTransferManagerForAssetType(uint16 assetType);
     error SameDomainSeparator();
     error WrongNonces();
-    error WrongAssetType(uint16 assetType);
+    error WrongAssetType(uint8 assetType);
     error WrongCurrency();
     error WrongCaller();
 
     // Events
+    event NewDomainSeparator();
+
     event TakerBid(
         uint128 orderNonce,
         address bidUser,
@@ -39,6 +41,4 @@ interface ILooksRareProtocol {
         address[] feeRecipients,
         uint256[] feeAmounts
     );
-
-    event NewDomainSeparator();
 }

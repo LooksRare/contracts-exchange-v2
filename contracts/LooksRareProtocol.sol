@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-// LooksRare generalist libraries
+// LooksRare unopinionated libraries
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
 
@@ -12,7 +12,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 
-// Peripheral contracts
+// Other core contracts
 import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
 import {NonceManager} from "./NonceManager.sol";
@@ -40,11 +40,9 @@ contract LooksRareProtocol is
     LowLevelERC20,
     SignatureChecker
 {
-    using OrderStructs for OrderStructs.MultipleMakerAskOrders;
-    using OrderStructs for OrderStructs.MultipleMakerBidOrders;
-
-    // Keep track of transfer managers
-    mapping(uint16 => address) internal _transferManagers;
+    using OrderStructs for OrderStructs.MakerAsk;
+    using OrderStructs for OrderStructs.MakerBid;
+    using OrderStructs for bytes32;
 
     // Initial domain separator
     bytes32 internal _INITIAL_DOMAIN_SEPARATOR;
@@ -57,6 +55,9 @@ contract LooksRareProtocol is
 
     // Current chainId
     uint256 internal _chainId;
+
+    // Keep track of transfer managers
+    mapping(uint16 => address) internal _transferManagers;
 
     /**
      * @notice Constructor
@@ -81,303 +82,110 @@ contract LooksRareProtocol is
         _domainSeparator = _INITIAL_DOMAIN_SEPARATOR;
         _chainId = _INITIAL_CHAIN_ID;
 
-        // Transfer managers
+        // Transfer managers for ERC-721/ERC-1155
         _transferManagers[0] = transferManager;
         _transferManagers[1] = transferManager;
     }
 
     /**
-     * @notice Match maker ask with single taker bid
-     * @param singleTakerBidOrder single taker bid order
-     * @param multipleMakerAsk multiple maker ask order
-     * @param makerArraySlot maker array slot
+     * @notice Buy with taker bid (against makerAsk)
+     * @param takerBid taker bid struct
+     * @param makerAsk maker ask struct
+     * @param makerSignature maker signature
+     * @param merkleRoot merkle root if the signature contains multiple maker orders
+     * @param merkleProofs array containing merkle proofs (if multiple maker orders under the signature)
+     * @param referrer address of the referrer
      */
-    function matchAskWithTakerBid(
-        OrderStructs.SingleTakerBidOrder calldata singleTakerBidOrder,
-        OrderStructs.MultipleMakerAskOrders calldata multipleMakerAsk,
-        uint256 makerArraySlot
+    function executeTakerBid(
+        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.MakerAsk calldata makerAsk,
+        bytes calldata makerSignature,
+        bytes32 merkleRoot,
+        bytes32[] calldata merkleProofs,
+        address referrer
     ) external payable nonReentrant {
+        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         {
-            bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, multipleMakerAsk.hash()));
-            _verify(digest, multipleMakerAsk.baseMakerOrder.signer, multipleMakerAsk.signature);
+            bytes32 digest;
+            if (merkleProofs.length == 0) {
+                digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, makerAsk.hash()));
+            } else {
+                _verifyMerkleProofForOrderHash(merkleProofs, merkleRoot, makerAsk.hash());
+                digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleRoot.hash()));
+            }
+            _verify(digest, makerAsk.signer, makerSignature);
         }
 
-        uint256 totalProtocolFee = _matchAskWithTakerBid(
-            singleTakerBidOrder.takerBidOrder,
-            msg.sender,
-            multipleMakerAsk.makerAskOrders[makerArraySlot],
-            multipleMakerAsk.baseMakerOrder
-        );
+        // Execute the transaction and fetch protocol fee
+        uint256 totalProtocolFee = _executeTakerBid(takerBid, msg.sender, makerAsk);
 
-        if (singleTakerBidOrder.referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[singleTakerBidOrder.referrer]) / 10000;
+        // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
+        if (referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(
-                multipleMakerAsk.baseMakerOrder.currency,
-                msg.sender,
-                singleTakerBidOrder.referrer,
-                totalReferralFee
-            );
-        }
-        _transferFungibleToken(
-            multipleMakerAsk.baseMakerOrder.currency,
-            msg.sender,
-            _protocolFeeRecipient,
-            totalProtocolFee
-        );
 
+            // Transfer the referral fee if anything to transfer
+            _transferFungibleTokens(makerAsk.currency, msg.sender, referrer, totalReferralFee);
+        }
+
+        // Transfer remaining protocol fee to the fee recipient
+        _transferFungibleTokens(makerAsk.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
+
+        // Return ETH if any
         _returnETHIfAny();
     }
 
     /**
-     * @notice Match maker bid with single taker ask
-     * @param singleTakerAskOrder single taker ask order
-     * @param multipleMakerBid multiple maker bid order
-     * @param makerArraySlot maker array slot
+     * @notice Buy with taker ask (against maker bid)
+     * @param takerAsk taker ask struct
+     * @param makerBid maker bid struct
+     * @param makerSignature maker signature
+     * @param merkleRoot merkle root if the signature contains multiple maker orders
+     * @param merkleProofs array containing merkle proofs (if multiple maker orders under the signature)
+     * @param referrer address of the referrer
      */
-    function matchBidWithTakerAsk(
-        OrderStructs.SingleTakerAskOrder calldata singleTakerAskOrder,
-        OrderStructs.MultipleMakerBidOrders calldata multipleMakerBid,
-        uint256 makerArraySlot
-    ) external payable nonReentrant {
+    function executeTakerAsk(
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid,
+        bytes calldata makerSignature,
+        bytes32 merkleRoot,
+        bytes32[] calldata merkleProofs,
+        address referrer
+    ) external nonReentrant {
+        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         {
-            bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, multipleMakerBid.hash()));
-            _verify(digest, multipleMakerBid.baseMakerOrder.signer, multipleMakerBid.signature);
-        }
-
-        uint256 totalProtocolFee = _matchBidWithTakerAsk(
-            singleTakerAskOrder.takerAskOrder,
-            msg.sender,
-            multipleMakerBid.makerBidOrders[makerArraySlot],
-            multipleMakerBid.baseMakerOrder
-        );
-
-        if (singleTakerAskOrder.referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[singleTakerAskOrder.referrer]) / 10000;
-            totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(
-                multipleMakerBid.baseMakerOrder.currency,
-                multipleMakerBid.baseMakerOrder.signer,
-                singleTakerAskOrder.referrer,
-                totalReferralFee
-            );
-        }
-        _transferFungibleToken(
-            multipleMakerBid.baseMakerOrder.currency,
-            multipleMakerBid.baseMakerOrder.signer,
-            _protocolFeeRecipient,
-            totalProtocolFee
-        );
-    }
-
-    /**
-     * @notice Match multiple maker asks with taker bids
-     * @param multipleTakerBids multiple taker bid orders
-     * @param multipleMakerAsks multiple maker ask orders
-     * @param makerArraySlots array of maker array slot
-     * @param isExecutionAtomic whether the execution should revert if one of the transaction fails. If it is true, the execution must be atomic. Any revertion will make the transaction fail.
-     */
-    function matchMultipleAsksWithTakerBids(
-        OrderStructs.MultipleTakerBidOrders calldata multipleTakerBids,
-        OrderStructs.MultipleMakerAskOrders[] calldata multipleMakerAsks,
-        uint256[] calldata makerArraySlots,
-        bool isExecutionAtomic
-    ) external payable nonReentrant {
-        uint256 length = multipleTakerBids.takerBidOrders.length;
-
-        if (length == 0 || multipleMakerAsks.length != length || makerArraySlots.length != length) {
-            revert WrongLengths();
-        }
-
-        uint256 totalProtocolFee;
-
-        // Fire the trades
-        for (uint256 i; i < multipleMakerAsks.length; ) {
-            {
-                bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, multipleMakerAsks[i].hash()));
-                _verify(digest, multipleMakerAsks[i].baseMakerOrder.signer, multipleMakerAsks[i].signature);
-            }
-
-            // Verify currency is the same as taker bid
-            if (multipleTakerBids.currency != multipleMakerAsks[i].baseMakerOrder.currency) {
-                revert WrongCurrency();
-            }
-
-            if (isExecutionAtomic) // If execution is desired to be atomic, call function without try/catch pattern
-            {
-                uint256 protocolFee = _matchAskWithTakerBid(
-                    multipleTakerBids.takerBidOrders[i],
-                    msg.sender,
-                    multipleMakerAsks[i].makerAskOrders[makerArraySlots[i]],
-                    multipleMakerAsks[i].baseMakerOrder
-                );
-                totalProtocolFee += protocolFee;
+            bytes32 digest;
+            if (merkleProofs.length == 0) {
+                digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, makerBid.hash()));
             } else {
-                try
-                    this.restrictedMatchAskWithTakerBid(
-                        multipleTakerBids.takerBidOrders[i],
-                        msg.sender,
-                        multipleMakerAsks[i].makerAskOrders[makerArraySlots[i]],
-                        multipleMakerAsks[i].baseMakerOrder
-                    )
-                returns (uint256 protocolFee) {
-                    totalProtocolFee += protocolFee;
-                } catch {}
+                _verifyMerkleProofForOrderHash(merkleProofs, merkleRoot, makerBid.hash());
+                digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleRoot.hash()));
             }
-
-            unchecked {
-                ++i;
-            }
+            _verify(digest, makerBid.signer, makerSignature);
         }
 
-        if (multipleTakerBids.referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[multipleTakerBids.referrer]) / 10000;
+        // Execute the transaction and fetch protocol fee
+        uint256 totalProtocolFee = _executeTakerAsk(takerAsk, msg.sender, makerBid);
+
+        // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
+        if (referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
-            _transferFungibleToken(
-                multipleTakerBids.currency,
-                msg.sender,
-                multipleTakerBids.referrer,
-                totalReferralFee
-            );
-        }
-        _transferFungibleToken(multipleTakerBids.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
 
-        _returnETHIfAny();
-    }
-
-    /**
-     * @notice Match multiple maker bids with taker asks
-     * @param multipleTakerAsks multiple taker ask orders
-     * @param multipleMakerBids multiple maker bid orders
-     * @param makerArraySlots array of maker array slot
-     * @param isExecutionAtomic whether the execution should revert if one of the transaction fails. If it is true, the execution must be atomic. Any revertion will make the transaction fail.
-     */
-    function matchMultipleBidsWithTakerAsks(
-        OrderStructs.MultipleTakerAskOrders calldata multipleTakerAsks,
-        OrderStructs.MultipleMakerBidOrders[] calldata multipleMakerBids,
-        uint256[] calldata makerArraySlots,
-        bool isExecutionAtomic
-    ) external payable nonReentrant {
-        uint256 length = multipleTakerAsks.takerAskOrders.length;
-
-        if (length == 0 || multipleMakerBids.length != length || makerArraySlots.length != length) {
-            revert WrongLengths();
+            // Transfer the referral fee if anything to transfer
+            _transferFungibleTokens(makerBid.currency, makerBid.signer, referrer, totalReferralFee);
         }
 
-        // Fire the trades
-        for (uint256 i; i < multipleMakerBids.length; ) {
-            {
-                bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, multipleMakerBids[i].hash()));
-                _verify(digest, multipleMakerBids[i].baseMakerOrder.signer, multipleMakerBids[i].signature);
-            }
-
-            // Verify currency is the same as taker bid
-            if (multipleTakerAsks.currency != multipleMakerBids[i].baseMakerOrder.currency) {
-                revert WrongCurrency();
-            }
-
-            if (isExecutionAtomic) // If execution is desired to be atomic, call function without try/catch pattern
-            {
-                uint256 protocolFee = _matchBidWithTakerAsk(
-                    multipleTakerAsks.takerAskOrders[i],
-                    msg.sender,
-                    multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
-                    multipleMakerBids[i].baseMakerOrder
-                );
-
-                if (multipleTakerAsks.referrer != address(0)) {
-                    uint256 totalReferralFee = (protocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
-                    protocolFee -= totalReferralFee;
-                    _transferFungibleToken(
-                        multipleTakerAsks.currency,
-                        multipleMakerBids[i].baseMakerOrder.signer,
-                        multipleTakerAsks.referrer,
-                        totalReferralFee
-                    );
-                }
-                _transferFungibleToken(
-                    multipleTakerAsks.currency,
-                    multipleMakerBids[i].baseMakerOrder.signer,
-                    _protocolFeeRecipient,
-                    protocolFee
-                );
-            } else {
-                try
-                    this.restrictedMatchBidWithTakerAsk(
-                        multipleTakerAsks.takerAskOrders[i],
-                        multipleMakerBids[i].baseMakerOrder.signer,
-                        multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
-                        multipleMakerBids[i].baseMakerOrder
-                    )
-                returns (uint256 protocolFee) {
-                    protocolFee = _matchBidWithTakerAsk(
-                        multipleTakerAsks.takerAskOrders[i],
-                        msg.sender,
-                        multipleMakerBids[i].makerBidOrders[makerArraySlots[i]],
-                        multipleMakerBids[i].baseMakerOrder
-                    );
-
-                    if (multipleTakerAsks.referrer != address(0)) {
-                        uint256 totalReferralFee = (protocolFee * _referrers[multipleTakerAsks.referrer]) / 10000;
-                        protocolFee -= totalReferralFee;
-                        _transferFungibleToken(
-                            multipleTakerAsks.currency,
-                            multipleMakerBids[i].baseMakerOrder.signer,
-                            multipleTakerAsks.referrer,
-                            totalReferralFee
-                        );
-                    }
-                    _transferFungibleToken(
-                        multipleTakerAsks.currency,
-                        multipleMakerBids[i].baseMakerOrder.signer,
-                        _protocolFeeRecipient,
-                        protocolFee
-                    );
-                } catch {}
-            }
-
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /**
-     * @notice Match makerAsk with takerBid
-     * This function is solely used by this contract when atomicity is not required for batch-selling
-     */
-    function restrictedMatchAskWithTakerBid(
-        OrderStructs.TakerBidOrder calldata takerBid,
-        address sender,
-        OrderStructs.SingleMakerAskOrder calldata makerAsk,
-        OrderStructs.BaseMakerOrder calldata baseMakerOrder
-    ) external payable returns (uint256 protocolFeeAmount) {
-        if (msg.sender != address(this)) {
-            revert();
-        }
-
-        protocolFeeAmount = _matchAskWithTakerBid(takerBid, sender, makerAsk, baseMakerOrder);
-    }
-
-    /**
-     * @notice Match makerBid with takerAsk
-     * This function is solely used by this contract when atomicity is not required for batch-buying
-     */
-    function restrictedMatchBidWithTakerAsk(
-        OrderStructs.TakerAskOrder calldata takerAsk,
-        address sender,
-        OrderStructs.SingleMakerBidOrder calldata makerBid,
-        OrderStructs.BaseMakerOrder calldata baseMakerOrder
-    ) external returns (uint256 protocolFeeAmount) {
-        if (msg.sender != address(this)) {
-            revert WrongCaller();
-        }
-
-        protocolFeeAmount = _matchBidWithTakerAsk(takerAsk, sender, makerBid, baseMakerOrder);
+        // Transfer remaining protocol fee to the fee recipient
+        _transferFungibleTokens(makerBid.currency, makerBid.signer, _protocolFeeRecipient, totalProtocolFee);
     }
 
     /**
      * @notice Return an array with initial domain separator, initial chainId, current domain separator, and current chainId address
+     * @return initialDomainSeparator domain separator at the deployment
+     * @return initialChainId chainId at the deployment
+     * @return currentDomainSeparator current domain separator
+     * @return currentChainId current chainId
      */
     function information()
         external
@@ -397,7 +205,7 @@ contract LooksRareProtocol is
      * @param assetType asset type
      * @param transferManager transfer manager address
      */
-    function addTransferManagerForAssetType(uint16 assetType, address transferManager) external onlyOwner {
+    function addTransferManagerForAssetType(uint8 assetType, address transferManager) external onlyOwner {
         if (_transferManagers[assetType] != address(0)) {
             revert WrongAssetType(assetType);
         }
@@ -429,28 +237,31 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Match takerBids with makerAsk
+     * @notice Execute takerBid
+     * @param takerBid taker bid order struct
+     * @param sender sender of the transaction (i.e., msg.sender)
+     * @param makerAsk maker ask order struct
      */
-    function _matchAskWithTakerBid(
-        OrderStructs.TakerBidOrder calldata takerBid,
+    function _executeTakerBid(
+        OrderStructs.TakerBid calldata takerBid,
         address sender,
-        OrderStructs.SingleMakerAskOrder calldata makerAsk,
-        OrderStructs.BaseMakerOrder calldata baseMakerOrder
+        OrderStructs.MakerAsk calldata makerAsk
     ) internal returns (uint256 protocolFeeAmount) {
-        if (!_isCurrencyWhitelisted[baseMakerOrder.currency]) {
+        // Verify whether the currency is available
+        if (!_isCurrencyWhitelisted[makerAsk.currency]) {
             revert WrongCurrency();
         }
 
-        // Verify nonce
+        // Verify nonces and invalidate order nonce if valid
         if (
-            _userBidAskNonces[baseMakerOrder.signer].askNonce != baseMakerOrder.bidAskNonce ||
-            _userSubsetNonce[baseMakerOrder.signer][baseMakerOrder.subsetNonce] ||
-            _userOrderNonce[baseMakerOrder.signer][makerAsk.orderNonce]
+            _userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
+            _userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
+            _userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
         ) {
             revert WrongNonces();
         } else {
             // Invalidate order at this nonce for future execution
-            _userOrderNonce[baseMakerOrder.signer][makerAsk.orderNonce] = true;
+            _userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
         }
 
         uint256[] memory fees = new uint256[](2);
@@ -458,18 +269,17 @@ contract LooksRareProtocol is
         uint256[] memory itemIds;
         uint256[] memory amounts;
 
-        recipients[0] = baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient;
+        recipients[0] = makerAsk.recipient == address(0) ? makerAsk.signer : makerAsk.recipient;
 
         (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerBid(
             takerBid,
-            makerAsk,
-            baseMakerOrder
+            makerAsk
         );
 
         _transferNFT(
-            baseMakerOrder.collection,
-            baseMakerOrder.assetType,
-            baseMakerOrder.signer,
+            makerAsk.collection,
+            makerAsk.assetType,
+            makerAsk.signer,
             takerBid.recipient == address(0) ? sender : takerBid.recipient,
             itemIds,
             amounts
@@ -477,7 +287,7 @@ contract LooksRareProtocol is
 
         for (uint256 i; i < recipients.length; ) {
             if (recipients[i] != address(0) && fees[i] != 0) {
-                _transferFungibleToken(baseMakerOrder.currency, sender, recipients[i], fees[i]);
+                _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
             }
             unchecked {
                 ++i;
@@ -488,39 +298,43 @@ contract LooksRareProtocol is
             makerAsk.orderNonce,
             sender,
             takerBid.recipient == address(0) ? sender : takerBid.recipient,
-            baseMakerOrder.signer,
-            baseMakerOrder.strategyId,
-            baseMakerOrder.currency,
-            baseMakerOrder.collection,
+            makerAsk.signer,
+            makerAsk.strategyId,
+            makerAsk.currency,
+            makerAsk.collection,
             itemIds,
             amounts,
             recipients,
             fees
         );
-
-        return protocolFeeAmount;
     }
 
-    function _matchBidWithTakerAsk(
-        OrderStructs.TakerAskOrder calldata takerAsk,
+    /**
+     * @notice Execute takerAsk
+     * @param takerAsk taker ask order struct
+     * @param sender sender of the transaction (i.e., msg.sender)
+     * @param makerBid maker bid order struct
+     */
+    function _executeTakerAsk(
+        OrderStructs.TakerAsk calldata takerAsk,
         address sender,
-        OrderStructs.SingleMakerBidOrder calldata makerBid,
-        OrderStructs.BaseMakerOrder calldata baseMakerOrder
+        OrderStructs.MakerBid calldata makerBid
     ) internal returns (uint256 protocolFeeAmount) {
-        if (!_isCurrencyWhitelisted[baseMakerOrder.currency]) {
+        // Verify whether the currency is whitelisted but is not ETH (address(0))
+        if (!_isCurrencyWhitelisted[makerBid.currency] && makerBid.currency != address(0)) {
             revert WrongCurrency();
         }
 
-        // Verify nonce
+        // Verify nonces and invalidate order nonce if valid
         if (
-            _userBidAskNonces[baseMakerOrder.signer].askNonce != baseMakerOrder.bidAskNonce ||
-            _userSubsetNonce[baseMakerOrder.signer][baseMakerOrder.subsetNonce] ||
-            _userOrderNonce[baseMakerOrder.signer][makerBid.orderNonce]
+            _userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
+            _userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
+            _userOrderNonce[makerBid.signer][makerBid.orderNonce]
         ) {
             revert WrongNonces();
         } else {
             // Invalidate order at this nonce for future execution
-            _userOrderNonce[baseMakerOrder.signer][makerBid.orderNonce] = true;
+            _userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
         }
 
         uint256[] memory fees = new uint256[](2);
@@ -532,13 +346,12 @@ contract LooksRareProtocol is
 
         (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerAsk(
             takerAsk,
-            makerBid,
-            baseMakerOrder
+            makerBid
         );
 
         for (uint256 i; i < recipients.length; ) {
             if (recipients[i] != address(0) && fees[i] != 0) {
-                _transferFungibleToken(baseMakerOrder.currency, baseMakerOrder.signer, recipients[i], fees[i]);
+                _transferFungibleTokens(makerBid.currency, makerBid.signer, recipients[i], fees[i]);
             }
             unchecked {
                 ++i;
@@ -546,36 +359,34 @@ contract LooksRareProtocol is
         }
 
         _transferNFT(
-            baseMakerOrder.collection,
-            baseMakerOrder.assetType,
+            makerBid.collection,
+            makerBid.assetType,
             sender,
-            baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient,
+            makerBid.recipient == address(0) ? makerBid.signer : makerBid.recipient,
             itemIds,
             amounts
         );
 
         emit TakerAsk(
             makerBid.orderNonce,
-            baseMakerOrder.signer,
-            baseMakerOrder.recipient == address(0) ? baseMakerOrder.signer : baseMakerOrder.recipient,
+            makerBid.signer,
+            makerBid.recipient == address(0) ? makerBid.signer : makerBid.recipient,
             sender,
             takerAsk.recipient,
-            baseMakerOrder.strategyId,
-            baseMakerOrder.currency,
-            baseMakerOrder.collection,
+            makerBid.strategyId,
+            makerBid.currency,
+            makerBid.collection,
             itemIds,
             amounts,
             recipients,
             fees
         );
-
-        return protocolFeeAmount;
     }
 
     /**
-     * @notice Transfer funds and tokens
+     * @notice Transfer non-fungible tokens
      * @param collection address of the collection
-     * @param assetType asset type
+     * @param assetType asset type (0 = ERC721, 1 = ERC1155)
      * @param sender address of the sender
      * @param recipient address of the recipient
      * @param itemIds array of itemIds
@@ -589,6 +400,7 @@ contract LooksRareProtocol is
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
+        // Verify there is a transfer manager for the asset type
         address transferManager = _transferManagers[assetType];
         if (transferManager == address(0)) {
             revert NoTransferManagerForAssetType(assetType);
@@ -623,7 +435,7 @@ contract LooksRareProtocol is
      * @param recipient address recipient
      * @param amount array of amount
      */
-    function _transferFungibleToken(
+    function _transferFungibleTokens(
         address currency,
         address sender,
         address recipient,
@@ -634,5 +446,20 @@ contract LooksRareProtocol is
         } else {
             _executeERC20Transfer(currency, sender, recipient, amount);
         }
+    }
+
+    /**
+     * @notice Verify whether the merkle proofs provided for the order hash are correct
+     * @param proof array containing merkle proofs
+     * @param root merkle root
+     * @param orderHash order hash
+     */
+    function _verifyMerkleProofForOrderHash(
+        bytes32[] calldata proof,
+        bytes32 root,
+        bytes32 orderHash
+    ) internal pure returns (bool isVerified) {
+        // TODO
+        return true;
     }
 }

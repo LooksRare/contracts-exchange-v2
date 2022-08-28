@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import {TestHelpers} from "./TestHelpers.sol";
-
 import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
@@ -16,6 +15,9 @@ abstract contract TestParameters is TestHelpers {
 }
 
 contract ProtocolHelpers is TestParameters, IExecutionManager {
+    using OrderStructs for OrderStructs.MakerAsk;
+    using OrderStructs for OrderStructs.MakerBid;
+
     receive() external payable {}
 
     bytes32 internal _domainSeparator;
@@ -23,40 +25,38 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
     function _createSimpleMakerAskOrder(uint256 price, uint256 itemId)
         internal
         pure
-        returns (OrderStructs.SingleMakerAskOrder memory makerAskOrder)
+        returns (OrderStructs.MakerAsk memory makerAsk)
     {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
 
-        makerAskOrder.minPrice = price;
-        makerAskOrder.itemIds = itemIds;
-        makerAskOrder.amounts = amounts;
+        makerAsk.minPrice = price;
+        makerAsk.itemIds = itemIds;
+        makerAsk.amounts = amounts;
     }
 
     function _createSimpleMakerBidOrder(uint256 price, uint256 itemId)
         internal
         pure
-        returns (OrderStructs.SingleMakerBidOrder memory makerBidOrder)
+        returns (OrderStructs.MakerBid memory makerBid)
     {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
 
-        makerBidOrder.maxPrice = price;
-        makerBidOrder.itemIds = itemIds;
-        makerBidOrder.amounts = amounts;
+        makerBid.maxPrice = price;
+        makerBid.itemIds = itemIds;
+        makerBid.amounts = amounts;
     }
 
     function _createMultipleItemsMakerAskOrder(uint256 price, uint256[] calldata _itemIds)
         internal
         pure
-        returns (OrderStructs.SingleMakerAskOrder memory makerAskOrder)
+        returns (OrderStructs.MakerAsk memory makerAsk)
     {
-        makerAskOrder.minPrice = price;
-
         uint256[] memory itemIds = new uint256[](_itemIds.length);
         uint256[] memory amounts = new uint256[](_itemIds.length);
 
@@ -65,21 +65,13 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
             amounts[i] = 1;
         }
 
-        makerAskOrder.itemIds = itemIds;
-        makerAskOrder.amounts = amounts;
-
-        return makerAskOrder;
+        makerAsk.minPrice = price;
+        makerAsk.itemIds = itemIds;
+        makerAsk.amounts = amounts;
     }
 
-    function _signMakerAsksOrder(OrderStructs.MultipleMakerAskOrders memory _makerAsks, uint256 _signerKey)
-        internal
-        returns (bytes memory)
-    {
-        bytes32 _MAKER_ASK_ORDERS_HASH = OrderStructs._MULTIPLE_MAKER_ASK_ORDERS;
-
-        bytes32 orderHash = keccak256(
-            abi.encode(_MAKER_ASK_ORDERS_HASH, _makerAsks.makerAskOrders, _makerAsks.baseMakerOrder)
-        );
+    function _signMakerAsk(OrderStructs.MakerAsk memory _makerAsk, uint256 _signerKey) internal returns (bytes memory) {
+        bytes32 orderHash = _makerAsk.hash();
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,
@@ -89,15 +81,8 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
         return abi.encodePacked(r, s, v);
     }
 
-    function _signMakerBidsOrder(OrderStructs.MultipleMakerBidOrders memory _makerBids, uint256 _signerKey)
-        internal
-        returns (bytes memory)
-    {
-        bytes32 _MAKER_BID_ORDERS_HASH = OrderStructs._MULTIPLE_MAKER_BID_ORDERS;
-
-        bytes32 orderHash = keccak256(
-            abi.encode(_MAKER_BID_ORDERS_HASH, _makerBids.makerBidOrders, _makerBids.baseMakerOrder)
-        );
+    function _signMakerBid(OrderStructs.MakerBid memory _makerBid, uint256 _signerKey) internal returns (bytes memory) {
+        bytes32 orderHash = _makerBid.hash();
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,

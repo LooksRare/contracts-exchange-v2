@@ -6,18 +6,13 @@ import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 
-import {ProtocolHelpers} from "./utils/ProtocolHelpers.sol";
+import {OrderStructs, ProtocolHelpers} from "./utils/ProtocolHelpers.sol";
 import {MockERC721} from "./utils/MockERC721.sol";
 
 contract LooksRareProtocolTest is ProtocolHelpers {
-    using OrderStructs for OrderStructs.MultipleMakerAskOrders;
-    using OrderStructs for OrderStructs.MultipleMakerBidOrders;
-
     address[] public operators;
-
     MockERC721 public mockERC721;
     RoyaltyFeeRegistry public royaltyFeeRegistry;
     LooksRareProtocol public looksRareProtocol;
@@ -30,6 +25,12 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         transferManager.grantApprovals(operators);
         weth.approve(address(looksRareProtocol), type(uint256).max);
         weth.deposit{value: 10 ether}();
+    }
+
+    function _setUpRoyalties(address collection, uint16 royaltyFee) internal {
+        vm.startPrank(royaltyFeeRegistry.owner());
+        royaltyFeeRegistry.updateRoyaltyInfoForCollection(collection, _collectionOwner, _collectionOwner, royaltyFee);
+        vm.stopPrank();
     }
 
     function _setUpUsers() internal {
@@ -50,13 +51,6 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         // Verify interfaceId of ERC-2981 is not supported
         assertFalse(mockERC721.supportsInterface(0x2a55205a));
 
-        // Update registry info
-        royaltyFeeRegistry.updateRoyaltyInfoForCollection(address(mockERC721), _collectionOwner, _collectionOwner, 100);
-
-        (address recipient, uint256 amount) = royaltyFeeRegistry.royaltyInfo(address(mockERC721), 1 ether);
-        assertEq(recipient, _collectionOwner);
-        assertEq(amount, 1 ether / 100);
-
         // Operations
         transferManager.whitelistOperator(address(looksRareProtocol));
         looksRareProtocol.addCurrency(address(0));
@@ -68,6 +62,9 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         operators.push(address(looksRareProtocol));
     }
 
+    /**
+     * Verify initial post-deployment states are as expected
+     */
     function testInitialStates() public {
         (
             bytes32 initialDomainSeparator,
@@ -95,398 +92,91 @@ contract LooksRareProtocolTest is ProtocolHelpers {
             Strategy memory strategy = looksRareProtocol.viewStrategy(i);
             assertTrue(strategy.isActive);
             assertTrue(strategy.hasRoyalties);
-            assertEq(strategy.protocolFee, uint8(200));
+            assertEq(strategy.protocolFee, uint16(200));
+            assertEq(strategy.maxProtocolFee, uint16(300));
             assertEq(strategy.implementation, address(0));
         }
     }
 
     /**
-     * One ERC721 is sold to buyer who uses an array of order to match (size = 1)
+     * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
-    function testStandardPurchaseWithRoyaltiesArray() public {
+    function testTakerBidERC721WithRoyaltiesFromRegistry() public {
         _setUpUsers();
-        uint256 numberOrders = 1;
 
-        OrderStructs.MultipleMakerAskOrders memory multiMakerAskOrders;
-        OrderStructs.SingleMakerAskOrder[] memory makerAskOrders = new OrderStructs.SingleMakerAskOrder[](numberOrders);
-        OrderStructs.TakerBidOrder memory takerBidOrder;
-        uint256[] memory makerArraySlots = new uint256[](numberOrders);
-        OrderStructs.MultipleTakerBidOrders memory multipleTakerBidOrders;
-        OrderStructs.MultipleMakerAskOrders[] memory multipleMakerAskOrders = new OrderStructs.MultipleMakerAskOrders[](
-            numberOrders
-        );
-        OrderStructs.TakerBidOrder[] memory takerBidOrders = new OrderStructs.TakerBidOrder[](numberOrders);
+        uint256 price = 1 ether; // Fixed price of sale
+        uint16 royaltyFee = 100;
 
-        // Maker user actions
-        vm.startPrank(makerUser);
+        _setUpRoyalties(address(mockERC721), royaltyFee);
 
-        for (uint256 i; i < numberOrders; i++) {
-            mockERC721.mint(makerUser, i);
-            OrderStructs.SingleMakerAskOrder memory makerAskOrder = _createSimpleMakerAskOrder(1 ether, i);
-            makerAskOrders[i] = makerAskOrder;
-            makerAskOrder.minNetRatio = 9700;
-            makerAskOrder.orderNonce = uint112(i);
-        }
+        bytes32 merkleRoot = bytes32(0);
+        address referrer = address(0); // No referrer
+        bytes32[] memory merkleProofs = new bytes32[](0);
+        bytes memory signature;
+        OrderStructs.MakerAsk memory makerAsk;
+        OrderStructs.TakerBid memory takerBid;
 
-        multiMakerAskOrders.baseMakerOrder.signer = makerUser;
-        multiMakerAskOrders.baseMakerOrder.strategyId = 0;
-        multiMakerAskOrders.baseMakerOrder.assetType = 0; // ERC721
-        multiMakerAskOrders.baseMakerOrder.collection = address(mockERC721);
-        multiMakerAskOrders.baseMakerOrder.currency = address(0);
-        multiMakerAskOrders.makerAskOrders = makerAskOrders;
-        multiMakerAskOrders.signature = _signMakerAsksOrder(multiMakerAskOrders, makerUserPK);
-        vm.stopPrank();
+        {
+            // Order parameters
+            uint256 tokenId = 0; // TokenId
+            uint16 strategyId = 0; // Standard sale for fixed price
+            uint16 minNetRatio = 9700; // 3% slippage protection
+            uint112 orderNonce = 0;
+            uint8 assetType = 0; // ERC721
+            address currency = address(0); // ETH
 
-        // Taker user actions
-        vm.startPrank(takerUser);
+            // Maker user actions
+            vm.startPrank(makerUser);
+            // Mint asset
+            mockERC721.mint(makerUser, tokenId);
+            // Prepare order
+            makerAsk = _createSimpleMakerAskOrder(price, tokenId);
+            makerAsk.minNetRatio = minNetRatio;
+            makerAsk.orderNonce = orderNonce;
+            makerAsk.signer = makerUser;
+            makerAsk.strategyId = strategyId;
+            makerAsk.assetType = assetType;
+            makerAsk.collection = address(mockERC721);
+            makerAsk.currency = currency;
+            signature = _signMakerAsk(makerAsk, makerUserPK);
+            vm.stopPrank();
 
-        takerBidOrder = OrderStructs.TakerBidOrder(
-            1 ether,
-            takerUser,
-            makerAskOrders[0].itemIds,
-            makerAskOrders[0].amounts,
-            abi.encode()
-        );
+            // Taker user actions
+            vm.startPrank(takerUser);
 
-        makerArraySlots[0] = 0;
-        multipleMakerAskOrders[0] = multiMakerAskOrders;
-        takerBidOrders[0] = takerBidOrder;
-        multipleTakerBidOrders.takerBidOrders = takerBidOrders;
-
-        looksRareProtocol.matchMultipleAsksWithTakerBids{value: 1 ether}(
-            multipleTakerBidOrders,
-            multipleMakerAskOrders,
-            makerArraySlots,
-            true
-        );
-        vm.stopPrank();
-
-        assertEq(mockERC721.ownerOf(0), takerUser);
-        assertEq(address(looksRareProtocol).balance, 0);
-    }
-
-    /**
-     * One ERC721 is sold to buyer who buy 3 orders with 1 ERC721 per order
-     */
-    function testStandardPurchaseThreeItemsERC721WithRoyaltiesArray() public {
-        _setUpUsers();
-        uint256 numberOrders = 3;
-
-        OrderStructs.MultipleMakerAskOrders memory multiMakerAskOrders;
-        OrderStructs.SingleMakerAskOrder[] memory makerAskOrders = new OrderStructs.SingleMakerAskOrder[](numberOrders);
-        uint256[] memory makerArraySlots = new uint256[](numberOrders);
-        OrderStructs.MultipleTakerBidOrders memory multipleTakerBidOrders;
-        OrderStructs.MultipleMakerAskOrders[] memory multipleMakerAskOrders = new OrderStructs.MultipleMakerAskOrders[](
-            numberOrders
-        );
-        OrderStructs.TakerBidOrder[] memory takerBidOrders = new OrderStructs.TakerBidOrder[](numberOrders);
-
-        // Maker user actions
-        vm.startPrank(makerUser);
-
-        for (uint256 i; i < numberOrders; i++) {
-            mockERC721.mint(makerUser, i);
-            OrderStructs.SingleMakerAskOrder memory makerAskOrder = _createSimpleMakerAskOrder((i + 1) * 1e18, i);
-            makerAskOrders[i] = makerAskOrder;
-            makerAskOrder.minNetRatio = 9700;
-            makerAskOrder.orderNonce = uint112(i);
-        }
-
-        multiMakerAskOrders.baseMakerOrder.signer = makerUser;
-        multiMakerAskOrders.baseMakerOrder.strategyId = 0;
-        multiMakerAskOrders.baseMakerOrder.assetType = 0; // ERC721
-        multiMakerAskOrders.baseMakerOrder.collection = address(mockERC721);
-        multiMakerAskOrders.baseMakerOrder.currency = address(0);
-        multiMakerAskOrders.makerAskOrders = makerAskOrders;
-        multiMakerAskOrders.signature = _signMakerAsksOrder(multiMakerAskOrders, makerUserPK);
-        vm.stopPrank();
-
-        // Taker user actions
-        vm.startPrank(takerUser);
-
-        for (uint256 i; i < numberOrders; i++) {
-            takerBidOrders[i] = OrderStructs.TakerBidOrder(
-                (i + 1) * 1e18,
+            takerBid = OrderStructs.TakerBid(
                 takerUser,
-                makerAskOrders[i].itemIds,
-                makerAskOrders[i].amounts,
+                makerAsk.minNetRatio,
+                makerAsk.minPrice,
+                makerAsk.itemIds,
+                makerAsk.amounts,
                 abi.encode()
             );
-
-            makerArraySlots[i] = i;
-            multipleMakerAskOrders[i] = multiMakerAskOrders;
         }
 
-        multipleTakerBidOrders.takerBidOrders = takerBidOrders;
-        multipleTakerBidOrders.referrer = address(0);
+        uint256 initialBalanceMakerUser = makerUser.balance;
+        uint256 initialBalanceTakerUser = takerUser.balance;
 
-        looksRareProtocol.matchMultipleAsksWithTakerBids{value: 6 ether}(
-            multipleTakerBidOrders,
-            multipleMakerAskOrders,
-            makerArraySlots,
-            true
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            merkleRoot,
+            merkleProofs,
+            referrer
         );
 
         vm.stopPrank();
 
-        for (uint256 i; i < numberOrders; i++) {
-            assertEq(mockERC721.ownerOf(i), takerUser);
-        }
-        assertEq(address(looksRareProtocol).balance, 0);
-    }
-
-    /**
-     * One ERC721 is sold to buyer who uses no array to match (single-order match)
-     */
-    function testStandardPurchaseWithRoyaltiesNoArray() public {
-        _setUpUsers();
-        uint256 numberOrders = 1;
-
-        OrderStructs.MultipleMakerAskOrders memory multiMakerAskOrders;
-        OrderStructs.SingleMakerAskOrder[] memory makerAskOrders = new OrderStructs.SingleMakerAskOrder[](numberOrders);
-        OrderStructs.TakerBidOrder memory takerBidOrder;
-        OrderStructs.SingleTakerBidOrder memory singleTakerBidOrder;
-
-        // Maker user actions
-        vm.startPrank(makerUser);
-
-        for (uint256 i; i < numberOrders; i++) {
-            mockERC721.mint(makerUser, i);
-            OrderStructs.SingleMakerAskOrder memory makerAskOrder = _createSimpleMakerAskOrder(1 ether, i);
-            makerAskOrders[i] = makerAskOrder;
-            makerAskOrder.minNetRatio = 9700;
-            makerAskOrder.orderNonce = uint112(i);
-        }
-
-        multiMakerAskOrders.baseMakerOrder.signer = makerUser;
-        multiMakerAskOrders.baseMakerOrder.strategyId = 0;
-        multiMakerAskOrders.baseMakerOrder.assetType = 0; // ERC721
-        multiMakerAskOrders.baseMakerOrder.collection = address(mockERC721);
-        multiMakerAskOrders.baseMakerOrder.currency = address(0);
-        multiMakerAskOrders.makerAskOrders = makerAskOrders;
-        multiMakerAskOrders.signature = _signMakerAsksOrder(multiMakerAskOrders, makerUserPK);
-
-        vm.stopPrank();
-
-        // Taker user actions
-        vm.startPrank(takerUser);
-
-        takerBidOrder = OrderStructs.TakerBidOrder(
-            1 ether,
-            takerUser,
-            makerAskOrders[0].itemIds,
-            makerAskOrders[0].amounts,
-            abi.encode()
-        );
-
-        uint256 makerArraySlot = 0;
-        singleTakerBidOrder.takerBidOrder = takerBidOrder;
-        singleTakerBidOrder.referrer = address(0);
-
-        looksRareProtocol.matchAskWithTakerBid{value: 1 ether}(
-            singleTakerBidOrder,
-            multiMakerAskOrders,
-            makerArraySlot
-        );
-
-        vm.stopPrank();
-
+        // Taker user has received the asset
         assertEq(mockERC721.ownerOf(0), takerUser);
+        // Taker bid user pays the whole price
+        assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
+        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
+        assertEq(address(makerUser).balance, initialBalanceMakerUser + (price * 9700) / 10000);
+        // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
-    }
-
-    /**
-     * One ERC721 is sold to buyer who uses no array to match (single-order match)
-     */
-    function testStandardSaleWithRoyaltiesNoArray() public {
-        _setUpUsers();
-        uint256 numberOrders = 1;
-
-        OrderStructs.TakerAskOrder memory takerAskOrder;
-        OrderStructs.MultipleMakerBidOrders memory multiMakerBidOrders;
-        OrderStructs.SingleMakerBidOrder[] memory makerBidOrders = new OrderStructs.SingleMakerBidOrder[](numberOrders);
-        OrderStructs.SingleTakerAskOrder memory singleTakerAskOrder;
-
-        // Maker user actions
-        vm.startPrank(takerUser);
-
-        for (uint256 i; i < numberOrders; i++) {
-            mockERC721.mint(takerUser, i);
-            OrderStructs.SingleMakerBidOrder memory makerBidOrder = _createSimpleMakerBidOrder(1 ether, i);
-            makerBidOrder.orderNonce = uint112(i);
-            makerBidOrders[i] = makerBidOrder;
-        }
-
-        multiMakerBidOrders.baseMakerOrder.signer = makerUser;
-        multiMakerBidOrders.baseMakerOrder.strategyId = 0;
-        multiMakerBidOrders.baseMakerOrder.assetType = 0; // ERC721
-        multiMakerBidOrders.baseMakerOrder.collection = address(mockERC721);
-        multiMakerBidOrders.baseMakerOrder.currency = address(weth);
-        multiMakerBidOrders.makerBidOrders = makerBidOrders;
-        multiMakerBidOrders.signature = _signMakerBidsOrder(multiMakerBidOrders, makerUserPK);
-        vm.stopPrank();
-
-        // Taker user actions
-        vm.startPrank(takerUser);
-
-        takerAskOrder = OrderStructs.TakerAskOrder(
-            takerUser,
-            9700,
-            1 ether,
-            makerBidOrders[0].itemIds,
-            makerBidOrders[0].amounts,
-            abi.encode()
-        );
-
-        uint256 makerArraySlot = 0;
-        singleTakerAskOrder.takerAskOrder = takerAskOrder;
-        singleTakerAskOrder.referrer = address(0);
-
-        looksRareProtocol.matchBidWithTakerAsk(singleTakerAskOrder, multiMakerBidOrders, makerArraySlot);
-
-        vm.stopPrank();
-
-        assertEq(mockERC721.ownerOf(0), makerUser);
-        assertEq(weth.balanceOf(makerUser), 9 ether); // 10 - 1 = 9
-        assertEq(address(looksRareProtocol).balance, 0);
-    }
-
-    /**
-     * Three ERC721 tokens are sold to buyer who uses an array to match (multi-order match)
-     */
-    function testStandardSaleThreeItemsERC721WithRoyaltiesArray() public {
-        _setUpUsers();
-        uint256 numberOrders = 3;
-
-        // Maker user actions
-        vm.startPrank(takerUser);
-
-        // Custom structs
-        OrderStructs.MultipleMakerBidOrders memory multiMakerBidOrders;
-        OrderStructs.MultipleMakerBidOrders[] memory multipleMakerBidOrders = new OrderStructs.MultipleMakerBidOrders[](
-            numberOrders
-        );
-        uint256[] memory makerArraySlots = new uint256[](numberOrders);
-
-        OrderStructs.MultipleTakerAskOrders memory multipleTakerAskOrders;
-        OrderStructs.TakerAskOrder[] memory takerAskOrders = new OrderStructs.TakerAskOrder[](numberOrders);
-        OrderStructs.SingleMakerBidOrder[] memory makerBidOrders = new OrderStructs.SingleMakerBidOrder[](numberOrders);
-
-        for (uint256 i; i < numberOrders; i++) {
-            mockERC721.mint(takerUser, i);
-            OrderStructs.SingleMakerBidOrder memory makerBidOrder = _createSimpleMakerBidOrder((i + 1) * 1e18, i);
-            makerBidOrder.orderNonce = uint112(i);
-            makerBidOrders[i] = makerBidOrder;
-        }
-
-        multiMakerBidOrders.baseMakerOrder.signer = makerUser;
-        multiMakerBidOrders.baseMakerOrder.strategyId = 0;
-        multiMakerBidOrders.baseMakerOrder.assetType = 0; // ERC721
-        multiMakerBidOrders.baseMakerOrder.collection = address(mockERC721);
-        multiMakerBidOrders.baseMakerOrder.currency = address(weth);
-        multiMakerBidOrders.makerBidOrders = makerBidOrders;
-
-        multiMakerBidOrders.signature = _signMakerBidsOrder(multiMakerBidOrders, makerUserPK);
-        vm.stopPrank();
-
-        // Taker user actions
-        vm.startPrank(takerUser);
-
-        for (uint256 i; i < numberOrders; i++) {
-            takerAskOrders[i] = OrderStructs.TakerAskOrder(
-                takerUser,
-                9700,
-                (i + 1) * 1e18,
-                makerBidOrders[i].itemIds,
-                makerBidOrders[i].amounts,
-                abi.encode()
-            );
-
-            makerArraySlots[i] = i;
-            multipleMakerBidOrders[i] = multiMakerBidOrders;
-        }
-
-        multipleTakerAskOrders.takerAskOrders = takerAskOrders;
-        multipleTakerAskOrders.currency = address(weth);
-        multipleTakerAskOrders.referrer = address(0);
-
-        looksRareProtocol.matchMultipleBidsWithTakerAsks(
-            multipleTakerAskOrders,
-            multipleMakerBidOrders,
-            makerArraySlots,
-            true
-        );
-
-        vm.stopPrank();
-
-        for (uint256 i; i < numberOrders; i++) {
-            assertEq(mockERC721.ownerOf(i), makerUser);
-        }
-
-        assertEq(address(looksRareProtocol).balance, 0);
-        assertEq(weth.balanceOf(makerUser), 4 ether); // 10 - 6 = 4
-    }
-
-    /**
-     * One ERC721 is sold to buyer who uses no array to match (single-order match) with collection discount
-     */
-    function testStandardSaleWithRoyaltiesAndCollectionDiscount() public {
-        _setUpUsers();
-        uint256 numberOrders = 1;
-        uint256 discountFactor = 5000; // 50%
-
-        OrderStructs.TakerAskOrder memory takerAskOrder;
-        OrderStructs.MultipleMakerBidOrders memory multiMakerBidOrders;
-        OrderStructs.SingleMakerBidOrder[] memory makerBidOrders = new OrderStructs.SingleMakerBidOrder[](numberOrders);
-        OrderStructs.SingleTakerAskOrder memory singleTakerAskOrder;
-
-        // 1. Owner user actions
-        vm.startPrank(_owner);
-        looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), discountFactor);
-        vm.stopPrank();
-
-        // 2. Maker user actions
-        vm.startPrank(takerUser);
-
-        for (uint256 i; i < numberOrders; i++) {
-            mockERC721.mint(takerUser, i);
-            OrderStructs.SingleMakerBidOrder memory makerBidOrder = _createSimpleMakerBidOrder(1 ether, i);
-            makerBidOrder.orderNonce = uint112(i);
-            makerBidOrders[i] = makerBidOrder;
-        }
-
-        multiMakerBidOrders.baseMakerOrder.signer = makerUser;
-        multiMakerBidOrders.baseMakerOrder.strategyId = 0;
-        multiMakerBidOrders.baseMakerOrder.assetType = 0; // ERC721
-        multiMakerBidOrders.baseMakerOrder.collection = address(mockERC721);
-        multiMakerBidOrders.baseMakerOrder.currency = address(weth);
-        multiMakerBidOrders.makerBidOrders = makerBidOrders;
-        multiMakerBidOrders.signature = _signMakerBidsOrder(multiMakerBidOrders, makerUserPK);
-        vm.stopPrank();
-
-        // 3. Taker user actions
-        vm.startPrank(takerUser);
-
-        takerAskOrder = OrderStructs.TakerAskOrder(
-            takerUser,
-            9800,
-            1 ether,
-            makerBidOrders[0].itemIds,
-            makerBidOrders[0].amounts,
-            abi.encode()
-        );
-
-        uint256 makerArraySlot = 0;
-        singleTakerAskOrder.takerAskOrder = takerAskOrder;
-        singleTakerAskOrder.referrer = address(0);
-
-        looksRareProtocol.matchBidWithTakerAsk(singleTakerAskOrder, multiMakerBidOrders, makerArraySlot);
-
-        vm.stopPrank();
-
-        assertEq(mockERC721.ownerOf(0), makerUser);
-        assertEq(weth.balanceOf(makerUser), 9 ether); // 10 - 1 = 9 ETH
-        assertEq(weth.balanceOf(takerUser), 10.98 ether); // 10 + 1 * (100% - 1% royalty - 2/1% protocol fee)
-        assertEq(address(looksRareProtocol).balance, 0);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
     }
 }

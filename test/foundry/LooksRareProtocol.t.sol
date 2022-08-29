@@ -168,7 +168,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         // Other execution parameters
         bytes32 merkleRoot = bytes32(0);
         address referrer = address(0); // No referrer
-        bytes32[] memory merkleProofs = new bytes32[](0);
+        bytes32[] memory merkleProof = new bytes32[](0);
 
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid{value: price}(
@@ -176,7 +176,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
             makerAsk,
             signature,
             merkleRoot,
-            merkleProofs,
+            merkleProof,
             referrer
         );
 
@@ -259,10 +259,10 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         // Other execution parameters
         bytes32 merkleRoot = bytes32(0);
         address referrer = address(0); // No referrer
-        bytes32[] memory merkleProofs = new bytes32[](0);
+        bytes32[] memory merkleProof = new bytes32[](0);
 
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProofs, referrer);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, referrer);
         vm.stopPrank();
 
         // Taker user has received the asset
@@ -321,8 +321,8 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         // Verify the merkle proof
         for (uint256 i; i < numberOrders; i++) {
             {
-                bytes32[] memory merkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleRoot, merkleProof, orderHashes[i]));
+                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
+                assertTrue(m.verifyProof(merkleRoot, tempMerkleProof, orderHashes[i]));
             }
         }
 
@@ -377,5 +377,106 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+    }
+
+    function testTakerAskMultipleOrdersSignedERC721() public {
+        _setUpUsers();
+
+        // Initialize Merkle Tree
+        Merkle m = new Merkle();
+
+        uint256 numberOrders = 3; // The test will sell itemId = 2
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+
+        OrderStructs.MakerBid memory makerBid;
+        OrderStructs.TakerAsk memory takerAsk;
+        bytes memory signature;
+
+        uint256 price = 1 ether; // Fixed price of sale
+        uint16 minNetRatio = 9800; // 2% slippage protection for strategy
+
+        // Maker user actions
+        vm.startPrank(makerUser);
+
+        for (uint112 i; i < numberOrders; i++) {
+            // Prepare the order hash
+            makerBid = _createSingleItemMakerBidOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                i, // orderNonce (incremental)
+                minNetRatio,
+                address(mockERC721),
+                address(weth), // ETH,
+                makerUser,
+                price,
+                i // itemId
+            );
+
+            orderHashes[i] = _computeOrderHashMakerBid(makerBid);
+        }
+
+        bytes32 merkleRoot = m.getRoot(orderHashes);
+
+        // Verify the merkle proof
+        for (uint256 i; i < numberOrders; i++) {
+            {
+                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
+                assertTrue(m.verifyProof(merkleRoot, tempMerkleProof, orderHashes[i]));
+            }
+        }
+
+        // Maker signs the root
+        signature = _signMerkleProof(merkleRoot, makerUserPK);
+        vm.stopPrank();
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        {
+            // Mint asset
+            mockERC721.mint(takerUser, numberOrders - 1);
+
+            // Prepare the taker ask
+            takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.minNetRatio,
+                makerBid.maxPrice,
+                makerBid.itemIds,
+                makerBid.amounts,
+                abi.encode()
+            );
+        }
+
+        bytes32[] memory merkleProof = m.getProof(orderHashes, numberOrders - 1);
+        delete m;
+
+        // Store the balances in WETH
+        uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
+        uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
+
+        {
+            // Execute taker ask transaction
+            looksRareProtocol.executeTakerAsk(
+                takerAsk,
+                makerBid,
+                signature,
+                merkleRoot,
+                merkleProof,
+                address(0) // No referrer
+            );
+        }
+
+        vm.stopPrank();
+
+        // Maker user has received the asset
+        assertEq(mockERC721.ownerOf(numberOrders - 1), makerUser);
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
+        // Taker ask user receives 97% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * 9800) / 10000);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
 }

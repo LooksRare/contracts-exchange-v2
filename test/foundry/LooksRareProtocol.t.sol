@@ -104,46 +104,48 @@ contract LooksRareProtocolTest is ProtocolHelpers {
     function testTakerBidERC721WithRoyaltiesFromRegistry() public {
         _setUpUsers();
 
+        OrderStructs.MakerAsk memory makerAsk;
+        OrderStructs.TakerBid memory takerBid;
+        bytes memory signature;
+
         uint256 price = 1 ether; // Fixed price of sale
         uint16 royaltyFee = 100;
+        uint256 itemId = 0; // TokenId
+        uint16 minNetRatio = royaltyFee + 200; // 3% slippage protection
 
         _setUpRoyalties(address(mockERC721), royaltyFee);
 
-        bytes32 merkleRoot = bytes32(0);
-        address referrer = address(0); // No referrer
-        bytes32[] memory merkleProofs = new bytes32[](0);
-        bytes memory signature;
-        OrderStructs.MakerAsk memory makerAsk;
-        OrderStructs.TakerBid memory takerBid;
-
+        // Maker user actions
         {
-            // Order parameters
-            uint256 tokenId = 0; // TokenId
-            uint16 strategyId = 0; // Standard sale for fixed price
-            uint16 minNetRatio = 9700; // 3% slippage protection
-            uint112 orderNonce = 0;
-            uint8 assetType = 0; // ERC721
-            address currency = address(0); // ETH
-
-            // Maker user actions
             vm.startPrank(makerUser);
             // Mint asset
-            mockERC721.mint(makerUser, tokenId);
-            // Prepare order
-            makerAsk = _createSimpleMakerAskOrder(price, tokenId);
-            makerAsk.minNetRatio = minNetRatio;
-            makerAsk.orderNonce = orderNonce;
-            makerAsk.signer = makerUser;
-            makerAsk.strategyId = strategyId;
-            makerAsk.assetType = assetType;
-            makerAsk.collection = address(mockERC721);
-            makerAsk.currency = currency;
+            mockERC721.mint(makerUser, itemId);
+
+            // Prepare the order hash
+            makerAsk = _createSingleItemMakerAskOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                0, // orderNonce
+                minNetRatio,
+                address(mockERC721),
+                address(0), // ETH,
+                makerUser,
+                price,
+                itemId
+            );
+        }
+
+        {
+            // Sign order
             signature = _signMakerAsk(makerAsk, makerUserPK);
             vm.stopPrank();
 
             // Taker user actions
             vm.startPrank(takerUser);
 
+            // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
                 makerAsk.minNetRatio,
@@ -154,9 +156,16 @@ contract LooksRareProtocolTest is ProtocolHelpers {
             );
         }
 
+        // Store the balances in ETH
         uint256 initialBalanceMakerUser = makerUser.balance;
         uint256 initialBalanceTakerUser = takerUser.balance;
 
+        // Other execution parameters
+        bytes32 merkleRoot = bytes32(0);
+        address referrer = address(0); // No referrer
+        bytes32[] memory merkleProofs = new bytes32[](0);
+
+        // Execute taker bid transaction
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,

@@ -22,52 +22,151 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
 
     bytes32 internal _domainSeparator;
 
-    function _createSimpleMakerAskOrder(uint256 price, uint256 itemId)
-        internal
-        pure
-        returns (OrderStructs.MakerAsk memory makerAsk)
-    {
+    function _createSingleItemMakerAskOrder(
+        uint112 askNonce,
+        uint112 subsetNonce,
+        uint16 strategyId,
+        uint8 assetType,
+        uint112 orderNonce,
+        uint16 minNetRatio,
+        address collection,
+        address currency,
+        address signer,
+        uint256 minPrice,
+        uint256 itemId
+    ) internal view returns (OrderStructs.MakerAsk memory makerAsk) {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
 
-        makerAsk.minPrice = price;
-        makerAsk.itemIds = itemIds;
-        makerAsk.amounts = amounts;
+        return
+            OrderStructs.MakerAsk({
+                askNonce: askNonce,
+                subsetNonce: subsetNonce,
+                strategyId: strategyId,
+                assetType: assetType,
+                orderNonce: orderNonce,
+                minNetRatio: minNetRatio,
+                collection: collection,
+                currency: currency,
+                recipient: signer,
+                signer: signer,
+                startTime: block.timestamp,
+                endTime: block.timestamp,
+                minPrice: minPrice,
+                itemIds: itemIds,
+                amounts: amounts,
+                additionalParameters: abi.encode()
+            });
     }
 
-    function _createSimpleMakerBidOrder(uint256 price, uint256 itemId)
-        internal
-        pure
-        returns (OrderStructs.MakerBid memory makerBid)
-    {
+    function _createMultiItemMakerAskOrder(
+        uint112 askNonce,
+        uint112 subsetNonce,
+        uint16 strategyId,
+        uint8 assetType,
+        uint112 orderNonce,
+        uint16 minNetRatio,
+        address collection,
+        address currency,
+        address signer,
+        uint256 minPrice,
+        uint256[] memory itemIds,
+        uint256[] memory amounts
+    ) internal view returns (OrderStructs.MakerAsk memory makerAsk) {
+        return
+            OrderStructs.MakerAsk({
+                askNonce: askNonce,
+                subsetNonce: subsetNonce,
+                strategyId: strategyId,
+                assetType: assetType,
+                orderNonce: orderNonce,
+                minNetRatio: minNetRatio,
+                collection: collection,
+                currency: currency,
+                recipient: signer,
+                signer: signer,
+                startTime: block.timestamp,
+                endTime: block.timestamp,
+                minPrice: minPrice,
+                itemIds: itemIds,
+                amounts: amounts,
+                additionalParameters: abi.encode()
+            });
+    }
+
+    function _createSingleItemMakerBidOrder(
+        uint112 bidNonce,
+        uint112 subsetNonce,
+        uint16 strategyId,
+        uint8 assetType,
+        uint112 orderNonce,
+        uint16 minNetRatio,
+        address collection,
+        address currency,
+        address signer,
+        uint256 maxPrice,
+        uint256 itemId
+    ) internal view returns (OrderStructs.MakerBid memory makerBid) {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
-
-        makerBid.maxPrice = price;
-        makerBid.itemIds = itemIds;
-        makerBid.amounts = amounts;
+        return
+            OrderStructs.MakerBid({
+                bidNonce: bidNonce,
+                subsetNonce: subsetNonce,
+                strategyId: strategyId,
+                assetType: assetType,
+                orderNonce: orderNonce,
+                minNetRatio: minNetRatio,
+                collection: collection,
+                currency: currency,
+                recipient: signer,
+                signer: signer,
+                startTime: block.timestamp,
+                endTime: block.timestamp,
+                maxPrice: maxPrice,
+                itemIds: itemIds,
+                amounts: amounts,
+                additionalParameters: abi.encode()
+            });
     }
 
-    function _createMultipleItemsMakerAskOrder(uint256 price, uint256[] calldata _itemIds)
-        internal
-        pure
-        returns (OrderStructs.MakerAsk memory makerAsk)
-    {
-        uint256[] memory itemIds = new uint256[](_itemIds.length);
-        uint256[] memory amounts = new uint256[](_itemIds.length);
-
-        for (uint256 i; i < _itemIds.length; i++) {
-            itemIds[i] = _itemIds[i];
-            amounts[i] = 1;
-        }
-
-        makerAsk.minPrice = price;
-        makerAsk.itemIds = itemIds;
-        makerAsk.amounts = amounts;
+    function _createMultiItemMakerBidOrder(
+        uint112 bidNonce,
+        uint112 subsetNonce,
+        uint16 strategyId,
+        uint8 assetType,
+        uint112 orderNonce,
+        uint16 minNetRatio,
+        address collection,
+        address currency,
+        address signer,
+        uint256 maxPrice,
+        uint256[] memory itemIds,
+        uint256[] memory amounts
+    ) internal view returns (OrderStructs.MakerBid memory makerBid) {
+        return
+            OrderStructs.MakerBid({
+                bidNonce: bidNonce,
+                subsetNonce: subsetNonce,
+                strategyId: strategyId,
+                assetType: assetType,
+                orderNonce: orderNonce,
+                minNetRatio: minNetRatio,
+                collection: collection,
+                currency: currency,
+                recipient: signer,
+                signer: signer,
+                startTime: block.timestamp,
+                endTime: block.timestamp,
+                maxPrice: maxPrice,
+                itemIds: itemIds,
+                amounts: amounts,
+                additionalParameters: abi.encode()
+            });
     }
 
     function _signMakerAsk(OrderStructs.MakerAsk memory _makerAsk, uint256 _signerKey) internal returns (bytes memory) {

@@ -17,6 +17,7 @@ abstract contract TestParameters is TestHelpers {
 contract ProtocolHelpers is TestParameters, IExecutionManager {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
+    using OrderStructs for bytes32;
 
     receive() external payable {}
 
@@ -181,7 +182,7 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
     }
 
     function _signMakerBid(OrderStructs.MakerBid memory _makerBid, uint256 _signerKey) internal returns (bytes memory) {
-        bytes32 orderHash = _makerBid.hash();
+        bytes32 orderHash = _computeOrderHashMakerBid(_makerBid);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,
@@ -189,5 +190,24 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
         );
 
         return abi.encodePacked(r, s, v);
+    }
+
+    function _signMerkleProof(bytes32 _merkleRoot, uint256 _signerKey) internal returns (bytes memory) {
+        bytes32 merkleRootHash = _merkleRoot.hash();
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            _signerKey,
+            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleRootHash))
+        );
+
+        return abi.encodePacked(r, s, v);
+    }
+
+    function _computeOrderHashMakerBid(OrderStructs.MakerBid memory _makerBid) internal pure returns (bytes32) {
+        return _makerBid.hash();
+    }
+
+    function _computeOrderHashMakerAsk(OrderStructs.MakerAsk memory _makerAsk) internal pure returns (bytes32) {
+        return _makerAsk.hash();
     }
 }

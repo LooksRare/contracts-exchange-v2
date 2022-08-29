@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
 import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
+import {Merkle} from "../../lib/murky/src/Merkle.sol";
 
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
@@ -138,6 +139,9 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 price,
                 itemId
             );
+
+            // Sign order
+            signature = _signMakerAsk(makerAsk, makerUserPK);
         }
 
         vm.stopPrank();
@@ -146,9 +150,6 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         vm.startPrank(takerUser);
 
         {
-            // Sign order
-            signature = _signMakerAsk(makerAsk, makerUserPK);
-
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
@@ -272,5 +273,109 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * 9700) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+    }
+
+    function testTakerBidMultipleOrdersSignedERC721() public {
+        _setUpUsers();
+
+        // Initialize Merkle Tree
+        Merkle m = new Merkle();
+
+        uint256 numberOrders = 3; // The test will buy itemId = 2
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+
+        OrderStructs.MakerAsk memory makerAsk;
+        OrderStructs.TakerBid memory takerBid;
+        bytes memory signature;
+
+        uint256 price = 1 ether; // Fixed price of sale
+        uint16 minNetRatio = 9800; // 2% slippage protection for strategy
+
+        // Maker user actions
+        vm.startPrank(makerUser);
+
+        for (uint112 i; i < numberOrders; i++) {
+            // Mint asset
+            mockERC721.mint(makerUser, i);
+
+            // Prepare the order hash
+            makerAsk = _createSingleItemMakerAskOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                i, // orderNonce (incremental)
+                minNetRatio,
+                address(mockERC721),
+                address(0), // ETH,
+                makerUser,
+                price,
+                i // itemId
+            );
+
+            orderHashes[i] = _computeOrderHashMakerAsk(makerAsk);
+        }
+
+        bytes32 merkleRoot = m.getRoot(orderHashes);
+
+        // Verify the merkle proof
+        for (uint256 i; i < numberOrders; i++) {
+            {
+                bytes32[] memory merkleProof = m.getProof(orderHashes, i);
+                assertTrue(m.verifyProof(merkleRoot, merkleProof, orderHashes[i]));
+            }
+        }
+
+        // Maker signs the root
+        signature = _signMerkleProof(merkleRoot, makerUserPK);
+
+        vm.stopPrank();
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        {
+            // Prepare the taker bid
+            takerBid = OrderStructs.TakerBid(
+                takerUser,
+                makerAsk.minNetRatio,
+                makerAsk.minPrice,
+                makerAsk.itemIds,
+                makerAsk.amounts,
+                abi.encode()
+            );
+        }
+
+        bytes32[] memory merkleProof = m.getProof(orderHashes, numberOrders - 1);
+        delete m;
+
+        // Store the balances in ETH
+        uint256 initialBalanceMakerUser = makerUser.balance;
+        uint256 initialBalanceTakerUser = takerUser.balance;
+
+        {
+            // Execute taker bid transaction
+            looksRareProtocol.executeTakerBid{value: price}(
+                takerBid,
+                makerAsk,
+                signature,
+                merkleRoot,
+                merkleProof,
+                address(0) // No referrer
+            );
+        }
+
+        vm.stopPrank();
+
+        // Taker user has received the asset
+        assertEq(mockERC721.ownerOf(numberOrders - 1), takerUser);
+        // Taker bid user pays the whole price
+        assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(address(makerUser).balance, initialBalanceMakerUser + (price * 9800) / 10000);
+        // No leftover in the balance of the contract
+        assertEq(address(looksRareProtocol).balance, 0);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
     }
 }

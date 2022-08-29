@@ -158,8 +158,6 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         vm.startPrank(takerUser);
 
         {
-            uint256 gas = gasleft();
-
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
@@ -169,8 +167,6 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 makerAsk.amounts,
                 abi.encode()
             );
-
-            emit log_uint(gas - gasleft());
         }
 
         // Store the balances in ETH
@@ -181,7 +177,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
             // Other execution parameters
             bytes32 merkleRoot = bytes32(0);
             bytes32[] memory merkleProof = new bytes32[](0);
-            uint256 gas = gasleft();
+            uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
             looksRareProtocol.executeTakerBid{value: price}(
@@ -192,7 +188,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 merkleProof,
                 address(0) // No referrer
             );
-            emit log_uint(gas - gasleft());
+            emit log_uint(gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -277,7 +273,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
             bytes32 merkleRoot = bytes32(0);
             bytes32[] memory merkleProof = new bytes32[](0);
 
-            uint256 gas = gasleft();
+            uint256 gasLeft = gasleft();
 
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
@@ -287,7 +283,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 merkleProof,
                 address(0) // No referrer
             );
-            emit log_uint(gas - gasleft());
+            emit log_uint(gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -308,7 +304,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         // Initialize Merkle Tree
         Merkle m = new Merkle();
 
-        uint256 numberOrders = 3; // The test will sell itemId = numberOrders - 1
+        uint256 numberOrders = 1000; // The test will sell itemId = numberOrders - 1
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         OrderStructs.MakerAsk memory makerAsk;
@@ -381,7 +377,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         uint256 initialBalanceTakerUser = takerUser.balance;
 
         {
-            uint256 gas = gasleft();
+            uint256 gasLeft = gasleft();
             // Execute taker bid transaction
             looksRareProtocol.executeTakerBid{value: price}(
                 takerBid,
@@ -391,7 +387,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 merkleProof,
                 address(0) // No referrer
             );
-            emit log_uint(gas - gasleft());
+            emit log_uint(gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -486,7 +482,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
         {
-            uint256 gas = gasleft();
+            uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(
@@ -498,7 +494,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 address(0) // No referrer
             );
 
-            emit log_uint(gas - gasleft());
+            emit log_uint(gasLeft - gasleft());
         }
 
         vm.stopPrank();

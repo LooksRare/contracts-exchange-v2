@@ -5,10 +5,11 @@ interface ILooksRareProtocol {
     // Custom errors
     error NoTransferManagerForAssetType(uint16 assetType);
     error SameDomainSeparator();
-    error WrongNonces();
     error WrongAssetType(uint8 assetType);
-    error WrongCurrency();
     error WrongCaller();
+    error WrongCurrency();
+    error WrongMerkleProof();
+    error WrongNonces();
 
     // Events
     event NewDomainSeparator();

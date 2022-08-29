@@ -96,7 +96,7 @@ contract LooksRareProtocol is
      * @param makerAsk maker ask struct
      * @param makerSignature maker signature
      * @param merkleRoot merkle root if the signature contains multiple maker orders
-     * @param merkleProofs array containing merkle proofs (if multiple maker orders under the signature)
+     * @param merkleProof array containing the merkle proof (if multiple maker orders under the signature)
      * @param referrer address of the referrer
      */
     function executeTakerBid(
@@ -104,16 +104,16 @@ contract LooksRareProtocol is
         OrderStructs.MakerAsk calldata makerAsk,
         bytes calldata makerSignature,
         bytes32 merkleRoot,
-        bytes32[] calldata merkleProofs,
+        bytes32[] calldata merkleProof,
         address referrer
     ) external payable nonReentrant {
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         {
             bytes32 digest;
-            if (merkleProofs.length == 0) {
+            if (merkleProof.length == 0) {
                 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, makerAsk.hash()));
             } else {
-                _verifyMerkleProofForOrderHash(merkleProofs, merkleRoot, makerAsk.hash());
+                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerAsk.hash());
                 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleRoot.hash()));
             }
             _verify(digest, makerAsk.signer, makerSignature);
@@ -144,7 +144,7 @@ contract LooksRareProtocol is
      * @param makerBid maker bid struct
      * @param makerSignature maker signature
      * @param merkleRoot merkle root if the signature contains multiple maker orders
-     * @param merkleProofs array containing merkle proofs (if multiple maker orders under the signature)
+     * @param merkleProof array containing merkle proofs (if multiple maker orders under the signature)
      * @param referrer address of the referrer
      */
     function executeTakerAsk(
@@ -152,16 +152,16 @@ contract LooksRareProtocol is
         OrderStructs.MakerBid calldata makerBid,
         bytes calldata makerSignature,
         bytes32 merkleRoot,
-        bytes32[] calldata merkleProofs,
+        bytes32[] calldata merkleProof,
         address referrer
     ) external nonReentrant {
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         {
             bytes32 digest;
-            if (merkleProofs.length == 0) {
+            if (merkleProof.length == 0) {
                 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, makerBid.hash()));
             } else {
-                _verifyMerkleProofForOrderHash(merkleProofs, merkleRoot, makerBid.hash());
+                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerBid.hash());
                 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleRoot.hash()));
             }
             _verify(digest, makerBid.signer, makerSignature);
@@ -461,7 +461,9 @@ contract LooksRareProtocol is
         bytes32[] memory proof,
         bytes32 root,
         bytes32 orderHash
-    ) internal pure returns (bool isVerified) {
-        return MerkleProof.verify(proof, root, orderHash);
+    ) internal pure {
+        if (!MerkleProof.verify(proof, root, orderHash)) {
+            revert WrongMerkleProof();
+        }
     }
 }

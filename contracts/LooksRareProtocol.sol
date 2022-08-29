@@ -47,11 +47,14 @@ contract LooksRareProtocol is
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for bytes32;
 
+    // Encoding prefix for EIP-712 signatures
+    string internal constant _ENCODING_PREFIX = "\x19\x01";
+
     // Initial domain separator
-    bytes32 internal _INITIAL_DOMAIN_SEPARATOR;
+    bytes32 internal immutable _INITIAL_DOMAIN_SEPARATOR;
 
     // Initial chainId
-    uint256 internal _INITIAL_CHAIN_ID;
+    uint256 internal immutable _INITIAL_CHAIN_ID;
 
     // Current domain separator
     bytes32 internal _domainSeparator;
@@ -111,10 +114,10 @@ contract LooksRareProtocol is
         {
             bytes32 digest;
             if (merkleProof.length == 0) {
-                digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, makerAsk.hash()));
+                digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, makerAsk.hash()));
             } else {
                 _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerAsk.hash());
-                digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleRoot.hash()));
+                digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, merkleRoot.hash()));
             }
             _verify(digest, makerAsk.signer, makerSignature);
         }
@@ -159,10 +162,10 @@ contract LooksRareProtocol is
         {
             bytes32 digest;
             if (merkleProof.length == 0) {
-                digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, makerBid.hash()));
+                digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, makerBid.hash()));
             } else {
                 _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerBid.hash());
-                digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleRoot.hash()));
+                digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, merkleRoot.hash()));
             }
             _verify(digest, makerBid.signer, makerSignature);
         }

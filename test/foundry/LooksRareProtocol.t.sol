@@ -10,10 +10,13 @@ import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.so
 
 import {OrderStructs, ProtocolHelpers} from "./utils/ProtocolHelpers.sol";
 import {MockERC721} from "./utils/MockERC721.sol";
+import {MockERC1155} from "./utils/MockERC1155.sol";
 
 contract LooksRareProtocolTest is ProtocolHelpers {
     address[] public operators;
     MockERC721 public mockERC721;
+    MockERC1155 public mockERC1155;
+
     RoyaltyFeeRegistry public royaltyFeeRegistry;
     LooksRareProtocol public looksRareProtocol;
     TransferManager public transferManager;
@@ -22,6 +25,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
     function _setUpUser(address user) internal asPrankedUser(user) {
         vm.deal(user, 100 ether);
         mockERC721.setApprovalForAll(address(transferManager), true);
+        mockERC1155.setApprovalForAll(address(transferManager), true);
         transferManager.grantApprovals(operators);
         weth.approve(address(looksRareProtocol), type(uint256).max);
         weth.deposit{value: 10 ether}();
@@ -43,13 +47,12 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         transferManager = new TransferManager();
         looksRareProtocol = new LooksRareProtocol(address(transferManager), address(royaltyFeeRegistry));
         mockERC721 = new MockERC721();
+        mockERC1155 = new MockERC1155();
+
         weth = new WETH();
 
         vm.deal(_owner, 100 ether);
         vm.deal(_collectionOwner, 100 ether);
-
-        // Verify interfaceId of ERC-2981 is not supported
-        assertFalse(mockERC721.supportsInterface(0x2a55205a));
 
         // Operations
         transferManager.whitelistOperator(address(looksRareProtocol));
@@ -116,8 +119,8 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         _setUpRoyalties(address(mockERC721), royaltyFee);
 
         // Maker user actions
+        vm.startPrank(makerUser);
         {
-            vm.startPrank(makerUser);
             // Mint asset
             mockERC721.mint(makerUser, itemId);
 
@@ -137,13 +140,14 @@ contract LooksRareProtocolTest is ProtocolHelpers {
             );
         }
 
+        vm.stopPrank();
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
         {
             // Sign order
             signature = _signMakerAsk(makerAsk, makerUserPK);
-            vm.stopPrank();
-
-            // Taker user actions
-            vm.startPrank(takerUser);
 
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
@@ -187,5 +191,86 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+    }
+
+    /**
+     * One ERC721 (where royalties come from the registry) is sold through a taker ask using WETH
+     */
+    function testTakerAskERC721WithRoyaltiesFromRegistry() public {
+        _setUpUsers();
+
+        OrderStructs.MakerBid memory makerBid;
+        OrderStructs.TakerAsk memory takerAsk;
+        bytes memory signature;
+
+        uint256 price = 1 ether; // Fixed price of sale
+        uint16 royaltyFee = 100;
+        uint256 itemId = 0; // TokenId
+        uint16 minNetRatio = royaltyFee + 200; // 3% slippage protection
+
+        _setUpRoyalties(address(mockERC721), royaltyFee);
+
+        vm.startPrank(makerUser);
+        // Maker user actions
+        {
+            // Prepare the order hash
+            makerBid = _createSingleItemMakerBidOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                0, // orderNonce
+                minNetRatio,
+                address(mockERC721),
+                address(weth), // WETH,
+                makerUser,
+                price,
+                itemId
+            );
+
+            // Sign order
+            signature = _signMakerBid(makerBid, makerUserPK);
+        }
+        vm.stopPrank();
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        {
+            // Mint asset
+            mockERC721.mint(takerUser, itemId);
+
+            // Prepare the taker ask
+            takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.minNetRatio,
+                makerBid.maxPrice,
+                makerBid.itemIds,
+                makerBid.amounts,
+                abi.encode()
+            );
+        }
+
+        // Store the balances in WETH
+        uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
+        uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
+
+        // Other execution parameters
+        bytes32 merkleRoot = bytes32(0);
+        address referrer = address(0); // No referrer
+        bytes32[] memory merkleProofs = new bytes32[](0);
+
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProofs, referrer);
+        vm.stopPrank();
+
+        // Taker user has received the asset
+        assertEq(mockERC721.ownerOf(0), makerUser);
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
+        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
+        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * 9700) / 10000);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
 }

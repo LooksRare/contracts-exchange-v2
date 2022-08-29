@@ -5,6 +5,9 @@ pragma solidity ^0.8.14;
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
 
+// OpenZeppelin's library for verifying Merkle proofs
+import {MerkleProof} from "./libraries/OpenZeppelin/MerkleProof.sol";
+
 // Order structs
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
@@ -455,11 +458,10 @@ contract LooksRareProtocol is
      * @param orderHash order hash
      */
     function _verifyMerkleProofForOrderHash(
-        bytes32[] calldata proof,
+        bytes32[] memory proof,
         bytes32 root,
         bytes32 orderHash
     ) internal pure returns (bool isVerified) {
-        // TODO
-        return true;
+        return MerkleProof.verify(proof, root, orderHash);
     }
 }

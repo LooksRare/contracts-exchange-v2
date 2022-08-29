@@ -43,17 +43,14 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         _setUpUser(takerUser);
     }
 
-    function setUp() public asPrankedUser(_owner) {
+    function setUp() public {
+        vm.startPrank(_owner);
+        weth = new WETH();
         royaltyFeeRegistry = new RoyaltyFeeRegistry(9500);
         transferManager = new TransferManager();
         looksRareProtocol = new LooksRareProtocol(address(transferManager), address(royaltyFeeRegistry));
         mockERC721 = new MockERC721();
         mockERC1155 = new MockERC1155();
-
-        weth = new WETH();
-
-        vm.deal(_owner, 100 ether);
-        vm.deal(_collectionOwner, 100 ether);
 
         // Operations
         transferManager.whitelistOperator(address(looksRareProtocol));
@@ -61,9 +58,20 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         looksRareProtocol.addCurrency(address(weth));
         looksRareProtocol.setProtocolFeeRecipient(_owner);
 
-        // Fetch domain separator
+        // Fetch domain separator and store it as one of the operators
         (_domainSeparator, , , ) = looksRareProtocol.information();
         operators.push(address(looksRareProtocol));
+
+        // Distribute ETH and WETH to protocol owner
+        vm.deal(_owner, 100 ether);
+        weth.deposit{value: 10 ether}();
+        vm.stopPrank();
+
+        // Distribute ETH and WETH to collection owner
+        vm.deal(_collectionOwner, 100 ether);
+        vm.startPrank(_collectionOwner);
+        weth.deposit{value: 10 ether}();
+        vm.stopPrank();
     }
 
     /**
@@ -150,6 +158,8 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         vm.startPrank(takerUser);
 
         {
+            uint256 gas = gasleft();
+
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
@@ -159,26 +169,31 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 makerAsk.amounts,
                 abi.encode()
             );
+
+            emit log_uint(gas - gasleft());
         }
 
         // Store the balances in ETH
         uint256 initialBalanceMakerUser = makerUser.balance;
         uint256 initialBalanceTakerUser = takerUser.balance;
 
-        // Other execution parameters
-        bytes32 merkleRoot = bytes32(0);
-        address referrer = address(0); // No referrer
-        bytes32[] memory merkleProof = new bytes32[](0);
+        {
+            // Other execution parameters
+            bytes32 merkleRoot = bytes32(0);
+            bytes32[] memory merkleProof = new bytes32[](0);
+            uint256 gas = gasleft();
 
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid{value: price}(
-            takerBid,
-            makerAsk,
-            signature,
-            merkleRoot,
-            merkleProof,
-            referrer
-        );
+            // Execute taker bid transaction
+            looksRareProtocol.executeTakerBid{value: price}(
+                takerBid,
+                makerAsk,
+                signature,
+                merkleRoot,
+                merkleProof,
+                address(0) // No referrer
+            );
+            emit log_uint(gas - gasleft());
+        }
 
         vm.stopPrank();
 
@@ -256,13 +271,25 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
-        // Other execution parameters
-        bytes32 merkleRoot = bytes32(0);
-        address referrer = address(0); // No referrer
-        bytes32[] memory merkleProof = new bytes32[](0);
-
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, referrer);
+        {
+            // Other execution parameters
+            bytes32 merkleRoot = bytes32(0);
+            bytes32[] memory merkleProof = new bytes32[](0);
+
+            uint256 gas = gasleft();
+
+            looksRareProtocol.executeTakerAsk(
+                takerAsk,
+                makerBid,
+                signature,
+                merkleRoot,
+                merkleProof,
+                address(0) // No referrer
+            );
+            emit log_uint(gas - gasleft());
+        }
+
         vm.stopPrank();
 
         // Taker user has received the asset
@@ -281,7 +308,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         // Initialize Merkle Tree
         Merkle m = new Merkle();
 
-        uint256 numberOrders = 3; // The test will buy itemId = 2
+        uint256 numberOrders = 3; // The test will sell itemId = numberOrders - 1
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         OrderStructs.MakerAsk memory makerAsk;
@@ -354,6 +381,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         uint256 initialBalanceTakerUser = takerUser.balance;
 
         {
+            uint256 gas = gasleft();
             // Execute taker bid transaction
             looksRareProtocol.executeTakerBid{value: price}(
                 takerBid,
@@ -363,6 +391,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 merkleProof,
                 address(0) // No referrer
             );
+            emit log_uint(gas - gasleft());
         }
 
         vm.stopPrank();
@@ -385,7 +414,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         // Initialize Merkle Tree
         Merkle m = new Merkle();
 
-        uint256 numberOrders = 3; // The test will sell itemId = 2
+        uint256 numberOrders = 1000; // The test will sell itemId = numberOrders - 1
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         OrderStructs.MakerBid memory makerBid;
@@ -457,6 +486,8 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
         {
+            uint256 gas = gasleft();
+
             // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
@@ -466,6 +497,8 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 merkleProof,
                 address(0) // No referrer
             );
+
+            emit log_uint(gas - gasleft());
         }
 
         vm.stopPrank();
@@ -474,7 +507,7 @@ contract LooksRareProtocolTest is ProtocolHelpers {
         assertEq(mockERC721.ownerOf(numberOrders - 1), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
-        // Taker ask user receives 97% of the whole price (2% protocol)
+        // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));

@@ -7,108 +7,159 @@ pragma solidity ^0.8.14;
  * @author LooksRare protocol team (👀,💎)
  */
 library OrderStructs {
-    // keccak256("MultipleMakerAskOrders(SingleMakerAskOrder[] makerAskOrders,BaseMakerOrder baseMakerOrder,bytes signature)")
-    bytes32 internal constant _MULTIPLE_MAKER_ASK_ORDERS =
-        0xd64ff02cfb72eb79ff0952c037f152e6ad36fc5008a8fdaa2513bde0e1fcf15d;
+    // Maker ask hash used to compute maker ask order hash
+    bytes32 internal constant _MAKER_ASK_HASH = keccak256(abi.encodePacked(uint256(1)));
 
-    // keccak256("MultipleMakerBidOrders(SingleMakerBidOrder[] makerBidOrders,BaseMakerOrder baseMakerOrder,bytes signature)")
-    bytes32 internal constant _MULTIPLE_MAKER_BID_ORDERS =
-        0xbe879ec8e2b2320a9bfc29ff67b2f89f8854e91b0b64acf0be9ddaf9a510903d;
+    // Maker bid hash used to compute maker bid order hash
+    bytes32 internal constant _MAKER_BID_HASH = keccak256(abi.encodePacked(uint256(2)));
 
-    function hash(MultipleMakerAskOrders calldata orders) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_MULTIPLE_MAKER_ASK_ORDERS, orders.makerAskOrders, orders.baseMakerOrder));
-    }
+    // Merkle root hash used to compute merkle root order
+    bytes32 internal constant _MERKLE_ROOT_HASH = keccak256(abi.encodePacked(uint256(3)));
 
-    function hash(MultipleMakerBidOrders calldata orders) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_MULTIPLE_MAKER_BID_ORDERS, orders.makerBidOrders, orders.baseMakerOrder));
+    /**
+     * @notice Hash the makerAsk struct
+     * @param makerAsk struct for maker ask order
+     * @return makerAskHash hash of the struct
+     */
+    function hash(MakerAsk memory makerAsk) internal pure returns (bytes32 makerAskHash) {
+        // Encoding is done into two parts to avoid stack too deep issues
+        bytes memory initialEncodingBytes = abi.encode(
+            _MAKER_ASK_HASH,
+            makerAsk.askNonce,
+            makerAsk.subsetNonce,
+            makerAsk.strategyId,
+            makerAsk.assetType,
+            makerAsk.orderNonce,
+            makerAsk.minNetRatio
+        );
+
+        return (
+            keccak256(
+                abi.encode(
+                    initialEncodingBytes,
+                    makerAsk.collection,
+                    makerAsk.currency,
+                    makerAsk.signer,
+                    makerAsk.startTime,
+                    makerAsk.endTime,
+                    makerAsk.minPrice,
+                    makerAsk.itemIds,
+                    makerAsk.amounts,
+                    keccak256(makerAsk.additionalParameters)
+                )
+            )
+        );
     }
 
     /**
-     * MAKER ORDERS
+     * @notice Hash the makerBid struct
+     * @param makerBid struct for maker bid order
+     * @return makerBidHash hash of the struct
      */
-    struct BaseMakerOrder {
-        uint112 bidAskNonce;
+    function hash(MakerBid memory makerBid) internal pure returns (bytes32 makerBidHash) {
+        // Encoding is done into two parts to avoid stack too deep issues
+        bytes memory initialEncodingBytes = abi.encode(
+            _MAKER_BID_HASH,
+            makerBid.bidNonce,
+            makerBid.subsetNonce,
+            makerBid.strategyId,
+            makerBid.assetType,
+            makerBid.orderNonce,
+            makerBid.minNetRatio
+        );
+
+        return (
+            keccak256(
+                abi.encode(
+                    initialEncodingBytes,
+                    makerBid.collection,
+                    makerBid.currency,
+                    makerBid.signer,
+                    makerBid.startTime,
+                    makerBid.endTime,
+                    makerBid.maxPrice,
+                    makerBid.itemIds,
+                    makerBid.amounts,
+                    keccak256(makerBid.additionalParameters)
+                )
+            )
+        );
+    }
+
+    /**
+     * @notice Hash a merkleRoot
+     * @param merkleRoot merkle root containing a set of maker bid/ask struct hashes
+     * @return merkleRootHash hash of the merkle root
+     */
+    function hash(bytes32 merkleRoot) internal pure returns (bytes32 merkleRootHash) {
+        return (keccak256(abi.encode(_MERKLE_ROOT_HASH, merkleRoot)));
+    }
+
+    /**
+     * 1. MAKER ORDERS
+     */
+
+    // MakerAsk
+    struct MakerAsk {
+        uint112 askNonce;
         uint112 subsetNonce;
         uint16 strategyId; // 0: Standard; 1: Collection; 2. etc.
-        uint8 assetType; // 0: ERC721; 1: ERC1155
+        uint8 assetType;
+        uint112 orderNonce;
+        uint16 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
         address collection;
         address currency;
         address recipient;
         address signer;
         uint256 startTime;
         uint256 endTime;
-    }
-
-    struct SingleMakerAskOrder {
         uint256 minPrice;
         uint256[] itemIds;
         uint256[] amounts; // length = 1 if single sale // length > 1 if batch sale
-        uint112 orderNonce;
-        uint16 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
         bytes additionalParameters;
     }
 
-    struct SingleMakerBidOrder {
+    // MakerBid
+    struct MakerBid {
+        uint112 bidNonce;
+        uint112 subsetNonce;
+        uint16 strategyId; // 0: Standard; 1: Collection; 2. etc.
+        uint8 assetType;
+        uint112 orderNonce;
+        uint16 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
+        address collection;
+        address currency;
+        address recipient;
+        address signer;
+        uint256 startTime;
+        uint256 endTime;
         uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
-        uint112 orderNonce;
         bytes additionalParameters;
-    }
-
-    // The struct that is signed
-    struct MultipleMakerBidOrders {
-        SingleMakerBidOrder[] makerBidOrders;
-        BaseMakerOrder baseMakerOrder;
-        bytes signature;
-    }
-
-    // The struct that is signed
-    struct MultipleMakerAskOrders {
-        SingleMakerAskOrder[] makerAskOrders;
-        BaseMakerOrder baseMakerOrder;
-        bytes signature;
     }
 
     /**
-     * TAKER ORDERS
+     * 2. TAKER ORDERS
      */
-    struct TakerBidOrder {
-        uint256 maxPrice;
+
+    // TakerBid
+    struct TakerBid {
         address recipient;
+        uint16 minNetRatio;
+        uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
         bytes additionalParameters;
     }
 
-    struct SingleTakerBidOrder {
-        address referrer;
-        TakerBidOrder takerBidOrder;
-    }
-
-    struct MultipleTakerBidOrders {
-        address referrer;
-        address currency;
-        TakerBidOrder[] takerBidOrders;
-    }
-
-    struct TakerAskOrder {
+    // TakerAsk
+    struct TakerAsk {
         address recipient;
         uint16 minNetRatio;
         uint256 minPrice;
         uint256[] itemIds;
         uint256[] amounts;
         bytes additionalParameters;
-    }
-
-    struct SingleTakerAskOrder {
-        address referrer;
-        TakerAskOrder takerAskOrder;
-    }
-
-    struct MultipleTakerAskOrders {
-        address referrer;
-        address currency;
-        TakerAskOrder[] takerAskOrders;
     }
 }

@@ -6,18 +6,13 @@ import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 
 import {ProtocolHelpers} from "./utils/ProtocolHelpers.sol";
 import {MockERC721} from "./utils/MockERC721.sol";
 
 contract ExecutionManagerTest is IExecutionManager, ProtocolHelpers {
-    using OrderStructs for OrderStructs.MultipleMakerAskOrders;
-    using OrderStructs for OrderStructs.MultipleMakerBidOrders;
-
     address[] public operators;
-
     MockERC721 public mockERC721;
     RoyaltyFeeRegistry public royaltyFeeRegistry;
     LooksRareProtocol public looksRareProtocol;
@@ -108,6 +103,9 @@ contract ExecutionManagerTest is IExecutionManager, ProtocolHelpers {
         assertEq(strategy.implementation, address(0));
     }
 
+    /**
+     * Owner functions for strategy additions/updates revert as expected under multiple cases
+     */
     function testOwnerRevertionsForWrongParametersAddStrategy() public asPrankedUser(_owner) {
         uint16 strategyId = 1;
         bool hasRoyalties = true;

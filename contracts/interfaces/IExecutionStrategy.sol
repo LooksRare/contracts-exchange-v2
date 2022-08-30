@@ -10,11 +10,8 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  */
 interface IExecutionStrategy {
     function executeStrategyWithTakerBid(
-        OrderStructs.TakerBidOrder calldata takerBid,
-        OrderStructs.SingleMakerAskOrder calldata makerAsk,
-        address collection,
-        uint256 startTime,
-        uint256 endTime
+        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.MakerAsk calldata makerAsk
     )
         external
         returns (
@@ -24,11 +21,8 @@ interface IExecutionStrategy {
         );
 
     function executeStrategyWithTakerAsk(
-        OrderStructs.TakerAskOrder calldata takerAsk,
-        OrderStructs.SingleMakerBidOrder calldata makerBid,
-        address collection,
-        uint256 startTime,
-        uint256 endTime
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid
     )
         external
         returns (

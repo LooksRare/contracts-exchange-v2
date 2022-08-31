@@ -232,6 +232,18 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                 itemIds.length == amounts.length &&
                 price == takerBid.maxPrice;
 
+            for (uint256 i; i < itemIds.length; ) {
+                if ((takerBid.amounts[i] != amounts[i]) || (takerBid.itemIds[i] != itemIds[i])) {
+                    canOrderBeExecuted = false;
+                    // Exit loop if false
+                    i = itemIds.length - 1;
+                }
+
+                unchecked {
+                    ++i;
+                }
+            }
+
             if (!canOrderBeExecuted) {
                 revert OrderInvalid();
             }
@@ -264,6 +276,18 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             bool canOrderBeExecuted = itemIds.length != 0 &&
                 itemIds.length == amounts.length &&
                 price == takerAsk.minPrice;
+
+            for (uint256 i; i < itemIds.length; ) {
+                if ((takerAsk.amounts[i] != amounts[i]) || (takerAsk.itemIds[i] != itemIds[i])) {
+                    canOrderBeExecuted = false;
+                    // Exit loop if false
+                    i = itemIds.length - 1;
+                }
+
+                unchecked {
+                    ++i;
+                }
+            }
 
             if (!canOrderBeExecuted) {
                 revert OrderInvalid();

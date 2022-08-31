@@ -23,7 +23,7 @@ library OrderStructs {
      * @param makerAsk struct for maker ask order
      * @return makerAskHash hash of the struct
      */
-    function hash(MakerAsk memory makerAsk) internal pure returns (bytes32) {
+    function hash(MakerAsk memory makerAsk) internal pure returns (bytes32 makerAskHash) {
         // Encoding is done into two parts to avoid stack too deep issues
         return
             keccak256(

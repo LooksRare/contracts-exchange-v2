@@ -25,32 +25,31 @@ library OrderStructs {
      */
     function hash(MakerAsk memory makerAsk) internal pure returns (bytes32 makerAskHash) {
         // Encoding is done into two parts to avoid stack too deep issues
-        bytes memory initialEncodingBytes = abi.encode(
-            _MAKER_ASK_HASH,
-            makerAsk.askNonce,
-            makerAsk.subsetNonce,
-            makerAsk.strategyId,
-            makerAsk.assetType,
-            makerAsk.orderNonce,
-            makerAsk.minNetRatio
-        );
-
-        return (
+        return
             keccak256(
-                abi.encode(
-                    initialEncodingBytes,
-                    makerAsk.collection,
-                    makerAsk.currency,
-                    makerAsk.signer,
-                    makerAsk.startTime,
-                    makerAsk.endTime,
-                    makerAsk.minPrice,
-                    makerAsk.itemIds,
-                    makerAsk.amounts,
-                    keccak256(makerAsk.additionalParameters)
+                bytes.concat(
+                    abi.encode(
+                        _MAKER_ASK_HASH,
+                        makerAsk.askNonce,
+                        makerAsk.subsetNonce,
+                        makerAsk.strategyId,
+                        makerAsk.assetType,
+                        makerAsk.orderNonce,
+                        makerAsk.minNetRatio
+                    ),
+                    abi.encode(
+                        makerAsk.collection,
+                        makerAsk.currency,
+                        makerAsk.signer,
+                        makerAsk.startTime,
+                        makerAsk.endTime,
+                        makerAsk.minPrice,
+                        makerAsk.itemIds,
+                        makerAsk.amounts,
+                        keccak256(makerAsk.additionalParameters)
+                    )
                 )
-            )
-        );
+            );
     }
 
     /**
@@ -59,30 +58,29 @@ library OrderStructs {
      * @return makerBidHash hash of the struct
      */
     function hash(MakerBid memory makerBid) internal pure returns (bytes32 makerBidHash) {
-        // Encoding is done into two parts to avoid stack too deep issues
-        bytes memory initialEncodingBytes = abi.encode(
-            _MAKER_BID_HASH,
-            makerBid.bidNonce,
-            makerBid.subsetNonce,
-            makerBid.strategyId,
-            makerBid.assetType,
-            makerBid.orderNonce,
-            makerBid.minNetRatio
-        );
-
         return (
             keccak256(
-                abi.encode(
-                    initialEncodingBytes,
-                    makerBid.collection,
-                    makerBid.currency,
-                    makerBid.signer,
-                    makerBid.startTime,
-                    makerBid.endTime,
-                    makerBid.maxPrice,
-                    makerBid.itemIds,
-                    makerBid.amounts,
-                    keccak256(makerBid.additionalParameters)
+                bytes.concat(
+                    abi.encode(
+                        _MAKER_BID_HASH,
+                        makerBid.bidNonce,
+                        makerBid.subsetNonce,
+                        makerBid.strategyId,
+                        makerBid.assetType,
+                        makerBid.orderNonce,
+                        makerBid.minNetRatio
+                    ),
+                    abi.encode(
+                        makerBid.collection,
+                        makerBid.currency,
+                        makerBid.signer,
+                        makerBid.startTime,
+                        makerBid.endTime,
+                        makerBid.maxPrice,
+                        makerBid.itemIds,
+                        makerBid.amounts,
+                        keccak256(makerBid.additionalParameters)
+                    )
                 )
             )
         );

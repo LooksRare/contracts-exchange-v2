@@ -111,15 +111,11 @@ contract LooksRareProtocol is
         address referrer
     ) external payable nonReentrant {
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        {
-            bytes32 digest;
-            if (merkleProof.length == 0) {
-                digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, makerAsk.hash()));
-            } else {
-                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerAsk.hash());
-                digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, merkleRoot.hash()));
-            }
-            _verify(digest, makerAsk.signer, makerSignature);
+        if (merkleProof.length == 0) {
+            _computeDigestAndVerify(makerAsk.hash(), makerSignature, makerAsk.signer);
+        } else {
+            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerAsk.hash());
+            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
         }
 
         // Execute the transaction and fetch protocol fee
@@ -159,15 +155,11 @@ contract LooksRareProtocol is
         address referrer
     ) external nonReentrant {
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        {
-            bytes32 digest;
-            if (merkleProof.length == 0) {
-                digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, makerBid.hash()));
-            } else {
-                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerBid.hash());
-                digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, merkleRoot.hash()));
-            }
-            _verify(digest, makerBid.signer, makerSignature);
+        if (merkleProof.length == 0) {
+            _computeDigestAndVerify(makerBid.hash(), makerSignature, makerBid.signer);
+        } else {
+            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerBid.hash());
+            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
         }
 
         // Execute the transaction and fetch protocol fee
@@ -452,6 +444,21 @@ contract LooksRareProtocol is
         } else {
             _executeERC20Transfer(currency, sender, recipient, amount);
         }
+    }
+
+    /**
+     * @notice Compute digest and verify
+     * @param computedHash hash of order (makerBid or makerAsk)/merkle root
+     * @param makerSignature signature of the maker
+     * @param signer address of the signer
+     */
+    function _computeDigestAndVerify(
+        bytes32 computedHash,
+        bytes memory makerSignature,
+        address signer
+    ) internal view {
+        bytes32 digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, computedHash));
+        _verify(digest, signer, makerSignature);
     }
 
     /**

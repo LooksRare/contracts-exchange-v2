@@ -35,11 +35,12 @@ library OrderStructs {
                         makerAsk.strategyId,
                         makerAsk.assetType,
                         makerAsk.orderNonce,
-                        makerAsk.minNetRatio
+                        makerAsk.minNetRatio,
+                        makerAsk.collection
                     ),
                     abi.encode(
-                        makerAsk.collection,
                         makerAsk.currency,
+                        makerAsk.recipient,
                         makerAsk.signer,
                         makerAsk.startTime,
                         makerAsk.endTime,
@@ -68,11 +69,12 @@ library OrderStructs {
                         makerBid.strategyId,
                         makerBid.assetType,
                         makerBid.orderNonce,
-                        makerBid.minNetRatio
+                        makerBid.minNetRatio,
+                        makerBid.collection
                     ),
                     abi.encode(
-                        makerBid.collection,
                         makerBid.currency,
+                        makerBid.recipient,
                         makerBid.signer,
                         makerBid.startTime,
                         makerBid.endTime,

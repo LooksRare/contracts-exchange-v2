@@ -321,7 +321,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             bool canOrderBeExecuted = itemIds.length == 1 &&
                 amounts.length == 1 &&
                 price == takerAsk.minPrice &&
-                takerAsk.amounts[0] != amounts[0] &&
+                takerAsk.amounts[0] == amounts[0] &&
                 amounts[0] > 0;
 
             if (!canOrderBeExecuted) {

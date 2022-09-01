@@ -316,10 +316,12 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         itemIds = takerAsk.itemIds;
         amounts = makerBid.amounts;
 
+        // A collection order can only be executable for 1 itemId but quantity to fill can vary
         {
-            bool canOrderBeExecuted = itemIds.length != 0 &&
-                itemIds.length == amounts.length &&
-                price == takerAsk.minPrice;
+            bool canOrderBeExecuted = itemIds.length == 1 &&
+                amounts.length == 1 &&
+                price == takerAsk.minPrice &&
+                takerAsk.amounts[0] != amounts[0];
 
             if (!canOrderBeExecuted) {
                 revert OrderInvalid();

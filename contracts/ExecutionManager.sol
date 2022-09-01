@@ -233,7 +233,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                 price == takerBid.maxPrice;
 
             for (uint256 i; i < itemIds.length; ) {
-                if ((takerBid.amounts[i] != amounts[i]) || (takerBid.itemIds[i] != itemIds[i])) {
+                if ((takerBid.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerBid.itemIds[i] != itemIds[i])) {
                     canOrderBeExecuted = false;
                     // Exit loop if false
                     i = itemIds.length - 1;
@@ -278,7 +278,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                 price == takerAsk.minPrice;
 
             for (uint256 i; i < itemIds.length; ) {
-                if ((takerAsk.amounts[i] != amounts[i]) || (takerAsk.itemIds[i] != itemIds[i])) {
+                if ((takerAsk.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerAsk.itemIds[i] != itemIds[i])) {
                     canOrderBeExecuted = false;
                     // Exit loop if false
                     i = itemIds.length - 1;
@@ -321,7 +321,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             bool canOrderBeExecuted = itemIds.length == 1 &&
                 amounts.length == 1 &&
                 price == takerAsk.minPrice &&
-                takerAsk.amounts[0] != amounts[0];
+                takerAsk.amounts[0] != amounts[0] &&
+                amounts[0] > 0;
 
             if (!canOrderBeExecuted) {
                 revert OrderInvalid();

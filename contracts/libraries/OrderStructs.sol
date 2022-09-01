@@ -45,8 +45,8 @@ library OrderStructs {
                         makerAsk.startTime,
                         makerAsk.endTime,
                         makerAsk.minPrice,
-                        makerAsk.itemIds,
-                        makerAsk.amounts,
+                        keccak256(abi.encodePacked(makerAsk.itemIds)),
+                        keccak256(abi.encodePacked(makerAsk.amounts)),
                         keccak256(makerAsk.additionalParameters)
                     )
                 )
@@ -79,8 +79,8 @@ library OrderStructs {
                         makerBid.startTime,
                         makerBid.endTime,
                         makerBid.maxPrice,
-                        makerBid.itemIds,
-                        makerBid.amounts,
+                        keccak256(abi.encodePacked(makerBid.itemIds)),
+                        keccak256(abi.encodePacked(makerBid.amounts)),
                         keccak256(makerBid.additionalParameters)
                     )
                 )

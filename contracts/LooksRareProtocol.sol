@@ -229,7 +229,7 @@ contract LooksRareProtocol is
             _domainSeparator = keccak256(
                 abi.encode(
                     keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                    keccak256("LooksRareExchange"),
+                    keccak256("LooksRareProtocol"),
                     keccak256(bytes("2")),
                     block.chainid,
                     address(this)

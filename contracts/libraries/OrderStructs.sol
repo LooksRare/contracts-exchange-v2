@@ -8,10 +8,12 @@ pragma solidity ^0.8.14;
  */
 library OrderStructs {
     // Maker ask hash used to compute maker ask order hash
-    bytes32 internal constant _MAKER_ASK_HASH = keccak256(abi.encodePacked(uint256(1)));
+    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,uint16 minNetRatio,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_ASK_HASH = 0x85fa30b2b848c94bd5f5b88383658126eb3a69201d0b539f4bf956996bdb6af1;
 
     // Maker bid hash used to compute maker bid order hash
-    bytes32 internal constant _MAKER_BID_HASH = keccak256(abi.encodePacked(uint256(2)));
+    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,uint16 minNetRatio,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_BID_HASH = 0xaac47bd6046bbe5acd60a92f52dde1bb26209688be10f8a6e723fb405c70721b;
 
     // Merkle root hash used to compute merkle root order
     bytes32 internal constant _MERKLE_ROOT_HASH = keccak256(abi.encodePacked(uint256(3)));
@@ -23,32 +25,31 @@ library OrderStructs {
      */
     function hash(MakerAsk memory makerAsk) internal pure returns (bytes32 makerAskHash) {
         // Encoding is done into two parts to avoid stack too deep issues
-        bytes memory initialEncodingBytes = abi.encode(
-            _MAKER_ASK_HASH,
-            makerAsk.askNonce,
-            makerAsk.subsetNonce,
-            makerAsk.strategyId,
-            makerAsk.assetType,
-            makerAsk.orderNonce,
-            makerAsk.minNetRatio
-        );
-
-        return (
+        return
             keccak256(
-                abi.encode(
-                    initialEncodingBytes,
-                    makerAsk.collection,
-                    makerAsk.currency,
-                    makerAsk.signer,
-                    makerAsk.startTime,
-                    makerAsk.endTime,
-                    makerAsk.minPrice,
-                    makerAsk.itemIds,
-                    makerAsk.amounts,
-                    keccak256(makerAsk.additionalParameters)
+                bytes.concat(
+                    abi.encode(
+                        _MAKER_ASK_HASH,
+                        makerAsk.askNonce,
+                        makerAsk.subsetNonce,
+                        makerAsk.strategyId,
+                        makerAsk.assetType,
+                        makerAsk.orderNonce,
+                        makerAsk.minNetRatio
+                    ),
+                    abi.encode(
+                        makerAsk.collection,
+                        makerAsk.currency,
+                        makerAsk.signer,
+                        makerAsk.startTime,
+                        makerAsk.endTime,
+                        makerAsk.minPrice,
+                        makerAsk.itemIds,
+                        makerAsk.amounts,
+                        keccak256(makerAsk.additionalParameters)
+                    )
                 )
-            )
-        );
+            );
     }
 
     /**
@@ -57,30 +58,29 @@ library OrderStructs {
      * @return makerBidHash hash of the struct
      */
     function hash(MakerBid memory makerBid) internal pure returns (bytes32 makerBidHash) {
-        // Encoding is done into two parts to avoid stack too deep issues
-        bytes memory initialEncodingBytes = abi.encode(
-            _MAKER_BID_HASH,
-            makerBid.bidNonce,
-            makerBid.subsetNonce,
-            makerBid.strategyId,
-            makerBid.assetType,
-            makerBid.orderNonce,
-            makerBid.minNetRatio
-        );
-
         return (
             keccak256(
-                abi.encode(
-                    initialEncodingBytes,
-                    makerBid.collection,
-                    makerBid.currency,
-                    makerBid.signer,
-                    makerBid.startTime,
-                    makerBid.endTime,
-                    makerBid.maxPrice,
-                    makerBid.itemIds,
-                    makerBid.amounts,
-                    keccak256(makerBid.additionalParameters)
+                bytes.concat(
+                    abi.encode(
+                        _MAKER_BID_HASH,
+                        makerBid.bidNonce,
+                        makerBid.subsetNonce,
+                        makerBid.strategyId,
+                        makerBid.assetType,
+                        makerBid.orderNonce,
+                        makerBid.minNetRatio
+                    ),
+                    abi.encode(
+                        makerBid.collection,
+                        makerBid.currency,
+                        makerBid.signer,
+                        makerBid.startTime,
+                        makerBid.endTime,
+                        makerBid.maxPrice,
+                        makerBid.itemIds,
+                        makerBid.amounts,
+                        keccak256(makerBid.additionalParameters)
+                    )
                 )
             )
         );

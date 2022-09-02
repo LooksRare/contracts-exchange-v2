@@ -14,7 +14,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         uint8 assetType;
 
         // If ERC1155, adjust asset type
-        if (IERC165(collection).supportsInterface(0x4e2312e0)) {
+        if (IERC165(collection).supportsInterface(0xd9b67a26)) {
             assetType = 1;
         }
 

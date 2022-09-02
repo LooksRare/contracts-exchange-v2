@@ -35,17 +35,18 @@ library OrderStructs {
                         makerAsk.strategyId,
                         makerAsk.assetType,
                         makerAsk.orderNonce,
-                        makerAsk.minNetRatio
+                        makerAsk.minNetRatio,
+                        makerAsk.collection
                     ),
                     abi.encode(
-                        makerAsk.collection,
                         makerAsk.currency,
+                        makerAsk.recipient,
                         makerAsk.signer,
                         makerAsk.startTime,
                         makerAsk.endTime,
                         makerAsk.minPrice,
-                        makerAsk.itemIds,
-                        makerAsk.amounts,
+                        keccak256(abi.encodePacked(makerAsk.itemIds)),
+                        keccak256(abi.encodePacked(makerAsk.amounts)),
                         keccak256(makerAsk.additionalParameters)
                     )
                 )
@@ -68,17 +69,18 @@ library OrderStructs {
                         makerBid.strategyId,
                         makerBid.assetType,
                         makerBid.orderNonce,
-                        makerBid.minNetRatio
+                        makerBid.minNetRatio,
+                        makerBid.collection
                     ),
                     abi.encode(
-                        makerBid.collection,
                         makerBid.currency,
+                        makerBid.recipient,
                         makerBid.signer,
                         makerBid.startTime,
                         makerBid.endTime,
                         makerBid.maxPrice,
-                        makerBid.itemIds,
-                        makerBid.amounts,
+                        keccak256(abi.encodePacked(makerBid.itemIds)),
+                        keccak256(abi.encodePacked(makerBid.amounts)),
                         keccak256(makerBid.additionalParameters)
                     )
                 )

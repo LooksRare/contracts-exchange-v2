@@ -209,7 +209,6 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @notice Execute standard sale strategy with takerBid
      * @param takerBid takerBid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk makerAsk struct (contains ask-specific parameter for the maker side of the transaction)
-     * @dev It doesn't verify the items for takerBids match the ones from makerAsk
      */
     function _executeStandardSaleStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -227,20 +226,26 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
 
+        uint256 targetLength = amounts.length;
+
         {
-            bool canOrderBeExecuted = amounts.length != 0 &&
-                itemIds.length == amounts.length &&
+            bool canOrderBeExecuted = targetLength != 0 &&
+                itemIds.length == targetLength &&
+                takerBid.itemIds.length == targetLength &&
+                takerBid.amounts.length == targetLength &&
                 price == takerBid.maxPrice;
 
-            for (uint256 i; i < itemIds.length; ) {
-                if ((takerBid.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerBid.itemIds[i] != itemIds[i])) {
-                    canOrderBeExecuted = false;
-                    // Exit loop if false
-                    i = itemIds.length - 1;
-                }
+            if (canOrderBeExecuted) {
+                for (uint256 i; i < targetLength; ) {
+                    if ((takerBid.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerBid.itemIds[i] != itemIds[i])) {
+                        canOrderBeExecuted = false;
+                        // Exit loop if false
+                        i = targetLength - 1;
+                    }
 
-                unchecked {
-                    ++i;
+                    unchecked {
+                        ++i;
+                    }
                 }
             }
 
@@ -254,7 +259,6 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @notice Execute standard sale strategy with takerAsk
      * @param takerAsk takerAsk struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
-     * @dev It doesn't verify the items for takerAsk match the ones from makerBid
      */
     function _executeStandardSaleStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -272,20 +276,26 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         itemIds = makerBid.itemIds;
         amounts = makerBid.amounts;
 
+        uint256 targetLength = amounts.length;
+
         {
-            bool canOrderBeExecuted = itemIds.length != 0 &&
-                itemIds.length == amounts.length &&
+            bool canOrderBeExecuted = targetLength != 0 &&
+                itemIds.length == targetLength &&
+                takerAsk.itemIds.length == targetLength &&
+                takerAsk.amounts.length == targetLength &&
                 price == takerAsk.minPrice;
 
-            for (uint256 i; i < itemIds.length; ) {
-                if ((takerAsk.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerAsk.itemIds[i] != itemIds[i])) {
-                    canOrderBeExecuted = false;
-                    // Exit loop if false
-                    i = itemIds.length - 1;
-                }
+            if (canOrderBeExecuted) {
+                for (uint256 i; i < targetLength; ) {
+                    if ((takerAsk.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerAsk.itemIds[i] != itemIds[i])) {
+                        canOrderBeExecuted = false;
+                        // Exit loop if false
+                        i = targetLength - 1;
+                    }
 
-                unchecked {
-                    ++i;
+                    unchecked {
+                        ++i;
+                    }
                 }
             }
 

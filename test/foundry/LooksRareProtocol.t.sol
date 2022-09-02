@@ -5,7 +5,7 @@ import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/roy
 import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 import {Merkle} from "../../lib/murky/src/Merkle.sol";
 
-import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
+import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 
@@ -13,7 +13,7 @@ import {OrderStructs, ProtocolHelpers} from "./utils/ProtocolHelpers.sol";
 import {MockERC721} from "./utils/MockERC721.sol";
 import {MockERC1155} from "./utils/MockERC1155.sol";
 
-contract LooksRareProtocolTest is ProtocolHelpers {
+contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
     address[] public operators;
     MockERC721 public mockERC721;
     MockERC1155 public mockERC1155;
@@ -175,8 +175,6 @@ contract LooksRareProtocolTest is ProtocolHelpers {
 
         {
             // Other execution parameters
-            bytes32 merkleRoot = bytes32(0);
-            bytes32[] memory merkleProof = new bytes32[](0);
             uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
@@ -184,8 +182,8 @@ contract LooksRareProtocolTest is ProtocolHelpers {
                 takerBid,
                 makerAsk,
                 signature,
-                merkleRoot,
-                merkleProof,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
                 address(0) // No referrer
             );
             emit log_uint(gasLeft - gasleft());
@@ -269,18 +267,14 @@ contract LooksRareProtocolTest is ProtocolHelpers {
 
         // Execute taker bid transaction
         {
-            // Other execution parameters
-            bytes32 merkleRoot = bytes32(0);
-            bytes32[] memory merkleProof = new bytes32[](0);
-
             uint256 gasLeft = gasleft();
 
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,
                 signature,
-                merkleRoot,
-                merkleProof,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
                 address(0) // No referrer
             );
             emit log_uint(gasLeft - gasleft());
@@ -577,16 +571,12 @@ contract LooksRareProtocolTest is ProtocolHelpers {
 
         // Execute taker bid transaction
         {
-            // Other execution parameters
-            bytes32 merkleRoot = bytes32(0);
-            bytes32[] memory merkleProof = new bytes32[](0);
-
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,
                 signature,
-                merkleRoot,
-                merkleProof,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
                 address(0) // No referrer
             );
         }

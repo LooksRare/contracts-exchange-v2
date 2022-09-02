@@ -12,6 +12,8 @@ abstract contract TestParameters is TestHelpers {
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);
     address internal takerUser = vm.addr(takerUserPK);
+    bytes32 internal _emptyMerkleRoot = bytes32(0);
+    bytes32[] internal _emptyMerkleProof = new bytes32[](0);
 }
 
 contract ProtocolHelpers is TestParameters, IExecutionManager {

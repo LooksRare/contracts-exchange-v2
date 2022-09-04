@@ -240,7 +240,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                     if ((takerBid.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerBid.itemIds[i] != itemIds[i])) {
                         canOrderBeExecuted = false;
                         // Exit loop if false
-                        i = targetLength - 1;
+                        break;
                     }
 
                     unchecked {
@@ -290,7 +290,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                     if ((takerAsk.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerAsk.itemIds[i] != itemIds[i])) {
                         canOrderBeExecuted = false;
                         // Exit loop if false
-                        i = targetLength - 1;
+                        break;
                     }
 
                     unchecked {

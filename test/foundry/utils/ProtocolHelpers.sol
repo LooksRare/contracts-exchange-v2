@@ -8,10 +8,13 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 abstract contract TestParameters is TestHelpers {
     address internal _owner = address(42);
     address internal _collectionOwner = address(22);
+    address internal _emptyReferrer = address(0);
     uint256 internal makerUserPK = 1;
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);
     address internal takerUser = vm.addr(takerUserPK);
+    bytes32 internal _emptyMerkleRoot = bytes32(0);
+    bytes32[] internal _emptyMerkleProof = new bytes32[](0);
 }
 
 contract ProtocolHelpers is TestParameters, IExecutionManager {

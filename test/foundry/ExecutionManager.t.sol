@@ -219,22 +219,17 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
         // Change makerBid itemIds array's length to make it equal to 0
         itemIds = new uint256[](0);
         makerBid.itemIds = itemIds;
-        // takerAsk.itemIds = itemIds; // TODO
+        signature = _signMakerBid(makerBid, makerUserPK);
 
-        for (uint16 i; i < 1; i++) {
-            makerBid.strategyId = i;
-            signature = _signMakerBid(makerBid, makerUserPK);
-
-            vm.expectRevert(OrderInvalid.selector);
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                address(0) // No referrer
-            );
-        }
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            address(0) // No referrer
+        );
 
         /**
          * 3. STANDARD STRATEGY/MAKER BID: maker itemIds' length is not equal to maker amounts' length

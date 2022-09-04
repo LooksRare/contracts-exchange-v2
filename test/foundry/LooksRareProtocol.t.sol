@@ -562,7 +562,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         {
             looksRareProtocol.executeTakerAsk(
                 takerAsk,

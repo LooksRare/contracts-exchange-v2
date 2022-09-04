@@ -68,9 +68,9 @@ contract LooksRareProtocol is
     /**
      * @notice Constructor
      * @param transferManager address of the transfer manager
-     * @param royaltyFeeManager address of the royalty fee manager
+     * @param royaltyFeeRegistry address of the royalty fee registry
      */
-    constructor(address transferManager, address royaltyFeeManager) ExecutionManager(royaltyFeeManager) {
+    constructor(address transferManager, address royaltyFeeRegistry) ExecutionManager(royaltyFeeRegistry) {
         // Compute and store the initial domain separator
         _INITIAL_DOMAIN_SEPARATOR = keccak256(
             abi.encode(

@@ -184,7 +184,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                address(0) // No referrer
+                _emptyReferrer
             );
             emit log_uint(gasLeft - gasleft());
         }
@@ -275,7 +275,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                address(0) // No referrer
+                _emptyReferrer
             );
             emit log_uint(gasLeft - gasleft());
         }
@@ -379,7 +379,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
                 signature,
                 merkleRoot,
                 merkleProof,
-                address(0) // No referrer
+                _emptyReferrer
             );
             emit log_uint(gasLeft - gasleft());
         }
@@ -479,14 +479,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                merkleRoot,
-                merkleProof,
-                address(0) // No referrer
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, _emptyReferrer);
 
             emit log_uint(gasLeft - gasleft());
         }
@@ -577,7 +570,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                address(0) // No referrer
+                _emptyReferrer
             );
         }
 

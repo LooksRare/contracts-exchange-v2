@@ -158,7 +158,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -175,7 +175,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
     }
 
@@ -208,7 +208,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -228,7 +228,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -248,7 +248,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -268,7 +268,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -290,7 +290,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -309,7 +309,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         // Change price of takerAsk to be higher than makerAsk price
@@ -322,7 +322,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -344,7 +344,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -364,7 +364,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -384,7 +384,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -406,7 +406,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         /**
@@ -425,7 +425,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
 
         // Change price of takerBid to be higher than makerAsk price
@@ -438,7 +438,7 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            address(0) // No referrer
+            _emptyReferrer
         );
     }
 }

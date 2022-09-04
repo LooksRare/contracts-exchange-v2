@@ -59,6 +59,122 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     }
 
     /**
+     * @notice Add strategy
+     * @param strategyId id of the new strategy
+     * @param hasRoyalties whether the strategy has royalties
+     * @param protocolFee protocol fee
+     * @param maxProtocolFee protocol fee
+     * @param implementation address of the implementation
+     */
+    function addStrategy(
+        uint16 strategyId,
+        bool hasRoyalties,
+        uint16 protocolFee,
+        uint16 maxProtocolFee,
+        address implementation
+    ) external onlyOwner {
+        if (strategyId < _COUNT_INTERNAL_STRATEGIES || _strategies[strategyId].implementation != address(0)) {
+            revert StrategyUsed(strategyId);
+        }
+
+        if (maxProtocolFee < protocolFee || maxProtocolFee > _MAX_PROTOCOL_FEE) {
+            revert StrategyProtocolFeeTooHigh(strategyId);
+        }
+
+        _strategies[strategyId] = Strategy({
+            isActive: true,
+            hasRoyalties: hasRoyalties,
+            protocolFee: protocolFee,
+            maxProtocolFee: maxProtocolFee,
+            implementation: implementation
+        });
+
+        emit NewStrategy(strategyId, implementation);
+    }
+
+    /**
+     * @notice Add custom discount for collection
+     * @param collection address of the collection
+     * @param discountFactor discount factor (e.g., 1000 = -10% relative to the protocol fee)
+     */
+    function adjustDiscountFactorCollection(address collection, uint256 discountFactor) external onlyOwner {
+        if (discountFactor >= 10000) {
+            revert CollectionDiscountFactorTooHigh();
+        }
+
+        _collectionDiscountFactors[collection] = discountFactor;
+        emit NewCollectionDiscountFactor(collection, discountFactor);
+    }
+
+    /**
+     * @notice Set protocol fee recipient
+     * @param newProtocolFeeRecipient address of the new protocol fee recipient
+     */
+    function setProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
+        _protocolFeeRecipient = newProtocolFeeRecipient;
+        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
+    }
+
+    /**
+     * @notice Set royalty fee registry
+     * @param newRoyaltyFeeRegistry address of the new royalty fee registry
+     */
+    function setRoyaltyFeeRegistry(address newRoyaltyFeeRegistry) external onlyOwner {
+        _royaltyFeeRegistry = IRoyaltyFeeRegistry(newRoyaltyFeeRegistry);
+        emit NewRoyaltyFeeRegistry(newRoyaltyFeeRegistry);
+    }
+
+    /**
+     * @notice Update strategy
+     * @param strategyId id of the strategy
+     * @param hasRoyalties whether the strategy should distribute royalties
+     * @param protocolFee protocol fee
+     * @param isActive whether the strategy is active
+     */
+    function updateStrategy(
+        uint16 strategyId,
+        bool hasRoyalties,
+        uint16 protocolFee,
+        bool isActive
+    ) external onlyOwner {
+        if (strategyId > _COUNT_INTERNAL_STRATEGIES && _strategies[strategyId].implementation == address(0)) {
+            revert StrategyNotUsed(strategyId);
+        }
+
+        if (protocolFee > _strategies[strategyId].maxProtocolFee) {
+            revert StrategyProtocolFeeTooHigh(strategyId);
+        }
+
+        _strategies[strategyId] = Strategy({
+            isActive: isActive,
+            hasRoyalties: hasRoyalties,
+            protocolFee: protocolFee,
+            maxProtocolFee: _strategies[strategyId].maxProtocolFee,
+            implementation: _strategies[strategyId].implementation
+        });
+
+        emit StrategyUpdated(strategyId, isActive, hasRoyalties, protocolFee);
+    }
+
+    /**
+     * @notice View collection discount factor
+     * @param collection address of the collection
+     * @return collectionDiscountFactor collection discount factor (e.g., 500 --> 5% relative to protocol fee)
+     */
+    function viewCollectionDiscountFactor(address collection) external view returns (uint256 collectionDiscountFactor) {
+        return _collectionDiscountFactors[collection];
+    }
+
+    /**
+     * @notice View strategy information
+     * @param strategyId id of the strategy
+     * @return strategy parameters of the strategy (e.g., implementation address, protocol fee)
+     */
+    function viewStrategy(uint16 strategyId) external view returns (Strategy memory strategy) {
+        return _strategies[strategyId];
+    }
+
+    /**
      * @notice Execute strategy for taker ask
      * @param takerAsk takerAsk struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
@@ -360,113 +476,6 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                 (royaltyRecipient, royaltyAmount) = IERC2981(collection).royaltyInfo(itemIds[0], amount);
             }
         }
-    }
-
-    /**
-     * @notice Set protocol fee recipient
-     * @param newProtocolFeeRecipient address of the new protocol fee recipient
-     */
-    function setProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
-        _protocolFeeRecipient = newProtocolFeeRecipient;
-        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
-    }
-
-    /**
-     * @notice Add strategy
-     * @param strategyId id of the new strategy
-     * @param hasRoyalties whether the strategy has royalties
-     * @param protocolFee protocol fee
-     * @param maxProtocolFee protocol fee
-     * @param implementation address of the implementation
-     */
-    function addStrategy(
-        uint16 strategyId,
-        bool hasRoyalties,
-        uint16 protocolFee,
-        uint16 maxProtocolFee,
-        address implementation
-    ) external onlyOwner {
-        if (strategyId < _COUNT_INTERNAL_STRATEGIES || _strategies[strategyId].implementation != address(0)) {
-            revert StrategyUsed(strategyId);
-        }
-
-        if (maxProtocolFee < protocolFee || maxProtocolFee > _MAX_PROTOCOL_FEE) {
-            revert StrategyProtocolFeeTooHigh(strategyId);
-        }
-
-        _strategies[strategyId] = Strategy({
-            isActive: true,
-            hasRoyalties: hasRoyalties,
-            protocolFee: protocolFee,
-            maxProtocolFee: maxProtocolFee,
-            implementation: implementation
-        });
-
-        emit NewStrategy(strategyId, implementation);
-    }
-
-    /**
-     * @notice Add custom discount for collection
-     * @param collection address of the collection
-     * @param discountFactor discount factor (e.g., 1000 = -10% relative to the protocol fee)
-     */
-    function adjustDiscountFactorCollection(address collection, uint256 discountFactor) external onlyOwner {
-        if (discountFactor >= 10000) {
-            revert CollectionDiscountFactorTooHigh();
-        }
-
-        _collectionDiscountFactors[collection] = discountFactor;
-        emit NewCollectionDiscountFactor(collection, discountFactor);
-    }
-
-    /**
-     * @notice Update strategy
-     * @param strategyId id of the strategy
-     * @param hasRoyalties whether the strategy should distribute royalties
-     * @param protocolFee protocol fee
-     * @param isActive whether the strategy is active
-     */
-    function updateStrategy(
-        uint16 strategyId,
-        bool hasRoyalties,
-        uint16 protocolFee,
-        bool isActive
-    ) external onlyOwner {
-        if (strategyId > _COUNT_INTERNAL_STRATEGIES && _strategies[strategyId].implementation == address(0)) {
-            revert StrategyNotUsed(strategyId);
-        }
-
-        if (protocolFee > _strategies[strategyId].maxProtocolFee) {
-            revert StrategyProtocolFeeTooHigh(strategyId);
-        }
-
-        _strategies[strategyId] = Strategy({
-            isActive: isActive,
-            hasRoyalties: hasRoyalties,
-            protocolFee: protocolFee,
-            maxProtocolFee: _strategies[strategyId].maxProtocolFee,
-            implementation: _strategies[strategyId].implementation
-        });
-
-        emit StrategyUpdated(strategyId, isActive, hasRoyalties, protocolFee);
-    }
-
-    /**
-     * @notice View collection discount factor
-     * @param collection address of the collection
-     * @return collectionDiscountFactor collection discount factor (e.g., 500 --> 5% relative to protocol fee)
-     */
-    function viewCollectionDiscountFactor(address collection) external view returns (uint256 collectionDiscountFactor) {
-        return _collectionDiscountFactors[collection];
-    }
-
-    /**
-     * @notice View strategy information
-     * @param strategyId id of the strategy
-     * @return strategy parameters of the strategy (e.g., implementation address, protocol fee)
-     */
-    function viewStrategy(uint16 strategyId) external view returns (Strategy memory strategy) {
-        return _strategies[strategyId];
     }
 
     /**

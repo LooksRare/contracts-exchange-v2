@@ -198,6 +198,10 @@ contract LooksRareProtocol is
                     revert TakerBidFail();
                 }
             }
+
+            unchecked {
+                ++i;
+            }
         }
 
         // Check whether to execute a referral logic (and adjust downward the protocol fee if so)

@@ -16,6 +16,7 @@ interface IExecutionManager {
     // Events
     event NewCollectionDiscountFactor(address collection, uint256 discountFactor);
     event NewProtocolFeeRecipient(address protocolFeeRecipient);
+    event NewRoyaltyFeeRegistry(address royaltyFeeRegistry);
     event NewStrategy(uint16 strategyId, address implementation);
     event StrategyUpdated(uint16 strategyId, bool isActive, bool hasRoyalties, uint16 protocolFee);
 

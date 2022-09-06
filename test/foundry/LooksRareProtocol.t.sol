@@ -9,11 +9,11 @@ import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRarePr
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 
-import {OrderStructs, ProtocolHelpers} from "./utils/ProtocolHelpers.sol";
+import {OrderStructs, ProtocolHelpers, MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
 import {MockERC721} from "./utils/MockERC721.sol";
 import {MockERC1155} from "./utils/MockERC1155.sol";
 
-contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
+contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;
     MockERC721 public mockERC721;
     MockERC1155 public mockERC1155;
@@ -104,7 +104,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
             Strategy memory strategy = looksRareProtocol.viewStrategy(i);
             assertTrue(strategy.isActive);
             assertTrue(strategy.hasRoyalties);
-            assertEq(strategy.protocolFee, uint16(200));
+            assertEq(strategy.protocolFee, _standardProtocolFee);
             assertEq(strategy.maxProtocolFee, uint16(300));
             assertEq(strategy.implementation, address(0));
         }
@@ -123,12 +123,10 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         uint256 price = 1 ether; // Fixed price of sale
         uint16 royaltyFee = 100;
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = royaltyFee + 200; // 3% slippage protection
+        uint16 minNetRatio = 10000 - (royaltyFee + _standardProtocolFee); // 3% slippage protection
 
         _setUpRoyalties(address(mockERC721), royaltyFee);
 
-        // Maker user actions
-        vm.startPrank(makerUser);
         {
             // Mint asset
             mockERC721.mint(makerUser, itemId);
@@ -152,8 +150,6 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
             signature = _signMakerAsk(makerAsk, makerUserPK);
         }
 
-        vm.stopPrank();
-
         // Taker user actions
         vm.startPrank(takerUser);
 
@@ -174,7 +170,6 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         uint256 initialBalanceTakerUser = takerUser.balance;
 
         {
-            // Other execution parameters
             uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
@@ -186,13 +181,13 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
                 _emptyMerkleProof,
                 _emptyReferrer
             );
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerBid // ERC721 // Registry Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(0), takerUser);
+        assertEq(mockERC721.ownerOf(itemId), takerUser);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
         // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
@@ -216,12 +211,10 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         uint256 price = 1 ether; // Fixed price of sale
         uint16 royaltyFee = 100;
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = royaltyFee + 200; // 3% slippage protection
+        uint16 minNetRatio = 10000 - (royaltyFee + 200); // 3% slippage protection
 
         _setUpRoyalties(address(mockERC721), royaltyFee);
 
-        vm.startPrank(makerUser);
-        // Maker user actions
         {
             // Prepare the order hash
             makerBid = _createSingleItemMakerBidOrder(
@@ -241,7 +234,6 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);
         }
-        vm.stopPrank();
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -265,10 +257,10 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
-        // Execute taker bid transaction
         {
             uint256 gasLeft = gasleft();
 
+            // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,
@@ -277,13 +269,13 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
                 _emptyMerkleProof,
                 _emptyReferrer
             );
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerAsk // ERC721 // Registry Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(0), makerUser);
+        assertEq(mockERC721.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
@@ -306,10 +298,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         bytes memory signature;
 
         uint256 price = 1 ether; // Fixed price of sale
-        uint16 minNetRatio = 9800; // 2% slippage protection for strategy
-
-        // Maker user actions
-        vm.startPrank(makerUser);
+        uint16 minNetRatio = 10000 - _standardProtocolFee; // 2% slippage protection for strategy
 
         for (uint112 i; i < numberOrders; i++) {
             // Mint asset
@@ -346,8 +335,6 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         // Maker signs the root
         signature = _signMerkleProof(merkleRoot, makerUserPK);
 
-        vm.stopPrank();
-
         // Taker user actions
         vm.startPrank(takerUser);
 
@@ -372,6 +359,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
 
         {
             uint256 gasLeft = gasleft();
+
             // Execute taker bid transaction
             looksRareProtocol.executeTakerBid{value: price}(
                 takerBid,
@@ -381,7 +369,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
                 merkleProof,
                 _emptyReferrer
             );
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerBid // ERC721 // Multiple Orders Signed", gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -391,7 +379,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, initialBalanceMakerUser + (price * 9800) / 10000);
+        assertEq(address(makerUser).balance, initialBalanceMakerUser + (price * minNetRatio) / 10000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -412,10 +400,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         bytes memory signature;
 
         uint256 price = 1 ether; // Fixed price of sale
-        uint16 minNetRatio = 9800; // 2% slippage protection for strategy
-
-        // Maker user actions
-        vm.startPrank(makerUser);
+        uint16 minNetRatio = 10000 - _standardProtocolFee; // 2% slippage protection for strategy
 
         for (uint112 i; i < numberOrders; i++) {
             // Prepare the order hash
@@ -448,7 +433,6 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
 
         // Maker signs the root
         signature = _signMerkleProof(merkleRoot, makerUserPK);
-        vm.stopPrank();
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -481,7 +465,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
             // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, _emptyReferrer);
 
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerAsk // ERC721 // Multiple Orders Signed", gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -491,7 +475,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
         // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * 9800) / 10000);
+        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
@@ -510,12 +494,10 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         uint256 price = 1 ether; // Fixed price of sale
         uint16 royaltyFee = 100;
         uint256 itemId = 0; // TokenId (not used)
-        uint16 minNetRatio = royaltyFee + 200; // 3% slippage protection
+        uint16 minNetRatio = 10000 - (royaltyFee + _standardProtocolFee); // 3% slippage protection
 
         _setUpRoyalties(address(mockERC721), royaltyFee);
 
-        vm.startPrank(makerUser);
-        // Maker user actions
         {
             // Prepare the order hash
             makerBid = _createSingleItemMakerBidOrder(
@@ -535,7 +517,6 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);
         }
-        vm.stopPrank();
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -562,8 +543,10 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
-        // Execute taker ask transaction
         {
+            uint256 gasLeft = gasleft();
+
+            // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,
@@ -572,6 +555,7 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
                 _emptyMerkleProof,
                 _emptyReferrer
             );
+            emit log_named_uint("TakerAsk // ERC721 // CollectionOrder // Registry Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -584,5 +568,181 @@ contract LooksRareProtocolTest is ProtocolHelpers, ILooksRareProtocol {
         assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * 9700) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+    }
+
+    /**
+     * TakerAsk matches makerBid but protocol fee was discontinued for this strategy.
+     */
+    function testTakerAskERC721WithoutProtocolFee() public {
+        _setUpUsers();
+
+        // Remove protocol fee for ERC721
+        vm.prank(_owner);
+        looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), 10000);
+
+        OrderStructs.MakerBid memory makerBid;
+        OrderStructs.TakerAsk memory takerAsk;
+        bytes memory signature;
+
+        uint256 price = 1 ether; // Fixed price of sale
+        uint256 itemId = 0; // TokenId
+        uint16 minNetRatio = 10000; // 0% slippage protection
+
+        {
+            // Prepare the order hash
+            makerBid = _createSingleItemMakerBidOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                0, // orderNonce
+                minNetRatio,
+                address(mockERC721),
+                address(weth), // WETH,
+                makerUser,
+                price,
+                itemId
+            );
+
+            // Sign order
+            signature = _signMakerBid(makerBid, makerUserPK);
+        }
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        {
+            // Mint asset
+            mockERC721.mint(takerUser, itemId);
+
+            // Prepare the taker ask
+            takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.minNetRatio,
+                makerBid.maxPrice,
+                makerBid.itemIds,
+                makerBid.amounts,
+                abi.encode()
+            );
+        }
+
+        // Store the balances in WETH
+        uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
+        uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
+
+        {
+            uint256 gasLeft = gasleft();
+
+            // Execute taker ask transaction
+            looksRareProtocol.executeTakerAsk(
+                takerAsk,
+                makerBid,
+                signature,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
+                _emptyReferrer
+            );
+            emit log_named_uint("TakerAsk // ERC721 // No Protocol Fee // No Royalties", gasLeft - gasleft());
+        }
+
+        vm.stopPrank();
+
+        // Taker user has received the asset
+        assertEq(mockERC721.ownerOf(itemId), makerUser);
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
+        // Taker ask user receives 100% of whole price
+        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + price);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+    }
+
+    /**
+     * TakerBid matches makerAsk but protocol fee was discontinued for this strategy.
+     */
+    function testTakerBidERC721WithoutProtocolFee() public {
+        _setUpUsers();
+
+        // Remove protocol fee for ERC721
+        vm.prank(_owner);
+        looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), 10000);
+
+        OrderStructs.MakerAsk memory makerAsk;
+        OrderStructs.TakerBid memory takerBid;
+        bytes memory signature;
+
+        uint256 price = 1 ether; // Fixed price of sale
+        uint256 itemId = 0; // TokenId
+        uint16 minNetRatio = 10000;
+
+        {
+            // Mint asset
+            mockERC721.mint(makerUser, itemId);
+
+            // Prepare the order hash
+            makerAsk = _createSingleItemMakerAskOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                0, // orderNonce
+                minNetRatio,
+                address(mockERC721),
+                address(0), // ETH,
+                makerUser,
+                price,
+                itemId
+            );
+
+            // Sign order
+            signature = _signMakerAsk(makerAsk, makerUserPK);
+        }
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        {
+            // Prepare the taker bid
+            takerBid = OrderStructs.TakerBid(
+                takerUser,
+                makerAsk.minNetRatio,
+                makerAsk.minPrice,
+                makerAsk.itemIds,
+                makerAsk.amounts,
+                abi.encode()
+            );
+        }
+
+        // Store the balances in ETH
+        uint256 initialBalanceMakerUser = makerUser.balance;
+        uint256 initialBalanceTakerUser = takerUser.balance;
+
+        {
+            uint256 gasLeft = gasleft();
+
+            // Execute taker bid transaction
+            looksRareProtocol.executeTakerBid{value: price}(
+                takerBid,
+                makerAsk,
+                signature,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
+                _emptyReferrer
+            );
+            emit log_named_uint("TakerBid // ERC721 // No Protocol Fee // No Royalties", gasLeft - gasleft());
+        }
+
+        vm.stopPrank();
+
+        // Taker user has received the asset
+        assertEq(mockERC721.ownerOf(itemId), takerUser);
+        // Taker bid user pays the whole price
+        assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
+        // Maker ask user receives 100% of whole price
+        assertEq(address(makerUser).balance, initialBalanceMakerUser + price);
+        // No leftover in the balance of the contract
+        assertEq(address(looksRareProtocol).balance, 0);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
     }
 }

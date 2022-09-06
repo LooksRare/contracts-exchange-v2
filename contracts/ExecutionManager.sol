@@ -98,7 +98,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @param discountFactor discount factor (e.g., 1000 = -10% relative to the protocol fee)
      */
     function adjustDiscountFactorCollection(address collection, uint256 discountFactor) external onlyOwner {
-        if (discountFactor >= 10000) {
+        if (discountFactor > 10000) {
             revert CollectionDiscountFactorTooHigh();
         }
 

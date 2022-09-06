@@ -791,12 +791,12 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
             );
         }
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Store the balances in ETH
         uint256 initialBalanceMakerUser = makerUser.balance;
         uint256 initialBalanceTakerUser = takerUser.balance;
+
+        // Taker user actions
+        vm.startPrank(takerUser);
 
         {
             // Other execution parameters
@@ -833,6 +833,129 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
         assertEq(address(takerUser).balance, initialBalanceTakerUser - (numberPurchases * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(address(makerUser).balance, initialBalanceMakerUser + ((price * 9800) * numberPurchases) / 10000);
+        // No leftover in the balance of the contract
+        assertEq(address(looksRareProtocol).balance, 0);
+    }
+
+    /**
+     * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer)
+     */
+    function testThreeTakerBidsERC721OneFails() public {
+        _setUpUsers();
+
+        uint256 numberPurchases = 3;
+        uint256 price = 1 ether;
+        uint256 faultyTokenId = numberPurchases - 1;
+
+        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        bytes[] memory signatures = new bytes[](numberPurchases);
+
+        for (uint256 i; i < numberPurchases; i++) {
+            // Mint asset
+            mockERC721.mint(makerUser, i);
+
+            // Prepare the order hash
+            makerAsks[i] = _createSingleItemMakerAskOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                uint112(i), // orderNonce
+                9800,
+                address(mockERC721),
+                address(0), // ETH,
+                makerUser,
+                price, // Fixed
+                i // itemId (0, 1, etc.)
+            );
+
+            // Sign order
+            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+
+            takerBids[i] = OrderStructs.TakerBid(
+                takerUser,
+                makerAsks[i].minNetRatio,
+                makerAsks[i].minPrice,
+                makerAsks[i].itemIds,
+                makerAsks[i].amounts,
+                abi.encode()
+            );
+        }
+
+        // Transfer tokenId=2 to random user
+        address randomUser = address(55);
+        vm.prank(makerUser);
+        mockERC721.transferFrom(makerUser, randomUser, faultyTokenId);
+
+        // Store the balances in ETH
+        uint256 initialBalanceMakerUser = makerUser.balance;
+        uint256 initialBalanceTakerUser = takerUser.balance;
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        /**
+         * 1. The whole purchase fails if execution is atomic
+         */
+        {
+            // Other execution parameters
+            bytes32[] memory merkleRoots = new bytes32[](numberPurchases);
+            bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
+
+            // @dev It is the expected revertion message for ERC721 tokens from the Solmate library
+            vm.expectRevert(bytes("WRONG_FROM"));
+            looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+                takerBids,
+                makerAsks,
+                signatures,
+                merkleRoots,
+                merkleProofs,
+                _emptyReferrer,
+                true
+            );
+        }
+
+        /**
+         * 2. The whole purchase doesn't fail if execution is not-atomic
+         */
+        {
+            // Other execution parameters
+            bytes32[] memory merkleRoots = new bytes32[](numberPurchases);
+            bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
+
+            // Execute taker bid transaction
+            looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+                takerBids,
+                makerAsks,
+                signatures,
+                merkleRoots,
+                merkleProofs,
+                _emptyReferrer,
+                false
+            );
+        }
+
+        vm.stopPrank();
+
+        for (uint256 i; i < faultyTokenId; i++) {
+            // Taker user has received the first two assets
+            assertEq(mockERC721.ownerOf(i), takerUser);
+            // Verify the first two nonces are marked as executed
+            assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(i)));
+        }
+
+        // Taker user has not received the asset
+        assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
+        // Verify the nonce is NOT marked as executed
+        assertFalse(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(faultyTokenId)));
+        // Taker bid user pays the whole price
+        assertEq(address(takerUser).balance, initialBalanceTakerUser - ((numberPurchases - 1) * price));
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(
+            address(makerUser).balance,
+            initialBalanceMakerUser + ((price * 9800) * (numberPurchases - 1)) / 10000
+        );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }

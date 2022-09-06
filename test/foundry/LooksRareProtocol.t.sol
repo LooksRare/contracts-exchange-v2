@@ -260,7 +260,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
         {
             uint256 gasLeft = gasleft();
 
-            // Execute taker bid transaction
+            // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,

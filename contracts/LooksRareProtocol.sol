@@ -194,9 +194,7 @@ contract LooksRareProtocol is
                     uint256 protocolFee
                 ) {
                     totalProtocolFee += protocolFee;
-                } catch {
-                    revert TakerBidFail();
-                }
+                } catch {}
             }
 
             unchecked {

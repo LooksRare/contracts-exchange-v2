@@ -155,7 +155,7 @@ contract LooksRareProtocol is
         bytes32[][] calldata merkleProofs,
         address referrer,
         bool isAtomic
-    ) external nonReentrant {
+    ) external payable nonReentrant {
         {
             uint256 length = takerBids.length;
             if (

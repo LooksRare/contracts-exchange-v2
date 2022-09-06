@@ -157,11 +157,13 @@ contract LooksRareProtocol is
         bool isAtomic
     ) external nonReentrant {
         {
+            uint256 length = takerBids.length;
             if (
-                makerAsks.length != takerBids.length &&
-                makerSignatures.length != takerBids.length &&
-                merkleRoots.length != takerBids.length &&
-                merkleProofs.length != takerBids.length
+                length == 0 &&
+                makerAsks.length != length &&
+                makerSignatures.length != length &&
+                merkleRoots.length != length &&
+                merkleProofs.length != length
             ) revert WrongLengths();
         }
 

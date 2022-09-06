@@ -170,7 +170,6 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
         uint256 initialBalanceTakerUser = takerUser.balance;
 
         {
-            // Other execution parameters
             uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
@@ -182,13 +181,13 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
                 _emptyMerkleProof,
                 _emptyReferrer
             );
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerBid // ERC721 // Registry Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(0), takerUser);
+        assertEq(mockERC721.ownerOf(itemId), takerUser);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
         // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
@@ -258,10 +257,10 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
         uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
-        // Execute taker bid transaction
         {
             uint256 gasLeft = gasleft();
 
+            // Execute taker bid transaction
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,
@@ -270,13 +269,13 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
                 _emptyMerkleProof,
                 _emptyReferrer
             );
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerAsk // ERC721 // Registry Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(0), makerUser);
+        assertEq(mockERC721.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
@@ -360,6 +359,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
 
         {
             uint256 gasLeft = gasleft();
+
             // Execute taker bid transaction
             looksRareProtocol.executeTakerBid{value: price}(
                 takerBid,
@@ -369,7 +369,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
                 merkleProof,
                 _emptyReferrer
             );
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerBid // ERC721 // Multiple Orders Signed", gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -465,7 +465,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
             // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, _emptyReferrer);
 
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerAsk // ERC721 // Multiple Orders Signed", gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -543,8 +543,10 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
         uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
-        // Execute taker ask transaction
         {
+            uint256 gasLeft = gasleft();
+
+            // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,
@@ -553,6 +555,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
                 _emptyMerkleProof,
                 _emptyReferrer
             );
+            emit log_named_uint("TakerAsk // ERC721 // CollectionOrder // Registry Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();
@@ -627,10 +630,10 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
         uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
         uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
 
-        // Execute taker bid transaction
         {
             uint256 gasLeft = gasleft();
 
+            // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,
@@ -639,13 +642,13 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
                 _emptyMerkleProof,
                 _emptyReferrer
             );
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerAsk // ERC721 // No Protocol Fee // No Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(0), makerUser);
+        assertEq(mockERC721.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
         // Taker ask user receives 100% of whole price
@@ -715,7 +718,6 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
         uint256 initialBalanceTakerUser = takerUser.balance;
 
         {
-            // Other execution parameters
             uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
@@ -727,13 +729,13 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
                 _emptyMerkleProof,
                 _emptyReferrer
             );
-            emit log_uint(gasLeft - gasleft());
+            emit log_named_uint("TakerBid // ERC721 // No Protocol Fee // No Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(0), takerUser);
+        assertEq(mockERC721.ownerOf(itemId), takerUser);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
         // Maker ask user receives 100% of whole price

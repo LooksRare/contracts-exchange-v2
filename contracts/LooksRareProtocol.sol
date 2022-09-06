@@ -138,6 +138,100 @@ contract LooksRareProtocol is
     }
 
     /**
+     * @notice Batch buy with taker bids (against maker asks)
+     * @param takerBids array of taker bid struct
+     * @param makerAsks array maker ask struct
+     * @param makerSignatures array of maker signatures
+     * @param merkleRoots array of merkle roots if the signature contains multiple maker orders
+     * @param merkleProofs array containing the merkle proof (if multiple maker orders under the signature)
+     * @param referrer address of the referrer
+     * @param isAtomic whether the trade should revert if 1 or more fails
+     */
+    function executeMultipleTakerBids(
+        OrderStructs.TakerBid[] calldata takerBids,
+        OrderStructs.MakerAsk[] calldata makerAsks,
+        bytes[] calldata makerSignatures,
+        bytes32[] calldata merkleRoots,
+        bytes32[][] calldata merkleProofs,
+        address referrer,
+        bool isAtomic
+    ) external nonReentrant {
+        {
+            if (
+                makerAsks.length != takerBids.length &&
+                makerSignatures.length != takerBids.length &&
+                merkleRoots.length != takerBids.length &&
+                merkleProofs.length != takerBids.length
+            ) revert WrongLengths();
+        }
+
+        // Initialize protocol fee
+        uint256 totalProtocolFee;
+        for (uint256 i; i < takerBids.length; ) {
+            {
+                if (i != 0 && makerAsks[i].currency != makerAsks[i - 1].currency) {
+                    revert WrongCurrency();
+                }
+            }
+
+            // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+            if (merkleProofs[i].length == 0) {
+                _computeDigestAndVerify(makerAsks[i].hash(), makerSignatures[i], makerAsks[i].signer);
+            } else {
+                {
+                    _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i], makerAsks[i].hash());
+                }
+                _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsks[i].signer);
+            }
+
+            if (isAtomic) {
+                // Execute the transaction and add protocol fee
+                totalProtocolFee += _executeTakerBid(takerBids[i], msg.sender, makerAsks[i]);
+            } else {
+                try this.restrictedExecuteTakerBid(takerBids[i], msg.sender, makerAsks[i]) returns (
+                    uint256 protocolFee
+                ) {
+                    totalProtocolFee += protocolFee;
+                } catch {
+                    revert TakerBidFail();
+                }
+            }
+        }
+
+        // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
+        if (referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
+            totalProtocolFee -= totalReferralFee;
+
+            // Transfer the referral fee if anything to transfer
+            _transferFungibleTokens(makerAsks[0].currency, msg.sender, referrer, totalReferralFee);
+        }
+
+        // Transfer remaining protocol fee to the fee recipient
+        _transferFungibleTokens(makerAsks[0].currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
+
+        // Return ETH if any
+        _returnETHIfAny();
+    }
+
+    /**
+     * @notice Function used to do non-atomic matching of batch taker bid
+     * @param takerBid taker bid struct
+     * @param sender address of the sender (i.e., the initial msg sender)
+     * @param makerAsk maker ask struct
+     * @dev This function is only callable by this contract.
+     * @return protocol fee
+     */
+    function restrictedExecuteTakerBid(
+        OrderStructs.TakerBid calldata takerBid,
+        address sender,
+        OrderStructs.MakerAsk calldata makerAsk
+    ) external returns (uint256) {
+        if (msg.sender != address(this)) revert WrongCaller();
+        return _executeTakerBid(takerBid, sender, makerAsk);
+    }
+
+    /**
      * @notice Buy with taker ask (against maker bid)
      * @param takerAsk taker ask struct
      * @param makerBid maker bid struct

@@ -815,10 +815,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
                 _emptyReferrer,
                 false
             );
-            emit log_named_uint(
-                "TakerBid (3 items) // Non-atomic // ERC721 // Protocol Fee // No Royalties",
-                gasLeft - gasleft()
-            );
+            emit log_named_uint("TakerBid (3 items) // Non-atomic // ERC721 // No Royalties", gasLeft - gasleft());
         }
 
         vm.stopPrank();

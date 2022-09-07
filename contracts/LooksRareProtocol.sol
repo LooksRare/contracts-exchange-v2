@@ -159,7 +159,7 @@ contract LooksRareProtocol is
         {
             uint256 length = takerBids.length;
             if (
-                length < 2 &&
+                length == 0 &&
                 makerAsks.length != length &&
                 makerSignatures.length != length &&
                 merkleRoots.length != length &&

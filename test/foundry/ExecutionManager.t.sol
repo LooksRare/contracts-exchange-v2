@@ -111,27 +111,20 @@ contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
      * Owner functions for strategy additions/updates revert as expected under multiple cases
      */
     function testOwnerRevertionsForWrongParametersAddStrategy() public asPrankedUser(_owner) {
-        uint16 strategyId = 1;
         bool hasRoyalties = true;
         uint16 protocolFee = 250;
         uint16 maxProtocolFee = 300;
         address implementation = address(0);
 
-        // 1. Strategy already exists so cannot be added
-        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyUsed.selector, strategyId));
-        looksRareProtocol.addStrategy(strategyId, hasRoyalties, protocolFee, maxProtocolFee, implementation);
-
-        // 2. Strategy does not exist but maxProtocolFee is lower than protocolFee
-        strategyId = 3;
+        // 1. Strategy does not exist but maxProtocolFee is lower than protocolFee
         maxProtocolFee = protocolFee - 1;
-        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyProtocolFeeTooHigh.selector, strategyId));
-        looksRareProtocol.addStrategy(strategyId, hasRoyalties, protocolFee, maxProtocolFee, implementation);
+        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyProtocolFeeTooHigh.selector));
+        looksRareProtocol.addStrategy(hasRoyalties, protocolFee, maxProtocolFee, implementation);
 
-        // 3. Strategy does not exist but maxProtocolFee is higher than _MAX_PROTOCOL_FEE
-        strategyId = 3;
+        // 2. Strategy does not exist but maxProtocolFee is higher than _MAX_PROTOCOL_FEE
         maxProtocolFee = 5000 + 1;
-        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyProtocolFeeTooHigh.selector, strategyId));
-        looksRareProtocol.addStrategy(strategyId, hasRoyalties, protocolFee, maxProtocolFee, implementation);
+        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyProtocolFeeTooHigh.selector));
+        looksRareProtocol.addStrategy(hasRoyalties, protocolFee, maxProtocolFee, implementation);
     }
 
     function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {

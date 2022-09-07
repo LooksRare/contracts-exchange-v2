@@ -14,14 +14,14 @@ abstract contract TestParameters is TestHelpers {
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);
     address internal takerUser = vm.addr(takerUserPK);
-    bytes32 internal _emptyMerkleRoot = bytes32(0);
+    OrderStructs.MerkleRoot internal _emptyMerkleRoot = OrderStructs.MerkleRoot({root: bytes32(0)});
     bytes32[] internal _emptyMerkleProof = new bytes32[](0);
 }
 
 contract ProtocolHelpers is TestParameters, IExecutionManager {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
-    using OrderStructs for bytes32;
+    using OrderStructs for OrderStructs.MerkleRoot;
 
     receive() external payable {}
 
@@ -196,7 +196,10 @@ contract ProtocolHelpers is TestParameters, IExecutionManager {
         return abi.encodePacked(r, s, v);
     }
 
-    function _signMerkleProof(bytes32 _merkleRoot, uint256 _signerKey) internal returns (bytes memory) {
+    function _signMerkleProof(OrderStructs.MerkleRoot memory _merkleRoot, uint256 _signerKey)
+        internal
+        returns (bytes memory)
+    {
         bytes32 merkleRootHash = _merkleRoot.hash();
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(

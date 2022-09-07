@@ -322,13 +322,13 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
             orderHashes[i] = _computeOrderHashMakerAsk(makerAsk);
         }
 
-        bytes32 merkleRoot = m.getRoot(orderHashes);
+        OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({root: m.getRoot(orderHashes)});
 
         // Verify the merkle proof
         for (uint256 i; i < numberOrders; i++) {
             {
                 bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleRoot, tempMerkleProof, orderHashes[i]));
+                assertTrue(m.verifyProof(merkleRoot.root, tempMerkleProof, orderHashes[i]));
             }
         }
 
@@ -421,13 +421,13 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
             orderHashes[i] = _computeOrderHashMakerBid(makerBid);
         }
 
-        bytes32 merkleRoot = m.getRoot(orderHashes);
+        OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({root: m.getRoot(orderHashes)});
 
         // Verify the merkle proof
         for (uint256 i; i < numberOrders; i++) {
             {
                 bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleRoot, tempMerkleProof, orderHashes[i]));
+                assertTrue(m.verifyProof(merkleRoot.root, tempMerkleProof, orderHashes[i]));
             }
         }
 
@@ -800,7 +800,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
 
         {
             // Other execution parameters
-            bytes32[] memory merkleRoots = new bytes32[](numberPurchases);
+            OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
             bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
 
             uint256 gasLeft = gasleft();
@@ -897,7 +897,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
          */
         {
             // Other execution parameters
-            bytes32[] memory merkleRoots = new bytes32[](numberPurchases);
+            OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
             bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
 
             // @dev It is the expected revertion message for ERC721 tokens from the Solmate library
@@ -918,7 +918,7 @@ contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
          */
         {
             // Other execution parameters
-            bytes32[] memory merkleRoots = new bytes32[](numberPurchases);
+            OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
             bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
 
             // Execute taker bid transaction

@@ -16,7 +16,8 @@ library OrderStructs {
     bytes32 internal constant _MAKER_BID_HASH = 0xaac47bd6046bbe5acd60a92f52dde1bb26209688be10f8a6e723fb405c70721b;
 
     // Merkle root hash used to compute merkle root order
-    bytes32 internal constant _MERKLE_ROOT_HASH = keccak256(abi.encodePacked(uint256(3)));
+    // keccak256("MerkleRoot(bytes32 root)")
+    bytes32 internal constant _MERKLE_ROOT_HASH = 0x0cb314254867c611b4ba06dea78882bd68b33649e1ddb950d6db2ee328a55ad0;
 
     /**
      * @notice Hash the makerAsk struct
@@ -90,11 +91,11 @@ library OrderStructs {
 
     /**
      * @notice Hash a merkleRoot
-     * @param merkleRoot merkle root containing a set of maker bid/ask struct hashes
+     * @param merkleRoot merkle root struct
      * @return merkleRootHash hash of the merkle root
      */
-    function hash(bytes32 merkleRoot) internal pure returns (bytes32 merkleRootHash) {
-        return (keccak256(abi.encode(_MERKLE_ROOT_HASH, merkleRoot)));
+    function hash(MerkleRoot memory merkleRoot) internal pure returns (bytes32 merkleRootHash) {
+        return (keccak256(abi.encode(_MERKLE_ROOT_HASH, merkleRoot.root)));
     }
 
     /**
@@ -163,5 +164,14 @@ library OrderStructs {
         uint256[] itemIds;
         uint256[] amounts;
         bytes additionalParameters;
+    }
+
+    /**
+     * 3. MERKLE ROOT
+     */
+
+    // MerkleRoot
+    struct MerkleRoot {
+        bytes32 root;
     }
 }

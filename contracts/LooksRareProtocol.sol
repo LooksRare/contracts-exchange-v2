@@ -119,7 +119,7 @@ contract LooksRareProtocol is
         }
 
         // Execute the transaction and fetch protocol fee
-        uint256 totalProtocolFee = _executeTakerBid(takerBid, msg.sender, makerAsk);
+        uint256 totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender);
 
         // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
         if (referrer != address(0)) {
@@ -188,9 +188,9 @@ contract LooksRareProtocol is
 
             if (isAtomic) {
                 // Execute the transaction and add protocol fee
-                totalProtocolFee += _executeTakerBid(takerBids[i], msg.sender, makerAsks[i]);
+                totalProtocolFee += _executeTakerBid(takerBids[i], makerAsks[i], msg.sender);
             } else {
-                try this.restrictedExecuteTakerBid(takerBids[i], msg.sender, makerAsks[i]) returns (
+                try this.restrictedExecuteTakerBid(takerBids[i], makerAsks[i], msg.sender) returns (
                     uint256 protocolFee
                 ) {
                     totalProtocolFee += protocolFee;
@@ -228,11 +228,11 @@ contract LooksRareProtocol is
      */
     function restrictedExecuteTakerBid(
         OrderStructs.TakerBid calldata takerBid,
-        address sender,
-        OrderStructs.MakerAsk calldata makerAsk
+        OrderStructs.MakerAsk calldata makerAsk,
+        address sender
     ) external returns (uint256) {
         if (msg.sender != address(this)) revert WrongCaller();
-        return _executeTakerBid(takerBid, sender, makerAsk);
+        return _executeTakerBid(takerBid, makerAsk, sender);
     }
 
     /**
@@ -261,7 +261,7 @@ contract LooksRareProtocol is
         }
 
         // Execute the transaction and fetch protocol fee
-        uint256 totalProtocolFee = _executeTakerAsk(takerAsk, msg.sender, makerBid);
+        uint256 totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, msg.sender);
 
         // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
         if (referrer != address(0)) {
@@ -335,13 +335,13 @@ contract LooksRareProtocol is
     /**
      * @notice Execute takerBid
      * @param takerBid taker bid order struct
-     * @param sender sender of the transaction (i.e., msg.sender)
      * @param makerAsk maker ask order struct
+     * @param sender sender of the transaction (i.e., msg.sender)
      */
     function _executeTakerBid(
         OrderStructs.TakerBid calldata takerBid,
-        address sender,
-        OrderStructs.MakerAsk calldata makerAsk
+        OrderStructs.MakerAsk calldata makerAsk,
+        address sender
     ) internal returns (uint256 protocolFeeAmount) {
         // Verify whether the currency is available
         if (!_isCurrencyWhitelisted[makerAsk.currency]) {
@@ -408,13 +408,13 @@ contract LooksRareProtocol is
     /**
      * @notice Execute takerAsk
      * @param takerAsk taker ask order struct
-     * @param sender sender of the transaction (i.e., msg.sender)
      * @param makerBid maker bid order struct
+     * @param sender sender of the transaction (i.e., msg.sender)
      */
     function _executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
-        address sender,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.MakerBid calldata makerBid,
+        address sender
     ) internal returns (uint256 protocolFeeAmount) {
         // Verify whether the currency is whitelisted but is not ETH (address(0))
         if (!_isCurrencyWhitelisted[makerBid.currency] && makerBid.currency != address(0)) {

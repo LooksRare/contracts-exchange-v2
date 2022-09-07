@@ -45,7 +45,7 @@ contract LooksRareProtocol is
 {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
-    using OrderStructs for bytes32;
+    using OrderStructs for OrderStructs.MerkleRoot;
 
     // Encoding prefix for EIP-712 signatures
     string internal constant _ENCODING_PREFIX = "\x19\x01";
@@ -98,7 +98,7 @@ contract LooksRareProtocol is
      * @param takerBid taker bid struct
      * @param makerAsk maker ask struct
      * @param makerSignature maker signature
-     * @param merkleRoot merkle root if the signature contains multiple maker orders
+     * @param merkleRoot merkle root struct (if the signature contains multiple maker orders)
      * @param merkleProof array containing the merkle proof (if multiple maker orders under the signature)
      * @param referrer address of the referrer
      */
@@ -106,7 +106,7 @@ contract LooksRareProtocol is
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         bytes calldata makerSignature,
-        bytes32 merkleRoot,
+        OrderStructs.MerkleRoot calldata merkleRoot,
         bytes32[] calldata merkleProof,
         address referrer
     ) external payable nonReentrant {
@@ -114,7 +114,7 @@ contract LooksRareProtocol is
         if (merkleProof.length == 0) {
             _computeDigestAndVerify(makerAsk.hash(), makerSignature, makerAsk.signer);
         } else {
-            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerAsk.hash());
+            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, makerAsk.hash());
             _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
         }
 
@@ -142,7 +142,7 @@ contract LooksRareProtocol is
      * @param takerBids array of taker bid struct
      * @param makerAsks array maker ask struct
      * @param makerSignatures array of maker signatures
-     * @param merkleRoots array of merkle roots if the signature contains multiple maker orders
+     * @param merkleRoots array of merkle root structs if the signature contains multiple maker orders
      * @param merkleProofs array containing the merkle proof (if multiple maker orders under the signature)
      * @param referrer address of the referrer
      * @param isAtomic whether the trade should revert if 1 or more fails
@@ -151,7 +151,7 @@ contract LooksRareProtocol is
         OrderStructs.TakerBid[] calldata takerBids,
         OrderStructs.MakerAsk[] calldata makerAsks,
         bytes[] calldata makerSignatures,
-        bytes32[] calldata merkleRoots,
+        OrderStructs.MerkleRoot[] calldata merkleRoots,
         bytes32[][] calldata merkleProofs,
         address referrer,
         bool isAtomic
@@ -181,7 +181,7 @@ contract LooksRareProtocol is
                 _computeDigestAndVerify(makerAsks[i].hash(), makerSignatures[i], makerAsks[i].signer);
             } else {
                 {
-                    _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i], makerAsks[i].hash());
+                    _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, makerAsks[i].hash());
                 }
                 _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsks[i].signer);
             }
@@ -240,7 +240,7 @@ contract LooksRareProtocol is
      * @param takerAsk taker ask struct
      * @param makerBid maker bid struct
      * @param makerSignature maker signature
-     * @param merkleRoot merkle root if the signature contains multiple maker orders
+     * @param merkleRoot merkle root struct (if the signature contains multiple maker orders)
      * @param merkleProof array containing merkle proofs (if multiple maker orders under the signature)
      * @param referrer address of the referrer
      */
@@ -248,7 +248,7 @@ contract LooksRareProtocol is
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         bytes calldata makerSignature,
-        bytes32 merkleRoot,
+        OrderStructs.MerkleRoot calldata merkleRoot,
         bytes32[] calldata merkleProof,
         address referrer
     ) external nonReentrant {
@@ -256,7 +256,7 @@ contract LooksRareProtocol is
         if (merkleProof.length == 0) {
             _computeDigestAndVerify(makerBid.hash(), makerSignature, makerBid.signer);
         } else {
-            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot, makerBid.hash());
+            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, makerBid.hash());
             _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
         }
 

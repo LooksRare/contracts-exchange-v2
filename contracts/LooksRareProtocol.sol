@@ -221,8 +221,8 @@ contract LooksRareProtocol is
     /**
      * @notice Function used to do non-atomic matching of batch taker bid
      * @param takerBid taker bid struct
-     * @param sender address of the sender (i.e., the initial msg sender)
      * @param makerAsk maker ask struct
+     * @param sender address of the sender (i.e., the initial msg sender)
      * @dev This function is only callable by this contract.
      * @return protocol fee
      */

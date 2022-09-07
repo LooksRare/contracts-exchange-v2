@@ -9,9 +9,8 @@ interface IExecutionManager {
     error OrderInvalid();
     error OutsideOfTimeRange();
     error StrategyNotAvailable(uint16 strategyId);
-    error StrategyUsed(uint16 strategyId);
-    error StrategyNotUsed(uint16 strategyId);
-    error StrategyProtocolFeeTooHigh(uint16 strategyId);
+    error StrategyNotUsed();
+    error StrategyProtocolFeeTooHigh();
 
     // Events
     event NewCollectionDiscountFactor(address collection, uint256 discountFactor);

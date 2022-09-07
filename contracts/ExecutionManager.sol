@@ -18,11 +18,11 @@ import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
-    // Number of internal strategies
-    uint8 private immutable _COUNT_INTERNAL_STRATEGIES = 2;
-
     // Maximum protocol fee
     uint16 private immutable _MAX_PROTOCOL_FEE = 5000;
+
+    // Count how many strategies
+    uint16 countStrategies = 2;
 
     // Royalty fee registry
     IRoyaltyFeeRegistry internal _royaltyFeeRegistry;
@@ -60,28 +60,22 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
 
     /**
      * @notice Add strategy
-     * @param strategyId id of the new strategy
      * @param hasRoyalties whether the strategy has royalties
      * @param protocolFee protocol fee
      * @param maxProtocolFee protocol fee
      * @param implementation address of the implementation
      */
     function addStrategy(
-        uint16 strategyId,
         bool hasRoyalties,
         uint16 protocolFee,
         uint16 maxProtocolFee,
         address implementation
     ) external onlyOwner {
-        if (strategyId < _COUNT_INTERNAL_STRATEGIES || _strategies[strategyId].implementation != address(0)) {
-            revert StrategyUsed(strategyId);
-        }
-
         if (maxProtocolFee < protocolFee || maxProtocolFee > _MAX_PROTOCOL_FEE) {
-            revert StrategyProtocolFeeTooHigh(strategyId);
+            revert StrategyProtocolFeeTooHigh();
         }
 
-        _strategies[strategyId] = Strategy({
+        _strategies[countStrategies] = Strategy({
             isActive: true,
             hasRoyalties: hasRoyalties,
             protocolFee: protocolFee,
@@ -89,7 +83,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
             implementation: implementation
         });
 
-        emit NewStrategy(strategyId, implementation);
+        emit NewStrategy(countStrategies++, implementation);
     }
 
     /**
@@ -137,12 +131,12 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         uint16 protocolFee,
         bool isActive
     ) external onlyOwner {
-        if (strategyId > _COUNT_INTERNAL_STRATEGIES && _strategies[strategyId].implementation == address(0)) {
-            revert StrategyNotUsed(strategyId);
+        if (strategyId >= countStrategies) {
+            revert StrategyNotUsed();
         }
 
         if (protocolFee > _strategies[strategyId].maxProtocolFee) {
-            revert StrategyProtocolFeeTooHigh(strategyId);
+            revert StrategyProtocolFeeTooHigh();
         }
 
         _strategies[strategyId] = Strategy({

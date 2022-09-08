@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import {TestHelpers} from "./TestHelpers.sol";
-import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 abstract contract TestParameters is TestHelpers {
@@ -19,7 +18,7 @@ abstract contract TestParameters is TestHelpers {
     bytes32[] internal _emptyMerkleProof = new bytes32[](0);
 }
 
-contract ProtocolHelpers is TestParameters, IExecutionManager {
+contract ProtocolHelpers is TestParameters {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;

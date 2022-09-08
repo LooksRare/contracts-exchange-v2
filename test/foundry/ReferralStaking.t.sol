@@ -7,8 +7,8 @@ import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {IReferralStaking} from "../../contracts/interfaces/IReferralStaking.sol";
-import {TestHelpers} from "./utils/TestHelpers.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
+import {TestHelpers} from "./utils/TestHelpers.sol";
 
 contract ReferralStakingTest is TestHelpers, IReferralStaking {
     MockERC20 public mockERC20;
@@ -17,10 +17,10 @@ contract ReferralStakingTest is TestHelpers, IReferralStaking {
     LooksRareProtocol public looksRareProtocol;
     ReferralStaking public referralStaking;
 
-    address owner = address(1);
-    address user = address(2);
-
-    uint256 constant timelock = 120;
+    // Test parameters
+    address public owner = address(1);
+    address public user = address(2);
+    uint256 public constant timelock = 120;
 
     function setUp() public {
         vm.startPrank(owner);

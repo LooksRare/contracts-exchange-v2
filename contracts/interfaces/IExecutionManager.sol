@@ -3,11 +3,12 @@ pragma solidity ^0.8.14;
 
 interface IExecutionManager {
     // Custom errors
-    error SlippageAsk();
-    error SlippageBid();
+    error BundleEIP2981NotAllowed(address collection, uint256[] itemIds);
     error CollectionDiscountFactorTooHigh();
     error OrderInvalid();
     error OutsideOfTimeRange();
+    error SlippageAsk();
+    error SlippageBid();
     error StrategyNotAvailable(uint16 strategyId);
     error StrategyNotUsed();
     error StrategyProtocolFeeTooHigh();

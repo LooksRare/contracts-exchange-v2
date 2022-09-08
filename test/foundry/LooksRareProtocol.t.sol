@@ -4,15 +4,13 @@ pragma solidity ^0.8.0;
 import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
 import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 import {Merkle} from "../../lib/murky/src/Merkle.sol";
-
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
-
+import {MockERC721} from "../mock/MockERC721.sol";
+import {MockERC721WithRoyalties} from "../mock/MockERC721WithRoyalties.sol";
+import {MockERC1155} from "../mock/MockERC1155.sol";
 import {OrderStructs, ProtocolHelpers, MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
-import {MockERC721} from "./utils/MockERC721.sol";
-import {MockERC721WithRoyalties} from "./utils/MockERC721WithRoyalties.sol";
-import {MockERC1155} from "./utils/MockERC1155.sol";
 
 contract LooksRareProtocolTest is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;

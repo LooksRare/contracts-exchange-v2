@@ -3,15 +3,13 @@ pragma solidity ^0.8.0;
 
 import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
 import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
-
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
-import {MockERC721} from "./utils/MockERC721.sol";
-import {MockERC1155} from "./utils/MockERC1155.sol";
+import {MockERC721} from "../mock/MockERC721.sol";
+import {MockERC1155} from "../mock/MockERC1155.sol";
 
 contract ExecutionManagerTest is IExecutionManager, MockOrderGenerator {
     address[] public operators;

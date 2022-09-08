@@ -10,6 +10,7 @@ abstract contract TestParameters is TestHelpers {
     address internal _collectionOwner = address(22);
     address internal _emptyReferrer = address(0);
     uint16 internal _standardProtocolFee = uint16(200);
+    uint16 internal _standardRoyaltyFee = uint16(100);
     uint256 internal makerUserPK = 1;
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);

@@ -5,15 +5,15 @@ import {ERC721} from "@rari-capital/solmate/src/tokens/ERC721.sol";
 import {IERC165, IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/IERC2981.sol";
 
 contract MockERC721WithRoyalties is ERC721, IERC2981 {
-    address public immutable RECIPIENT;
-    uint256 public immutable ROYALTY_FEE;
+    address public immutable DEFAULT_ROYALTY_RECIPIENT;
+    uint256 public immutable DEFAULT_ROYALTY_FEE;
 
     mapping(uint256 => uint256) internal _royaltyFeeForTokenId;
     mapping(uint256 => address) internal _royaltyRecipientForTokenId;
 
-    constructor(address _royaltyFeeRECIPIENT, uint256 _royaltyFee) ERC721("MockERC721", "MockERC721") {
-        RECIPIENT = _royaltyFeeRECIPIENT;
-        ROYALTY_FEE = _royaltyFee;
+    constructor(address _royaltyFeeRecipient, uint256 _royaltyFee) ERC721("MockERC721", "MockERC721") {
+        DEFAULT_ROYALTY_RECIPIENT = _royaltyFeeRecipient;
+        DEFAULT_ROYALTY_FEE = _royaltyFee;
     }
 
     function addCustomRoyaltyInformationForTokenId(
@@ -37,9 +37,9 @@ contract MockERC721WithRoyalties is ERC721, IERC2981 {
         returns (address royaltyRecipient, uint256 royaltyAmount)
     {
         address recipient = _royaltyRecipientForTokenId[tokenId] == address(0)
-            ? RECIPIENT
+            ? DEFAULT_ROYALTY_RECIPIENT
             : _royaltyRecipientForTokenId[tokenId];
-        uint256 royaltyFee = _royaltyFeeForTokenId[tokenId] == 0 ? ROYALTY_FEE : _royaltyFeeForTokenId[tokenId];
+        uint256 royaltyFee = _royaltyFeeForTokenId[tokenId] == 0 ? DEFAULT_ROYALTY_FEE : _royaltyFeeForTokenId[tokenId];
         return (recipient, (royaltyFee * salePrice) / 10000);
     }
 

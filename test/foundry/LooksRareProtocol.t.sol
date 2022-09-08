@@ -608,7 +608,7 @@ contract LooksRareProtocolTest is LooksRareProtocolBaseTest, IExecutionManager {
 
         uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - _standardProtocolFee - _standardRoyaltyFee;
+        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
         {
             // Mint asset

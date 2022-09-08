@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {LooksRareProtocolBaseTest} from "./LooksRareProtocolBaseTest.t.sol";
+import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-contract ExecutionManagerTest is LooksRareProtocolBaseTest, IExecutionManager {
+contract ExecutionManager is ProtocolBase, IExecutionManager {
     /**
     /**
      * Owner can change protocol fee and deactivate royalty

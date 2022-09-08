@@ -5,14 +5,13 @@ import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/roy
 import {WETH} from "@rari-capital/solmate/src/tokens/WETH.sol";
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC721WithRoyalties} from "../mock/MockERC721WithRoyalties.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
-contract LooksRareProtocolBaseTest is MockOrderGenerator, ILooksRareProtocol {
+contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;
     MockERC721WithRoyalties public mockERC721WithRoyalties;
     MockERC721 public mockERC721;

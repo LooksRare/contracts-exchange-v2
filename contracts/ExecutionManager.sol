@@ -24,14 +24,14 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     // Royalty fee registry
     IRoyaltyFeeRegistry internal _royaltyFeeRegistry;
 
-    // Protocol fee recipient
-    address internal _protocolFeeRecipient;
-
     // Track collection discount factors (e.g., 100 = 1%, 5,000 = 50%) relative to strategy fee
     mapping(address => uint256) internal _collectionDiscountFactors;
 
     // Track strategy status and implementation
     mapping(uint16 => Strategy) internal _strategies;
+
+    // Protocol fee recipient
+    address internal _protocolFeeRecipient;
 
     // Count how many strategies exist (it includes strategies that have been removed)
     uint16 public countStrategies = 2;

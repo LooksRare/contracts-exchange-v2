@@ -27,7 +27,7 @@ contract CollectionOrdersTest is ProtocolBase {
                 0, // orderNonce
                 minNetRatio,
                 address(mockERC721),
-                address(weth), // WETH,
+                address(weth),
                 makerUser,
                 price,
                 0 // itemId (not used)

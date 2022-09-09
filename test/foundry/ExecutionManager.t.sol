@@ -5,7 +5,7 @@ import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.so
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-contract ExecutionManager is ProtocolBase, IExecutionManager {
+contract ExecutionManagerTest is ProtocolBase, IExecutionManager {
     /**
     /**
      * Owner can change protocol fee and deactivate royalty

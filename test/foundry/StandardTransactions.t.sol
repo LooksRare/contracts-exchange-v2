@@ -104,7 +104,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // orderNonce
                 minNetRatio,
                 address(mockERC721),
-                address(weth), // WETH,
+                address(weth),
                 makerUser,
                 price,
                 itemId
@@ -183,7 +183,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // orderNonce
                 minNetRatio,
                 address(mockERC721),
-                address(weth), // WETH,
+                address(weth),
                 makerUser,
                 price,
                 itemId
@@ -338,7 +338,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // orderNonce
                 minNetRatio,
                 address(mockERC721WithRoyalties),
-                address(weth), // WETH,
+                address(weth),
                 makerUser,
                 price,
                 itemId

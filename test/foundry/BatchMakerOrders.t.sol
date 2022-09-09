@@ -125,7 +125,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 i, // orderNonce (incremental)
                 minNetRatio,
                 address(mockERC721),
-                address(weth), // ETH,
+                address(weth),
                 makerUser,
                 price,
                 i // itemId

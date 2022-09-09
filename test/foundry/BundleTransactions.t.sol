@@ -7,17 +7,192 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 contract BundleTransactionsTest is ProtocolBase {
     function testTakerAskERC721BundleNoRoyalties() public {
         _setUpUsers();
-        // TODO
+        uint256 numberItemsInBundle = 5;
+
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
+            address(mockERC721),
+            address(weth),
+            numberItemsInBundle
+        );
+
+        uint256 price = makerBid.maxPrice;
+        uint16 minNetRatio = 10000 - (_standardProtocolFee);
+
+        // Adjust slippage parameters accordingly
+        makerBid.minNetRatio = minNetRatio;
+        takerAsk.minNetRatio = minNetRatio;
+
+        // Sign the order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+        {
+            // Mint the items
+            mockERC721.batchMint(takerUser, makerBid.itemIds);
+
+            uint256 gasLeft = gasleft();
+
+            // Execute taker ask transaction
+            looksRareProtocol.executeTakerAsk(
+                takerAsk,
+                makerBid,
+                signature,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
+                _emptyReferrer
+            );
+
+            emit log_named_uint(
+                "TakerAsk // ERC721 // Bundle (5 items) // Protocol Fee // No Royalties",
+                gasLeft - gasleft()
+            );
+        }
+        vm.stopPrank();
+
+        for (uint256 i; i < makerBid.itemIds.length; i++) {
+            // Maker user has received all the assets in the bundle
+            assertEq(mockERC721.ownerOf(makerBid.itemIds[i]), makerUser);
+        }
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        // Royalty recipient receives no royalty
+        assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient);
+        // Owner receives protocol fee
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (_standardProtocolFee * price) / 10000);
+        // Taker ask user receives 98% of the whole price (no royalties are paid)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     function testTakerAskERC721BundleWithRoyaltiesFromRegistry() public {
         _setUpUsers();
-        // TODO
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        uint256 numberItemsInBundle = 5;
+
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
+            address(mockERC721),
+            address(weth),
+            numberItemsInBundle
+        );
+
+        uint256 price = makerBid.maxPrice;
+        uint16 minNetRatio = 10000 - (_standardProtocolFee + _standardRoyaltyFee);
+
+        // Adjust slippage parameters accordingly
+        makerBid.minNetRatio = minNetRatio;
+        takerAsk.minNetRatio = minNetRatio;
+
+        // Sign the order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+        {
+            // Mint the items
+            mockERC721.batchMint(takerUser, makerBid.itemIds);
+
+            uint256 gasLeft = gasleft();
+
+            // Execute taker ask transaction
+            looksRareProtocol.executeTakerAsk(
+                takerAsk,
+                makerBid,
+                signature,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
+                _emptyReferrer
+            );
+
+            emit log_named_uint(
+                "TakerAsk // ERC721 // Bundle (5 items) // Protocol Fee // Registry Royalties",
+                gasLeft - gasleft()
+            );
+        }
+        vm.stopPrank();
+
+        for (uint256 i; i < makerBid.itemIds.length; i++) {
+            // Maker user has received all the assets in the bundle
+            assertEq(mockERC721.ownerOf(makerBid.itemIds[i]), makerUser);
+        }
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        // Royalty recipient receives royalties
+        assertEq(
+            weth.balanceOf(_royaltyRecipient),
+            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10000
+        );
+        // Owner receives protocol fee
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (_standardProtocolFee * price) / 10000);
+        // Taker ask user receives 97% of the whole price (royalties are paid)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     function testTakerAskERC721BundleWithEIP2981Royalties() public {
         _setUpUsers();
-        // TODO
+        uint256 numberItemsInBundle = 5;
+
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
+            address(mockERC721WithRoyalties),
+            address(weth),
+            numberItemsInBundle
+        );
+
+        uint256 price = makerBid.maxPrice;
+        uint16 minNetRatio = 10000 - (_standardProtocolFee + _standardRoyaltyFee);
+
+        // Adjust slippage parameters accordingly
+        makerBid.minNetRatio = minNetRatio;
+        takerAsk.minNetRatio = minNetRatio;
+
+        // Sign the order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+        {
+            // Mint the items
+            mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
+
+            uint256 gasLeft = gasleft();
+
+            // Execute taker ask transaction
+            looksRareProtocol.executeTakerAsk(
+                takerAsk,
+                makerBid,
+                signature,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
+                _emptyReferrer
+            );
+
+            emit log_named_uint(
+                "TakerAsk // ERC721 // Bundle (5 items) // Protocol Fee // Registry Royalties",
+                gasLeft - gasleft()
+            );
+        }
+        vm.stopPrank();
+
+        for (uint256 i; i < makerBid.itemIds.length; i++) {
+            // Maker user has received all the assets in the bundle
+            assertEq(mockERC721WithRoyalties.ownerOf(makerBid.itemIds[i]), makerUser);
+        }
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        // Royalty recipient receives royalties
+        assertEq(
+            weth.balanceOf(_royaltyRecipient),
+            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10000
+        );
+        // Owner receives protocol fee
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (_standardProtocolFee * price) / 10000);
+        // Taker ask user receives 97% of the whole price (royalties are paid)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     function testTakerBidERC721BundleNoRoyalties() public {
@@ -33,7 +208,7 @@ contract BundleTransactionsTest is ProtocolBase {
         makerAsk.minNetRatio = minNetRatio;
         takerBid.minNetRatio = minNetRatio;
 
-        // Mint the items
+        // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -78,11 +253,10 @@ contract BundleTransactionsTest is ProtocolBase {
 
     function testTakerBidERC721BundleWithRoyaltiesFromRegistry() public {
         _setUpUsers();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         uint256 numberItemsInBundle = 5;
 
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
-
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
 
         uint256 price = makerAsk.minPrice;
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
@@ -91,7 +265,7 @@ contract BundleTransactionsTest is ProtocolBase {
         makerAsk.minNetRatio = minNetRatio;
         takerBid.minNetRatio = minNetRatio;
 
-        // Mint the items
+        // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -153,7 +327,7 @@ contract BundleTransactionsTest is ProtocolBase {
         makerAsk.minNetRatio = minNetRatio;
         takerBid.minNetRatio = minNetRatio;
 
-        // Mint the items
+        // Mint the items and sign the order
         mockERC721WithRoyalties.batchMint(makerUser, makerAsk.itemIds);
         signature = _signMakerAsk(makerAsk, makerUserPK);
 

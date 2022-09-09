@@ -319,11 +319,78 @@ contract StandardTransactionsTest is ProtocolBase {
     }
 
     /**
-     * TakerAsk matches makerBid for ERC721 token with EIP2981 royalties.
+     * One ERC721 (with EIP2981 royalties) is sold through a taker ask using WETH
      */
     function testTakerAskERC721WithEIP2981Royalties() public {
         _setUpUsers();
-        // TODO
+
+        uint256 price = 1 ether; // Fixed price of sale
+        uint256 itemId = 0; // TokenId
+        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + 200);
+
+        {
+            // Prepare the order hash
+            makerBid = _createSingleItemMakerBidOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                0, // orderNonce
+                minNetRatio,
+                address(mockERC721WithRoyalties),
+                address(weth), // WETH,
+                makerUser,
+                price,
+                itemId
+            );
+
+            // Sign order
+            signature = _signMakerBid(makerBid, makerUserPK);
+        }
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        {
+            // Mint asset
+            mockERC721WithRoyalties.mint(takerUser, itemId);
+
+            // Prepare the taker ask
+            takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.minNetRatio,
+                makerBid.maxPrice,
+                makerBid.itemIds,
+                makerBid.amounts,
+                abi.encode()
+            );
+        }
+
+        {
+            uint256 gasLeft = gasleft();
+
+            // Execute taker ask transaction
+            looksRareProtocol.executeTakerAsk(
+                takerAsk,
+                makerBid,
+                signature,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
+                _emptyReferrer
+            );
+            emit log_named_uint("TakerAsk // ERC721 // Protocol Fee // EIP2981 Royalties", gasLeft - gasleft());
+        }
+
+        vm.stopPrank();
+
+        // Taker user has received the asset
+        assertEq(mockERC721WithRoyalties.ownerOf(itemId), makerUser);
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
+        // Verify the nonce is marked as executed
+        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     /**

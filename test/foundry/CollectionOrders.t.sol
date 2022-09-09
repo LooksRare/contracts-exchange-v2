@@ -17,11 +17,9 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes memory signature;
 
         uint256 price = 1 ether; // Fixed price of sale
-        uint16 royaltyFee = 100;
-        uint256 itemId = 0; // TokenId (not used)
-        uint16 minNetRatio = 10000 - (royaltyFee + _standardProtocolFee); // 3% slippage protection
+        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
-        _setUpRoyalties(address(mockERC721), royaltyFee);
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
 
         {
             // Prepare the order hash
@@ -36,7 +34,7 @@ contract CollectionOrdersTest is ProtocolBase {
                 address(weth), // WETH,
                 makerUser,
                 price,
-                itemId
+                0 // itemId (not used)
             );
 
             // Sign order
@@ -64,10 +62,6 @@ contract CollectionOrdersTest is ProtocolBase {
             );
         }
 
-        // Store the balances in WETH
-        uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
-        uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
-
         {
             uint256 gasLeft = gasleft();
 
@@ -91,9 +85,9 @@ contract CollectionOrdersTest is ProtocolBase {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(tokenId), makerUser);
         // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * 9700) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }

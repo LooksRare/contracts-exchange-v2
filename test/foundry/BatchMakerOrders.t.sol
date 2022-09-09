@@ -75,10 +75,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes32[] memory merkleProof = m.getProof(orderHashes, numberOrders - 1);
         delete m;
 
-        // Store the balances in ETH
-        uint256 initialBalanceMakerUser = makerUser.balance;
-        uint256 initialBalanceTakerUser = takerUser.balance;
-
         {
             uint256 gasLeft = gasleft();
 
@@ -102,9 +98,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(numberOrders - 1), takerUser);
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, initialBalanceMakerUser + (price * minNetRatio) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * minNetRatio) / 10000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -180,10 +176,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes32[] memory merkleProof = m.getProof(orderHashes, numberOrders - 1);
         delete m;
 
-        // Store the balances in WETH
-        uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
-        uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
-
         {
             uint256 gasLeft = gasleft();
 
@@ -201,9 +193,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(numberOrders - 1), makerUser);
         // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * minNetRatio) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }

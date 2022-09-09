@@ -58,10 +58,6 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        // Store the balances in ETH
-        uint256 initialBalanceMakerUser = makerUser.balance;
-        uint256 initialBalanceTakerUser = takerUser.balance;
-
         {
             uint256 gasLeft = gasleft();
 
@@ -82,9 +78,9 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), takerUser);
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(address(makerUser).balance, initialBalanceMakerUser + (price * 9700) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9700) / 10000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -144,10 +140,6 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        // Store the balances in WETH
-        uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
-        uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
-
         {
             uint256 gasLeft = gasleft();
 
@@ -168,9 +160,9 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + (price * 9700) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
@@ -231,10 +223,6 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        // Store the balances in WETH
-        uint256 initialBalanceMakerUser = weth.balanceOf(makerUser);
-        uint256 initialBalanceTakerUser = weth.balanceOf(takerUser);
-
         {
             uint256 gasLeft = gasleft();
 
@@ -255,9 +243,9 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), initialBalanceMakerUser - price);
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 100% of whole price
-        assertEq(weth.balanceOf(takerUser), initialBalanceTakerUser + price);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + price);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
@@ -265,7 +253,7 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * TakerBid matches makerAsk with EIP2981 token
      */
-    function testTakerBidERC721WithEIP2981() public {
+    function testTakerBidERC721WithEIP2981Royalties() public {
         _setUpUsers();
 
         OrderStructs.MakerAsk memory makerAsk;
@@ -314,10 +302,6 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        // Store the balances in ETH
-        uint256 initialBalanceMakerUser = makerUser.balance;
-        uint256 initialBalanceTakerUser = takerUser.balance;
-
         {
             uint256 gasLeft = gasleft();
 
@@ -338,11 +322,11 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker user has received the asset
         assertEq(mockERC721WithRoyalties.ownerOf(itemId), takerUser);
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 100% of whole price
         assertEq(
             address(makerUser).balance,
-            initialBalanceMakerUser + (price * (10000 - _standardProtocolFee - _standardRoyaltyFee)) / 10000
+            _initialETHBalanceUser + (price * (10000 - _standardProtocolFee - _standardRoyaltyFee)) / 10000
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
@@ -351,7 +335,19 @@ contract StandardTransactionsTest is ProtocolBase {
     }
 
     /**
-     * TakerBid matches makerAsk but protocol fee was discontinued for this strategy.
+     * TakerAsk matches makerBid for ERC721 token with EIP2981 royalties.
+     */
+    function testTakerAskERC721WithEIP2981Royalties() public {
+        _setUpUsers();
+
+        OrderStructs.MakerBid memory makerBid;
+        OrderStructs.TakerAsk memory takerAsk;
+        bytes memory signature;
+        // TODO
+    }
+
+    /**
+     * TakerBid matches makerAsk but protocol fee was discontinued for this strategy using the discount function.
      */
     function testTakerBidERC721WithoutProtocolFee() public {
         _setUpUsers();
@@ -406,10 +402,6 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        // Store the balances in ETH
-        uint256 initialBalanceMakerUser = makerUser.balance;
-        uint256 initialBalanceTakerUser = takerUser.balance;
-
         {
             uint256 gasLeft = gasleft();
 
@@ -430,9 +422,9 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), takerUser);
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, initialBalanceTakerUser - price);
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 100% of whole price
-        assertEq(address(makerUser).balance, initialBalanceMakerUser + price);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + price);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -440,7 +432,7 @@ contract StandardTransactionsTest is ProtocolBase {
     }
 
     /**
-     * Three ERC721 are sold through 3 taker bids in one transaction with non-atomicity
+     * Three ERC721 are sold through 3 taker bids in one transaction with non-atomicity.
      */
     function testThreeTakerBidsERC721() public {
         _setUpUsers();
@@ -484,10 +476,6 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        // Store the balances in ETH
-        uint256 initialBalanceMakerUser = makerUser.balance;
-        uint256 initialBalanceTakerUser = takerUser.balance;
-
         // Taker user actions
         vm.startPrank(takerUser);
 
@@ -523,15 +511,15 @@ contract StandardTransactionsTest is ProtocolBase {
             assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(i)));
         }
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, initialBalanceTakerUser - (numberPurchases * price));
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, initialBalanceMakerUser + ((price * 9800) * numberPurchases) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9800) * numberPurchases) / 10000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }
 
     /**
-     * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer)
+     * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */
     function testThreeTakerBidsERC721OneFails() public {
         _setUpUsers();
@@ -580,10 +568,6 @@ contract StandardTransactionsTest is ProtocolBase {
         address randomUser = address(55);
         vm.prank(makerUser);
         mockERC721.transferFrom(makerUser, randomUser, faultyTokenId);
-
-        // Store the balances in ETH
-        uint256 initialBalanceMakerUser = makerUser.balance;
-        uint256 initialBalanceTakerUser = takerUser.balance;
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -643,12 +627,9 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify the nonce is NOT marked as executed
         assertFalse(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(faultyTokenId)));
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, initialBalanceTakerUser - ((numberPurchases - 1) * price));
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(
-            address(makerUser).balance,
-            initialBalanceMakerUser + ((price * 9800) * (numberPurchases - 1)) / 10000
-        );
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9800) * (numberPurchases - 1)) / 10000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }

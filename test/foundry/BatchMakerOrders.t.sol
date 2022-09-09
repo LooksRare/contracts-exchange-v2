@@ -15,10 +15,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         uint256 numberOrders = 1000; // The test will sell itemId = numberOrders - 1
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
-        OrderStructs.MakerAsk memory makerAsk;
-        OrderStructs.TakerBid memory takerBid;
-        bytes memory signature;
-
         uint256 price = 1 ether; // Fixed price of sale
         uint16 minNetRatio = 10000 - _standardProtocolFee; // 2% slippage protection for strategy
 
@@ -115,10 +111,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         uint256 numberOrders = 1000; // The test will sell itemId = numberOrders - 1
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
-
-        OrderStructs.MakerBid memory makerBid;
-        OrderStructs.TakerAsk memory takerAsk;
-        bytes memory signature;
 
         uint256 price = 1 ether; // Fixed price of sale
         uint16 minNetRatio = 10000 - _standardProtocolFee; // 2% slippage protection for strategy

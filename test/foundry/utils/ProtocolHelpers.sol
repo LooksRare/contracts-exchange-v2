@@ -24,6 +24,13 @@ abstract contract TestParameters is TestHelpers {
     uint256 internal _initialWETHBalanceRoyaltyRecipient = 10 ether;
     uint256 internal _initialETHBalanceOwner = 50 ether;
     uint256 internal _initialWETHBalanceOwner = 15 ether;
+
+    // Reused parameters
+    OrderStructs.MakerAsk makerAsk;
+    OrderStructs.MakerBid makerBid;
+    OrderStructs.TakerBid takerBid;
+    OrderStructs.TakerAsk takerAsk;
+    bytes signature;
 }
 
 contract ProtocolHelpers is TestParameters {

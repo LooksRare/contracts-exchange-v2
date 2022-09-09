@@ -12,10 +12,6 @@ contract CollectionOrdersTest is ProtocolBase {
     function testTakerAskCollectionOrderERC721WithRoyaltiesFromRegistry(uint256 tokenId) public {
         _setUpUsers();
 
-        OrderStructs.MakerBid memory makerBid;
-        OrderStructs.TakerAsk memory takerAsk;
-        bytes memory signature;
-
         uint256 price = 1 ether; // Fixed price of sale
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 

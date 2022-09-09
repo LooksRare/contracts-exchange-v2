@@ -71,8 +71,6 @@ contract ExecutionManager is ProtocolBase, IExecutionManager {
         // Change timestamp to avoid underflow issues
         vm.warp(12000000);
 
-        bytes memory signature;
-
         /**
          * 1. Too early to execute
          */
@@ -115,7 +113,6 @@ contract ExecutionManager is ProtocolBase, IExecutionManager {
     function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
         // (For takerBid tests)
         vm.deal(takerUser, 100 ether);
-        bytes memory signature;
 
         /**
          * 1. COLLECTION STRATEGY: itemIds' length is greater than 1

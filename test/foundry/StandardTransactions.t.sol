@@ -12,10 +12,6 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        OrderStructs.MakerAsk memory makerAsk;
-        OrderStructs.TakerBid memory takerBid;
-        bytes memory signature;
-
         uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
@@ -93,10 +89,6 @@ contract StandardTransactionsTest is ProtocolBase {
     function testTakerAskERC721WithRoyaltiesFromRegistry() public {
         _setUpUsers();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-
-        OrderStructs.MakerBid memory makerBid;
-        OrderStructs.TakerAsk memory takerAsk;
-        bytes memory signature;
 
         uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
@@ -177,10 +169,6 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.prank(_owner);
         looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), 10000);
 
-        OrderStructs.MakerBid memory makerBid;
-        OrderStructs.TakerAsk memory takerAsk;
-        bytes memory signature;
-
         uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
         uint16 minNetRatio = 10000; // 0% slippage protection
@@ -255,10 +243,6 @@ contract StandardTransactionsTest is ProtocolBase {
      */
     function testTakerBidERC721WithEIP2981Royalties() public {
         _setUpUsers();
-
-        OrderStructs.MakerAsk memory makerAsk;
-        OrderStructs.TakerBid memory takerBid;
-        bytes memory signature;
 
         uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
@@ -351,10 +335,6 @@ contract StandardTransactionsTest is ProtocolBase {
         // Remove protocol fee for ERC721
         vm.prank(_owner);
         looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), 10000);
-
-        OrderStructs.MakerAsk memory makerAsk;
-        OrderStructs.TakerBid memory takerBid;
-        bytes memory signature;
 
         uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId

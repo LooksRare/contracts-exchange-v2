@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC721} from "@rari-capital/solmate/src/tokens/ERC721.sol";
 import {IERC165, IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/IERC2981.sol";
+import {MockERC721} from "./MockERC721.sol";
 
-contract MockERC721WithRoyalties is ERC721, IERC2981 {
+contract MockERC721WithRoyalties is MockERC721, IERC2981 {
     address public immutable DEFAULT_ROYALTY_RECIPIENT;
     uint256 public immutable DEFAULT_ROYALTY_FEE;
 
     mapping(uint256 => uint256) internal _royaltyFeeForTokenId;
     mapping(uint256 => address) internal _royaltyRecipientForTokenId;
 
-    constructor(address _royaltyFeeRecipient, uint256 _royaltyFee) ERC721("MockERC721", "MockERC721") {
+    constructor(address _royaltyFeeRecipient, uint256 _royaltyFee) {
         DEFAULT_ROYALTY_RECIPIENT = _royaltyFeeRecipient;
         DEFAULT_ROYALTY_FEE = _royaltyFee;
     }
@@ -24,10 +24,6 @@ contract MockERC721WithRoyalties is ERC721, IERC2981 {
         require(royaltyFee <= 10000, "Royalty too high");
         _royaltyRecipientForTokenId[tokenId] = royaltyRecipient;
         _royaltyFeeForTokenId[tokenId] = royaltyFee;
-    }
-
-    function mint(address to, uint256 tokenId) public {
-        _mint(to, tokenId);
     }
 
     function royaltyInfo(uint256 tokenId, uint256 salePrice)
@@ -43,11 +39,7 @@ contract MockERC721WithRoyalties is ERC721, IERC2981 {
         return (recipient, (royaltyFee * salePrice) / 10000);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(MockERC721, IERC165) returns (bool) {
         return interfaceId == 0x2a55205a || super.supportsInterface(interfaceId);
-    }
-
-    function tokenURI(uint256) public pure override returns (string memory) {
-        return "tokenURI";
     }
 }

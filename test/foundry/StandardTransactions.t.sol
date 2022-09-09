@@ -339,10 +339,6 @@ contract StandardTransactionsTest is ProtocolBase {
      */
     function testTakerAskERC721WithEIP2981Royalties() public {
         _setUpUsers();
-
-        OrderStructs.MakerBid memory makerBid;
-        OrderStructs.TakerAsk memory takerAsk;
-        bytes memory signature;
         // TODO
     }
 

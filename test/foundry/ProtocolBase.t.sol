@@ -23,18 +23,23 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     WETH public weth;
 
     function _setUpUser(address user) internal asPrankedUser(user) {
-        vm.deal(user, 100 ether);
+        // Do approvals for collections and WETH
         mockERC721.setApprovalForAll(address(transferManager), true);
         mockERC1155.setApprovalForAll(address(transferManager), true);
         mockERC721WithRoyalties.setApprovalForAll(address(transferManager), true);
-        transferManager.grantApprovals(operators);
         weth.approve(address(looksRareProtocol), type(uint256).max);
-        weth.deposit{value: 10 ether}();
+
+        // Grant approvals for transfer manager
+        transferManager.grantApprovals(operators);
+
+        // Receive ETH and WETH
+        vm.deal(user, _initialETHBalanceUser + _initialWETHBalanceUser);
+        weth.deposit{value: _initialWETHBalanceUser}();
     }
 
     function _setUpRoyalties(address collection, uint16 royaltyFee) internal {
         vm.startPrank(royaltyFeeRegistry.owner());
-        royaltyFeeRegistry.updateRoyaltyInfoForCollection(collection, _collectionOwner, _collectionOwner, royaltyFee);
+        royaltyFeeRegistry.updateRoyaltyInfoForCollection(collection, _royaltyRecipient, _royaltyRecipient, royaltyFee);
         vm.stopPrank();
     }
 
@@ -51,7 +56,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         looksRareProtocol = new LooksRareProtocol(address(transferManager), address(royaltyFeeRegistry));
         mockERC721 = new MockERC721();
         mockERC1155 = new MockERC1155();
-        mockERC721WithRoyalties = new MockERC721WithRoyalties(_collectionOwner, _standardRoyaltyFee);
+        mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 
         // Operations
         transferManager.whitelistOperator(address(looksRareProtocol));
@@ -64,14 +69,14 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         operators.push(address(looksRareProtocol));
 
         // Distribute ETH and WETH to protocol owner
-        vm.deal(_owner, 100 ether);
-        weth.deposit{value: 10 ether}();
+        vm.deal(_owner, _initialETHBalanceOwner + _initialWETHBalanceOwner);
+        weth.deposit{value: _initialWETHBalanceOwner}();
         vm.stopPrank();
 
-        // Distribute ETH and WETH to collection owner
-        vm.deal(_collectionOwner, 100 ether);
-        vm.startPrank(_collectionOwner);
-        weth.deposit{value: 10 ether}();
+        // Distribute ETH and WETH to royalty recipient
+        vm.deal(_royaltyRecipient, _initialETHBalanceRoyaltyRecipient + _initialWETHBalanceRoyaltyRecipient);
+        vm.startPrank(_royaltyRecipient);
+        weth.deposit{value: _initialWETHBalanceRoyaltyRecipient}();
         vm.stopPrank();
     }
 }

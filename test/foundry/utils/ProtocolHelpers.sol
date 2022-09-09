@@ -6,7 +6,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 abstract contract TestParameters is TestHelpers {
     address internal _owner = address(42);
-    address internal _collectionOwner = address(22);
+    address internal _royaltyRecipient = address(22);
     address internal _emptyReferrer = address(0);
     uint16 internal _standardProtocolFee = uint16(200);
     uint16 internal _standardRoyaltyFee = uint16(100);
@@ -16,6 +16,14 @@ abstract contract TestParameters is TestHelpers {
     address internal takerUser = vm.addr(takerUserPK);
     OrderStructs.MerkleRoot internal _emptyMerkleRoot = OrderStructs.MerkleRoot({root: bytes32(0)});
     bytes32[] internal _emptyMerkleProof = new bytes32[](0);
+
+    // Initial balances
+    uint256 internal _initialETHBalanceUser = 100 ether;
+    uint256 internal _initialWETHBalanceUser = 10 ether;
+    uint256 internal _initialETHBalanceRoyaltyRecipient = 10 ether;
+    uint256 internal _initialWETHBalanceRoyaltyRecipient = 10 ether;
+    uint256 internal _initialETHBalanceOwner = 50 ether;
+    uint256 internal _initialWETHBalanceOwner = 15 ether;
 }
 
 contract ProtocolHelpers is TestParameters {

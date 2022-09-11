@@ -92,7 +92,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + 200);
+        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
         {
             // Prepare the order hash
@@ -162,7 +162,7 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * TakerAsk matches makerBid but protocol fee was discontinued for this strategy.
      */
-    function testTakerAskERC721WithoutProtocolFee() public {
+    function testTakerAskERC721WithoutProtocolFeeNorRoyalty() public {
         _setUpUsers();
 
         // Remove protocol fee for ERC721
@@ -326,7 +326,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + 200);
+        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
         {
             // Prepare the order hash
@@ -396,7 +396,7 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * TakerBid matches makerAsk but protocol fee was discontinued for this strategy using the discount function.
      */
-    function testTakerBidERC721WithoutProtocolFee() public {
+    function testTakerBidERC721WithoutProtocolFeeNorRoyalty() public {
         _setUpUsers();
 
         // Remove protocol fee for ERC721

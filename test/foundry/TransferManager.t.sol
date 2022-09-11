@@ -2,14 +2,12 @@
 pragma solidity ^0.8.0;
 
 import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
-
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-
+import {MockERC721} from "../mock/MockERC721.sol";
+import {MockERC1155} from "../mock/MockERC1155.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
-import {MockERC721} from "./utils/MockERC721.sol";
-import {MockERC1155} from "./utils/MockERC1155.sol";
 
 abstract contract TestParameters is TestHelpers {
     address internal _owner = address(42);

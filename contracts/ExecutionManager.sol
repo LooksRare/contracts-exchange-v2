@@ -21,20 +21,20 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     // Maximum protocol fee
     uint16 private immutable _MAX_PROTOCOL_FEE = 5000;
 
-    // Count how many strategies
-    uint16 countStrategies = 2;
-
     // Royalty fee registry
     IRoyaltyFeeRegistry internal _royaltyFeeRegistry;
-
-    // Protocol fee recipient
-    address internal _protocolFeeRecipient;
 
     // Track collection discount factors (e.g., 100 = 1%, 5,000 = 50%) relative to strategy fee
     mapping(address => uint256) internal _collectionDiscountFactors;
 
     // Track strategy status and implementation
     mapping(uint16 => Strategy) internal _strategies;
+
+    // Protocol fee recipient
+    address internal _protocolFeeRecipient;
+
+    // Count how many strategies exist (it includes strategies that have been removed)
+    uint16 public countStrategies = 2;
 
     /**
      * @notice Constructor
@@ -451,23 +451,46 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Get royalty recipient and amount
+     * @notice Get royalty recipient and amount for a collection, set of itemIds, and gross sale amount.
      * @param collection address of the collection
      * @param itemIds array of itemIds
      * @param amount price amount of the sale
+     * @return royaltyRecipient address of the royalty recipient
+     * @return royaltyAmount amount to pay in royalties to the royalty recipient
+     * @dev There are two onchain sources for the royalty fee to distribute.
+     *      1. RoyaltyFeeRegistry: It is an onchain registry where royalty fee is defined across all items of a collection.
+     *      2. ERC2981: The NFT Royalty Standard where royalty fee is defined at a tokenId level for each item of a collection.
+     *      The onchain logic looks up the registry first. If it doesn't find anything, it checks if a collection is ERC2981.
+     *      If so, it fetches the proper royalty information for the itemId.
+     *      For a bundle that contains multiple itemIds (for a collection using ERC2981), if the royalty fee/recipient differ among the itemIds
+     *      part of the bundle, the trade reverts.
      */
     function _getRoyaltyRecipientAndAmount(
         address collection,
         uint256[] memory itemIds,
         uint256 amount
     ) internal view returns (address royaltyRecipient, uint256 royaltyAmount) {
-        // Call registry
+        // 1. Royalty fee registry
         (royaltyRecipient, royaltyAmount) = _royaltyFeeRegistry.royaltyInfo(collection, amount);
 
-        // Try calling ERC2981 if it exists
-        if (itemIds.length == 1 && royaltyRecipient == address(0) && royaltyAmount == 0) {
-            if (IERC165(collection).supportsInterface(0x2a55205a)) {
-                (royaltyRecipient, royaltyAmount) = IERC2981(collection).royaltyInfo(itemIds[0], amount);
+        // 2. ERC2981 logic
+        if (royaltyRecipient == address(0) && royaltyAmount == 0 && IERC165(collection).supportsInterface(0x2a55205a)) {
+            (royaltyRecipient, royaltyAmount) = IERC2981(collection).royaltyInfo(itemIds[0], amount);
+
+            // Specific logic if bundle
+            if (itemIds.length > 1) {
+                for (uint256 i = 1; i < itemIds.length; ) {
+                    (address royaltyRecipientForToken, uint256 royaltyAmountForToken) = IERC2981(collection)
+                        .royaltyInfo(itemIds[i], amount);
+
+                    if (royaltyRecipientForToken != royaltyRecipient || royaltyAmount != royaltyAmountForToken) {
+                        revert BundleEIP2981NotAllowed(collection, itemIds);
+                    }
+
+                    unchecked {
+                        ++i;
+                    }
+                }
             }
         }
     }

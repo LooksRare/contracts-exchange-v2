@@ -24,6 +24,8 @@ abstract contract TestParameters is Test {
     uint256 internal _initialWETHBalanceRoyaltyRecipient = 10 ether;
     uint256 internal _initialETHBalanceOwner = 50 ether;
     uint256 internal _initialWETHBalanceOwner = 15 ether;
+    uint256 internal _initialETHBalanceReferrer = 30 ether;
+    uint256 internal _initialWETHBalanceReferrer = 12 ether;
 
     // Referral parameters
     address public _referrerUser = address(2);

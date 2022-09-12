@@ -28,7 +28,7 @@ abstract contract TestParameters is Test {
     uint256 internal _initialWETHBalanceReferrer = 12 ether;
 
     // Referral parameters
-    address public _referrerUser = address(2);
+    address public _referrer = address(2);
     uint256 public constant _timelock = 120;
 
     // Reused parameters

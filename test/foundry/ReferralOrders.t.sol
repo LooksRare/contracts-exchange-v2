@@ -17,7 +17,7 @@ contract ReferralOrdersTest is ProtocolBase {
     uint256 internal _tier0Cost = 10 ether;
     uint256 internal _tier1Cost = 20 ether;
 
-    function _calculateReferralFee(uint256 originalAmount, uint256 tierRate) public returns (uint256 referralFee) {
+    function _calculateReferralFee(uint256 originalAmount, uint256 tierRate) internal returns (uint256 referralFee) {
         return (originalAmount * tierRate) / (10000 * 10000);
     }
 
@@ -30,10 +30,10 @@ contract ReferralOrdersTest is ProtocolBase {
         looksRareProtocol.updateReferralProgramStatus(true);
     }
 
-    function _setUpReferrer() public asPrankedUser(_referrerUser) {
-        vm.deal(_referrerUser, _initialETHBalanceReferrer + _initialWETHBalanceReferrer);
+    function _setUpReferrer() public asPrankedUser(_referrer) {
+        vm.deal(_referrer, _initialETHBalanceReferrer + _initialWETHBalanceReferrer);
         weth.deposit{value: _initialWETHBalanceReferrer}();
-        mockERC20.mint(_referrerUser, _tier1Cost);
+        mockERC20.mint(_referrer, _tier1Cost);
         mockERC20.approve(address(referralStaking), type(uint256).max);
         referralStaking.deposit(1, _tier1Cost);
     }
@@ -98,7 +98,7 @@ contract ReferralOrdersTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _referrerUser
+                _referrer
             );
             emit log_named_uint(
                 "TakerBid // ERC721 // Protocol Fee with Referral // No Royalties",
@@ -116,7 +116,7 @@ contract ReferralOrdersTest is ProtocolBase {
         assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * minNetRatio) / 10000);
         // Referral user receives 20% of protocol fee
         uint256 referralFee = _calculateReferralFee(price * _standardProtocolFee, _referralTier1);
-        assertEq(address(_referrerUser).balance, _initialETHBalanceReferrer + referralFee);
+        assertEq(address(_referrer).balance, _initialETHBalanceReferrer + referralFee);
         // Owner receives 80% of protocol fee
         assertEq(
             address(_owner).balance,
@@ -198,7 +198,7 @@ contract ReferralOrdersTest is ProtocolBase {
                 signatures,
                 merkleRoots,
                 merkleProofs,
-                _referrerUser,
+                _referrer,
                 false
             );
         }
@@ -228,7 +228,7 @@ contract ReferralOrdersTest is ProtocolBase {
             (numberPurchases - 1) * price * _standardProtocolFee,
             _referralTier1
         );
-        assertEq(address(_referrerUser).balance, _initialETHBalanceReferrer + referralFee);
+        assertEq(address(_referrer).balance, _initialETHBalanceReferrer + referralFee);
         // Owner receives 80% of protocol fee
         assertEq(
             address(_owner).balance,
@@ -298,7 +298,7 @@ contract ReferralOrdersTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _referrerUser
+                _referrer
             );
             emit log_named_uint(
                 "TakerAsk // ERC721 // Protocol Fee with Referral // No Royalties",
@@ -315,7 +315,7 @@ contract ReferralOrdersTest is ProtocolBase {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Referral user receives 20% of protocol fee
         uint256 referralFee = _calculateReferralFee(price * _standardProtocolFee, _referralTier1);
-        assertEq(weth.balanceOf(_referrerUser), _initialWETHBalanceReferrer + referralFee);
+        assertEq(weth.balanceOf(_referrer), _initialWETHBalanceReferrer + referralFee);
         // Owner receives 80% of protocol fee
         assertEq(
             weth.balanceOf(_owner),

@@ -121,17 +121,8 @@ contract LooksRareProtocol is
         // Execute the transaction and fetch protocol fee
         uint256 totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender);
 
-        // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
-        if (referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
-            totalProtocolFee -= totalReferralFee;
-
-            // Transfer the referral fee if anything to transfer
-            _transferFungibleTokens(makerAsk.currency, msg.sender, referrer, totalReferralFee);
-        }
-
-        // Transfer remaining protocol fee to the fee recipient
-        _transferFungibleTokens(makerAsk.currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
+        // Pay protocol fee (and referral fee if any)
+        _payProtocolFeeAndReferralFee(makerAsk.currency, msg.sender, referrer, totalProtocolFee);
 
         // Return ETH if any
         _returnETHIfAny();
@@ -202,17 +193,8 @@ contract LooksRareProtocol is
             }
         }
 
-        // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
-        if (referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
-            totalProtocolFee -= totalReferralFee;
-
-            // Transfer the referral fee if anything to transfer
-            _transferFungibleTokens(makerAsks[0].currency, msg.sender, referrer, totalReferralFee);
-        }
-
-        // Transfer remaining protocol fee to the fee recipient
-        _transferFungibleTokens(makerAsks[0].currency, msg.sender, _protocolFeeRecipient, totalProtocolFee);
+        // Pay protocol fee (and referral fee if any)
+        _payProtocolFeeAndReferralFee(makerAsks[0].currency, msg.sender, referrer, totalProtocolFee);
 
         // Return ETH if any
         _returnETHIfAny();
@@ -263,17 +245,8 @@ contract LooksRareProtocol is
         // Execute the transaction and fetch protocol fee
         uint256 totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, msg.sender);
 
-        // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
-        if (referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
-            totalProtocolFee -= totalReferralFee;
-
-            // Transfer the referral fee if anything to transfer
-            _transferFungibleTokens(makerBid.currency, makerBid.signer, referrer, totalReferralFee);
-        }
-
-        // Transfer remaining protocol fee to the fee recipient
-        _transferFungibleTokens(makerBid.currency, makerBid.signer, _protocolFeeRecipient, totalProtocolFee);
+        // Pay protocol fee (and referral fee if any)
+        _payProtocolFeeAndReferralFee(makerBid.currency, makerBid.signer, referrer, totalProtocolFee);
     }
 
     /**
@@ -477,6 +450,32 @@ contract LooksRareProtocol is
             recipients,
             fees
         );
+    }
+
+    /**
+     * @notice Pay protocol fee and referral fee (if any)
+     * @param currency address of the currency to transfer (address(0) is ETH)
+     * @param bidUser bid user address
+     * @param referrer address of the referrer (address(0) if none)
+     * @param totalProtocolFee total protocol fee denominated in currency
+     */
+    function _payProtocolFeeAndReferralFee(
+        address currency,
+        address bidUser,
+        address referrer,
+        uint256 totalProtocolFee
+    ) internal {
+        // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
+        if (referrer != address(0)) {
+            uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
+            totalProtocolFee -= totalReferralFee;
+
+            // Transfer the referral fee if anything to transfer
+            _transferFungibleTokens(currency, bidUser, referrer, totalReferralFee);
+        }
+
+        // Transfer remaining protocol fee to the fee recipient
+        _transferFungibleTokens(currency, bidUser, _protocolFeeRecipient, totalProtocolFee);
     }
 
     /**

@@ -17,11 +17,11 @@ contract ReferralOrdersTest is ProtocolBase {
     uint256 internal _tier0Cost = 10 ether;
     uint256 internal _tier1Cost = 20 ether;
 
-    function _calculateReferralFee(uint256 originalAmount, uint256 tierRate) internal returns (uint256 referralFee) {
+    function _calculateReferralFee(uint256 originalAmount, uint256 tierRate) private returns (uint256 referralFee) {
         return (originalAmount * tierRate) / (10000 * 10000);
     }
 
-    function _setUpReferralStaking() public asPrankedUser(_owner) {
+    function _setUpReferralStaking() private asPrankedUser(_owner) {
         mockERC20 = new MockERC20();
         referralStaking = new ReferralStaking(address(looksRareProtocol), address(mockERC20), _timelock);
         referralStaking.setTier(0, _referralTier0, _tier0Cost);
@@ -30,7 +30,7 @@ contract ReferralOrdersTest is ProtocolBase {
         looksRareProtocol.updateReferralProgramStatus(true);
     }
 
-    function _setUpReferrer() public asPrankedUser(_referrer) {
+    function _setUpReferrer() private asPrankedUser(_referrer) {
         vm.deal(_referrer, _initialETHBalanceReferrer + _initialWETHBalanceReferrer);
         weth.deposit{value: _initialWETHBalanceReferrer}();
         mockERC20.mint(_referrer, _tier1Cost);

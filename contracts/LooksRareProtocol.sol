@@ -465,8 +465,8 @@ contract LooksRareProtocol is
         address referrer,
         uint256 totalProtocolFee
     ) internal {
-        // Check whether to execute a referral logic (and adjust downward the protocol fee if so)
-        if (referrer != address(0)) {
+        // Check whether referral program is active and whether to execute a referral logic (and adjust downward the protocol fee if so)
+        if (isReferralProgramActive && referrer != address(0)) {
             uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
 

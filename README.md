@@ -1,4 +1,8 @@
-# Contracts Exchange V2
+# @looksrare/contracts-exchange-v2
+
+## Description
+
+This project contains core smart contracts used for the LooksRare exchange protocol ("v2").
 
 ## Setup
 
@@ -17,7 +21,7 @@ It is a hybrid [Hardhat](https://hardhat.org/) repo that also requires [Foundry]
 
 ### Run tests
 
-- TypeScript tests are included in the `typescript` folder in the `test` folder at the root of the repo.
+- TypeScript tests are included in the `hardhat` folder in the `test` folder at the root of the repo.
 - Solidity tests are included in the `foundry` folder in the `test` folder at the root of the repo.
 
 ### Example of Foundry/Forge commands

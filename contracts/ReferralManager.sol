@@ -10,18 +10,22 @@ import {IReferralManager} from "./interfaces/IReferralManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract ReferralManager is IReferralManager, OwnableTwoSteps {
+    // Whether the referral program is active
+    bool public isReferralProgramActive;
+
     // Address of the referral controller
     address public referralController;
 
+    // Tracks referrer status
+    mapping(address => uint16) internal _referrers;
+
+    // Modifier for referral controller actions
     modifier onlyController() {
         if (msg.sender != referralController) {
             revert NotController();
         }
         _;
     }
-
-    // Tracks referrer status
-    mapping(address => uint16) internal _referrers;
 
     /**
      * @notice Register referrer with its associated percentage
@@ -53,7 +57,16 @@ contract ReferralManager is IReferralManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Add referral controller
+     * @notice Update status for referral program
+     * @param isActive whether the referral program is active
+     */
+    function updateReferralProgramStatus(bool isActive) external onlyOwner {
+        isReferralProgramActive = isActive;
+        emit NewReferralProgramStatus(isActive);
+    }
+
+    /**
+     * @notice Update referral controller
      * @param newReferralController address of new referral controller contract
      */
     function updateReferralController(address newReferralController) external onlyOwner {

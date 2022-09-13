@@ -15,7 +15,7 @@ contract BundleTransactionsTest is ProtocolBase {
             numberItemsInBundle
         );
 
-        uint256 price = makerBid.maxPrice;
+        price = makerBid.maxPrice;
         uint16 minNetRatio = 10000 - _standardProtocolFee;
 
         // Adjust slippage parameters accordingly
@@ -77,7 +77,7 @@ contract BundleTransactionsTest is ProtocolBase {
             numberItemsInBundle
         );
 
-        uint256 price = makerBid.maxPrice;
+        price = makerBid.maxPrice;
         uint16 minNetRatio = 10000 - (_standardProtocolFee + _standardRoyaltyFee);
 
         // Adjust slippage parameters accordingly
@@ -141,7 +141,7 @@ contract BundleTransactionsTest is ProtocolBase {
             numberItemsInBundle
         );
 
-        uint256 price = makerBid.maxPrice;
+        price = makerBid.maxPrice;
         uint16 minNetRatio = 10000 - (_standardProtocolFee + _standardRoyaltyFee);
 
         // Adjust slippage parameters accordingly
@@ -201,7 +201,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
-        uint256 price = makerAsk.minPrice;
+        price = makerAsk.minPrice;
         uint16 minNetRatio = 10000 - _standardProtocolFee;
 
         // Adjust slippage parameters accordingly
@@ -258,7 +258,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
-        uint256 price = makerAsk.minPrice;
+        price = makerAsk.minPrice;
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
         // Adjust slippage parameters accordingly
@@ -320,7 +320,7 @@ contract BundleTransactionsTest is ProtocolBase {
             numberItemsInBundle
         );
 
-        uint256 price = makerAsk.minPrice;
+        price = makerAsk.minPrice;
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
         // Adjust slippage parameters accordingly

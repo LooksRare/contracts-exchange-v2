@@ -12,7 +12,7 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 price = 1 ether; // Fixed price of sale
+        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
@@ -76,7 +76,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9700) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * minNetRatio) / 10000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -90,7 +90,7 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 price = 1 ether; // Fixed price of sale
+        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
@@ -154,7 +154,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
@@ -169,7 +169,7 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.prank(_owner);
         looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), 10000);
 
-        uint256 price = 1 ether; // Fixed price of sale
+        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
         uint16 minNetRatio = 10000; // 0% slippage protection
 
@@ -244,7 +244,7 @@ contract StandardTransactionsTest is ProtocolBase {
     function testTakerBidERC721WithEIP2981Royalties() public {
         _setUpUsers();
 
-        uint256 price = 1 ether; // Fixed price of sale
+        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
@@ -324,7 +324,7 @@ contract StandardTransactionsTest is ProtocolBase {
     function testTakerAskERC721WithEIP2981Royalties() public {
         _setUpUsers();
 
-        uint256 price = 1 ether; // Fixed price of sale
+        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
@@ -388,7 +388,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
     }
@@ -403,7 +403,7 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.prank(_owner);
         looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), 10000);
 
-        uint256 price = 1 ether; // Fixed price of sale
+        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
         uint16 minNetRatio = 10000;
 
@@ -481,7 +481,7 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
 
         uint256 numberPurchases = 3;
-        uint256 price = 1 ether;
+        price = 1 ether;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
@@ -568,7 +568,7 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
 
         uint256 numberPurchases = 3;
-        uint256 price = 1 ether;
+        price = 1 ether;
         uint256 faultyTokenId = numberPurchases - 1;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);

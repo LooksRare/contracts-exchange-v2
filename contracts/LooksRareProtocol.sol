@@ -465,9 +465,11 @@ contract LooksRareProtocol is
         address referrer,
         uint256 totalProtocolFee
     ) internal {
+        uint256 totalReferralFee;
+
         // Check whether referral program is active and whether to execute a referral logic (and adjust downward the protocol fee if so)
         if (isReferralProgramActive && referrer != address(0)) {
-            uint256 totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
+            totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
 
             // Transfer the referral fee if anything to transfer
@@ -476,6 +478,12 @@ contract LooksRareProtocol is
 
         // Transfer remaining protocol fee to the fee recipient
         _transferFungibleTokens(currency, bidUser, _protocolFeeRecipient, totalProtocolFee);
+
+        if (totalReferralFee != 0) {
+            emit ProtocolPaymentWithReferrer(currency, totalProtocolFee, referrer, totalReferralFee);
+        } else {
+            emit ProtocolPayment(currency, totalProtocolFee);
+        }
     }
 
     /**

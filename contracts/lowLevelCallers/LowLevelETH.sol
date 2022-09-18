@@ -26,9 +26,7 @@ contract LowLevelETH {
             status := call(_gasLimit, _to, _amount, 0, 0, 0, 0)
         }
 
-        if (!status) {
-            revert TransferFail();
-        }
+        if (!status) revert TransferFail();
     }
 
     /**
@@ -43,9 +41,7 @@ contract LowLevelETH {
             status := call(gas(), _to, _amount, 0, 0, 0, 0)
         }
 
-        if (!status) {
-            revert TransferFail();
-        }
+        if (!status) revert TransferFail();
     }
 
     /**

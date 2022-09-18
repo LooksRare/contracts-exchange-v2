@@ -162,9 +162,7 @@ contract LooksRareProtocol is
         uint256 totalProtocolFee;
         for (uint256 i; i < takerBids.length; ) {
             {
-                if (i != 0 && makerAsks[i].currency != makerAsks[i - 1].currency) {
-                    revert WrongCurrency();
-                }
+                if (i != 0 && makerAsks[i].currency != makerAsks[i - 1].currency) revert WrongCurrency();
             }
 
             // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
@@ -275,9 +273,7 @@ contract LooksRareProtocol is
      * @param transferManager transfer manager address
      */
     function addTransferManagerForAssetType(uint8 assetType, address transferManager) external onlyOwner {
-        if (_transferManagers[assetType] != address(0)) {
-            revert WrongAssetType(assetType);
-        }
+        if (_transferManagers[assetType] != address(0)) revert WrongAssetType(assetType);
 
         _transferManagers[assetType] = transferManager;
     }
@@ -317,21 +313,17 @@ contract LooksRareProtocol is
         address sender
     ) internal returns (uint256 protocolFeeAmount) {
         // Verify whether the currency is available
-        if (!_isCurrencyWhitelisted[makerAsk.currency]) {
-            revert WrongCurrency();
-        }
+        if (!_isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
 
         // Verify nonces and invalidate order nonce if valid
         if (
             _userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
             _userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
             _userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
-        ) {
-            revert WrongNonces();
-        } else {
-            // Invalidate order at this nonce for future execution
-            _userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
-        }
+        ) revert WrongNonces();
+
+        // Invalidate order at this nonce for future execution
+        _userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
 
         uint256[] memory fees = new uint256[](2);
         address[] memory recipients = new address[](2);
@@ -390,21 +382,17 @@ contract LooksRareProtocol is
         address sender
     ) internal returns (uint256 protocolFeeAmount) {
         // Verify whether the currency is whitelisted but is not ETH (address(0))
-        if (!_isCurrencyWhitelisted[makerBid.currency] && makerBid.currency != address(0)) {
-            revert WrongCurrency();
-        }
+        if (!_isCurrencyWhitelisted[makerBid.currency] && makerBid.currency != address(0)) revert WrongCurrency();
 
         // Verify nonces and invalidate order nonce if valid
         if (
             _userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
             _userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
             _userOrderNonce[makerBid.signer][makerBid.orderNonce]
-        ) {
-            revert WrongNonces();
-        } else {
-            // Invalidate order at this nonce for future execution
-            _userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
-        }
+        ) revert WrongNonces();
+
+        // Invalidate order at this nonce for future execution
+        _userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
 
         uint256[] memory fees = new uint256[](2);
         address[] memory recipients = new address[](2);
@@ -505,9 +493,7 @@ contract LooksRareProtocol is
     ) internal {
         // Verify there is a transfer manager for the asset type
         address transferManager = _transferManagers[assetType];
-        if (transferManager == address(0)) {
-            revert NoTransferManagerForAssetType(assetType);
-        }
+        if (transferManager == address(0)) revert NoTransferManagerForAssetType(assetType);
 
         // 0 is not an option
         if (itemIds.length == 1) {
@@ -577,8 +563,6 @@ contract LooksRareProtocol is
         bytes32 root,
         bytes32 orderHash
     ) internal pure {
-        if (!MerkleProof.verify(proof, root, orderHash)) {
-            revert WrongMerkleProof();
-        }
+        if (!MerkleProof.verify(proof, root, orderHash)) revert WrongMerkleProof();
     }
 }

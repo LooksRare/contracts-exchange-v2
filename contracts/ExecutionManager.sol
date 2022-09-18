@@ -71,9 +71,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         uint16 maxProtocolFee,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFee < protocolFee || maxProtocolFee > _MAX_PROTOCOL_FEE) {
-            revert StrategyProtocolFeeTooHigh();
-        }
+        if (maxProtocolFee < protocolFee || maxProtocolFee > _MAX_PROTOCOL_FEE) revert StrategyProtocolFeeTooHigh();
 
         _strategies[countStrategies] = Strategy({
             isActive: true,
@@ -92,9 +90,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @param discountFactor discount factor (e.g., 1000 = -10% relative to the protocol fee)
      */
     function adjustDiscountFactorCollection(address collection, uint256 discountFactor) external onlyOwner {
-        if (discountFactor > 10000) {
-            revert CollectionDiscountFactorTooHigh();
-        }
+        if (discountFactor > 10000) revert CollectionDiscountFactorTooHigh();
 
         _collectionDiscountFactors[collection] = discountFactor;
         emit NewCollectionDiscountFactor(collection, discountFactor);
@@ -131,13 +127,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         uint16 protocolFee,
         bool isActive
     ) external onlyOwner {
-        if (strategyId >= countStrategies) {
-            revert StrategyNotUsed();
-        }
-
-        if (protocolFee > _strategies[strategyId].maxProtocolFee) {
-            revert StrategyProtocolFeeTooHigh();
-        }
+        if (strategyId >= countStrategies) revert StrategyNotUsed();
+        if (protocolFee > _strategies[strategyId].maxProtocolFee) revert StrategyProtocolFeeTooHigh();
 
         _strategies[strategyId] = Strategy({
             isActive: isActive,
@@ -201,11 +192,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
 
         netPrice = price - protocolFeeAmount - royaltyFeeAmount;
 
-        if (netPrice < (price * takerAsk.minNetRatio) / 10000) {
-            revert SlippageAsk();
-        } else if (netPrice < (price * makerBid.minNetRatio) / 10000) {
-            revert SlippageBid();
-        }
+        if (netPrice < (price * takerAsk.minNetRatio) / 10000) revert SlippageAsk();
+        if (netPrice < (price * makerBid.minNetRatio) / 10000) revert SlippageBid();
     }
 
     /**
@@ -241,11 +229,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
 
         netPrice = price - royaltyFeeAmount - protocolFeeAmount;
 
-        if (netPrice < (price * makerAsk.minNetRatio) / 10000) {
-            revert SlippageAsk();
-        } else if (netPrice < (price * takerBid.minNetRatio) / 10000) {
-            revert SlippageBid();
-        }
+        if (netPrice < (price * makerAsk.minNetRatio) / 10000) revert SlippageAsk();
+        if (netPrice < (price * takerBid.minNetRatio) / 10000) revert SlippageBid();
     }
 
     /**
@@ -359,9 +344,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                 }
             }
 
-            if (!canOrderBeExecuted) {
-                revert OrderInvalid();
-            }
+            if (!canOrderBeExecuted) revert OrderInvalid();
         }
     }
 
@@ -409,9 +392,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                 }
             }
 
-            if (!canOrderBeExecuted) {
-                revert OrderInvalid();
-            }
+            if (!canOrderBeExecuted) revert OrderInvalid();
         }
     }
 
@@ -444,9 +425,7 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                 takerAsk.amounts[0] == amounts[0] &&
                 amounts[0] > 0;
 
-            if (!canOrderBeExecuted) {
-                revert OrderInvalid();
-            }
+            if (!canOrderBeExecuted) revert OrderInvalid();
         }
     }
 
@@ -483,9 +462,8 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
                     (address royaltyRecipientForToken, uint256 royaltyAmountForToken) = IERC2981(collection)
                         .royaltyInfo(itemIds[i], amount);
 
-                    if (royaltyRecipientForToken != royaltyRecipient || royaltyAmount != royaltyAmountForToken) {
+                    if (royaltyRecipientForToken != royaltyRecipient || royaltyAmount != royaltyAmountForToken)
                         revert BundleEIP2981NotAllowed(collection, itemIds);
-                    }
 
                     unchecked {
                         ++i;
@@ -501,8 +479,6 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
      * @param endTime end timestamp
      */
     function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) internal view {
-        if (startTime > block.timestamp || endTime < block.timestamp) {
-            revert OutsideOfTimeRange();
-        }
+        if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
     }
 }

@@ -41,9 +41,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256 itemId,
         uint256 amount
     ) external override {
-        if (!isOperatorValidForTransfer(from, msg.sender)) {
-            revert TransferCallerInvalid();
-        }
+        if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
         if (assetType == 0) {
             _executeERC721Transfer(collection, from, to, itemId);
@@ -71,13 +69,8 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         uint256[] calldata itemIds,
         uint256[] calldata amounts
     ) external override {
-        if (itemIds.length == 0 || itemIds.length != amounts.length) {
-            revert WrongLengths();
-        }
-
-        if (from != msg.sender && !isOperatorValidForTransfer(from, msg.sender)) {
-            revert TransferCallerInvalid();
-        }
+        if (itemIds.length == 0 || itemIds.length != amounts.length) revert WrongLengths();
+        if (from != msg.sender && !isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
         if (assetType == 0) {
             for (uint256 i; i < amounts.length; ) {
@@ -115,18 +108,12 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
             itemIds.length != assetTypes.length ||
             itemIds.length != collections.length ||
             itemIds.length != amounts.length
-        ) {
-            revert WrongLengths();
-        }
+        ) revert WrongLengths();
 
-        if (from != msg.sender && !isOperatorValidForTransfer(from, msg.sender)) {
-            revert TransferCallerInvalid();
-        }
+        if (from != msg.sender && !isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
         for (uint256 i; i < collections.length; ) {
-            if (itemIds[i].length == 0 || itemIds[i].length != amounts[i].length) {
-                revert WrongLengths();
-            }
+            if (itemIds[i].length == 0 || itemIds[i].length != amounts[i].length) revert WrongLengths();
 
             if (assetTypes[i] == 0) {
                 for (uint256 j; j < amounts[i].length; ) {
@@ -153,18 +140,11 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
      * @dev Each operator address must be globally whitelisted to be approved.
      */
     function grantApprovals(address[] calldata operators) external {
-        if (operators.length == 0) {
-            revert WrongLengths();
-        }
+        if (operators.length == 0) revert WrongLengths();
 
         for (uint256 i; i < operators.length; ) {
-            if (!_whitelistedOperators[operators[i]]) {
-                revert NotWhitelisted();
-            }
-
-            if (_hasUserApprovedOperator[msg.sender][operators[i]]) {
-                revert AlreadyApproved();
-            }
+            if (!_whitelistedOperators[operators[i]]) revert NotWhitelisted();
+            if (_hasUserApprovedOperator[msg.sender][operators[i]]) revert AlreadyApproved();
 
             _hasUserApprovedOperator[msg.sender][operators[i]] = true;
 
@@ -182,14 +162,10 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
      * @dev Each operator address must be approved at the user level to be revoked.
      */
     function revokeApprovals(address[] calldata operators) external {
-        if (operators.length == 0) {
-            revert WrongLengths();
-        }
+        if (operators.length == 0) revert WrongLengths();
 
         for (uint256 i; i < operators.length; ) {
-            if (!_hasUserApprovedOperator[msg.sender][operators[i]]) {
-                revert NotApproved();
-            }
+            if (!_hasUserApprovedOperator[msg.sender][operators[i]]) revert NotApproved();
 
             delete _hasUserApprovedOperator[msg.sender][operators[i]];
             unchecked {
@@ -205,9 +181,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
      * @param operator address of the operator to add
      */
     function whitelistOperator(address operator) external onlyOwner {
-        if (_whitelistedOperators[operator]) {
-            revert AlreadyWhitelisted();
-        }
+        if (_whitelistedOperators[operator]) revert AlreadyWhitelisted();
 
         _whitelistedOperators[operator] = true;
 
@@ -219,9 +193,7 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
      * @param operator address of the operator to remove
      */
     function removeOperator(address operator) external onlyOwner {
-        if (!_whitelistedOperators[operator]) {
-            revert NotWhitelisted();
-        }
+        if (!_whitelistedOperators[operator]) revert NotWhitelisted();
 
         delete _whitelistedOperators[operator];
 

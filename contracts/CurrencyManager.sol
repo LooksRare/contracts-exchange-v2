@@ -18,13 +18,8 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
      * @param currency address of the currency (address(0) for ETH)
      */
     function addCurrency(address currency) external onlyOwner {
-        if (currency != address(0) && currency.code.length == 0) {
-            revert CurrencyNotContract(currency);
-        }
-
-        if (_isCurrencyWhitelisted[currency]) {
-            revert CurrencyAlreadyWhitelisted(currency);
-        }
+        if (currency != address(0) && currency.code.length == 0) revert CurrencyNotContract(currency);
+        if (_isCurrencyWhitelisted[currency]) revert CurrencyAlreadyWhitelisted(currency);
 
         _isCurrencyWhitelisted[currency] = true;
         emit CurrencyWhitelisted(currency);
@@ -35,9 +30,7 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
      * @param currency address of the currency (address(0) for ETH)
      */
     function removeCurrency(address currency) external onlyOwner {
-        if (!_isCurrencyWhitelisted[currency]) {
-            revert CurrencyNotWhitelisted(currency);
-        }
+        if (!_isCurrencyWhitelisted[currency]) revert CurrencyNotWhitelisted(currency);
 
         delete _isCurrencyWhitelisted[currency];
         emit CurrencyRemoved(currency);

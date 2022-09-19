@@ -453,11 +453,17 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         (royaltyRecipient, royaltyAmount) = _royaltyFeeRegistry.royaltyInfo(collection, amount);
 
         // 2. ERC2981 logic
-        if (royaltyRecipient == address(0) && royaltyAmount == 0 && IERC165(collection).supportsInterface(0x2a55205a)) {
-            (royaltyRecipient, royaltyAmount) = IERC2981(collection).royaltyInfo(itemIds[0], amount);
+        if (royaltyRecipient == address(0) && royaltyAmount == 0) {
+            (bool status, bytes memory data) = collection.staticcall(
+                abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[0], amount)
+            );
+
+            if (status) {
+                (royaltyRecipient, royaltyAmount) = abi.decode(data, (address, uint256));
+            }
 
             // Specific logic if bundle
-            if (itemIds.length > 1) {
+            if (status && itemIds.length > 1) {
                 for (uint256 i = 1; i < itemIds.length; ) {
                     (address royaltyRecipientForToken, uint256 royaltyAmountForToken) = IERC2981(collection)
                         .royaltyInfo(itemIds[i], amount);

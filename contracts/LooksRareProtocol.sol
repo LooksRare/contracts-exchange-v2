@@ -4,6 +4,8 @@ pragma solidity ^0.8.14;
 // LooksRare unopinionated libraries
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
+import {LowLevelETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelETH.sol";
+import {LowLevelERC20} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20.sol";
 
 // OpenZeppelin's library for verifying Merkle proofs
 import {MerkleProof} from "./libraries/OpenZeppelin/MerkleProof.sol";
@@ -21,10 +23,6 @@ import {ExecutionManager} from "./ExecutionManager.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {ReferralManager} from "./ReferralManager.sol";
 import {TransferManager} from "./TransferManager.sol";
-
-// Low-level callers
-import {LowLevelETH} from "./lowLevelCallers/LowLevelETH.sol";
-import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
 
 /**
  * @title LooksRareProtocol
@@ -533,7 +531,7 @@ contract LooksRareProtocol is
         if (currency == address(0)) {
             _transferETH(recipient, amount);
         } else {
-            _executeERC20Transfer(currency, sender, recipient, amount);
+            _executeERC20TransferFrom(currency, sender, recipient, amount);
         }
     }
 

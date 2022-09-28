@@ -2,16 +2,16 @@
 pragma solidity ^0.8.0;
 
 import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
-import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+import {IOwnableTwoSteps, OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
-import {IReferralStaking} from "../../contracts/interfaces/IReferralStaking.sol";
+import {IReferralStaking, ReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
 import {TestParameters} from "./utils/TestParameters.sol";
 
-contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking {
+contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, IOwnableTwoSteps {
     MockERC20 public mockERC20;
     RoyaltyFeeRegistry public royaltyFeeRegistry;
     TransferManager public transferManager;
@@ -42,19 +42,19 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking {
 
     function testOwnerOnly() public asPrankedUser(_referrer) {
         // Make sure that owner functions can't be used by a _referrer
-        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         referralStaking.registerReferrer(_referrer, 0);
 
-        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         referralStaking.unregisterReferrer(_referrer);
 
-        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         referralStaking.setTier(1, 1000, 10 ether);
 
-        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         referralStaking.setTimelockPeriod(60);
 
-        vm.expectRevert(OwnableTwoSteps.NotOwner.selector);
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         referralStaking.removeLastTier();
     }
 

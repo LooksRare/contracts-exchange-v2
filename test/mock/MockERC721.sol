@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.7;
 
-import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/IERC165.sol";
+import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
 import {ERC721} from "@rari-capital/solmate/src/tokens/ERC721.sol";
 
 contract MockERC721 is ERC721("MockERC721", "MockERC721") {

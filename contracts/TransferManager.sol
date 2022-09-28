@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/IERC165.sol";
-import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/IERC2981.sol";
+// LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+import {LowLevelERC721} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC721.sol";
+import {LowLevelERC1155} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC1155.sol";
+
+// Generic interfaces
+import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
+import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
+import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
+import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1155.sol";
 
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {IERC721} from "./interfaces/IERC721.sol";
-import {IERC1155} from "./interfaces/IERC1155.sol";
 
 /**
  * @title TransferManager
@@ -17,7 +22,7 @@ import {IERC1155} from "./interfaces/IERC1155.sol";
  *         "Safe" transfer functions for ERC721 are not implemented; these functions introduce added gas costs to verify if the recipient is a contract as it requires verifying the receiver interface is valid.
  * @author LooksRare protocol team (👀,💎)
  */
-contract TransferManager is ITransferManager, OwnableTwoSteps {
+contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, OwnableTwoSteps {
     // Whether user has approved operator
     mapping(address => mapping(address => bool)) internal _hasUserApprovedOperator;
 
@@ -44,9 +49,9 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
         if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
         if (assetType == 0) {
-            _executeERC721Transfer(collection, from, to, itemId);
+            _executeERC721TransferFrom(collection, from, to, itemId);
         } else if (assetType == 1) {
-            _executeERC1155Transfer(collection, from, to, itemId, amount);
+            _executeERC1155SafeTransferFrom(collection, from, to, itemId, amount);
         } else {
             revert WrongAssetType(assetType);
         }
@@ -74,13 +79,13 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
 
         if (assetType == 0) {
             for (uint256 i; i < amounts.length; ) {
-                _executeERC721Transfer(collection, from, to, itemIds[i]);
+                _executeERC721TransferFrom(collection, from, to, itemIds[i]);
                 unchecked {
                     ++i;
                 }
             }
         } else if (assetType == 1) {
-            _executeERC1155BatchTransfer(collection, from, to, itemIds, amounts);
+            _executeERC1155SafeBatchTransferFrom(collection, from, to, itemIds, amounts);
         } else {
             revert WrongAssetType(assetType);
         }
@@ -117,13 +122,13 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
 
             if (assetTypes[i] == 0) {
                 for (uint256 j; j < amounts[i].length; ) {
-                    _executeERC721Transfer(collections[i], from, to, itemIds[i][j]);
+                    _executeERC721TransferFrom(collections[i], from, to, itemIds[i][j]);
                     unchecked {
                         ++j;
                     }
                 }
             } else if (assetTypes[i] == 1) {
-                _executeERC1155BatchTransfer(collections[i], from, to, itemIds[i], amounts[i]);
+                _executeERC1155SafeBatchTransferFrom(collections[i], from, to, itemIds[i], amounts[i]);
             } else {
                 revert WrongAssetType(assetTypes[i]);
             }
@@ -207,57 +212,5 @@ contract TransferManager is ITransferManager, OwnableTwoSteps {
      */
     function isOperatorValidForTransfer(address user, address operator) internal view returns (bool) {
         return _whitelistedOperators[operator] && _hasUserApprovedOperator[user][operator];
-    }
-
-    /**
-     * @notice Execute ERC721 transfer
-     * @param collection collection address
-     * @param from sender address
-     * @param to recipient address
-     * @param itemId tokenId
-     */
-    function _executeERC721Transfer(
-        address collection,
-        address from,
-        address to,
-        uint256 itemId
-    ) internal {
-        IERC721(collection).transferFrom(from, to, itemId);
-    }
-
-    /**
-     * @notice Execute ERC1155 transfer of single item for a defined amount
-     * @param collection collection address
-     * @param from sender address
-     * @param to recipient address
-     * @param itemId tokenId
-     * @param amount amount
-     */
-    function _executeERC1155Transfer(
-        address collection,
-        address from,
-        address to,
-        uint256 itemId,
-        uint256 amount
-    ) internal {
-        IERC1155(collection).safeTransferFrom(from, to, itemId, amount, "");
-    }
-
-    /**
-     * @notice Execute ERC1155 batch transfer of multiple items for a defined set of amounts
-     * @param collection collection address
-     * @param from sender address
-     * @param to recipient address
-     * @param itemIds array of tokenIds
-     * @param amounts array of amounts
-     */
-    function _executeERC1155BatchTransfer(
-        address collection,
-        address from,
-        address to,
-        uint256[] calldata itemIds,
-        uint256[] calldata amounts
-    ) internal {
-        IERC1155(collection).safeBatchTransferFrom(from, to, itemIds, amounts, "");
     }
 }

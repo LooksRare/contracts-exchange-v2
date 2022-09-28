@@ -2,7 +2,7 @@
 pragma solidity ^0.8.14;
 
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
-import {LowLevelERC20} from "./lowLevelCallers/LowLevelERC20.sol";
+import {LowLevelERC20} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20.sol";
 import {IReferralStaking} from "./interfaces/IReferralStaking.sol";
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
@@ -63,7 +63,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
         // If the amount added is not exactly the amount needed to climb to the next tier, reverts
         if (_tiers[tier].stake - _userStakes[msg.sender] != amount) revert WrongDepositAmount();
 
-        _executeERC20Transfer(looksRareTokenAddress, msg.sender, address(this), amount);
+        _executeERC20TransferFrom(looksRareTokenAddress, msg.sender, address(this), amount);
         _userStakes[msg.sender] += amount;
         looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
         _lastDepositTimestamp[msg.sender] = block.timestamp;

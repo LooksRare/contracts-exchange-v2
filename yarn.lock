@@ -750,17 +750,17 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@looksrare/contracts-exchange-v1@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@looksrare/contracts-exchange-v1/-/contracts-exchange-v1-1.1.0.tgz#bdeca1e3d3be766b17d84bcf92e455f96dd228bc"
-  integrity sha512-7uEzJhNeiVdum1g7SQZ1VB0flRVyWcyhhIvLEWGXQFcD5bD9I/VXPwGMlzjghKePFO9AuHgaAxeQtjUqVhkNPw==
+"@looksrare/contracts-exchange-v1@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@looksrare/contracts-exchange-v1/-/contracts-exchange-v1-1.2.0.tgz#e23daee853f9f101bea782c4110374ecf10eab2d"
+  integrity sha512-8Rr19/dVbBNPwALgS8RFi0HpHPDSXFX73bC+IrMlp2e889U9K+X1mhnbuF0NREs1FKeFehpKgyU2vm15wolUXg==
   dependencies:
     "@openzeppelin/contracts" "4.4.2"
 
-"@looksrare/contracts-libs@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-1.0.0.tgz#0b6b5fea7c30b19375ce9c963103b8eb3741e595"
-  integrity sha512-2dMPFrMo80m7yhuH8uNf9jpdUkVtzZxNeWEV5wKwzV7u5p5r6wUPJI3A4FX+TrDbOzemlVjla5j6PbHjJfThoA==
+"@looksrare/contracts-libs@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.0.0.tgz#44e2d624ee669d4fd5f8ace6f64795fb8373f5a7"
+  integrity sha512-OzhVLHjSLRPFEC1J0KKJbxRYzVJ6hruCT3MtGn+jzZkVamyl5FLNX6ql143pAjdW+n2o+ESUnDH6ZHFqbQLRWQ==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"

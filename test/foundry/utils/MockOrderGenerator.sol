@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/IERC165.sol";
+import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {ProtocolHelpers} from "./ProtocolHelpers.sol";
 

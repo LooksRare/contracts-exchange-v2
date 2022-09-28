@@ -623,8 +623,8 @@ contract StandardTransactionsTest is ProtocolBase {
             OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
             bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
 
-            // @dev It is the expected revertion message for ERC721 tokens from the Solmate library
-            vm.expectRevert(bytes("WRONG_FROM"));
+            // It is for ERC721TransferFromFail();
+            vm.expectRevert(0xe0f5c508);
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
                 takerBids,
                 makerAsks,

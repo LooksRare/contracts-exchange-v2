@@ -757,10 +757,10 @@
   dependencies:
     "@openzeppelin/contracts" "4.4.2"
 
-"@looksrare/contracts-libs@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.0.0.tgz#44e2d624ee669d4fd5f8ace6f64795fb8373f5a7"
-  integrity sha512-OzhVLHjSLRPFEC1J0KKJbxRYzVJ6hruCT3MtGn+jzZkVamyl5FLNX6ql143pAjdW+n2o+ESUnDH6ZHFqbQLRWQ==
+"@looksrare/contracts-libs@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.0.1.tgz#211e31f019fd52e60450b3f5ab6badf7a573526a"
+  integrity sha512-07AlMftucI+kAsTjEZSNraO9P0vFVohPOS29xmmZh6aY5sIODBtyljR2d5tFxnfvQsifuSJJvXB9FUwFiyD5HQ==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"

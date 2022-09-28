@@ -71,6 +71,6 @@
   },
   "dependencies": {
     "@looksrare/contracts-exchange-v1": "^1.2.0",
-    "@looksrare/contracts-libs": "^2.0.0"
+    "@looksrare/contracts-libs": "^2.0.1"
   }
 }

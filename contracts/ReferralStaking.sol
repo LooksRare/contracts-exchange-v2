@@ -18,20 +18,20 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     // Address of the LOOKS token
     address public immutable looksRareTokenAddress;
 
-    // Address of the LooksRare protocol
-    LooksRareProtocol public immutable looksRareProtocol;
+    // Current number of existing tiers
+    uint8 public numberOfTiers;
 
     // Lockup after deposit
     uint256 public timelockPeriod;
+
+    // Address of the LooksRare protocol
+    LooksRareProtocol public immutable looksRareProtocol;
 
     // Tracks the last deposit timestamp of a user
     mapping(address => uint256) internal _lastDepositTimestamp;
 
     // List of tiers, simulate an array behavior
     mapping(uint8 => Tier) internal _tiers;
-
-    // Current number of available tiers
-    uint8 public numberOfTiers;
 
     // Amount of LOOKS staked per address
     mapping(address => uint256) internal _userStakes;
@@ -55,7 +55,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     /**
      * @notice Deposit LOOKS for staking
      * @param tier Tier index the user wants to reach with the new deposit
-     * @param amount Amount to deposit
+     * @param amount Amount to deposit (in LOOKS)
      */
     function deposit(uint8 tier, uint256 amount) external {
         if (tier >= numberOfTiers) revert StakingTierDoesntExist();
@@ -102,8 +102,11 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
         emit Downgrade(msg.sender, tier);
     }
 
-    /* Owner only functions */
-
+    /**
+     * @notice Register referrer
+     * @param user User address
+     * @param tier Tier for the user
+     */
     function registerReferrer(address user, uint8 tier) external onlyOwner {
         if (tier >= numberOfTiers) revert StakingTierDoesntExist();
         if (_userStakes[user] > 0) revert UserAlreadyStaking();
@@ -111,26 +114,39 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
         looksRareProtocol.registerReferrer(user, _tiers[tier].rate);
     }
 
+    /**
+     * @notice Unregister referrer
+     * @param user User address
+     */
     function unregisterReferrer(address user) external onlyOwner {
         looksRareProtocol.unregisterReferrer(user);
     }
 
+    /**
+     * @notice Set tier
+     * @param index Tier index
+     * @param rate Rate for the tier
+     * @param stake Stake required for the tier (in LOOKS)
+     */
     function setTier(
         uint8 index,
-        uint16 _rate,
-        uint256 _stake
+        uint16 rate,
+        uint256 stake
     ) external onlyOwner {
         require(
             index <= numberOfTiers,
             "Use an existing index to update a tier, or use numberOfTiers to create a new tier"
         );
-        _tiers[index] = Tier(_rate, _stake);
+        _tiers[index] = Tier(rate, stake);
         if (index == numberOfTiers) {
             numberOfTiers++;
         }
-        emit NewTier(index, _rate, _stake);
+        emit NewTier(index, rate, stake);
     }
 
+    /**
+     * @notice Remove last tier
+     */
     function removeLastTier() external onlyOwner {
         require(numberOfTiers > 0, "No tiers left");
         delete _tiers[numberOfTiers - 1];
@@ -138,22 +154,36 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
         emit LastTierRemoved();
     }
 
-    function setTimelockPeriod(uint256 _timelockPeriod) external onlyOwner {
-        require(_timelockPeriod <= MAX_TIMELOCK_PERIOD, "Time lock too high");
-        timelockPeriod = _timelockPeriod;
-        emit UpdateTimelock(_timelockPeriod);
+    /**
+     * @notice Set new timelock period
+     * @param newTimelockPeriod Timelock period (in seconds)
+     */
+    function setTimelockPeriod(uint256 newTimelockPeriod) external onlyOwner {
+        require(newTimelockPeriod <= MAX_TIMELOCK_PERIOD, "Time lock too high");
+        timelockPeriod = newTimelockPeriod;
+        emit UpdateTimelock(newTimelockPeriod);
     }
 
-    /* Getter functions */
-
+    /**
+     * @notice View user stake
+     * @param user User address
+     */
     function viewUserStake(address user) external view returns (uint256) {
         return _userStakes[user];
     }
 
+    /**
+     * @notice View tier information
+     * @param tier Tier index
+     */
     function viewTier(uint8 tier) external view returns (Tier memory) {
         return _tiers[tier];
     }
 
+    /**
+     * @notice View user timelock
+     * @param user User address
+     */
     function viewUserTimelock(address user) external view returns (uint256, uint256) {
         return (_lastDepositTimestamp[user], timelockPeriod);
     }

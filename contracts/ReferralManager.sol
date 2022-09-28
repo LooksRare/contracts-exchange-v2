@@ -19,9 +19,9 @@ contract ReferralManager is IReferralManager, OwnableTwoSteps {
     // Tracks referrer status
     mapping(address => uint16) internal _referrers;
 
-    // Modifier for referral controller actions
-    modifier onlyController() {
-        if (msg.sender != referralController) revert NotController();
+    // Modifier for referral controller
+    modifier onlyReferralController() {
+        if (msg.sender != referralController) revert NotReferralController();
         _;
     }
 
@@ -30,7 +30,7 @@ contract ReferralManager is IReferralManager, OwnableTwoSteps {
      * @param referrer referrer address
      * @param percentage percentage to collect (e.g., 100 = 1%)
      */
-    function registerReferrer(address referrer, uint16 percentage) external onlyController {
+    function registerReferrer(address referrer, uint16 percentage) external onlyReferralController {
         if (percentage > 10000) revert PercentageTooHigh();
 
         _referrers[referrer] = percentage;
@@ -42,7 +42,7 @@ contract ReferralManager is IReferralManager, OwnableTwoSteps {
      * @notice Unregister referrer
      * @param referrer referrer address
      */
-    function unregisterReferrer(address referrer) external onlyController {
+    function unregisterReferrer(address referrer) external onlyReferralController {
         if (_referrers[referrer] == 0) revert NotReferrer();
 
         delete _referrers[referrer];

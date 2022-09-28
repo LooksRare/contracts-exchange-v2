@@ -3,7 +3,7 @@ pragma solidity ^0.8.14;
 
 interface IReferralManager {
     // Custom errors
-    error NotController();
+    error NotReferralController();
     error NotReferrer();
     error PercentageTooHigh();
 

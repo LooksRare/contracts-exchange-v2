@@ -23,11 +23,11 @@ contract CollectionDiscountManager is ICollectionDiscountManager, OwnableTwoStep
     }
 
     /**
-     * @notice Add custom discount for collection
+     * @notice Update discount factor for a collection address
      * @param collection Collection address
      * @param discountFactor Discount factor (e.g., 1000 = -10% relative to the protocol fee)
      */
-    function adjustDiscountFactorCollection(address collection, uint256 discountFactor)
+    function updateCollectionDiscountFactor(address collection, uint256 discountFactor)
         external
         onlyCollectionDiscountController
     {

@@ -168,7 +168,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Remove protocol fee for ERC721
         vm.startPrank(_owner);
         looksRareProtocol.updateCollectionDiscountController(_owner);
-        looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), 10000);
+        looksRareProtocol.updateCollectionDiscountFactor(address(mockERC721), 10000);
         vm.stopPrank();
 
         price = 1 ether; // Fixed price of sale
@@ -404,7 +404,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Remove protocol fee for ERC721
         vm.startPrank(_owner);
         looksRareProtocol.updateCollectionDiscountController(_owner);
-        looksRareProtocol.adjustDiscountFactorCollection(address(mockERC721), 10000);
+        looksRareProtocol.updateCollectionDiscountFactor(address(mockERC721), 10000);
         vm.stopPrank();
 
         price = 1 ether; // Fixed price of sale

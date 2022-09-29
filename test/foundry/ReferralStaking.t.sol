@@ -31,11 +31,10 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
         looksRareProtocol.updateReferralController(address(referralStaking));
         vm.stopPrank();
 
-        vm.startPrank(_referrer);
         uint256 amountErc20 = 100 ether;
         mockERC20.mint(_referrer, amountErc20);
+        vm.prank(_referrer);
         mockERC20.approve(address(referralStaking), amountErc20);
-        vm.stopPrank();
     }
 
     // Owner functions
@@ -43,10 +42,7 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
     function testOwnerOnly() public asPrankedUser(_referrer) {
         // Make sure that owner functions can't be used by a _referrer
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        referralStaking.registerReferrer(_referrer, 0);
-
-        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        referralStaking.unregisterReferrer(_referrer);
+        referralStaking.updateReferrerRate(_referrer, 0);
 
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         referralStaking.setTier(1, 1000, 10 ether);
@@ -96,23 +92,18 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
 
         // Use wrong tier id
         vm.expectRevert(IReferralStaking.StakingTierDoesntExist.selector);
-        referralStaking.registerReferrer(_referrer, 2);
+        referralStaking.updateReferrerRate(_referrer, 2);
 
         // Register and unregister
-        referralStaking.registerReferrer(_referrer, 0);
-        referralStaking.unregisterReferrer(_referrer);
-
+        referralStaking.setTier(1, 1000, 30 ether);
+        referralStaking.updateReferrerRate(_referrer, 1);
+        referralStaking.updateReferrerRate(_referrer, 0);
+        referralStaking.removeLastTier();
         vm.stopPrank();
 
         // User deposit first, and can't be registered after
-        vm.startPrank(_referrer);
-        referralStaking.deposit(0, 10 ether);
-        vm.stopPrank();
-
-        vm.startPrank(_owner);
-        vm.expectRevert(IReferralStaking.UserAlreadyStaking.selector);
-        referralStaking.registerReferrer(_referrer, 0);
-        vm.stopPrank();
+        vm.prank(_referrer);
+        referralStaking.upgrade(0, 10 ether);
     }
 
     function testSetTimelock() public asPrankedUser(_owner) {
@@ -128,9 +119,9 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
         assertEq(referralStaking.timelockPeriod(), 60);
 
         // Test the getter returning the _timelock
-        (uint256 lastDepositTimestamp, uint256 timelockPeriod) = referralStaking.viewUserTimelock(_referrer);
-        assertEq(lastDepositTimestamp, 0);
-        assertEq(timelockPeriod, 60);
+        // (uint256 lastDepositTimestamp, uint256 timelockPeriod) = referralStaking.viewUserTimelock(_referrer);
+        // assertEq(lastDepositTimestamp, 0);
+        // assertEq(timelockPeriod, 60);
     }
 
     // Public functions
@@ -142,20 +133,20 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
 
         // Deposit for non existing tier
         vm.expectRevert(IReferralStaking.StakingTierDoesntExist.selector);
-        referralStaking.deposit(100, 1 ether);
+        referralStaking.upgrade(100, 1 ether);
 
         // Deposit invalid amount
         vm.expectRevert(IReferralStaking.WrongDepositAmount.selector);
-        referralStaking.deposit(0, 1 ether);
+        referralStaking.upgrade(0, 1 ether);
 
         // Deposit valid amount
         vm.expectEmit(false, false, false, true);
         emit Deposit(_referrer, 0);
-        referralStaking.deposit(0, 10 ether);
-        assertEq(referralStaking.viewUserStake(_referrer), 10 ether);
+        referralStaking.upgrade(0, 10 ether);
+        UserStatus memory userStatus = referralStaking.viewUserStatus(_referrer);
+        assertEq(userStatus.stake, 10 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
-        (uint256 lastDepositTimestamp, ) = referralStaking.viewUserTimelock(_referrer);
-        assertEq(lastDepositTimestamp, block.timestamp);
+        assertEq(userStatus.lastDepositTimestamp, block.timestamp);
 
         // Withdraw before the end of the _timelock
         vm.expectRevert(IReferralStaking.FundsTimelocked.selector);
@@ -169,36 +160,37 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
         vm.expectEmit(false, false, false, true);
         emit WithdrawAll(_referrer);
         referralStaking.withdrawAll();
-        assertEq(referralStaking.viewUserStake(_referrer), 0);
+        userStatus = referralStaking.viewUserStatus(_referrer);
+        assertEq(userStatus.stake, 0);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
     }
 
     function testIncreaseDeposit() public asPrankedUser(_referrer) {
         // Deposit and increase stake
-        referralStaking.deposit(0, 10 ether);
+        referralStaking.upgrade(0, 10 ether);
 
         // Deposit on the wrong tier
         vm.expectRevert(IReferralStaking.WrongDepositAmount.selector);
-        referralStaking.deposit(0, 10 ether);
+        referralStaking.upgrade(0, 10 ether);
 
         // Deposit the wrong amount (needs +10 for the next level)
         vm.expectRevert(IReferralStaking.WrongDepositAmount.selector);
-        referralStaking.deposit(1, 20 ether);
+        referralStaking.upgrade(1, 20 ether);
 
         // Increase stake
-        referralStaking.deposit(1, 10 ether);
-        assertEq(referralStaking.viewUserStake(_referrer), 20 ether);
+        referralStaking.upgrade(1, 10 ether);
+        UserStatus memory userStatus = referralStaking.viewUserStatus(_referrer);
+        assertEq(userStatus.stake, 20 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 20 ether);
     }
 
     function testDowngrade() public {
         // Add a new tier for the purpose of this test
-        vm.startPrank(_owner);
+        vm.prank(_owner);
         referralStaking.setTier(2, 3000, 30 ether);
-        vm.stopPrank();
 
         vm.startPrank(_referrer);
-        referralStaking.deposit(1, 20 ether);
+        referralStaking.upgrade(1, 20 ether);
 
         // Downgrade to a non existing tier
         vm.expectRevert(IReferralStaking.StakingTierDoesntExist.selector);
@@ -224,31 +216,29 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
         vm.expectEmit(false, false, false, true);
         emit Downgrade(_referrer, 0);
         referralStaking.downgrade(0);
-        assertEq(referralStaking.viewUserStake(_referrer), 10 ether);
-        assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
-
         vm.stopPrank();
+
+        UserStatus memory userStatus = referralStaking.viewUserStatus(_referrer);
+        assertEq(userStatus.stake, 10 ether);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
     }
 
     function testUpdateTierAndDowngrade() public {
         // Initial deposit
-        vm.startPrank(_referrer);
-        referralStaking.deposit(1, 20 ether);
-        vm.stopPrank();
+        vm.prank(_referrer);
+        referralStaking.upgrade(1, 20 ether);
 
         // Reduce staking requirements
-        vm.startPrank(_owner);
+        vm.prank(_owner);
         referralStaking.setTier(1, 2000, 15 ether);
-        vm.stopPrank();
-
-        vm.startPrank(_referrer);
 
         // Withdraw unused tokens
         vm.warp(block.timestamp + _timelock);
+        vm.prank(_referrer);
         referralStaking.downgrade(1);
-        assertEq(referralStaking.viewUserStake(_referrer), 15 ether);
-        assertEq(mockERC20.balanceOf(address(referralStaking)), 15 ether);
 
-        vm.stopPrank();
+        UserStatus memory userStatus = referralStaking.viewUserStatus(_referrer);
+        assertEq(userStatus.stake, 15 ether);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), 15 ether);
     }
 }

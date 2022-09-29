@@ -39,7 +39,7 @@ contract ReferralOrdersTest is ProtocolBase {
         weth.deposit{value: _initialWETHBalanceReferrer}();
         mockERC20.mint(_referrer, _tier1Cost);
         mockERC20.approve(address(referralStaking), type(uint256).max);
-        referralStaking.deposit(1, _tier1Cost);
+        referralStaking.upgrade(1, _tier1Cost);
     }
 
     /**

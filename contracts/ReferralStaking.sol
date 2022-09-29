@@ -65,7 +65,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
 
         _executeERC20TransferFrom(looksRareTokenAddress, msg.sender, address(this), amount);
         _userStakes[msg.sender] += amount;
-        looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
+        looksRareProtocol.updateReferrerRate(msg.sender, _tiers[tier].rate);
         _lastDepositTimestamp[msg.sender] = block.timestamp;
 
         emit Deposit(msg.sender, tier);
@@ -80,7 +80,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
 
         _executeERC20DirectTransfer(looksRareTokenAddress, msg.sender, _userStakes[msg.sender]);
         delete _userStakes[msg.sender];
-        looksRareProtocol.unregisterReferrer(msg.sender);
+        looksRareProtocol.updateReferrerRate(msg.sender, 0);
 
         emit WithdrawAll(msg.sender);
     }
@@ -96,8 +96,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
 
         _executeERC20DirectTransfer(looksRareTokenAddress, msg.sender, _userStakes[msg.sender] - _tiers[tier].stake);
         _userStakes[msg.sender] = _userStakes[msg.sender] - (_userStakes[msg.sender] - _tiers[tier].stake);
-        looksRareProtocol.unregisterReferrer(msg.sender);
-        looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
+        looksRareProtocol.updateReferrerRate(msg.sender, _tiers[tier].rate);
 
         emit Downgrade(msg.sender, tier);
     }
@@ -111,7 +110,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
         if (tier >= numberOfTiers) revert StakingTierDoesntExist();
         if (_userStakes[user] > 0) revert UserAlreadyStaking();
 
-        looksRareProtocol.registerReferrer(user, _tiers[tier].rate);
+        looksRareProtocol.updateReferrerRate(user, _tiers[tier].rate);
     }
 
     /**
@@ -119,7 +118,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
      * @param user User address
      */
     function unregisterReferrer(address user) external onlyOwner {
-        looksRareProtocol.unregisterReferrer(user);
+        looksRareProtocol.updateReferrerRate(user, 0);
     }
 
     /**

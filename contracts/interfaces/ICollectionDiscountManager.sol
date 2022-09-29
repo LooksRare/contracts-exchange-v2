@@ -8,5 +8,5 @@ interface ICollectionDiscountManager {
 
     // Events
     event NewCollectionDiscountController(address collectionDiscountController);
-    event NewCollectionDiscountFactor(address collection, uint256 discountFactor);
+    event NewCollectionDiscountFactor(address collection, uint16 discountFactor);
 }

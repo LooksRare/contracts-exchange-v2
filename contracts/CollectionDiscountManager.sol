@@ -16,21 +16,13 @@ contract CollectionDiscountManager is ICollectionDiscountManager, OwnableTwoStep
     // Track collection discount factors (e.g., 100 = 1%, 5,000 = 50%) relative to strategy fee
     mapping(address => uint256) internal _collectionDiscountFactors;
 
-    // Modifier for collection discount controller
-    modifier onlyCollectionDiscountController() {
-        if (msg.sender != collectionDiscountController) revert NotCollectionDiscountController();
-        _;
-    }
-
     /**
      * @notice Update discount factor for a collection address
      * @param collection Collection address
      * @param discountFactor Discount factor (e.g., 1000 = -10% relative to the protocol fee)
      */
-    function updateCollectionDiscountFactor(address collection, uint256 discountFactor)
-        external
-        onlyCollectionDiscountController
-    {
+    function updateCollectionDiscountFactor(address collection, uint256 discountFactor) external {
+        if (msg.sender != collectionDiscountController) revert NotCollectionDiscountController();
         if (discountFactor > 10000) revert CollectionDiscountFactorTooHigh();
 
         if (discountFactor != 0) {

@@ -4,7 +4,6 @@ pragma solidity ^0.8.14;
 interface IExecutionManager {
     // Custom errors
     error BundleEIP2981NotAllowed(address collection, uint256[] itemIds);
-    error CollectionDiscountFactorTooHigh();
     error OrderInvalid();
     error OutsideOfTimeRange();
     error SlippageAsk();
@@ -14,7 +13,6 @@ interface IExecutionManager {
     error StrategyProtocolFeeTooHigh();
 
     // Events
-    event NewCollectionDiscountFactor(address collection, uint256 discountFactor);
     event NewProtocolFeeRecipient(address protocolFeeRecipient);
     event NewRoyaltyFeeRegistry(address royaltyFeeRegistry);
     event NewStrategy(uint16 strategyId, address implementation);

@@ -17,7 +17,11 @@ contract ReferralOrdersTest is ProtocolBase {
     uint256 internal _tier0Cost = 10 ether;
     uint256 internal _tier1Cost = 20 ether;
 
-    function _calculateReferralFee(uint256 originalAmount, uint256 tierRate) private returns (uint256 referralFee) {
+    function _calculateReferralFee(uint256 originalAmount, uint256 tierRate)
+        private
+        pure
+        returns (uint256 referralFee)
+    {
         return (originalAmount * tierRate) / (10000 * 10000);
     }
 

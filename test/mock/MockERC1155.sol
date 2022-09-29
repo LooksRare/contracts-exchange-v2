@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.7;
 
-import {ERC1155} from "@rari-capital/solmate/src/tokens/ERC1155.sol";
+import {ERC1155} from "solmate/src/tokens/ERC1155.sol";
 
 contract MockERC1155 is ERC1155 {
     function uri(uint256) public pure override returns (string memory) {

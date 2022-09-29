@@ -25,4 +25,11 @@ interface IReferralStaking {
         // Amount of LOOKS to stake to enable this tier
         uint256 stake;
     }
+
+    struct UserStatus {
+        // Amount of LOOKS staked
+        uint256 stake;
+        // Last deposit timestamp
+        uint256 lastDepositTimestamp;
+    }
 }

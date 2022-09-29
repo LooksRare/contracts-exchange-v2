@@ -6,9 +6,11 @@ import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IE
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
-import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
+import {OrderStructs} from "./libraries/OrderStructs.sol";
+
+import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";
 
 /**
  * @title ExecutionManager
@@ -17,24 +19,21 @@ import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
  *         For instance, a taker ask is executed against a maker bid (and a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
-contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
+contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
     // Maximum protocol fee
     uint16 private immutable _MAX_PROTOCOL_FEE = 5000;
 
-    // Royalty fee registry
-    IRoyaltyFeeRegistry internal _royaltyFeeRegistry;
-
-    // Track collection discount factors (e.g., 100 = 1%, 5,000 = 50%) relative to strategy fee
-    mapping(address => uint256) internal _collectionDiscountFactors;
-
-    // Track strategy status and implementation
-    mapping(uint16 => Strategy) internal _strategies;
+    // Count how many strategies exist (it includes strategies that have been removed)
+    uint16 public countStrategies = 2;
 
     // Protocol fee recipient
     address internal _protocolFeeRecipient;
 
-    // Count how many strategies exist (it includes strategies that have been removed)
-    uint16 public countStrategies = 2;
+    // Royalty fee registry
+    IRoyaltyFeeRegistry internal _royaltyFeeRegistry;
+
+    // Track strategy status and implementation
+    mapping(uint16 => Strategy) internal _strategies;
 
     /**
      * @notice Constructor
@@ -85,18 +84,6 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Add custom discount for collection
-     * @param collection address of the collection
-     * @param discountFactor discount factor (e.g., 1000 = -10% relative to the protocol fee)
-     */
-    function adjustDiscountFactorCollection(address collection, uint256 discountFactor) external onlyOwner {
-        if (discountFactor > 10000) revert CollectionDiscountFactorTooHigh();
-
-        _collectionDiscountFactors[collection] = discountFactor;
-        emit NewCollectionDiscountFactor(collection, discountFactor);
-    }
-
-    /**
      * @notice Set protocol fee recipient
      * @param newProtocolFeeRecipient address of the new protocol fee recipient
      */
@@ -139,15 +126,6 @@ contract ExecutionManager is IExecutionManager, OwnableTwoSteps {
         });
 
         emit StrategyUpdated(strategyId, isActive, hasRoyalties, protocolFee);
-    }
-
-    /**
-     * @notice View collection discount factor
-     * @param collection address of the collection
-     * @return collectionDiscountFactor collection discount factor (e.g., 500 --> 5% relative to protocol fee)
-     */
-    function viewCollectionDiscountFactor(address collection) external view returns (uint256 collectionDiscountFactor) {
-        return _collectionDiscountFactors[collection];
     }
 
     /**

@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import {IRoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/interfaces/IRoyaltyFeeRegistry.sol";
 import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
+import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
+
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";

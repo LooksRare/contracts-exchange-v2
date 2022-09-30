@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
 import {IOwnableTwoSteps, OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {IReferralStaking, ReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
+import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
 import {TestParameters} from "./utils/TestParameters.sol";
 
 contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, IOwnableTwoSteps {
     MockERC20 public mockERC20;
-    RoyaltyFeeRegistry public royaltyFeeRegistry;
+    MockRoyaltyFeeRegistry public royaltyFeeRegistry;
     TransferManager public transferManager;
     LooksRareProtocol public looksRareProtocol;
     ReferralStaking public referralStaking;
 
     function setUp() public {
         vm.startPrank(_owner);
-        royaltyFeeRegistry = new RoyaltyFeeRegistry(9500);
+        royaltyFeeRegistry = new MockRoyaltyFeeRegistry(9500);
         transferManager = new TransferManager();
         looksRareProtocol = new LooksRareProtocol(address(transferManager), address(royaltyFeeRegistry));
         mockERC20 = new MockERC20();

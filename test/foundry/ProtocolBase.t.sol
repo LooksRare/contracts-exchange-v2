@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {RoyaltyFeeRegistry} from "@looksrare/contracts-exchange-v1/contracts/royaltyFeeHelpers/RoyaltyFeeRegistry.sol";
 import {WETH} from "solmate/src/tokens/WETH.sol";
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC721WithRoyalties} from "../mock/MockERC721WithRoyalties.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
+import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
@@ -17,7 +17,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     MockERC721 public mockERC721;
     MockERC1155 public mockERC1155;
 
-    RoyaltyFeeRegistry public royaltyFeeRegistry;
+    MockRoyaltyFeeRegistry public royaltyFeeRegistry;
     LooksRareProtocol public looksRareProtocol;
     TransferManager public transferManager;
     WETH public weth;
@@ -51,7 +51,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     function setUp() public {
         vm.startPrank(_owner);
         weth = new WETH();
-        royaltyFeeRegistry = new RoyaltyFeeRegistry(9500);
+        royaltyFeeRegistry = new MockRoyaltyFeeRegistry(9500);
         transferManager = new TransferManager();
         looksRareProtocol = new LooksRareProtocol(address(transferManager), address(royaltyFeeRegistry));
         mockERC721 = new MockERC721();

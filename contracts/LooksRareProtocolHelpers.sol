@@ -18,7 +18,7 @@ import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 contract LooksRareProtocolHelpers is SignatureChecker {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
-    using OrderStructs for bytes32;
+    using OrderStructs for OrderStructs.MerkleRoot;
 
     // Encoding prefix for EIP-712 signatures
     string internal constant _ENCODING_PREFIX = "\x19\x01";
@@ -36,9 +36,9 @@ contract LooksRareProtocolHelpers is SignatureChecker {
 
     /**
      * @notice Verify maker ask order
-     * @param makerAsk makerAsk
-     * @param makerSignature signature of the maker
-     * @param signer address of signer
+     * @param makerAsk Maker ask struct
+     * @param makerSignature Maker signature
+     * @param signer Signer address
      */
     function verifyMakerAskOrder(
         OrderStructs.MakerAsk memory makerAsk,
@@ -52,9 +52,9 @@ contract LooksRareProtocolHelpers is SignatureChecker {
 
     /**
      * @notice Verify maker bid order
-     * @param makerBid makerBid
-     * @param makerSignature signature of the maker
-     * @param signer address of signer
+     * @param makerBid Maker bid struct
+     * @param makerSignature Maker signature
+     * @param signer Signer address
      */
     function verifyMakerBidOrder(
         OrderStructs.MakerBid memory makerBid,
@@ -67,8 +67,25 @@ contract LooksRareProtocolHelpers is SignatureChecker {
     }
 
     /**
+     * @notice Verify merkle root
+     * @param merkleRoot Merkle root struct
+     * @param makerSignature Maker signature
+     * @param signer Signer address
+     */
+    function verifyMerkleRoot(
+        OrderStructs.MerkleRoot memory merkleRoot,
+        bytes memory makerSignature,
+        address signer
+    ) public view returns (bool) {
+        bytes32 digest = computeDigestMerkleRoot(merkleRoot);
+        _verify(digest, signer, makerSignature);
+        return true;
+    }
+
+    /**
      * @notice Compute digest for maker ask
-     * @param makerAsk makerAsk
+     * @param makerAsk Maker ask struct
+     * @return digest Digest
      */
     function computeDigestMakerAsk(OrderStructs.MakerAsk memory makerAsk) public view returns (bytes32 digest) {
         (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
@@ -77,10 +94,20 @@ contract LooksRareProtocolHelpers is SignatureChecker {
 
     /**
      * @notice Compute digest for maker bid
-     * @param makerBid makerBid
+     * @param makerBid Maker bid struct
+     * @return digest Digest
      */
     function computeDigestMakerBid(OrderStructs.MakerBid memory makerBid) public view returns (bytes32 digest) {
         (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerBid.hash()));
+    }
+
+    /**
+     * @notice Compute digest for merkle root
+     * @param merkleRoot Merkle root struct
+     */
+    function computeDigestMerkleRoot(OrderStructs.MerkleRoot memory merkleRoot) public view returns (bytes32 digest) {
+        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
+        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleRoot.hash()));
     }
 }

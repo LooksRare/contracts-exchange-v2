@@ -167,7 +167,7 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
         UserStatus memory userStatus = referralStaking.viewUserStatus(_referrer);
         assertEq(userStatus.stake, 10 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 10 ether);
-        assertEq(userStatus.lastDepositTimestamp, block.timestamp);
+        assertEq(userStatus.earliestWithdrawalTimestamp, block.timestamp + _timelock);
 
         // Withdraw before the end of the _timelock
         vm.expectRevert(IReferralStaking.FundsTimelocked.selector);

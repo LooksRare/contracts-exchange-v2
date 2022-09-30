@@ -173,7 +173,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     }
 
     /**
-     * @notice View user status (stake and latest deposit time)
+     * @notice View user status (stake and earliest withdrawal time)
      * @param user User address
      */
     function viewUserStatus(address user) external view returns (UserStatus memory userStatus) {

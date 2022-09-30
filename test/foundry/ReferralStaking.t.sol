@@ -106,6 +106,32 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
         referralStaking.upgrade(0, 10 ether);
     }
 
+    function testPossibleToSetATierWithNoLOOKS() public {
+        uint16 rate = 1000;
+        uint16 stake = 0 ether;
+
+        // Tier0 is adjusted for no LOOKS
+        vm.prank(_owner);
+        referralStaking.setTier(0, rate, stake);
+
+        Tier memory tier = referralStaking.viewTier(0);
+        assertEq(tier.stake, stake);
+        assertEq(tier.rate, rate);
+
+        // User register without deposit
+        vm.startPrank(_referrer);
+        referralStaking.upgrade(0, stake);
+
+        UserStatus memory userStatus = referralStaking.viewUserStatus(_referrer);
+        assertEq(userStatus.stake, stake);
+        assertEq(looksRareProtocol.referrerRates(_referrer), rate);
+        assertEq(mockERC20.balanceOf(address(referralStaking)), stake);
+
+        vm.warp(block.timestamp + _timelock);
+        referralStaking.withdrawAll();
+        vm.stopPrank();
+    }
+
     function testSetTimelock() public asPrankedUser(_owner) {
         // Set a _timelock out of boundaries
         vm.expectRevert("Time lock too high");
@@ -117,11 +143,6 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
         emit UpdateTimelock(60);
         referralStaking.setTimelockPeriod(60);
         assertEq(referralStaking.timelockPeriod(), 60);
-
-        // Test the getter returning the _timelock
-        // (uint256 lastDepositTimestamp, uint256 timelockPeriod) = referralStaking.viewUserTimelock(_referrer);
-        // assertEq(lastDepositTimestamp, 0);
-        // assertEq(timelockPeriod, 60);
     }
 
     // Public functions
@@ -160,6 +181,7 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
         vm.expectEmit(false, false, false, true);
         emit WithdrawAll(_referrer);
         referralStaking.withdrawAll();
+
         userStatus = referralStaking.viewUserStatus(_referrer);
         assertEq(userStatus.stake, 0);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 0);
@@ -179,6 +201,7 @@ contract ReferralStakingTest is TestHelpers, TestParameters, IReferralStaking, I
 
         // Increase stake
         referralStaking.upgrade(1, 10 ether);
+
         UserStatus memory userStatus = referralStaking.viewUserStatus(_referrer);
         assertEq(userStatus.stake, 20 ether);
         assertEq(mockERC20.balanceOf(address(referralStaking)), 20 ether);

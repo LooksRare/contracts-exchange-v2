@@ -31,12 +31,12 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
 
     /**
      * @notice Transfer a single item
-     * @param collection collection address
-     * @param assetType asset type (0 for ERC721, 1 for ERC1155)
-     * @param from sender address
-     * @param to recipient address
-     * @param itemId itemId
-     * @param amount amount (it is not used for ERC721)
+     * @param collection Collection address
+     * @param assetType Asset type (0 for ERC721, 1 for ERC1155)
+     * @param from Sender address
+     * @param to Recipient address
+     * @param itemId ItemId
+     * @param amount Amount to transfer (it is not used for ERC721)
      */
     function transferSingleItem(
         address collection,
@@ -59,12 +59,12 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
 
     /**
      * @notice Transfer batch items in the same collection
-     * @param collection collection address
-     * @param assetType asset type (0 for ERC721, 1 for ERC1155)
-     * @param from sender address
-     * @param to recipient address
-     * @param itemIds array of itemIds
-     * @param amounts array of amounts (it is not used for ERC721)
+     * @param collection Collection address
+     * @param assetType Asset type (0 for ERC721, 1 for ERC1155)
+     * @param from Sender address
+     * @param to Recipient address
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts (it is not used for ERC721)
      */
     function transferBatchItems(
         address collection,
@@ -93,12 +93,12 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
 
     /**
      * @notice Transfer batch items across collections
-     * @param collections array of collection addresses
-     * @param assetTypes array of asset types
-     * @param from sender address
-     * @param to recipient address
-     * @param itemIds array of array of itemIds
-     * @param amounts array of array of amounts
+     * @param collections Array of collection addresses
+     * @param assetTypes Array of asset types
+     * @param from Sender address
+     * @param to Recipient address
+     * @param itemIds Array of array of itemIds
+     * @param amounts Array of array of amounts
      */
     function transferBatchItemsAcrossCollections(
         address[] calldata collections,
@@ -141,7 +141,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
 
     /**
      * @notice Grant approvals for list of operators on behalf of the sender
-     * @param operators array of operator addresses
+     * @param operators Array of operator addresses
      * @dev Each operator address must be globally whitelisted to be approved.
      */
     function grantApprovals(address[] calldata operators) external {
@@ -163,7 +163,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
 
     /**
      * @notice Revoke all approvals for the sender
-     * @param operators array of operator addresses
+     * @param operators Array of operator addresses
      * @dev Each operator address must be approved at the user level to be revoked.
      */
     function revokeApprovals(address[] calldata operators) external {
@@ -183,7 +183,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
 
     /**
      * @notice Whitelist an operator in the system
-     * @param operator address of the operator to add
+     * @param operator Operator address to add
      */
     function whitelistOperator(address operator) external onlyOwner {
         if (isOperatorWhitelisted[operator]) revert AlreadyWhitelisted();
@@ -195,7 +195,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
 
     /**
      * @notice Remove an operator from the system
-     * @param operator address of the operator to remove
+     * @param operator Operator address to remove
      */
     function removeOperator(address operator) external onlyOwner {
         if (!isOperatorWhitelisted[operator]) revert NotWhitelisted();
@@ -206,9 +206,9 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
     }
 
     /**
-     * @notice Check whether transfer (by an operator) is valid
-     * @param user address of the user
-     * @param operator address of the operator
+     * @notice Check (internally) whether transfer (by an operator) is valid
+     * @param user User address
+     * @param operator Operator address
      */
     function isOperatorValidForTransfer(address user, address operator) internal view returns (bool) {
         return isOperatorWhitelisted[operator] && hasUserApprovedOperator[user][operator];

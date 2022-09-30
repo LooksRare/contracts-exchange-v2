@@ -66,7 +66,11 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
             _executeERC20TransferFrom(looksRareToken, msg.sender, address(this), amount);
         }
 
-        _userStatus[msg.sender] = UserStatus({stake: userStake + amount, lastDepositTimestamp: block.timestamp});
+        _userStatus[msg.sender] = UserStatus({
+            stake: userStake + amount,
+            earliestWithdrawalTimestamp: block.timestamp + timelockPeriod
+        });
+
         looksRareProtocol.updateReferrerRate(msg.sender, _tiers[tier].rate);
 
         emit Deposit(msg.sender, tier);
@@ -78,7 +82,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     function withdrawAll() external {
         uint256 userStake = _userStatus[msg.sender].stake;
         if (userStake == 0 && looksRareProtocol.referrerRates(msg.sender) == 0) revert NoFundsStaked();
-        _checkTimelock(_userStatus[msg.sender].lastDepositTimestamp);
+        if (_userStatus[msg.sender].earliestWithdrawalTimestamp > block.timestamp) revert FundsTimelocked();
 
         delete _userStatus[msg.sender];
         looksRareProtocol.updateReferrerRate(msg.sender, 0);
@@ -99,7 +103,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
 
         if (tier >= numberOfTiers) revert StakingTierDoesntExist();
         if (_tiers[tier].stake >= userStake) revert TierTooHigh();
-        _checkTimelock(_userStatus[msg.sender].lastDepositTimestamp);
+        if (_userStatus[msg.sender].earliestWithdrawalTimestamp > block.timestamp) revert FundsTimelocked();
 
         _userStatus[msg.sender].stake = _tiers[tier].stake;
         looksRareProtocol.updateReferrerRate(msg.sender, _tiers[tier].rate);
@@ -175,13 +179,5 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
      */
     function viewTier(uint8 tier) external view returns (Tier memory) {
         return _tiers[tier];
-    }
-
-    /**
-     * @notice Check timelock
-     * @param lastDepositTimestamp Last deposit timestamp
-     */
-    function _checkTimelock(uint256 lastDepositTimestamp) internal view {
-        if (lastDepositTimestamp + timelockPeriod > block.timestamp) revert FundsTimelocked();
     }
 }

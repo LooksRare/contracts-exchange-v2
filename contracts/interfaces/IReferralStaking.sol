@@ -29,7 +29,7 @@ interface IReferralStaking {
     struct UserStatus {
         // Amount of LOOKS staked
         uint256 stake;
-        // Last deposit timestamp
-        uint256 lastDepositTimestamp;
+        // Earliest withdrawal timestamp
+        uint256 earliestWithdrawalTimestamp;
     }
 }

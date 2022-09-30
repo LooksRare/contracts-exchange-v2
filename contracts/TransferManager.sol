@@ -23,11 +23,11 @@ import {ITransferManager} from "./interfaces/ITransferManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, OwnableTwoSteps {
-    // Whether user has approved operator
-    mapping(address => mapping(address => bool)) internal _hasUserApprovedOperator;
+    // Whether the user has approved the operator address (first address is user, second address is operator)
+    mapping(address => mapping(address => bool)) public hasUserApprovedOperator;
 
-    // Whether the operator is in the whitelist
-    mapping(address => bool) internal _whitelistedOperators;
+    // Whether the operator address is whitelisted
+    mapping(address => bool) public isOperatorWhitelisted;
 
     /**
      * @notice Transfer a single item
@@ -148,10 +148,10 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         if (operators.length == 0) revert WrongLengths();
 
         for (uint256 i; i < operators.length; ) {
-            if (!_whitelistedOperators[operators[i]]) revert NotWhitelisted();
-            if (_hasUserApprovedOperator[msg.sender][operators[i]]) revert AlreadyApproved();
+            if (!isOperatorWhitelisted[operators[i]]) revert NotWhitelisted();
+            if (hasUserApprovedOperator[msg.sender][operators[i]]) revert AlreadyApproved();
 
-            _hasUserApprovedOperator[msg.sender][operators[i]] = true;
+            hasUserApprovedOperator[msg.sender][operators[i]] = true;
 
             unchecked {
                 ++i;
@@ -170,9 +170,9 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         if (operators.length == 0) revert WrongLengths();
 
         for (uint256 i; i < operators.length; ) {
-            if (!_hasUserApprovedOperator[msg.sender][operators[i]]) revert NotApproved();
+            if (!hasUserApprovedOperator[msg.sender][operators[i]]) revert NotApproved();
 
-            delete _hasUserApprovedOperator[msg.sender][operators[i]];
+            delete hasUserApprovedOperator[msg.sender][operators[i]];
             unchecked {
                 ++i;
             }
@@ -186,9 +186,9 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
      * @param operator address of the operator to add
      */
     function whitelistOperator(address operator) external onlyOwner {
-        if (_whitelistedOperators[operator]) revert AlreadyWhitelisted();
+        if (isOperatorWhitelisted[operator]) revert AlreadyWhitelisted();
 
-        _whitelistedOperators[operator] = true;
+        isOperatorWhitelisted[operator] = true;
 
         emit OperatorWhitelisted(operator);
     }
@@ -198,9 +198,9 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
      * @param operator address of the operator to remove
      */
     function removeOperator(address operator) external onlyOwner {
-        if (!_whitelistedOperators[operator]) revert NotWhitelisted();
+        if (!isOperatorWhitelisted[operator]) revert NotWhitelisted();
 
-        delete _whitelistedOperators[operator];
+        delete isOperatorWhitelisted[operator];
 
         emit OperatorRemoved(operator);
     }
@@ -211,6 +211,6 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
      * @param operator address of the operator
      */
     function isOperatorValidForTransfer(address user, address operator) internal view returns (bool) {
-        return _whitelistedOperators[operator] && _hasUserApprovedOperator[user][operator];
+        return isOperatorWhitelisted[operator] && hasUserApprovedOperator[user][operator];
     }
 }

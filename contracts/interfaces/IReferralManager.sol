@@ -10,6 +10,5 @@ interface IReferralManager {
     // Events
     event NewReferralController(address referralController);
     event NewReferralProgramStatus(bool isActive);
-    event NewReferrer(address referrer, uint16 percentage);
-    event ReferrerRemoved(address referrer);
+    event NewReferrerRate(address referrer, uint16 rate);
 }

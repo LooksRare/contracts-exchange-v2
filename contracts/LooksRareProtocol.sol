@@ -455,7 +455,7 @@ contract LooksRareProtocol is
 
         // Check whether referral program is active and whether to execute a referral logic (and adjust downward the protocol fee if so)
         if (isReferralProgramActive && referrer != address(0)) {
-            totalReferralFee = (totalProtocolFee * _referrers[referrer]) / 10000;
+            totalReferralFee = (totalProtocolFee * referrerRates[referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
 
             // Transfer the referral fee if anything to transfer

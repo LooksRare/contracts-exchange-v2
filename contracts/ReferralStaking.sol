@@ -15,58 +15,69 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     // Maximum timelock period that can be set by this contract owner
     uint256 public constant MAX_TIMELOCK_PERIOD = 30 days;
 
-    // Address of the LOOKS token
-    address public immutable looksRareTokenAddress;
-
-    // Current number of existing tiers
-    uint8 public numberOfTiers;
-
-    // Lockup after deposit
-    uint256 public timelockPeriod;
-
     // Address of the LooksRare protocol
     LooksRareProtocol public immutable looksRareProtocol;
 
-    // Tracks the last deposit timestamp of a user
-    mapping(address => uint256) internal _lastDepositTimestamp;
+    // Address of the LOOKS token
+    address public immutable looksRareToken;
+
+    // Current number of referral tiers
+    uint8 public numberOfTiers;
+
+    // Lockup after deposit (in seconds)
+    uint256 public timelockPeriod;
+
+    // Tracks user status (staked amount and last deposit timestamp)
+    mapping(address => UserStatus) internal _userStatus;
 
     // List of tiers, simulate an array behavior
     mapping(uint8 => Tier) internal _tiers;
 
-    // Amount of LOOKS staked per address
-    mapping(address => uint256) internal _userStakes;
-
     /**
      * @notice Constructor
      * @param _looksRareProtocol LooksRare protocol address
-     * @param _looksRareTokenAddress LOOKS token address
+     * @param _looksRareToken LOOKS token address
      * @param _timelockPeriod Lockup period after deposit, in seconds
      */
     constructor(
         address _looksRareProtocol,
-        address _looksRareTokenAddress,
+        address _looksRareToken,
         uint256 _timelockPeriod
     ) {
-        looksRareTokenAddress = _looksRareTokenAddress;
+        looksRareToken = _looksRareToken;
         looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
         timelockPeriod = _timelockPeriod;
     }
 
     /**
-     * @notice Deposit LOOKS for staking
-     * @param tier Tier index the user wants to reach with the new deposit
+     * @notice Upgrade to a new tier
+     * @param tier Tier index the user wants to reach
+     * @param rate Rate to reach
      * @param amount Amount to deposit (in LOOKS)
      */
-    function deposit(uint8 tier, uint256 amount) external {
+    function upgrade(
+        uint8 tier,
+        uint16 rate,
+        uint256 amount
+    ) external {
+        uint256 userStake = _userStatus[msg.sender].stake;
+
         if (tier >= numberOfTiers) revert StakingTierDoesntExist();
+        if (rate != _tiers[tier].rate) revert WrongTierRate();
 
         // If the amount added is not exactly the amount needed to climb to the next tier, reverts
-        if (_tiers[tier].stake - _userStakes[msg.sender] != amount) revert WrongDepositAmount();
+        if (_tiers[tier].stake - userStake != amount) revert WrongDepositAmount();
 
-        _executeERC20TransferFrom(looksRareTokenAddress, msg.sender, address(this), amount);
-        _userStakes[msg.sender] += amount;
-        looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
-        _lastDepositTimestamp[msg.sender] = block.timestamp;
+        if (amount != 0) {
+            _executeERC20TransferFrom(looksRareToken, msg.sender, address(this), amount);
+        }
+
+        _userStatus[msg.sender] = UserStatus({
+            stake: userStake + amount,
+            earliestWithdrawalTimestamp: block.timestamp + timelockPeriod
+        });
+
+        looksRareProtocol.updateReferrerRate(msg.sender, _tiers[tier].rate);
 
         emit Deposit(msg.sender, tier);
     }
@@ -75,12 +86,16 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
      * @notice Withdraw all staked LOOKS for a user
      */
     function withdrawAll() external {
-        if (_userStakes[msg.sender] == 0) revert NoFundsStaked();
-        if (_lastDepositTimestamp[msg.sender] + timelockPeriod > block.timestamp) revert FundsTimelocked();
+        uint256 userStake = _userStatus[msg.sender].stake;
+        if (userStake == 0 && looksRareProtocol.referrerRates(msg.sender) == 0) revert NoFundsStaked();
+        if (_userStatus[msg.sender].earliestWithdrawalTimestamp > block.timestamp) revert FundsTimelocked();
 
-        _executeERC20DirectTransfer(looksRareTokenAddress, msg.sender, _userStakes[msg.sender]);
-        delete _userStakes[msg.sender];
-        looksRareProtocol.unregisterReferrer(msg.sender);
+        delete _userStatus[msg.sender];
+        looksRareProtocol.updateReferrerRate(msg.sender, 0);
+
+        if (userStake != 0) {
+            _executeERC20DirectTransfer(looksRareToken, msg.sender, userStake);
+        }
 
         emit WithdrawAll(msg.sender);
     }
@@ -89,37 +104,29 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
      * @notice Downgrade to a lower staking tier
      * @param tier Tier index the user wants to reach
      */
-    function downgrade(uint8 tier) external {
-        if (tier >= numberOfTiers) revert StakingTierDoesntExist();
-        if (_tiers[tier].stake >= _userStakes[msg.sender]) revert TierTooHigh();
-        if (_lastDepositTimestamp[msg.sender] + timelockPeriod > block.timestamp) revert FundsTimelocked();
+    function downgrade(uint8 tier, uint16 rate) external {
+        uint256 userStake = _userStatus[msg.sender].stake;
 
-        _executeERC20DirectTransfer(looksRareTokenAddress, msg.sender, _userStakes[msg.sender] - _tiers[tier].stake);
-        _userStakes[msg.sender] = _userStakes[msg.sender] - (_userStakes[msg.sender] - _tiers[tier].stake);
-        looksRareProtocol.unregisterReferrer(msg.sender);
-        looksRareProtocol.registerReferrer(msg.sender, _tiers[tier].rate);
+        if (tier >= numberOfTiers) revert StakingTierDoesntExist();
+        if (rate != _tiers[tier].rate) revert WrongTierRate();
+        if (_tiers[tier].stake >= userStake) revert TierTooHigh();
+        if (_userStatus[msg.sender].earliestWithdrawalTimestamp > block.timestamp) revert FundsTimelocked();
+
+        _userStatus[msg.sender].stake = _tiers[tier].stake;
+        looksRareProtocol.updateReferrerRate(msg.sender, _tiers[tier].rate);
+        _executeERC20DirectTransfer(looksRareToken, msg.sender, userStake - _tiers[tier].stake);
 
         emit Downgrade(msg.sender, tier);
     }
 
     /**
-     * @notice Register referrer
+     * @notice Update referrer tier without requirement to stake
      * @param user User address
      * @param tier Tier for the user
      */
-    function registerReferrer(address user, uint8 tier) external onlyOwner {
+    function updateReferrerRate(address user, uint8 tier) external onlyOwner {
         if (tier >= numberOfTiers) revert StakingTierDoesntExist();
-        if (_userStakes[user] > 0) revert UserAlreadyStaking();
-
-        looksRareProtocol.registerReferrer(user, _tiers[tier].rate);
-    }
-
-    /**
-     * @notice Unregister referrer
-     * @param user User address
-     */
-    function unregisterReferrer(address user) external onlyOwner {
-        looksRareProtocol.unregisterReferrer(user);
+        looksRareProtocol.updateReferrerRate(user, _tiers[tier].rate);
     }
 
     /**
@@ -137,10 +144,12 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
             index <= numberOfTiers,
             "Use an existing index to update a tier, or use numberOfTiers to create a new tier"
         );
+
         _tiers[index] = Tier(rate, stake);
         if (index == numberOfTiers) {
             numberOfTiers++;
         }
+
         emit NewTier(index, rate, stake);
     }
 
@@ -149,8 +158,7 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
      */
     function removeLastTier() external onlyOwner {
         require(numberOfTiers > 0, "No tiers left");
-        delete _tiers[numberOfTiers - 1];
-        numberOfTiers--;
+        delete _tiers[--numberOfTiers];
         emit LastTierRemoved();
     }
 
@@ -165,11 +173,11 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     }
 
     /**
-     * @notice View user stake
+     * @notice View user status (stake and earliest withdrawal time)
      * @param user User address
      */
-    function viewUserStake(address user) external view returns (uint256) {
-        return _userStakes[user];
+    function viewUserStatus(address user) external view returns (UserStatus memory userStatus) {
+        return _userStatus[user];
     }
 
     /**
@@ -178,13 +186,5 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
      */
     function viewTier(uint8 tier) external view returns (Tier memory) {
         return _tiers[tier];
-    }
-
-    /**
-     * @notice View user timelock
-     * @param user User address
-     */
-    function viewUserTimelock(address user) external view returns (uint256, uint256) {
-        return (_lastDepositTimestamp[user], timelockPeriod);
     }
 }

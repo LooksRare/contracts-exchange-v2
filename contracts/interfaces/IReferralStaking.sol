@@ -12,6 +12,7 @@ interface IReferralStaking {
 
     // Errors
     error WrongDepositAmount();
+    error WrongTierRate();
     error NoFundsStaked();
     error StakingTierDoesntExist();
     error TierTooHigh();
@@ -24,5 +25,12 @@ interface IReferralStaking {
         uint16 rate;
         // Amount of LOOKS to stake to enable this tier
         uint256 stake;
+    }
+
+    struct UserStatus {
+        // Amount of LOOKS staked
+        uint256 stake;
+        // Earliest withdrawal timestamp
+        uint256 earliestWithdrawalTimestamp;
     }
 }

@@ -12,6 +12,7 @@ interface IReferralStaking {
 
     // Errors
     error WrongDepositAmount();
+    error WrongTierRate();
     error NoFundsStaked();
     error StakingTierDoesntExist();
     error TierTooHigh();

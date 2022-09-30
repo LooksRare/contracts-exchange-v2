@@ -52,12 +52,18 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
     /**
      * @notice Upgrade to a new tier
      * @param tier Tier index the user wants to reach
+     * @param rate Rate to reach
      * @param amount Amount to deposit (in LOOKS)
      */
-    function upgrade(uint8 tier, uint256 amount) external {
+    function upgrade(
+        uint8 tier,
+        uint16 rate,
+        uint256 amount
+    ) external {
         uint256 userStake = _userStatus[msg.sender].stake;
 
         if (tier >= numberOfTiers) revert StakingTierDoesntExist();
+        if (rate != _tiers[tier].rate) revert WrongTierRate();
 
         // If the amount added is not exactly the amount needed to climb to the next tier, reverts
         if (_tiers[tier].stake - userStake != amount) revert WrongDepositAmount();
@@ -98,10 +104,11 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
      * @notice Downgrade to a lower staking tier
      * @param tier Tier index the user wants to reach
      */
-    function downgrade(uint8 tier) external {
+    function downgrade(uint8 tier, uint16 rate) external {
         uint256 userStake = _userStatus[msg.sender].stake;
 
         if (tier >= numberOfTiers) revert StakingTierDoesntExist();
+        if (rate != _tiers[tier].rate) revert WrongTierRate();
         if (_tiers[tier].stake >= userStake) revert TierTooHigh();
         if (_userStatus[msg.sender].earliestWithdrawalTimestamp > block.timestamp) revert FundsTimelocked();
 

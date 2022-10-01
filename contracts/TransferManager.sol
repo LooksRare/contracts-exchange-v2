@@ -12,6 +12,7 @@ import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/I
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
 import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1155.sol";
 
+// Interfaces
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 
 /**

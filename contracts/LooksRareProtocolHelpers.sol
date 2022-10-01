@@ -7,6 +7,9 @@ import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChe
 // Order structs
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
+// Interfaces
+import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
+
 // LooksRareProtocol
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
@@ -20,18 +23,54 @@ contract LooksRareProtocolHelpers is SignatureChecker {
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;
 
+    enum RoyaltyType {
+        NoRoyalty,
+        RoyaltyFeeRegistry,
+        RoyaltyEIP2981
+    }
+
     // Encoding prefix for EIP-712 signatures
     string internal constant _ENCODING_PREFIX = "\x19\x01";
 
     // LooksRareProtocol
     LooksRareProtocol public looksRareProtocol;
 
+    // LooksRareProtocol
+    IRoyaltyFeeRegistry public royaltyFeeRegistry;
+
     /**
      * @notice Constructor
-     * @param looksRareProtocolAddress address of the LooksRareProtocol
+     * @param _looksRareProtocol LooksRare protocol address
      */
-    constructor(address looksRareProtocolAddress) {
-        looksRareProtocol = LooksRareProtocol(looksRareProtocolAddress);
+    constructor(address _looksRareProtocol) {
+        looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
+        royaltyFeeRegistry = LooksRareProtocol(_looksRareProtocol).royaltyFeeRegistry();
+    }
+
+    /**
+     * @notice Calculate protocol fee, collection discount (if any), royalty recipient, and royalty percentage
+     * @param strategyId Strategy id (e.g., 0 --> standard order, 1 --> collection bid)
+     * @param collection Collection addresss
+     * @param itemIds Array of itemIds
+     * @param price Order price
+     */
+    function calculateProtocolFeeAndCollectionDiscountFactorAndRoyaltyInfo(
+        uint16 strategyId,
+        address collection,
+        uint256[] memory itemIds,
+        uint256 price
+    )
+        public
+        view
+        returns (
+            uint256 protocolFee,
+            uint16 collectionDiscountFactor,
+            uint256 royaltyFee,
+            address royaltyRecipient,
+            RoyaltyType royaltyType
+        )
+    {
+        //
     }
 
     /**

@@ -20,7 +20,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager {
         emit StrategyUpdated(strategyId, isActive, hasRoyalties, protocolFee);
         looksRareProtocol.updateStrategy(strategyId, hasRoyalties, protocolFee, isActive);
 
-        Strategy memory strategy = looksRareProtocol.viewStrategy(strategyId);
+        Strategy memory strategy = looksRareProtocol.strategyInfo(strategyId);
         assertTrue(strategy.isActive);
         assertFalse(strategy.hasRoyalties);
         assertEq(strategy.protocolFee, protocolFee);
@@ -40,7 +40,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager {
         emit StrategyUpdated(strategyId, isActive, hasRoyalties, protocolFee);
         looksRareProtocol.updateStrategy(strategyId, hasRoyalties, protocolFee, isActive);
 
-        Strategy memory strategy = looksRareProtocol.viewStrategy(strategyId);
+        Strategy memory strategy = looksRareProtocol.strategyInfo(strategyId);
         assertFalse(strategy.isActive);
         assertTrue(strategy.hasRoyalties);
         assertEq(strategy.protocolFee, protocolFee);

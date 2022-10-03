@@ -80,9 +80,38 @@ contract LooksRareProtocolHelpers is SignatureChecker {
             ? _getRoyaltyRecipientAndAmountAndRoyaltyType(collection, itemIds, price)
             : (address(0), 0, RoyaltyType.NoRoyalty);
 
-        protocolFeeAmount = ((price * strategyInfo.protocolFee) / 10000);
+        protocolFeeAmount = (price * strategyInfo.protocolFee) / 10000;
         collectionDiscountFactor = looksRareProtocol.collectionDiscountFactor(collection);
         netPrice = price - protocolFeeAmount - royaltyFeeAmount;
+    }
+
+    /**
+     * @notice Compute digest for maker ask
+     * @param makerAsk Maker ask struct
+     * @return digest Digest
+     */
+    function computeDigestMakerAsk(OrderStructs.MakerAsk memory makerAsk) public view returns (bytes32 digest) {
+        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
+        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerAsk.hash()));
+    }
+
+    /**
+     * @notice Compute digest for maker bid
+     * @param makerBid Maker bid struct
+     * @return digest Digest
+     */
+    function computeDigestMakerBid(OrderStructs.MakerBid memory makerBid) public view returns (bytes32 digest) {
+        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
+        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerBid.hash()));
+    }
+
+    /**
+     * @notice Compute digest for merkle root
+     * @param merkleRoot Merkle root struct
+     */
+    function computeDigestMerkleRoot(OrderStructs.MerkleRoot memory merkleRoot) public view returns (bytes32 digest) {
+        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
+        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleRoot.hash()));
     }
 
     /**
@@ -131,35 +160,6 @@ contract LooksRareProtocolHelpers is SignatureChecker {
         bytes32 digest = computeDigestMerkleRoot(merkleRoot);
         _verify(digest, signer, makerSignature);
         return true;
-    }
-
-    /**
-     * @notice Compute digest for maker ask
-     * @param makerAsk Maker ask struct
-     * @return digest Digest
-     */
-    function computeDigestMakerAsk(OrderStructs.MakerAsk memory makerAsk) public view returns (bytes32 digest) {
-        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerAsk.hash()));
-    }
-
-    /**
-     * @notice Compute digest for maker bid
-     * @param makerBid Maker bid struct
-     * @return digest Digest
-     */
-    function computeDigestMakerBid(OrderStructs.MakerBid memory makerBid) public view returns (bytes32 digest) {
-        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerBid.hash()));
-    }
-
-    /**
-     * @notice Compute digest for merkle root
-     * @param merkleRoot Merkle root struct
-     */
-    function computeDigestMerkleRoot(OrderStructs.MerkleRoot memory merkleRoot) public view returns (bytes32 digest) {
-        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleRoot.hash()));
     }
 
     function _getRoyaltyRecipientAndAmountAndRoyaltyType(

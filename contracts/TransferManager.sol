@@ -76,7 +76,9 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         uint256[] calldata amounts
     ) external override {
         if (itemIds.length == 0 || itemIds.length != amounts.length) revert WrongLengths();
-        if (from != msg.sender && !isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+        if (from != msg.sender) {
+            if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+        }
 
         if (assetType == 0) {
             for (uint256 i; i < amounts.length; ) {
@@ -116,7 +118,9 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
             itemIds.length != amounts.length
         ) revert WrongLengths();
 
-        if (from != msg.sender && !isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+        if (from != msg.sender) {
+            if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+        }
 
         for (uint256 i; i < collections.length; ) {
             if (itemIds[i].length == 0 || itemIds[i].length != amounts[i].length) revert WrongLengths();

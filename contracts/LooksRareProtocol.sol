@@ -318,12 +318,12 @@ contract LooksRareProtocol is
         // Verify nonces and invalidate order nonce if valid
         if (
             _userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
-            _userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
-            _userOrderNonce[makerBid.signer][makerBid.orderNonce]
+            userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
+            userOrderNonce[makerBid.signer][makerBid.orderNonce]
         ) revert WrongNonces();
 
         // Invalidate order at this nonce for future execution
-        _userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
+        userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
 
         uint256[] memory fees = new uint256[](2);
         address[] memory recipients = new address[](2);
@@ -389,12 +389,12 @@ contract LooksRareProtocol is
         // Verify nonces and invalidate order nonce if valid
         if (
             _userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
-            _userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
-            _userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
+            userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
+            userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
         ) revert WrongNonces();
 
         // Invalidate order at this nonce for future execution
-        _userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
+        userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
 
         uint256[] memory fees = new uint256[](2);
         address[] memory recipients = new address[](2);

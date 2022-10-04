@@ -2,10 +2,11 @@
 pragma solidity ^0.8.0;
 
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
+import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-contract InitialStatesTest is ProtocolBase, IExecutionManager {
+contract InitialStatesTest is ProtocolBase, IStrategyManager {
     /**
      * Verify initial post-deployment states are as expected
      */
@@ -33,7 +34,7 @@ contract InitialStatesTest is ProtocolBase, IExecutionManager {
         assertEq(initialChainId, currentChainId);
 
         for (uint16 i = 0; i < 2; i++) {
-            Strategy memory strategy = looksRareProtocol.viewStrategy(i);
+            Strategy memory strategy = looksRareProtocol.strategyInfo(i);
             assertTrue(strategy.isActive);
             assertTrue(strategy.hasRoyalties);
             assertEq(strategy.protocolFee, _standardProtocolFee);

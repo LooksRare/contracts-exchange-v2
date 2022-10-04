@@ -11,17 +11,17 @@ import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
  */
 contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
     // Whether the currency is whitelisted
-    mapping(address => bool) internal _isCurrencyWhitelisted;
+    mapping(address => bool) public isCurrencyWhitelisted;
 
     /**
      * @notice Whitelist currency for execution
-     * @param currency address of the currency (address(0) for ETH)
+     * @param currency Currency address (address(0) for ETH)
      */
     function addCurrency(address currency) external onlyOwner {
         if (currency != address(0) && currency.code.length == 0) revert CurrencyNotContract(currency);
-        if (_isCurrencyWhitelisted[currency]) revert CurrencyAlreadyWhitelisted(currency);
+        if (isCurrencyWhitelisted[currency]) revert CurrencyAlreadyWhitelisted(currency);
 
-        _isCurrencyWhitelisted[currency] = true;
+        isCurrencyWhitelisted[currency] = true;
         emit CurrencyWhitelisted(currency);
     }
 
@@ -30,18 +30,9 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
      * @param currency address of the currency (address(0) for ETH)
      */
     function removeCurrency(address currency) external onlyOwner {
-        if (!_isCurrencyWhitelisted[currency]) revert CurrencyNotWhitelisted(currency);
+        if (!isCurrencyWhitelisted[currency]) revert CurrencyNotWhitelisted(currency);
 
-        delete _isCurrencyWhitelisted[currency];
+        delete isCurrencyWhitelisted[currency];
         emit CurrencyRemoved(currency);
-    }
-
-    /**
-     * @notice Is currency whitelisted
-     * @param currency address of the currency (address(0) for ETH)
-     * @return isWhitelisted whether the currency is whitelisted
-     */
-    function isCurrencyWhitelisted(address currency) external view returns (bool isWhitelisted) {
-        return _isCurrencyWhitelisted[currency];
     }
 }

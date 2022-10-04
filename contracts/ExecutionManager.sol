@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
-import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
+// LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
+// Interfaces
 import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
-import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
+// Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
+// Direct dependencies
 import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";
+import {FeeManager} from "./FeeManager.sol";
+import {StrategyManager} from "./StrategyManager.sol";
 
 /**
  * @title ExecutionManager
@@ -20,123 +23,12 @@ import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";
  *         For instance, a taker ask is executed against a maker bid (and a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
-contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
-    // Maximum protocol fee
-    uint16 private immutable _MAX_PROTOCOL_FEE = 5000;
-
-    // Count how many strategies exist (it includes strategies that have been removed)
-    uint16 public countStrategies = 2;
-
-    // Protocol fee recipient
-    address internal _protocolFeeRecipient;
-
-    // Royalty fee registry
-    IRoyaltyFeeRegistry internal _royaltyFeeRegistry;
-
-    // Track strategy status and implementation
-    mapping(uint16 => Strategy) internal _strategies;
-
+contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyManager, IExecutionManager {
     /**
      * @notice Constructor
-     * @param royaltyFeeRegistry address of the royalty fee registry
+     * @param _royaltyFeeRegistry Royalty fee registry address
      */
-    constructor(address royaltyFeeRegistry) {
-        _royaltyFeeRegistry = IRoyaltyFeeRegistry(royaltyFeeRegistry);
-        _strategies[0] = Strategy({
-            isActive: true,
-            hasRoyalties: true,
-            protocolFee: 200,
-            maxProtocolFee: 300,
-            implementation: address(0)
-        });
-        _strategies[1] = Strategy({
-            isActive: true,
-            hasRoyalties: true,
-            protocolFee: 200,
-            maxProtocolFee: 300,
-            implementation: address(0)
-        });
-    }
-
-    /**
-     * @notice Add strategy
-     * @param hasRoyalties whether the strategy has royalties
-     * @param protocolFee protocol fee
-     * @param maxProtocolFee protocol fee
-     * @param implementation address of the implementation
-     */
-    function addStrategy(
-        bool hasRoyalties,
-        uint16 protocolFee,
-        uint16 maxProtocolFee,
-        address implementation
-    ) external onlyOwner {
-        if (maxProtocolFee < protocolFee || maxProtocolFee > _MAX_PROTOCOL_FEE) revert StrategyProtocolFeeTooHigh();
-
-        _strategies[countStrategies] = Strategy({
-            isActive: true,
-            hasRoyalties: hasRoyalties,
-            protocolFee: protocolFee,
-            maxProtocolFee: maxProtocolFee,
-            implementation: implementation
-        });
-
-        emit NewStrategy(countStrategies++, implementation);
-    }
-
-    /**
-     * @notice Set protocol fee recipient
-     * @param newProtocolFeeRecipient address of the new protocol fee recipient
-     */
-    function setProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
-        _protocolFeeRecipient = newProtocolFeeRecipient;
-        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
-    }
-
-    /**
-     * @notice Set royalty fee registry
-     * @param newRoyaltyFeeRegistry address of the new royalty fee registry
-     */
-    function setRoyaltyFeeRegistry(address newRoyaltyFeeRegistry) external onlyOwner {
-        _royaltyFeeRegistry = IRoyaltyFeeRegistry(newRoyaltyFeeRegistry);
-        emit NewRoyaltyFeeRegistry(newRoyaltyFeeRegistry);
-    }
-
-    /**
-     * @notice Update strategy
-     * @param strategyId id of the strategy
-     * @param hasRoyalties whether the strategy should distribute royalties
-     * @param protocolFee protocol fee
-     * @param isActive whether the strategy is active
-     */
-    function updateStrategy(
-        uint16 strategyId,
-        bool hasRoyalties,
-        uint16 protocolFee,
-        bool isActive
-    ) external onlyOwner {
-        if (strategyId >= countStrategies) revert StrategyNotUsed();
-        if (protocolFee > _strategies[strategyId].maxProtocolFee) revert StrategyProtocolFeeTooHigh();
-
-        _strategies[strategyId] = Strategy({
-            isActive: isActive,
-            hasRoyalties: hasRoyalties,
-            protocolFee: protocolFee,
-            maxProtocolFee: _strategies[strategyId].maxProtocolFee,
-            implementation: _strategies[strategyId].implementation
-        });
-
-        emit StrategyUpdated(strategyId, isActive, hasRoyalties, protocolFee);
-    }
-
-    /**
-     * @notice View strategy information
-     * @param strategyId id of the strategy
-     * @return strategy parameters of the strategy (e.g., implementation address, protocol fee)
-     */
-    function viewStrategy(uint16 strategyId) external view returns (Strategy memory strategy) {
-        return _strategies[strategyId];
-    }
+    constructor(address _royaltyFeeRegistry) FeeManager(_royaltyFeeRegistry) {}
 
     /**
      * @notice Execute strategy for taker ask
@@ -160,13 +52,13 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
         uint256 price;
         (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
-        (royaltyRecipient, royaltyFeeAmount) = _strategies[makerBid.strategyId].hasRoyalties
+        (royaltyRecipient, royaltyFeeAmount) = _strategyInfo[makerBid.strategyId].hasRoyalties
             ? _getRoyaltyRecipientAndAmount(makerBid.collection, itemIds, price)
             : (address(0), 0);
 
         protocolFeeAmount =
-            (((price * _strategies[makerBid.strategyId].protocolFee) / 10000) *
-                (10000 - _collectionDiscountFactors[makerBid.collection])) /
+            (((price * _strategyInfo[makerBid.strategyId].protocolFee) / 10000) *
+                (10000 - collectionDiscountFactor[makerBid.collection])) /
             10000;
 
         netPrice = price - protocolFeeAmount - royaltyFeeAmount;
@@ -197,13 +89,13 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
         uint256 price;
         (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
-        (royaltyRecipient, royaltyFeeAmount) = _strategies[makerAsk.strategyId].hasRoyalties
+        (royaltyRecipient, royaltyFeeAmount) = _strategyInfo[makerAsk.strategyId].hasRoyalties
             ? _getRoyaltyRecipientAndAmount(makerAsk.collection, itemIds, price)
             : (address(0), 0);
 
         protocolFeeAmount =
-            (((price * _strategies[makerAsk.strategyId].protocolFee) / 10000) *
-                (10000 - _collectionDiscountFactors[makerAsk.collection])) /
+            (((price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000) *
+                (10000 - collectionDiscountFactor[makerAsk.collection])) /
             10000;
 
         netPrice = price - royaltyFeeAmount - protocolFeeAmount;
@@ -237,8 +129,8 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
             // Collection offer is not available for taker bid
             revert StrategyNotAvailable(makerAsk.strategyId);
         } else {
-            if (_strategies[makerAsk.strategyId].isActive) {
-                (price, itemIds, amounts) = IExecutionStrategy(_strategies[makerAsk.strategyId].implementation)
+            if (_strategyInfo[makerAsk.strategyId].isActive) {
+                (price, itemIds, amounts) = IExecutionStrategy(_strategyInfo[makerAsk.strategyId].implementation)
                     .executeStrategyWithTakerBid(takerBid, makerAsk);
             } else {
                 revert StrategyNotAvailable(makerAsk.strategyId);
@@ -248,8 +140,8 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
 
     /**
      * @notice Execute strategy hooks for takerAsk
-     * @param takerAsk takerAsk struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
+     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
      */
     function _executeStrategyHooksForTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -270,8 +162,8 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
         } else if (makerBid.strategyId == 1) {
             (price, itemIds, amounts) = _executeCollectionStrategyWithTakerAsk(takerAsk, makerBid);
         } else {
-            if (_strategies[makerBid.strategyId].isActive) {
-                (price, itemIds, amounts) = IExecutionStrategy(_strategies[makerBid.strategyId].implementation)
+            if (_strategyInfo[makerBid.strategyId].isActive) {
+                (price, itemIds, amounts) = IExecutionStrategy(_strategyInfo[makerBid.strategyId].implementation)
                     .executeStrategyWithTakerAsk(takerAsk, makerBid);
             } else {
                 revert StrategyNotAvailable(makerBid.strategyId);
@@ -281,8 +173,8 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
 
     /**
      * @notice Execute standard sale strategy with takerBid
-     * @param takerBid takerBid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk makerAsk struct (contains ask-specific parameter for the maker side of the transaction)
+     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
+     * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
      */
     function _executeStandardSaleStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -328,9 +220,9 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
     }
 
     /**
-     * @notice Execute standard sale strategy with takerAsk
-     * @param takerAsk takerAsk struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
+     * @notice Execute standard sale strategy with taker ask order
+     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
      */
     function _executeStandardSaleStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -376,9 +268,9 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
     }
 
     /**
-     * @notice Execute collection strategy with takerAsk
-     * @param takerAsk takerAsk struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
+     * @notice Execute collection strategy with taker ask order
+     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
      */
     function _executeCollectionStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -409,59 +301,9 @@ contract ExecutionManager is CollectionDiscountManager, IExecutionManager {
     }
 
     /**
-     * @notice Get royalty recipient and amount for a collection, set of itemIds, and gross sale amount.
-     * @param collection address of the collection
-     * @param itemIds array of itemIds
-     * @param amount price amount of the sale
-     * @return royaltyRecipient address of the royalty recipient
-     * @return royaltyAmount amount to pay in royalties to the royalty recipient
-     * @dev There are two onchain sources for the royalty fee to distribute.
-     *      1. RoyaltyFeeRegistry: It is an onchain registry where royalty fee is defined across all items of a collection.
-     *      2. ERC2981: The NFT Royalty Standard where royalty fee is defined at a tokenId level for each item of a collection.
-     *      The onchain logic looks up the registry first. If it doesn't find anything, it checks if a collection is ERC2981.
-     *      If so, it fetches the proper royalty information for the itemId.
-     *      For a bundle that contains multiple itemIds (for a collection using ERC2981), if the royalty fee/recipient differ among the itemIds
-     *      part of the bundle, the trade reverts.
-     */
-    function _getRoyaltyRecipientAndAmount(
-        address collection,
-        uint256[] memory itemIds,
-        uint256 amount
-    ) internal view returns (address royaltyRecipient, uint256 royaltyAmount) {
-        // 1. Royalty fee registry
-        (royaltyRecipient, royaltyAmount) = _royaltyFeeRegistry.royaltyInfo(collection, amount);
-
-        // 2. ERC2981 logic
-        if (royaltyRecipient == address(0) && royaltyAmount == 0) {
-            (bool status, bytes memory data) = collection.staticcall(
-                abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[0], amount)
-            );
-
-            if (status) {
-                (royaltyRecipient, royaltyAmount) = abi.decode(data, (address, uint256));
-            }
-
-            // Specific logic if bundle
-            if (status && itemIds.length > 1) {
-                for (uint256 i = 1; i < itemIds.length; ) {
-                    (address royaltyRecipientForToken, uint256 royaltyAmountForToken) = IERC2981(collection)
-                        .royaltyInfo(itemIds[i], amount);
-
-                    if (royaltyRecipientForToken != royaltyRecipient || royaltyAmount != royaltyAmountForToken)
-                        revert BundleEIP2981NotAllowed(collection, itemIds);
-
-                    unchecked {
-                        ++i;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * @notice Verify order timestamp validity
-     * @param startTime start timestamp
-     * @param endTime end timestamp
+     * @param startTime Start timestamp
+     * @param endTime End timestamp
      */
     function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) internal view {
         if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();

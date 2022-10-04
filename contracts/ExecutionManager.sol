@@ -195,27 +195,23 @@ contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyMana
         uint256 targetLength = amounts.length;
 
         {
-            bool canOrderBeExecuted = targetLength != 0 &&
-                itemIds.length == targetLength &&
-                takerBid.itemIds.length == targetLength &&
-                takerBid.amounts.length == targetLength &&
-                price == takerBid.maxPrice;
+            if (
+                targetLength == 0 ||
+                itemIds.length != targetLength ||
+                takerBid.itemIds.length != targetLength ||
+                takerBid.amounts.length != targetLength ||
+                price != takerBid.maxPrice
+            ) revert OrderInvalid();
 
-            if (canOrderBeExecuted) {
-                for (uint256 i; i < targetLength; ) {
-                    if ((takerBid.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerBid.itemIds[i] != itemIds[i])) {
-                        canOrderBeExecuted = false;
-                        // Exit loop if false
-                        break;
-                    }
+            for (uint256 i; i < targetLength; ) {
+                if ((takerBid.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerBid.itemIds[i] != itemIds[i])) {
+                    revert OrderInvalid();
+                }
 
-                    unchecked {
-                        ++i;
-                    }
+                unchecked {
+                    ++i;
                 }
             }
-
-            if (!canOrderBeExecuted) revert OrderInvalid();
         }
     }
 
@@ -243,27 +239,23 @@ contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyMana
         uint256 targetLength = amounts.length;
 
         {
-            bool canOrderBeExecuted = targetLength != 0 &&
-                itemIds.length == targetLength &&
-                takerAsk.itemIds.length == targetLength &&
-                takerAsk.amounts.length == targetLength &&
-                price == takerAsk.minPrice;
+            if (
+                targetLength == 0 ||
+                itemIds.length != targetLength ||
+                takerAsk.itemIds.length != targetLength ||
+                takerAsk.amounts.length != targetLength ||
+                price != takerAsk.minPrice
+            ) revert OrderInvalid();
 
-            if (canOrderBeExecuted) {
-                for (uint256 i; i < targetLength; ) {
-                    if ((takerAsk.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerAsk.itemIds[i] != itemIds[i])) {
-                        canOrderBeExecuted = false;
-                        // Exit loop if false
-                        break;
-                    }
+            for (uint256 i; i < targetLength; ) {
+                if ((takerAsk.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerAsk.itemIds[i] != itemIds[i])) {
+                    revert OrderInvalid();
+                }
 
-                    unchecked {
-                        ++i;
-                    }
+                unchecked {
+                    ++i;
                 }
             }
-
-            if (!canOrderBeExecuted) revert OrderInvalid();
         }
     }
 
@@ -290,13 +282,13 @@ contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyMana
 
         // A collection order can only be executable for 1 itemId but quantity to fill can vary
         {
-            bool canOrderBeExecuted = itemIds.length == 1 &&
-                amounts.length == 1 &&
-                price == takerAsk.minPrice &&
-                takerAsk.amounts[0] == amounts[0] &&
-                amounts[0] > 0;
-
-            if (!canOrderBeExecuted) revert OrderInvalid();
+            if (
+                itemIds.length != 1 ||
+                amounts.length != 1 ||
+                price != takerAsk.minPrice ||
+                takerAsk.amounts[0] != amounts[0] ||
+                amounts[0] == 0
+            ) revert OrderInvalid();
         }
     }
 

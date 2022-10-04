@@ -100,7 +100,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
     }
 
     function testTakerAskMultipleOrdersSignedERC721() public {
@@ -189,6 +189,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 }

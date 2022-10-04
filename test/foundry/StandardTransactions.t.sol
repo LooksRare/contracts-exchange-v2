@@ -80,7 +80,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
     }
 
     /**
@@ -156,7 +156,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     /**
@@ -237,7 +237,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker ask user receives 100% of whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + price);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     /**
@@ -317,7 +317,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
     }
 
     /**
@@ -392,7 +392,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     /**
@@ -475,7 +475,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
     }
 
     /**
@@ -555,7 +555,7 @@ contract StandardTransactionsTest is ProtocolBase {
             // Taker user has received the asset
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the nonce is marked as executed
-            assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(i)));
+            assertTrue(looksRareProtocol.userOrderNonce(makerUser, uint112(i)));
         }
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
@@ -666,13 +666,13 @@ contract StandardTransactionsTest is ProtocolBase {
             // Taker user has received the first two assets
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the first two nonces are marked as executed
-            assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(i)));
+            assertTrue(looksRareProtocol.userOrderNonce(makerUser, uint112(i)));
         }
 
         // Taker user has not received the asset
         assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
         // Verify the nonce is NOT marked as executed
-        assertFalse(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(faultyTokenId)));
+        assertFalse(looksRareProtocol.userOrderNonce(makerUser, uint112(faultyTokenId)));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)

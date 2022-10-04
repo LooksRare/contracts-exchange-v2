@@ -85,6 +85,6 @@ contract CollectionOrdersTest is ProtocolBase {
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 }

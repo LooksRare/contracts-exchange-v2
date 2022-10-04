@@ -63,7 +63,7 @@ contract BundleTransactionsTest is ProtocolBase {
         // Taker ask user receives 98% of the whole price (no royalties are paid)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     function testTakerAskERC721BundleWithRoyaltiesFromRegistry() public {
@@ -128,7 +128,7 @@ contract BundleTransactionsTest is ProtocolBase {
         // Taker ask user receives 97% of the whole price (royalties are paid)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     function testTakerAskERC721BundleWithEIP2981Royalties() public {
@@ -192,7 +192,7 @@ contract BundleTransactionsTest is ProtocolBase {
         // Taker ask user receives 97% of the whole price (royalties are paid)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 
     function testTakerBidERC721BundleNoRoyalties() public {
@@ -248,7 +248,7 @@ contract BundleTransactionsTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
     }
 
     function testTakerBidERC721BundleWithRoyaltiesFromRegistry() public {
@@ -308,7 +308,7 @@ contract BundleTransactionsTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
     }
 
     function testTakerBidERC721BundleWithEIP2981Royalties() public {
@@ -370,6 +370,6 @@ contract BundleTransactionsTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
     }
 }

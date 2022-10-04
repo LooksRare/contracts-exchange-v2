@@ -129,7 +129,7 @@ contract ReferralOrdersTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerAsk.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
     }
 
     /**
@@ -213,13 +213,13 @@ contract ReferralOrdersTest is ProtocolBase {
             // Taker user has received the first two assets
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the first two nonces are marked as executed
-            assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(i)));
+            assertTrue(looksRareProtocol.userOrderNonce(makerUser, uint112(i)));
         }
 
         // Taker user has not received the asset
         assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
         // Verify the nonce is NOT marked as executed
-        assertFalse(looksRareProtocol.viewUserOrderNonce(makerUser, uint112(faultyTokenId)));
+        assertFalse(looksRareProtocol.userOrderNonce(makerUser, uint112(faultyTokenId)));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
@@ -326,6 +326,6 @@ contract ReferralOrdersTest is ProtocolBase {
             _initialWETHBalanceOwner + ((price * _standardProtocolFee) / 10000 - referralFee)
         );
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.viewUserOrderNonce(makerUser, makerBid.orderNonce));
+        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
 }

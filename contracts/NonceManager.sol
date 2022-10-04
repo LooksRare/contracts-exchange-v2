@@ -18,10 +18,10 @@ contract NonceManager is INonceManager {
     mapping(address => UserBidAskNonces) internal _userBidAskNonces;
 
     // Track order nonce for a user
-    mapping(address => mapping(uint112 => bool)) internal _userOrderNonce;
+    mapping(address => mapping(uint112 => bool)) public userOrderNonce;
 
     // Track subset nonce for a user
-    mapping(address => mapping(uint112 => bool)) internal _userSubsetNonce;
+    mapping(address => mapping(uint112 => bool)) public userSubsetNonce;
 
     /**
      * @notice Cancel order nonces
@@ -31,7 +31,7 @@ contract NonceManager is INonceManager {
         if (orderNonces.length == 0) revert WrongLengths();
 
         for (uint256 i; i < orderNonces.length; ) {
-            _userOrderNonce[msg.sender][orderNonces[i]] = true;
+            userOrderNonce[msg.sender][orderNonces[i]] = true;
             unchecked {
                 ++i;
             }
@@ -48,7 +48,7 @@ contract NonceManager is INonceManager {
         if (subsetNonces.length == 0) revert WrongLengths();
 
         for (uint256 i; i < subsetNonces.length; ) {
-            _userSubsetNonce[msg.sender][subsetNonces[i]] = true;
+            userSubsetNonce[msg.sender][subsetNonces[i]] = true;
             unchecked {
                 ++i;
             }
@@ -88,25 +88,5 @@ contract NonceManager is INonceManager {
      */
     function viewUserBidAskNonces(address user) external view returns (UserBidAskNonces memory bidAskNonces) {
         return _userBidAskNonces[user];
-    }
-
-    /**
-     * @notice Check whether user order nonce is executed or cancelled
-     * @param user address of the user
-     * @param nonce order nonce
-     * @return isNonceExecutedOrCancelled whether the nonce is cancelled or executed
-     */
-    function viewUserOrderNonce(address user, uint112 nonce) external view returns (bool isNonceExecutedOrCancelled) {
-        return _userOrderNonce[user][nonce];
-    }
-
-    /**
-     * @notice Check whether user subset nonce is executed or cancelled
-     * @param user address of the user
-     * @param nonce subset nonce
-     * @return isNonceExecutedOrCancelled whether the nonce is cancelled or executed
-     */
-    function viewUserSubsetNonce(address user, uint112 nonce) external view returns (bool isNonceExecutedOrCancelled) {
-        return _userSubsetNonce[user][nonce];
     }
 }

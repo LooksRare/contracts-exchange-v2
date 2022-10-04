@@ -461,11 +461,15 @@ contract LooksRareProtocol is
             totalReferralFee = (totalProtocolFee * referrerRates[referrer]) / 10000;
             totalProtocolFee -= totalReferralFee;
 
-            // Transfer the referral fee if anything to transfer
-            _transferFungibleTokens(currency, bidUser, referrer, totalReferralFee);
+            // If bid user isn't the referrer, pay the referral.
+            // If currency is ETH, funds are returned to sender at the end of the execution.
+            // If currency is ERC20, funds are not transferred from bidder to bidder.
+            if (bidUser != referrer) {
+                _transferFungibleTokens(currency, bidUser, referrer, totalReferralFee);
+            }
         }
 
-        // Transfer remaining protocol fee to the fee recipient
+        // Transfer remaining protocol fee to the protocol fee recipient
         _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFee);
 
         if (totalReferralFee != 0) {

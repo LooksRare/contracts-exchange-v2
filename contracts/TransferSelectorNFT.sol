@@ -36,7 +36,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
         address transferManagerForAssetType,
         bytes4 selectorForAssetType
     ) external onlyOwner {
-        if (managerSelectorOfAssetType[assetType].transferManager != address(0)) revert WrongAssetType(assetType);
+        if (managerSelectorOfAssetType[assetType].transferManager != address(0)) revert AlreadySet();
 
         managerSelectorOfAssetType[assetType] = ManagerSelector({
             transferManager: transferManagerForAssetType,

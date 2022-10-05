@@ -628,12 +628,12 @@ contract StandardTransactionsTest is ProtocolBase {
             OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
             bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
 
-            // NFTTransferFail(address collection, uint16 assetType);
+            // NFTTransferFail(address collection, uint8 assetType);
             vm.expectRevert(
                 abi.encodeWithSelector(
                     ITransferSelectorNFT.NFTTransferFail.selector,
                     makerAsks[faultyTokenId].collection,
-                    uint16(0)
+                    uint8(0)
                 )
             );
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(

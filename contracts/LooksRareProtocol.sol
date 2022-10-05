@@ -192,7 +192,9 @@ contract LooksRareProtocol is
         uint256 totalProtocolFee;
         for (uint256 i; i < takerBids.length; ) {
             {
-                if (i != 0 && makerAsks[i].currency != makerAsks[i - 1].currency) revert WrongCurrency();
+                if (i != 0) {
+                    if (makerAsks[i].currency != makerAsks[i - 1].currency) revert WrongCurrency();
+                }
             }
 
             // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
@@ -313,7 +315,9 @@ contract LooksRareProtocol is
         address sender
     ) internal returns (uint256 protocolFeeAmount) {
         // Verify whether the currency is whitelisted but is not ETH (address(0))
-        if (!isCurrencyWhitelisted[makerBid.currency] && makerBid.currency != address(0)) revert WrongCurrency();
+        if (!isCurrencyWhitelisted[makerBid.currency]) {
+            if (makerBid.currency != address(0)) revert WrongCurrency();
+        }
 
         // Verify nonces and invalidate order nonce if valid
         if (
@@ -338,8 +342,10 @@ contract LooksRareProtocol is
         );
 
         for (uint256 i; i < recipients.length; ) {
-            if (recipients[i] != address(0) && fees[i] != 0) {
-                _transferFungibleTokens(makerBid.currency, makerBid.signer, recipients[i], fees[i]);
+            if (recipients[i] != address(0)) {
+                if (fees[i] != 0) {
+                    _transferFungibleTokens(makerBid.currency, makerBid.signer, recipients[i], fees[i]);
+                }
             }
             unchecked {
                 ++i;
@@ -418,8 +424,8 @@ contract LooksRareProtocol is
         );
 
         for (uint256 i; i < recipients.length; ) {
-            if (recipients[i] != address(0) && fees[i] != 0) {
-                _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
+            if (recipients[i] != address(0)) {
+                if (fees[i] != 0) _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
             }
             unchecked {
                 ++i;
@@ -457,15 +463,17 @@ contract LooksRareProtocol is
         uint256 totalReferralFee;
 
         // Check whether referral program is active and whether to execute a referral logic (and adjust downward the protocol fee if so)
-        if (isReferralProgramActive && referrer != address(0)) {
-            totalReferralFee = (totalProtocolFee * referrerRates[referrer]) / 10000;
-            totalProtocolFee -= totalReferralFee;
+        if (referrer != address(0)) {
+            if (isReferralProgramActive) {
+                totalReferralFee = (totalProtocolFee * referrerRates[referrer]) / 10000;
+                totalProtocolFee -= totalReferralFee;
 
-            // If bid user isn't the referrer, pay the referral.
-            // If currency is ETH, funds are returned to sender at the end of the execution.
-            // If currency is ERC20, funds are not transferred from bidder to bidder.
-            if (bidUser != referrer) {
-                _transferFungibleTokens(currency, bidUser, referrer, totalReferralFee);
+                // If bid user isn't the referrer, pay the referral.
+                // If currency is ETH, funds are returned to sender at the end of the execution.
+                // If currency is ERC20, funds are not transferred from bidder to bidder.
+                if (bidUser != referrer) {
+                    _transferFungibleTokens(currency, bidUser, referrer, totalReferralFee);
+                }
             }
         }
 

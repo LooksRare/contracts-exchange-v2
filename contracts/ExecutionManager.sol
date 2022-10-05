@@ -14,16 +14,23 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 // Direct dependencies
 import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";
 import {FeeManager} from "./FeeManager.sol";
+import {InheritedStrategies} from "./InheritedStrategies.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
 /**
  * @title ExecutionManager
  * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain
  *         when off-chain maker orders is matched by on-chain taker orders of a different kind.
- *         For instance, a taker ask is executed against a maker bid (and a taker bid against a maker ask).
+ *         For instance, a taker ask is executed against a maker bid (or a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
-contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyManager, IExecutionManager {
+contract ExecutionManager is
+    CollectionDiscountManager,
+    FeeManager,
+    InheritedStrategies,
+    StrategyManager,
+    IExecutionManager
+{
     /**
      * @notice Constructor
      * @param _royaltyFeeRegistry Royalty fee registry address
@@ -32,8 +39,8 @@ contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyMana
 
     /**
      * @notice Execute strategy for taker ask
-     * @param takerAsk takerAsk struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid makerBid struct (contains bid-specific parameter for the maker side of the transaction)
+     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
      */
     function _executeStrategyForTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -69,8 +76,8 @@ contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyMana
 
     /**
      * @notice Execute strategy for taker bid
-     * @param takerBid takerBid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk makerAsk struct (contains ask-specific parameter for the maker side of the transaction)
+     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
+     * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
      */
     function _executeStrategyForTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -106,8 +113,8 @@ contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyMana
 
     /**
      * @notice Execute strategy hooks for takerBid
-     * @param takerBid takerBid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk makerAsk struct (contains ask-specific parameter for the maker side of the transaction)
+     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
+     * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
      */
     function _executeStrategyHooksForTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -168,127 +175,6 @@ contract ExecutionManager is CollectionDiscountManager, FeeManager, StrategyMana
             } else {
                 revert StrategyNotAvailable(makerBid.strategyId);
             }
-        }
-    }
-
-    /**
-     * @notice Execute standard sale strategy with takerBid
-     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
-     */
-    function _executeStandardSaleStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
-    )
-        internal
-        pure
-        returns (
-            uint256 price,
-            uint256[] calldata itemIds,
-            uint256[] calldata amounts
-        )
-    {
-        price = makerAsk.minPrice;
-        itemIds = makerAsk.itemIds;
-        amounts = makerAsk.amounts;
-
-        uint256 targetLength = amounts.length;
-
-        {
-            if (
-                targetLength == 0 ||
-                itemIds.length != targetLength ||
-                takerBid.itemIds.length != targetLength ||
-                takerBid.amounts.length != targetLength ||
-                price != takerBid.maxPrice
-            ) revert OrderInvalid();
-
-            for (uint256 i; i < targetLength; ) {
-                if ((takerBid.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerBid.itemIds[i] != itemIds[i])) {
-                    revert OrderInvalid();
-                }
-
-                unchecked {
-                    ++i;
-                }
-            }
-        }
-    }
-
-    /**
-     * @notice Execute standard sale strategy with taker ask order
-     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
-     */
-    function _executeStandardSaleStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
-    )
-        internal
-        pure
-        returns (
-            uint256 price,
-            uint256[] calldata itemIds,
-            uint256[] calldata amounts
-        )
-    {
-        price = makerBid.maxPrice;
-        itemIds = makerBid.itemIds;
-        amounts = makerBid.amounts;
-
-        uint256 targetLength = amounts.length;
-
-        {
-            if (
-                targetLength == 0 ||
-                itemIds.length != targetLength ||
-                takerAsk.itemIds.length != targetLength ||
-                takerAsk.amounts.length != targetLength ||
-                price != takerAsk.minPrice
-            ) revert OrderInvalid();
-
-            for (uint256 i; i < targetLength; ) {
-                if ((takerAsk.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerAsk.itemIds[i] != itemIds[i])) {
-                    revert OrderInvalid();
-                }
-
-                unchecked {
-                    ++i;
-                }
-            }
-        }
-    }
-
-    /**
-     * @notice Execute collection strategy with taker ask order
-     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
-     */
-    function _executeCollectionStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
-    )
-        internal
-        pure
-        returns (
-            uint256 price,
-            uint256[] calldata itemIds,
-            uint256[] calldata amounts
-        )
-    {
-        price = makerBid.maxPrice;
-        itemIds = takerAsk.itemIds;
-        amounts = makerBid.amounts;
-
-        // A collection order can only be executable for 1 itemId but quantity to fill can vary
-        {
-            if (
-                itemIds.length != 1 ||
-                amounts.length != 1 ||
-                price != takerAsk.minPrice ||
-                takerAsk.amounts[0] != amounts[0] ||
-                amounts[0] == 0
-            ) revert OrderInvalid();
         }
     }
 

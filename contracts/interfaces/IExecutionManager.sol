@@ -3,7 +3,6 @@ pragma solidity ^0.8.14;
 
 interface IExecutionManager {
     // Custom errors
-    error OrderInvalid();
     error OutsideOfTimeRange();
     error SlippageAsk();
     error SlippageBid();

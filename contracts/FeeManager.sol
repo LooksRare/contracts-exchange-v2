@@ -73,26 +73,29 @@ contract FeeManager is IFeeManager, OwnableTwoSteps {
         (royaltyRecipient, royaltyAmount) = royaltyFeeRegistry.royaltyInfo(collection, amount);
 
         // 2. ERC2981 logic
-        if (royaltyRecipient == address(0) && royaltyAmount == 0) {
-            (bool status, bytes memory data) = collection.staticcall(
-                abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[0], amount)
-            );
+        if (royaltyRecipient == address(0)) {
+            if (royaltyAmount == 0) {
+                (bool status, bytes memory data) = collection.staticcall(
+                    abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[0], amount)
+                );
 
-            if (status) {
-                (royaltyRecipient, royaltyAmount) = abi.decode(data, (address, uint256));
-            }
+                if (status) {
+                    (royaltyRecipient, royaltyAmount) = abi.decode(data, (address, uint256));
 
-            // Specific logic if bundle
-            if (status && itemIds.length > 1) {
-                for (uint256 i = 1; i < itemIds.length; ) {
-                    (address royaltyRecipientForToken, uint256 royaltyAmountForToken) = IERC2981(collection)
-                        .royaltyInfo(itemIds[i], amount);
+                    // Specific logic if bundle
+                    uint256 itemIdsLength = itemIds.length;
+                    if (itemIdsLength > 1) {
+                        for (uint256 i = 1; i < itemIdsLength; ) {
+                            (address royaltyRecipientForToken, uint256 royaltyAmountForToken) = IERC2981(collection)
+                                .royaltyInfo(itemIds[i], amount);
 
-                    if (royaltyRecipientForToken != royaltyRecipient || royaltyAmount != royaltyAmountForToken)
-                        revert BundleEIP2981NotAllowed(collection, itemIds);
+                            if (royaltyRecipientForToken != royaltyRecipient || royaltyAmount != royaltyAmountForToken)
+                                revert BundleEIP2981NotAllowed(collection, itemIds);
 
-                    unchecked {
-                        ++i;
+                            unchecked {
+                                ++i;
+                            }
+                        }
                     }
                 }
             }

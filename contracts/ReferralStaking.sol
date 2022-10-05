@@ -87,7 +87,9 @@ contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
      */
     function withdrawAll() external {
         uint256 userStake = _userStatus[msg.sender].stake;
-        if (userStake == 0 && looksRareProtocol.referrerRates(msg.sender) == 0) revert NoFundsStaked();
+        if (userStake == 0) {
+            if (looksRareProtocol.referrerRates(msg.sender) == 0) revert NoFundsStaked();
+        }
         if (_userStatus[msg.sender].earliestWithdrawalTimestamp > block.timestamp) revert FundsTimelocked();
 
         delete _userStatus[msg.sender];

@@ -18,7 +18,7 @@ contract InheritedStrategies is IInheritedStrategies {
     /**
      * @notice Execute standard sale strategy with takerBid
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
+     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      */
     function _executeStandardSaleStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -61,7 +61,7 @@ contract InheritedStrategies is IInheritedStrategies {
     /**
      * @notice Execute standard sale strategy with taker ask order
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
+     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      */
     function _executeStandardSaleStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -104,7 +104,7 @@ contract InheritedStrategies is IInheritedStrategies {
     /**
      * @notice Execute collection strategy with taker ask order
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
+     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      */
     function _executeCollectionStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,

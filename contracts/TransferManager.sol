@@ -31,67 +31,61 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
     mapping(address => bool) public isOperatorWhitelisted;
 
     /**
-     * @notice Transfer a single item
+     * @notice Transfer items for ERC721 collection
      * @param collection Collection address
-     * @param assetType Asset type (0 for ERC721, 1 for ERC1155)
-     * @param from Sender address
-     * @param to Recipient address
-     * @param itemId ItemId
-     * @param amount Amount to transfer (it is not used for ERC721)
-     */
-    function transferSingleItem(
-        address collection,
-        uint8 assetType,
-        address from,
-        address to,
-        uint256 itemId,
-        uint256 amount
-    ) external override {
-        if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
-
-        if (assetType == 0) {
-            _executeERC721TransferFrom(collection, from, to, itemId);
-        } else if (assetType == 1) {
-            _executeERC1155SafeTransferFrom(collection, from, to, itemId, amount);
-        } else {
-            revert WrongAssetType(assetType);
-        }
-    }
-
-    /**
-     * @notice Transfer batch items in the same collection
-     * @param collection Collection address
-     * @param assetType Asset type (0 for ERC721, 1 for ERC1155)
      * @param from Sender address
      * @param to Recipient address
      * @param itemIds Array of itemIds
      * @param amounts Array of amounts (it is not used for ERC721)
      */
-    function transferBatchItems(
+    function transferItemsERC721(
         address collection,
-        uint8 assetType,
         address from,
         address to,
         uint256[] calldata itemIds,
         uint256[] calldata amounts
-    ) external override {
-        if (itemIds.length == 0 || itemIds.length != amounts.length) revert WrongLengths();
-        if (from != msg.sender) {
-            if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+    ) external returns (bool status) {
+        uint256 length = itemIds.length;
+        if (length == 0 || length != amounts.length) revert WrongLengths();
+        if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+
+        for (uint256 i; i < amounts.length; ) {
+            _executeERC721TransferFrom(collection, from, to, itemIds[i]);
+            unchecked {
+                ++i;
+            }
         }
 
-        if (assetType == 0) {
-            for (uint256 i; i < amounts.length; ) {
-                _executeERC721TransferFrom(collection, from, to, itemIds[i]);
-                unchecked {
-                    ++i;
-                }
-            }
-        } else if (assetType == 1) {
-            _executeERC1155SafeBatchTransferFrom(collection, from, to, itemIds, amounts);
+        return true;
+    }
+
+    /**
+     * @notice Transfer items for ERC1155 collection
+     * @param collection Collection address
+     * @param from Sender address
+     * @param to Recipient address
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts (it is not used for ERC721)
+     * @dev It does not allow batch transferring if from = msg.sender since native function should be used.
+     */
+    function transferItemsERC1155(
+        address collection,
+        address from,
+        address to,
+        uint256[] calldata itemIds,
+        uint256[] calldata amounts
+    ) external returns (bool status) {
+        uint256 length = itemIds.length;
+        if (length == 0 || length != amounts.length) revert WrongLengths();
+        if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+
+        if (length == 1) {
+            _executeERC1155SafeTransferFrom(collection, from, to, itemIds[0], amounts[0]);
         } else {
-            revert WrongAssetType(assetType);
+            _executeERC1155SafeBatchTransferFrom(collection, from, to, itemIds, amounts);
         }
+
+        return true;
     }
 
     /**
@@ -110,7 +104,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         address to,
         uint256[][] calldata itemIds,
         uint256[][] calldata amounts
-    ) external override {
+    ) external returns (bool status) {
         if (
             itemIds.length == 0 ||
             itemIds.length != assetTypes.length ||
@@ -142,6 +136,8 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
                 ++i;
             }
         }
+
+        return true;
     }
 
     /**

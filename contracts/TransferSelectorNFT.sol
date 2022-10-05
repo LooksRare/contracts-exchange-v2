@@ -14,7 +14,7 @@ import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
  */
 contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
     // Tracks manager address and associated selector to transfer asset type
-    mapping(uint16 => ManagerSelector) public managerSelectorOfAssetType;
+    mapping(uint8 => ManagerSelector) public managerSelectorOfAssetType;
 
     /**
      * @notice Constructor

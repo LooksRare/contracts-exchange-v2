@@ -36,20 +36,19 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
      * @param from Sender address
      * @param to Recipient address
      * @param itemIds Array of itemIds
-     * @param amounts Array of amounts (it is not used for ERC721)
      */
     function transferItemsERC721(
         address collection,
         address from,
         address to,
         uint256[] calldata itemIds,
-        uint256[] calldata amounts
+        uint256[] calldata
     ) external returns (bool status) {
         uint256 length = itemIds.length;
-        if (length == 0 || length != amounts.length) revert WrongLengths();
+        if (length == 0) revert WrongLengths();
         if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
-        for (uint256 i; i < amounts.length; ) {
+        for (uint256 i; i < length; ) {
             _executeERC721TransferFrom(collection, from, to, itemIds[i]);
             unchecked {
                 ++i;
@@ -76,7 +75,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         uint256[] calldata amounts
     ) external returns (bool status) {
         uint256 length = itemIds.length;
-        if (length == 0 || length != amounts.length) revert WrongLengths();
+        if (length == 0 || amounts.length != length) revert WrongLengths();
         if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
         if (length == 1) {
@@ -96,6 +95,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
      * @param to Recipient address
      * @param itemIds Array of array of itemIds
      * @param amounts Array of array of amounts
+     * @dev If assetType for ERC721 is used, the amount aren't used.
      */
     function transferBatchItemsAcrossCollections(
         address[] calldata collections,
@@ -105,22 +105,20 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         uint256[][] calldata itemIds,
         uint256[][] calldata amounts
     ) external returns (bool status) {
-        if (
-            itemIds.length == 0 ||
-            itemIds.length != assetTypes.length ||
-            itemIds.length != collections.length ||
-            itemIds.length != amounts.length
-        ) revert WrongLengths();
+        uint256 length = itemIds.length;
+        if (length == 0 || assetTypes.length != length || collections.length != length || amounts.length != length)
+            revert WrongLengths();
 
         if (from != msg.sender) {
             if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
         }
 
-        for (uint256 i; i < collections.length; ) {
-            if (itemIds[i].length == 0 || itemIds[i].length != amounts[i].length) revert WrongLengths();
+        for (uint256 i; i < length; ) {
+            uint256 secondLength = itemIds[i].length;
+            if (secondLength == 0 || amounts[i].length != secondLength) revert WrongLengths();
 
             if (assetTypes[i] == 0) {
-                for (uint256 j; j < amounts[i].length; ) {
+                for (uint256 j; j < secondLength; ) {
                     _executeERC721TransferFrom(collections[i], from, to, itemIds[i][j]);
                     unchecked {
                         ++j;

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
+import {IInheritedStrategies} from "../../contracts/interfaces/IInheritedStrategies.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -125,7 +126,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerAsk.itemIds = itemIds;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -145,7 +146,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -165,7 +166,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -185,7 +186,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerAsk.itemIds = itemIds;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -207,7 +208,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerAsk.amounts = amounts;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -226,7 +227,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change price of takerAsk to be higher than makerAsk price
         takerAsk.minPrice = makerBid.maxPrice + 1;
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -239,7 +240,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change price of takerAsk to be higher than makerAsk price
         takerAsk.minPrice = makerBid.maxPrice - 1;
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -259,7 +260,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -279,7 +280,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -299,7 +300,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerBid.itemIds = itemIds;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -321,7 +322,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerBid.amounts = amounts;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -340,7 +341,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change price of takerBid to be lower than makerAsk price
         takerBid.maxPrice = makerAsk.minPrice - 1;
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -353,7 +354,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change price of takerBid to be higher than makerAsk price
         takerBid.maxPrice = makerAsk.minPrice + 1;
 
-        vm.expectRevert(IExecutionManager.OrderInvalid.selector);
+        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,

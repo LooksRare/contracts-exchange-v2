@@ -31,66 +31,55 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
     mapping(address => bool) public isOperatorWhitelisted;
 
     /**
-     * @notice Transfer a single item
+     * @notice Transfer items for ERC721 collection
      * @param collection Collection address
-     * @param assetType Asset type (0 for ERC721, 1 for ERC1155)
      * @param from Sender address
      * @param to Recipient address
-     * @param itemId ItemId
-     * @param amount Amount to transfer (it is not used for ERC721)
+     * @param itemIds Array of itemIds
      */
-    function transferSingleItem(
+    function transferItemsERC721(
         address collection,
-        uint8 assetType,
         address from,
         address to,
-        uint256 itemId,
-        uint256 amount
-    ) external override {
+        uint256[] calldata itemIds,
+        uint256[] calldata
+    ) external {
+        uint256 length = itemIds.length;
+        if (length == 0) revert WrongLengths();
         if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
-        if (assetType == 0) {
-            _executeERC721TransferFrom(collection, from, to, itemId);
-        } else if (assetType == 1) {
-            _executeERC1155SafeTransferFrom(collection, from, to, itemId, amount);
-        } else {
-            revert WrongAssetType(assetType);
+        for (uint256 i; i < length; ) {
+            _executeERC721TransferFrom(collection, from, to, itemIds[i]);
+            unchecked {
+                ++i;
+            }
         }
     }
 
     /**
-     * @notice Transfer batch items in the same collection
+     * @notice Transfer items for ERC1155 collection
      * @param collection Collection address
-     * @param assetType Asset type (0 for ERC721, 1 for ERC1155)
      * @param from Sender address
      * @param to Recipient address
      * @param itemIds Array of itemIds
      * @param amounts Array of amounts (it is not used for ERC721)
+     * @dev It does not allow batch transferring if from = msg.sender since native function should be used.
      */
-    function transferBatchItems(
+    function transferItemsERC1155(
         address collection,
-        uint8 assetType,
         address from,
         address to,
         uint256[] calldata itemIds,
         uint256[] calldata amounts
-    ) external override {
-        if (itemIds.length == 0 || itemIds.length != amounts.length) revert WrongLengths();
-        if (from != msg.sender) {
-            if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
-        }
+    ) external {
+        uint256 length = itemIds.length;
+        if (length == 0 || amounts.length != length) revert WrongLengths();
+        if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
-        if (assetType == 0) {
-            for (uint256 i; i < amounts.length; ) {
-                _executeERC721TransferFrom(collection, from, to, itemIds[i]);
-                unchecked {
-                    ++i;
-                }
-            }
-        } else if (assetType == 1) {
-            _executeERC1155SafeBatchTransferFrom(collection, from, to, itemIds, amounts);
+        if (length == 1) {
+            _executeERC1155SafeTransferFrom(collection, from, to, itemIds[0], amounts[0]);
         } else {
-            revert WrongAssetType(assetType);
+            _executeERC1155SafeBatchTransferFrom(collection, from, to, itemIds, amounts);
         }
     }
 
@@ -102,6 +91,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
      * @param to Recipient address
      * @param itemIds Array of array of itemIds
      * @param amounts Array of array of amounts
+     * @dev If assetType for ERC721 is used, the amount aren't used.
      */
     function transferBatchItemsAcrossCollections(
         address[] calldata collections,
@@ -110,23 +100,27 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         address to,
         uint256[][] calldata itemIds,
         uint256[][] calldata amounts
-    ) external override {
+    ) external {
+        uint256 collectionsLength = collections.length;
+
         if (
-            itemIds.length == 0 ||
-            itemIds.length != assetTypes.length ||
-            itemIds.length != collections.length ||
-            itemIds.length != amounts.length
+            collectionsLength == 0 ||
+            itemIds.length != collectionsLength ||
+            collections.length != collectionsLength ||
+            amounts.length != collectionsLength
         ) revert WrongLengths();
 
         if (from != msg.sender) {
             if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
         }
 
-        for (uint256 i; i < collections.length; ) {
-            if (itemIds[i].length == 0 || itemIds[i].length != amounts[i].length) revert WrongLengths();
+        for (uint256 i; i < collectionsLength; ) {
+            uint256 itemIdsLengthForSingleCollection = itemIds[i].length;
+            if (itemIdsLengthForSingleCollection == 0 || amounts[i].length != itemIdsLengthForSingleCollection)
+                revert WrongLengths();
 
             if (assetTypes[i] == 0) {
-                for (uint256 j; j < amounts[i].length; ) {
+                for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     _executeERC721TransferFrom(collections[i], from, to, itemIds[i][j]);
                     unchecked {
                         ++j;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
@@ -627,8 +628,14 @@ contract StandardTransactionsTest is ProtocolBase {
             OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
             bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
 
-            // It is for ERC721TransferFromFail();
-            vm.expectRevert(0xe0f5c508);
+            // NFTTransferFail(address collection, uint8 assetType);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    ITransferSelectorNFT.NFTTransferFail.selector,
+                    makerAsks[faultyTokenId].collection,
+                    uint8(0)
+                )
+            );
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
                 takerBids,
                 makerAsks,

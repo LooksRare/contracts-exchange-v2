@@ -48,8 +48,13 @@ contract TransferManagerTest is TestParameters {
         mockERC721.mint(_sender, tokenId);
         vm.stopPrank();
 
+        uint256[] memory tokenIds = new uint256[](1);
+        tokenIds[0] = tokenId;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
         vm.startPrank(_transferrer);
-        transferManager.transferSingleItem(address(mockERC721), 0, _sender, _recipient, tokenId, 1);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, tokenIds, amounts);
         vm.stopPrank();
 
         assertEq(mockERC721.ownerOf(tokenId), _recipient);
@@ -72,8 +77,13 @@ contract TransferManagerTest is TestParameters {
         mockERC1155.mint(_sender, tokenId, amount);
         vm.stopPrank();
 
+        uint256[] memory tokenIds = new uint256[](1);
+        tokenIds[0] = tokenId;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+
         vm.startPrank(_transferrer);
-        transferManager.transferSingleItem(address(mockERC1155), 1, _sender, _recipient, tokenId, amount);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, tokenIds, amounts);
         vm.stopPrank();
 
         assertEq(mockERC1155.balanceOf(_recipient, tokenId), amount);
@@ -106,7 +116,7 @@ contract TransferManagerTest is TestParameters {
         amounts[1] = 1;
 
         vm.startPrank(_transferrer);
-        transferManager.transferBatchItems(address(mockERC721), 0, _sender, _recipient, tokenIds, amounts);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, tokenIds, amounts);
         vm.stopPrank();
 
         assertEq(mockERC721.ownerOf(tokenId1), _recipient);
@@ -142,7 +152,7 @@ contract TransferManagerTest is TestParameters {
         amounts[1] = amount2;
 
         vm.startPrank(_transferrer);
-        transferManager.transferBatchItems(address(mockERC1155), 1, _sender, _recipient, tokenIds, amounts);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, tokenIds, amounts);
         vm.stopPrank();
 
         assertEq(mockERC1155.balanceOf(_recipient, tokenId1), amount1);
@@ -223,29 +233,6 @@ contract TransferManagerTest is TestParameters {
         assertEq(mockERC721.ownerOf(tokenIdERC721), _recipient);
         assertEq(mockERC1155.balanceOf(_recipient, tokenId1ERC1155), amount1ERC1155);
         assertEq(mockERC1155.balanceOf(_recipient, tokenId2ERC1155), amount2ERC1155);
-    }
-
-    function testTransferBatchItemsSameERC721ByOwner() public asPrankedUser(_sender) {
-        // Initial set up
-        uint256 tokenId1 = 1;
-        uint256 tokenId2 = 2;
-
-        mockERC721.setApprovalForAll(address(transferManager), true);
-        mockERC721.mint(_sender, tokenId1);
-        mockERC721.mint(_sender, tokenId2);
-
-        uint256[] memory tokenIds = new uint256[](2);
-        tokenIds[0] = tokenId1;
-        tokenIds[1] = tokenId2;
-
-        uint256[] memory amounts = new uint256[](2);
-        amounts[0] = 1;
-        amounts[1] = 1;
-
-        transferManager.transferBatchItems(address(mockERC721), 0, _sender, _recipient, tokenIds, amounts);
-
-        assertEq(mockERC721.ownerOf(tokenId1), _recipient);
-        assertEq(mockERC721.ownerOf(tokenId2), _recipient);
     }
 
     function testTransferBatchItemsAcrossCollectionERC721AndERC1155ByOwner() public asPrankedUser(_sender) {

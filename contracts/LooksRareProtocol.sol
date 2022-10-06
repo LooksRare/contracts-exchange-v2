@@ -22,7 +22,7 @@ import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {ReferralManager} from "./ReferralManager.sol";
-import {TransferManager} from "./TransferManager.sol";
+import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 /**
  * @title LooksRareProtocol
@@ -36,6 +36,7 @@ contract LooksRareProtocol is
     ExecutionManager,
     NonceManager,
     ReferralManager,
+    TransferSelectorNFT,
     ReentrancyGuard,
     LowLevelETH,
     LowLevelERC20,
@@ -60,15 +61,15 @@ contract LooksRareProtocol is
     // Current chainId
     uint256 internal _chainId;
 
-    // Transfer manager of asset type
-    mapping(uint16 => address) public transferManagerOfAssetType;
-
     /**
      * @notice Constructor
-     * @param transferManager Transfer manager address for asset types 0 and 1
+     * @param transferManager Transfer manager address
      * @param royaltyFeeRegistry Royalty fee registry address
      */
-    constructor(address transferManager, address royaltyFeeRegistry) ExecutionManager(royaltyFeeRegistry) {
+    constructor(address transferManager, address royaltyFeeRegistry)
+        ExecutionManager(royaltyFeeRegistry)
+        TransferSelectorNFT(transferManager)
+    {
         // Compute and store the initial domain separator
         _INITIAL_DOMAIN_SEPARATOR = keccak256(
             abi.encode(
@@ -85,10 +86,6 @@ contract LooksRareProtocol is
         // Store the current domainSeparator and chainId
         _domainSeparator = _INITIAL_DOMAIN_SEPARATOR;
         _chainId = _INITIAL_CHAIN_ID;
-
-        // Transfer managers for ERC-721/ERC-1155
-        transferManagerOfAssetType[0] = transferManager;
-        transferManagerOfAssetType[1] = transferManager;
     }
 
     /**
@@ -268,18 +265,6 @@ contract LooksRareProtocol is
         } else {
             revert SameDomainSeparator();
         }
-    }
-
-    /**
-     * @notice Add transfer manager for new asset types
-     * @param assetType Asset type
-     * @param transferManager Transfer manager address
-     */
-    function addTransferManagerForAssetType(uint8 assetType, address transferManager) external onlyOwner {
-        if (transferManagerOfAssetType[assetType] != address(0)) revert WrongAssetType(assetType);
-        transferManagerOfAssetType[assetType] = transferManager;
-
-        emit NewAssetType(assetType, transferManager);
     }
 
     /**
@@ -484,49 +469,6 @@ contract LooksRareProtocol is
             emit ProtocolPaymentWithReferrer(currency, totalProtocolFee, referrer, totalReferralFee);
         } else {
             emit ProtocolPayment(currency, totalProtocolFee);
-        }
-    }
-
-    /**
-     * @notice Transfer non-fungible tokens
-     * @param collection Collection address
-     * @param assetType Asset type (0 = ERC721, 1 = ERC1155)
-     * @param sender Sender address
-     * @param recipient Recipient address
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
-     */
-    function _transferNFT(
-        address collection,
-        uint8 assetType,
-        address sender,
-        address recipient,
-        uint256[] memory itemIds,
-        uint256[] memory amounts
-    ) internal {
-        // Verify there is a transfer manager for the asset type
-        address transferManager = transferManagerOfAssetType[assetType];
-        if (transferManager == address(0)) revert NoTransferManagerForAssetType(assetType);
-
-        // 0 is not an option
-        if (itemIds.length == 1) {
-            ITransferManager(transferManager).transferSingleItem(
-                collection,
-                assetType,
-                sender,
-                recipient,
-                itemIds[0],
-                amounts[0]
-            );
-        } else {
-            ITransferManager(transferManager).transferBatchItems(
-                collection,
-                assetType,
-                sender,
-                recipient,
-                itemIds,
-                amounts
-            );
         }
     }
 

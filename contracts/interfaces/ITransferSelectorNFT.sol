@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+/**
+ * @title ITransferSelectorNFT
+ * @author LooksRare protocol team (👀,💎)
+ */
+
 interface ITransferSelectorNFT {
     error AlreadySet();
     error NFTTransferFail(address collection, uint8 assetType);

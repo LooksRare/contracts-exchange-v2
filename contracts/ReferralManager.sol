@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+// LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+
+// Interfaces
 import {IReferralManager} from "./interfaces/IReferralManager.sol";
 
 /**
@@ -21,8 +24,8 @@ contract ReferralManager is IReferralManager, OwnableTwoSteps {
 
     /**
      * @notice Update referrer rate
-     * @param referrer referrer address
-     * @param rate percentage to collect (e.g., 100 = 1%) per referred trade
+     * @param referrer Referrer address
+     * @param rate Rate percentage to collect (e.g., 100 = 1%) per referred trade
      */
     function updateReferrerRate(address referrer, uint16 rate) external {
         if (msg.sender != referralController) revert NotReferralController();

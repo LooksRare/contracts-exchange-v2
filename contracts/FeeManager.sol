@@ -2,9 +2,9 @@
 pragma solidity ^0.8.14;
 
 // LooksRare unopinionated libraries
+import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
-import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 // Interfaces
 import {IFeeManager} from "./interfaces/IFeeManager.sol";

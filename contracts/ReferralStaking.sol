@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+// LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {LowLevelERC20} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20.sol";
+
+// Interfaces
+import {IInheritedStrategies} from "./interfaces/IInheritedStrategies.sol";
 import {IReferralStaking} from "./interfaces/IReferralStaking.sol";
+
+// Other dependencies
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
 /**

@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+/**
+ * @title IReferralStaking
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface IReferralStaking {
     // Events
     event Deposit(address user, uint8 tier);

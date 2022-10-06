@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+/**
+ * @title ILooksRareProtocol
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface ILooksRareProtocol {
     // Custom errors
     error SameDomainSeparator();

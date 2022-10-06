@@ -5,7 +5,6 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
  * @title IExecutionStrategy
- * @notice Contains functions for execution strategies (v2)
  * @author LooksRare protocol team (👀,💎)
  */
 interface IExecutionStrategy {

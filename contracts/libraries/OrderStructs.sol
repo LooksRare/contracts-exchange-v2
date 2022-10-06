@@ -20,85 +20,6 @@ library OrderStructs {
     bytes32 internal constant _MERKLE_ROOT_HASH = 0x0cb314254867c611b4ba06dea78882bd68b33649e1ddb950d6db2ee328a55ad0;
 
     /**
-     * @notice Hash the makerAsk struct
-     * @param makerAsk struct for maker ask order
-     * @return makerAskHash hash of the struct
-     */
-    function hash(MakerAsk memory makerAsk) internal pure returns (bytes32 makerAskHash) {
-        // Encoding is done into two parts to avoid stack too deep issues
-        return
-            keccak256(
-                bytes.concat(
-                    abi.encode(
-                        _MAKER_ASK_HASH,
-                        makerAsk.askNonce,
-                        makerAsk.subsetNonce,
-                        makerAsk.strategyId,
-                        makerAsk.assetType,
-                        makerAsk.orderNonce,
-                        makerAsk.minNetRatio,
-                        makerAsk.collection
-                    ),
-                    abi.encode(
-                        makerAsk.currency,
-                        makerAsk.recipient,
-                        makerAsk.signer,
-                        makerAsk.startTime,
-                        makerAsk.endTime,
-                        makerAsk.minPrice,
-                        keccak256(abi.encodePacked(makerAsk.itemIds)),
-                        keccak256(abi.encodePacked(makerAsk.amounts)),
-                        keccak256(makerAsk.additionalParameters)
-                    )
-                )
-            );
-    }
-
-    /**
-     * @notice Hash the makerBid struct
-     * @param makerBid struct for maker bid order
-     * @return makerBidHash hash of the struct
-     */
-    function hash(MakerBid memory makerBid) internal pure returns (bytes32 makerBidHash) {
-        return (
-            keccak256(
-                bytes.concat(
-                    abi.encode(
-                        _MAKER_BID_HASH,
-                        makerBid.bidNonce,
-                        makerBid.subsetNonce,
-                        makerBid.strategyId,
-                        makerBid.assetType,
-                        makerBid.orderNonce,
-                        makerBid.minNetRatio,
-                        makerBid.collection
-                    ),
-                    abi.encode(
-                        makerBid.currency,
-                        makerBid.recipient,
-                        makerBid.signer,
-                        makerBid.startTime,
-                        makerBid.endTime,
-                        makerBid.maxPrice,
-                        keccak256(abi.encodePacked(makerBid.itemIds)),
-                        keccak256(abi.encodePacked(makerBid.amounts)),
-                        keccak256(makerBid.additionalParameters)
-                    )
-                )
-            )
-        );
-    }
-
-    /**
-     * @notice Hash a merkleRoot
-     * @param merkleRoot merkle root struct
-     * @return merkleRootHash hash of the merkle root
-     */
-    function hash(MerkleRoot memory merkleRoot) internal pure returns (bytes32 merkleRootHash) {
-        return (keccak256(abi.encode(_MERKLE_ROOT_HASH, merkleRoot.root)));
-    }
-
-    /**
      * 1. MAKER ORDERS
      */
 
@@ -173,5 +94,84 @@ library OrderStructs {
     // MerkleRoot
     struct MerkleRoot {
         bytes32 root;
+    }
+
+    /**
+     * @notice Hash the maker ask struct
+     * @param makerAsk Maker ask order struct
+     * @return makerAskHash Hash of the maker ask struct
+     */
+    function hash(MakerAsk memory makerAsk) internal pure returns (bytes32 makerAskHash) {
+        // Encoding is done into two parts to avoid stack too deep issues
+        return
+            keccak256(
+                bytes.concat(
+                    abi.encode(
+                        _MAKER_ASK_HASH,
+                        makerAsk.askNonce,
+                        makerAsk.subsetNonce,
+                        makerAsk.strategyId,
+                        makerAsk.assetType,
+                        makerAsk.orderNonce,
+                        makerAsk.minNetRatio,
+                        makerAsk.collection
+                    ),
+                    abi.encode(
+                        makerAsk.currency,
+                        makerAsk.recipient,
+                        makerAsk.signer,
+                        makerAsk.startTime,
+                        makerAsk.endTime,
+                        makerAsk.minPrice,
+                        keccak256(abi.encodePacked(makerAsk.itemIds)),
+                        keccak256(abi.encodePacked(makerAsk.amounts)),
+                        keccak256(makerAsk.additionalParameters)
+                    )
+                )
+            );
+    }
+
+    /**
+     * @notice Hash the maker bid struct
+     * @param makerBid Maker bid order struct
+     * @return makerBidHash Hash of the maker bid struct
+     */
+    function hash(MakerBid memory makerBid) internal pure returns (bytes32 makerBidHash) {
+        return (
+            keccak256(
+                bytes.concat(
+                    abi.encode(
+                        _MAKER_BID_HASH,
+                        makerBid.bidNonce,
+                        makerBid.subsetNonce,
+                        makerBid.strategyId,
+                        makerBid.assetType,
+                        makerBid.orderNonce,
+                        makerBid.minNetRatio,
+                        makerBid.collection
+                    ),
+                    abi.encode(
+                        makerBid.currency,
+                        makerBid.recipient,
+                        makerBid.signer,
+                        makerBid.startTime,
+                        makerBid.endTime,
+                        makerBid.maxPrice,
+                        keccak256(abi.encodePacked(makerBid.itemIds)),
+                        keccak256(abi.encodePacked(makerBid.amounts)),
+                        keccak256(makerBid.additionalParameters)
+                    )
+                )
+            )
+        );
+    }
+
+    /**
+     * @notice Hash a merkle root
+     * @param merkleRoot Merkle root struct
+     * @return merkleRootHash Hash of the merkle root struct
+     */
+    function hash(MerkleRoot memory merkleRoot) internal pure returns (bytes32 merkleRootHash) {
+        return (keccak256(abi.encode(_MERKLE_ROOT_HASH, merkleRoot.root)));
     }
 }

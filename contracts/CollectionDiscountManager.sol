@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+// LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+
+// Interfaces
 import {ICollectionDiscountManager} from "./interfaces/ICollectionDiscountManager.sol";
 
 /**
@@ -13,7 +16,7 @@ contract CollectionDiscountManager is ICollectionDiscountManager, OwnableTwoStep
     // Address of the referral controller
     address public collectionDiscountController;
 
-    // Track collection discount factors (e.g., 100 = 1%, 5,000 = 50%) relative to strategy fee
+    // Check the collection discount factor (e.g., 100 = 1%, 5,000 = 50%) relative to strategy fee
     mapping(address => uint16) public collectionDiscountFactor;
 
     /**

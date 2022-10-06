@@ -4,12 +4,12 @@ pragma solidity ^0.8.14;
 // LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
+// Libraries
+import {OrderStructs} from "./libraries/OrderStructs.sol";
+
 // Interfaces
 import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
-
-// Libraries
-import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Direct dependencies
 import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";

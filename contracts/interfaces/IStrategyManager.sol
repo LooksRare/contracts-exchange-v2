@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+/**
+ * @title IStrategyManager
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface IStrategyManager {
     // Custom errors
     error StrategyNotUsed();

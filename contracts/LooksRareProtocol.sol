@@ -20,7 +20,6 @@ import {ITransferManager} from "./interfaces/ITransferManager.sol";
 // Other dependencies
 import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
-import {NonceManager} from "./NonceManager.sol";
 import {ReferralManager} from "./ReferralManager.sol";
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
@@ -34,7 +33,6 @@ contract LooksRareProtocol is
     ILooksRareProtocol,
     CurrencyManager,
     ExecutionManager,
-    NonceManager,
     ReferralManager,
     TransferSelectorNFT,
     ReentrancyGuard,
@@ -304,15 +302,12 @@ contract LooksRareProtocol is
             if (makerBid.currency != address(0)) revert WrongCurrency();
         }
 
-        // Verify nonces and invalidate order nonce if valid
+        // Verify nonces
         if (
             _userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
             userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
             userOrderNonce[makerBid.signer][makerBid.orderNonce]
         ) revert WrongNonces();
-
-        // Invalidate order at this nonce for future execution
-        userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
 
         uint256[] memory fees = new uint256[](2);
         address[] memory recipients = new address[](2);
@@ -377,15 +372,12 @@ contract LooksRareProtocol is
         // Verify whether the currency is available
         if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
 
-        // Verify nonces and invalidate order nonce if valid
+        // Verify nonces
         if (
             _userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
             userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
             userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
         ) revert WrongNonces();
-
-        // Invalidate order at this nonce for future execution
-        userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
 
         uint256[] memory fees = new uint256[](2);
         address[] memory recipients = new address[](2);

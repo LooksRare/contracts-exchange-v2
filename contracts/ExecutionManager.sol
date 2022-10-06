@@ -15,6 +15,7 @@ import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
 import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";
 import {FeeManager} from "./FeeManager.sol";
 import {InheritedStrategies} from "./InheritedStrategies.sol";
+import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
 /**
@@ -28,6 +29,7 @@ contract ExecutionManager is
     CollectionDiscountManager,
     FeeManager,
     InheritedStrategies,
+    NonceManager,
     StrategyManager,
     IExecutionManager
 {
@@ -132,13 +134,22 @@ contract ExecutionManager is
 
         if (makerAsk.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
+            userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
         } else if (makerAsk.strategyId == 1) {
             // Collection offer is not available for taker bid
             revert StrategyNotAvailable(makerAsk.strategyId);
         } else {
             if (_strategyInfo[makerAsk.strategyId].isActive) {
-                (price, itemIds, amounts) = IExecutionStrategy(_strategyInfo[makerAsk.strategyId].implementation)
-                    .executeStrategyWithTakerBid(takerBid, makerAsk);
+                bool isNonceInvalidated;
+
+                (price, itemIds, amounts, isNonceInvalidated) = IExecutionStrategy(
+                    _strategyInfo[makerAsk.strategyId].implementation
+                ).executeStrategyWithTakerBid(takerBid, makerAsk);
+
+                if (isNonceInvalidated) {
+                    // Invalidate order at this nonce for future execution
+                    userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
+                }
             } else {
                 revert StrategyNotAvailable(makerAsk.strategyId);
             }
@@ -166,12 +177,21 @@ contract ExecutionManager is
 
         if (makerBid.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
+            userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
         } else if (makerBid.strategyId == 1) {
             (price, itemIds, amounts) = _executeCollectionStrategyWithTakerAsk(takerAsk, makerBid);
+            userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
         } else {
             if (_strategyInfo[makerBid.strategyId].isActive) {
-                (price, itemIds, amounts) = IExecutionStrategy(_strategyInfo[makerBid.strategyId].implementation)
-                    .executeStrategyWithTakerAsk(takerAsk, makerBid);
+                bool isNonceInvalidated;
+                (price, itemIds, amounts, isNonceInvalidated) = IExecutionStrategy(
+                    _strategyInfo[makerBid.strategyId].implementation
+                ).executeStrategyWithTakerAsk(takerAsk, makerBid);
+
+                if (isNonceInvalidated) {
+                    // Invalidate order at this nonce for future execution
+                    userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
+                }
             } else {
                 revert StrategyNotAvailable(makerBid.strategyId);
             }

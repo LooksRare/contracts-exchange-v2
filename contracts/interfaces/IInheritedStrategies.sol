@@ -6,5 +6,6 @@ pragma solidity ^0.8.14;
  * @author LooksRare protocol team (👀,💎)
  */
 interface IInheritedStrategies {
+    // Custom errors
     error OrderInvalid();
 }

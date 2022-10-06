@@ -25,7 +25,7 @@ interface IReferralStaking {
 
     // Custom structs
     struct Tier {
-        // Referral share relative to the protocol fees (per 10000)
+        // Referral share relative to the protocol fees (per 10,000)
         uint16 rate;
         // Amount of LOOKS to stake to enable this tier
         uint256 stake;

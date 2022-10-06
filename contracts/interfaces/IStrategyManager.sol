@@ -10,7 +10,7 @@ interface IStrategyManager {
     error StrategyNotUsed();
     error StrategyProtocolFeeTooHigh();
 
-    // Custom events
+    // Events
     event NewStrategy(uint16 strategyId, address implementation);
     event StrategyUpdated(uint16 strategyId, bool isActive, bool hasRoyalties, uint16 protocolFee);
 

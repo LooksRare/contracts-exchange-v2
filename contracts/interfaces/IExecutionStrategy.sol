@@ -8,6 +8,9 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 interface IExecutionStrategy {
+    // Custom errors
+    error OrderInvalid();
+
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk

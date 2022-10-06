@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
+/**
+ * @title IStrategyManager
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface IStrategyManager {
     // Custom errors
     error StrategyNotUsed();
     error StrategyProtocolFeeTooHigh();
 
-    // Custom events
+    // Events
     event NewStrategy(uint16 strategyId, address implementation);
     event StrategyUpdated(uint16 strategyId, bool isActive, bool hasRoyalties, uint16 protocolFee);
 

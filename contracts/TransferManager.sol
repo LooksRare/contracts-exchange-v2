@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {LowLevelERC721} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC721.sol";
 import {LowLevelERC1155} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC1155.sol";
-
-// Generic interfaces
 import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
@@ -91,7 +89,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
      * @param to Recipient address
      * @param itemIds Array of array of itemIds
      * @param amounts Array of array of amounts
-     * @dev If assetType for ERC721 is used, the amount aren't used.
+     * @dev If assetType for ERC721 is used, amounts aren't used.
      */
     function transferBatchItemsAcrossCollections(
         address[] calldata collections,

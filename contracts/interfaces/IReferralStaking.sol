@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
+/**
+ * @title IReferralStaking
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface IReferralStaking {
     // Events
     event Deposit(address user, uint8 tier);
@@ -21,7 +25,7 @@ interface IReferralStaking {
 
     // Custom structs
     struct Tier {
-        // Referral share relative to the protocol fees (per 10000)
+        // Referral share relative to the protocol fees (per 10,000)
         uint16 rate;
         // Amount of LOOKS to stake to enable this tier
         uint256 stake;

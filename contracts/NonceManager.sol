@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
+// Interfaces
 import {INonceManager} from "./interfaces/INonceManager.sol";
 
 /**
@@ -17,15 +18,15 @@ contract NonceManager is INonceManager {
     // Track bid and ask nonces for a user
     mapping(address => UserBidAskNonces) internal _userBidAskNonces;
 
-    // Track order nonce for a user
+    // Check whether the order nonce for a user was executed or cancelled
     mapping(address => mapping(uint112 => bool)) public userOrderNonce;
 
-    // Track subset nonce for a user
+    // Check whether the subset nonce for a user was cancelled
     mapping(address => mapping(uint112 => bool)) public userSubsetNonce;
 
     /**
      * @notice Cancel order nonces
-     * @param orderNonces array of order nonces
+     * @param orderNonces Array of order nonces
      */
     function cancelOrderNonces(uint112[] calldata orderNonces) external {
         if (orderNonces.length == 0) revert WrongLengths();
@@ -42,7 +43,7 @@ contract NonceManager is INonceManager {
 
     /**
      * @notice Cancel subset nonces
-     * @param subsetNonces array of subset nonces
+     * @param subsetNonces Array of subset nonces
      */
     function cancelSubsetNonces(uint112[] calldata subsetNonces) external {
         if (subsetNonces.length == 0) revert WrongLengths();
@@ -59,8 +60,8 @@ contract NonceManager is INonceManager {
 
     /**
      * @notice Increment bid/ask nonces for a user
-     * @param bid whether to increment the user bid nonce
-     * @param ask whether to increment the user bid nonce
+     * @param bid Whether to increment the user bid nonce
+     * @param ask Whether to increment the user ask nonce
      */
     function incrementBidAskNonces(bool bid, bool ask) external {
         unchecked {
@@ -83,8 +84,8 @@ contract NonceManager is INonceManager {
 
     /**
      * @notice Check the bid/ask nonce
-     * @param user address of the user
-     * @return bidAskNonces user bid ask nonces
+     * @param user User address
+     * @return bidAskNonces User bid ask nonces
      */
     function viewUserBidAskNonces(address user) external view returns (UserBidAskNonces memory bidAskNonces) {
         return _userBidAskNonces[user];

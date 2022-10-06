@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
+// LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+
+// Interfaces
 import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
 
 /**
@@ -10,7 +13,7 @@ import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
-    // Whether the currency is whitelisted
+    // Check whether the currency is whitelisted
     mapping(address => bool) public isCurrencyWhitelisted;
 
     /**
@@ -27,7 +30,7 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
 
     /**
      * @notice Remove currency for execution
-     * @param currency address of the currency (address(0) for ETH)
+     * @param currency Currency address (address(0) for ETH)
      */
     function removeCurrency(address currency) external onlyOwner {
         if (!isCurrencyWhitelisted[currency]) revert CurrencyNotWhitelisted(currency);

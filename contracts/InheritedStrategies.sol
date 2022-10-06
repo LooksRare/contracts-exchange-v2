@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
-
-// Libraries
-import {OrderStructs} from "./libraries/OrderStructs.sol";
+pragma solidity ^0.8.17;
 
 // Interfaces
 import {IInheritedStrategies} from "./interfaces/IInheritedStrategies.sol";
+
+// Libraries
+import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 /**
  * @title InheritedStrategies
@@ -16,7 +16,7 @@ import {IInheritedStrategies} from "./interfaces/IInheritedStrategies.sol";
  */
 contract InheritedStrategies is IInheritedStrategies {
     /**
-     * @notice Execute standard sale strategy with takerBid
+     * @notice Execute standard sale strategy with taker bid order
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      */

@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
+/**
+ * @title IRoyaltyFeeRegistry
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface IRoyaltyFeeRegistry {
     function updateRoyaltyInfoForCollection(
         address collection,

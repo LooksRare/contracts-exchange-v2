@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 
-// Order structs
+// Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
@@ -13,7 +13,7 @@ import {IFeeManager} from "./interfaces/IFeeManager.sol";
 import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
 
-// LooksRareProtocol
+// Other dependencies
 import {LooksRareProtocol} from "./LooksRareProtocol.sol";
 
 /**

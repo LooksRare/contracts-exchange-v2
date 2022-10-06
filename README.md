@@ -1,5 +1,7 @@
 # @looksrare/contracts-exchange-v2
 
+[![Tests](https://github.com/LooksRare/contracts-exchange-v2/actions/workflows/tests.yaml/badge.svg)](https://github.com/LooksRare/contracts-exchange-v2/actions/workflows/tests.yaml)
+
 ## Description
 
 This project contains core smart contracts used for the LooksRare exchange protocol ("v2").

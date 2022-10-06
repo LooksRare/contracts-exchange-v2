@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
@@ -10,14 +10,14 @@ import {LowLevelERC20} from "@looksrare/contracts-libs/contracts/lowLevelCallers
 // OpenZeppelin's library for verifying Merkle proofs
 import {MerkleProof} from "./libraries/OpenZeppelin/MerkleProof.sol";
 
-// Order structs
+// Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 
-// Other core contracts
+// Other dependencies
 import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
 import {NonceManager} from "./NonceManager.sol";

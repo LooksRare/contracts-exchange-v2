@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
+/**
+ * @title ICollectionDiscountManager
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface ICollectionDiscountManager {
     // Custom errors
     error CollectionDiscountFactorTooHigh();

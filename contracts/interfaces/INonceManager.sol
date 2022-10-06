@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
+/**
+ * @title INonceManager
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface INonceManager {
     // Custom errors
     error NoNonceToIncrement();

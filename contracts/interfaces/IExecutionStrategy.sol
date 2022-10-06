@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
  * @title IExecutionStrategy
- * @notice Contains functions for execution strategies (v2)
  * @author LooksRare protocol team (👀,💎)
  */
 interface IExecutionStrategy {
+    // Custom errors
+    error OrderInvalid();
+
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk

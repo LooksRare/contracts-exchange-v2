@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
+/**
+ * @title IExecutionManager
+ * @author LooksRare protocol team (👀,💎)
+ */
 interface IExecutionManager {
     // Custom errors
     error OutsideOfTimeRange();

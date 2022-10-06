@@ -43,7 +43,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         address to,
         uint256[] calldata itemIds,
         uint256[] calldata
-    ) external returns (bool status) {
+    ) external {
         uint256 length = itemIds.length;
         if (length == 0) revert WrongLengths();
         if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
@@ -54,8 +54,6 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
                 ++i;
             }
         }
-
-        return true;
     }
 
     /**
@@ -73,7 +71,7 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         address to,
         uint256[] calldata itemIds,
         uint256[] calldata amounts
-    ) external returns (bool status) {
+    ) external {
         uint256 length = itemIds.length;
         if (length == 0 || amounts.length != length) revert WrongLengths();
         if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
@@ -83,8 +81,6 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         } else {
             _executeERC1155SafeBatchTransferFrom(collection, from, to, itemIds, amounts);
         }
-
-        return true;
     }
 
     /**
@@ -104,21 +100,27 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
         address to,
         uint256[][] calldata itemIds,
         uint256[][] calldata amounts
-    ) external returns (bool status) {
-        uint256 length = itemIds.length;
-        if (length == 0 || assetTypes.length != length || collections.length != length || amounts.length != length)
-            revert WrongLengths();
+    ) external {
+        uint256 collectionsLength = collections.length;
+
+        if (
+            collectionsLength == 0 ||
+            itemIds.length != collectionsLength ||
+            collections.length != collectionsLength ||
+            amounts.length != collectionsLength
+        ) revert WrongLengths();
 
         if (from != msg.sender) {
             if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
         }
 
-        for (uint256 i; i < length; ) {
-            uint256 secondLength = itemIds[i].length;
-            if (secondLength == 0 || amounts[i].length != secondLength) revert WrongLengths();
+        for (uint256 i; i < collectionsLength; ) {
+            uint256 itemIdsLengthForSingleCollection = itemIds[i].length;
+            if (itemIdsLengthForSingleCollection == 0 || amounts[i].length != itemIdsLengthForSingleCollection)
+                revert WrongLengths();
 
             if (assetTypes[i] == 0) {
-                for (uint256 j; j < secondLength; ) {
+                for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     _executeERC721TransferFrom(collections[i], from, to, itemIds[i][j]);
                     unchecked {
                         ++j;
@@ -134,8 +136,6 @@ contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, O
                 ++i;
             }
         }
-
-        return true;
     }
 
     /**

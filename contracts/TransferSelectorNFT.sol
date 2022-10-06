@@ -20,7 +20,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
      * @notice Constructor
      */
     constructor(address transferManager) {
-        // Transfer managers for ERC721/ERC1155
+        // Transfer manager with selectors for ERC721/ERC1155
         managerSelectorOfAssetType[0] = ManagerSelector({transferManager: transferManager, selector: 0xa7bc96d3});
         managerSelectorOfAssetType[1] = ManagerSelector({transferManager: transferManager, selector: 0xa0a406c6});
     }
@@ -68,11 +68,10 @@ contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
         if (managerSelector.transferManager == address(0) || managerSelector.selector == 0x000000)
             revert NoTransferManagerForAssetType(assetType);
 
-        (bool status, bytes memory data) = managerSelector.transferManager.call(
+        (bool status, ) = managerSelector.transferManager.call(
             abi.encodeWithSelector(managerSelector.selector, collection, sender, recipient, itemIds, amounts)
         );
 
         if (!status) revert NFTTransferFail(collection, assetType);
-        if (!abi.decode(data, (bool))) revert NFTTransferFail(collection, assetType);
     }
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
-import {LowLevelERC20} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20.sol";
+import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // Interfaces
 import {IInheritedStrategies} from "./interfaces/IInheritedStrategies.sol";
@@ -17,7 +17,7 @@ import {LooksRareProtocol} from "./LooksRareProtocol.sol";
  * @notice This contract handles the staking process for referrals.
  * @author LooksRare protocol team (👀,💎)
  */
-contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20 {
+contract ReferralStaking is IReferralStaking, OwnableTwoSteps, LowLevelERC20Transfer {
     // Maximum timelock period that can be set by this contract owner
     uint256 public constant MAX_TIMELOCK_PERIOD = 30 days;
 

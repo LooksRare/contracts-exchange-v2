@@ -3,8 +3,8 @@ pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
-import {LowLevelERC721} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC721.sol";
-import {LowLevelERC1155} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC1155.sol";
+import {LowLevelERC721Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC721Transfer.sol";
+import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC1155Transfer.sol";
 import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
@@ -21,7 +21,7 @@ import {ITransferManager} from "./interfaces/ITransferManager.sol";
  *         "Safe" transfer functions for ERC721 are not implemented; these functions introduce added gas costs to verify if the recipient is a contract as it requires verifying the receiver interface is valid.
  * @author LooksRare protocol team (👀,💎)
  */
-contract TransferManager is ITransferManager, LowLevelERC721, LowLevelERC1155, OwnableTwoSteps {
+contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelERC1155Transfer, OwnableTwoSteps {
     // Whether the user has approved the operator address (first address is user, second address is operator)
     mapping(address => mapping(address => bool)) public hasUserApprovedOperator;
 

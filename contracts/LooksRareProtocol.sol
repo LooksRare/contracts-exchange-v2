@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
 import {LowLevelETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelETH.sol";
-import {LowLevelERC20} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20.sol";
+import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // OpenZeppelin's library for verifying Merkle proofs
 import {MerkleProof} from "./libraries/OpenZeppelin/MerkleProof.sol";
@@ -37,7 +37,7 @@ contract LooksRareProtocol is
     TransferSelectorNFT,
     ReentrancyGuard,
     LowLevelETH,
-    LowLevelERC20,
+    LowLevelERC20Transfer,
     SignatureChecker
 {
     using OrderStructs for OrderStructs.MakerAsk;

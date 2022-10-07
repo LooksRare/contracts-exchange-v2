@@ -144,7 +144,7 @@ contract InheritedStrategies is IInheritedStrategies {
             bytes32[] memory proof = abi.decode(takerAsk.additionalParameters, (bytes32[]));
 
             // Compute the node
-            bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
+            bytes32 node = bytes32(takerAsk.itemIds[0]);
 
             // Verify proof
             if (!MerkleProof.verify(proof, root, node)) revert OrderMerkleProofInvalid();

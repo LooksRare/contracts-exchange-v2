@@ -8,4 +8,5 @@ pragma solidity ^0.8.17;
 interface IInheritedStrategies {
     // Custom errors
     error OrderInvalid();
+    error OrderMerkleProofInvalid();
 }

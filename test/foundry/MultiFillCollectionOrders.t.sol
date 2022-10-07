@@ -212,8 +212,8 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Second taker user actions
         address secondTakerUser = address(420);
-        vm.startPrank(secondTakerUser);
         _setUpUser(secondTakerUser);
+        vm.startPrank(secondTakerUser);
 
         {
             uint256[] memory itemIds = new uint256[](3);

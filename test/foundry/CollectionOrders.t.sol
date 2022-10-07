@@ -102,7 +102,7 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes32[] memory merkleTreeIds = new bytes32[](5);
         for (uint256 i; i < merkleTreeIds.length; i++) {
             mockERC721.mint(takerUser, i);
-            merkleTreeIds[i] = bytes32(i);
+            merkleTreeIds[i] = keccak256(abi.encodePacked(i));
         }
 
         // Compute merkle root
@@ -138,7 +138,7 @@ contract CollectionOrdersTest is ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        uint256 itemIdSold = uint256(merkleTreeIds[2]);
+        uint256 itemIdSold = 2;
         bytes32[] memory proof = m.getProof(merkleTreeIds, 2);
 
         assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[2]));

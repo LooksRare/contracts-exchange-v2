@@ -20,7 +20,7 @@ contract CollectionOrdersTest is ProtocolBase {
         {
             // Prepare the order hash
             makerBid = _createSingleItemMakerBidOrder(
-                0, // askNonce
+                0, // bidNonce
                 0, // subsetNonce
                 1, // strategyId (Collection offer)
                 0, // assetType ERC721,

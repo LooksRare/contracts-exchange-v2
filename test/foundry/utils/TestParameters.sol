@@ -32,10 +32,10 @@ abstract contract TestParameters is Test {
     uint256 public constant _timelock = 120;
 
     // Reused parameters
-    OrderStructs.MakerAsk makerAsk;
-    OrderStructs.MakerBid makerBid;
-    OrderStructs.TakerBid takerBid;
-    OrderStructs.TakerAsk takerAsk;
-    bytes signature;
-    uint256 price;
+    OrderStructs.MakerAsk public makerAsk;
+    OrderStructs.MakerBid public makerBid;
+    OrderStructs.TakerBid public takerBid;
+    OrderStructs.TakerAsk public takerAsk;
+    bytes public signature;
+    uint256 public price;
 }

@@ -750,10 +750,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@looksrare/contracts-libs@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.0.1.tgz#211e31f019fd52e60450b3f5ab6badf7a573526a"
-  integrity sha512-07AlMftucI+kAsTjEZSNraO9P0vFVohPOS29xmmZh6aY5sIODBtyljR2d5tFxnfvQsifuSJJvXB9FUwFiyD5HQ==
+"@looksrare/contracts-libs@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.0.2.tgz#75fee42ba211bdf054ca7eba3e197d7e35f6c02c"
+  integrity sha512-dI6oyz8RxL90yxBr4WAlTMYLZA5WbxruP9AY90sbbMd1idz7FdVUIsTLXtmEDXbZtSU0JrU0chNQ/mrjREJV6g==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"

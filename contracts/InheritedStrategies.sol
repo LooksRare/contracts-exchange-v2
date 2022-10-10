@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-// Interfaces
-import {IInheritedStrategies} from "./interfaces/IInheritedStrategies.sol";
+// OpenZeppelin's library for verifying Merkle proofs
+import {MerkleProof} from "./libraries/OpenZeppelin/MerkleProof.sol";
 
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
+
+// Interfaces
+import {IInheritedStrategies} from "./interfaces/IInheritedStrategies.sol";
 
 /**
  * @title InheritedStrategies
  * @notice This contract handles the execution of inherited strategies.
  *         - StrategyId = 0 --> Standard Order
- *         - StrategyId = 1 --> Collection Order (Maker Bid only)
+ *         - StrategyId = 1 --> Collection Order (Maker Bid only) with an option to set a merkle proof
  * @author LooksRare protocol team (👀,💎)
  */
 contract InheritedStrategies is IInheritedStrategies {
@@ -131,6 +134,20 @@ contract InheritedStrategies is IInheritedStrategies {
                 takerAsk.amounts[0] != amounts[0] ||
                 amounts[0] == 0
             ) revert OrderInvalid();
+        }
+
+        if (makerBid.additionalParameters.length != 0) {
+            // Precomputed merkleRoot (that contains the itemIds that match a common characteristic)
+            bytes32 root = abi.decode(makerBid.additionalParameters, (bytes32));
+
+            // MerkleProof + indexInTree + itemId
+            bytes32[] memory proof = abi.decode(takerAsk.additionalParameters, (bytes32[]));
+
+            // Compute the node
+            bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
+
+            // Verify proof
+            if (!MerkleProof.verify(proof, root, node)) revert OrderMerkleProofInvalid();
         }
     }
 }

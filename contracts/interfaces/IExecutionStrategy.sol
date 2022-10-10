@@ -19,7 +19,8 @@ interface IExecutionStrategy {
         returns (
             uint256 price,
             uint256[] calldata itemIds,
-            uint256[] calldata amounts
+            uint256[] calldata amounts,
+            bool isNonceInvalidated
         );
 
     function executeStrategyWithTakerAsk(
@@ -30,6 +31,7 @@ interface IExecutionStrategy {
         returns (
             uint256 price,
             uint256[] calldata itemIds,
-            uint256[] calldata amounts
+            uint256[] calldata amounts,
+            bool isNonceInvalidated
         );
 }

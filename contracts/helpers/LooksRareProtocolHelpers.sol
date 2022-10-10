@@ -6,15 +6,15 @@ import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChe
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 
 // Libraries
-import {OrderStructs} from "./libraries/OrderStructs.sol";
+import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Interfaces
-import {IFeeManager} from "./interfaces/IFeeManager.sol";
-import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
-import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
+import {IFeeManager} from "../interfaces/IFeeManager.sol";
+import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
+import {IStrategyManager} from "../interfaces/IStrategyManager.sol";
 
 // Other dependencies
-import {LooksRareProtocol} from "./LooksRareProtocol.sol";
+import {LooksRareProtocol} from "../LooksRareProtocol.sol";
 
 /**
  * @title LooksRareProtocolHelpers

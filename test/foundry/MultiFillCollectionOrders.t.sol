@@ -166,7 +166,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         {
             uint256[] memory itemIds = new uint256[](1);
             uint256[] memory amounts = new uint256[](1);
-            itemIds[0] = 0; // tokenId = 0
+            itemIds[0] = 0;
             amounts[0] = 1;
 
             mockERC721.mint(takerUser, itemIds[0]);

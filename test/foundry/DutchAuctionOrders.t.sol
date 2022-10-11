@@ -47,6 +47,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             itemId: itemIds[0]
         });
 
+        // 0.0025 ether cheaper per second -> (10 - 1) / 3600
+        // TODO: stack too deep if we put these into the helper function as arguments
+        makerAsk.endTime = block.timestamp + 1 hours;
+        makerAsk.additionalParameters = abi.encode(startingPrice);
+
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -77,11 +82,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerAsk, takerBid) = _createMakerAskAndTakerBid();
-
-        // 0.0025 ether cheaper per second -> (10 - 1) / 3600
-        // TODO: stack too deep if we put these into the helper function as arguments
-        makerAsk.endTime = block.timestamp + 1 hours;
-        makerAsk.additionalParameters = abi.encode(startingPrice);
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -116,10 +116,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerAsk, takerBid) = _createMakerAskAndTakerBid();
-
-        // TODO: stack too deep if we put these into the helper function as arguments
-        makerAsk.endTime = block.timestamp + 1 hours;
-        makerAsk.additionalParameters = abi.encode(startingPrice);
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly

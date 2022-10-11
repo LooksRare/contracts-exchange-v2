@@ -10,8 +10,8 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
-    uint256 private startingPrice = 10 ether;
-    uint256 private finalPrice = 1 ether;
+    uint256 private startPrice = 10 ether;
+    uint256 private endPrice = 1 ether;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyDutchAuction = new StrategyDutchAuction(address(looksRareProtocol));
@@ -43,14 +43,14 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: finalPrice,
+            minPrice: endPrice,
             itemId: itemIds[0]
         });
 
         // 0.0025 ether cheaper per second -> (10 - 1) / 3600
         // TODO: stack too deep if we put these into the helper function as arguments
         makerAsk.endTime = block.timestamp + 1 hours;
-        makerAsk.additionalParameters = abi.encode(startingPrice);
+        makerAsk.additionalParameters = abi.encode(startPrice);
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -58,7 +58,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         takerBid = OrderStructs.TakerBid({
             recipient: takerUser,
             minNetRatio: makerAsk.minNetRatio,
-            maxPrice: startingPrice,
+            maxPrice: startPrice,
             itemIds: itemIds,
             amounts: amounts,
             additionalParameters: abi.encode()
@@ -106,9 +106,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         uint256 discount = elapsedTime * decayPerSecond;
 
         // Taker bid user pays the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - startingPrice + discount);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - startPrice + discount);
         // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startingPrice - discount) * 9700) / 10000);
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startPrice - discount) * 9700) / 10000);
     }
 
     function testCallerNotLooksRareProtocol() public {
@@ -126,7 +126,30 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
     function testItemIdsAndAmountsLengthMismatch() public {}
 
-    function testStartingPriceTooLow() public {}
+    function testStartPriceTooLow() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid();
+
+        // startPrice is 10 ether
+        makerAsk.minPrice = 10 ether + 1 wei;
+
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 
     function testAuctionStartingTimeTooLate() public {}
 

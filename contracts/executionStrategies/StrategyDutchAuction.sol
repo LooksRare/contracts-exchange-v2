@@ -12,6 +12,8 @@ contract StrategyDutchAuction is IExecutionStrategy {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 
+    error BidPriceTooLow();
+
     /**
      * @notice Constructor
      * @param _looksRareProtocol Address of the LooksRare protocol
@@ -56,7 +58,9 @@ contract StrategyDutchAuction is IExecutionStrategy {
         uint256 elapsedTime = block.timestamp - makerAsk.startTime;
         price = startPrice - elapsedTime * decayPerSecond;
 
-        if (price < makerAsk.minPrice || takerBid.maxPrice < price) revert OrderInvalid();
+        // TODO: Or should we set it as makerAsk.minPrice?
+        // if (price < makerAsk.minPrice) revert OrderInvalid();
+        if (takerBid.maxPrice < price) revert BidPriceTooLow();
 
         isNonceInvalidated = true;
 

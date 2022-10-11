@@ -133,8 +133,4 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testCurrentPriceBelowEndPrice() public {}
 
     function testTakerBidPriceTooLow() public {}
-
-    function testCurrentTimeTooEarly() public {}
-
-    function testCurrentTimeTooLate() public {}
 }

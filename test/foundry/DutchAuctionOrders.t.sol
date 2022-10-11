@@ -18,26 +18,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyDutchAuction));
     }
 
-    function testNewStrategy() public {
-        _setUpNewStrategy();
-        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(strategy.isActive);
-        assertTrue(strategy.hasRoyalties);
-        assertEq(strategy.protocolFee, _standardProtocolFee);
-        assertEq(strategy.maxProtocolFee, uint16(300));
-        assertEq(strategy.implementation, address(strategyDutchAuction));
-    }
-
-    function testDutchAuction(uint256 elapsedTime) public {
-        vm.assume(elapsedTime <= 3600);
-
-        _setUpUsers();
-        _setUpNewStrategy();
-
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-
+    function _createMakerAskAndTakerBid()
+        private
+        returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid)
+    {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 1;
 
@@ -45,6 +29,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = 1;
 
         mockERC721.mint(makerUser, itemIds[0]);
+
+        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
         // Prepare the order hash
         makerAsk = _createSingleItemMakerAskOrder({
@@ -61,11 +47,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             itemId: itemIds[0]
         });
 
-        // TODO: stack too deep
-        // 0.0025 ether cheaper per second -> (10 - 1) / 3600
-        makerAsk.endTime = block.timestamp + 1 hours;
-        makerAsk.additionalParameters = abi.encode(startingPrice);
-
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -77,6 +58,33 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             amounts: amounts,
             additionalParameters: abi.encode()
         });
+    }
+
+    function testNewStrategy() public {
+        _setUpNewStrategy();
+        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
+        assertTrue(strategy.isActive);
+        assertTrue(strategy.hasRoyalties);
+        assertEq(strategy.protocolFee, _standardProtocolFee);
+        assertEq(strategy.maxProtocolFee, uint16(300));
+        assertEq(strategy.implementation, address(strategyDutchAuction));
+    }
+
+    function testDutchAuction(uint256 elapsedTime) public {
+        vm.assume(elapsedTime <= 3600);
+
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid();
+
+        // 0.0025 ether cheaper per second -> (10 - 1) / 3600
+        // TODO: stack too deep if we put these into the helper function as arguments
+        makerAsk.endTime = block.timestamp + 1 hours;
+        makerAsk.additionalParameters = abi.encode(startingPrice);
+
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.warp(block.timestamp + elapsedTime);
 

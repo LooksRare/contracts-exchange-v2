@@ -136,6 +136,11 @@ contract InheritedStrategies is IInheritedStrategies {
             ) revert OrderInvalid();
         }
 
+        // Check for ERC721
+        if (makerBid.assetType == 0) {
+            if (amounts[0] != 1) revert OrderInvalid();
+        }
+
         if (makerBid.additionalParameters.length != 0) {
             // Precomputed merkleRoot (that contains the itemIds that match a common characteristic)
             bytes32 root = abi.decode(makerBid.additionalParameters, (bytes32));

@@ -12,6 +12,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
     uint256 private startPrice = 10 ether;
     uint256 private endPrice = 1 ether;
+    uint256 private decayPerSecond = 0.0025 ether;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyDutchAuction = new StrategyDutchAuction(address(looksRareProtocol));
@@ -102,7 +103,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
 
-        uint256 decayPerSecond = 0.0025 ether;
         uint256 discount = elapsedTime * decayPerSecond;
 
         // Taker bid user pays the whole price
@@ -155,5 +155,30 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
     function testCurrentPriceBelowEndPrice() public {}
 
-    function testTakerBidPriceTooLow() public {}
+    function testTakerBidPriceTooLow(uint256 elapsedTime) public {
+        vm.assume(elapsedTime <= 3600);
+
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid();
+
+        uint256 currentPrice = startPrice - decayPerSecond * elapsedTime;
+        takerBid.maxPrice = currentPrice - 1 wei;
+
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.expectRevert(StrategyDutchAuction.BidPriceTooLow.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 }

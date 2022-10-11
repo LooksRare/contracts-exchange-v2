@@ -46,15 +46,15 @@ contract StrategyDutchAuction is IExecutionStrategy {
             }
         }
 
-        uint256 startingPrice = abi.decode(makerAsk.additionalParameters, (uint256));
+        uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
 
         if (startPrice < makerAsk.minPrice) revert OrderInvalid();
 
         uint256 duration = makerAsk.endTime - makerAsk.startTime;
-        uint256 decayPerSecond = (startingPrice - makerAsk.minPrice) / duration;
+        uint256 decayPerSecond = (startPrice - makerAsk.minPrice) / duration;
 
         uint256 elapsedTime = block.timestamp - makerAsk.startTime;
-        price = startingPrice - elapsedTime * decayPerSecond;
+        price = startPrice - elapsedTime * decayPerSecond;
 
         if (price < makerAsk.minPrice || takerBid.maxPrice < price) revert OrderInvalid();
 

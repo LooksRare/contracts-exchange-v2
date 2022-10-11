@@ -18,8 +18,8 @@ interface IExecutionStrategy {
         external
         returns (
             uint256 price,
-            uint256[] calldata itemIds,
-            uint256[] calldata amounts,
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
             bool isNonceInvalidated
         );
 
@@ -30,8 +30,8 @@ interface IExecutionStrategy {
         external
         returns (
             uint256 price,
-            uint256[] calldata itemIds,
-            uint256[] calldata amounts,
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
             bool isNonceInvalidated
         );
 }

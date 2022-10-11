@@ -34,7 +34,7 @@ contract StrategyDutchAuction is IExecutionStrategy {
             bool isNonceInvalidated
         )
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert OrderInvalid();
+        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
         uint256 itemIdsLength = makerAsk.itemIds.length;
 

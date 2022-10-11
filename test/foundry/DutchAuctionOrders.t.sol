@@ -111,7 +111,20 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startingPrice - discount) * 9700) / 10000);
     }
 
-    function testCallerNotLooksRareProtocol() public {}
+    function testCallerNotLooksRareProtocol() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid();
+
+        // TODO: stack too deep if we put these into the helper function as arguments
+        makerAsk.endTime = block.timestamp + 1 hours;
+        makerAsk.additionalParameters = abi.encode(startingPrice);
+
+        vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
+        // Call the function directly
+        strategyDutchAuction.executeStrategyWithTakerBid(takerBid, makerAsk);
+    }
 
     function testZeroItemIdsLength() public {}
 

@@ -10,6 +10,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 interface IExecutionStrategy {
     // Custom errors
     error OrderInvalid();
+    error WrongCaller();
 
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,

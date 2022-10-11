@@ -73,11 +73,11 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         vm.warp(12000000);
 
         /**
-         * 1. Too early to execute
+         * 1. Too early to execute (also start time > end time)
          */
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
-        makerBid.startTime = block.timestamp + 1;
+        vm.warp(block.timestamp - 1);
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
@@ -93,7 +93,26 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         /**
          * 2. Too late to execute
          */
+        vm.warp(block.timestamp);
+
         makerBid.startTime = 0;
+        makerBid.endTime = block.timestamp - 1;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(OutsideOfTimeRange.selector);
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+
+        /**
+         * 3. start time > end time
+         */
+        makerBid.startTime = block.timestamp;
         makerBid.endTime = block.timestamp - 1;
         signature = _signMakerBid(makerBid, makerUserPK);
 

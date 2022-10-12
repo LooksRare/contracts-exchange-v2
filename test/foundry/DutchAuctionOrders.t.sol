@@ -61,7 +61,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         makerAsk.amounts = amounts;
 
         // 0.0025 ether cheaper per second -> (10 - 1) / 3600
-        // TODO: stack too deep if we put these into the helper function as arguments
         makerAsk.endTime = block.timestamp + 1 hours;
         makerAsk.additionalParameters = abi.encode(startPrice);
 

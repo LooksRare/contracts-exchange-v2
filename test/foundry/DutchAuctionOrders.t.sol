@@ -44,34 +44,21 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
         // Prepare the order hash
-        if (numberOfItems == 0) {
-            makerAsk = _createZeroItemMakerAskOrder({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: 2,
-                assetType: 0,
-                orderNonce: 0,
-                minNetRatio: minNetRatio,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                minPrice: endPrice
-            });
-        } else {
-            makerAsk = _createSingleItemMakerAskOrder({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: 2,
-                assetType: 0,
-                orderNonce: 0,
-                minNetRatio: minNetRatio,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                minPrice: endPrice,
-                itemId: 1
-            });
-        }
+        makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: 0,
+            orderNonce: 0,
+            minNetRatio: minNetRatio,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            minPrice: endPrice,
+            itemId: 1
+        });
+
+        makerAsk.itemIds = itemIds;
 
         // 0.0025 ether cheaper per second -> (10 - 1) / 3600
         // TODO: stack too deep if we put these into the helper function as arguments

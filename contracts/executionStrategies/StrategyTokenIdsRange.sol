@@ -23,10 +23,7 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
     /**
      * @inheritdoc IExecutionStrategy
      */
-    function executeStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
-    )
+    function executeStrategyWithTakerBid(OrderStructs.TakerBid calldata, OrderStructs.MakerAsk calldata)
         external
         pure
         override

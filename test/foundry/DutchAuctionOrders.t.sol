@@ -19,7 +19,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyDutchAuction));
     }
 
-    function _createMakerAskAndTakerBid(uint256 numberOfItems)
+    function _createMakerAskAndTakerBid(uint256 numberOfItems, uint256 numberOfAmounts)
         private
         returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid)
     {
@@ -31,8 +31,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             }
         }
 
-        uint256[] memory amounts = new uint256[](numberOfItems);
-        for (uint256 i; i < numberOfItems; ) {
+        uint256[] memory amounts = new uint256[](numberOfAmounts);
+        for (uint256 i; i < numberOfAmounts; ) {
             amounts[i] = 1;
             unchecked {
                 ++i;
@@ -59,6 +59,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         makerAsk.itemIds = itemIds;
+        makerAsk.amounts = amounts;
 
         // 0.0025 ether cheaper per second -> (10 - 1) / 3600
         // TODO: stack too deep if we put these into the helper function as arguments
@@ -91,7 +92,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -124,7 +125,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
@@ -135,7 +136,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(0);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(0, 0);
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -153,13 +154,33 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testItemIdsAndAmountsLengthMismatch() public {}
+    function testItemIdsAndAmountsLengthMismatch() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 2);
+
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 
     function testStartPriceTooLow() public {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         // startPrice is 10 ether
         makerAsk.minPrice = 10 ether + 1 wei;
@@ -186,7 +207,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         uint256 currentPrice = startPrice - decayPerSecond * elapsedTime;
         takerBid.maxPrice = currentPrice - 1 wei;

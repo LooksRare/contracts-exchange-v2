@@ -73,7 +73,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         vm.warp(12000000);
 
         /**
-         * 1. Too early to execute (also start time > end time)
+         * 1. Too early to execute
          */
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 

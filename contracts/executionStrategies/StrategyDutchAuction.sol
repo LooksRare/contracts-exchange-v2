@@ -22,6 +22,9 @@ contract StrategyDutchAuction is IExecutionStrategy {
         LOOKSRARE_PROTOCOL = _looksRareProtocol;
     }
 
+    /**
+     * @inheritdoc IExecutionStrategy
+     */
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
@@ -66,6 +69,9 @@ contract StrategyDutchAuction is IExecutionStrategy {
         amounts = makerAsk.amounts;
     }
 
+    /**
+     * @inheritdoc IExecutionStrategy
+     */
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid

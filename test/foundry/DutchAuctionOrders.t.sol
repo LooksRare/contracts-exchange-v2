@@ -5,7 +5,6 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyDutchAuction} from "../../contracts/executionStrategies/StrategyDutchAuction.sol";
-
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
@@ -159,6 +158,32 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 2);
+
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
+
+    function testAmountZero() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 0;
+        makerAsk.amounts = amounts;
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);

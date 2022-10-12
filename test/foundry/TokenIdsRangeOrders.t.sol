@@ -113,16 +113,32 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (1 ether * 9700) / 10000);
     }
 
-    // function testCallerNotLooksRareProtocol() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+    function testCallerNotLooksRareProtocol() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
-    //     vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
-    //     // Call the function directly
-    //     strategyDutchAuction.executeStrategyWithTakerBid(takerBid, makerAsk);
-    // }
+        uint256[] memory itemIds = new uint256[](3);
+        itemIds[0] = 5;
+        itemIds[1] = 7;
+        itemIds[2] = 10;
+
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 1;
+        amounts[1] = 1;
+        amounts[2] = 1;
+
+        takerAsk.itemIds = itemIds;
+        takerAsk.amounts = amounts;
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
+        // Call the function directly
+        strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
+    }
 
     // function testZeroItemIdsLength() public {
     //     _setUpUsers();

@@ -65,14 +65,22 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
 
         uint256 desiredAmount = makerBid.amounts[0];
         uint256 offeredAmount;
+        uint256 lastTokenId;
 
         for (uint256 i; i < takerAsk.itemIds.length; ) {
             uint256 offeredTokenId = takerAsk.itemIds[i];
+            // Force the client to sort the token IDs in ascending order,
+            // in order to prevent taker ask from providing duplicated
+            // token IDs
+            if (offeredTokenId <= lastTokenId) revert OrderInvalid();
+
             if (offeredTokenId >= minTokenId) {
                 if (offeredTokenId <= maxTokenId) {
                     offeredAmount += takerAsk.amounts[i];
                 }
             }
+
+            lastTokenId = offeredTokenId;
 
             unchecked {
                 ++i;

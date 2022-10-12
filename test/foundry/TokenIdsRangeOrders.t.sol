@@ -151,4 +151,62 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             _emptyReferrer
         );
     }
+
+    function testTakerDuplicatedItemIds() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+
+        uint256[] memory invalidItemIds = new uint256[](3);
+        invalidItemIds[0] = 5;
+        invalidItemIds[1] = 7;
+        invalidItemIds[2] = 7;
+
+        takerAsk.itemIds = invalidItemIds;
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
+
+    function testTakerUnsortedItemIds() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+
+        uint256[] memory invalidItemIds = new uint256[](3);
+        invalidItemIds[0] = 5;
+        invalidItemIds[1] = 10;
+        invalidItemIds[2] = 7;
+
+        takerAsk.itemIds = invalidItemIds;
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 }

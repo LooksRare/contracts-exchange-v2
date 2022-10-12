@@ -107,7 +107,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (1 ether * 9700) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.97 ether);
     }
 
     function testTokenIdsRangeERC1155() public {
@@ -184,7 +184,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (1 ether * 9700) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.97 ether);
     }
 
     function testCallerNotLooksRareProtocol() public {

@@ -174,6 +174,34 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
+    function testItemIdsMismatch() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = 2;
+
+        // Bidder bidding on something else
+        takerBid.itemIds = itemIds;
+
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
+
     function testZeroAmount() public {
         _setUpUsers();
         _setUpNewStrategy();

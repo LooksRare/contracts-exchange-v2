@@ -45,7 +45,10 @@ contract StrategyDutchAuction is IExecutionStrategy {
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();
         for (uint256 i; i < itemIdsLength; ) {
-            if (makerAsk.amounts[i] == 0) revert OrderInvalid();
+            uint256 amount = makerAsk.amounts[i];
+            if (amount == 0) revert OrderInvalid();
+            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) revert OrderInvalid();
+
             unchecked {
                 ++i;
             }

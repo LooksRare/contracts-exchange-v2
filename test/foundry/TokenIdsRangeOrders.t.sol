@@ -79,7 +79,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategy.implementation, address(strategyTokenIdsRange));
     }
 
-    function testTokenIdsRange() public {
+    function testTokenIdsRangeERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
@@ -103,6 +103,83 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(mockERC721.ownerOf(5), makerUser);
         assertEq(mockERC721.ownerOf(7), makerUser);
         assertEq(mockERC721.ownerOf(10), makerUser);
+
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
+        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (1 ether * 9700) / 10000);
+    }
+
+    function testTokenIdsRangeERC1155() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC1155), _standardRoyaltyFee);
+
+        uint256[] memory makerBidItemIds = new uint256[](2);
+        makerBidItemIds[0] = 5;
+        makerBidItemIds[1] = 10;
+
+        uint256[] memory makerBidAmounts = new uint256[](1);
+        makerBidAmounts[0] = 6;
+
+        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
+
+        makerBid = _createMultiItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: 1,
+            orderNonce: 0,
+            minNetRatio: minNetRatio,
+            collection: address(mockERC1155),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: 1 ether,
+            itemIds: makerBidItemIds,
+            amounts: makerBidAmounts
+        });
+
+        mockERC1155.mint(takerUser, 5, 2);
+        mockERC1155.mint(takerUser, 7, 2);
+        mockERC1155.mint(takerUser, 10, 2);
+
+        uint256[] memory takerAskItemIds = new uint256[](3);
+        takerAskItemIds[0] = 5;
+        takerAskItemIds[1] = 7;
+        takerAskItemIds[2] = 10;
+
+        uint256[] memory takerAskAmounts = new uint256[](3);
+        takerAskAmounts[0] = 2;
+        takerAskAmounts[1] = 2;
+        takerAskAmounts[2] = 2;
+
+        takerAsk = OrderStructs.TakerAsk({
+            recipient: takerUser,
+            minNetRatio: makerAsk.minNetRatio,
+            minPrice: makerBid.maxPrice,
+            itemIds: takerAskItemIds,
+            amounts: takerAskAmounts,
+            additionalParameters: abi.encode()
+        });
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+
+        // Maker user has received the asset
+        assertEq(mockERC1155.balanceOf(makerUser, 5), 2);
+        assertEq(mockERC1155.balanceOf(makerUser, 7), 2);
+        assertEq(mockERC1155.balanceOf(makerUser, 10), 2);
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);

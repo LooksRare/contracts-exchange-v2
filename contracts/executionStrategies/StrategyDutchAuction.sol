@@ -58,8 +58,6 @@ contract StrategyDutchAuction is IExecutionStrategy {
         uint256 elapsedTime = block.timestamp - makerAsk.startTime;
         price = startPrice - elapsedTime * decayPerSecond;
 
-        // TODO: Or should we set it as makerAsk.minPrice?
-        // if (price < makerAsk.minPrice) revert OrderInvalid();
         if (takerBid.maxPrice < price) revert BidPriceTooLow();
 
         isNonceInvalidated = true;

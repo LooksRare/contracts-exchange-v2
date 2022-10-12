@@ -88,9 +88,10 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
         }
 
         if (totalOfferedAmount != desiredAmount) revert OrderInvalid();
-        if (makerBid.maxPrice != takerAsk.minPrice) revert OrderInvalid();
 
         price = makerBid.maxPrice;
+        if (price != takerAsk.minPrice) revert OrderInvalid();
+
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;
         isNonceInvalidated = true;

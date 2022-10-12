@@ -238,4 +238,38 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             _emptyReferrer
         );
     }
+
+    function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+
+        uint256[] memory itemIds = new uint256[](2);
+        itemIds[0] = 5;
+        itemIds[1] = 10;
+
+        takerAsk.itemIds = itemIds;
+
+        uint256[] memory invalidAmounts = new uint256[](2);
+        invalidAmounts[0] = 1;
+        invalidAmounts[1] = 1;
+
+        takerAsk.amounts = invalidAmounts;
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 }

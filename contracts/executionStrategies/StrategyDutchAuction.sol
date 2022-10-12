@@ -72,18 +72,15 @@ contract StrategyDutchAuction is IExecutionStrategy {
     /**
      * @inheritdoc IExecutionStrategy
      */
-    function executeStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
-    )
+    function executeStrategyWithTakerAsk(OrderStructs.TakerAsk calldata, OrderStructs.MakerBid calldata)
         external
-        view
+        pure
         override
         returns (
-            uint256 price,
-            uint256[] memory itemIds,
-            uint256[] memory amounts,
-            bool isNonceInvalidated
+            uint256,
+            uint256[] memory,
+            uint256[] memory,
+            bool
         )
     {
         revert OrderInvalid();

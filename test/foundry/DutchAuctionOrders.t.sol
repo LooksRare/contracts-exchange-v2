@@ -151,8 +151,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testAuctionStartingTimeTooLate() public {}
-
     function testTakerBidPriceTooLow(uint256 elapsedTime) public {
         vm.assume(elapsedTime <= 3600);
 

@@ -71,7 +71,7 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
             // token IDs
             if (offeredTokenId <= lastTokenId) revert OrderInvalid();
 
-            uint256 offeredAmount = takerAsk.amounts[i];
+            uint256 offeredAmount = makerBid.assetType == 0 ? 1 : takerAsk.amounts[i];
             if (offeredAmount == 0) revert OrderInvalid();
 
             if (offeredTokenId >= minTokenId) {

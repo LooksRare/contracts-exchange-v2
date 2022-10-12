@@ -187,6 +187,44 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.97 ether);
     }
 
+    function testTakerAskForceAmountOneIfERC721() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+
+        uint256[] memory invalidAmounts = new uint256[](3);
+        invalidAmounts[0] = 1;
+        invalidAmounts[1] = 0;
+        invalidAmounts[2] = 2;
+
+        takerAsk.amounts = invalidAmounts;
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+
+        // Maker user has received the asset
+        assertEq(mockERC721.ownerOf(5), makerUser);
+        assertEq(mockERC721.ownerOf(7), makerUser);
+        assertEq(mockERC721.ownerOf(10), makerUser);
+
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
+        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.97 ether);
+    }
+
     function testCallerNotLooksRareProtocol() public {
         _setUpUsers();
         _setUpNewStrategy();
@@ -270,35 +308,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         invalidItemIds[2] = 7;
 
         takerAsk.itemIds = invalidItemIds;
-
-        // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyReferrer
-        );
-    }
-
-    function testTakerAskSomeZeroAmount() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
-
-        uint256[] memory invalidAmounts = new uint256[](3);
-        invalidAmounts[0] = 1;
-        invalidAmounts[1] = 0;
-        invalidAmounts[2] = 2;
-
-        takerAsk.amounts = invalidAmounts;
 
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);

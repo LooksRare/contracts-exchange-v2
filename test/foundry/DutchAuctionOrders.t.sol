@@ -174,7 +174,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testAmountZero() public {
+    function testZeroAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);

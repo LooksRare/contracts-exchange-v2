@@ -226,7 +226,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testTakerBidPriceTooLow(uint256 elapsedTime) public {
+    function testTakerBidTooLow(uint256 elapsedTime) public {
         vm.assume(elapsedTime <= 3600);
 
         _setUpUsers();
@@ -240,7 +240,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(StrategyDutchAuction.BidPriceTooLow.selector);
+        vm.expectRevert(StrategyDutchAuction.BidTooLow.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(

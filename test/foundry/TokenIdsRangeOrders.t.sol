@@ -124,7 +124,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
 
-    function testMakerItemIdsLowerBandHigherThanUpperBand() public {
+    function testMakerBidItemIdsLowerBandHigherThanUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
@@ -152,7 +152,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testTakerDuplicatedItemIds() public {
+    function testTakerAskDuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
@@ -181,7 +181,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testTakerUnsortedItemIds() public {
+    function testTakerAskUnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
@@ -193,6 +193,35 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         invalidItemIds[2] = 7;
 
         takerAsk.itemIds = invalidItemIds;
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
+
+    function testTakerAskSomeZeroAmount() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+
+        uint256[] memory invalidAmounts = new uint256[](3);
+        invalidAmounts[0] = 1;
+        invalidAmounts[1] = 0;
+        invalidAmounts[2] = 2;
+
+        takerAsk.amounts = invalidAmounts;
 
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);

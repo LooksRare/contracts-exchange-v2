@@ -64,7 +64,7 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
         if (minTokenId > maxTokenId) revert OrderInvalid();
 
         uint256 desiredAmount = makerBid.amounts[0];
-        uint256 offeredAmount;
+        uint256 totalOfferedAmount;
         uint256 lastTokenId;
 
         for (uint256 i; i < takerAsk.itemIds.length; ) {
@@ -76,7 +76,10 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
 
             if (offeredTokenId >= minTokenId) {
                 if (offeredTokenId <= maxTokenId) {
-                    offeredAmount += takerAsk.amounts[i];
+                    uint256 offeredAmount = takerAsk.amounts[i];
+                    if (offeredAmount == 0) revert OrderInvalid();
+
+                    totalOfferedAmount += offeredAmount;
                 }
             }
 
@@ -87,7 +90,7 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
             }
         }
 
-        if (offeredAmount != desiredAmount) revert OrderInvalid();
+        if (totalOfferedAmount != desiredAmount) revert OrderInvalid();
         if (makerBid.maxPrice != takerAsk.minPrice) revert OrderInvalid();
 
         price = makerBid.maxPrice;

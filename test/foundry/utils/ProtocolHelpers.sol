@@ -14,6 +14,42 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
     bytes32 internal _domainSeparator;
 
+    function _createZeroItemMakerAskOrder(
+        uint112 askNonce,
+        uint112 subsetNonce,
+        uint16 strategyId,
+        uint8 assetType,
+        uint112 orderNonce,
+        uint16 minNetRatio,
+        address collection,
+        address currency,
+        address signer,
+        uint256 minPrice
+    ) internal view returns (OrderStructs.MakerAsk memory makerAsk) {
+        uint256[] memory itemIds = new uint256[](0);
+        uint256[] memory amounts = new uint256[](0);
+
+        return
+            OrderStructs.MakerAsk({
+                askNonce: askNonce,
+                subsetNonce: subsetNonce,
+                strategyId: strategyId,
+                assetType: assetType,
+                orderNonce: orderNonce,
+                minNetRatio: minNetRatio,
+                collection: collection,
+                currency: currency,
+                recipient: signer,
+                signer: signer,
+                startTime: block.timestamp,
+                endTime: block.timestamp,
+                minPrice: minPrice,
+                itemIds: itemIds,
+                amounts: amounts,
+                additionalParameters: abi.encode()
+            });
+    }
+
     function _createSingleItemMakerAskOrder(
         uint112 askNonce,
         uint112 subsetNonce,

@@ -19,42 +19,64 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyDutchAuction));
     }
 
-    function _createMakerAskAndTakerBid()
+    function _createMakerAskAndTakerBid(uint256 numberOfItems)
         private
         returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid)
     {
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 1;
+        uint256[] memory itemIds = new uint256[](numberOfItems);
+        for (uint256 i; i < numberOfItems; ) {
+            itemIds[i] = i + 1;
+            unchecked {
+                ++i;
+            }
+        }
 
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1;
+        uint256[] memory amounts = new uint256[](numberOfItems);
+        for (uint256 i; i < numberOfItems; ) {
+            amounts[i] = 1;
+            unchecked {
+                ++i;
+            }
+        }
 
-        mockERC721.mint(makerUser, itemIds[0]);
+        mockERC721.mint(makerUser, 1);
 
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
         // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: 2,
-            assetType: 0,
-            orderNonce: 0,
-            minNetRatio: minNetRatio,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            minPrice: endPrice,
-            itemId: itemIds[0]
-        });
+        if (numberOfItems == 0) {
+            makerAsk = _createZeroItemMakerAskOrder({
+                askNonce: 0,
+                subsetNonce: 0,
+                strategyId: 2,
+                assetType: 0,
+                orderNonce: 0,
+                minNetRatio: minNetRatio,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                minPrice: endPrice
+            });
+        } else {
+            makerAsk = _createSingleItemMakerAskOrder({
+                askNonce: 0,
+                subsetNonce: 0,
+                strategyId: 2,
+                assetType: 0,
+                orderNonce: 0,
+                minNetRatio: minNetRatio,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                minPrice: endPrice,
+                itemId: 1
+            });
+        }
 
         // 0.0025 ether cheaper per second -> (10 - 1) / 3600
         // TODO: stack too deep if we put these into the helper function as arguments
         makerAsk.endTime = block.timestamp + 1 hours;
         makerAsk.additionalParameters = abi.encode(startPrice);
-
-        // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
 
         takerBid = OrderStructs.TakerBid({
             recipient: takerUser,
@@ -82,7 +104,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid();
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1);
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -115,14 +137,34 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid();
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1);
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
         strategyDutchAuction.executeStrategyWithTakerBid(takerBid, makerAsk);
     }
 
-    function testZeroItemIdsLength() public {}
+    function testZeroItemIdsLength() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(0);
+
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 
     function testItemIdsAndAmountsLengthMismatch() public {}
 
@@ -130,7 +172,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid();
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1);
 
         // startPrice is 10 ether
         makerAsk.minPrice = 10 ether + 1 wei;
@@ -157,7 +199,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid();
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1);
 
         uint256 currentPrice = startPrice - decayPerSecond * elapsedTime;
         takerBid.maxPrice = currentPrice - 1 wei;

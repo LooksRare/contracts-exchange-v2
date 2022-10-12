@@ -28,11 +28,7 @@ contract CollectionDiscountManager is ICollectionDiscountManager, OwnableTwoStep
         if (msg.sender != collectionDiscountController) revert NotCollectionDiscountController();
         if (discountFactor > 10000) revert CollectionDiscountFactorTooHigh();
 
-        if (discountFactor != 0) {
-            collectionDiscountFactor[collection] = discountFactor;
-        } else {
-            delete collectionDiscountFactor[collection];
-        }
+        collectionDiscountFactor[collection] = discountFactor;
 
         emit NewCollectionDiscountFactor(collection, discountFactor);
     }

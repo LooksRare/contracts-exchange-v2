@@ -59,10 +59,6 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
-        uint256 itemIdsLength = makerBid.itemIds.length;
-
-        if (itemIdsLength != 2) revert OrderInvalid();
-
         uint256 minTokenId = makerBid.itemIds[0];
         uint256 maxTokenId = makerBid.itemIds[1];
         if (minTokenId > maxTokenId) revert OrderInvalid();

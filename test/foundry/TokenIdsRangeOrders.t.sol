@@ -19,12 +19,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         private
         returns (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk)
     {
-        uint256[] memory itemIds = new uint256[](2);
-        itemIds[0] = 5;
-        itemIds[1] = 10;
+        uint256[] memory makerBidItemIds = new uint256[](2);
+        makerBidItemIds[0] = 5;
+        makerBidItemIds[1] = 10;
 
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 3;
+        uint256[] memory makerBidAmounts = new uint256[](1);
+        makerBidAmounts[0] = 3;
 
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
@@ -39,8 +39,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             currency: address(weth),
             signer: makerUser,
             maxPrice: 1 ether,
-            itemIds: itemIds,
-            amounts: amounts
+            itemIds: makerBidItemIds,
+            amounts: makerBidAmounts
         });
 
         mockERC721.mint(takerUser, 4);
@@ -49,12 +49,22 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         mockERC721.mint(takerUser, 10);
         mockERC721.mint(takerUser, 11);
 
+        uint256[] memory takerAskItemIds = new uint256[](3);
+        takerAskItemIds[0] = 5;
+        takerAskItemIds[1] = 7;
+        takerAskItemIds[2] = 10;
+
+        uint256[] memory takerAskAmounts = new uint256[](3);
+        takerAskAmounts[0] = 1;
+        takerAskAmounts[1] = 1;
+        takerAskAmounts[2] = 1;
+
         takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minNetRatio: makerAsk.minNetRatio,
             minPrice: makerBid.maxPrice,
-            itemIds: itemIds, // just a temporary placeholder, it needs to be replaced in each test
-            amounts: amounts, // just a temporary placeholder, it needs to be replaced in each test
+            itemIds: takerAskItemIds,
+            amounts: takerAskAmounts,
             additionalParameters: abi.encode()
         });
     }
@@ -75,19 +85,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
-        uint256[] memory itemIds = new uint256[](3);
-        itemIds[0] = 5;
-        itemIds[1] = 7;
-        itemIds[2] = 10;
-
-        uint256[] memory amounts = new uint256[](3);
-        amounts[0] = 1;
-        amounts[1] = 1;
-        amounts[2] = 1;
-
-        takerAsk.itemIds = itemIds;
-        takerAsk.amounts = amounts;
-
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -102,14 +99,14 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             _emptyReferrer
         );
 
-        // Taker user has received the asset
+        // Maker user has received the asset
         assertEq(mockERC721.ownerOf(5), makerUser);
         assertEq(mockERC721.ownerOf(7), makerUser);
         assertEq(mockERC721.ownerOf(10), makerUser);
 
-        // Taker bid user pays the whole price
+        // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
-        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
+        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (1 ether * 9700) / 10000);
     }
 
@@ -119,19 +116,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
-        uint256[] memory itemIds = new uint256[](3);
-        itemIds[0] = 5;
-        itemIds[1] = 7;
-        itemIds[2] = 10;
-
-        uint256[] memory amounts = new uint256[](3);
-        amounts[0] = 1;
-        amounts[1] = 1;
-        amounts[2] = 1;
-
-        takerAsk.itemIds = itemIds;
-        takerAsk.amounts = amounts;
-
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -140,153 +124,31 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
 
-    // function testZeroItemIdsLength() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(0, 0);
+    function testMakerItemIdsLowerBandHigherThanUpperBand() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
+        uint256[] memory invalidItemIds = new uint256[](2);
+        invalidItemIds[0] = 5;
+        invalidItemIds[1] = 4;
 
-    //     vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
+        makerBid.itemIds = invalidItemIds;
 
-    // function testItemIdsAndAmountsLengthMismatch() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 2);
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
 
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
-
-    //     vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
-
-    // function testItemIdsMismatch() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
-
-    //     uint256[] memory itemIds = new uint256[](1);
-    //     itemIds[0] = 2;
-
-    //     // Bidder bidding on something else
-    //     takerBid.itemIds = itemIds;
-
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
-
-    //     vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
-
-    // function testZeroAmount() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
-
-    //     uint256[] memory amounts = new uint256[](1);
-    //     amounts[0] = 0;
-    //     makerAsk.amounts = amounts;
-
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
-
-    //     vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
-
-    // function testStartPriceTooLow() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
-
-    //     // startPrice is 10 ether
-    //     makerAsk.minPrice = 10 ether + 1 wei;
-
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
-
-    //     vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
-
-    // function testTakerBidTooLow(uint256 elapsedTime) public {
-    //     vm.assume(elapsedTime <= 3600);
-
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
-
-    //     uint256 currentPrice = startPrice - decayPerSecond * elapsedTime;
-    //     takerBid.maxPrice = currentPrice - 1 wei;
-
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
-
-    //     vm.expectRevert(StrategyDutchAuction.BidTooLow.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 }

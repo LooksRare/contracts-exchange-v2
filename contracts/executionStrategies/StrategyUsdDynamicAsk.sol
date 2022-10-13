@@ -16,6 +16,9 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
     AggregatorV3Interface public priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
     uint256 public maximumLatency;
 
+    error InvalidChainlinkPrice();
+    error PriceNotRecentEnough();
+
     /**
      * @notice Emitted when the maximum Chainlink price latency is updated
      * @param maximumLatency Maximum Chainlink price latency
@@ -33,9 +36,12 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
     /**
      * @inheritdoc IExecutionStrategy
      */
-    function executeStrategyWithTakerBid(OrderStructs.TakerBid calldata, OrderStructs.MakerAsk calldata)
+    function executeStrategyWithTakerBid(
+        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.MakerAsk calldata makerAsk
+    )
         external
-        pure
+        view
         override
         returns (
             uint256 price,
@@ -43,7 +49,44 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
             uint256[] memory amounts,
             bool isNonceInvalidated
         )
-    {}
+    {
+        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
+
+        uint256 itemIdsLength = makerAsk.itemIds.length;
+
+        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();
+        for (uint256 i; i < itemIdsLength; ) {
+            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || makerAsk.amounts[i] != takerBid.amounts[i])
+                revert OrderInvalid();
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
+        if (answer < 0) revert InvalidChainlinkPrice();
+        if (block.timestamp - updatedAt > maximumLatency) revert PriceNotRecentEnough();
+
+        // The client has to provide a USD value that is augmented by 1e18.
+        uint256 desiredSalePriceInUSD = abi.decode(makerAsk.additionalParameters, (uint256));
+
+        uint256 ethPriceInUSD = uint256(answer) * 1e10;
+        uint256 minPriceInETH = makerAsk.minPrice;
+        uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * 1e18) / ethPriceInUSD;
+
+        if (minPriceInETH > desiredSalePriceInETH) {
+            price = minPriceInETH;
+        } else {
+            price = desiredSalePriceInETH;
+        }
+
+        if (takerBid.maxPrice < price) revert BidTooLow();
+
+        itemIds = makerAsk.itemIds;
+        amounts = makerAsk.amounts;
+        isNonceInvalidated = true;
+    }
 
     /**
      * @inheritdoc IExecutionStrategy
@@ -62,10 +105,7 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
             bool isNonceInvalidated
         )
     {
-        // if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-        (, int256 answer, , uint256 timestamp, ) = priceFeed.latestRoundData();
-        uint256 ethPriceInUSD = uint256(answer) / 1e8;
-        // uint256 minPriceInETH
+        revert OrderInvalid();
     }
 
     /**

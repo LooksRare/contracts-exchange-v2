@@ -12,8 +12,6 @@ contract StrategyDutchAuction is IExecutionStrategy {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 
-    error BidTooLow();
-
     /**
      * @notice Constructor
      * @param _looksRareProtocol Address of the LooksRare protocol

@@ -31,11 +31,7 @@ contract ReferralManager is IReferralManager, OwnableTwoSteps {
         if (msg.sender != referralController) revert NotReferralController();
         if (rate > 10000) revert PercentageTooHigh();
 
-        if (rate != 0) {
-            referrerRates[referrer] = rate;
-        } else {
-            delete referrerRates[referrer];
-        }
+        referrerRates[referrer] = rate;
 
         emit NewReferrerRate(referrer, rate);
     }

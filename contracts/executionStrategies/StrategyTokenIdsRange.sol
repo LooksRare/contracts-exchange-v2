@@ -58,7 +58,7 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
 
         uint256 minTokenId = makerBid.itemIds[0];
         uint256 maxTokenId = makerBid.itemIds[1];
-        if (minTokenId > maxTokenId) revert OrderInvalid();
+        if (minTokenId >= maxTokenId) revert OrderInvalid();
 
         uint256 desiredAmount = makerBid.amounts[0];
         uint256 totalOfferedAmount;

@@ -239,7 +239,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
 
-    function testMakerBidItemIdsLowerBandHigherThanUpperBand() public {
+    function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
         _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
@@ -247,7 +247,28 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         uint256[] memory invalidItemIds = new uint256[](2);
         invalidItemIds[0] = 5;
+        // lower band > upper band
         invalidItemIds[1] = 4;
+
+        makerBid.itemIds = invalidItemIds;
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+
+        // lower band == upper band
+        invalidItemIds[1] = 5;
 
         makerBid.itemIds = invalidItemIds;
 

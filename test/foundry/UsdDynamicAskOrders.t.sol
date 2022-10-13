@@ -5,18 +5,16 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
-import {StrategyUsdDynamicAsk} from "../../contracts/executionStrategies/StrategyUsdDynamicAsk.sol";
+import {StrategyUSDDynamicAsk} from "../../contracts/executionStrategies/StrategyUSDDynamicAsk.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-contract UsdDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
-    address private constant AZUKI = 0xED5AF388653567Af2F388E6224dC7C4b3241C544;
-    address private constant AZUKI_ORACLE = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;
-    string private constant GOERLI_RPC_URL = "https://goerli.infura.io/v3/";
-    StrategyUsdDynamicAsk public strategyUsdDynamicAsk;
+contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
+    string private constant MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
+    StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyUsdDynamicAsk = new StrategyUsdDynamicAsk(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyUsdDynamicAsk));
+        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyUSDDynamicAsk));
     }
 
     // function _createMakerAskAndTakerBid(uint256 numberOfItems, uint256 numberOfAmounts)
@@ -82,73 +80,32 @@ contract UsdDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(strategy.hasRoyalties);
         assertEq(strategy.protocolFee, _standardProtocolFee);
         assertEq(strategy.maxProtocolFee, uint16(300));
-        assertEq(strategy.implementation, address(strategyUsdDynamicAsk));
-    }
-
-    function testAddFloorPriceOracle() public {
-        _setUpNewStrategy();
-        StrategyUsdDynamicAsk strategy = StrategyUsdDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-        assertEq(strategy.oracle(AZUKI), address(0));
-
-        vm.prank(_owner);
-        strategy.setOracle(AZUKI, AZUKI_ORACLE);
-
-        assertEq(strategy.oracle(AZUKI), AZUKI_ORACLE);
-    }
-
-    function testAddFloorPriceOracleNotOwner() public {
-        _setUpNewStrategy();
-        StrategyUsdDynamicAsk strategy = StrategyUsdDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-        assertEq(strategy.oracle(AZUKI), address(0));
-
-        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategy.setOracle(AZUKI, AZUKI_ORACLE);
-    }
-
-    function testRemoveFloorPriceOracle() public {
-        _setUpNewStrategy();
-        StrategyUsdDynamicAsk strategy = StrategyUsdDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        vm.startPrank(_owner);
-        strategy.setOracle(AZUKI, AZUKI_ORACLE);
-        strategy.setOracle(AZUKI, address(0));
-        vm.stopPrank();
-
-        assertEq(strategy.oracle(AZUKI), address(0));
-    }
-
-    function testRemoveFloorPriceOracleNotOwner() public {
-        _setUpNewStrategy();
-        StrategyUsdDynamicAsk strategy = StrategyUsdDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        vm.prank(_owner);
-        strategy.setOracle(AZUKI, AZUKI_ORACLE);
-
-        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategy.setOracle(AZUKI, address(0));
+        assertEq(strategy.implementation, address(strategyUSDDynamicAsk));
     }
 
     function testSetMaximumLatency() public {
         _setUpNewStrategy();
-        StrategyUsdDynamicAsk strategy = StrategyUsdDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         vm.prank(_owner);
-        strategy.setMaxiimumLatency(3600);
+        strategy.setMaximumLatency(3600);
 
         assertEq(strategy.maximumLatency(), 3600);
     }
 
     function testSetMaximumLatencyNotOwner() public {
         _setUpNewStrategy();
-        StrategyUsdDynamicAsk strategy = StrategyUsdDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategy.setMaxiimumLatency(3600);
+        strategy.setMaximumLatency(3600);
     }
 
-    function testUsdDynamicAskUsdValueGreaterThanMinAcceptedEthValue() public {}
+    function testUSDDynamicAskUSDValueGreaterThanMinAcceptedEthValue() public {
+        vm.createSelectFork(MAINNET_RPC_URL);
+    }
 
-    function testUsdDynamicAskUsdValueLessThanMinAcceptedEthValue() public {}
+    function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {}
 
     function testFloorPriceTooOld() public {}
 

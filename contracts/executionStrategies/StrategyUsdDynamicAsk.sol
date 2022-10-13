@@ -7,21 +7,14 @@ import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
- * @title StrategyUsdDynamicAsk
+ * @title StrategyUSDDynamicAsk
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyUsdDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
+contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
+    AggregatorV3Interface public priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
     uint256 public maximumLatency;
-    mapping(address => address) public oracles;
-
-    /**
-     * @notice Emitted when a Chainlink floor price oracle is added.
-     * @param collection NFT collection address
-     * @param oracle Floor price oracle address
-     */
-    event OracleUpdated(address collection, address oracle);
 
     /**
      * @notice Emitted when the maximum Chainlink price latency is updated
@@ -70,25 +63,9 @@ contract StrategyUsdDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
         )
     {
         // if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-    }
-
-    /**
-     * @notice Set or unset an NFT collection's oracle address
-     * @dev Function only callable by contract owner
-     * @param _collection NFT collection address
-     * @param _oracle Floor price oracle address
-     */
-    function setOracle(address _collection, address _oracle) external onlyOwner {
-        oracles[_collection] = _oracle;
-        emit OracleUpdated(_collection, _oracle);
-    }
-
-    /**
-     * @notice View an NFT collection's oracle address
-     * @param collection NFT collection address
-     */
-    function oracle(address collection) external view returns (address) {
-        return oracles[collection];
+        (, int256 answer, , uint256 timestamp, ) = priceFeed.latestRoundData();
+        uint256 ethPriceInUSD = uint256(answer) / 1e8;
+        // uint256 minPriceInETH
     }
 
     /**
@@ -96,7 +73,7 @@ contract StrategyUsdDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
      * @dev Function only callable by contract owner
      * @param _maximumLatency Maximum Chainlink price latency
      */
-    function setMaxiimumLatency(uint256 _maximumLatency) external onlyOwner {
+    function setMaximumLatency(uint256 _maximumLatency) external onlyOwner {
         maximumLatency = _maximumLatency;
     }
 }

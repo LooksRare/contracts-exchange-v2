@@ -13,6 +13,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 contract StrategyUsdDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
+    uint256 public maximumLatency;
     mapping(address => address) public oracles;
 
     /**
@@ -21,6 +22,12 @@ contract StrategyUsdDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
      * @param oracle Floor price oracle address
      */
     event OracleUpdated(address collection, address oracle);
+
+    /**
+     * @notice Emitted when the maximum Chainlink price latency is updated
+     * @param maximumLatency Maximum Chainlink price latency
+     */
+    event MaximumLatencyUpdated(uint256 maximumLatency);
 
     /**
      * @notice Constructor
@@ -82,5 +89,14 @@ contract StrategyUsdDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
      */
     function oracle(address collection) external view returns (address) {
         return oracles[collection];
+    }
+
+    /**
+     * @notice Set maximum Chainlink price latency
+     * @dev Function only callable by contract owner
+     * @param _maximumLatency Maximum Chainlink price latency
+     */
+    function setMaxiimumLatency(uint256 _maximumLatency) external onlyOwner {
+        maximumLatency = _maximumLatency;
     }
 }

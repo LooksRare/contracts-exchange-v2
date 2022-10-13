@@ -128,9 +128,23 @@ contract UsdDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         strategy.setOracle(AZUKI, address(0));
     }
 
-    function testSetLatencyTolerance() public {}
+    function testSetMaximumLatency() public {
+        _setUpNewStrategy();
+        StrategyUsdDynamicAsk strategy = StrategyUsdDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
-    function testSetLatencyToleranceNotOwner() public {}
+        vm.prank(_owner);
+        strategy.setMaxiimumLatency(3600);
+
+        assertEq(strategy.maximumLatency(), 3600);
+    }
+
+    function testSetMaximumLatencyNotOwner() public {
+        _setUpNewStrategy();
+        StrategyUsdDynamicAsk strategy = StrategyUsdDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        strategy.setMaxiimumLatency(3600);
+    }
 
     function testUsdDynamicAskUsdValueGreaterThanMinAcceptedEthValue() public {}
 

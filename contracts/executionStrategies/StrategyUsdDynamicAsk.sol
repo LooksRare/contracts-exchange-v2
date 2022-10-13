@@ -17,6 +17,7 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
     uint256 public maximumLatency;
 
     error InvalidChainlinkPrice();
+    error LatencyToleranceTooHigh();
     error PriceNotRecentEnough();
 
     /**
@@ -109,11 +110,14 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
     }
 
     /**
-     * @notice Set maximum Chainlink price latency
+     * @notice Set maximum Chainlink price latency. It cannot be higher than 3,600
+     *         as Chainlink will at least update the price every 3,600 seconds, provided
+     *         ETH's price does not deviate more than 0.5%.
      * @dev Function only callable by contract owner
      * @param _maximumLatency Maximum Chainlink price latency
      */
     function setMaximumLatency(uint256 _maximumLatency) external onlyOwner {
+        if (_maximumLatency > 3600) revert LatencyToleranceTooHigh();
         maximumLatency = _maximumLatency;
     }
 }

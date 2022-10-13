@@ -24,6 +24,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     {
         uint256[] memory itemIds = new uint256[](numberOfItems);
         for (uint256 i; i < numberOfItems; ) {
+            mockERC721.mint(makerUser, i + 1);
             itemIds[i] = i + 1;
             unchecked {
                 ++i;
@@ -37,8 +38,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
                 ++i;
             }
         }
-
-        mockERC721.mint(makerUser, 1);
 
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
@@ -267,7 +266,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(StrategyDutchAuction.BidTooLow.selector);
+        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(

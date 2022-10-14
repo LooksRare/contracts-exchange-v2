@@ -314,31 +314,36 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    // function testZeroAmount() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+    function testZeroAmount() public {
+        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
-    //     uint256[] memory amounts = new uint256[](1);
-    //     amounts[0] = 0;
-    //     makerAsk.amounts = amounts;
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
+        });
 
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 0;
+        makerAsk.amounts = amounts;
 
-    //     vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.prank(_owner);
+        strategy.setMaximumLatency(3600);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 
     // function testStartPriceTooLow() public {
     //     _setUpUsers();

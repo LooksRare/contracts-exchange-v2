@@ -73,9 +73,9 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
         // The client has to provide a USD value that is augmented by 1e18.
         uint256 desiredSalePriceInUSD = abi.decode(makerAsk.additionalParameters, (uint256));
 
-        uint256 ethPriceInUSD = uint256(answer) * 1e10;
+        uint256 ethPriceInUSD = uint256(answer);
         uint256 minPriceInETH = makerAsk.minPrice;
-        uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * 1e18) / ethPriceInUSD;
+        uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * 1e8) / ethPriceInUSD;
 
         if (minPriceInETH > desiredSalePriceInETH) {
             price = minPriceInETH;

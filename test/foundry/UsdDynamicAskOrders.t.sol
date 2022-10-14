@@ -207,7 +207,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
-            desiredSalePriceInUSD: (LATEST_CHAINLINK_ANSWER_IN_WAD * 98) / 100
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -225,51 +225,23 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    // function testDutchAuction(uint256 elapsedTime) public {
-    //     vm.assume(elapsedTime <= 3600);
+    function testCallerNotLooksRareProtocol() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
+        });
 
-    //     vm.warp(block.timestamp + elapsedTime);
-
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-
-    //     // Taker user has received the asset
-    //     assertEq(mockERC721.ownerOf(1), takerUser);
-
-    //     uint256 discount = elapsedTime * decayPerSecond;
-
-    //     // Taker bid user pays the whole price
-    //     assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - startPrice + discount);
-    //     // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-    //     assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startPrice - discount) * 9700) / 10000);
-    // }
-
-    // function testCallerNotLooksRareProtocol() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
-
-    //     vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
-    //     // Call the function directly
-    //     strategyDutchAuction.executeStrategyWithTakerBid(takerBid, makerAsk);
-    // }
+        vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
+        // Call the function directly
+        strategyUSDDynamicAsk.executeStrategyWithTakerBid(takerBid, makerAsk);
+    }
 
     // function testZeroItemIdsLength() public {
     //     _setUpUsers();

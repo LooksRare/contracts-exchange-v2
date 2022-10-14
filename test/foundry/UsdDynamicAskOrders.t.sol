@@ -197,7 +197,33 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.9603 ether);
     }
 
-    function testOraclePriceNotRecentEnough() public {}
+    function testOraclePriceNotRecentEnough() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+
+        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: (LATEST_CHAINLINK_ANSWER_IN_WAD * 98) / 100
+        });
+
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.expectRevert(StrategyUSDDynamicAsk.PriceNotRecentEnough.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 
     // function testDutchAuction(uint256 elapsedTime) public {
     //     vm.assume(elapsedTime <= 3600);

@@ -8,6 +8,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
  * @title StrategyUSDDynamicAsk
+ * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount in ETH.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {

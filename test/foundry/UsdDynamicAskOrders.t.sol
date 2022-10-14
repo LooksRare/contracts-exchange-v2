@@ -23,6 +23,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     function setUp() public override {
         vm.createSelectFork(MAINNET_RPC_URL, FORKED_BLOCK_NUMBER);
         super.setUp();
+
+        _setUpUsers();
+        _setUpNewStrategy();
+        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
@@ -85,7 +89,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testNewStrategy() public {
-        _setUpNewStrategy();
         Strategy memory strategy = looksRareProtocol.strategyInfo(2);
         assertTrue(strategy.isActive);
         assertTrue(strategy.hasRoyalties);
@@ -95,7 +98,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testSetMaximumLatency() public {
-        _setUpNewStrategy();
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         vm.prank(_owner);
@@ -105,7 +107,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        _setUpNewStrategy();
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         vm.expectRevert(StrategyUSDDynamicAsk.LatencyToleranceTooHigh.selector);
@@ -114,7 +115,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testSetMaximumLatencyNotOwner() public {
-        _setUpNewStrategy();
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
@@ -122,10 +122,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
@@ -160,10 +156,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
@@ -198,10 +190,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testOraclePriceNotRecentEnough() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
@@ -226,10 +214,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testCallerNotLooksRareProtocol() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({

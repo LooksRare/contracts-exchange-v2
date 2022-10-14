@@ -345,55 +345,32 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    // function testStartPriceTooLow() public {
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+    function testTakerBidTooLow() public {
+        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
-    //     // startPrice is 10 ether
-    //     makerAsk.minPrice = 10 ether + 1 wei;
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
+        });
 
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
+        takerBid.maxPrice = 0.99 ether;
 
-    //     vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
+        signature = _signMakerAsk(makerAsk, makerUserPK);
 
-    // function testTakerBidTooLow(uint256 elapsedTime) public {
-    //     vm.assume(elapsedTime <= 3600);
+        vm.prank(_owner);
+        strategy.setMaximumLatency(3600);
 
-    //     _setUpUsers();
-    //     _setUpNewStrategy();
-    //     _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
-    //     (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
-
-    //     uint256 currentPrice = startPrice - decayPerSecond * elapsedTime;
-    //     takerBid.maxPrice = currentPrice - 1 wei;
-
-    //     // Sign order
-    //     signature = _signMakerAsk(makerAsk, makerUserPK);
-
-    //     vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
-    //     vm.prank(takerUser);
-    //     // Execute taker bid transaction
-    //     looksRareProtocol.executeTakerBid(
-    //         takerBid,
-    //         makerAsk,
-    //         signature,
-    //         _emptyMerkleRoot,
-    //         _emptyMerkleProof,
-    //         _emptyReferrer
-    //     );
-    // }
+        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
 }

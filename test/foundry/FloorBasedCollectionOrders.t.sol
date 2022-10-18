@@ -10,7 +10,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
 contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
-    string private constant MAINNET_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
+    string private constant GOERLI_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
     StrategyFloorBasedCollectionOffer public strategyFloorBasedCollectionOffer;
     // At block 15740567
     // roundId         uint80  : 18446744073709552305
@@ -23,7 +23,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     address private constant AZUKI_PRICE_FEED = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;
 
     function setUp() public override {
-        vm.createSelectFork(MAINNET_RPC_URL, FORKED_BLOCK_NUMBER);
+        vm.createSelectFork(GOERLI_RPC_URL, FORKED_BLOCK_NUMBER);
         super.setUp();
 
         _setUpUsers();

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
@@ -97,6 +98,20 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
     function testSetMaximumLatencyNotOwner() public {
         _testSetMaximumLatencyNotOwner(looksRareProtocol.strategyInfo(2).implementation);
+    }
+
+    event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
+
+    function testSetPriceFeed() public asPrankedUser(_owner) {
+        vm.expectEmit(true, true, true, false);
+        emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
+        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        assertEq(strategy.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
+    }
+
+    function testSetPriceFeedNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {

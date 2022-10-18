@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";

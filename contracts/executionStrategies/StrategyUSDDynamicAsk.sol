@@ -14,6 +14,9 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
+    /**
+     * @dev Chainlink ETH/USD Price Feed
+     */
     AggregatorV3Interface public priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
     uint256 public maximumLatency;
 

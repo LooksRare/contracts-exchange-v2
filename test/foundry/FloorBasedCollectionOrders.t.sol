@@ -11,7 +11,7 @@ import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
 contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant GOERLI_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
-    StrategyFloorBasedCollectionOffer public strategyFloorBasedCollectionOffer;
+    StrategyFloorBasedCollectionOffer public strategy;
     // At block 15740567
     // roundId         uint80  : 18446744073709552305
     // answer          int256  : 9700000000000000000
@@ -32,8 +32,8 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyFloorBasedCollectionOffer = new StrategyFloorBasedCollectionOffer(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyFloorBasedCollectionOffer));
+        strategy = new StrategyFloorBasedCollectionOffer(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategy));
     }
 
     function _createMakerBidAndTakerAsk(uint256 discount)
@@ -80,12 +80,12 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testNewStrategy() public {
-        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(strategy.isActive);
-        assertTrue(strategy.hasRoyalties);
-        assertEq(strategy.protocolFee, _standardProtocolFee);
-        assertEq(strategy.maxProtocolFee, uint16(300));
-        assertEq(strategy.implementation, address(strategyFloorBasedCollectionOffer));
+        Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
+        assertTrue(newStrategy.isActive);
+        assertTrue(newStrategy.hasRoyalties);
+        assertEq(newStrategy.protocolFee, _standardProtocolFee);
+        assertEq(newStrategy.maxProtocolFee, uint16(300));
+        assertEq(newStrategy.implementation, address(strategy));
     }
 
     function testSetMaximumLatency() public {
@@ -101,9 +101,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.6 ETH
         // Max price = 9.5 ETH
@@ -139,9 +137,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedPriceLessThanMaxPrice() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Max price = 9.5 ETH
@@ -179,9 +175,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testPriceFeedNotAvailable() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
@@ -207,9 +201,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testOraclePriceNotRecentEnough() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
@@ -235,9 +227,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testCallerNotLooksRareProtocol() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
@@ -251,13 +241,11 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        strategyFloorBasedCollectionOffer.executeStrategyWithTakerAsk(takerAsk, makerBid);
+        strategy.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
 
     function testTakerAskItemIdsLengthNotOne() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
@@ -287,9 +275,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testTakerAskAmountsLengthNotOne() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
@@ -319,9 +305,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testTakerAskZeroAmount() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
@@ -352,9 +336,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     }
 
     function testMakerBidTooLow() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Maker bid max price = 9.4 ETH

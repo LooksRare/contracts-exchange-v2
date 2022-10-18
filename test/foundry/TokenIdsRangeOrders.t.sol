@@ -8,11 +8,11 @@ import {StrategyTokenIdsRange} from "../../contracts/executionStrategies/Strateg
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
-    StrategyTokenIdsRange public strategyTokenIdsRange;
+    StrategyTokenIdsRange public strategy;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyTokenIdsRange));
+        strategy = new StrategyTokenIdsRange(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategy));
     }
 
     function _createMakerBidAndTakerAsk()
@@ -71,12 +71,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
     function testNewStrategy() public {
         _setUpNewStrategy();
-        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(strategy.isActive);
-        assertTrue(strategy.hasRoyalties);
-        assertEq(strategy.protocolFee, _standardProtocolFee);
-        assertEq(strategy.maxProtocolFee, uint16(300));
-        assertEq(strategy.implementation, address(strategyTokenIdsRange));
+        Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
+        assertTrue(newStrategy.isActive);
+        assertTrue(newStrategy.hasRoyalties);
+        assertEq(newStrategy.protocolFee, _standardProtocolFee);
+        assertEq(newStrategy.maxProtocolFee, uint16(300));
+        assertEq(newStrategy.implementation, address(strategy));
     }
 
     function testTokenIdsRangeERC721() public {
@@ -236,7 +236,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
+        strategy.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
 
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {

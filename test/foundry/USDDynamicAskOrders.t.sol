@@ -11,7 +11,7 @@ import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
-    StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
+    StrategyUSDDynamicAsk public strategy;
     // At block 15740567
     // roundId         uint80  :  92233720368547793259
     // answer          int256  :  126533075631
@@ -31,8 +31,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyUSDDynamicAsk));
+        strategy = new StrategyUSDDynamicAsk(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategy));
     }
 
     function _createMakerAskAndTakerBid(
@@ -90,12 +90,12 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testNewStrategy() public {
-        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(strategy.isActive);
-        assertTrue(strategy.hasRoyalties);
-        assertEq(strategy.protocolFee, _standardProtocolFee);
-        assertEq(strategy.maxProtocolFee, uint16(300));
-        assertEq(strategy.implementation, address(strategyUSDDynamicAsk));
+        Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
+        assertTrue(newStrategy.isActive);
+        assertTrue(newStrategy.hasRoyalties);
+        assertEq(newStrategy.protocolFee, _standardProtocolFee);
+        assertEq(newStrategy.maxProtocolFee, uint16(300));
+        assertEq(newStrategy.implementation, address(strategy));
     }
 
     function testSetMaximumLatency() public {
@@ -111,7 +111,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -145,7 +145,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -180,7 +180,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
     // This tests that we can handle fractions
     function testUSDDynamicAskUSDValueLessThanOneETH() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -216,7 +216,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testUSDDynamicAskBidderOverpaid() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -258,7 +258,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testOraclePriceNotRecentEnough() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -282,7 +282,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testCallerNotLooksRareProtocol() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -292,11 +292,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        strategyUSDDynamicAsk.executeStrategyWithTakerBid(takerBid, makerAsk);
+        strategy.executeStrategyWithTakerBid(takerBid, makerAsk);
     }
 
     function testZeroItemIdsLength() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 0,
@@ -323,7 +323,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testItemIdsAndAmountsLengthMismatch() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -350,7 +350,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testItemIdsMismatch() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -383,7 +383,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testZeroAmount() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -414,7 +414,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testTakerBidTooLow() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,

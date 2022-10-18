@@ -117,5 +117,6 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
     function setMaximumLatency(uint256 _maximumLatency) external onlyOwner {
         if (_maximumLatency > 3600) revert LatencyToleranceTooHigh();
         maximumLatency = _maximumLatency;
+        emit MaximumLatencyUpdated(_maximumLatency);
     }
 }

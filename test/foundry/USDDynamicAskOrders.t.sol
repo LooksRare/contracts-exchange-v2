@@ -97,9 +97,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategy.implementation, address(strategyUSDDynamicAsk));
     }
 
+    event MaximumLatencyUpdated(uint256 maximumLatency);
+
     function testSetMaximumLatency() public {
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 
+        vm.expectEmit(true, false, false, true);
+        emit MaximumLatencyUpdated(3600);
         vm.prank(_owner);
         strategy.setMaximumLatency(3600);
 

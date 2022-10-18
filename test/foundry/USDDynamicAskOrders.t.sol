@@ -230,6 +230,48 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.485 ether);
     }
 
+    function testUSDDynamicAskBidderOverpaid() public {
+        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
+        });
+
+        // Make the order currency native ETH
+        makerAsk.currency = address(0);
+        // Bidder overpays by 0.1 ETH
+        takerBid.maxPrice = 1.1 ether;
+
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.prank(_owner);
+        strategy.setMaximumLatency(3600);
+
+        uint256 initialETHBalanceTakerUser = address(takerUser).balance;
+        uint256 initialETHBalanceMakerUser = address(makerUser).balance;
+
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+
+        // Taker user has received the asset
+        assertEq(mockERC721.ownerOf(1), takerUser);
+
+        // Taker bid user pays the whole price, but without overpaying
+        assertEq(address(takerUser).balance, initialETHBalanceTakerUser - 1 ether);
+        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
+        assertEq(address(makerUser).balance, initialETHBalanceMakerUser + 0.97 ether);
+    }
+
     function testOraclePriceNotRecentEnough() public {
         StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
 

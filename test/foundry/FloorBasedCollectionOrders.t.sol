@@ -7,8 +7,9 @@ import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyFloorBasedCollectionOffer} from "../../contracts/executionStrategies/StrategyFloorBasedCollectionOffer.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
+import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
-contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager {
+contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant MAINNET_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
     StrategyFloorBasedCollectionOffer public strategyFloorBasedCollectionOffer;
     // At block 15740567
@@ -87,38 +88,16 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategy.implementation, address(strategyFloorBasedCollectionOffer));
     }
 
-    event MaximumLatencyUpdated(uint256 maximumLatency);
-
     function testSetMaximumLatency() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
-
-        vm.expectEmit(true, false, false, true);
-        emit MaximumLatencyUpdated(3600);
-        vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
-
-        assertEq(strategy.maximumLatency(), 3600);
+        _testSetMaximumLatency(looksRareProtocol.strategyInfo(2).implementation);
     }
 
     function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
-
-        vm.expectRevert(StrategyFloorBasedCollectionOffer.LatencyToleranceTooHigh.selector);
-        vm.prank(_owner);
-        strategy.setMaximumLatency(3601);
+        _testSetMaximumLatencyLatencyToleranceTooHigh(looksRareProtocol.strategyInfo(2).implementation);
     }
 
     function testSetMaximumLatencyNotOwner() public {
-        StrategyFloorBasedCollectionOffer strategy = StrategyFloorBasedCollectionOffer(
-            looksRareProtocol.strategyInfo(2).implementation
-        );
-
-        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategy.setMaximumLatency(3600);
+        _testSetMaximumLatencyNotOwner(looksRareProtocol.strategyInfo(2).implementation);
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {

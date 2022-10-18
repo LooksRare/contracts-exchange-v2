@@ -7,8 +7,9 @@ import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyUSDDynamicAsk} from "../../contracts/executionStrategies/StrategyUSDDynamicAsk.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
+import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
-contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
+contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
     StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
     // At block 15740567
@@ -97,32 +98,16 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategy.implementation, address(strategyUSDDynamicAsk));
     }
 
-    event MaximumLatencyUpdated(uint256 maximumLatency);
-
     function testSetMaximumLatency() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        vm.expectEmit(true, false, false, true);
-        emit MaximumLatencyUpdated(3600);
-        vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
-
-        assertEq(strategy.maximumLatency(), 3600);
+        _testSetMaximumLatency(looksRareProtocol.strategyInfo(2).implementation);
     }
 
     function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        vm.expectRevert(StrategyUSDDynamicAsk.LatencyToleranceTooHigh.selector);
-        vm.prank(_owner);
-        strategy.setMaximumLatency(3601);
+        _testSetMaximumLatencyLatencyToleranceTooHigh(looksRareProtocol.strategyInfo(2).implementation);
     }
 
     function testSetMaximumLatencyNotOwner() public {
-        StrategyUSDDynamicAsk strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategy.setMaximumLatency(3600);
+        _testSetMaximumLatencyNotOwner(looksRareProtocol.strategyInfo(2).implementation);
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {

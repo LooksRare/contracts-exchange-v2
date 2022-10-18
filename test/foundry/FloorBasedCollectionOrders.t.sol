@@ -19,7 +19,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     // updatedAt       uint256 : 1666100016
     // answeredInRound uint80  : 18446744073709552305
     uint256 private constant FORKED_BLOCK_NUMBER = 7791270;
-    uint256 private constant LATEST_CHAINLINK_ANSWER_IN_WAD = 9700000000000000000;
+    uint256 private constant LATEST_CHAINLINK_ANSWER_IN_WAD = 9.7 ether;
     address private constant AZUKI_PRICE_FEED = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;
 
     function setUp() public override {
@@ -59,8 +59,6 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             itemId: 0 // Doesn't matter, not used
         });
 
-        // makerBid.itemIds = itemIds;
-        // makerBid.amounts = amounts;
         makerBid.additionalParameters = abi.encode(discount);
 
         uint256[] memory itemIds = new uint256[](1);
@@ -117,7 +115,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     function testFloorBasedCollectionOfferDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.6 ETH
+        // Floor price = 9.7 ETH, discount = 0.1 ETH, desired price = 9.6 ETH
         // Max price = 9.5 ETH
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
@@ -131,7 +129,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         vm.prank(takerUser);
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -169,7 +167,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         vm.prank(takerUser);
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -203,7 +201,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         vm.expectRevert(StrategyFloorBasedCollectionOffer.PriceFeedNotAvailable.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -229,7 +227,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         vm.expectRevert(StrategyFloorBasedCollectionOffer.PriceNotRecentEnough.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -277,7 +275,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -307,7 +305,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -338,7 +336,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -369,7 +367,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
+        // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,

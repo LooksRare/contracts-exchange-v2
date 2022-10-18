@@ -19,8 +19,8 @@ contract StrategyFloorBasedCollectionOffer is IExecutionStrategy, OwnableTwoStep
 
     error InvalidChainlinkPrice();
     error LatencyToleranceTooHigh();
-    error PriceNotRecentEnough();
     error PriceFeedNotAvailable();
+    error PriceNotRecentEnough();
 
     /**
      * @notice Emitted when the maximum Chainlink price latency is updated

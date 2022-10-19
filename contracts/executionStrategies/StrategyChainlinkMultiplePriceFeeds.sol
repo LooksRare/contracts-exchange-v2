@@ -11,14 +11,14 @@ import {StrategyBase} from "./StrategyBase.sol";
 abstract contract StrategyChainlinkMultiplePriceFeeds is StrategyBase {
     mapping(address => address) public priceFeeds;
 
-    error PriceFeedNotAvailable();
-
     /**
      * @notice Emitted when a collection's price feed address is updated
      * @param collection NFT collection address
      * @param priceFeed Chainlink price feed address
      */
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
+
+    error PriceFeedNotAvailable();
 
     /**
      * @notice Set an NFT collection's Chainlink price feed address.

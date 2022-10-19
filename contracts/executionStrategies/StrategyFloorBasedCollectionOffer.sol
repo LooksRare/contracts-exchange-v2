@@ -3,11 +3,11 @@ pragma solidity ^0.8.17;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
-import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {StrategyBase} from "./StrategyBase.sol";
-import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePriceFeeds.sol";
+import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
+import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
  * @title StrategyFloorBasedCollectionOffer

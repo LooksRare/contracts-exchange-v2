@@ -9,6 +9,9 @@ import {StrategyBase} from "./StrategyBase.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 abstract contract StrategyChainlinkMultiplePriceFeeds is StrategyBase {
+    /**
+     * @dev NFT collection address to Chainlink price feed address mapping
+     */
     mapping(address => address) public priceFeeds;
 
     /**

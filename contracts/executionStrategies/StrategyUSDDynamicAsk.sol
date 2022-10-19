@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import {StrategyBase} from "./StrategyBase.sol";
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
@@ -12,7 +11,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount in ETH.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyUSDDynamicAsk is StrategyBase, StrategyChainlinkPriceLatency {
+contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
     /**

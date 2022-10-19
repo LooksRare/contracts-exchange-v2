@@ -4,11 +4,11 @@ pragma solidity ^0.8.17;
 import {StrategyBase} from "./StrategyBase.sol";
 
 /**
- * @title StrategyChainlink
+ * @title StrategyChainlinkPriceLatency
  * @notice
  * @author LooksRare protocol team (👀,💎)
  */
-abstract contract StrategyChainlink is StrategyBase {
+abstract contract StrategyChainlinkPriceLatency is StrategyBase {
     /**
      * @notice Maximum latency accepted after which
      *         the execution strategy rejects the retrieved price

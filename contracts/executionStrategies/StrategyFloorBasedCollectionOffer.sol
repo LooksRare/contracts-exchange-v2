@@ -5,7 +5,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {StrategyBase} from "./StrategyBase.sol";
-import {StrategyChainlink} from "./StrategyChainlink.sol";
+import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePriceFeeds.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 
@@ -14,7 +14,7 @@ import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
  * @notice This contract allows a bidder to place a discounted floor price bid
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloorBasedCollectionOffer is StrategyChainlink, StrategyChainlinkMultiplePriceFeeds {
+contract StrategyFloorBasedCollectionOffer is StrategyChainlinkPriceLatency, StrategyChainlinkMultiplePriceFeeds {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 

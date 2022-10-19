@@ -5,7 +5,7 @@ import {StrategyBase} from "./StrategyBase.sol";
 
 /**
  * @title StrategyChainlinkPriceLatency
- * @notice
+ * @notice This contract allows the owner to define the maximum acceptable Chainlink price latency.
  * @author LooksRare protocol team (👀,💎)
  */
 abstract contract StrategyChainlinkPriceLatency is StrategyBase {

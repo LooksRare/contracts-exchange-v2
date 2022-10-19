@@ -21,7 +21,6 @@ abstract contract StrategyChainlinkPriceLatency is StrategyBase {
      */
     event MaximumLatencyUpdated(uint256 maximumLatency);
 
-    error InvalidChainlinkPrice();
     error LatencyToleranceTooHigh();
     error PriceNotRecentEnough();
 

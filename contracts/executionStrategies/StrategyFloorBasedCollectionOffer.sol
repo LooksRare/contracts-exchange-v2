@@ -18,6 +18,8 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkPriceLatency, Str
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 
+    error InvalidChainlinkPrice();
+
     /**
      * @notice Constructor
      * @param _looksRareProtocol Address of the LooksRare protocol

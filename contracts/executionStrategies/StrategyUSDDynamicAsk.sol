@@ -31,6 +31,9 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
 
     /**
      * @inheritdoc IExecutionStrategy
+     * @notice This strategy looks at the seller's desired sale price in USD and minimum sale price in ETH,
+     *         converts the USD value into ETH using Chainlink's price feed and chooses the higher price.
+     * @dev The client has to provide the seller's desired sale price in USD as the additionalParameters
      */
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,

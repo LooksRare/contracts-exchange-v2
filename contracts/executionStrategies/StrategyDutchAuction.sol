@@ -23,6 +23,8 @@ contract StrategyDutchAuction is StrategyBase {
 
     /**
      * @inheritdoc IExecutionStrategy
+     * @notice The execution price decreases linearly within the defined period
+     * @dev The client has to provide the Dutch auction's start price as the additionalParameters
      */
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,

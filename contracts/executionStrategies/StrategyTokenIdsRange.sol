@@ -40,6 +40,8 @@ contract StrategyTokenIdsRange is StrategyBase {
 
     /**
      * @inheritdoc IExecutionStrategy
+     * @notice Bidder picks a token ID range (e.g. 1-100) and a seller
+     *         can fulfill the order with any tokens within the specificed ID range
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,

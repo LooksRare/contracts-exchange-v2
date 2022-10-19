@@ -74,7 +74,7 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
         address priceFeedAddress = priceFeeds[makerBid.collection];
         if (priceFeedAddress == address(0)) revert PriceFeedNotAvailable();
 
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(priceFeeds[makerBid.collection]);
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(priceFeedAddress);
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
         if (answer < 0) revert InvalidChainlinkPrice();
         if (block.timestamp - updatedAt > maximumLatency) revert PriceNotRecentEnough();

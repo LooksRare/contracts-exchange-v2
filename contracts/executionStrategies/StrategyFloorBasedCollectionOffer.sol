@@ -3,30 +3,23 @@ pragma solidity ^0.8.17;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
-import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
+import {StrategyBase} from "./StrategyBase.sol";
+import {StrategyChainlink} from "./StrategyChainlink.sol";
+import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 
 /**
  * @title StrategyFloorBasedCollectionOffer
  * @notice This contract allows a bidder to place a discounted floor price bid
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloorBasedCollectionOffer is IExecutionStrategy, OwnableTwoSteps {
+contract StrategyFloorBasedCollectionOffer is StrategyChainlink {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
-    uint256 public maximumLatency;
     mapping(address => address) public priceFeeds;
 
-    error InvalidChainlinkPrice();
-    error LatencyToleranceTooHigh();
     error PriceFeedNotAvailable();
     error PriceNotRecentEnough();
-
-    /**
-     * @notice Emitted when the maximum Chainlink price latency is updated
-     * @param maximumLatency Maximum Chainlink price latency
-     */
-    event MaximumLatencyUpdated(uint256 maximumLatency);
 
     /**
      * @notice Emitted when a collection's price feed address is updated
@@ -105,21 +98,6 @@ contract StrategyFloorBasedCollectionOffer is IExecutionStrategy, OwnableTwoStep
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;
         isNonceInvalidated = true;
-    }
-
-    // TODO: Not sure if the 3,600 seconds update frequency also holds true for
-    // NFT floor price oracles, we will have to confirm with Chainlink when we
-    // approach them for mainnet access.
-    /**
-     * @notice Set maximum Chainlink price latency. It cannot be higher than 3,600
-     *         as Chainlink will at least update the price every 3,600 seconds.
-     * @dev Function only callable by contract owner
-     * @param _maximumLatency Maximum Chainlink price latency
-     */
-    function setMaximumLatency(uint256 _maximumLatency) external onlyOwner {
-        if (_maximumLatency > 3600) revert LatencyToleranceTooHigh();
-        maximumLatency = _maximumLatency;
-        emit MaximumLatencyUpdated(_maximumLatency);
     }
 
     /**

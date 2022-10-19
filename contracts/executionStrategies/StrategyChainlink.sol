@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+import {StrategyBase} from "./StrategyBase.sol";
 
 /**
  * @title StrategyChainlink
  * @notice
  * @author LooksRare protocol team (👀,💎)
  */
-abstract contract StrategyChainlink is OwnableTwoSteps {
+abstract contract StrategyChainlink is StrategyBase {
     /**
      * @notice Maximum latency accepted after which
      *         the execution strategy rejects the retrieved price

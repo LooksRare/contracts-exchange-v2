@@ -19,8 +19,6 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
      */
     AggregatorV3Interface public priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
 
-    error PriceNotRecentEnough();
-
     /**
      * @notice Constructor
      * @param _looksRareProtocol Address of the LooksRare protocol

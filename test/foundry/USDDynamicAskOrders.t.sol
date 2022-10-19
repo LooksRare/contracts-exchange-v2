@@ -5,6 +5,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyUSDDynamicAsk} from "../../contracts/executionStrategies/StrategyUSDDynamicAsk.sol";
+import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
@@ -267,7 +268,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(StrategyUSDDynamicAsk.PriceNotRecentEnough.selector);
+        vm.expectRevert(StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(

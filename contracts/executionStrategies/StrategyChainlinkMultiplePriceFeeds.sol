@@ -12,7 +12,6 @@ abstract contract StrategyChainlinkMultiplePriceFeeds is StrategyBase {
     mapping(address => address) public priceFeeds;
 
     error PriceFeedNotAvailable();
-    error PriceNotRecentEnough();
 
     /**
      * @notice Emitted when a collection's price feed address is updated

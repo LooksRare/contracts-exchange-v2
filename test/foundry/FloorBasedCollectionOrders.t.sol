@@ -5,6 +5,7 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
+import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloorBasedCollectionOffer} from "../../contracts/executionStrategies/StrategyFloorBasedCollectionOffer.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -226,7 +227,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        vm.expectRevert(StrategyChainlinkMultiplePriceFeeds.PriceNotRecentEnough.selector);
+        vm.expectRevert(StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
         vm.prank(takerUser);
         // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(

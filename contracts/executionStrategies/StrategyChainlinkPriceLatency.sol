@@ -23,6 +23,7 @@ abstract contract StrategyChainlinkPriceLatency is StrategyBase {
 
     error InvalidChainlinkPrice();
     error LatencyToleranceTooHigh();
+    error PriceNotRecentEnough();
 
     /**
      * @notice Set maximum Chainlink price latency. It cannot be higher than 3,600

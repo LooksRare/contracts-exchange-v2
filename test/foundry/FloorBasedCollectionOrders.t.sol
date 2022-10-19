@@ -71,7 +71,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minNetRatio: makerAsk.minNetRatio,
+            minNetRatio: makerBid.minNetRatio,
             minPrice: 9.5 ether,
             itemIds: itemIds,
             amounts: amounts,

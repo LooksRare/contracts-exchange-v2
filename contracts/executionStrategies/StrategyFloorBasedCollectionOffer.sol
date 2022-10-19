@@ -6,6 +6,7 @@ import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSte
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {StrategyBase} from "./StrategyBase.sol";
 import {StrategyChainlink} from "./StrategyChainlink.sol";
+import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePriceFeeds.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 
 /**
@@ -13,20 +14,9 @@ import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
  * @notice This contract allows a bidder to place a discounted floor price bid
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloorBasedCollectionOffer is StrategyChainlink {
+contract StrategyFloorBasedCollectionOffer is StrategyChainlink, StrategyChainlinkMultiplePriceFeeds {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
-    mapping(address => address) public priceFeeds;
-
-    error PriceFeedNotAvailable();
-    error PriceNotRecentEnough();
-
-    /**
-     * @notice Emitted when a collection's price feed address is updated
-     * @param collection NFT collection address
-     * @param priceFeed Chainlink price feed address
-     */
-    event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
 
     /**
      * @notice Constructor
@@ -98,16 +88,5 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlink {
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;
         isNonceInvalidated = true;
-    }
-
-    /**
-     * @notice Set an NFT collection's Chainlink price feed address.
-     * @dev Function only callable by contract owner
-     * @param _collection NFT collection address
-     * @param _priceFeed Chainlink price feed address
-     */
-    function setPriceFeed(address _collection, address _priceFeed) external onlyOwner {
-        priceFeeds[_collection] = _priceFeed;
-        emit PriceFeedUpdated(_collection, _priceFeed);
     }
 }

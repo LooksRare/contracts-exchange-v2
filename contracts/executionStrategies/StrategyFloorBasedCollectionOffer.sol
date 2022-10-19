@@ -14,7 +14,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  * @notice This contract allows a bidder to place a discounted floor price bid
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloorBasedCollectionOffer is StrategyChainlinkPriceLatency, StrategyChainlinkMultiplePriceFeeds {
+contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeeds, StrategyChainlinkPriceLatency {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 

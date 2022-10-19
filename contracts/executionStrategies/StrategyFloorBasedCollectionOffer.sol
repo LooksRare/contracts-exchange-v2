@@ -48,9 +48,9 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkPriceLatency, Str
     /**
      * @inheritdoc IExecutionStrategy
      * @notice This strategy looks at the bidder's desired execution price in ETH (floor - discount)
-     *         and the bidder's maximum execution price and chooses the lower price
+     *         and maximum execution price and chooses the lower price
      * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price
-     *      as the additionalParameters.
+     *      as the additionalParameters
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,

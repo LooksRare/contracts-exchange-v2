@@ -8,29 +8,38 @@ pragma solidity ^0.8.17;
  */
 library OrderStructs {
     // Maker ask hash used to compute maker ask order hash
-    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,uint16 minNetRatio,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_ASK_HASH = 0x85fa30b2b848c94bd5f5b88383658126eb3a69201d0b539f4bf956996bdb6af1;
+    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_ASK_HASH = 0xc7a3b6254405d9b044a63d83e724f64f1b8c511097d23b2ec8922767c2dbcb06;
 
     // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,uint16 minNetRatio,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_BID_HASH = 0xaac47bd6046bbe5acd60a92f52dde1bb26209688be10f8a6e723fb405c70721b;
+    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,AdditionalRecipient[] additionalRecipients,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_BID_HASH = 0xb32799c81782b0e0c53c7b929dd860d9c76623cc02ffa12bd4cc18514f82fd15;
 
     // Merkle root hash used to compute merkle root order
     // keccak256("MerkleRoot(bytes32 root)")
     bytes32 internal constant _MERKLE_ROOT_HASH = 0x0cb314254867c611b4ba06dea78882bd68b33649e1ddb950d6db2ee328a55ad0;
 
     /**
-     * 1. MAKER ORDERS
+     * 1. ADDITIONAL RECIPIENT
+     */
+
+    // AdditionalRecipient
+    struct AdditionalRecipient {
+        address recipient;
+        uint16 percentage;
+    }
+
+    /**
+     * 2. MAKER ORDERS
      */
 
     // MakerAsk
     struct MakerAsk {
         uint112 askNonce;
         uint112 subsetNonce;
-        uint16 strategyId; // 0: Standard; 1: Collection; 2. etc.
+        uint16 strategyId;
         uint8 assetType;
         uint112 orderNonce;
-        uint16 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
         address collection;
         address currency;
         address recipient;
@@ -39,7 +48,7 @@ library OrderStructs {
         uint256 endTime;
         uint256 minPrice;
         uint256[] itemIds;
-        uint256[] amounts; // length = 1 if single sale // length > 1 if batch sale
+        uint256[] amounts;
         bytes additionalParameters;
     }
 
@@ -47,10 +56,9 @@ library OrderStructs {
     struct MakerBid {
         uint112 bidNonce;
         uint112 subsetNonce;
-        uint16 strategyId; // 0: Standard; 1: Collection; 2. etc.
+        uint16 strategyId;
         uint8 assetType;
         uint112 orderNonce;
-        uint16 minNetRatio; // e.g., 8500 = At least, 85% of the sale proceeds to the maker ask
         address collection;
         address currency;
         address recipient;
@@ -60,27 +68,27 @@ library OrderStructs {
         uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
+        AdditionalRecipient[] additionalRecipients;
         bytes additionalParameters;
     }
 
     /**
-     * 2. TAKER ORDERS
+     * 3. TAKER ORDERS
      */
 
     // TakerBid
     struct TakerBid {
         address recipient;
-        uint16 minNetRatio;
         uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
+        AdditionalRecipient[] additionalRecipients;
         bytes additionalParameters;
     }
 
     // TakerAsk
     struct TakerAsk {
         address recipient;
-        uint16 minNetRatio;
         uint256 minPrice;
         uint256[] itemIds;
         uint256[] amounts;
@@ -88,7 +96,7 @@ library OrderStructs {
     }
 
     /**
-     * 3. MERKLE ROOT
+     * 4. MERKLE ROOT
      */
 
     // MerkleRoot
@@ -113,7 +121,6 @@ library OrderStructs {
                         makerAsk.strategyId,
                         makerAsk.assetType,
                         makerAsk.orderNonce,
-                        makerAsk.minNetRatio,
                         makerAsk.collection
                     ),
                     abi.encode(
@@ -147,11 +154,10 @@ library OrderStructs {
                         makerBid.strategyId,
                         makerBid.assetType,
                         makerBid.orderNonce,
-                        makerBid.minNetRatio,
-                        makerBid.collection
+                        makerBid.collection,
+                        makerBid.currency
                     ),
                     abi.encode(
-                        makerBid.currency,
                         makerBid.recipient,
                         makerBid.signer,
                         makerBid.startTime,
@@ -159,6 +165,7 @@ library OrderStructs {
                         makerBid.maxPrice,
                         keccak256(abi.encodePacked(makerBid.itemIds)),
                         keccak256(abi.encodePacked(makerBid.amounts)),
+                        keccak256(abi.encode(makerBid.additionalRecipients)),
                         keccak256(makerBid.additionalParameters)
                     )
                 )

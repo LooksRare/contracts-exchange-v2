@@ -189,6 +189,52 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.118 ether);
     }
 
+    function testFloorBasedCollectionOfferDesiredDiscountedAmountGreaterThanOrEqualToFloorPrice() public {
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
+
+        // Floor price = 9.7 ETH, discount = 9.7 ETH, desired price = 0 ETH
+        // Max price = 0 ETH
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 9.7 ether
+        });
+
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.startPrank(_owner);
+        strategy.setMaximumLatency(3600);
+        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        vm.stopPrank();
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+
+        // Floor price = 9.7 ETH, discount = 9.8 ETH, desired price = -0.1 ETH
+        // Max price = -0.1 ETH
+        makerBid.additionalParameters = abi.encode(9.8 ether);
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
+
     function testPriceFeedNotAvailable() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 

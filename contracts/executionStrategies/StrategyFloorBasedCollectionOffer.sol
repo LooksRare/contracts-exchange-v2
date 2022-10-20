@@ -80,6 +80,7 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
 
         uint256 discountAmount = abi.decode(makerBid.additionalParameters, (uint256));
         uint256 floorPrice = uint256(answer);
+        if (floorPrice <= discountAmount) revert OrderInvalid();
         uint256 desiredPrice = floorPrice - discountAmount;
 
         if (desiredPrice > makerBid.maxPrice) {

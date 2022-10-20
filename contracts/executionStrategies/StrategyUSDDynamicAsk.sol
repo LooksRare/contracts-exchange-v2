@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";

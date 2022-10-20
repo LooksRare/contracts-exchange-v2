@@ -83,13 +83,15 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
         if (floorPrice <= discountAmount) revert OrderInvalid();
         uint256 desiredPrice = floorPrice - discountAmount;
 
-        if (desiredPrice > makerBid.maxPrice) {
+        if (takerAsk.minPrice > desiredPrice) {
+            if (takerAsk.minPrice > makerBid.maxPrice) revert BidTooLow();
+        }
+
+        if (desiredPrice >= makerBid.maxPrice) {
             price = makerBid.maxPrice;
         } else {
             price = desiredPrice;
         }
-
-        if (price < takerAsk.minPrice) revert BidTooLow();
 
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;

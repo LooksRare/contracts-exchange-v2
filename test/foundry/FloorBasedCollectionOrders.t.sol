@@ -10,6 +10,7 @@ import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStra
 import {StrategyFloorBasedCollectionOffer} from "../../contracts/executionStrategies/StrategyFloorBasedCollectionOffer.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
+import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 
 contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant GOERLI_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
@@ -228,6 +229,47 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         vm.expectRevert(StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+        vm.prank(takerUser);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
+
+    function testChainlinkPriceLessThanOrEqualToZero() public {
+        MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 0.1 ether
+        });
+
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.startPrank(_owner);
+        strategy.setMaximumLatency(3600);
+        strategy.setPriceFeed(address(mockERC721), address(aggregator));
+        vm.stopPrank();
+
+        vm.expectRevert(StrategyFloorBasedCollectionOffer.InvalidChainlinkPrice.selector);
+        vm.prank(takerUser);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+
+        aggregator.setAnswer(-1);
+        vm.expectRevert(StrategyFloorBasedCollectionOffer.InvalidChainlinkPrice.selector);
         vm.prank(takerUser);
         // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(

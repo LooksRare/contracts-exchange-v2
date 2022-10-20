@@ -75,7 +75,7 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
         if (priceFeed == address(0)) revert PriceFeedNotAvailable();
 
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer < 0) revert InvalidChainlinkPrice();
+        if (answer <= 0) revert InvalidChainlinkPrice();
         if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
 
         uint256 discountAmount = abi.decode(makerBid.additionalParameters, (uint256));

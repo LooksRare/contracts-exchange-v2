@@ -406,6 +406,36 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         );
     }
 
+    function testMakerBidAmountsLengthNotOne() public {
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 0.1 ether
+        });
+
+        uint256[] memory amounts = new uint256[](0);
+        makerBid.amounts = amounts;
+
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.startPrank(_owner);
+        strategy.setMaximumLatency(3600);
+        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        vm.stopPrank();
+
+        vm.prank(takerUser);
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
+
     function testTakerAskZeroAmount() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
@@ -414,8 +444,41 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         });
 
         uint256[] memory amounts = new uint256[](1);
+        // Seller will probably try 0
         amounts[0] = 0;
         takerAsk.amounts = amounts;
+
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.startPrank(_owner);
+        strategy.setMaximumLatency(3600);
+        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        vm.stopPrank();
+
+        vm.prank(takerUser);
+        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyReferrer
+        );
+    }
+
+    function testMakerBidAmountNotOne() public {
+        strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 0.1 ether
+        });
+
+        uint256[] memory amounts = new uint256[](1);
+        // Bidder will probably try a higher number
+        amounts[0] = 2;
+        makerBid.amounts = amounts;
 
         signature = _signMakerBid(makerBid, makerUserPK);
 

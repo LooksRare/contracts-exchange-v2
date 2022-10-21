@@ -68,8 +68,13 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
-        if (takerAsk.itemIds.length != 1 || takerAsk.amounts.length != 1 || takerAsk.amounts[0] != 1)
-            revert OrderInvalid();
+        if (
+            takerAsk.itemIds.length != 1 ||
+            takerAsk.amounts.length != 1 ||
+            takerAsk.amounts[0] != 1 ||
+            makerBid.amounts.length != 1 ||
+            makerBid.amounts[0] != 1
+        ) revert OrderInvalid();
 
         address priceFeed = priceFeeds[makerBid.collection];
         if (priceFeed == address(0)) revert PriceFeedNotAvailable();

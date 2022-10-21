@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
+import {StrategyBase} from "../../contracts/executionStrategies/StrategyBase.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-contract StrategyTestMultiFillCollectionOrder is IExecutionStrategy {
+contract StrategyTestMultiFillCollectionOrder is StrategyBase {
     using OrderStructs for OrderStructs.MakerBid;
 
     // Address of the protocol

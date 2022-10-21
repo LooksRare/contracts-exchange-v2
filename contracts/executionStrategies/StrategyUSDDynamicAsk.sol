@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
@@ -11,24 +11,15 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount in ETH.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
+contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
     /**
      * @dev Chainlink ETH/USD Price Feed
      */
     AggregatorV3Interface public priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
-    uint256 public maximumLatency;
 
     error InvalidChainlinkPrice();
-    error LatencyToleranceTooHigh();
-    error PriceNotRecentEnough();
-
-    /**
-     * @notice Emitted when the maximum Chainlink price latency is updated
-     * @param maximumLatency Maximum Chainlink price latency
-     */
-    event MaximumLatencyUpdated(uint256 maximumLatency);
 
     /**
      * @notice Constructor
@@ -40,6 +31,9 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
 
     /**
      * @inheritdoc IExecutionStrategy
+     * @notice This strategy looks at the seller's desired sale price in USD and minimum sale price in ETH,
+     *         converts the USD value into ETH using Chainlink's price feed and chooses the higher price.
+     * @dev The client has to provide the seller's desired sale price in USD as the additionalParameters
      */
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -108,18 +102,5 @@ contract StrategyUSDDynamicAsk is IExecutionStrategy, OwnableTwoSteps {
         )
     {
         revert OrderInvalid();
-    }
-
-    /**
-     * @notice Set maximum Chainlink price latency. It cannot be higher than 3,600
-     *         as Chainlink will at least update the price every 3,600 seconds, provided
-     *         ETH's price does not deviate more than 0.5%.
-     * @dev Function only callable by contract owner
-     * @param _maximumLatency Maximum Chainlink price latency
-     */
-    function setMaximumLatency(uint256 _maximumLatency) external onlyOwner {
-        if (_maximumLatency > 3600) revert LatencyToleranceTooHigh();
-        maximumLatency = _maximumLatency;
-        emit MaximumLatencyUpdated(_maximumLatency);
     }
 }

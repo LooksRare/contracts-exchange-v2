@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import {StrategyBase} from "./StrategyBase.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
@@ -8,7 +9,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  * @title StrategyTokenIdsRange
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyTokenIdsRange is IExecutionStrategy {
+contract StrategyTokenIdsRange is StrategyBase {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 
@@ -39,6 +40,8 @@ contract StrategyTokenIdsRange is IExecutionStrategy {
 
     /**
      * @inheritdoc IExecutionStrategy
+     * @notice Bidder picks a token ID range (e.g. 1-100) and a seller
+     *         can fulfill the order with any tokens within the specificed ID range
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,

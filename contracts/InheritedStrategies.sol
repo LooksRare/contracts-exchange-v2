@@ -14,7 +14,7 @@ import {IInheritedStrategies} from "./interfaces/IInheritedStrategies.sol";
  * @title InheritedStrategies
  * @notice This contract handles the execution of inherited strategies.
  *         - StrategyId = 0 --> Standard Order
- *         - StrategyId = 1 --> Collection Order (Maker Bid only) with an option to set a merkle proof
+ *         - StrategyId = 1 --> Collection Order (Maker Bid only) with an option to set a merkle root for a set of criteria
  * @author LooksRare protocol team (👀,💎)
  */
 contract InheritedStrategies is IInheritedStrategies {

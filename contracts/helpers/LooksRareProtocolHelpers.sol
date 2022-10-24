@@ -10,7 +10,6 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Interfaces
 import {IFeeManager} from "../interfaces/IFeeManager.sol";
-import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 import {IStrategyManager} from "../interfaces/IStrategyManager.sol";
 
 // Other dependencies
@@ -26,20 +25,11 @@ contract LooksRareProtocolHelpers is SignatureChecker {
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;
 
-    enum RoyaltyType {
-        NoRoyalty,
-        RoyaltyFeeRegistry,
-        RoyaltyEIP2981
-    }
-
     // Encoding prefix for EIP-712 signatures
     string internal constant _ENCODING_PREFIX = "\x19\x01";
 
     // LooksRareProtocol
     LooksRareProtocol public looksRareProtocol;
-
-    // LooksRareProtocol
-    IRoyaltyFeeRegistry public royaltyFeeRegistry;
 
     /**
      * @notice Constructor
@@ -47,7 +37,6 @@ contract LooksRareProtocolHelpers is SignatureChecker {
      */
     constructor(address _looksRareProtocol) {
         looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
-        royaltyFeeRegistry = LooksRareProtocol(_looksRareProtocol).royaltyFeeRegistry();
     }
 
     /**
@@ -70,16 +59,12 @@ contract LooksRareProtocolHelpers is SignatureChecker {
             uint16 collectionDiscountFactor,
             uint256 royaltyFeeAmount,
             address royaltyRecipient,
-            uint256 netPrice,
-            RoyaltyType royaltyType
+            uint256 netPrice
         )
     {
         IStrategyManager.Strategy memory strategyInfo = looksRareProtocol.strategyInfo(strategyId);
 
-        (royaltyRecipient, royaltyFeeAmount, royaltyType) = strategyInfo.hasRoyalties
-            ? _getRoyaltyRecipientAndAmountAndRoyaltyType(collection, itemIds, price)
-            : (address(0), 0, RoyaltyType.NoRoyalty);
-
+        (royaltyRecipient, royaltyFeeAmount) = _getRebateRecipientAndAmountAndRoyaltyType(collection, itemIds, price);
         protocolFeeAmount = (price * strategyInfo.protocolFee) / 10000;
         collectionDiscountFactor = looksRareProtocol.collectionDiscountFactor(collection);
         netPrice = price - protocolFeeAmount - royaltyFeeAmount;
@@ -162,48 +147,11 @@ contract LooksRareProtocolHelpers is SignatureChecker {
         return true;
     }
 
-    function _getRoyaltyRecipientAndAmountAndRoyaltyType(
+    function _getRebateRecipientAndAmountAndRoyaltyType(
         address collection,
         uint256[] memory itemIds,
         uint256 amount
-    )
-        internal
-        view
-        returns (
-            address royaltyRecipient,
-            uint256 royaltyAmount,
-            RoyaltyType royaltyType
-        )
-    {
-        // 1. Royalty fee registry
-        (royaltyRecipient, royaltyAmount) = royaltyFeeRegistry.royaltyInfo(collection, amount);
-
-        if (royaltyRecipient != address(0) || royaltyAmount != 0) {
-            // Although royalties would not get paid at the moment using the registry, it can change in the future.
-            royaltyType = RoyaltyType.RoyaltyFeeRegistry;
-        }
-
-        // 2. ERC2981 logic
-        if (royaltyRecipient == address(0) && royaltyAmount == 0) {
-            (bool status, bytes memory data) = collection.staticcall(
-                abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[0], amount)
-            );
-
-            if (status) {
-                (royaltyRecipient, royaltyAmount) = abi.decode(data, (address, uint256));
-                // The response is valid so royaltyType becomes EIP2981
-                royaltyType = RoyaltyType.RoyaltyEIP2981;
-            }
-
-            if (status && itemIds.length > 1) {
-                for (uint256 i = 1; i < itemIds.length; i++) {
-                    (address royaltyRecipientForToken, uint256 royaltyAmountForToken) = IERC2981(collection)
-                        .royaltyInfo(itemIds[i], amount);
-
-                    if (royaltyRecipientForToken != royaltyRecipient || royaltyAmount != royaltyAmountForToken)
-                        revert IFeeManager.BundleEIP2981NotAllowed(collection, itemIds);
-                }
-            }
-        }
+    ) internal view returns (address rebateRecipient, uint256 rebateAmount) {
+        //
     }
 }

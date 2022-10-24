@@ -34,12 +34,6 @@ contract ExecutionManager is
     IExecutionManager
 {
     /**
-     * @notice Constructor
-     * @param _royaltyFeeRegistry Royalty fee registry address
-     */
-    constructor(address _royaltyFeeRegistry) FeeManager(_royaltyFeeRegistry) {}
-
-    /**
      * @notice Execute strategy for taker ask
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
@@ -54,26 +48,21 @@ contract ExecutionManager is
             uint256[] memory amounts,
             uint256 netPrice,
             uint256 protocolFeeAmount,
-            address royaltyRecipient,
-            uint256 royaltyFeeAmount
+            address rebateRecipient,
+            uint256 rebateFeeAmount
         )
     {
         uint256 price;
         (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
-        (royaltyRecipient, royaltyFeeAmount) = _strategyInfo[makerBid.strategyId].hasRoyalties
-            ? _getRoyaltyRecipientAndAmount(makerBid.collection, itemIds, price)
-            : (address(0), 0);
+        (rebateRecipient, rebateFeeAmount) = _getRebateRecipientAndAmount(makerBid.collection, itemIds, price);
 
         protocolFeeAmount =
             (((price * _strategyInfo[makerBid.strategyId].protocolFee) / 10000) *
                 (10000 - collectionDiscountFactor[makerBid.collection])) /
             10000;
 
-        netPrice = price - protocolFeeAmount - royaltyFeeAmount;
-
-        if (netPrice < (price * takerAsk.minNetRatio) / 10000) revert SlippageAsk();
-        if (netPrice < (price * makerBid.minNetRatio) / 10000) revert SlippageBid();
+        netPrice = price - protocolFeeAmount - rebateFeeAmount;
     }
 
     /**
@@ -98,9 +87,7 @@ contract ExecutionManager is
         uint256 price;
         (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
-        (royaltyRecipient, royaltyFeeAmount) = _strategyInfo[makerAsk.strategyId].hasRoyalties
-            ? _getRoyaltyRecipientAndAmount(makerAsk.collection, itemIds, price)
-            : (address(0), 0);
+        (royaltyRecipient, royaltyFeeAmount) = _getRebateRecipientAndAmount(makerAsk.collection, itemIds, price);
 
         protocolFeeAmount =
             (((price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000) *
@@ -108,9 +95,6 @@ contract ExecutionManager is
             10000;
 
         netPrice = price - royaltyFeeAmount - protocolFeeAmount;
-
-        if (netPrice < (price * makerAsk.minNetRatio) / 10000) revert SlippageAsk();
-        if (netPrice < (price * takerBid.minNetRatio) / 10000) revert SlippageBid();
     }
 
     /**

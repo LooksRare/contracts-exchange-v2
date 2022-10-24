@@ -28,14 +28,12 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     constructor() {
         _strategyInfo[0] = Strategy({
             isActive: true,
-            hasRoyalties: true,
             protocolFee: 200,
             maxProtocolFee: 300,
             implementation: address(0)
         });
         _strategyInfo[1] = Strategy({
             isActive: true,
-            hasRoyalties: true,
             protocolFee: 200,
             maxProtocolFee: 300,
             implementation: address(0)
@@ -44,14 +42,12 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
 
     /**
      * @notice Add a new strategy
-     * @param hasRoyalties Whether the strategy has royalties
      * @param protocolFee Protocol fee
      * @param maxProtocolFee Maximum protocol fee
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      */
     function addStrategy(
-        bool hasRoyalties,
         uint16 protocolFee,
         uint16 maxProtocolFee,
         address implementation
@@ -60,7 +56,6 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
 
         _strategyInfo[countStrategies] = Strategy({
             isActive: true,
-            hasRoyalties: hasRoyalties,
             protocolFee: protocolFee,
             maxProtocolFee: maxProtocolFee,
             implementation: implementation
@@ -72,13 +67,11 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     /**
      * @notice Update strategy
      * @param strategyId Strategy id
-     * @param hasRoyalties Whether the strategy should distribute royalties
      * @param protocolFee Protocol fee (e.g., 200 --> 2%)
      * @param isActive Whether the strategy is active
      */
     function updateStrategy(
         uint16 strategyId,
-        bool hasRoyalties,
         uint16 protocolFee,
         bool isActive
     ) external onlyOwner {
@@ -87,19 +80,18 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
 
         _strategyInfo[strategyId] = Strategy({
             isActive: isActive,
-            hasRoyalties: hasRoyalties,
             protocolFee: protocolFee,
             maxProtocolFee: _strategyInfo[strategyId].maxProtocolFee,
             implementation: _strategyInfo[strategyId].implementation
         });
 
-        emit StrategyUpdated(strategyId, isActive, hasRoyalties, protocolFee);
+        emit StrategyUpdated(strategyId, isActive, protocolFee);
     }
 
     /**
      * @notice View strategy information for a given strategy id
      * @param strategyId Strategy id
-     * @return strategy Information about the strategy (protocol fee, maximum protocol fee, royalty status, implementation address)
+     * @return strategy Information about the strategy (protocol fee, maximum protocol fee, implementation address)
      */
     function strategyInfo(uint16 strategyId) external view returns (Strategy memory strategy) {
         return _strategyInfo[strategyId];

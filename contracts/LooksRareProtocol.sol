@@ -62,12 +62,8 @@ contract LooksRareProtocol is
     /**
      * @notice Constructor
      * @param transferManager Transfer manager address
-     * @param royaltyFeeRegistry Royalty fee registry address
      */
-    constructor(address transferManager, address royaltyFeeRegistry)
-        ExecutionManager(royaltyFeeRegistry)
-        TransferSelectorNFT(transferManager)
-    {
+    constructor(address transferManager) TransferSelectorNFT(transferManager) {
         // Compute and store the initial domain separator
         _INITIAL_DOMAIN_SEPARATOR = keccak256(
             abi.encode(

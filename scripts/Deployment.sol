@@ -17,7 +17,6 @@ contract Deployment is Test {
     ReferralStaking public referralStaking;
 
     // Config
-    address internal _royaltyFeeRegistry;
     address internal _looksRareToken;
     uint256 internal _timelockPeriod = 7 days;
 
@@ -28,7 +27,7 @@ contract Deployment is Test {
 
         vm.startBroadcast();
         transferManager = new TransferManager();
-        looksRareProtocol = new LooksRareProtocol(address(transferManager), _royaltyFeeRegistry);
+        looksRareProtocol = new LooksRareProtocol(address(transferManager));
         transferManager.whitelistOperator(address(looksRareProtocol));
         looksRareProtocol.addCurrency(address(0));
         looksRareProtocol.setProtocolFeeRecipient(looksRareProtocol.owner());

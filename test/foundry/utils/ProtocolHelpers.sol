@@ -116,7 +116,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 maxPrice: maxPrice,
                 itemIds: itemIds,
                 amounts: amounts,
-                additionalRecipients: emptyAdditionalRecipients,
+                additionalRecipient: _emptyAdditionalRecipient,
                 additionalParameters: abi.encode()
             });
     }
@@ -150,7 +150,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 maxPrice: maxPrice,
                 itemIds: itemIds,
                 amounts: amounts,
-                additionalRecipients: emptyAdditionalRecipients,
+                additionalRecipient: _emptyAdditionalRecipient,
                 additionalParameters: abi.encode()
             });
     }

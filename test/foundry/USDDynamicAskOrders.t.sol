@@ -83,7 +83,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             1 ether,
             makerAsk.itemIds,
             makerAsk.amounts,
-            emptyAdditionalRecipients,
+            _emptyAdditionalRecipient,
             abi.encode()
         );
     }

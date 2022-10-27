@@ -35,7 +35,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             makerAsk.minPrice,
             makerAsk.itemIds,
             makerAsk.amounts,
-            emptyAdditionalRecipients,
+            _emptyAdditionalRecipient,
             abi.encode()
         );
     }
@@ -101,7 +101,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             makerAsk.minPrice,
             makerAsk.itemIds,
             makerAsk.amounts,
-            emptyAdditionalRecipients,
+            _emptyAdditionalRecipient,
             abi.encode()
         );
     }

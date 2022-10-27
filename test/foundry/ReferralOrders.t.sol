@@ -86,7 +86,7 @@ contract ReferralOrdersTest is ProtocolBase {
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
-                emptyAdditionalRecipients,
+                _emptyAdditionalRecipient,
                 abi.encode()
             );
         }
@@ -174,7 +174,7 @@ contract ReferralOrdersTest is ProtocolBase {
                 makerAsks[i].minPrice,
                 makerAsks[i].itemIds,
                 makerAsks[i].amounts,
-                emptyAdditionalRecipients,
+                _emptyAdditionalRecipient,
                 abi.encode()
             );
         }

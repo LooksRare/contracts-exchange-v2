@@ -67,7 +67,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             startPrice,
             itemIds,
             amounts,
-            emptyAdditionalRecipients,
+            _emptyAdditionalRecipient,
             abi.encode()
         );
     }

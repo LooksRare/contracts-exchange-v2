@@ -64,19 +64,11 @@ contract NonceManager is INonceManager {
      * @param ask Whether to increment the user ask nonce
      */
     function incrementBidAskNonces(bool bid, bool ask) external {
-        unchecked {
-            if (ask && bid) {
-                _userBidAskNonces[msg.sender] = UserBidAskNonces({
-                    bidNonce: _userBidAskNonces[msg.sender].bidNonce + 1,
-                    askNonce: _userBidAskNonces[msg.sender].askNonce + 1
-                });
-            } else if (bid) {
-                _userBidAskNonces[msg.sender].bidNonce++;
-            } else if (ask) {
-                _userBidAskNonces[msg.sender].askNonce++;
-            } else {
-                revert NoNonceToIncrement();
-            }
+        if (bid) {
+            _userBidAskNonces[msg.sender].bidNonce++;
+        }
+        if (ask) {
+            _userBidAskNonces[msg.sender].askNonce++;
         }
 
         emit NewBidAskNonces(_userBidAskNonces[msg.sender].bidNonce, _userBidAskNonces[msg.sender].askNonce);

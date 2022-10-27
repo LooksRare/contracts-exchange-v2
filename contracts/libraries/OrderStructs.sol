@@ -12,8 +12,8 @@ library OrderStructs {
     bytes32 internal constant _MAKER_ASK_HASH = 0xc7a3b6254405d9b044a63d83e724f64f1b8c511097d23b2ec8922767c2dbcb06;
 
     // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,AdditionalRecipient[] additionalRecipients,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_BID_HASH = 0xb32799c81782b0e0c53c7b929dd860d9c76623cc02ffa12bd4cc18514f82fd15;
+    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,AdditionalRecipient additionalRecipient,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_BID_HASH = 0x195fb26bc7001b227e370f6c8f3784ecb4482d49703e19f897682ce9e355f162;
 
     // Merkle root hash used to compute merkle root order
     // keccak256("MerkleRoot(bytes32 root)")
@@ -68,7 +68,7 @@ library OrderStructs {
         uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
-        AdditionalRecipient[] additionalRecipients;
+        AdditionalRecipient additionalRecipient;
         bytes additionalParameters;
     }
 
@@ -82,7 +82,7 @@ library OrderStructs {
         uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
-        AdditionalRecipient[] additionalRecipients;
+        AdditionalRecipient additionalRecipient;
         bytes additionalParameters;
     }
 
@@ -165,7 +165,7 @@ library OrderStructs {
                         makerBid.maxPrice,
                         keccak256(abi.encodePacked(makerBid.itemIds)),
                         keccak256(abi.encodePacked(makerBid.amounts)),
-                        keccak256(abi.encode(makerBid.additionalRecipients)),
+                        keccak256(abi.encode(makerBid.additionalRecipient)),
                         keccak256(makerBid.additionalParameters)
                     )
                 )

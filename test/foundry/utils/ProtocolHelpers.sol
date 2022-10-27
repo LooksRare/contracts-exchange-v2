@@ -20,7 +20,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint16 strategyId,
         uint8 assetType,
         uint112 orderNonce,
-        uint16 minNetRatio,
         address collection,
         address currency,
         address signer,
@@ -39,7 +38,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 strategyId: strategyId,
                 assetType: assetType,
                 orderNonce: orderNonce,
-                minNetRatio: minNetRatio,
                 collection: collection,
                 currency: currency,
                 recipient: signer,
@@ -59,7 +57,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint16 strategyId,
         uint8 assetType,
         uint112 orderNonce,
-        uint16 minNetRatio,
         address collection,
         address currency,
         address signer,
@@ -74,7 +71,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 strategyId: strategyId,
                 assetType: assetType,
                 orderNonce: orderNonce,
-                minNetRatio: minNetRatio,
                 collection: collection,
                 currency: currency,
                 recipient: signer,
@@ -94,7 +90,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint16 strategyId,
         uint8 assetType,
         uint112 orderNonce,
-        uint16 minNetRatio,
         address collection,
         address currency,
         address signer,
@@ -112,7 +107,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 strategyId: strategyId,
                 assetType: assetType,
                 orderNonce: orderNonce,
-                minNetRatio: minNetRatio,
                 collection: collection,
                 currency: currency,
                 recipient: signer,
@@ -122,6 +116,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 maxPrice: maxPrice,
                 itemIds: itemIds,
                 amounts: amounts,
+                additionalRecipients: emptyAdditionalRecipients,
                 additionalParameters: abi.encode()
             });
     }
@@ -132,7 +127,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint16 strategyId,
         uint8 assetType,
         uint112 orderNonce,
-        uint16 minNetRatio,
         address collection,
         address currency,
         address signer,
@@ -147,7 +141,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 strategyId: strategyId,
                 assetType: assetType,
                 orderNonce: orderNonce,
-                minNetRatio: minNetRatio,
                 collection: collection,
                 currency: currency,
                 recipient: signer,
@@ -157,6 +150,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 maxPrice: maxPrice,
                 itemIds: itemIds,
                 amounts: amounts,
+                additionalRecipients: emptyAdditionalRecipients,
                 additionalParameters: abi.encode()
             });
     }

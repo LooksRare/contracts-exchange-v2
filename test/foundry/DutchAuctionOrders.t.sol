@@ -15,7 +15,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyDutchAuction = new StrategyDutchAuction(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyDutchAuction));
+        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategyDutchAuction));
     }
 
     function _createMakerAskAndTakerBid(uint256 numberOfItems, uint256 numberOfAmounts)
@@ -48,7 +48,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             strategyId: 2,
             assetType: 0,
             orderNonce: 0,
-            minNetRatio: minNetRatio,
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
@@ -63,21 +62,20 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         makerAsk.endTime = block.timestamp + 1 hours;
         makerAsk.additionalParameters = abi.encode(startPrice);
 
-        takerBid = OrderStructs.TakerBid({
-            recipient: takerUser,
-            minNetRatio: makerAsk.minNetRatio,
-            maxPrice: startPrice,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
-        });
+        takerBid = OrderStructs.TakerBid(
+            takerUser,
+            startPrice,
+            itemIds,
+            amounts,
+            emptyAdditionalRecipients,
+            abi.encode()
+        );
     }
 
     function testNewStrategy() public {
         _setUpNewStrategy();
         Strategy memory strategy = looksRareProtocol.strategyInfo(2);
         assertTrue(strategy.isActive);
-        assertTrue(strategy.hasRoyalties);
         assertEq(strategy.protocolFee, _standardProtocolFee);
         assertEq(strategy.maxProtocolFee, uint16(300));
         assertEq(strategy.implementation, address(strategyDutchAuction));
@@ -88,7 +86,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         // Sign order
@@ -121,7 +119,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testCallerNotLooksRareProtocol() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
@@ -132,7 +130,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testZeroItemIdsLength() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(0, 0);
 
         // Sign order
@@ -154,7 +152,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testItemIdsAndAmountsLengthMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 2);
 
         // Sign order
@@ -176,7 +174,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testItemIdsMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         uint256[] memory itemIds = new uint256[](1);
@@ -204,7 +202,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testZeroAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         uint256[] memory amounts = new uint256[](1);
@@ -230,7 +228,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testStartPriceTooLow() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         // startPrice is 10 ether
@@ -257,7 +255,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
         uint256 currentPrice = startPrice - decayPerSecond * elapsedTime;

@@ -8,7 +8,6 @@ import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {IReferralStaking, ReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
-import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
 import {TestParameters} from "./utils/TestParameters.sol";
 
@@ -30,16 +29,14 @@ contract ReferralStakingTest is
     IOwnableTwoSteps
 {
     MockERC20 public mockERC20;
-    MockRoyaltyFeeRegistry public royaltyFeeRegistry;
     TransferManager public transferManager;
     LooksRareProtocol public looksRareProtocol;
     ReferralStaking public referralStaking;
 
     function setUp() public {
         vm.startPrank(_owner);
-        royaltyFeeRegistry = new MockRoyaltyFeeRegistry(9500);
         transferManager = new TransferManager();
-        looksRareProtocol = new LooksRareProtocol(address(transferManager), address(royaltyFeeRegistry));
+        looksRareProtocol = new LooksRareProtocol(address(transferManager));
         mockERC20 = new MockERC20();
         referralStaking = new ReferralStaking(address(looksRareProtocol), address(mockERC20), _timelock);
 

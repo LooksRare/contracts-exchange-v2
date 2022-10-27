@@ -24,7 +24,6 @@ contract MockOrderGenerator is ProtocolHelpers {
             0,
             assetType,
             0,
-            0,
             collection,
             address(0), // ETH
             makerUser,
@@ -33,10 +32,10 @@ contract MockOrderGenerator is ProtocolHelpers {
         );
         takerBid = OrderStructs.TakerBid(
             takerUser,
-            makerAsk.minNetRatio,
             makerAsk.minPrice,
             makerAsk.itemIds,
             makerAsk.amounts,
+            emptyAdditionalRecipients,
             abi.encode()
         );
     }
@@ -52,23 +51,10 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType = 1;
         }
 
-        makerBid = _createSingleItemMakerBidOrder(
-            0,
-            0,
-            0,
-            assetType,
-            0,
-            0,
-            collection,
-            currency,
-            makerUser,
-            1 ether,
-            0
-        );
+        makerBid = _createSingleItemMakerBidOrder(0, 0, 0, assetType, 0, collection, currency, makerUser, 1 ether, 0);
 
         takerAsk = OrderStructs.TakerAsk(
             takerUser,
-            makerBid.minNetRatio,
             makerBid.maxPrice,
             makerBid.itemIds,
             makerBid.amounts,
@@ -102,7 +88,6 @@ contract MockOrderGenerator is ProtocolHelpers {
             0,
             assetType,
             0,
-            0,
             collection,
             address(0),
             makerUser,
@@ -113,10 +98,10 @@ contract MockOrderGenerator is ProtocolHelpers {
 
         takerBid = OrderStructs.TakerBid(
             takerUser,
-            makerAsk.minNetRatio,
             makerAsk.minPrice,
             makerAsk.itemIds,
             makerAsk.amounts,
+            emptyAdditionalRecipients,
             abi.encode()
         );
     }
@@ -146,7 +131,6 @@ contract MockOrderGenerator is ProtocolHelpers {
             0,
             assetType,
             0,
-            0,
             collection,
             currency,
             makerUser,
@@ -157,7 +141,6 @@ contract MockOrderGenerator is ProtocolHelpers {
 
         takerAsk = OrderStructs.TakerAsk(
             takerUser,
-            makerBid.minNetRatio,
             makerBid.maxPrice,
             makerBid.itemIds,
             makerBid.amounts,

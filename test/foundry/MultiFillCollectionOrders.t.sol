@@ -106,14 +106,13 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyMultiFillCollectionOrder = new StrategyTestMultiFillCollectionOrder(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyMultiFillCollectionOrder));
+        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategyMultiFillCollectionOrder));
     }
 
     function testNewStrategy() public {
         _setUpNewStrategy();
         Strategy memory strategy = looksRareProtocol.strategyInfo(2);
         assertTrue(strategy.isActive);
-        assertTrue(strategy.hasRoyalties);
         assertEq(strategy.protocolFee, _standardProtocolFee);
         assertEq(strategy.maxProtocolFee, uint16(300));
         assertEq(strategy.implementation, address(strategyMultiFillCollectionOrder));
@@ -132,7 +131,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         uint256 amountsToFill = 4;
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
 
         {
             uint256[] memory itemIds = new uint256[](0);
@@ -147,7 +146,6 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
                     2, // strategyId (Multi-fill bid offer)
                     0, // assetType ERC721,
                     0, // orderNonce
-                    minNetRatio,
                     address(mockERC721),
                     address(weth),
                     makerUser,
@@ -172,14 +170,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.minNetRatio,
-                makerBid.maxPrice,
-                itemIds,
-                amounts,
-                abi.encode()
-            );
+            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
 
             uint256 gasLeft = gasleft();
 
@@ -229,14 +220,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.batchMint(secondTakerUser, itemIds);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                secondTakerUser,
-                makerBid.minNetRatio,
-                makerBid.maxPrice,
-                itemIds,
-                amounts,
-                abi.encode()
-            );
+            takerAsk = OrderStructs.TakerAsk(secondTakerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
 
             uint256 gasLeft = gasleft();
 

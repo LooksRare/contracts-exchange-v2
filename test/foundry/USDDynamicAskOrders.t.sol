@@ -27,12 +27,12 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategy = new StrategyUSDDynamicAsk(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategy));
+        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategyUSDDynamicAsk));
     }
 
     function _createMakerAskAndTakerBid(
@@ -66,7 +66,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             strategyId: 2,
             assetType: 0,
             orderNonce: 0,
-            minNetRatio: minNetRatio,
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
@@ -79,23 +78,22 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         makerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
 
-        takerBid = OrderStructs.TakerBid({
-            recipient: takerUser,
-            minNetRatio: makerAsk.minNetRatio,
-            maxPrice: 1 ether,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
-        });
+        takerBid = OrderStructs.TakerBid(
+            takerUser,
+            1 ether,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            emptyAdditionalRecipients,
+            abi.encode()
+        );
     }
 
     function testNewStrategy() public {
-        Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(newStrategy.isActive);
-        assertTrue(newStrategy.hasRoyalties);
-        assertEq(newStrategy.protocolFee, _standardProtocolFee);
-        assertEq(newStrategy.maxProtocolFee, uint16(300));
-        assertEq(newStrategy.implementation, address(strategy));
+        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
+        assertTrue(strategy.isActive);
+        assertEq(strategy.protocolFee, _standardProtocolFee);
+        assertEq(strategy.maxProtocolFee, uint16(300));
+        assertEq(strategy.implementation, address(strategyUSDDynamicAsk));
     }
 
     function testSetMaximumLatency() public {

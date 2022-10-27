@@ -17,7 +17,7 @@ contract CollectionOrdersTest is ProtocolBase {
         price = 1 ether; // Fixed price of sale
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
 
         {
             // Prepare the order hash
@@ -27,7 +27,6 @@ contract CollectionOrdersTest is ProtocolBase {
                 1, // strategyId (Collection offer)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(weth),
                 makerUser,
@@ -50,14 +49,7 @@ contract CollectionOrdersTest is ProtocolBase {
             itemIds[0] = tokenId;
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.minNetRatio,
-                makerBid.maxPrice,
-                itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
+            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, makerBid.amounts, abi.encode());
         }
 
         {
@@ -111,7 +103,7 @@ contract CollectionOrdersTest is ProtocolBase {
         price = 1 ether; // Fixed price of sale
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
 
         {
             // Prepare the order hash
@@ -121,7 +113,6 @@ contract CollectionOrdersTest is ProtocolBase {
                 1, // strategyId (Collection offer)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(weth),
                 makerUser,
@@ -150,7 +141,6 @@ contract CollectionOrdersTest is ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(
                 takerUser,
-                makerBid.minNetRatio,
                 makerBid.maxPrice,
                 itemIds,
                 makerBid.amounts,

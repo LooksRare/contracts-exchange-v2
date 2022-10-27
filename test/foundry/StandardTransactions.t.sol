@@ -11,7 +11,7 @@ contract StandardTransactionsTest is ProtocolBase {
      */
     function testTakerBidERC721WithRoyaltiesFromRegistry() public {
         _setUpUsers();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
@@ -28,7 +28,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -47,10 +46,10 @@ contract StandardTransactionsTest is ProtocolBase {
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
-                makerAsk.minNetRatio,
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
+                emptyAdditionalRecipients,
                 abi.encode()
             );
         }
@@ -89,7 +88,7 @@ contract StandardTransactionsTest is ProtocolBase {
      */
     function testTakerAskERC721WithRoyaltiesFromRegistry() public {
         _setUpUsers();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
@@ -103,7 +102,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(weth),
                 makerUser,
@@ -125,7 +123,6 @@ contract StandardTransactionsTest is ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(
                 takerUser,
-                makerBid.minNetRatio,
                 makerBid.maxPrice,
                 makerBid.itemIds,
                 makerBid.amounts,
@@ -184,7 +181,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(weth),
                 makerUser,
@@ -206,7 +202,6 @@ contract StandardTransactionsTest is ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(
                 takerUser,
-                makerBid.minNetRatio,
                 makerBid.maxPrice,
                 makerBid.itemIds,
                 makerBid.amounts,
@@ -262,7 +257,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721WithRoyalties),
                 address(0), // ETH,
                 makerUser,
@@ -281,10 +275,10 @@ contract StandardTransactionsTest is ProtocolBase {
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
-                makerAsk.minNetRatio,
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
+                emptyAdditionalRecipients,
                 abi.encode()
             );
         }
@@ -339,7 +333,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721WithRoyalties),
                 address(weth),
                 makerUser,
@@ -361,7 +354,6 @@ contract StandardTransactionsTest is ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(
                 takerUser,
-                makerBid.minNetRatio,
                 makerBid.maxPrice,
                 makerBid.itemIds,
                 makerBid.amounts,
@@ -423,7 +415,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -442,10 +433,10 @@ contract StandardTransactionsTest is ProtocolBase {
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
-                makerAsk.minNetRatio,
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
+                emptyAdditionalRecipients,
                 abi.encode()
             );
         }
@@ -503,7 +494,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 uint112(i), // orderNonce
-                9800,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -516,10 +506,10 @@ contract StandardTransactionsTest is ProtocolBase {
 
             takerBids[i] = OrderStructs.TakerBid(
                 takerUser,
-                makerAsks[i].minNetRatio,
                 makerAsks[i].minPrice,
                 makerAsks[i].itemIds,
                 makerAsks[i].amounts,
+                emptyAdditionalRecipients,
                 abi.encode()
             );
         }
@@ -591,7 +581,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 uint112(i), // orderNonce
-                9800,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -604,10 +593,10 @@ contract StandardTransactionsTest is ProtocolBase {
 
             takerBids[i] = OrderStructs.TakerBid(
                 takerUser,
-                makerAsks[i].minNetRatio,
                 makerAsks[i].minPrice,
                 makerAsks[i].itemIds,
                 makerAsks[i].amounts,
+                emptyAdditionalRecipients,
                 abi.encode()
             );
         }

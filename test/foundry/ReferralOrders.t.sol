@@ -65,7 +65,6 @@ contract ReferralOrdersTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -84,10 +83,10 @@ contract ReferralOrdersTest is ProtocolBase {
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
-                makerAsk.minNetRatio,
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
+                emptyAdditionalRecipients,
                 abi.encode()
             );
         }
@@ -160,7 +159,6 @@ contract ReferralOrdersTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 uint112(i), // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -173,10 +171,10 @@ contract ReferralOrdersTest is ProtocolBase {
 
             takerBids[i] = OrderStructs.TakerBid(
                 takerUser,
-                makerAsks[i].minNetRatio,
                 makerAsks[i].minPrice,
                 makerAsks[i].itemIds,
                 makerAsks[i].amounts,
+                emptyAdditionalRecipients,
                 abi.encode()
             );
         }
@@ -262,7 +260,6 @@ contract ReferralOrdersTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(weth),
                 makerUser,
@@ -284,7 +281,6 @@ contract ReferralOrdersTest is ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(
                 takerUser,
-                makerBid.minNetRatio,
                 makerBid.maxPrice,
                 makerBid.itemIds,
                 makerBid.amounts,

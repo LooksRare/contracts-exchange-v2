@@ -18,10 +18,6 @@ contract BundleTransactionsTest is ProtocolBase {
         price = makerBid.maxPrice;
         uint16 minNetRatio = 10000 - _standardProtocolFee;
 
-        // Adjust slippage parameters accordingly
-        makerBid.minNetRatio = minNetRatio;
-        takerAsk.minNetRatio = minNetRatio;
-
         // Sign the order
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -68,7 +64,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
     function testTakerAskERC721BundleWithRoyaltiesFromRegistry() public {
         _setUpUsers();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         uint256 numberItemsInBundle = 5;
 
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
@@ -79,10 +75,6 @@ contract BundleTransactionsTest is ProtocolBase {
 
         price = makerBid.maxPrice;
         uint16 minNetRatio = 10000 - (_standardProtocolFee + _standardRoyaltyFee);
-
-        // Adjust slippage parameters accordingly
-        makerBid.minNetRatio = minNetRatio;
-        takerAsk.minNetRatio = minNetRatio;
 
         // Sign the order
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -144,10 +136,6 @@ contract BundleTransactionsTest is ProtocolBase {
         price = makerBid.maxPrice;
         uint16 minNetRatio = 10000 - (_standardProtocolFee + _standardRoyaltyFee);
 
-        // Adjust slippage parameters accordingly
-        makerBid.minNetRatio = minNetRatio;
-        takerAsk.minNetRatio = minNetRatio;
-
         // Sign the order
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -204,10 +192,6 @@ contract BundleTransactionsTest is ProtocolBase {
         price = makerAsk.minPrice;
         uint16 minNetRatio = 10000 - _standardProtocolFee;
 
-        // Adjust slippage parameters accordingly
-        makerAsk.minNetRatio = minNetRatio;
-        takerBid.minNetRatio = minNetRatio;
-
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -253,17 +237,13 @@ contract BundleTransactionsTest is ProtocolBase {
 
     function testTakerBidERC721BundleWithRoyaltiesFromRegistry() public {
         _setUpUsers();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         uint256 numberItemsInBundle = 5;
 
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
         price = makerAsk.minPrice;
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
-
-        // Adjust slippage parameters accordingly
-        makerAsk.minNetRatio = minNetRatio;
-        takerBid.minNetRatio = minNetRatio;
 
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
@@ -322,10 +302,6 @@ contract BundleTransactionsTest is ProtocolBase {
 
         price = makerAsk.minPrice;
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
-
-        // Adjust slippage parameters accordingly
-        makerAsk.minNetRatio = minNetRatio;
-        takerBid.minNetRatio = minNetRatio;
 
         // Mint the items and sign the order
         mockERC721WithRoyalties.batchMint(makerUser, makerAsk.itemIds);

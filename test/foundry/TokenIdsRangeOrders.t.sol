@@ -11,8 +11,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     StrategyTokenIdsRange public strategy;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategy = new StrategyTokenIdsRange(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategy));
+        strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategyTokenIdsRange));
     }
 
     function _createMakerBidAndTakerAsk()
@@ -34,7 +34,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             strategyId: 2,
             assetType: 0,
             orderNonce: 0,
-            minNetRatio: minNetRatio,
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
@@ -61,7 +60,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minNetRatio: makerAsk.minNetRatio,
             minPrice: makerBid.maxPrice,
             itemIds: takerAskItemIds,
             amounts: takerAskAmounts,
@@ -71,18 +69,17 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
     function testNewStrategy() public {
         _setUpNewStrategy();
-        Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(newStrategy.isActive);
-        assertTrue(newStrategy.hasRoyalties);
-        assertEq(newStrategy.protocolFee, _standardProtocolFee);
-        assertEq(newStrategy.maxProtocolFee, uint16(300));
-        assertEq(newStrategy.implementation, address(strategy));
+        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
+        assertTrue(strategy.isActive);
+        assertEq(strategy.protocolFee, _standardProtocolFee);
+        assertEq(strategy.maxProtocolFee, uint16(300));
+        assertEq(strategy.implementation, address(strategyTokenIdsRange));
     }
 
     function testTokenIdsRangeERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         // Sign order
@@ -113,7 +110,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTokenIdsRangeERC1155() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC1155), _standardRoyaltyFee);
 
         uint256[] memory makerBidItemIds = new uint256[](2);
         makerBidItemIds[0] = 5;
@@ -130,7 +126,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             strategyId: 2,
             assetType: 1,
             orderNonce: 0,
-            minNetRatio: minNetRatio,
             collection: address(mockERC1155),
             currency: address(weth),
             signer: makerUser,
@@ -155,7 +150,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minNetRatio: makerAsk.minNetRatio,
             minPrice: makerBid.maxPrice,
             itemIds: takerAskItemIds,
             amounts: takerAskAmounts,
@@ -190,7 +184,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskForceAmountOneIfERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidAmounts = new uint256[](3);
@@ -228,7 +222,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testCallerNotLooksRareProtocol() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         // Sign order
@@ -242,7 +236,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](2);
@@ -291,7 +285,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskDuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](3);
@@ -320,7 +314,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskUnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](3);
@@ -349,7 +343,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory itemIds = new uint256[](2);
@@ -383,7 +377,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskPriceTooHigh() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         takerAsk.minPrice = makerBid.maxPrice + 1 wei;

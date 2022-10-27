@@ -1,6 +1,8 @@
 # @looksrare/contracts-exchange-v2
 
 [![Tests](https://github.com/LooksRare/contracts-exchange-v2/actions/workflows/tests.yaml/badge.svg)](https://github.com/LooksRare/contracts-exchange-v2/actions/workflows/tests.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![SDK](https://img.shields.io/badge/SDK-library-red)](https://github.com/LooksRare/sdk-v2)
 
 ## Description
 

@@ -8,7 +8,7 @@ import {StrategyTokenIdsRange} from "../../contracts/executionStrategies/Strateg
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
-    StrategyTokenIdsRange public strategy;
+    StrategyTokenIdsRange public strategyTokenIdsRange;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
@@ -230,7 +230,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        strategy.executeStrategyWithTakerAsk(takerAsk, makerBid);
+        strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
 
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {

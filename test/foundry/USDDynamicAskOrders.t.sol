@@ -11,7 +11,8 @@ import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
-    StrategyUSDDynamicAsk public strategy;
+    StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
+
     // At block 15740567
     // roundId         uint80  :  92233720368547793259
     // answer          int256  :  126533075631
@@ -39,7 +40,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         uint256 numberOfItems,
         uint256 numberOfAmounts,
         uint256 desiredSalePriceInUSD
-    ) private returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) {
+    ) private returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
         uint256[] memory itemIds = new uint256[](numberOfItems);
         for (uint256 i; i < numberOfItems; ) {
             mockERC721.mint(makerUser, i + 1);
@@ -60,7 +61,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
         // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
+        newMakerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -73,12 +74,12 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             itemId: 1
         });
 
-        makerAsk.itemIds = itemIds;
-        makerAsk.amounts = amounts;
+        newMakerAsk.itemIds = itemIds;
+        newMakerAsk.amounts = amounts;
 
-        makerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
+        newMakerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
 
-        takerBid = OrderStructs.TakerBid(
+        newTakerBid = OrderStructs.TakerBid(
             takerUser,
             1 ether,
             makerAsk.itemIds,
@@ -109,9 +110,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -120,7 +119,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -143,9 +142,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: (LATEST_CHAINLINK_ANSWER_IN_WAD * 98) / 100
@@ -154,7 +151,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -178,9 +175,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
     // This tests that we can handle fractions
     function testUSDDynamicAskUSDValueLessThanOneETH() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD / 2
@@ -191,7 +186,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -214,9 +209,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testUSDDynamicAskBidderOverpaid() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -230,7 +223,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         uint256 initialETHBalanceTakerUser = address(takerUser).balance;
         uint256 initialETHBalanceMakerUser = address(makerUser).balance;
@@ -256,9 +249,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testOraclePriceNotRecentEnough() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -280,9 +271,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testCallerNotLooksRareProtocol() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -290,13 +279,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        strategy.executeStrategyWithTakerBid(takerBid, makerAsk);
+        strategyUSDDynamicAsk.executeStrategyWithTakerBid(takerBid, makerAsk);
     }
 
     function testZeroItemIdsLength() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 0,
             numberOfAmounts: 0,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -305,7 +292,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
@@ -321,9 +308,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testItemIdsAndAmountsLengthMismatch() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 2,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -332,7 +317,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
@@ -348,9 +333,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testItemIdsMismatch() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -365,7 +348,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
@@ -381,9 +364,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testZeroAmount() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -396,7 +377,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
@@ -412,9 +393,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testTakerBidTooLow() public {
-        strategy = StrategyUSDDynamicAsk(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -425,7 +404,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);

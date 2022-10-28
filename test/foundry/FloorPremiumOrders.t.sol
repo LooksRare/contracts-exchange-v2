@@ -31,30 +31,27 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
 
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
+        // TODO: Royalty/Rebate adjustment
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategy = new StrategyFloorPremium(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategy));
+        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategy));
     }
 
     function _createMakerAskAndTakerBid(uint256 premium)
         private
-        returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid)
+        returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid)
     {
         mockERC721.mint(makerUser, 1);
 
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
         // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
+        newMakerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: 0,
             orderNonce: 0,
-            minNetRatio: minNetRatio,
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
@@ -62,7 +59,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             itemId: 1
         });
 
-        makerAsk.additionalParameters = abi.encode(premium);
+        newMakerAsk.additionalParameters = abi.encode(premium);
 
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 1;
@@ -70,20 +67,19 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
 
-        takerBid = OrderStructs.TakerBid({
-            recipient: takerUser,
-            minNetRatio: makerAsk.minNetRatio,
-            maxPrice: LATEST_CHAINLINK_ANSWER_IN_WAD + premium,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
-        });
+        newTakerBid = OrderStructs.TakerBid(
+            takerUser,
+            LATEST_CHAINLINK_ANSWER_IN_WAD + premium,
+            itemIds,
+            amounts,
+            _emptyAdditionalRecipient,
+            abi.encode()
+        );
     }
 
     function testNewStrategy() public {
         Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
         assertTrue(newStrategy.isActive);
-        assertTrue(newStrategy.hasRoyalties);
         assertEq(newStrategy.protocolFee, _standardProtocolFee);
         assertEq(newStrategy.maxProtocolFee, uint16(300));
         assertEq(newStrategy.implementation, address(strategy));

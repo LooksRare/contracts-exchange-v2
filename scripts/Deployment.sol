@@ -5,7 +5,7 @@ import {Test} from "../lib/forge-std/src/Test.sol";
 
 import {LooksRareProtocol} from "../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../contracts/TransferManager.sol";
-import {ReferralStaking} from "../contracts/ReferralStaking.sol";
+import {AffiliateStaking} from "../contracts/AffiliateStaking.sol";
 
 contract Deployment is Test {
     // Custom error
@@ -14,7 +14,7 @@ contract Deployment is Test {
     // Contracts
     TransferManager public transferManager;
     LooksRareProtocol public looksRareProtocol;
-    ReferralStaking public referralStaking;
+    AffiliateStaking public affiliateStaking;
 
     // Config
     address internal _looksRareToken;
@@ -31,13 +31,13 @@ contract Deployment is Test {
         transferManager.whitelistOperator(address(looksRareProtocol));
         looksRareProtocol.addCurrency(address(0));
         looksRareProtocol.setProtocolFeeRecipient(looksRareProtocol.owner());
-        referralStaking = ReferralStaking(address(looksRareProtocol), _looksRareToken, _timelockPeriod);
+        affiliateStaking = AffiliateStaking(address(looksRareProtocol), _looksRareToken, _timelockPeriod);
 
         console.log("Transfer Manager address");
         console.log(address(transferManager));
         console.log("LooksRareProtocol address");
         console.log(address(looksRareProtocol));
-        console.log("ReferralStaking address");
+        console.log("AffiliateStaking address");
         console.log(address(looksRareProtocol));
         vm.stopBroadcast();
     }

@@ -134,7 +134,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -172,7 +172,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -209,7 +209,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Floor price = 9.7 ETH, discount = 9.8 ETH, desired price = -0.1 ETH
@@ -226,7 +226,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -252,7 +252,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -278,7 +278,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -306,7 +306,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         aggregator.setAnswer(-1);
@@ -319,7 +319,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -367,7 +367,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -397,7 +397,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -427,7 +427,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -459,7 +459,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -491,7 +491,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -522,7 +522,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 }

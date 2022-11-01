@@ -36,7 +36,7 @@ contract BundleTransactionsTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
 
             emit log_named_uint(
@@ -94,7 +94,7 @@ contract BundleTransactionsTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
 
             emit log_named_uint(
@@ -154,7 +154,7 @@ contract BundleTransactionsTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
 
             emit log_named_uint(
@@ -208,7 +208,7 @@ contract BundleTransactionsTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
             emit log_named_uint(
                 "TakerBid // ERC721 // Bundle (5 items) // Protocol Fee // No Royalties",
@@ -261,7 +261,7 @@ contract BundleTransactionsTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
             emit log_named_uint(
                 "TakerBid // ERC721 // Bundle (5 items) // Protocol Fee // Registry Royalties",
@@ -319,7 +319,7 @@ contract BundleTransactionsTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
             emit log_named_uint(
                 "TakerBid // ERC721 // Bundle (5 items) // Protocol Fee // EIP2981 Royalties",

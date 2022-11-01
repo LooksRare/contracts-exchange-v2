@@ -82,7 +82,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -101,7 +101,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -118,7 +118,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -147,7 +147,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -167,7 +167,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -187,7 +187,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -207,7 +207,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -229,7 +229,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -248,7 +248,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Change price of takerAsk to be higher than makerAsk price
@@ -261,7 +261,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -281,7 +281,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -301,7 +301,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -321,7 +321,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -343,7 +343,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         /**
@@ -362,7 +362,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Change price of takerBid to be higher than makerAsk price
@@ -375,7 +375,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 }

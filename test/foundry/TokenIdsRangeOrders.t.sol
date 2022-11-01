@@ -93,7 +93,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -167,7 +167,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -205,7 +205,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -258,7 +258,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // lower band == upper band
@@ -278,7 +278,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -307,7 +307,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -336,7 +336,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -370,7 +370,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -394,7 +394,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 }

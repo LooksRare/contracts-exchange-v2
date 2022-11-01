@@ -135,7 +135,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Taker user has received the asset
@@ -174,7 +174,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Taker user has received the asset
@@ -208,7 +208,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -234,7 +234,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -262,7 +262,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         aggregator.setAnswer(-1);
@@ -275,7 +275,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -325,7 +325,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -355,7 +355,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -386,7 +386,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -417,7 +417,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -448,7 +448,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -477,7 +477,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 }

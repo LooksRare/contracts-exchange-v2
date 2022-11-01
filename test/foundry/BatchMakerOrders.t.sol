@@ -79,7 +79,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 signature,
                 merkleRoot,
                 merkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
             emit log_named_uint(
                 "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
@@ -168,7 +168,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, _emptyReferrer);
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, _emptyAffiliate);
 
             emit log_named_uint(
                 "TakerAsk // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",

@@ -62,7 +62,7 @@ contract CollectionOrdersTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
             emit log_named_uint(
                 "TakerAsk // ERC721 // Protocol Fee // CollectionOrder // Registry Royalties",
@@ -158,7 +158,7 @@ contract CollectionOrdersTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
 
             emit log_named_uint(

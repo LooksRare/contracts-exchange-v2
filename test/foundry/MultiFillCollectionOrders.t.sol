@@ -181,7 +181,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
 
             emit log_named_uint(
@@ -231,7 +231,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
 
             emit log_named_uint(

@@ -102,7 +102,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Taker user has received the asset
@@ -145,7 +145,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -167,7 +167,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -195,7 +195,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -221,7 +221,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -246,7 +246,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -273,7 +273,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 }

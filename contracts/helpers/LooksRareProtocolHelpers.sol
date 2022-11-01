@@ -3,7 +3,6 @@ pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
-import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 
 // Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
@@ -37,37 +36,6 @@ contract LooksRareProtocolHelpers is SignatureChecker {
      */
     constructor(address _looksRareProtocol) {
         looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
-    }
-
-    /**
-     * @notice Calculate protocol fee, collection discount (if any), royalty recipient, and royalty percentage
-     * @param strategyId Strategy id (e.g., 0 --> standard order, 1 --> collection bid)
-     * @param collection Collection addresss
-     * @param itemIds Array of itemIds
-     * @param price Order price
-     */
-    function calculateProtocolFeeAndCollectionDiscountFactorAndRoyaltyInfo(
-        uint16 strategyId,
-        address collection,
-        uint256[] memory itemIds,
-        uint256 price
-    )
-        public
-        view
-        returns (
-            uint256 protocolFeeAmount,
-            uint16 collectionDiscountFactor,
-            uint256 royaltyFeeAmount,
-            address royaltyRecipient,
-            uint256 netPrice
-        )
-    {
-        IStrategyManager.Strategy memory strategyInfo = looksRareProtocol.strategyInfo(strategyId);
-
-        (royaltyRecipient, royaltyFeeAmount) = _getRebateRecipientAndAmountAndRoyaltyType(collection, itemIds, price);
-        protocolFeeAmount = (price * strategyInfo.protocolFee) / 10000;
-        collectionDiscountFactor = looksRareProtocol.collectionDiscountFactor(collection);
-        netPrice = price - protocolFeeAmount - royaltyFeeAmount;
     }
 
     /**

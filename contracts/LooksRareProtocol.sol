@@ -20,7 +20,7 @@ import {ITransferManager} from "./interfaces/ITransferManager.sol";
 // Other dependencies
 import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
-import {ReferralManager} from "./ReferralManager.sol";
+import {AffiliateManager} from "./AffiliateManager.sol";
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 /**
@@ -33,7 +33,7 @@ contract LooksRareProtocol is
     ILooksRareProtocol,
     CurrencyManager,
     ExecutionManager,
-    ReferralManager,
+    AffiliateManager,
     TransferSelectorNFT,
     ReentrancyGuard,
     LowLevelETH,
@@ -89,7 +89,7 @@ contract LooksRareProtocol is
      * @param makerSignature Maker signature
      * @param merkleRoot Merkle root struct (if the signature contains multiple maker orders)
      * @param merkleProof Array containing the merkle proof (used only if multiple maker orders under the signature)
-     * @param referrer Referrer address
+     * @param affiliate Affiliate address
      */
     function executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -97,7 +97,7 @@ contract LooksRareProtocol is
         bytes calldata makerSignature,
         OrderStructs.MerkleRoot calldata merkleRoot,
         bytes32[] calldata merkleProof,
-        address referrer
+        address affiliate
     ) external nonReentrant {
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         if (merkleProof.length == 0) {
@@ -110,8 +110,8 @@ contract LooksRareProtocol is
         // Execute the transaction and fetch protocol fee
         uint256 totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, msg.sender);
 
-        // Pay protocol fee (and referral fee if any)
-        _payProtocolFeeAndReferralFee(makerBid.currency, makerBid.signer, referrer, totalProtocolFee);
+        // Pay protocol fee (and affiliate fee if any)
+        _payProtocolFeeAndAffiliateFee(makerBid.currency, makerBid.signer, affiliate, totalProtocolFee);
     }
 
     /**
@@ -121,7 +121,7 @@ contract LooksRareProtocol is
      * @param makerSignature Maker signature
      * @param merkleRoot Merkle root struct (if the signature contains multiple maker orders)
      * @param merkleProof Array containing the merkle proof (if multiple maker orders under the signature)
-     * @param referrer Referrer address
+     * @param affiliate Affiliate address
      */
     function executeTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -129,7 +129,7 @@ contract LooksRareProtocol is
         bytes calldata makerSignature,
         OrderStructs.MerkleRoot calldata merkleRoot,
         bytes32[] calldata merkleProof,
-        address referrer
+        address affiliate
     ) external payable nonReentrant {
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         if (merkleProof.length == 0) {
@@ -142,8 +142,8 @@ contract LooksRareProtocol is
         // Execute the transaction and fetch protocol fee
         uint256 totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender);
 
-        // Pay protocol fee (and referral fee if any)
-        _payProtocolFeeAndReferralFee(makerAsk.currency, msg.sender, referrer, totalProtocolFee);
+        // Pay protocol fee (and affiliate fee if any)
+        _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFee);
 
         // Return ETH if any
         _returnETHIfAny();
@@ -156,7 +156,7 @@ contract LooksRareProtocol is
      * @param makerSignatures Array of maker signatures
      * @param merkleRoots Array of merkle root structs if the signature contains multiple maker orders
      * @param merkleProofs Array containing the merkle proof (if multiple maker orders under the signature)
-     * @param referrer Referrer address
+     * @param affiliate Affiliate address
      * @param isAtomic Whether the execution should be atomic i.e., whether it should revert if 1 or more order fails
      */
     function executeMultipleTakerBids(
@@ -165,7 +165,7 @@ contract LooksRareProtocol is
         bytes[] calldata makerSignatures,
         OrderStructs.MerkleRoot[] calldata merkleRoots,
         bytes32[][] calldata merkleProofs,
-        address referrer,
+        address affiliate,
         bool isAtomic
     ) external payable nonReentrant {
         {
@@ -214,8 +214,8 @@ contract LooksRareProtocol is
             }
         }
 
-        // Pay protocol fee (and referral fee if any)
-        _payProtocolFeeAndReferralFee(makerAsks[0].currency, msg.sender, referrer, totalProtocolFee);
+        // Pay protocol fee (and affiliate fee if any)
+        _payProtocolFeeAndAffiliateFee(makerAsks[0].currency, msg.sender, affiliate, totalProtocolFee);
 
         // Return ETH if any
         _returnETHIfAny();
@@ -421,31 +421,31 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Pay protocol fee and referral fee (if any)
+     * @notice Pay protocol fee and affiliate fee (if any)
      * @param currency Currency address to transfer (address(0) is ETH)
      * @param bidUser Bid user address
-     * @param referrer Referrer address (address(0) if none)
+     * @param affiliate Affiliate address (address(0) if none)
      * @param totalProtocolFee Total protocol fee (denominated in the currency)
      */
-    function _payProtocolFeeAndReferralFee(
+    function _payProtocolFeeAndAffiliateFee(
         address currency,
         address bidUser,
-        address referrer,
+        address affiliate,
         uint256 totalProtocolFee
     ) internal {
-        uint256 totalReferralFee;
+        uint256 totalAffiliateFee;
 
-        // Check whether referral program is active and whether to execute a referral logic (and adjust downward the protocol fee if so)
-        if (referrer != address(0)) {
-            if (isReferralProgramActive) {
-                totalReferralFee = (totalProtocolFee * referrerRates[referrer]) / 10000;
-                totalProtocolFee -= totalReferralFee;
+        // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
+        if (affiliate != address(0)) {
+            if (isAffiliateProgramActive) {
+                totalAffiliateFee = (totalProtocolFee * affiliateRates[affiliate]) / 10000;
+                totalProtocolFee -= totalAffiliateFee;
 
-                // If bid user isn't the referrer, pay the referral.
+                // If bid user isn't the affiliate, pay the affiliate.
                 // If currency is ETH, funds are returned to sender at the end of the execution.
                 // If currency is ERC20, funds are not transferred from bidder to bidder.
-                if (bidUser != referrer) {
-                    _transferFungibleTokens(currency, bidUser, referrer, totalReferralFee);
+                if (bidUser != affiliate) {
+                    _transferFungibleTokens(currency, bidUser, affiliate, totalAffiliateFee);
                 }
             }
         }
@@ -453,8 +453,8 @@ contract LooksRareProtocol is
         // Transfer remaining protocol fee to the protocol fee recipient
         _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFee);
 
-        if (totalReferralFee != 0) {
-            emit ProtocolPaymentWithReferrer(currency, totalProtocolFee, referrer, totalReferralFee);
+        if (totalAffiliateFee != 0) {
+            emit ProtocolPaymentWithAffiliate(currency, totalProtocolFee, affiliate, totalAffiliateFee);
         } else {
             emit ProtocolPayment(currency, totalProtocolFee);
         }

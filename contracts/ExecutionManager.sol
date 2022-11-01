@@ -10,9 +10,9 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 // Interfaces
 import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
+import {ICollectionStakingRegistry} from "./interfaces/ICollectionStakingRegistry.sol";
 
 // Direct dependencies
-import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";
 import {FeeManager} from "./FeeManager.sol";
 import {InheritedStrategies} from "./InheritedStrategies.sol";
 import {NonceManager} from "./NonceManager.sol";
@@ -25,14 +25,7 @@ import {StrategyManager} from "./StrategyManager.sol";
  *         For instance, a taker ask is executed against a maker bid (or a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
-contract ExecutionManager is
-    CollectionDiscountManager,
-    FeeManager,
-    InheritedStrategies,
-    NonceManager,
-    StrategyManager,
-    IExecutionManager
-{
+contract ExecutionManager is FeeManager, InheritedStrategies, NonceManager, StrategyManager, IExecutionManager {
     /**
      * @notice Execute strategy for taker ask
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
@@ -53,14 +46,21 @@ contract ExecutionManager is
         )
     {
         uint256 price;
+
         (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
-        (rebateRecipient, rebateFeeAmount) = _getRebateRecipientAndAmount(makerBid.collection, itemIds, price);
+        {
+            protocolFeeAmount = (price * _strategyInfo[makerBid.strategyId].protocolFee) / 10000;
 
-        protocolFeeAmount =
-            (((price * _strategyInfo[makerBid.strategyId].protocolFee) / 10000) *
-                (10000 - collectionDiscountFactor[makerBid.collection])) /
-            10000;
+            uint16 rebatePercent;
+
+            (rebateRecipient, rebatePercent) = ICollectionStakingRegistry(makerBid.collection).viewProtocolFeeRebate(
+                makerBid.collection
+            );
+
+            rebateFeeAmount = (rebatePercent * protocolFeeAmount) / 10000;
+            protocolFeeAmount -= rebateFeeAmount;
+        }
 
         netPrice = price - protocolFeeAmount - rebateFeeAmount;
     }
@@ -80,21 +80,27 @@ contract ExecutionManager is
             uint256[] memory amounts,
             uint256 netPrice,
             uint256 protocolFeeAmount,
-            address royaltyRecipient,
-            uint256 royaltyFeeAmount
+            address rebateRecipient,
+            uint256 rebateFeeAmount
         )
     {
         uint256 price;
         (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
-        (royaltyRecipient, royaltyFeeAmount) = _getRebateRecipientAndAmount(makerAsk.collection, itemIds, price);
+        {
+            protocolFeeAmount = (price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000;
 
-        protocolFeeAmount =
-            (((price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000) *
-                (10000 - collectionDiscountFactor[makerAsk.collection])) /
-            10000;
+            uint16 rebatePercent;
 
-        netPrice = price - royaltyFeeAmount - protocolFeeAmount;
+            (rebateRecipient, rebatePercent) = ICollectionStakingRegistry(makerAsk.collection).viewProtocolFeeRebate(
+                makerAsk.collection
+            );
+
+            rebateFeeAmount = (rebatePercent * protocolFeeAmount) / 10000;
+            protocolFeeAmount -= rebateFeeAmount;
+        }
+
+        netPrice = price - protocolFeeAmount - rebateFeeAmount;
     }
 
     /**

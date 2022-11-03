@@ -26,6 +26,15 @@ import {StrategyManager} from "./StrategyManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract ExecutionManager is FeeManager, InheritedStrategies, NonceManager, StrategyManager, IExecutionManager {
+    event NewCollectionStakingRegistry(address collectionStakingRegistry);
+
+    ICollectionStakingRegistry public collectionStakingRegistry;
+
+    function setCollectionStakingRegistry(address newCollectionStakingRegistry) external onlyOwner {
+        collectionStakingRegistry = ICollectionStakingRegistry(newCollectionStakingRegistry);
+        emit NewCollectionStakingRegistry(newCollectionStakingRegistry);
+    }
+
     /**
      * @notice Execute strategy for taker ask
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
@@ -54,9 +63,7 @@ contract ExecutionManager is FeeManager, InheritedStrategies, NonceManager, Stra
 
             uint16 rebatePercent;
 
-            (rebateRecipient, rebatePercent) = ICollectionStakingRegistry(makerBid.collection).viewProtocolFeeRebate(
-                makerBid.collection
-            );
+            (rebateRecipient, rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerBid.collection);
 
             rebateFeeAmount = (rebatePercent * protocolFeeAmount) / 10000;
             protocolFeeAmount -= rebateFeeAmount;
@@ -92,9 +99,7 @@ contract ExecutionManager is FeeManager, InheritedStrategies, NonceManager, Stra
 
             uint16 rebatePercent;
 
-            (rebateRecipient, rebatePercent) = ICollectionStakingRegistry(makerAsk.collection).viewProtocolFeeRebate(
-                makerAsk.collection
-            );
+            (rebateRecipient, rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerAsk.collection);
 
             rebateFeeAmount = (rebatePercent * protocolFeeAmount) / 10000;
             protocolFeeAmount -= rebateFeeAmount;

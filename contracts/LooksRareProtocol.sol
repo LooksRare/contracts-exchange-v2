@@ -23,6 +23,8 @@ import {ExecutionManager} from "./ExecutionManager.sol";
 import {AffiliateManager} from "./AffiliateManager.sol";
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title LooksRareProtocol
  * @notice This contract is the primary contract of the LooksRare protocol (v2).

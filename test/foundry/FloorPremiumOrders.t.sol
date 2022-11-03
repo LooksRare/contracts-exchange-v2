@@ -140,11 +140,10 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
-
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 9.8 ether);
-        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.506 ether);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.604 ether);
     }
 
     function testFloorOPremiumDesiredSalePriceLessThanMinPrice() public {
@@ -182,8 +181,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
 
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 9.9 ether);
-        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.603 ether);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.702 ether);
     }
 
     function testPriceFeedNotAvailable() public {

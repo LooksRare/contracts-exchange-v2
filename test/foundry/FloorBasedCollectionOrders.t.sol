@@ -142,8 +142,8 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.5 ether);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.215 ether);
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.31 ether);
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedPriceLessThanMaxPrice() public {
@@ -180,8 +180,8 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.4 ether);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.118 ether);
+        // Taker ask user receives 97% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.212 ether);
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedAmountGreaterThanOrEqualToFloorPrice() public {

@@ -297,7 +297,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of whole price (protocol fee)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Affiliate user receives 20% of protocol fee
         uint256 affiliateFee = _calculateAffiliateFee(price * _standardProtocolFee, _affiliateRate);
         assertEq(weth.balanceOf(_affiliate), _initialWETHBalanceAffiliate + affiliateFee);

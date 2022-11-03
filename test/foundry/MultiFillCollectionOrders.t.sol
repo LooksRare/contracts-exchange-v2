@@ -196,8 +196,8 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(mockERC721.ownerOf(0), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is not marked as executed
         assertFalse(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
 
@@ -247,8 +247,8 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 4 * price);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(secondTakerUser), _initialWETHBalanceUser + 3 * ((price * 9700) / 10000));
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(secondTakerUser), _initialWETHBalanceUser + 3 * ((price * 9800) / 10000));
         // Verify the nonce is now marked as executed
         assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }

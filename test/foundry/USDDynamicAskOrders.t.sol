@@ -58,8 +58,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             }
         }
 
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
         // Prepare the order hash
         newMakerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
@@ -76,14 +74,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         newMakerAsk.itemIds = itemIds;
         newMakerAsk.amounts = amounts;
-
         newMakerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
 
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
             1 ether,
-            makerAsk.itemIds,
-            makerAsk.amounts,
+            itemIds,
+            amounts,
             _emptyAdditionalRecipient,
             abi.encode()
         );
@@ -134,11 +131,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
-
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 1 ether);
-        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.97 ether);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.98 ether);
     }
 
     function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {
@@ -169,8 +165,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 0.99 ether);
-        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.9603 ether);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.9702 ether);
     }
 
     // This tests that we can handle fractions
@@ -204,8 +200,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 0.5 ether);
-        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.485 ether);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.49 ether);
     }
 
     function testUSDDynamicAskBidderOverpaid() public {
@@ -241,11 +237,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
-
         // Taker bid user pays the whole price, but without overpaying
         assertEq(address(takerUser).balance, initialETHBalanceTakerUser - 1 ether);
-        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(address(makerUser).balance, initialETHBalanceMakerUser + 0.97 ether);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(address(makerUser).balance, initialETHBalanceMakerUser + 0.98 ether);
     }
 
     function testOraclePriceNotRecentEnough() public {

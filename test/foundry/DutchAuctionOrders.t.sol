@@ -20,7 +20,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
     function _createMakerAskAndTakerBid(uint256 numberOfItems, uint256 numberOfAmounts)
         private
-        returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid)
+        returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid)
     {
         uint256[] memory itemIds = new uint256[](numberOfItems);
         for (uint256 i; i < numberOfItems; ) {
@@ -39,10 +39,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             }
         }
 
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
         // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
+        newMakerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -55,14 +53,14 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             itemId: 1
         });
 
-        makerAsk.itemIds = itemIds;
-        makerAsk.amounts = amounts;
+        newMakerAsk.itemIds = itemIds;
+        newMakerAsk.amounts = amounts;
 
         // 0.0025 ether cheaper per second -> (10 - 1) / 3600
-        makerAsk.endTime = block.timestamp + 1 hours;
-        makerAsk.additionalParameters = abi.encode(startPrice);
+        newMakerAsk.endTime = block.timestamp + 1 hours;
+        newMakerAsk.additionalParameters = abi.encode(startPrice);
 
-        takerBid = OrderStructs.TakerBid(
+        newTakerBid = OrderStructs.TakerBid(
             takerUser,
             startPrice,
             itemIds,
@@ -112,8 +110,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - startPrice + discount);
-        // Maker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startPrice - discount) * 9700) / 10000);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startPrice - discount) * 9800) / 10000);
     }
 
     function testCallerNotLooksRareProtocol() public {

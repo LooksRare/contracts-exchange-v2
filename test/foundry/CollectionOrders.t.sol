@@ -11,13 +11,10 @@ contract CollectionOrdersTest is ProtocolBase {
      * Any itemId for ERC721 (where royalties come from the registry) is sold through a collection taker ask using WETH.
      * We use fuzzing to generate the tokenId that is sold.
      */
-    function testTakerAskCollectionOrderERC721WithRoyaltiesFromRegistry(uint256 tokenId) public {
+    function testTakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
 
         price = 1 ether; // Fixed price of sale
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
-        // TODO: Royalty/Rebate adjustment
 
         {
             // Prepare the order hash
@@ -76,8 +73,8 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(tokenId), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }
@@ -85,7 +82,7 @@ contract CollectionOrdersTest is ProtocolBase {
     /**
      * A collection offer with merkle tree criteria
      */
-    function testTakerAskCollectionOrderWithMerkleTreeERC721WithRoyaltiesFromRegistry() public {
+    function testTakerAskCollectionOrderWithMerkleTreeERC721() public {
         _setUpUsers();
 
         // Initialize Merkle Tree
@@ -101,9 +98,6 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes32 merkleRoot = m.getRoot(merkleTreeIds);
 
         price = 1 ether; // Fixed price of sale
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
-        // TODO: Royalty/Rebate adjustment
 
         {
             // Prepare the order hash
@@ -173,8 +167,8 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemIdSold), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }

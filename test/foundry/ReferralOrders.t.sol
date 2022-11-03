@@ -18,15 +18,17 @@ contract AffiliateOrdersTest is ProtocolBase {
         return (originalAmount * tierRate) / (10000 * 10000);
     }
 
-    function _setUpAffiliateStaking() private asPrankedUser(_owner) {
-        mockERC20 = new MockERC20();
+    function _setUpAffiliate() private {
+        vm.startPrank(_owner);
+        looksRareProtocol.updateAffiliateController(_owner);
         looksRareProtocol.updateAffiliateProgramStatus(true);
-    }
+        looksRareProtocol.updateAffiliateRate(_affiliate, _affiliateRate);
+        vm.stopPrank();
 
-    function _setUpAffiliate() private asPrankedUser(_affiliate) {
+        vm.startPrank(_affiliate);
         vm.deal(_affiliate, _initialETHBalanceAffiliate + _initialWETHBalanceAffiliate);
         weth.deposit{value: _initialWETHBalanceAffiliate}();
-        looksRareProtocol.updateAffiliateRate(_affiliate, _affiliateRate);
+        vm.stopPrank();
     }
 
     /**
@@ -34,12 +36,10 @@ contract AffiliateOrdersTest is ProtocolBase {
      */
     function testTakerBidERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
-        _setUpAffiliateStaking();
         _setUpAffiliate();
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - _standardProtocolFee;
 
         {
             // Mint asset
@@ -103,7 +103,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * minNetRatio) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * (10000 - _standardProtocolFee)) / 10000);
         // Affiliate user receives 20% of protocol fee
         uint256 affiliateFee = _calculateAffiliateFee(price * _standardProtocolFee, _affiliateRate);
         assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + affiliateFee);
@@ -123,7 +123,6 @@ contract AffiliateOrdersTest is ProtocolBase {
      */
     function testMultipleTakerBidsERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
-        _setUpAffiliateStaking();
         _setUpAffiliate();
 
         price = 1 ether;
@@ -232,7 +231,6 @@ contract AffiliateOrdersTest is ProtocolBase {
      */
     function testTakerAskERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
-        _setUpAffiliateStaking();
         _setUpAffiliate();
 
         price = 1 ether; // Fixed price of sale

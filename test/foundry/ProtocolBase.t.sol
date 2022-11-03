@@ -1,21 +1,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// WETH
 import {WETH} from "solmate/src/tokens/WETH.sol";
+
+// Libraries
+import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+
+// Core contracts
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
+import {CollectionStakingRegistry} from "../../contracts/CollectionStakingRegistry.sol";
+
+// Mock files
+import {MockERC20} from "../mock/MockERC20.sol";
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC721WithRoyalties} from "../mock/MockERC721WithRoyalties.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
+
+// Utils
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;
+
+    MockERC20 public looksRareToken;
     MockERC721WithRoyalties public mockERC721WithRoyalties;
     MockERC721 public mockERC721;
     MockERC1155 public mockERC1155;
 
+    CollectionStakingRegistry public collectionStakingRegistry;
     LooksRareProtocol public looksRareProtocol;
     TransferManager public transferManager;
     WETH public weth;
@@ -43,10 +57,13 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     function setUp() public virtual {
         vm.startPrank(_owner);
         weth = new WETH();
-        transferManager = new TransferManager();
-        looksRareProtocol = new LooksRareProtocol(address(transferManager));
+        looksRareToken = new MockERC20();
         mockERC721 = new MockERC721();
         mockERC1155 = new MockERC1155();
+
+        transferManager = new TransferManager();
+        collectionStakingRegistry = new CollectionStakingRegistry(address(looksRareToken));
+        looksRareProtocol = new LooksRareProtocol(address(transferManager));
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 
         // Operations
@@ -54,6 +71,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         looksRareProtocol.addCurrency(address(0));
         looksRareProtocol.addCurrency(address(weth));
         looksRareProtocol.setProtocolFeeRecipient(_owner);
+        looksRareProtocol.setCollectionStakingRegistry(address(collectionStakingRegistry));
 
         // Fetch domain separator and store it as one of the operators
         (_domainSeparator, , , ) = looksRareProtocol.information();

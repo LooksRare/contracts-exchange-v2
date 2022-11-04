@@ -128,7 +128,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         price = 1 ether;
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
-        uint16 minNetRatio = 9800;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
@@ -207,10 +206,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser + ((price * minNetRatio) * (numberPurchases - 1)) / 10000
-        );
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9800) * (numberPurchases - 1)) / 10000);
         // Affiliate user receives 20% of protocol fee
         uint256 affiliateFee = _calculateAffiliateFee(
             (numberPurchases - 1) * price * _standardProtocolFee,
@@ -235,7 +231,6 @@ contract AffiliateOrdersTest is ProtocolBase {
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - _standardProtocolFee;
 
         {
             // Prepare the order hash

@@ -129,7 +129,6 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
         // TODO: Royalty/Rebate adjustment
 

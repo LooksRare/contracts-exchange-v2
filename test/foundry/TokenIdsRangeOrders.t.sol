@@ -26,8 +26,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 3;
 
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
         makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
@@ -117,8 +115,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 6;
-
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
 
         makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,

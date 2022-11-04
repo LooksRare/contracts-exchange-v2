@@ -94,7 +94,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        // TODO assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * minNetRatio) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9800) / 10000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -111,7 +111,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         price = 1 ether; // Fixed price of sale
-        uint16 minNetRatio = 10000 - _standardProtocolFee; // 2% slippage protection for strategy
 
         for (uint112 i; i < numberOrders; i++) {
             // Prepare the order hash

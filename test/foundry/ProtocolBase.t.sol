@@ -20,6 +20,7 @@ import {MockERC1155} from "../mock/MockERC1155.sol";
 
 // Utils
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
+import {MockRoyaltyFeeRegistry} from "./utils/MockRoyaltyFeeRegistry.sol";
 
 contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;
@@ -32,6 +33,8 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     CollectionStakingRegistry public collectionStakingRegistry;
     LooksRareProtocol public looksRareProtocol;
     TransferManager public transferManager;
+    MockRoyaltyFeeRegistry public royaltyFeeRegistry;
+
     WETH public weth;
 
     function _setUpUser(address user) internal asPrankedUser(user) {
@@ -62,7 +65,8 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         mockERC1155 = new MockERC1155();
 
         transferManager = new TransferManager();
-        collectionStakingRegistry = new CollectionStakingRegistry(address(looksRareToken));
+        royaltyFeeRegistry = new MockRoyaltyFeeRegistry(9500);
+        collectionStakingRegistry = new CollectionStakingRegistry(address(looksRareToken), address(royaltyFeeRegistry));
         looksRareProtocol = new LooksRareProtocol(address(transferManager));
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 

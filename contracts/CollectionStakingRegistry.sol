@@ -5,42 +5,65 @@ pragma solidity ^0.8.17;
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 // Interfaces
+import {ICriteriaStakingRegistry} from "./interfaces/ICriteriaStakingRegistry.sol";
 import {ICollectionStakingRegistry} from "./interfaces/ICollectionStakingRegistry.sol";
 
 /**
  * @title CollectionStakingRegistry
- * @notice This contract manages the stakes of the collection.
+ * @notice This contract manages the LOOKS stakes of the collection.
  * @author LooksRare protocol team (👀,💎)
  */
 contract CollectionStakingRegistry is ICollectionStakingRegistry, OwnableTwoSteps {
+    // Address of the LooksRare token
+    address public immutable looksRareToken;
+
+    // Criteria staking contract
+    ICriteriaStakingRegistry public criteriaStakingRegistry;
+
     // Collection stake
     mapping(address => CollectionStake) public collectionStake;
 
     // Tier
     mapping(uint256 => Tier) public tier;
 
-    // Address of the LooksRare token
-    address public immutable looksRareToken;
-
     /**
      * @notice Constructor
-     * @param _looksRareToken Address of the LooksRareToken
+     * @param _looksRareToken Address of the LooksRare token
+     * @param _criteriaStakingRegistry Address of the criteria staking contract
      */
-    constructor(address _looksRareToken) {
+    constructor(address _looksRareToken, address _criteriaStakingRegistry) {
         looksRareToken = _looksRareToken;
+        criteriaStakingRegistry = ICriteriaStakingRegistry(_criteriaStakingRegistry);
         tier[0] = Tier({rebatePercent: 2500, stake: 0});
     }
 
     /**
      * @notice TODO
      */
-    function setTier(address collection, uint256 targetTier) external {
+    function adjustTier(address collection, uint256 targetTier) external {
+        _checkSender(collection, msg.sender);
+
         collectionStake[collection] = CollectionStake({
             collectionManager: msg.sender,
             rebateReceiver: msg.sender,
             rebatePercent: tier[targetTier].rebatePercent,
             stake: tier[targetTier].stake
         });
+    }
+
+    /**
+     * @notice TODO
+     */
+    function withdrawAll(address collection) external {
+        //
+    }
+
+    function _checkSender(address collection, address sender) private view {
+        if (sender != collectionStake[collection].collectionManager) {
+            if (!criteriaStakingRegistry.verifyCollectionOwner(collection, sender)) {
+                revert("Wrong criteria");
+            }
+        }
     }
 
     /**

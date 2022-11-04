@@ -15,7 +15,6 @@ contract StandardTransactionsTest is ProtocolBase {
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
         {
             // Mint asset
@@ -92,7 +91,6 @@ contract StandardTransactionsTest is ProtocolBase {
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
 
         {
             // Prepare the order hash
@@ -149,155 +147,6 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
-        // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
-    }
-
-    /**
-     * TakerBid matches makerAsk with EIP2981 token
-     */
-    function testTakerBidERC721WithEIP2981Royalties() public {
-        _setUpUsers();
-
-        price = 1 ether; // Fixed price of sale
-        uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
-
-        {
-            // Mint asset
-            mockERC721WithRoyalties.mint(makerUser, itemId);
-
-            // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder(
-                0, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721WithRoyalties),
-                address(0), // ETH,
-                makerUser,
-                price,
-                itemId
-            );
-
-            // Sign order
-            signature = _signMakerAsk(makerAsk, makerUserPK);
-        }
-
-        // Taker user actions
-        vm.startPrank(takerUser);
-
-        {
-            // Prepare the taker bid
-            takerBid = OrderStructs.TakerBid(
-                takerUser,
-                makerAsk.minPrice,
-                makerAsk.itemIds,
-                makerAsk.amounts,
-                _emptyAdditionalRecipient,
-                abi.encode()
-            );
-        }
-
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
-            emit log_named_uint("TakerBid // ERC721 // Protocol Fee // EIP2981 Royalties", gasLeft - gasleft());
-        }
-
-        vm.stopPrank();
-
-        // Taker user has received the asset
-        assertEq(mockERC721WithRoyalties.ownerOf(itemId), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 98% of whole price
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * (10000 - _standardProtocolFee)) / 10000);
-        // No leftover in the balance of the contract
-        assertEq(address(looksRareProtocol).balance, 0);
-        // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
-    }
-
-    /**
-     * One ERC721 (with EIP2981 royalties) is sold through a taker ask using WETH
-     */
-    function testTakerAskERC721WithEIP2981Royalties() public {
-        _setUpUsers();
-
-        price = 1 ether; // Fixed price of sale
-        uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee);
-
-        {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder(
-                0, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721WithRoyalties),
-                address(weth),
-                makerUser,
-                price,
-                itemId
-            );
-
-            // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
-        }
-
-        // Taker user actions
-        vm.startPrank(takerUser);
-
-        {
-            // Mint asset
-            mockERC721WithRoyalties.mint(takerUser, itemId);
-
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
-
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
-            emit log_named_uint("TakerAsk // ERC721 // Protocol Fee // EIP2981 Royalties", gasLeft - gasleft());
-        }
-
-        vm.stopPrank();
-
-        // Taker user has received the asset
-        assertEq(mockERC721WithRoyalties.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)

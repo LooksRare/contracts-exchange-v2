@@ -12,6 +12,8 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract CriteriaStakingRegistryV1 is ICriteriaStakingRegistry {
+    error NotRoyaltyFeeSetterInRegistry();
+
     // Address of the royalty fee registry
     IRoyaltyFeeRegistry public immutable royaltyFeeRegistry;
 
@@ -34,7 +36,7 @@ contract CriteriaStakingRegistryV1 is ICriteriaStakingRegistry {
         if (royaltyFeeSetter != address(0)) {
             if (royaltyFeeSetter == sender) isVerified = true;
         } else {
-            revert("Collection setter does not match sender");
+            revert NotRoyaltyFeeSetterInRegistry();
         }
 
         // 2. Check if owner

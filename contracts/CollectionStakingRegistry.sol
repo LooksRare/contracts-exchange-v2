@@ -3,6 +3,8 @@ pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
+import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // Interfaces
 import {ICriteriaStakingRegistry} from "./interfaces/ICriteriaStakingRegistry.sol";
@@ -10,18 +12,23 @@ import {ICollectionStakingRegistry} from "./interfaces/ICollectionStakingRegistr
 
 /**
  * @title CollectionStakingRegistry
- * @notice This contract manages the LOOKS stakes of the collection.
+ * @notice This contract manages the LOOKS stakes for collections.
  * @author LooksRare protocol team (👀,💎)
  */
-contract CollectionStakingRegistry is ICollectionStakingRegistry, OwnableTwoSteps {
+contract CollectionStakingRegistry is
+    LowLevelERC20Transfer,
+    ICollectionStakingRegistry,
+    OwnableTwoSteps,
+    ReentrancyGuard
+{
     // Address of the LooksRare token
     address public immutable looksRareToken;
 
     // Criteria staking contract
     ICriteriaStakingRegistry public criteriaStakingRegistry;
 
-    // Collection stake
-    mapping(address => CollectionStake) public collectionStake;
+    // Collection info
+    mapping(address => CollectionInfo) public collectionInfo;
 
     // Tier
     mapping(uint256 => Tier) public tier;
@@ -34,36 +41,89 @@ contract CollectionStakingRegistry is ICollectionStakingRegistry, OwnableTwoStep
     constructor(address _looksRareToken, address _criteriaStakingRegistry) {
         looksRareToken = _looksRareToken;
         criteriaStakingRegistry = ICriteriaStakingRegistry(_criteriaStakingRegistry);
-        tier[0] = Tier({rebatePercent: 2500, stake: 0});
+        tier[1] = Tier({rebatePercent: 2500, stake: 0});
     }
 
     /**
-     * @notice TODO
+     * @notice This function allows to claim/modify the ownership of a collection and the stakes associated with a collection.
+     * @param collection Address of the collection
+     * @param targetTier Target tier (e.g., 0, 1)
+     * @param collectionManager Address of the collection manager
+     * @param rebateReceiver Address of the rebate receiver
+     * @param rebatePercentOfTier Rebate percent (e.g., 2500 = 25%) at the target tier
+     * @param stakeAmountOfTier Total stake amount (in LOOKS) required at the target tier
+     * @dev If the stakeAmount is lower than current amount staked, the user receives the difference in LOOKS.
+     *      If the stakeAmount is higher than the current amount staked, the user transfers the difference in LOOKS.
+     *      If the stakeAmount is equal to the current amount staked, the user doesn't transfer/receiver any LOOKS.
      */
-    function adjustTier(address collection, uint256 targetTier) external {
-        _checkSender(collection, msg.sender);
+    function claimCollectionOwnershipAndSetTier(
+        address collection,
+        uint256 targetTier,
+        address collectionManager,
+        address rebateReceiver,
+        uint16 rebatePercentOfTier,
+        uint256 stakeAmountOfTier
+    ) external nonReentrant {
+        address currentCollectionManager = collectionInfo[collection].collectionManager;
 
-        collectionStake[collection] = CollectionStake({
-            collectionManager: msg.sender,
-            rebateReceiver: msg.sender,
-            rebatePercent: tier[targetTier].rebatePercent,
-            stake: tier[targetTier].stake
-        });
-    }
-
-    /**
-     * @notice TODO
-     */
-    function withdrawAll(address collection) external {
-        //
-    }
-
-    function _checkSender(address collection, address sender) private view {
-        if (sender != collectionStake[collection].collectionManager) {
-            if (!criteriaStakingRegistry.verifyCollectionOwner(collection, sender)) {
-                revert("Wrong criteria");
+        if (currentCollectionManager == address(0)) {
+            if (!criteriaStakingRegistry.verifyCollectionOwner(collection, msg.sender)) {
+                revert NotCollectionOwner();
             }
+        } else if (currentCollectionManager != msg.sender) {
+            revert WrongCollectionOwner();
         }
+
+        if (rebatePercentOfTier != tier[targetTier].rebatePercent) revert WrongRebatePercentForTier();
+        if (stakeAmountOfTier != tier[targetTier].stake) revert WrongStakeAmountForTier();
+
+        uint256 currentCollectionStake = collectionInfo[collection].stake;
+
+        if (currentCollectionStake < stakeAmountOfTier) {
+            _executeERC20TransferFrom(
+                looksRareToken,
+                msg.sender,
+                address(this),
+                stakeAmountOfTier - currentCollectionStake
+            );
+        } else if (currentCollectionStake > stakeAmountOfTier) {
+            _executeERC20DirectTransfer(looksRareToken, msg.sender, currentCollectionStake - stakeAmountOfTier);
+        }
+
+        collectionInfo[collection] = CollectionInfo({
+            collectionManager: collectionManager,
+            rebateReceiver: rebateReceiver,
+            rebatePercent: rebatePercentOfTier,
+            stake: stakeAmountOfTier
+        });
+
+        emit CollectionUpdate(collectionManager, rebateReceiver, rebatePercentOfTier, stakeAmountOfTier);
+    }
+
+    /**
+     * @notice Withdraw all LOOKS staked and exit the rebate program
+     */
+    function withdrawAll(address collection) external nonReentrant {
+        if (collectionInfo[collection].collectionManager != msg.sender) revert WrongCollectionOwner();
+
+        uint256 currentCollectionStake = collectionInfo[collection].stake;
+
+        delete collectionInfo[collection];
+        collectionInfo[collection].collectionManager = msg.sender;
+
+        if (currentCollectionStake != 0) {
+            _executeERC20DirectTransfer(looksRareToken, msg.sender, currentCollectionStake);
+        }
+    }
+
+    /**
+     * @notice Adjust tier
+     * @dev Only callable by owner.
+     */
+    function adjustTier(uint256 tierIndex, Tier calldata newTier) external onlyOwner {
+        tier[tierIndex] = newTier;
+
+        emit NewTier(tierIndex, newTier.rebatePercent, newTier.stake);
     }
 
     /**
@@ -78,6 +138,6 @@ contract CollectionStakingRegistry is ICollectionStakingRegistry, OwnableTwoStep
         override
         returns (address rebateReceiver, uint16 rebatePercent)
     {
-        return (collectionStake[collection].rebateReceiver, collectionStake[collection].rebatePercent);
+        return (collectionInfo[collection].rebateReceiver, collectionInfo[collection].rebatePercent);
     }
 }

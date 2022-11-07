@@ -399,6 +399,7 @@ contract LooksRareProtocol is
         );
 
         for (uint256 i; i < recipients.length; ) {
+            // Check if additional recipient is set
             if (recipients[i] != address(0)) {
                 if (fees[i] != 0) _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
             }

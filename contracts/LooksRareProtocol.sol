@@ -18,12 +18,10 @@ import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 
 // Other dependencies
+import {AffiliateManager} from "./AffiliateManager.sol";
 import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
-import {AffiliateManager} from "./AffiliateManager.sol";
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
-
-import "hardhat/console.sol";
 
 /**
  * @title LooksRareProtocol
@@ -45,9 +43,6 @@ contract LooksRareProtocol is
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;
-
-    // Encoding prefix for EIP-712 signatures
-    string internal constant _ENCODING_PREFIX = "\x19\x01";
 
     // Initial domain separator
     bytes32 internal immutable _INITIAL_DOMAIN_SEPARATOR;
@@ -101,16 +96,21 @@ contract LooksRareProtocol is
         bytes32[] calldata merkleProof,
         address affiliate
     ) external nonReentrant {
-        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleProof.length == 0) {
-            _computeDigestAndVerify(makerBid.hash(), makerSignature, makerBid.signer);
-        } else {
-            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, makerBid.hash());
-            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
-        }
+        uint256 totalProtocolFee;
+        {
+            bytes32 orderHash = makerBid.hash();
 
-        // Execute the transaction and fetch protocol fee
-        uint256 totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, msg.sender);
+            // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+            if (merkleProof.length == 0) {
+                _computeDigestAndVerify(makerBid.hash(), makerSignature, makerBid.signer);
+            } else {
+                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, makerBid.hash());
+                _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
+            }
+
+            // Execute the transaction and fetch protocol fee
+            totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
+        }
 
         // Pay protocol fee (and affiliate fee if any)
         _payProtocolFeeAndAffiliateFee(makerBid.currency, makerBid.signer, affiliate, totalProtocolFee);
@@ -133,16 +133,22 @@ contract LooksRareProtocol is
         bytes32[] calldata merkleProof,
         address affiliate
     ) external payable nonReentrant {
-        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleProof.length == 0) {
-            _computeDigestAndVerify(makerAsk.hash(), makerSignature, makerAsk.signer);
-        } else {
-            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, makerAsk.hash());
-            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
-        }
+        uint256 totalProtocolFee;
 
-        // Execute the transaction and fetch protocol fee
-        uint256 totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender);
+        {
+            bytes32 orderHash = makerAsk.hash();
+
+            // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+            if (merkleProof.length == 0) {
+                _computeDigestAndVerify(makerAsk.hash(), makerSignature, makerAsk.signer);
+            } else {
+                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, makerAsk.hash());
+                _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
+            }
+
+            // Execute the transaction and fetch protocol fee
+            totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
+        }
 
         // Pay protocol fee (and affiliate fee if any)
         _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFee);
@@ -183,36 +189,42 @@ contract LooksRareProtocol is
 
         // Initialize protocol fee
         uint256 totalProtocolFee;
+
         for (uint256 i; i < takerBids.length; ) {
             {
                 if (i != 0) {
                     if (makerAsks[i].currency != makerAsks[i - 1].currency) revert WrongCurrency();
                 }
             }
+            {
+                bytes32 orderHash = makerAsks[i].hash();
 
-            // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-            if (merkleProofs[i].length == 0) {
-                _computeDigestAndVerify(makerAsks[i].hash(), makerSignatures[i], makerAsks[i].signer);
-            } else {
                 {
-                    _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, makerAsks[i].hash());
+                    // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+                    if (merkleProofs[i].length == 0) {
+                        _computeDigestAndVerify(orderHash, makerSignatures[i], makerAsks[i].signer);
+                    } else {
+                        {
+                            _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
+                        }
+                        _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsks[i].signer);
+                    }
                 }
-                _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsks[i].signer);
-            }
 
-            if (isAtomic) {
-                // Execute the transaction and add protocol fee
-                totalProtocolFee += _executeTakerBid(takerBids[i], makerAsks[i], msg.sender);
-            } else {
-                try this.restrictedExecuteTakerBid(takerBids[i], makerAsks[i], msg.sender) returns (
-                    uint256 protocolFee
-                ) {
-                    totalProtocolFee += protocolFee;
-                } catch {}
-            }
+                if (isAtomic) {
+                    // Execute the transaction and add protocol fee
+                    totalProtocolFee += _executeTakerBid(takerBids[i], makerAsks[i], msg.sender, orderHash);
+                } else {
+                    try this.restrictedExecuteTakerBid(takerBids[i], makerAsks[i], msg.sender, orderHash) returns (
+                        uint256 protocolFee
+                    ) {
+                        totalProtocolFee += protocolFee;
+                    } catch {}
+                }
 
-            unchecked {
-                ++i;
+                unchecked {
+                    ++i;
+                }
             }
         }
 
@@ -228,16 +240,18 @@ contract LooksRareProtocol is
      * @param takerBid Taker bid struct
      * @param makerAsk Maker ask struct
      * @param sender Sender address (i.e., the initial msg sender)
+     * @param orderHash Order hash
      * @return protocolFeeAmount Protocol fee amount
      * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
      */
     function restrictedExecuteTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
-        address sender
-    ) external returns (uint256 protocolFeeAmount) {
+        address sender,
+        bytes32 orderHash
+    ) external returns (uint256) {
         if (msg.sender != address(this)) revert WrongCaller();
-        return _executeTakerBid(takerBid, makerAsk, sender);
+        return _executeTakerBid(takerBid, makerAsk, sender, orderHash);
     }
 
     /**
@@ -288,13 +302,15 @@ contract LooksRareProtocol is
      * @param takerAsk Taker ask order struct
      * @param makerBid Maker bid order struct
      * @param sender Sender of the transaction (i.e., msg.sender)
+     * @param orderHash Order hash
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
-        address sender
-    ) internal returns (uint256 protocolFeeAmount) {
+        address sender,
+        bytes32 orderHash
+    ) internal returns (uint256) {
         // Verify whether the currency is whitelisted but is not ETH (address(0))
         if (!isCurrencyWhitelisted[makerBid.currency]) {
             if (makerBid.currency != address(0)) revert WrongCurrency();
@@ -307,19 +323,15 @@ contract LooksRareProtocol is
             userOrderNonce[makerBid.signer][makerBid.orderNonce]
         ) revert WrongNonces();
 
-        uint256[] memory fees = new uint256[](2);
-        address[] memory recipients = new address[](2);
-        uint256[] memory itemIds;
-        uint256[] memory amounts;
+        (
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
+            address[] memory recipients,
+            uint256[] memory fees
+        ) = _executeStrategyForTakerAsk(takerAsk, makerBid, sender);
 
-        recipients[0] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
-
-        (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerAsk(
-            takerAsk,
-            makerBid
-        );
-
-        for (uint256 i; i < recipients.length; ) {
+        // It starts at 1 since the protocol fee is transferred at the very end
+        for (uint256 i = 1; i < recipients.length; ) {
             if (recipients[i] != address(0)) {
                 if (fees[i] != 0) {
                     _transferFungibleTokens(makerBid.currency, makerBid.signer, recipients[i], fees[i]);
@@ -340,11 +352,11 @@ contract LooksRareProtocol is
         );
 
         emit TakerAsk(
+            orderHash,
             makerBid.orderNonce,
             makerBid.signer,
             makerBid.recipient == address(0) ? makerBid.signer : makerBid.recipient,
             sender,
-            takerAsk.recipient,
             makerBid.strategyId,
             makerBid.currency,
             makerBid.collection,
@@ -353,6 +365,9 @@ contract LooksRareProtocol is
             recipients,
             fees
         );
+
+        // Return protocol fee
+        return fees[0];
     }
 
     /**
@@ -360,13 +375,15 @@ contract LooksRareProtocol is
      * @param takerBid Taker bid order struct
      * @param makerAsk Maker ask order struct
      * @param sender Sender of the transaction (i.e., msg.sender)
+     * @param orderHash Order hash
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
-        address sender
-    ) internal returns (uint256 protocolFeeAmount) {
+        address sender,
+        bytes32 orderHash
+    ) internal returns (uint256) {
         // Verify whether the currency is available
         if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
 
@@ -377,17 +394,12 @@ contract LooksRareProtocol is
             userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
         ) revert WrongNonces();
 
-        uint256[] memory fees = new uint256[](2);
-        address[] memory recipients = new address[](2);
-        uint256[] memory itemIds;
-        uint256[] memory amounts;
-
-        recipients[0] = makerAsk.recipient == address(0) ? makerAsk.signer : makerAsk.recipient;
-
-        (itemIds, amounts, fees[0], protocolFeeAmount, recipients[1], fees[1]) = _executeStrategyForTakerBid(
-            takerBid,
-            makerAsk
-        );
+        (
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
+            address[] memory recipients,
+            uint256[] memory fees
+        ) = _executeStrategyForTakerBid(takerBid, makerAsk);
 
         _transferNFT(
             makerAsk.collection,
@@ -398,10 +410,12 @@ contract LooksRareProtocol is
             amounts
         );
 
-        for (uint256 i; i < recipients.length; ) {
-            // Check if additional recipient is set
+        // @dev It starts at 1 since 0 is the protocol fee
+        for (uint256 i = 1; i < recipients.length; ) {
             if (recipients[i] != address(0)) {
-                if (fees[i] != 0) _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
+                if (fees[i] != 0) {
+                    _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
+                }
             }
             unchecked {
                 ++i;
@@ -409,6 +423,7 @@ contract LooksRareProtocol is
         }
 
         emit TakerBid(
+            orderHash,
             makerAsk.orderNonce,
             sender,
             takerBid.recipient == address(0) ? sender : takerBid.recipient,
@@ -421,6 +436,8 @@ contract LooksRareProtocol is
             recipients,
             fees
         );
+
+        return fees[0];
     }
 
     /**
@@ -457,9 +474,7 @@ contract LooksRareProtocol is
         _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFee);
 
         if (totalAffiliateFee != 0) {
-            emit ProtocolPaymentWithAffiliate(currency, totalProtocolFee, affiliate, totalAffiliateFee);
-        } else {
-            emit ProtocolPayment(currency, totalProtocolFee);
+            emit AffiliatePayment(affiliate, totalAffiliateFee);
         }
     }
 
@@ -494,7 +509,8 @@ contract LooksRareProtocol is
         bytes memory makerSignature,
         address signer
     ) internal view {
-        bytes32 digest = keccak256(abi.encodePacked(_ENCODING_PREFIX, _domainSeparator, computedHash));
+        // \x19\x01 is the encoding prefix
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, computedHash));
         _verify(digest, signer, makerSignature);
     }
 
@@ -505,7 +521,7 @@ contract LooksRareProtocol is
      * @param orderHash Order hash (can be maker bid hash or maker ask hash)
      */
     function _verifyMerkleProofForOrderHash(
-        bytes32[] memory proof,
+        bytes32[] calldata proof,
         bytes32 root,
         bytes32 orderHash
     ) internal pure {

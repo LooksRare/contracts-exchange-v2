@@ -18,6 +18,8 @@ import {InheritedStrategies} from "./InheritedStrategies.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title ExecutionManager
  * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain
@@ -42,34 +44,50 @@ contract ExecutionManager is FeeManager, InheritedStrategies, NonceManager, Stra
      */
     function _executeStrategyForTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.MakerBid calldata makerBid,
+        address sender
     )
         internal
         returns (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            uint256 netPrice,
-            uint256 protocolFeeAmount,
-            address rebateRecipient,
-            uint256 rebateFeeAmount
+            address[] memory recipients,
+            uint256[] memory fees
         )
     {
         uint256 price;
 
+        if (makerBid.additionalRecipient.recipient != address(0) && makerBid.additionalRecipient.percentage != 0) {
+            recipients = new address[](4);
+            fees = new uint256[](4);
+        } else {
+            recipients = new address[](3);
+            fees = new uint256[](3);
+        }
+
         (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
         {
-            protocolFeeAmount = (price * _strategyInfo[makerBid.strategyId].protocolFee) / 10000;
+            // 0 -> Protocol fee
+            fees[0] = (price * _strategyInfo[makerBid.strategyId].protocolFee) / 10000;
+            recipients[0] = protocolFeeRecipient;
 
+            // 1 --> Amount for seller
+            fees[2] = price - fees[0];
+            recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
+
+            // 2 --> Rebate and adjustment of protocol fee
             uint16 rebatePercent;
-
-            (rebateRecipient, rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerBid.collection);
-
-            rebateFeeAmount = (rebatePercent * protocolFeeAmount) / 10000;
-            protocolFeeAmount -= rebateFeeAmount;
+            (recipients[1], rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerBid.collection);
+            fees[1] = (rebatePercent * fees[0]) / 10000;
+            fees[0] -= fees[1];
         }
 
-        netPrice = price - protocolFeeAmount - rebateFeeAmount;
+        // 3 --> Additional recipient
+        if (fees.length == 4) {
+            fees[3] = (makerBid.additionalRecipient.percentage * price) / 10000;
+            recipients[3] = makerBid.additionalRecipient.recipient;
+        }
     }
 
     /**
@@ -85,25 +103,43 @@ contract ExecutionManager is FeeManager, InheritedStrategies, NonceManager, Stra
         returns (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            uint256 netPrice,
-            uint256 protocolFeeAmount,
-            address rebateRecipient,
-            uint256 rebateFeeAmount
+            address[] memory recipients,
+            uint256[] memory fees
         )
     {
         uint256 price;
+
+        if (takerBid.additionalRecipient.recipient != address(0) && takerBid.additionalRecipient.percentage != 0) {
+            recipients = new address[](4);
+            fees = new uint256[](4);
+        } else {
+            recipients = new address[](3);
+            fees = new uint256[](3);
+        }
+
         (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
         {
-            protocolFeeAmount = (price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000;
+            // 0 -> Protocol fee
+            fees[0] = (price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000;
+            recipients[0] = protocolFeeRecipient;
 
+            // 1 --> Amount for seller
+            fees[2] = price - fees[0];
+            recipients[2] = makerAsk.recipient == address(0) ? makerAsk.signer : makerAsk.recipient;
+
+            // 2 --> Rebate and adjustment of protocol fee
             uint16 rebatePercent;
-            (rebateRecipient, rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerAsk.collection);
-            rebateFeeAmount = (rebatePercent * protocolFeeAmount) / 10000;
-            protocolFeeAmount -= rebateFeeAmount;
+            (recipients[1], rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerAsk.collection);
+            fees[1] = (rebatePercent * fees[0]) / 10000;
+            fees[0] -= fees[1];
         }
 
-        netPrice = price - protocolFeeAmount - rebateFeeAmount;
+        // 3 --> Additional recipient
+        if (fees.length == 4) {
+            fees[3] = (takerBid.additionalRecipient.percentage * price) / 10000;
+            recipients[3] = takerBid.additionalRecipient.recipient;
+        }
     }
 
     /**

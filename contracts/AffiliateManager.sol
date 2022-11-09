@@ -32,7 +32,6 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
         if (rate > 10000) revert PercentageTooHigh();
 
         affiliateRates[affiliate] = rate;
-
         emit NewAffiliateRate(affiliate, rate);
     }
 

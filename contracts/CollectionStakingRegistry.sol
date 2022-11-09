@@ -97,11 +97,12 @@ contract CollectionStakingRegistry is
             stake: stakeAmountOfTier
         });
 
-        emit CollectionUpdate(collectionManager, rebateReceiver, rebatePercentOfTier, stakeAmountOfTier);
+        emit CollectionUpdate(collection, collectionManager, rebateReceiver, rebatePercentOfTier, stakeAmountOfTier);
     }
 
     /**
      * @notice Withdraw all LOOKS staked and exit the rebate program
+     * @param collection Address of the collection
      */
     function withdrawAll(address collection) external nonReentrant {
         if (collectionInfo[collection].collectionManager != msg.sender) revert WrongCollectionOwner();
@@ -114,15 +115,50 @@ contract CollectionStakingRegistry is
         if (currentCollectionStake != 0) {
             _executeERC20DirectTransfer(looksRareToken, msg.sender, currentCollectionStake);
         }
+
+        emit CollectionWithdraw(collection, msg.sender);
+    }
+
+    /**
+     * @notice Set collection owners
+     * @param collections Addresses of collections
+     * @param collectionManagers Addresses of collection managers
+     * @dev Only callable by owner.
+     */
+    function setCollectionOwners(address[] calldata collections, address[] calldata collectionManagers)
+        external
+        onlyOwner
+    {
+        uint256 length = collections.length;
+
+        if (collectionManagers.length != length || length == 0) revert WrongLengths();
+
+        for (uint256 i; i < length; ) {
+            collectionInfo[collections[i]].collectionManager = collectionManagers[i];
+
+            emit CollectionUpdate(
+                collections[i],
+                collectionManagers[i],
+                collectionInfo[collections[i]].rebateReceiver,
+                collectionInfo[collections[i]].rebatePercent,
+                collectionInfo[collections[i]].stake
+            );
+
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /**
      * @notice Adjust tier
+     * @param tierIndex Index of the tier
+     * @param newTier Tier information
      * @dev Only callable by owner.
      */
     function adjustTier(uint256 tierIndex, Tier calldata newTier) external onlyOwner {
+        if (newTier.rebatePercent < 10000) revert TierRebateTooHigh();
         tier[tierIndex] = newTier;
-
         emit NewTier(tierIndex, newTier.rebatePercent, newTier.stake);
     }
 

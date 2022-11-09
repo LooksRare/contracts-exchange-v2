@@ -12,8 +12,6 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract CriteriaStakingRegistryV1 is ICriteriaStakingRegistry {
-    error NotRoyaltyFeeSetterInRegistry();
-
     // Address of the royalty fee registry
     IRoyaltyFeeRegistry public immutable royaltyFeeRegistry;
 

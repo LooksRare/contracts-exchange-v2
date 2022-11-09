@@ -7,14 +7,18 @@ pragma solidity ^0.8.17;
  */
 interface ICollectionStakingRegistry {
     // Custom errors
-    error CollectionOwnerAlreadySet();
+    error CollectionOwnerAlreadySet(); // There is already a collection owner set in the staking registry
     error NotCollectionOwner(); // Collection owner is not matching the criteria set to claim the ownership
+    error TierRebateTooHigh(); // Tier rebate is too high
     error WrongCollectionOwner(); // Caller is not the collection owner
-    error WrongRebatePercentForTier();
-    error WrongStakeAmountForTier();
+    error WrongLengths(); // Wrong length for arrays in a function
+    error WrongRebatePercentForTier(); // Wrong rebate percent for the tier
+    error WrongStakeAmountForTier(); // Wrong stake amount for the tier
 
     // Custom events
+    event CollectionWithdraw(address collection, address collectionManager);
     event CollectionUpdate(
+        address collection,
         address collectionManager,
         address rebateReceiver,
         uint16 rebatePercent,

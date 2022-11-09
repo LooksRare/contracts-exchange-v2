@@ -98,9 +98,7 @@ contract ExecutionManager is FeeManager, InheritedStrategies, NonceManager, Stra
             protocolFeeAmount = (price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000;
 
             uint16 rebatePercent;
-
             (rebateRecipient, rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerAsk.collection);
-
             rebateFeeAmount = (rebatePercent * protocolFeeAmount) / 10000;
             protocolFeeAmount -= rebateFeeAmount;
         }

@@ -20,14 +20,14 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     address public affiliateController;
 
     // Tracks affiliate rates
-    mapping(address => uint16) public affiliateRates;
+    mapping(address => uint256) public affiliateRates;
 
     /**
      * @notice Update affiliate rate
      * @param affiliate Affiliate address
      * @param rate Rate percentage to collect (e.g., 100 = 1%) per referred trade
      */
-    function updateAffiliateRate(address affiliate, uint16 rate) external {
+    function updateAffiliateRate(address affiliate, uint256 rate) external {
         if (msg.sender != affiliateController) revert NotAffiliateController();
         if (rate > 10000) revert PercentageTooHigh();
 

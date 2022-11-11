@@ -14,5 +14,5 @@ interface IAffiliateManager {
     // Events
     event NewAffiliateController(address affiliateController);
     event NewAffiliateProgramStatus(bool isActive);
-    event NewAffiliateRate(address affiliate, uint16 rate);
+    event NewAffiliateRate(address affiliate, uint256 rate);
 }

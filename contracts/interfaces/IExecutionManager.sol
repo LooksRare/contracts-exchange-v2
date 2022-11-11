@@ -11,4 +11,8 @@ interface IExecutionManager {
     error SlippageAsk();
     error SlippageBid();
     error StrategyNotAvailable(uint16 strategyId);
+
+    // Custom events
+    event NewCollectionStakingRegistry(address collectionStakingRegistry);
+    event NewProtocolFeeRecipient(address protocolFeeRecipient);
 }

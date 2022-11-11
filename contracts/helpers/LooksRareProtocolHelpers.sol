@@ -8,7 +8,7 @@ import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChe
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Interfaces
-import {IFeeManager} from "../interfaces/IFeeManager.sol";
+import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../interfaces/IStrategyManager.sol";
 
 // Other dependencies

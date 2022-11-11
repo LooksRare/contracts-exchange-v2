@@ -13,7 +13,6 @@ import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
 import {ICollectionStakingRegistry} from "./interfaces/ICollectionStakingRegistry.sol";
 
 // Direct dependencies
-import {FeeManager} from "./FeeManager.sol";
 import {InheritedStrategies} from "./InheritedStrategies.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
@@ -25,14 +24,30 @@ import {StrategyManager} from "./StrategyManager.sol";
  *         For instance, a taker ask is executed against a maker bid (or a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
-contract ExecutionManager is FeeManager, InheritedStrategies, NonceManager, StrategyManager, IExecutionManager {
-    event NewCollectionStakingRegistry(address collectionStakingRegistry);
+contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager, IExecutionManager {
+    // Protocol fee recipient
+    address public protocolFeeRecipient;
 
+    // Collection staking registry
     ICollectionStakingRegistry public collectionStakingRegistry;
 
+    /**
+     * @notice Set collection staking registry
+     * @param newCollectionStakingRegistry Address of the collection staking registry
+     * @dev Only callable by owner.
+     */
     function setCollectionStakingRegistry(address newCollectionStakingRegistry) external onlyOwner {
         collectionStakingRegistry = ICollectionStakingRegistry(newCollectionStakingRegistry);
         emit NewCollectionStakingRegistry(newCollectionStakingRegistry);
+    }
+
+    /**
+     * @notice Set protocol fee recipient
+     * @param newProtocolFeeRecipient New protocol fee recipient address
+     */
+    function setProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
+        protocolFeeRecipient = newProtocolFeeRecipient;
+        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
     }
 
     /**

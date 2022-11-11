@@ -284,12 +284,14 @@ contract LooksRareProtocol is
             if (makerBid.currency != address(0)) revert WrongCurrency();
         }
 
-        // Verify nonces
-        if (
-            _userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
-            userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
-            userOrderNonce[makerBid.signer][makerBid.orderNonce]
-        ) revert WrongNonces();
+        {
+            // Verify nonces
+            if (
+                _userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
+                userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
+                userOrderNonce[makerBid.signer][makerBid.orderNonce]
+            ) revert WrongNonces();
+        }
 
         (
             uint256[] memory itemIds,

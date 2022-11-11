@@ -60,14 +60,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.endTime = block.timestamp + 1 hours;
         newMakerAsk.additionalParameters = abi.encode(startPrice);
 
-        newTakerBid = OrderStructs.TakerBid(
-            takerUser,
-            startPrice,
-            itemIds,
-            amounts,
-            _emptyAdditionalRecipient,
-            abi.encode()
-        );
+        newTakerBid = OrderStructs.TakerBid(takerUser, startPrice, itemIds, amounts, abi.encode());
     }
 
     function testNewStrategy() public {

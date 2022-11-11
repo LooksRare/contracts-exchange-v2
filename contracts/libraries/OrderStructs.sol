@@ -12,25 +12,17 @@ library OrderStructs {
     bytes32 internal constant _MAKER_ASK_HASH = 0xc7a3b6254405d9b044a63d83e724f64f1b8c511097d23b2ec8922767c2dbcb06;
 
     // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,AdditionalRecipient additionalRecipient,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_BID_HASH = 0x195fb26bc7001b227e370f6c8f3784ecb4482d49703e19f897682ce9e355f162;
+    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_BID_HASH = 0x997623e8963edba01cc5ac8ec02677d22a7ddf20f801ec6b7c03cafd3f224b07;
 
     // Merkle root hash used to compute merkle root order
     // keccak256("MerkleRoot(bytes32 root)")
     bytes32 internal constant _MERKLE_ROOT_HASH = 0x0cb314254867c611b4ba06dea78882bd68b33649e1ddb950d6db2ee328a55ad0;
 
-    /**
-     * 1. ADDITIONAL RECIPIENT
-     */
-
-    // AdditionalRecipient
-    struct AdditionalRecipient {
-        address recipient;
-        uint16 percentage;
-    }
+   
 
     /**
-     * 2. MAKER ORDERS
+     * 1. MAKER ORDERS
      */
 
     // MakerAsk
@@ -68,12 +60,11 @@ library OrderStructs {
         uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
-        AdditionalRecipient additionalRecipient;
         bytes additionalParameters;
     }
 
     /**
-     * 3. TAKER ORDERS
+     * 2. TAKER ORDERS
      */
 
     // TakerBid
@@ -82,7 +73,6 @@ library OrderStructs {
         uint256 maxPrice;
         uint256[] itemIds;
         uint256[] amounts;
-        AdditionalRecipient additionalRecipient;
         bytes additionalParameters;
     }
 
@@ -96,7 +86,7 @@ library OrderStructs {
     }
 
     /**
-     * 4. MERKLE ROOT
+     * 3. MERKLE ROOT
      */
 
     // MerkleRoot
@@ -165,7 +155,6 @@ library OrderStructs {
                         makerBid.maxPrice,
                         keccak256(abi.encodePacked(makerBid.itemIds)),
                         keccak256(abi.encodePacked(makerBid.amounts)),
-                        keccak256(abi.encode(makerBid.additionalRecipient)),
                         keccak256(makerBid.additionalParameters)
                     )
                 )

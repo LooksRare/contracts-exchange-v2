@@ -70,13 +70,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     {
         uint256 price;
 
-        if (makerBid.additionalRecipient.recipient != address(0) && makerBid.additionalRecipient.percentage != 0) {
-            recipients = new address[](4);
-            fees = new uint256[](4);
-        } else {
-            recipients = new address[](3);
-            fees = new uint256[](3);
-        }
+        recipients = new address[](3);
+        fees = new uint256[](3);
 
         (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
@@ -94,12 +89,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             (recipients[1], rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerBid.collection);
             fees[1] = (rebatePercent * fees[0]) / 10000;
             fees[0] -= fees[1];
-        }
-
-        // 3 --> Additional recipient
-        if (fees.length == 4) {
-            fees[3] = (makerBid.additionalRecipient.percentage * price) / 10000;
-            recipients[3] = makerBid.additionalRecipient.recipient;
         }
     }
 
@@ -122,13 +111,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     {
         uint256 price;
 
-        if (takerBid.additionalRecipient.recipient != address(0) && takerBid.additionalRecipient.percentage != 0) {
-            recipients = new address[](4);
-            fees = new uint256[](4);
-        } else {
-            recipients = new address[](3);
-            fees = new uint256[](3);
-        }
+        recipients = new address[](3);
+        fees = new uint256[](3);
 
         (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
@@ -146,12 +130,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             (recipients[1], rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerAsk.collection);
             fees[1] = (rebatePercent * fees[0]) / 10000;
             fees[0] -= fees[1];
-        }
-
-        // 3 --> Additional recipient
-        if (fees.length == 4) {
-            fees[3] = (takerBid.additionalRecipient.percentage * price) / 10000;
-            recipients[3] = takerBid.additionalRecipient.recipient;
         }
     }
 

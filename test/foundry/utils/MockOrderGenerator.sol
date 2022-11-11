@@ -9,7 +9,7 @@ contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerAskAndTakerBid(address collection)
         internal
         view
-        returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid)
+        returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid)
     {
         uint8 assetType;
 
@@ -18,7 +18,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType = 1;
         }
 
-        makerAsk = _createSingleItemMakerAskOrder(
+        newMakerAsk = _createSingleItemMakerAskOrder(
             0,
             0,
             0,
@@ -30,12 +30,12 @@ contract MockOrderGenerator is ProtocolHelpers {
             1 ether,
             0
         );
-        takerBid = OrderStructs.TakerBid(
+
+        newTakerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,
             makerAsk.amounts,
-            _emptyAdditionalRecipient,
             abi.encode()
         );
     }
@@ -65,7 +65,7 @@ contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerAskAndTakerBidWithBundle(address collection, uint256 numberTokens)
         internal
         view
-        returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid)
+        returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid)
     {
         uint8 assetType;
 
@@ -82,7 +82,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             amounts[i] = 1;
         }
 
-        makerAsk = _createMultiItemMakerAskOrder(
+        newMakerAsk = _createMultiItemMakerAskOrder(
             0,
             0,
             0,
@@ -96,12 +96,11 @@ contract MockOrderGenerator is ProtocolHelpers {
             amounts
         );
 
-        takerBid = OrderStructs.TakerBid(
+        newTakerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,
             makerAsk.amounts,
-            _emptyAdditionalRecipient,
             abi.encode()
         );
     }

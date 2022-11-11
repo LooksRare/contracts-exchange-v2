@@ -73,7 +73,6 @@ contract AffiliateOrdersTest is ProtocolBase {
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
-                _emptyAdditionalRecipient,
                 abi.encode()
             );
         }
@@ -159,7 +158,6 @@ contract AffiliateOrdersTest is ProtocolBase {
                 makerAsks[i].minPrice,
                 makerAsks[i].itemIds,
                 makerAsks[i].amounts,
-                _emptyAdditionalRecipient,
                 abi.encode()
             );
         }

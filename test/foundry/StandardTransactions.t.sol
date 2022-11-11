@@ -48,7 +48,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
-                _emptyAdditionalRecipient,
                 abi.encode()
             );
         }
@@ -194,7 +193,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 makerAsks[i].minPrice,
                 makerAsks[i].itemIds,
                 makerAsks[i].amounts,
-                _emptyAdditionalRecipient,
                 abi.encode()
             );
         }
@@ -281,7 +279,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 makerAsks[i].minPrice,
                 makerAsks[i].itemIds,
                 makerAsks[i].amounts,
-                _emptyAdditionalRecipient,
                 abi.encode()
             );
         }

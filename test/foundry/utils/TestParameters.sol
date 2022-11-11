@@ -38,6 +38,4 @@ abstract contract TestParameters is Test {
     OrderStructs.TakerAsk public takerAsk;
     bytes public signature;
     uint256 public price;
-
-    OrderStructs.AdditionalRecipient public _emptyAdditionalRecipient;
 }

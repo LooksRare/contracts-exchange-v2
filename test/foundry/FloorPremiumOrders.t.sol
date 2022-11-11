@@ -72,7 +72,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
             LATEST_CHAINLINK_ANSWER_IN_WAD + premium,
             itemIds,
             amounts,
-            _emptyAdditionalRecipient,
             abi.encode()
         );
     }

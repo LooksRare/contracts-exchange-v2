@@ -76,14 +76,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         newMakerAsk.amounts = amounts;
         newMakerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
 
-        newTakerBid = OrderStructs.TakerBid(
-            takerUser,
-            1 ether,
-            itemIds,
-            amounts,
-            _emptyAdditionalRecipient,
-            abi.encode()
-        );
+        newTakerBid = OrderStructs.TakerBid(takerUser, 1 ether, itemIds, amounts, abi.encode());
     }
 
     function testNewStrategy() public {

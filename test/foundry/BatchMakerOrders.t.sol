@@ -61,7 +61,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
-                _emptyAdditionalRecipient,
                 abi.encode()
             );
         }

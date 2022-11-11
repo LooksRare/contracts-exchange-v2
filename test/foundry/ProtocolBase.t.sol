@@ -78,7 +78,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         looksRareProtocol.setCollectionStakingRegistry(address(collectionStakingRegistry));
 
         // Fetch domain separator and store it as one of the operators
-        (_domainSeparator, , , ) = looksRareProtocol.information();
+        _domainSeparator = looksRareProtocol.domainSeparator();
         operators.push(address(looksRareProtocol));
 
         // Distribute ETH and WETH to protocol owner

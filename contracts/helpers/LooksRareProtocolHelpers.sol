@@ -44,7 +44,7 @@ contract LooksRareProtocolHelpers is SignatureChecker {
      * @return digest Digest
      */
     function computeDigestMakerAsk(OrderStructs.MakerAsk memory makerAsk) public view returns (bytes32 digest) {
-        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
+        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerAsk.hash()));
     }
 
@@ -54,7 +54,7 @@ contract LooksRareProtocolHelpers is SignatureChecker {
      * @return digest Digest
      */
     function computeDigestMakerBid(OrderStructs.MakerBid memory makerBid) public view returns (bytes32 digest) {
-        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
+        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerBid.hash()));
     }
 
@@ -63,7 +63,7 @@ contract LooksRareProtocolHelpers is SignatureChecker {
      * @param merkleRoot Merkle root struct
      */
     function computeDigestMerkleRoot(OrderStructs.MerkleRoot memory merkleRoot) public view returns (bytes32 digest) {
-        (, , bytes32 domainSeparator, ) = looksRareProtocol.information();
+        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleRoot.hash()));
     }
 

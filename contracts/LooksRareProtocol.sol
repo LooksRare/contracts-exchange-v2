@@ -44,17 +44,11 @@ contract LooksRareProtocol is
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;
 
-    // Initial domain separator
-    bytes32 internal immutable _INITIAL_DOMAIN_SEPARATOR;
-
-    // Initial chainId
-    uint256 internal immutable _INITIAL_CHAIN_ID;
+    // Current chainId
+    uint256 public chainId;
 
     // Current domain separator
-    bytes32 internal _domainSeparator;
-
-    // Current chainId
-    uint256 internal _chainId;
+    bytes32 public domainSeparator;
 
     /**
      * @notice Constructor
@@ -62,7 +56,7 @@ contract LooksRareProtocol is
      */
     constructor(address transferManager) TransferSelectorNFT(transferManager) {
         // Compute and store the initial domain separator
-        _INITIAL_DOMAIN_SEPARATOR = keccak256(
+        domainSeparator = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                 keccak256("LooksRareProtocol"),
@@ -72,11 +66,7 @@ contract LooksRareProtocol is
             )
         );
         // Store initial chainId
-        _INITIAL_CHAIN_ID = block.chainid;
-
-        // Store the current domainSeparator and chainId
-        _domainSeparator = _INITIAL_DOMAIN_SEPARATOR;
-        _chainId = _INITIAL_CHAIN_ID;
+        chainId = block.chainid;
     }
 
     /**
@@ -134,7 +124,6 @@ contract LooksRareProtocol is
         address affiliate
     ) external payable nonReentrant {
         uint256 totalProtocolFee;
-
         {
             bytes32 orderHash = makerAsk.hash();
 
@@ -149,7 +138,6 @@ contract LooksRareProtocol is
             // Execute the transaction and fetch protocol fee
             totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
         }
-
         // Pay protocol fee (and affiliate fee if any)
         _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFee);
 
@@ -187,49 +175,49 @@ contract LooksRareProtocol is
             ) revert WrongLengths();
         }
 
-        // Initialize protocol fee
-        uint256 totalProtocolFee;
+        {
+            // Initialize protocol fee
+            uint256 totalProtocolFee;
 
-        for (uint256 i; i < takerBids.length; ) {
-            {
-                if (i != 0) {
-                    if (makerAsks[i].currency != makerAsks[i - 1].currency) revert WrongCurrency();
-                }
-            }
-            {
-                bytes32 orderHash = makerAsks[i].hash();
-
+            for (uint256 i; i < takerBids.length; ) {
                 {
-                    // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-                    if (merkleProofs[i].length == 0) {
-                        _computeDigestAndVerify(orderHash, makerSignatures[i], makerAsks[i].signer);
-                    } else {
-                        {
-                            _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
-                        }
-                        _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsks[i].signer);
+                    if (i != 0) {
+                        if (makerAsks[i].currency != makerAsks[i - 1].currency) revert WrongCurrency();
                     }
                 }
+                {
+                    bytes32 orderHash = makerAsks[i].hash();
 
-                if (isAtomic) {
-                    // Execute the transaction and add protocol fee
-                    totalProtocolFee += _executeTakerBid(takerBids[i], makerAsks[i], msg.sender, orderHash);
-                } else {
-                    try this.restrictedExecuteTakerBid(takerBids[i], makerAsks[i], msg.sender, orderHash) returns (
-                        uint256 protocolFee
-                    ) {
-                        totalProtocolFee += protocolFee;
-                    } catch {}
-                }
+                    {
+                        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+                        if (merkleProofs[i].length == 0) {
+                            _computeDigestAndVerify(orderHash, makerSignatures[i], makerAsks[i].signer);
+                        } else {
+                            _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
+                            _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsks[i].signer);
+                        }
+                    }
 
-                unchecked {
-                    ++i;
+                    if (isAtomic) {
+                        // Execute the transaction and add protocol fee
+                        totalProtocolFee += _executeTakerBid(takerBids[i], makerAsks[i], msg.sender, orderHash);
+                    } else {
+                        try this.restrictedExecuteTakerBid(takerBids[i], makerAsks[i], msg.sender, orderHash) returns (
+                            uint256 protocolFee
+                        ) {
+                            totalProtocolFee += protocolFee;
+                        } catch {}
+                    }
+
+                    unchecked {
+                        ++i;
+                    }
                 }
             }
-        }
 
-        // Pay protocol fee (and affiliate fee if any)
-        _payProtocolFeeAndAffiliateFee(makerAsks[0].currency, msg.sender, affiliate, totalProtocolFee);
+            // Pay protocol fee (and affiliate fee if any)
+            _payProtocolFeeAndAffiliateFee(makerAsks[0].currency, msg.sender, affiliate, totalProtocolFee);
+        }
 
         // Return ETH if any
         _returnETHIfAny();
@@ -260,8 +248,8 @@ contract LooksRareProtocol is
      *      the chain with the new id. Anyone can call this function.
      */
     function updateDomainSeparator() external {
-        if (block.chainid != _chainId) {
-            _domainSeparator = keccak256(
+        if (block.chainid != chainId) {
+            domainSeparator = keccak256(
                 abi.encode(
                     keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                     keccak256("LooksRareProtocol"),
@@ -270,31 +258,11 @@ contract LooksRareProtocol is
                     address(this)
                 )
             );
-            _chainId = block.chainid;
+            chainId = block.chainid;
             emit NewDomainSeparator();
         } else {
             revert SameDomainSeparator();
         }
-    }
-
-    /**
-     * @notice Return an array with initial domain separator, initial chainId, current domain separator, and current chainId address
-     * @return initialDomainSeparator Domain separator at the deployment
-     * @return initialChainId ChainId at the deployment
-     * @return currentDomainSeparator Current domain separator
-     * @return currentChainId Current chainId
-     */
-    function information()
-        external
-        view
-        returns (
-            bytes32 initialDomainSeparator,
-            uint256 initialChainId,
-            bytes32 currentDomainSeparator,
-            uint256 currentChainId
-        )
-    {
-        return (_INITIAL_DOMAIN_SEPARATOR, _INITIAL_CHAIN_ID, _domainSeparator, _chainId);
     }
 
     /**
@@ -463,7 +431,7 @@ contract LooksRareProtocol is
 
                 // If bid user isn't the affiliate, pay the affiliate.
                 // If currency is ETH, funds are returned to sender at the end of the execution.
-                // If currency is ERC20, funds are not transferred from bidder to bidder.
+                // If currency is ERC20, funds are not transferred from bidder to bidder (since it uses transferFrom).
                 if (bidUser != affiliate) {
                     _transferFungibleTokens(currency, bidUser, affiliate, totalAffiliateFee);
                 }
@@ -510,7 +478,7 @@ contract LooksRareProtocol is
         address signer
     ) internal view {
         // \x19\x01 is the encoding prefix
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", _domainSeparator, computedHash));
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash));
         _verify(digest, signer, makerSignature);
     }
 

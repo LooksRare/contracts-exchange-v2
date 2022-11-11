@@ -11,12 +11,7 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
      * Verify initial post-deployment states are as expected
      */
     function testInitialStates() public {
-        (
-            bytes32 initialDomainSeparator,
-            uint256 initialChainId,
-            bytes32 currentDomainSeparator,
-            uint256 currentChainId
-        ) = looksRareProtocol.information();
+        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
 
         bytes32 expectedDomainSeparator = keccak256(
             abi.encode(
@@ -28,10 +23,7 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
             )
         );
 
-        assertEq(initialDomainSeparator, expectedDomainSeparator);
-        assertEq(initialChainId, block.chainid);
-        assertEq(initialDomainSeparator, currentDomainSeparator);
-        assertEq(initialChainId, currentChainId);
+        assertEq(domainSeparator, expectedDomainSeparator);
 
         for (uint16 i = 0; i < 2; i++) {
             Strategy memory strategy = looksRareProtocol.strategyInfo(i);

@@ -33,9 +33,9 @@ contract MockOrderGenerator is ProtocolHelpers {
 
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
-            makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
+            newMakerAsk.minPrice,
+            newMakerAsk.itemIds,
+            newMakerAsk.amounts,
             abi.encode()
         );
     }
@@ -43,7 +43,7 @@ contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerBidAndTakerAsk(address collection, address currency)
         internal
         view
-        returns (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk)
+        returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk)
     {
         uint8 assetType;
         // If ERC1155, adjust asset type
@@ -51,13 +51,24 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType = 1;
         }
 
-        makerBid = _createSingleItemMakerBidOrder(0, 0, 0, assetType, 0, collection, currency, makerUser, 1 ether, 0);
+        newMakerBid = _createSingleItemMakerBidOrder(
+            0,
+            0,
+            0,
+            assetType,
+            0,
+            collection,
+            currency,
+            makerUser,
+            1 ether,
+            0
+        );
 
-        takerAsk = OrderStructs.TakerAsk(
+        newTakerAsk = OrderStructs.TakerAsk(
             takerUser,
-            makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
+            newMakerBid.maxPrice,
+            newMakerBid.itemIds,
+            newMakerBid.amounts,
             abi.encode()
         );
     }
@@ -98,9 +109,9 @@ contract MockOrderGenerator is ProtocolHelpers {
 
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
-            makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
+            newMakerAsk.minPrice,
+            newMakerAsk.itemIds,
+            newMakerAsk.amounts,
             abi.encode()
         );
     }
@@ -109,7 +120,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         address currency,
         uint256 numberTokens
-    ) internal view returns (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) {
+    ) internal view returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
         uint8 assetType;
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0x4e2312e0)) {
@@ -124,7 +135,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             amounts[i] = 1;
         }
 
-        makerBid = _createMultiItemMakerBidOrder(
+        newMakerBid = _createMultiItemMakerBidOrder(
             0,
             0,
             0,
@@ -138,11 +149,11 @@ contract MockOrderGenerator is ProtocolHelpers {
             amounts
         );
 
-        takerAsk = OrderStructs.TakerAsk(
+        newTakerAsk = OrderStructs.TakerAsk(
             takerUser,
-            makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
+            newMakerBid.maxPrice,
+            newMakerBid.itemIds,
+            newMakerBid.amounts,
             abi.encode()
         );
     }

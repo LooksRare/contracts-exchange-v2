@@ -89,12 +89,11 @@ contract LooksRareProtocol is
         uint256 totalProtocolFee;
         {
             bytes32 orderHash = makerBid.hash();
-
             // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
             if (merkleProof.length == 0) {
-                _computeDigestAndVerify(makerBid.hash(), makerSignature, makerBid.signer);
+                _computeDigestAndVerify(orderHash, makerSignature, makerBid.signer);
             } else {
-                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, makerBid.hash());
+                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
                 _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
             }
 
@@ -126,12 +125,11 @@ contract LooksRareProtocol is
         uint256 totalProtocolFee;
         {
             bytes32 orderHash = makerAsk.hash();
-
             // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
             if (merkleProof.length == 0) {
-                _computeDigestAndVerify(makerAsk.hash(), makerSignature, makerAsk.signer);
+                _computeDigestAndVerify(orderHash, makerSignature, makerAsk.signer);
             } else {
-                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, makerAsk.hash());
+                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
                 _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
             }
 
@@ -180,29 +178,33 @@ contract LooksRareProtocol is
             uint256 totalProtocolFee;
 
             for (uint256 i; i < takerBids.length; ) {
-                {
-                    if (i != 0) {
-                        if (makerAsks[i].currency != makerAsks[i - 1].currency) revert WrongCurrency();
-                    }
-                }
-                {
-                    bytes32 orderHash = makerAsks[i].hash();
+                OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
 
+                // Verify currency is the same
+                if (i != 0) {
+                    if (makerAsk.currency != makerAsks[i - 1].currency) revert WrongCurrency();
+                }
+
+                OrderStructs.TakerBid calldata takerBid = takerBids[i];
+                bytes32 orderHash = makerAsk.hash();
+
+                {
                     {
                         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
                         if (merkleProofs[i].length == 0) {
-                            _computeDigestAndVerify(orderHash, makerSignatures[i], makerAsks[i].signer);
+                            _computeDigestAndVerify(orderHash, makerSignatures[i], makerAsk.signer);
                         } else {
                             _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
-                            _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsks[i].signer);
+                            _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsk.signer);
                         }
                     }
 
+                    // If atomic, it uses the executeTakerBid function, if not atomic, it uses a catch/revert pattern with external function
                     if (isAtomic) {
                         // Execute the transaction and add protocol fee
-                        totalProtocolFee += _executeTakerBid(takerBids[i], makerAsks[i], msg.sender, orderHash);
+                        totalProtocolFee += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
                     } else {
-                        try this.restrictedExecuteTakerBid(takerBids[i], makerAsks[i], msg.sender, orderHash) returns (
+                        try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
                             uint256 protocolFee
                         ) {
                             totalProtocolFee += protocolFee;
@@ -228,7 +230,7 @@ contract LooksRareProtocol is
      * @param takerBid Taker bid struct
      * @param makerAsk Maker ask struct
      * @param sender Sender address (i.e., the initial msg sender)
-     * @param orderHash Order hash
+     * @param orderHash Hash of the maker ask order
      * @return protocolFeeAmount Protocol fee amount
      * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
      */
@@ -270,7 +272,7 @@ contract LooksRareProtocol is
      * @param takerAsk Taker ask order struct
      * @param makerBid Maker bid order struct
      * @param sender Sender of the transaction (i.e., msg.sender)
-     * @param orderHash Order hash
+     * @param orderHash Hash of the maker bid order
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerAsk(
@@ -345,7 +347,7 @@ contract LooksRareProtocol is
      * @param takerBid Taker bid order struct
      * @param makerAsk Maker ask order struct
      * @param sender Sender of the transaction (i.e., msg.sender)
-     * @param orderHash Order hash
+     * @param orderHash Hash of the maker ask order
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerBid(

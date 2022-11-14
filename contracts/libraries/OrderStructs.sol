@@ -19,8 +19,6 @@ library OrderStructs {
     // keccak256("MerkleRoot(bytes32 root)")
     bytes32 internal constant _MERKLE_ROOT_HASH = 0x0cb314254867c611b4ba06dea78882bd68b33649e1ddb950d6db2ee328a55ad0;
 
-   
-
     /**
      * 1. MAKER ORDERS
      */

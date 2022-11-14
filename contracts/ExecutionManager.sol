@@ -77,7 +77,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
         {
             // 0 -> Protocol fee
-            fees[0] = (price * _strategyInfo[makerBid.strategyId].protocolFee) / 10000;
+            fees[0] = (price * _strategyInfo[makerBid.strategyId].standardProtocolFee) / 10000;
             recipients[0] = protocolFeeRecipient;
 
             // 1 --> Amount for seller
@@ -118,7 +118,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
         {
             // 0 -> Protocol fee
-            fees[0] = (price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000;
+            fees[0] = (price * _strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10000;
             recipients[0] = protocolFeeRecipient;
 
             // 1 --> Amount for seller

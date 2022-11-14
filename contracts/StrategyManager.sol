@@ -28,35 +28,41 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     constructor() {
         _strategyInfo[0] = Strategy({
             isActive: true,
-            protocolFee: 200,
+            standardProtocolFee: 200,
             maxProtocolFee: 300,
+            minTotalFee: 200,
             implementation: address(0)
         });
+
         _strategyInfo[1] = Strategy({
             isActive: true,
-            protocolFee: 200,
+            standardProtocolFee: 200,
             maxProtocolFee: 300,
+            minTotalFee: 200,
             implementation: address(0)
         });
     }
 
     /**
      * @notice Add a new strategy
-     * @param protocolFee Protocol fee
+     * @param standardProtocolFee Protocol fee
      * @param maxProtocolFee Maximum protocol fee
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      */
     function addStrategy(
-        uint16 protocolFee,
+        uint16 standardProtocolFee,
+        uint16 minTotalFee,
         uint16 maxProtocolFee,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFee < protocolFee || maxProtocolFee > _MAX_PROTOCOL_FEE) revert StrategyProtocolFeeTooHigh();
+        if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > _MAX_PROTOCOL_FEE)
+            revert StrategyProtocolFeeTooHigh();
 
         _strategyInfo[countStrategies] = Strategy({
             isActive: true,
-            protocolFee: protocolFee,
+            standardProtocolFee: standardProtocolFee,
+            minTotalFee: minTotalFee,
             maxProtocolFee: maxProtocolFee,
             implementation: implementation
         });
@@ -67,25 +73,33 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     /**
      * @notice Update strategy
      * @param strategyId Strategy id
-     * @param protocolFee Protocol fee (e.g., 200 --> 2%)
+     * @param newStandardProtocolFee New standard protocol fee (e.g., 200 --> 2%)
+     * @param newMinTotalFee New minimum total fee
      * @param isActive Whether the strategy is active
      */
     function updateStrategy(
         uint16 strategyId,
-        uint16 protocolFee,
+        uint16 newStandardProtocolFee,
+        uint16 newMinTotalFee,
         bool isActive
     ) external onlyOwner {
+        Strategy memory currentStrategyInfo = _strategyInfo[strategyId];
         if (strategyId >= countStrategies) revert StrategyNotUsed();
-        if (protocolFee > _strategyInfo[strategyId].maxProtocolFee) revert StrategyProtocolFeeTooHigh();
+
+        if (
+            newStandardProtocolFee > currentStrategyInfo.maxProtocolFee ||
+            newMinTotalFee > currentStrategyInfo.maxProtocolFee
+        ) revert StrategyProtocolFeeTooHigh();
 
         _strategyInfo[strategyId] = Strategy({
             isActive: isActive,
-            protocolFee: protocolFee,
-            maxProtocolFee: _strategyInfo[strategyId].maxProtocolFee,
-            implementation: _strategyInfo[strategyId].implementation
+            standardProtocolFee: newStandardProtocolFee,
+            minTotalFee: newMinTotalFee,
+            maxProtocolFee: currentStrategyInfo.maxProtocolFee,
+            implementation: currentStrategyInfo.implementation
         });
 
-        emit StrategyUpdated(strategyId, isActive, protocolFee);
+        emit StrategyUpdated(strategyId, isActive, newStandardProtocolFee, newMinTotalFee);
     }
 
     /**

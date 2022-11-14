@@ -12,7 +12,7 @@ interface ICollectionStakingRegistry {
     error TierRebateTooHigh(); // Tier rebate is too high
     error WrongCollectionOwner(); // Caller is not the collection owner
     error WrongLengths(); // Wrong length for arrays in a function
-    error WrongRebatePercentForTier(); // Wrong rebate percent for the tier
+    error WrongRebateBasisPoint(); // Wrong rebate basis point for the tier
     error WrongStakeAmountForTier(); // Wrong stake amount for the tier
 
     // Custom events
@@ -21,24 +21,24 @@ interface ICollectionStakingRegistry {
         address collection,
         address collectionManager,
         address rebateReceiver,
-        uint16 rebatePercent,
+        uint16 rebateBp,
         uint256 stakeAmount
     );
 
-    event NewTier(uint256 tierIndex, uint16 rebatePercent, uint256 stakeAmount);
+    event NewTier(uint256 tierIndex, uint16 rebateBp, uint256 stakeAmount);
 
     // Custom structs
     struct CollectionInfo {
         address collectionManager;
         address rebateReceiver;
-        uint16 rebatePercent;
+        uint16 rebateBp;
         uint256 stake;
     }
 
     struct Tier {
-        uint16 rebatePercent;
+        uint16 rebateBp; // Rebate basis point at the tier (e.g., 25 = 0.25)
         uint160 stake; // @dev uint160 covers the entire supply of LOOKS
     }
 
-    function viewProtocolFeeRebate(address collection) external returns (address rebateReceiver, uint16 rebatePercent);
+    function viewProtocolFeeRebate(address collection) external returns (address rebateReceiver, uint16 rebateBp);
 }

@@ -85,9 +85,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
 
             // 2 --> Rebate and adjustment of protocol fee
-            uint16 rebatePercent;
-            (recipients[1], rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerBid.collection);
-            fees[1] = (rebatePercent * fees[0]) / 10000;
+            uint16 rebateBp;
+            (recipients[1], rebateBp) = collectionStakingRegistry.viewProtocolFeeRebate(makerBid.collection);
+            fees[1] = (rebateBp * fees[0]) / 10000;
             fees[0] -= fees[1];
         }
     }
@@ -126,9 +126,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             recipients[2] = makerAsk.recipient == address(0) ? makerAsk.signer : makerAsk.recipient;
 
             // 2 --> Rebate and adjustment of protocol fee
-            uint16 rebatePercent;
-            (recipients[1], rebatePercent) = collectionStakingRegistry.viewProtocolFeeRebate(makerAsk.collection);
-            fees[1] = (rebatePercent * fees[0]) / 10000;
+            uint16 rebateBp;
+            (recipients[1], rebateBp) = collectionStakingRegistry.viewProtocolFeeRebate(makerAsk.collection);
+            fees[1] = (rebateBp * fees[0]) / 10000;
             fees[0] -= fees[1];
         }
     }

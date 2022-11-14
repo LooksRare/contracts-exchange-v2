@@ -25,14 +25,14 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     /**
      * @notice Update affiliate rate
      * @param affiliate Affiliate address
-     * @param rate Rate percentage to collect (e.g., 100 = 1%) per referred trade
+     * @param bp Rate basis point to collect (e.g., 100 = 1%) per referred trade
      */
-    function updateAffiliateRate(address affiliate, uint256 rate) external {
+    function updateAffiliateRate(address affiliate, uint256 bp) external {
         if (msg.sender != affiliateController) revert NotAffiliateController();
-        if (rate > 10000) revert PercentageTooHigh();
+        if (bp > 10000) revert PercentageTooHigh();
 
-        affiliateRates[affiliate] = rate;
-        emit NewAffiliateRate(affiliate, rate);
+        affiliateRates[affiliate] = bp;
+        emit NewAffiliateRate(affiliate, bp);
     }
 
     /**

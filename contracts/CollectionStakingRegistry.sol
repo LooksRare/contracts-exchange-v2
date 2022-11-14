@@ -41,7 +41,7 @@ contract CollectionStakingRegistry is
     constructor(address _looksRareToken, address _criteriaStakingRegistry) {
         looksRareToken = _looksRareToken;
         criteriaStakingRegistry = ICriteriaStakingRegistry(_criteriaStakingRegistry);
-        tier[1] = Tier({rebatePercent: 2500, stake: 0});
+        tier[1] = Tier({rebateBp: 2500, stake: 0});
     }
 
     /**
@@ -50,7 +50,7 @@ contract CollectionStakingRegistry is
      * @param targetTier Target tier (e.g., 0, 1)
      * @param collectionManager Address of the collection manager
      * @param rebateReceiver Address of the rebate receiver
-     * @param rebatePercentOfTier Rebate percent (e.g., 2500 = 25%) at the target tier
+     * @param rebateBpOfTier Rebate basis (e.g., 2500 = 25%) at the target tier
      * @param stakeAmountOfTier Total stake amount (in LOOKS) required at the target tier
      * @dev If the stakeAmount is lower than current amount staked, the user receives the difference in LOOKS.
      *      If the stakeAmount is higher than the current amount staked, the user transfers the difference in LOOKS.
@@ -61,7 +61,7 @@ contract CollectionStakingRegistry is
         uint256 targetTier,
         address collectionManager,
         address rebateReceiver,
-        uint16 rebatePercentOfTier,
+        uint16 rebateBpOfTier,
         uint256 stakeAmountOfTier
     ) external nonReentrant {
         address currentCollectionManager = collectionInfo[collection].collectionManager;
@@ -74,7 +74,7 @@ contract CollectionStakingRegistry is
             revert WrongCollectionOwner();
         }
 
-        if (rebatePercentOfTier != tier[targetTier].rebatePercent) revert WrongRebatePercentForTier();
+        if (rebateBpOfTier != tier[targetTier].rebateBp) revert WrongRebateBasisPoint();
         if (stakeAmountOfTier != tier[targetTier].stake) revert WrongStakeAmountForTier();
 
         uint256 currentCollectionStake = collectionInfo[collection].stake;
@@ -93,11 +93,11 @@ contract CollectionStakingRegistry is
         collectionInfo[collection] = CollectionInfo({
             collectionManager: collectionManager,
             rebateReceiver: rebateReceiver,
-            rebatePercent: rebatePercentOfTier,
+            rebateBp: rebateBpOfTier,
             stake: stakeAmountOfTier
         });
 
-        emit CollectionUpdate(collection, collectionManager, rebateReceiver, rebatePercentOfTier, stakeAmountOfTier);
+        emit CollectionUpdate(collection, collectionManager, rebateReceiver, rebateBpOfTier, stakeAmountOfTier);
     }
 
     /**
@@ -140,7 +140,7 @@ contract CollectionStakingRegistry is
                 collections[i],
                 collectionManagers[i],
                 collectionInfo[collections[i]].rebateReceiver,
-                collectionInfo[collections[i]].rebatePercent,
+                collectionInfo[collections[i]].rebateBp,
                 collectionInfo[collections[i]].stake
             );
 
@@ -157,23 +157,23 @@ contract CollectionStakingRegistry is
      * @dev Only callable by owner.
      */
     function adjustTier(uint256 tierIndex, Tier calldata newTier) external onlyOwner {
-        if (newTier.rebatePercent < 10000) revert TierRebateTooHigh();
+        if (newTier.rebateBp < 10000) revert TierRebateTooHigh();
         tier[tierIndex] = newTier;
-        emit NewTier(tierIndex, newTier.rebatePercent, newTier.stake);
+        emit NewTier(tierIndex, newTier.rebateBp, newTier.stake);
     }
 
     /**
      * @notice View protocol fee rebate
      * @param collection Address of the collection
      * @return rebateReceiver Address of the rebate receiver
-     * @return rebatePercent Address of the rebate percent (e.g., 2500 -> 25%)
+     * @return rebateBp Rebate basis point (e.g., 2500 -> 25%)
      */
     function viewProtocolFeeRebate(address collection)
         external
         view
         override
-        returns (address rebateReceiver, uint16 rebatePercent)
+        returns (address rebateReceiver, uint16 rebateBp)
     {
-        return (collectionInfo[collection].rebateReceiver, collectionInfo[collection].rebatePercent);
+        return (collectionInfo[collection].rebateReceiver, collectionInfo[collection].rebateBp);
     }
 }

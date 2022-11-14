@@ -19,7 +19,7 @@ contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
         uint256 fee;
     }
 
-    // Limit (if enforced for fee royalty in percentage (10,000 = 100%)
+    // Limit (if enforced for fee royalty in basis point (10,000 = 100%)
     uint256 public royaltyFeeLimit;
 
     mapping(address => FeeInfo) private _royaltyFeeInfoCollection;

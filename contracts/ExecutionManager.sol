@@ -10,7 +10,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 // Interfaces
 import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
-import {ICollectionStakingRegistry} from "./interfaces/ICollectionStakingRegistry.sol";
+import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
 
 // Direct dependencies
 import {InheritedStrategies} from "./InheritedStrategies.sol";
@@ -28,17 +28,17 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     // Protocol fee recipient
     address public protocolFeeRecipient;
 
-    // Collection staking registry
-    ICollectionStakingRegistry public collectionStakingRegistry;
+    // Creator fee manager
+    ICreatorFeeManager public creatorFeeManager;
 
     /**
      * @notice Set collection staking registry
-     * @param newCollectionStakingRegistry Address of the collection staking registry
+     * @param newCreatorFeeManager Address of the creator fee manager
      * @dev Only callable by owner.
      */
-    function setCollectionStakingRegistry(address newCollectionStakingRegistry) external onlyOwner {
-        collectionStakingRegistry = ICollectionStakingRegistry(newCollectionStakingRegistry);
-        emit NewCollectionStakingRegistry(newCollectionStakingRegistry);
+    function setCreatorFeeManager(address newCreatorFeeManager) external onlyOwner {
+        creatorFeeManager = ICreatorFeeManager(newCreatorFeeManager);
+        emit NewCreatorFeeManager(newCreatorFeeManager);
     }
 
     /**
@@ -76,19 +76,28 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
         {
-            // 0 -> Protocol fee
-            fees[0] = (price * _strategyInfo[makerBid.strategyId].standardProtocolFee) / 10000;
+            // 0 --> Creator fee and adjustment of protocol fee
+            (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
+            uint256 minTotalFee = (price * _strategyInfo[makerBid.strategyId].minTotalFee) / 10000;
+
+            // 1 --> Protocol fee
+            if (recipients[1] == address(0) || fees[1] == 0) {
+                fees[0] = minTotalFee;
+            } else {
+                uint256 standardProtocolFee = (price * _strategyInfo[makerBid.strategyId].standardProtocolFee) / 10000;
+
+                if (fees[1] + standardProtocolFee > minTotalFee) {
+                    fees[0] = standardProtocolFee;
+                } else {
+                    fees[0] = minTotalFee - fees[1];
+                }
+            }
+
             recipients[0] = protocolFeeRecipient;
 
-            // 1 --> Amount for seller
-            fees[2] = price - fees[0];
+            // 2 --> Amount for seller
+            fees[2] = price - fees[1] - fees[0];
             recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
-
-            // 2 --> Rebate and adjustment of protocol fee
-            uint16 rebateBp;
-            (recipients[1], rebateBp) = collectionStakingRegistry.viewProtocolFeeRebate(makerBid.collection);
-            fees[1] = (rebateBp * fees[0]) / 10000;
-            fees[0] -= fees[1];
         }
     }
 
@@ -117,19 +126,28 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
         {
-            // 0 -> Protocol fee
-            fees[0] = (price * _strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10000;
+            // 0 --> Creator fee and adjustment of protocol fee
+            (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
+            uint256 minTotalFee = (price * _strategyInfo[makerAsk.strategyId].minTotalFee) / 10000;
+
+            // 1 --> Protocol fee
+            if (recipients[1] == address(0) || fees[1] == 0) {
+                fees[0] = minTotalFee;
+            } else {
+                uint256 standardProtocolFee = (price * _strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10000;
+
+                if (fees[1] + standardProtocolFee > minTotalFee) {
+                    fees[0] = standardProtocolFee;
+                } else {
+                    fees[0] = minTotalFee - fees[1];
+                }
+            }
+
             recipients[0] = protocolFeeRecipient;
 
-            // 1 --> Amount for seller
-            fees[2] = price - fees[0];
+            // 2 --> Amount for seller
+            fees[2] = price - fees[1] - fees[0];
             recipients[2] = makerAsk.recipient == address(0) ? makerAsk.signer : makerAsk.recipient;
-
-            // 2 --> Rebate and adjustment of protocol fee
-            uint16 rebateBp;
-            (recipients[1], rebateBp) = collectionStakingRegistry.viewProtocolFeeRebate(makerAsk.collection);
-            fees[1] = (rebateBp * fees[0]) / 10000;
-            fees[0] -= fees[1];
         }
     }
 

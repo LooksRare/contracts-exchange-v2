@@ -13,6 +13,6 @@ interface IExecutionManager {
     error StrategyNotAvailable(uint16 strategyId);
 
     // Custom events
-    event NewCollectionStakingRegistry(address collectionStakingRegistry);
+    event NewCreatorFeeManager(address creatorFeeManager);
     event NewProtocolFeeRecipient(address protocolFeeRecipient);
 }

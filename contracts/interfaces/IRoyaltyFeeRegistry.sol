@@ -3,16 +3,11 @@ pragma solidity ^0.8.0;
 
 /**
  * @title IRoyaltyFeeRegistry
- * @notice This interface is used for the logic used to determine the collection owner for the CollectionStakingRegistry.
  * @author LooksRare protocol team (👀,💎)
  */
 interface IRoyaltyFeeRegistry {
-    function royaltyFeeInfoCollection(address collection)
+    function royaltyInfo(address collection, uint256 price)
         external
         view
-        returns (
-            address,
-            address,
-            uint256
-        );
+        returns (address receiver, uint256 royaltyFee);
 }

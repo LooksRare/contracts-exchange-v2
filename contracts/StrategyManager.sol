@@ -28,7 +28,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     constructor() {
         _strategyInfo[0] = Strategy({
             isActive: true,
-            standardProtocolFee: 200,
+            standardProtocolFee: 150,
             maxProtocolFee: 300,
             minTotalFee: 200,
             implementation: address(0)
@@ -36,7 +36,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
 
         _strategyInfo[1] = Strategy({
             isActive: true,
-            standardProtocolFee: 200,
+            standardProtocolFee: 150,
             maxProtocolFee: 300,
             minTotalFee: 200,
             implementation: address(0)

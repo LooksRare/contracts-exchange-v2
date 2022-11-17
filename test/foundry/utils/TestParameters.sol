@@ -8,7 +8,9 @@ abstract contract TestParameters is Test {
     address internal _owner = address(42);
     address internal _royaltyRecipient = address(22);
     address internal _emptyAffiliate = address(0);
-    uint16 internal _standardProtocolFee = uint16(200);
+    uint16 internal _standardProtocolFee = uint16(150);
+    uint16 internal _minTotalFee = uint16(200);
+    uint16 internal _maxProtocolFee = uint16(300);
     uint16 internal _standardRoyaltyFee = uint16(100);
     uint256 internal makerUserPK = 1;
     uint256 internal takerUserPK = 2;

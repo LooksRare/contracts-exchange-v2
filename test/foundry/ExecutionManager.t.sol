@@ -13,16 +13,18 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
      */
     function testOwnerCanChangeStrategyProtocolFeeAndDeactivateRoyalty() public asPrankedUser(_owner) {
         uint16 strategyId = 0;
-        uint16 protocolFee = 250;
+        uint16 standardProtocolFee = 250;
+        uint16 minTotalFee = 250;
         bool isActive = true;
 
         vm.expectEmit(false, false, false, false);
-        emit StrategyUpdated(strategyId, isActive, protocolFee);
-        looksRareProtocol.updateStrategy(strategyId, protocolFee, isActive);
+        emit StrategyUpdated(strategyId, isActive, standardProtocolFee, minTotalFee);
+        looksRareProtocol.updateStrategy(strategyId, standardProtocolFee, minTotalFee, isActive);
 
         Strategy memory strategy = looksRareProtocol.strategyInfo(strategyId);
         assertTrue(strategy.isActive);
-        assertEq(strategy.protocolFee, protocolFee);
+        assertEq(strategy.standardProtocolFee, standardProtocolFee);
+        assertEq(strategy.minTotalFee, minTotalFee);
         assertEq(strategy.implementation, address(0));
     }
 
@@ -31,16 +33,18 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
      */
     function testOwnerCanDiscontinueStrategy() public asPrankedUser(_owner) {
         uint16 strategyId = 1;
-        uint16 protocolFee = 299;
+        uint16 standardProtocolFee = 299;
+        uint16 minTotalFee = 250;
         bool isActive = false;
 
         vm.expectEmit(false, false, false, false);
-        emit StrategyUpdated(strategyId, isActive, protocolFee);
-        looksRareProtocol.updateStrategy(strategyId, protocolFee, isActive);
+        emit StrategyUpdated(strategyId, isActive, standardProtocolFee, minTotalFee);
+        looksRareProtocol.updateStrategy(strategyId, standardProtocolFee, minTotalFee, isActive);
 
         Strategy memory strategy = looksRareProtocol.strategyInfo(strategyId);
-        assertFalse(strategy.isActive);
-        assertEq(strategy.protocolFee, protocolFee);
+        assertTrue(strategy.isActive);
+        assertEq(strategy.standardProtocolFee, standardProtocolFee);
+        assertEq(strategy.minTotalFee, minTotalFee);
         assertEq(strategy.implementation, address(0));
     }
 
@@ -48,19 +52,25 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
      * Owner functions for strategy additions/updates revert as expected under multiple cases
      */
     function testOwnerRevertionsForWrongParametersAddStrategy() public asPrankedUser(_owner) {
-        uint16 protocolFee = 250;
+        uint16 standardProtocolFee = 250;
+        uint16 minTotalFee = 300;
         uint16 maxProtocolFee = 300;
         address implementation = address(0);
 
-        // 1. Strategy does not exist but maxProtocolFee is lower than protocolFee
-        maxProtocolFee = protocolFee - 1;
+        // 1. Strategy does not exist but maxProtocolFee is lower than standardProtocolFee
+        maxProtocolFee = standardProtocolFee - 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
-        looksRareProtocol.addStrategy(protocolFee, maxProtocolFee, implementation);
+        looksRareProtocol.addStrategy(standardProtocolFee, maxProtocolFee, minTotalFee, implementation);
 
-        // 2. Strategy does not exist but maxProtocolFee is higher than _MAX_PROTOCOL_FEE
+        // 2. Strategy does not exist but maxProtocolFee is lower than minTotalFee
+        maxProtocolFee = minTotalFee - 1;
+        vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
+        looksRareProtocol.addStrategy(standardProtocolFee, maxProtocolFee, minTotalFee, implementation);
+
+        // 3. Strategy does not exist but maxProtocolFee is higher than _MAX_PROTOCOL_FEE
         maxProtocolFee = 5000 + 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
-        looksRareProtocol.addStrategy(protocolFee, maxProtocolFee, implementation);
+        looksRareProtocol.addStrategy(standardProtocolFee, maxProtocolFee, minTotalFee, implementation);
     }
 
     function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {

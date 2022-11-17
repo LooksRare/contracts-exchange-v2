@@ -10,7 +10,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Core contracts
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-import {CollectionStakingRegistry} from "../../contracts/CollectionStakingRegistry.sol";
+import {CreatorFeeManagerV2A} from "../../contracts/CreatorFeeManagerV2A.sol";
 
 // Mock files
 import {MockERC20} from "../mock/MockERC20.sol";
@@ -30,10 +30,10 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     MockERC721 public mockERC721;
     MockERC1155 public mockERC1155;
 
-    CollectionStakingRegistry public collectionStakingRegistry;
     LooksRareProtocol public looksRareProtocol;
     TransferManager public transferManager;
     MockRoyaltyFeeRegistry public royaltyFeeRegistry;
+    CreatorFeeManagerV2A public creatorFeeManager;
 
     WETH public weth;
 
@@ -66,7 +66,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
         transferManager = new TransferManager();
         royaltyFeeRegistry = new MockRoyaltyFeeRegistry(9500);
-        collectionStakingRegistry = new CollectionStakingRegistry(address(looksRareToken), address(royaltyFeeRegistry));
+        creatorFeeManager = new CreatorFeeManagerV2A(address(royaltyFeeRegistry));
         looksRareProtocol = new LooksRareProtocol(address(transferManager));
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 
@@ -75,7 +75,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         looksRareProtocol.addCurrency(address(0));
         looksRareProtocol.addCurrency(address(weth));
         looksRareProtocol.setProtocolFeeRecipient(_owner);
-        looksRareProtocol.setCollectionStakingRegistry(address(collectionStakingRegistry));
+        looksRareProtocol.setCreatorFeeManager(address(creatorFeeManager));
 
         // Fetch domain separator and store it as one of the operators
         _domainSeparator = looksRareProtocol.domainSeparator();

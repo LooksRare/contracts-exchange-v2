@@ -33,7 +33,12 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategyUSDDynamicAsk));
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            address(strategyUSDDynamicAsk)
+        );
     }
 
     function _createMakerAskAndTakerBid(
@@ -82,7 +87,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     function testNewStrategy() public {
         Strategy memory strategy = looksRareProtocol.strategyInfo(2);
         assertTrue(strategy.isActive);
-        assertEq(strategy.protocolFee, _standardProtocolFee);
+        assertEq(strategy.standardProtocolFee, _standardProtocolFee);
         assertEq(strategy.maxProtocolFee, uint16(300));
         assertEq(strategy.implementation, address(strategyUSDDynamicAsk));
     }

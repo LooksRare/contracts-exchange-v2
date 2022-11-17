@@ -12,12 +12,17 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategyTokenIdsRange));
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            address(strategyTokenIdsRange)
+        );
     }
 
     function _createMakerBidAndTakerAsk()
         private
-        returns (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk)
+        returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk)
     {
         uint256[] memory makerBidItemIds = new uint256[](2);
         makerBidItemIds[0] = 5;
@@ -26,7 +31,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 3;
 
-        makerBid = _createMultiItemMakerBidOrder({
+        newMakerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -56,9 +61,9 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAskAmounts[1] = 1;
         takerAskAmounts[2] = 1;
 
-        takerAsk = OrderStructs.TakerAsk({
+        newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minPrice: makerBid.maxPrice,
+            minPrice: newMakerBid.maxPrice,
             itemIds: takerAskItemIds,
             amounts: takerAskAmounts,
             additionalParameters: abi.encode()
@@ -69,7 +74,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpNewStrategy();
         Strategy memory strategy = looksRareProtocol.strategyInfo(2);
         assertTrue(strategy.isActive);
-        assertEq(strategy.protocolFee, _standardProtocolFee);
+        assertEq(strategy.standardProtocolFee, _standardProtocolFee);
         assertEq(strategy.maxProtocolFee, uint16(300));
         assertEq(strategy.implementation, address(strategyTokenIdsRange));
     }

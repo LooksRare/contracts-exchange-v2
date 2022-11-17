@@ -86,7 +86,6 @@ contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
     function royaltyFeeInfoCollection(address collection)
         external
         view
-        override
         returns (
             address,
             address,

@@ -15,7 +15,12 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyDutchAuction = new StrategyDutchAuction(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategyDutchAuction));
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            address(strategyDutchAuction)
+        );
     }
 
     function _createMakerAskAndTakerBid(uint256 numberOfItems, uint256 numberOfAmounts)
@@ -67,7 +72,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpNewStrategy();
         Strategy memory strategy = looksRareProtocol.strategyInfo(2);
         assertTrue(strategy.isActive);
-        assertEq(strategy.protocolFee, _standardProtocolFee);
+        assertEq(strategy.standardProtocolFee, _standardProtocolFee);
         assertEq(strategy.maxProtocolFee, uint16(300));
         assertEq(strategy.implementation, address(strategyDutchAuction));
     }

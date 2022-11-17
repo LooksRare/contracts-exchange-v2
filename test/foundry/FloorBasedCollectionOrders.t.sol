@@ -36,7 +36,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategy = new StrategyFloorBasedCollectionOffer(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(_standardProtocolFee, 300, address(strategy));
+        looksRareProtocol.addStrategy(_standardProtocolFee, _minTotalFee, _maxProtocolFee, address(strategy));
     }
 
     function _createMakerBidAndTakerAsk(uint256 discount)
@@ -79,7 +79,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     function testNewStrategy() public {
         Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
         assertTrue(newStrategy.isActive);
-        assertEq(newStrategy.protocolFee, _standardProtocolFee);
+        assertEq(newStrategy.standardProtocolFee, _standardProtocolFee);
         assertEq(newStrategy.maxProtocolFee, uint16(300));
         assertEq(newStrategy.implementation, address(strategy));
     }

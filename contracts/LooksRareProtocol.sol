@@ -303,7 +303,7 @@ contract LooksRareProtocol is
         ) = _executeStrategyForTakerAsk(takerAsk, makerBid, sender);
 
         // It starts at 1 since the protocol fee is transferred at the very end
-        for (uint256 i = 1; i < recipients.length; ) {
+        for (uint256 i = 1; i < 3; ) {
             if (recipients[i] != address(0)) {
                 if (fees[i] != 0) {
                     _transferFungibleTokens(makerBid.currency, makerBid.signer, recipients[i], fees[i]);
@@ -383,7 +383,7 @@ contract LooksRareProtocol is
         );
 
         // @dev It starts at 1 since 0 is the protocol fee
-        for (uint256 i = 1; i < recipients.length; ) {
+        for (uint256 i = 1; i < 3; ) {
             if (recipients[i] != address(0)) {
                 if (fees[i] != 0) {
                     _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);

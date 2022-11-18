@@ -42,7 +42,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateStrategy(strategyId, standardProtocolFee, minTotalFee, isActive);
 
         Strategy memory strategy = looksRareProtocol.strategyInfo(strategyId);
-        assertTrue(strategy.isActive);
+        assertFalse(strategy.isActive);
         assertEq(strategy.standardProtocolFee, standardProtocolFee);
         assertEq(strategy.minTotalFee, minTotalFee);
         assertEq(strategy.implementation, address(0));
@@ -60,17 +60,17 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // 1. Strategy does not exist but maxProtocolFee is lower than standardProtocolFee
         maxProtocolFee = standardProtocolFee - 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
-        looksRareProtocol.addStrategy(standardProtocolFee, maxProtocolFee, minTotalFee, implementation);
+        looksRareProtocol.addStrategy(standardProtocolFee, minTotalFee, maxProtocolFee, implementation);
 
         // 2. Strategy does not exist but maxProtocolFee is lower than minTotalFee
         maxProtocolFee = minTotalFee - 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
-        looksRareProtocol.addStrategy(standardProtocolFee, maxProtocolFee, minTotalFee, implementation);
+        looksRareProtocol.addStrategy(standardProtocolFee, minTotalFee, maxProtocolFee, implementation);
 
         // 3. Strategy does not exist but maxProtocolFee is higher than _MAX_PROTOCOL_FEE
         maxProtocolFee = 5000 + 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
-        looksRareProtocol.addStrategy(standardProtocolFee, maxProtocolFee, minTotalFee, implementation);
+        looksRareProtocol.addStrategy(standardProtocolFee, minTotalFee, maxProtocolFee, implementation);
     }
 
     function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {

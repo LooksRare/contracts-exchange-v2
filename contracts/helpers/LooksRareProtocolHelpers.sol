@@ -114,12 +114,4 @@ contract LooksRareProtocolHelpers is SignatureChecker {
         _verify(digest, signer, makerSignature);
         return true;
     }
-
-    function _getRebateRecipientAndAmountAndRoyaltyType(
-        address collection,
-        uint256[] memory itemIds,
-        uint256 amount
-    ) internal view returns (address rebateRecipient, uint256 rebateAmount) {
-        //
-    }
 }

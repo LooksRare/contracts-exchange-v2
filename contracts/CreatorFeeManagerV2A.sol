@@ -63,6 +63,9 @@ contract CreatorFeeManagerV2A is ICreatorFeeManager {
                             }
                         }
                     }
+                    unchecked {
+                        ++i;
+                    }
                 }
             }
         }

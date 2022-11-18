@@ -135,8 +135,6 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
 
-        // TODO: Royalty/Rebate adjustment
-
         {
             uint256[] memory itemIds = new uint256[](0);
             uint256[] memory amounts = new uint256[](1);

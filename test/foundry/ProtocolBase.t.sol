@@ -57,6 +57,16 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         _setUpUser(takerUser);
     }
 
+    function _setupRegistryRoyalties(address collection, uint256 standardRoyaltyFee) internal {
+        vm.prank(royaltyFeeRegistry.owner());
+        royaltyFeeRegistry.updateRoyaltyInfoForCollection(
+            collection,
+            _royaltyRecipient,
+            _royaltyRecipient,
+            standardRoyaltyFee
+        );
+    }
+
     function setUp() public virtual {
         vm.startPrank(_owner);
         weth = new WETH();

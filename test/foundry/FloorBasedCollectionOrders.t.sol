@@ -28,10 +28,8 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     function setUp() public override {
         vm.createSelectFork(GOERLI_RPC_URL, FORKED_BLOCK_NUMBER);
         super.setUp();
-
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {

@@ -82,7 +82,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTokenIdsRangeERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         // Sign order
@@ -185,7 +184,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskForceAmountOneIfERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidAmounts = new uint256[](3);
@@ -223,7 +221,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testCallerNotLooksRareProtocol() public {
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         // Sign order
@@ -237,7 +234,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](2);
@@ -286,7 +282,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskDuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](3);
@@ -315,7 +310,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskUnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](3);
@@ -344,7 +338,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory itemIds = new uint256[](2);
@@ -378,7 +371,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskPriceTooHigh() public {
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         takerAsk.minPrice = makerBid.maxPrice + 1 wei;

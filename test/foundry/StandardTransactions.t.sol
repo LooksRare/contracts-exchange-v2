@@ -11,7 +11,7 @@ contract StandardTransactionsTest is ProtocolBase {
      */
     function testTakerBidERC721WithRoyaltiesFromRegistry() public {
         _setUpUsers();
-        // TODO: Royalty/Rebate adjustment
+        _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
@@ -73,8 +73,13 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemId), takerUser);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 98% of the whole price (2% protocol)
+        // Maker ask user receives 98% of the whole price (2%)
         assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9800) / 10000);
+        // Royalty recipient receives 0.5% of the whole price
+        assertEq(
+            address(_royaltyRecipient).balance,
+            _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10000
+        );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -86,7 +91,7 @@ contract StandardTransactionsTest is ProtocolBase {
      */
     function testTakerAskERC721WithRoyaltiesFromRegistry() public {
         _setUpUsers();
-        // TODO: Royalty/Rebate adjustment
+        _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
@@ -148,8 +153,13 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
+        // Taker ask user receives 98% of the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
+        // Royalty recipient receives 0.5% of the whole price
+        assertEq(
+            weth.balanceOf(_royaltyRecipient),
+            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10000
+        );
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }

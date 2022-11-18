@@ -11,7 +11,7 @@ abstract contract TestParameters is Test {
     uint16 internal _standardProtocolFee = uint16(150);
     uint16 internal _minTotalFee = uint16(200);
     uint16 internal _maxProtocolFee = uint16(300);
-    uint16 internal _standardRoyaltyFee = uint16(100);
+    uint16 internal _standardRoyaltyFee = uint16(50);
     uint256 internal makerUserPK = 1;
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);

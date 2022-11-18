@@ -25,10 +25,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     function setUp() public override {
         vm.createSelectFork(MAINNET_RPC_URL, FORKED_BLOCK_NUMBER);
         super.setUp();
-
         _setUpUsers();
         _setUpNewStrategy();
-        // TODO: Royalty/Rebate adjustment
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {

@@ -40,8 +40,7 @@ contract CreatorFeeManagerV2A is ICreatorFeeManager {
         (receiver, ) = royaltyFeeRegistry.royaltyInfo(collection, price);
 
         if (receiver == address(0)) {
-            // interfaceId of 0x2a55205a
-            if (IERC2981(collection).supportsInterface(0x2a55205a)) {
+            if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
                 uint256 length = itemIds.length;
 
                 for (uint256 i; i < length; ) {

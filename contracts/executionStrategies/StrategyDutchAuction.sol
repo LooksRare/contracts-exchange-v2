@@ -26,7 +26,7 @@ contract StrategyDutchAuction is StrategyBase {
      *         The execution price set by the seller decreases linearly within the defined period.
      * @param takerBid Taker bid struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker bid-specific parameters for the execution of the transaction)
-     * @dev The client has to provide the seller's desired initial price in USD as the additionalParameters
+     * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
      */
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,

@@ -31,8 +31,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             standardProtocolFee: 150,
             maxProtocolFee: 300,
             minTotalFee: 200,
-            selectorTakerAsk: 0x00000000,
-            selectorTakerBid: 0x00000000,
+            selectorTakerAsk: bytes4(0),
+            selectorTakerBid: bytes4(0),
             implementation: address(0)
         });
 
@@ -41,8 +41,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             standardProtocolFee: 150,
             maxProtocolFee: 300,
             minTotalFee: 200,
-            selectorTakerAsk: 0x00000000,
-            selectorTakerBid: 0x00000000,
+            selectorTakerAsk: bytes4(0),
+            selectorTakerBid: bytes4(0),
             implementation: address(0)
         });
     }
@@ -67,7 +67,9 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > _MAX_PROTOCOL_FEE)
             revert StrategyProtocolFeeTooHigh();
 
-        if (selectorTakerAsk == 0x00000000 && selectorTakerBid == 0x00000000) revert StrategyHasNoSelector();
+        if (selectorTakerAsk == bytes4(0)) {
+            if (selectorTakerBid == bytes4(0)) revert StrategyHasNoSelector();
+        }
 
         _strategyInfo[countStrategies] = Strategy({
             isActive: true,

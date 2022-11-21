@@ -180,7 +180,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 bool isNonceInvalidated;
 
                 bytes4 selector = _strategyInfo[makerAsk.strategyId].selectorTakerBid;
-                if (selector == 0x00000000) revert NoSelectorForTakerBid();
+                if (selector == bytes4(0)) revert NoSelectorForTakerBid();
 
                 (bool status, bytes memory data) = _strategyInfo[makerAsk.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerBid, makerAsk)
@@ -234,7 +234,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 bool isNonceInvalidated;
 
                 bytes4 selector = _strategyInfo[makerBid.strategyId].selectorTakerAsk;
-                if (selector == 0x00000000) revert NoSelectorForTakerAsk();
+                if (selector == bytes4(0)) revert NoSelectorForTakerAsk();
 
                 (bool status, bytes memory data) = _strategyInfo[makerBid.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerAsk, makerBid)

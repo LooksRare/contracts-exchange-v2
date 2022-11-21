@@ -60,17 +60,38 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // 1. Strategy does not exist but maxProtocolFee is lower than standardProtocolFee
         maxProtocolFee = standardProtocolFee - 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
-        looksRareProtocol.addStrategy(standardProtocolFee, minTotalFee, maxProtocolFee, implementation);
+        looksRareProtocol.addStrategy(
+            standardProtocolFee,
+            minTotalFee,
+            maxProtocolFee,
+            0x00000000,
+            0x00000000,
+            implementation
+        );
 
         // 2. Strategy does not exist but maxProtocolFee is lower than minTotalFee
         maxProtocolFee = minTotalFee - 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
-        looksRareProtocol.addStrategy(standardProtocolFee, minTotalFee, maxProtocolFee, implementation);
+        looksRareProtocol.addStrategy(
+            standardProtocolFee,
+            minTotalFee,
+            maxProtocolFee,
+            0x00000000,
+            0x00000000,
+            implementation
+        );
 
         // 3. Strategy does not exist but maxProtocolFee is higher than _MAX_PROTOCOL_FEE
         maxProtocolFee = 5000 + 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
-        looksRareProtocol.addStrategy(standardProtocolFee, minTotalFee, maxProtocolFee, implementation);
+        looksRareProtocol.addStrategy(
+            standardProtocolFee,
+            minTotalFee,
+            maxProtocolFee,
+            0x00000000,
+            0x00000000,
+            implementation
+        );
     }
 
     function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {

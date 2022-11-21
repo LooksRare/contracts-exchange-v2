@@ -9,6 +9,8 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     StrategyTokenIdsRange public strategyTokenIdsRange;
+    bytes4 public selectorTakerAsk = StrategyTokenIdsRange.executeStrategyWithTakerAsk.selector;
+    bytes4 public selectorTakerBid = StrategyTokenIdsRange.executeStrategyWithTakerBid.selector;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
@@ -16,6 +18,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
+            selectorTakerAsk,
+            selectorTakerBid,
             address(strategyTokenIdsRange)
         );
     }

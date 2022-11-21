@@ -1,21 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// LooksRare unopinionated libraries
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
-import {IRoyaltyFeeRegistry} from "../../contracts/interfaces/IRoyaltyFeeRegistry.sol";
+
+// Royalty Fee Registry interface
+import {IRoyaltyFeeRegistry} from "../../../contracts/interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
  * @title MockRoyaltyFeeRegistry
- * @notice It is a mock royalty fee registry for the LooksRare exchange.
+ * @notice It is a royalty fee registry for the LooksRare exchange.
+ * @dev The original one used the standard Ownable library from OpenZeppelin.
  */
-contract MockRoyaltyFeeRegistry is OwnableTwoSteps, IRoyaltyFeeRegistry {
+contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
     struct FeeInfo {
         address setter;
         address receiver;
         uint256 fee;
     }
 
-    // Limit (if enforced for fee royalty in percentage (10,000 = 100%)
+    // Limit (if enforced for fee royalty in basis point (10,000 = 100%)
     uint256 public royaltyFeeLimit;
 
     mapping(address => FeeInfo) private _royaltyFeeInfoCollection;
@@ -36,7 +40,7 @@ contract MockRoyaltyFeeRegistry is OwnableTwoSteps, IRoyaltyFeeRegistry {
      * @notice Update royalty info for collection
      * @param _royaltyFeeLimit new royalty fee limit (500 = 5%, 1,000 = 10%)
      */
-    function updateRoyaltyFeeLimit(uint256 _royaltyFeeLimit) external override onlyOwner {
+    function updateRoyaltyFeeLimit(uint256 _royaltyFeeLimit) external onlyOwner {
         require(_royaltyFeeLimit <= 9500, "Owner: Royalty fee limit too high");
         royaltyFeeLimit = _royaltyFeeLimit;
 
@@ -55,7 +59,7 @@ contract MockRoyaltyFeeRegistry is OwnableTwoSteps, IRoyaltyFeeRegistry {
         address setter,
         address receiver,
         uint256 fee
-    ) external override onlyOwner {
+    ) external onlyOwner {
         require(fee <= royaltyFeeLimit, "Registry: Royalty fee too high");
         _royaltyFeeInfoCollection[collection] = FeeInfo({setter: setter, receiver: receiver, fee: fee});
 
@@ -68,7 +72,7 @@ contract MockRoyaltyFeeRegistry is OwnableTwoSteps, IRoyaltyFeeRegistry {
      * @param amount amount
      * @return receiver address and amount received by royalty recipient
      */
-    function royaltyInfo(address collection, uint256 amount) external view override returns (address, uint256) {
+    function royaltyInfo(address collection, uint256 amount) external view returns (address, uint256) {
         return (
             _royaltyFeeInfoCollection[collection].receiver,
             (amount * _royaltyFeeInfoCollection[collection].fee) / 10000
@@ -82,7 +86,6 @@ contract MockRoyaltyFeeRegistry is OwnableTwoSteps, IRoyaltyFeeRegistry {
     function royaltyFeeInfoCollection(address collection)
         external
         view
-        override
         returns (
             address,
             address,

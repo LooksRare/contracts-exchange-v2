@@ -2,57 +2,44 @@
 pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {ReferralStaking} from "../../contracts/ReferralStaking.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
-import {IReferralStaking} from "../../contracts/interfaces/IReferralStaking.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 
-contract ReferralOrdersTest is ProtocolBase {
-    ReferralStaking public referralStaking;
+contract AffiliateOrdersTest is ProtocolBase {
     MockERC20 public mockERC20; // It is used as LOOKS for this test
 
-    // Tiers for this test file
-    uint16 internal _referralTier0 = 1000;
-    uint16 internal _referralTier1 = 2000;
-    uint256 internal _tier0Cost = 10 ether;
-    uint256 internal _tier1Cost = 20 ether;
+    uint16 internal _affiliateRate = 2000;
 
-    function _calculateReferralFee(uint256 originalAmount, uint256 tierRate)
+    function _calculateAffiliateFee(uint256 originalAmount, uint256 tierRate)
         private
         pure
-        returns (uint256 referralFee)
+        returns (uint256 affiliateFee)
     {
         return (originalAmount * tierRate) / (10000 * 10000);
     }
 
-    function _setUpReferralStaking() private asPrankedUser(_owner) {
-        mockERC20 = new MockERC20();
-        referralStaking = new ReferralStaking(address(looksRareProtocol), address(mockERC20), _timelock);
-        referralStaking.setTier(0, _referralTier0, _tier0Cost);
-        referralStaking.setTier(1, _referralTier1, _tier1Cost);
-        looksRareProtocol.updateReferralController(address(referralStaking));
-        looksRareProtocol.updateReferralProgramStatus(true);
-    }
+    function _setUpAffiliate() private {
+        vm.startPrank(_owner);
+        looksRareProtocol.updateAffiliateController(_owner);
+        looksRareProtocol.updateAffiliateProgramStatus(true);
+        looksRareProtocol.updateAffiliateRate(_affiliate, _affiliateRate);
+        vm.stopPrank();
 
-    function _setUpReferrer() private asPrankedUser(_referrer) {
-        vm.deal(_referrer, _initialETHBalanceReferrer + _initialWETHBalanceReferrer);
-        weth.deposit{value: _initialWETHBalanceReferrer}();
-        mockERC20.mint(_referrer, _tier1Cost);
-        mockERC20.approve(address(referralStaking), type(uint256).max);
-        referralStaking.upgrade(1, _referralTier1, _tier1Cost);
+        vm.startPrank(_affiliate);
+        vm.deal(_affiliate, _initialETHBalanceAffiliate + _initialWETHBalanceAffiliate);
+        weth.deposit{value: _initialWETHBalanceAffiliate}();
+        vm.stopPrank();
     }
 
     /**
-     * TakerBid matches makerAsk. Protocol fee is set, no royalties, referrer is set.
+     * TakerBid matches makerAsk. Protocol fee is set, no royalties, affiliate is set.
      */
-    function testTakerBidERC721WithReferralButWithoutRoyalty() public {
+    function testTakerBidERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
-        _setUpReferralStaking();
-        _setUpReferrer();
+        _setUpAffiliate();
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - _standardProtocolFee;
 
         {
             // Mint asset
@@ -65,7 +52,6 @@ contract ReferralOrdersTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -84,7 +70,6 @@ contract ReferralOrdersTest is ProtocolBase {
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
-                makerAsk.minNetRatio,
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
@@ -102,10 +87,10 @@ contract ReferralOrdersTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _referrer
+                _affiliate
             );
             emit log_named_uint(
-                "TakerBid // ERC721 // Protocol Fee with Referral // No Royalties",
+                "TakerBid // ERC721 // Protocol Fee with Affiliate // No Royalties",
                 gasLeft - gasleft()
             );
         }
@@ -117,15 +102,12 @@ contract ReferralOrdersTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * minNetRatio) / 10000);
-        // Referral user receives 20% of protocol fee
-        uint256 referralFee = _calculateReferralFee(price * _standardProtocolFee, _referralTier1);
-        assertEq(address(_referrer).balance, _initialETHBalanceReferrer + referralFee);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * (10000 - _minTotalFee)) / 10000);
+        // Affiliate user receives 20% of protocol fee
+        uint256 affiliateFee = _calculateAffiliateFee(price * _minTotalFee, _affiliateRate);
+        assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + affiliateFee);
         // Owner receives 80% of protocol fee
-        assertEq(
-            address(_owner).balance,
-            _initialETHBalanceOwner + ((price * _standardProtocolFee) / 10000 - referralFee)
-        );
+        assertEq(address(_owner).balance, _initialETHBalanceOwner + ((price * _minTotalFee) / 10000 - affiliateFee));
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -133,17 +115,15 @@ contract ReferralOrdersTest is ProtocolBase {
     }
 
     /**
-     * Multiple takerBids match makerAsk orders. Protocol fee is set, no royalties, referrer is set.
+     * Multiple takerBids match makerAsk orders. Protocol fee is set, no royalties, affiliate is set.
      */
-    function testMultipleTakerBidsERC721WithReferralButWithoutRoyalty() public {
+    function testMultipleTakerBidsERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
-        _setUpReferralStaking();
-        _setUpReferrer();
+        _setUpAffiliate();
 
         price = 1 ether;
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
-        uint16 minNetRatio = 9800;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
@@ -160,7 +140,6 @@ contract ReferralOrdersTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 uint112(i), // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -173,7 +152,6 @@ contract ReferralOrdersTest is ProtocolBase {
 
             takerBids[i] = OrderStructs.TakerBid(
                 takerUser,
-                makerAsks[i].minNetRatio,
                 makerAsks[i].minPrice,
                 makerAsks[i].itemIds,
                 makerAsks[i].amounts,
@@ -202,7 +180,7 @@ contract ReferralOrdersTest is ProtocolBase {
                 signatures,
                 merkleRoots,
                 merkleProofs,
-                _referrer,
+                _affiliate,
                 false
             );
         }
@@ -223,36 +201,28 @@ contract ReferralOrdersTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser + ((price * minNetRatio) * (numberPurchases - 1)) / 10000
-        );
-        // Referral user receives 20% of protocol fee
-        uint256 referralFee = _calculateReferralFee(
-            (numberPurchases - 1) * price * _standardProtocolFee,
-            _referralTier1
-        );
-        assertEq(address(_referrer).balance, _initialETHBalanceReferrer + referralFee);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9800) * (numberPurchases - 1)) / 10000);
+        // Affiliate user receives 20% of protocol fee
+        uint256 affiliateFee = _calculateAffiliateFee((numberPurchases - 1) * price * _minTotalFee, _affiliateRate);
+        assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + affiliateFee);
         // Owner receives 80% of protocol fee
         assertEq(
             address(_owner).balance,
-            _initialETHBalanceOwner + (((numberPurchases - 1) * (price * _standardProtocolFee)) / 10000 - referralFee)
+            _initialETHBalanceOwner + (((numberPurchases - 1) * (price * _minTotalFee)) / 10000 - affiliateFee)
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }
 
     /**
-     * TakerAsk matches makerBid. Protocol fee is set, no royalties, referrer is set.
+     * TakerAsk matches makerBid. Protocol fee is set, no royalties, affiliate is set.
      */
-    function testTakerAskERC721WithReferralButWithoutRoyalty() public {
+    function testTakerAskERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
-        _setUpReferralStaking();
-        _setUpReferrer();
+        _setUpAffiliate();
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
-        uint16 minNetRatio = 10000 - _standardProtocolFee;
 
         {
             // Prepare the order hash
@@ -262,7 +232,6 @@ contract ReferralOrdersTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 0, // orderNonce
-                minNetRatio,
                 address(mockERC721),
                 address(weth),
                 makerUser,
@@ -284,7 +253,6 @@ contract ReferralOrdersTest is ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(
                 takerUser,
-                makerBid.minNetRatio,
                 makerBid.maxPrice,
                 makerBid.itemIds,
                 makerBid.amounts,
@@ -302,10 +270,10 @@ contract ReferralOrdersTest is ProtocolBase {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _referrer
+                _affiliate
             );
             emit log_named_uint(
-                "TakerAsk // ERC721 // Protocol Fee with Referral // No Royalties",
+                "TakerAsk // ERC721 // Protocol Fee with Affiliate // No Royalties",
                 gasLeft - gasleft()
             );
         }
@@ -316,15 +284,12 @@ contract ReferralOrdersTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of whole price (protocol fee)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
-        // Referral user receives 20% of protocol fee
-        uint256 referralFee = _calculateReferralFee(price * _standardProtocolFee, _referralTier1);
-        assertEq(weth.balanceOf(_referrer), _initialWETHBalanceReferrer + referralFee);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
+        // Affiliate user receives 20% of protocol fee
+        uint256 affiliateFee = _calculateAffiliateFee(price * _minTotalFee, _affiliateRate);
+        assertEq(weth.balanceOf(_affiliate), _initialWETHBalanceAffiliate + affiliateFee);
         // Owner receives 80% of protocol fee
-        assertEq(
-            weth.balanceOf(_owner),
-            _initialWETHBalanceOwner + ((price * _standardProtocolFee) / 10000 - referralFee)
-        );
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + ((price * _minTotalFee) / 10000 - affiliateFee));
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }

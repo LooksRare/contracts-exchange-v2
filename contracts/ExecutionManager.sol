@@ -10,10 +10,9 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 // Interfaces
 import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
+import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
 
 // Direct dependencies
-import {CollectionDiscountManager} from "./CollectionDiscountManager.sol";
-import {FeeManager} from "./FeeManager.sol";
 import {InheritedStrategies} from "./InheritedStrategies.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
@@ -25,19 +24,31 @@ import {StrategyManager} from "./StrategyManager.sol";
  *         For instance, a taker ask is executed against a maker bid (or a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
-contract ExecutionManager is
-    CollectionDiscountManager,
-    FeeManager,
-    InheritedStrategies,
-    NonceManager,
-    StrategyManager,
-    IExecutionManager
-{
+contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager, IExecutionManager {
+    // Protocol fee recipient
+    address public protocolFeeRecipient;
+
+    // Creator fee manager
+    ICreatorFeeManager public creatorFeeManager;
+
     /**
-     * @notice Constructor
-     * @param _royaltyFeeRegistry Royalty fee registry address
+     * @notice Set collection staking registry
+     * @param newCreatorFeeManager Address of the creator fee manager
+     * @dev Only callable by owner.
      */
-    constructor(address _royaltyFeeRegistry) FeeManager(_royaltyFeeRegistry) {}
+    function setCreatorFeeManager(address newCreatorFeeManager) external onlyOwner {
+        creatorFeeManager = ICreatorFeeManager(newCreatorFeeManager);
+        emit NewCreatorFeeManager(newCreatorFeeManager);
+    }
+
+    /**
+     * @notice Set protocol fee recipient
+     * @param newProtocolFeeRecipient New protocol fee recipient address
+     */
+    function setProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
+        protocolFeeRecipient = newProtocolFeeRecipient;
+        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
+    }
 
     /**
      * @notice Execute strategy for taker ask
@@ -46,34 +57,48 @@ contract ExecutionManager is
      */
     function _executeStrategyForTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.MakerBid calldata makerBid,
+        address sender
     )
         internal
         returns (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            uint256 netPrice,
-            uint256 protocolFeeAmount,
-            address royaltyRecipient,
-            uint256 royaltyFeeAmount
+            address[] memory recipients,
+            uint256[] memory fees
         )
     {
         uint256 price;
+
+        recipients = new address[](3);
+        fees = new uint256[](3);
+
         (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
-        (royaltyRecipient, royaltyFeeAmount) = _strategyInfo[makerBid.strategyId].hasRoyalties
-            ? _getRoyaltyRecipientAndAmount(makerBid.collection, itemIds, price)
-            : (address(0), 0);
+        {
+            // 0 --> Creator fee and adjustment of protocol fee
+            (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
+            uint256 minTotalFee = (price * _strategyInfo[makerBid.strategyId].minTotalFee) / 10000;
 
-        protocolFeeAmount =
-            (((price * _strategyInfo[makerBid.strategyId].protocolFee) / 10000) *
-                (10000 - collectionDiscountFactor[makerBid.collection])) /
-            10000;
+            // 1 --> Protocol fee
+            if (recipients[1] == address(0) || fees[1] == 0) {
+                fees[0] = minTotalFee;
+            } else {
+                uint256 standardProtocolFee = (price * _strategyInfo[makerBid.strategyId].standardProtocolFee) / 10000;
 
-        netPrice = price - protocolFeeAmount - royaltyFeeAmount;
+                if (fees[1] + standardProtocolFee > minTotalFee) {
+                    fees[0] = standardProtocolFee;
+                } else {
+                    fees[0] = minTotalFee - fees[1];
+                }
+            }
 
-        if (netPrice < (price * takerAsk.minNetRatio) / 10000) revert SlippageAsk();
-        if (netPrice < (price * makerBid.minNetRatio) / 10000) revert SlippageBid();
+            recipients[0] = protocolFeeRecipient;
+
+            // 2 --> Amount for seller
+            fees[2] = price - fees[1] - fees[0];
+            recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
+        }
     }
 
     /**
@@ -89,28 +114,41 @@ contract ExecutionManager is
         returns (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            uint256 netPrice,
-            uint256 protocolFeeAmount,
-            address royaltyRecipient,
-            uint256 royaltyFeeAmount
+            address[] memory recipients,
+            uint256[] memory fees
         )
     {
         uint256 price;
+
+        recipients = new address[](3);
+        fees = new uint256[](3);
+
         (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
-        (royaltyRecipient, royaltyFeeAmount) = _strategyInfo[makerAsk.strategyId].hasRoyalties
-            ? _getRoyaltyRecipientAndAmount(makerAsk.collection, itemIds, price)
-            : (address(0), 0);
+        {
+            // 0 --> Creator fee and adjustment of protocol fee
+            (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
+            uint256 minTotalFee = (price * _strategyInfo[makerAsk.strategyId].minTotalFee) / 10000;
 
-        protocolFeeAmount =
-            (((price * _strategyInfo[makerAsk.strategyId].protocolFee) / 10000) *
-                (10000 - collectionDiscountFactor[makerAsk.collection])) /
-            10000;
+            // 1 --> Protocol fee
+            if (recipients[1] == address(0) || fees[1] == 0) {
+                fees[0] = minTotalFee;
+            } else {
+                uint256 standardProtocolFee = (price * _strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10000;
 
-        netPrice = price - royaltyFeeAmount - protocolFeeAmount;
+                if (fees[1] + standardProtocolFee > minTotalFee) {
+                    fees[0] = standardProtocolFee;
+                } else {
+                    fees[0] = minTotalFee - fees[1];
+                }
+            }
 
-        if (netPrice < (price * makerAsk.minNetRatio) / 10000) revert SlippageAsk();
-        if (netPrice < (price * takerBid.minNetRatio) / 10000) revert SlippageBid();
+            recipients[0] = protocolFeeRecipient;
+
+            // 2 --> Amount for seller
+            fees[2] = price - fees[1] - fees[0];
+            recipients[2] = makerAsk.recipient == address(0) ? makerAsk.signer : makerAsk.recipient;
+        }
     }
 
     /**

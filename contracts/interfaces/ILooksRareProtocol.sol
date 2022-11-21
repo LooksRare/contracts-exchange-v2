@@ -15,10 +15,10 @@ interface ILooksRareProtocol {
 
     // Events
     event NewDomainSeparator();
-    event ProtocolPayment(address currency, uint256 protocolFee);
-    event ProtocolPaymentWithReferrer(address currency, uint256 protocolFee, address referrer, uint256 referralFee);
+    event AffiliatePayment(address affiliate, uint256 affiliateFee);
 
     event TakerBid(
+        bytes32 orderHash,
         uint128 orderNonce,
         address bidUser,
         address bidRecipient,
@@ -33,11 +33,11 @@ interface ILooksRareProtocol {
     );
 
     event TakerAsk(
+        bytes32 orderHash,
         uint128 orderNonce,
         address bidUser,
         address bidRecipient,
         address askUser,
-        address askRecipient,
         uint256 strategyId,
         address currency,
         address collection,

@@ -7,9 +7,11 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 abstract contract TestParameters is Test {
     address internal _owner = address(42);
     address internal _royaltyRecipient = address(22);
-    address internal _emptyReferrer = address(0);
-    uint16 internal _standardProtocolFee = uint16(200);
-    uint16 internal _standardRoyaltyFee = uint16(100);
+    address internal _emptyAffiliate = address(0);
+    uint16 internal _standardProtocolFee = uint16(150);
+    uint16 internal _minTotalFee = uint16(200);
+    uint16 internal _maxProtocolFee = uint16(300);
+    uint16 internal _standardRoyaltyFee = uint16(50);
     uint256 internal makerUserPK = 1;
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);
@@ -24,11 +26,11 @@ abstract contract TestParameters is Test {
     uint256 internal _initialWETHBalanceRoyaltyRecipient = 10 ether;
     uint256 internal _initialETHBalanceOwner = 50 ether;
     uint256 internal _initialWETHBalanceOwner = 15 ether;
-    uint256 internal _initialETHBalanceReferrer = 30 ether;
-    uint256 internal _initialWETHBalanceReferrer = 12 ether;
+    uint256 internal _initialETHBalanceAffiliate = 30 ether;
+    uint256 internal _initialWETHBalanceAffiliate = 12 ether;
 
-    // Referral parameters
-    address public _referrer = address(2);
+    // Affiliate parameters
+    address public _affiliate = address(2);
     uint256 public constant _timelock = 120;
 
     // Reused parameters

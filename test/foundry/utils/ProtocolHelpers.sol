@@ -20,13 +20,12 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint16 strategyId,
         uint8 assetType,
         uint112 orderNonce,
-        uint16 minNetRatio,
         address collection,
         address currency,
         address signer,
         uint256 minPrice,
         uint256 itemId
-    ) internal view returns (OrderStructs.MakerAsk memory makerAsk) {
+    ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk) {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
@@ -39,7 +38,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 strategyId: strategyId,
                 assetType: assetType,
                 orderNonce: orderNonce,
-                minNetRatio: minNetRatio,
                 collection: collection,
                 currency: currency,
                 recipient: signer,
@@ -59,14 +57,13 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint16 strategyId,
         uint8 assetType,
         uint112 orderNonce,
-        uint16 minNetRatio,
         address collection,
         address currency,
         address signer,
         uint256 minPrice,
         uint256[] memory itemIds,
         uint256[] memory amounts
-    ) internal view returns (OrderStructs.MakerAsk memory makerAsk) {
+    ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk) {
         return
             OrderStructs.MakerAsk({
                 askNonce: askNonce,
@@ -74,7 +71,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 strategyId: strategyId,
                 assetType: assetType,
                 orderNonce: orderNonce,
-                minNetRatio: minNetRatio,
                 collection: collection,
                 currency: currency,
                 recipient: signer,
@@ -94,13 +90,12 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint16 strategyId,
         uint8 assetType,
         uint112 orderNonce,
-        uint16 minNetRatio,
         address collection,
         address currency,
         address signer,
         uint256 maxPrice,
         uint256 itemId
-    ) internal view returns (OrderStructs.MakerBid memory makerBid) {
+    ) internal view returns (OrderStructs.MakerBid memory newMakerBid) {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
@@ -112,7 +107,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 strategyId: strategyId,
                 assetType: assetType,
                 orderNonce: orderNonce,
-                minNetRatio: minNetRatio,
                 collection: collection,
                 currency: currency,
                 recipient: signer,
@@ -132,14 +126,13 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint16 strategyId,
         uint8 assetType,
         uint112 orderNonce,
-        uint16 minNetRatio,
         address collection,
         address currency,
         address signer,
         uint256 maxPrice,
         uint256[] memory itemIds,
         uint256[] memory amounts
-    ) internal view returns (OrderStructs.MakerBid memory makerBid) {
+    ) internal view returns (OrderStructs.MakerBid memory newMakerBid) {
         return
             OrderStructs.MakerBid({
                 bidNonce: bidNonce,
@@ -147,7 +140,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
                 strategyId: strategyId,
                 assetType: assetType,
                 orderNonce: orderNonce,
-                minNetRatio: minNetRatio,
                 collection: collection,
                 currency: currency,
                 recipient: signer,

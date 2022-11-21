@@ -106,15 +106,19 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyMultiFillCollectionOrder = new StrategyTestMultiFillCollectionOrder(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategyMultiFillCollectionOrder));
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            address(strategyMultiFillCollectionOrder)
+        );
     }
 
     function testNewStrategy() public {
         _setUpNewStrategy();
         Strategy memory strategy = looksRareProtocol.strategyInfo(2);
         assertTrue(strategy.isActive);
-        assertTrue(strategy.hasRoyalties);
-        assertEq(strategy.protocolFee, _standardProtocolFee);
+        assertEq(strategy.standardProtocolFee, _standardProtocolFee);
         assertEq(strategy.maxProtocolFee, uint16(300));
         assertEq(strategy.implementation, address(strategyMultiFillCollectionOrder));
     }
@@ -130,9 +134,6 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
 
         {
             uint256[] memory itemIds = new uint256[](0);
@@ -147,7 +148,6 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
                     2, // strategyId (Multi-fill bid offer)
                     0, // assetType ERC721,
                     0, // orderNonce
-                    minNetRatio,
                     address(mockERC721),
                     address(weth),
                     makerUser,
@@ -172,14 +172,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.minNetRatio,
-                makerBid.maxPrice,
-                itemIds,
-                amounts,
-                abi.encode()
-            );
+            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
 
             uint256 gasLeft = gasleft();
 
@@ -190,7 +183,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
 
             emit log_named_uint(
@@ -205,8 +198,8 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(mockERC721.ownerOf(0), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9700) / 10000);
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is not marked as executed
         assertFalse(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
 
@@ -229,14 +222,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.batchMint(secondTakerUser, itemIds);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                secondTakerUser,
-                makerBid.minNetRatio,
-                makerBid.maxPrice,
-                itemIds,
-                amounts,
-                abi.encode()
-            );
+            takerAsk = OrderStructs.TakerAsk(secondTakerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
 
             uint256 gasLeft = gasleft();
 
@@ -247,7 +233,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
                 signature,
                 _emptyMerkleRoot,
                 _emptyMerkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
 
             emit log_named_uint(
@@ -263,8 +249,8 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 4 * price);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(secondTakerUser), _initialWETHBalanceUser + 3 * ((price * 9700) / 10000));
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(secondTakerUser), _initialWETHBalanceUser + 3 * ((price * 9800) / 10000));
         // Verify the nonce is now marked as executed
         assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }

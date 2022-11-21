@@ -8,16 +8,21 @@ import {StrategyTokenIdsRange} from "../../contracts/executionStrategies/Strateg
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
-    StrategyTokenIdsRange public strategy;
+    StrategyTokenIdsRange public strategyTokenIdsRange;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategy = new StrategyTokenIdsRange(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategy));
+        strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            address(strategyTokenIdsRange)
+        );
     }
 
     function _createMakerBidAndTakerAsk()
         private
-        returns (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk)
+        returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk)
     {
         uint256[] memory makerBidItemIds = new uint256[](2);
         makerBidItemIds[0] = 5;
@@ -26,15 +31,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 3;
 
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
-        makerBid = _createMultiItemMakerBidOrder({
+        newMakerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: 0,
             orderNonce: 0,
-            minNetRatio: minNetRatio,
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
@@ -59,10 +61,9 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAskAmounts[1] = 1;
         takerAskAmounts[2] = 1;
 
-        takerAsk = OrderStructs.TakerAsk({
+        newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minNetRatio: makerAsk.minNetRatio,
-            minPrice: makerBid.maxPrice,
+            minPrice: newMakerBid.maxPrice,
             itemIds: takerAskItemIds,
             amounts: takerAskAmounts,
             additionalParameters: abi.encode()
@@ -71,18 +72,16 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
     function testNewStrategy() public {
         _setUpNewStrategy();
-        Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(newStrategy.isActive);
-        assertTrue(newStrategy.hasRoyalties);
-        assertEq(newStrategy.protocolFee, _standardProtocolFee);
-        assertEq(newStrategy.maxProtocolFee, uint16(300));
-        assertEq(newStrategy.implementation, address(strategy));
+        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
+        assertTrue(strategy.isActive);
+        assertEq(strategy.standardProtocolFee, _standardProtocolFee);
+        assertEq(strategy.maxProtocolFee, uint16(300));
+        assertEq(strategy.implementation, address(strategyTokenIdsRange));
     }
 
     function testTokenIdsRangeERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         // Sign order
@@ -96,7 +95,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -106,14 +105,13 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.97 ether);
+        // Taker ask user receives 98% of the whole price (2% protocol fee)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
     }
 
     function testTokenIdsRangeERC1155() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC1155), _standardRoyaltyFee);
 
         uint256[] memory makerBidItemIds = new uint256[](2);
         makerBidItemIds[0] = 5;
@@ -122,15 +120,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 6;
 
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
         makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: 1,
             orderNonce: 0,
-            minNetRatio: minNetRatio,
             collection: address(mockERC1155),
             currency: address(weth),
             signer: makerUser,
@@ -155,7 +150,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minNetRatio: makerAsk.minNetRatio,
             minPrice: makerBid.maxPrice,
             itemIds: takerAskItemIds,
             amounts: takerAskAmounts,
@@ -173,7 +167,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -183,14 +177,13 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.97 ether);
+        // Taker ask user receives 98% of the whole price (2% protocol fee)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
     }
 
     function testTakerAskForceAmountOneIfERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidAmounts = new uint256[](3);
@@ -211,7 +204,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -221,14 +214,13 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.97 ether);
+        // Taker ask user receives 98% of the whole price (2% protocol fee)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
     }
 
     function testCallerNotLooksRareProtocol() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         // Sign order
@@ -236,13 +228,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        strategy.executeStrategyWithTakerAsk(takerAsk, makerBid);
+        strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
 
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](2);
@@ -264,7 +255,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // lower band == upper band
@@ -284,14 +275,13 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testTakerAskDuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](3);
@@ -313,14 +303,13 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testTakerAskUnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](3);
@@ -342,14 +331,13 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory itemIds = new uint256[](2);
@@ -376,14 +364,13 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testTakerAskPriceTooHigh() public {
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
 
         takerAsk.minPrice = makerBid.maxPrice + 1 wei;
@@ -400,7 +387,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 }

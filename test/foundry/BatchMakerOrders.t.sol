@@ -16,7 +16,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         price = 1 ether; // Fixed price of sale
-        uint16 minNetRatio = 10000 - _standardProtocolFee; // 2% slippage protection for strategy
 
         for (uint112 i; i < numberOrders; i++) {
             // Mint asset
@@ -29,7 +28,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 i, // orderNonce (incremental)
-                minNetRatio,
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -60,7 +58,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
             // Prepare the taker bid
             takerBid = OrderStructs.TakerBid(
                 takerUser,
-                makerAsk.minNetRatio,
                 makerAsk.minPrice,
                 makerAsk.itemIds,
                 makerAsk.amounts,
@@ -81,7 +78,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 signature,
                 merkleRoot,
                 merkleProof,
-                _emptyReferrer
+                _emptyAffiliate
             );
             emit log_named_uint(
                 "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
@@ -96,7 +93,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * minNetRatio) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9800) / 10000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -113,7 +110,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         price = 1 ether; // Fixed price of sale
-        uint16 minNetRatio = 10000 - _standardProtocolFee; // 2% slippage protection for strategy
 
         for (uint112 i; i < numberOrders; i++) {
             // Prepare the order hash
@@ -123,7 +119,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
                 i, // orderNonce (incremental)
-                minNetRatio,
                 address(mockERC721),
                 address(weth),
                 makerUser,
@@ -157,7 +152,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(
                 takerUser,
-                makerBid.minNetRatio,
                 makerBid.maxPrice,
                 makerBid.itemIds,
                 makerBid.amounts,
@@ -172,7 +166,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, _emptyReferrer);
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, _emptyAffiliate);
 
             emit log_named_uint(
                 "TakerAsk // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
@@ -187,7 +181,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * minNetRatio) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
         assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
     }

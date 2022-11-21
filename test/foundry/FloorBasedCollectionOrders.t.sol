@@ -28,33 +28,28 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     function setUp() public override {
         vm.createSelectFork(GOERLI_RPC_URL, FORKED_BLOCK_NUMBER);
         super.setUp();
-
         _setUpUsers();
         _setUpNewStrategy();
-        _setUpRoyalties(address(mockERC721), _standardRoyaltyFee);
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategy = new StrategyFloorBasedCollectionOffer(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(true, _standardProtocolFee, 300, address(strategy));
+        looksRareProtocol.addStrategy(_standardProtocolFee, _minTotalFee, _maxProtocolFee, address(strategy));
     }
 
     function _createMakerBidAndTakerAsk(uint256 discount)
         private
-        returns (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk)
+        returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk)
     {
         mockERC721.mint(takerUser, 1);
 
-        uint16 minNetRatio = 10000 - (_standardRoyaltyFee + _standardProtocolFee); // 3% slippage protection
-
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder({
+        newMakerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: 0,
             orderNonce: 0,
-            minNetRatio: minNetRatio,
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
@@ -62,7 +57,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             itemId: 0 // Doesn't matter, not used
         });
 
-        makerBid.additionalParameters = abi.encode(discount);
+        newMakerBid.additionalParameters = abi.encode(discount);
 
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 1;
@@ -70,9 +65,8 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
 
-        takerAsk = OrderStructs.TakerAsk({
+        newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minNetRatio: makerBid.minNetRatio,
             minPrice: 9.5 ether,
             itemIds: itemIds,
             amounts: amounts,
@@ -83,8 +77,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     function testNewStrategy() public {
         Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
         assertTrue(newStrategy.isActive);
-        assertTrue(newStrategy.hasRoyalties);
-        assertEq(newStrategy.protocolFee, _standardProtocolFee);
+        assertEq(newStrategy.standardProtocolFee, _standardProtocolFee);
         assertEq(newStrategy.maxProtocolFee, uint16(300));
         assertEq(newStrategy.implementation, address(strategy));
     }
@@ -120,9 +113,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         // Floor price = 9.7 ETH, discount = 0.1 ETH, desired price = 9.6 ETH
         // Max price = 9.5 ETH
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -139,7 +130,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -147,8 +138,8 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.5 ether);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.215 ether);
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.31 ether);
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedPriceLessThanMaxPrice() public {
@@ -156,9 +147,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Max price = 9.5 ETH
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.3 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.3 ether});
 
         takerAsk.minPrice = 9.4 ether;
 
@@ -177,7 +166,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Maker user has received the asset
@@ -185,8 +174,8 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.4 ether);
-        // Taker ask user receives 97% of the whole price (2% protocol + 1% royalties)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.118 ether);
+        // Taker ask user receives 97% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.212 ether);
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedAmountGreaterThanOrEqualToFloorPrice() public {
@@ -194,9 +183,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
 
         // Floor price = 9.7 ETH, discount = 9.7 ETH, desired price = 0 ETH
         // Max price = 0 ETH
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 9.7 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 9.7 ether});
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -214,7 +201,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         // Floor price = 9.7 ETH, discount = 9.8 ETH, desired price = -0.1 ETH
@@ -231,16 +218,14 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testPriceFeedNotAvailable() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -257,16 +242,14 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testOraclePriceNotRecentEnough() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -283,7 +266,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -291,9 +274,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -311,7 +292,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
 
         aggregator.setAnswer(-1);
@@ -324,16 +305,14 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testCallerNotLooksRareProtocol() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         vm.startPrank(_owner);
         strategy.setMaximumLatency(3600);
@@ -349,9 +328,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     function testTakerAskItemIdsLengthNotOne() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         uint256[] memory itemIds = new uint256[](0);
         takerAsk.itemIds = itemIds;
@@ -372,16 +349,14 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testTakerAskAmountsLengthNotOne() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         uint256[] memory amounts = new uint256[](0);
         takerAsk.amounts = amounts;
@@ -402,16 +377,14 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testMakerBidAmountsLengthNotOne() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         uint256[] memory amounts = new uint256[](0);
         makerBid.amounts = amounts;
@@ -432,16 +405,14 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testTakerAskZeroAmount() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         uint256[] memory amounts = new uint256[](1);
         // Seller will probably try 0
@@ -464,16 +435,14 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
     function testMakerBidAmountNotOne() public {
         strategy = StrategyFloorBasedCollectionOffer(looksRareProtocol.strategyInfo(2).implementation);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.1 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
 
         uint256[] memory amounts = new uint256[](1);
         // Bidder will probably try a higher number
@@ -496,7 +465,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 
@@ -506,9 +475,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Maker bid max price = 9.4 ETH
         // Taker ask min price = 9.5 ETH
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 0.3 ether
-        });
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.3 ether});
         makerBid.maxPrice = 9.4 ether;
 
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -527,7 +494,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
             signature,
             _emptyMerkleRoot,
             _emptyMerkleProof,
-            _emptyReferrer
+            _emptyAffiliate
         );
     }
 }

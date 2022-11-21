@@ -9,7 +9,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
-    bytes4 public selectorTakerAsk = StrategyDutchAuction.executeStrategyWithTakerAsk.selector;
+    bytes4 public selectorTakerAsk = _emptyBytes4;
     bytes4 public selectorTakerBid = StrategyDutchAuction.executeStrategyWithTakerBid.selector;
 
     uint256 private startPrice = 10 ether;

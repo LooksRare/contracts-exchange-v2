@@ -18,6 +18,7 @@ abstract contract TestParameters is Test {
     address internal takerUser = vm.addr(takerUserPK);
     OrderStructs.MerkleRoot internal _emptyMerkleRoot = OrderStructs.MerkleRoot({root: bytes32(0)});
     bytes32[] internal _emptyMerkleProof = new bytes32[](0);
+    bytes4 internal _emptyBytes4;
 
     // Initial balances
     uint256 internal _initialETHBalanceUser = 100 ether;

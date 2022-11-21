@@ -31,7 +31,6 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
     function executeStrategyWithTakerBid(OrderStructs.TakerBid calldata, OrderStructs.MakerAsk calldata)
         external
         pure
-        override
         returns (
             uint256,
             uint256[] calldata,
@@ -52,7 +51,6 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
         OrderStructs.MakerBid calldata makerBid
     )
         external
-        override
         returns (
             uint256 price,
             uint256[] calldata itemIds,

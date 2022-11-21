@@ -15,7 +15,7 @@ import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant GOERLI_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
     StrategyFloorPremium public strategyFloorPremium;
-    bytes4 public selectorTakerAsk = StrategyFloorPremium.executeStrategyWithTakerAsk.selector;
+    bytes4 public selectorTakerAsk = _emptyBytes4;
     bytes4 public selectorTakerBid = StrategyFloorPremium.executeStrategyWithTakerBid.selector;
 
     // At block 15740567

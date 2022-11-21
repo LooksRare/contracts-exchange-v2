@@ -10,7 +10,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     StrategyTokenIdsRange public strategyTokenIdsRange;
     bytes4 public selectorTakerAsk = StrategyTokenIdsRange.executeStrategyWithTakerAsk.selector;
-    bytes4 public selectorTakerBid = StrategyTokenIdsRange.executeStrategyWithTakerBid.selector;
+    bytes4 public selectorTakerBid = _emptyBytes4;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));

@@ -64,8 +64,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             standardProtocolFee,
             minTotalFee,
             maxProtocolFee,
-            0x00000000,
-            0x00000000,
+            _emptyBytes4,
+            _emptyBytes4,
             implementation
         );
 
@@ -76,8 +76,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             standardProtocolFee,
             minTotalFee,
             maxProtocolFee,
-            0x00000000,
-            0x00000000,
+            _emptyBytes4,
+            _emptyBytes4,
             implementation
         );
 
@@ -88,8 +88,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             standardProtocolFee,
             minTotalFee,
             maxProtocolFee,
-            0x00000000,
-            0x00000000,
+            _emptyBytes4,
+            _emptyBytes4,
             implementation
         );
     }

@@ -180,9 +180,20 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             if (_strategyInfo[makerAsk.strategyId].isActive) {
                 bool isNonceInvalidated;
 
-                (price, itemIds, amounts, isNonceInvalidated) = IExecutionStrategy(
-                    _strategyInfo[makerAsk.strategyId].implementation
-                ).executeStrategyWithTakerBid(takerBid, makerAsk);
+                bytes4 selector = _strategyInfo[makerAsk.strategyId].selectorTakerBid;
+                if (selector == 0x00000000) revert NoSelectorForTakerBid();
+
+                (bool status, bytes memory data) = _strategyInfo[makerAsk.strategyId].implementation.call(
+                    abi.encodeWithSelector(selector, takerBid, makerAsk)
+                );
+
+                if (!status) {
+                    assembly {
+                        revert(add(data, 32), mload(data))
+                    }
+                }
+
+                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
 
                 if (isNonceInvalidated) {
                     // Invalidate order at this nonce for future execution
@@ -222,9 +233,21 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         } else {
             if (_strategyInfo[makerBid.strategyId].isActive) {
                 bool isNonceInvalidated;
-                (price, itemIds, amounts, isNonceInvalidated) = IExecutionStrategy(
-                    _strategyInfo[makerBid.strategyId].implementation
-                ).executeStrategyWithTakerAsk(takerAsk, makerBid);
+
+                bytes4 selector = _strategyInfo[makerBid.strategyId].selectorTakerAsk;
+                if (selector == 0x00000000) revert NoSelectorForTakerAsk();
+
+                (bool status, bytes memory data) = _strategyInfo[makerBid.strategyId].implementation.call(
+                    abi.encodeWithSelector(selector, takerAsk, makerBid)
+                );
+
+                if (!status) {
+                    assembly {
+                        revert(add(data, 32), mload(data))
+                    }
+                }
+
+                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
 
                 if (isNonceInvalidated) {
                     // Invalidate order at this nonce for future execution

@@ -31,6 +31,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             standardProtocolFee: 150,
             maxProtocolFee: 300,
             minTotalFee: 200,
+            selectorTakerAsk: 0x00000000,
+            selectorTakerBid: 0x00000000,
             implementation: address(0)
         });
 
@@ -39,6 +41,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             standardProtocolFee: 150,
             maxProtocolFee: 300,
             minTotalFee: 200,
+            selectorTakerAsk: 0x00000000,
+            selectorTakerBid: 0x00000000,
             implementation: address(0)
         });
     }
@@ -47,6 +51,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
      * @notice Add a new strategy
      * @param standardProtocolFee Protocol fee
      * @param maxProtocolFee Maximum protocol fee
+     * @param selectorTakerAsk Selector for takerAsk
+     * @param selectorTakerBid Selector for takerBid
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      */
@@ -54,16 +60,22 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         uint16 standardProtocolFee,
         uint16 minTotalFee,
         uint16 maxProtocolFee,
+        bytes4 selectorTakerAsk,
+        bytes4 selectorTakerBid,
         address implementation
     ) external onlyOwner {
         if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > _MAX_PROTOCOL_FEE)
             revert StrategyProtocolFeeTooHigh();
+
+        if (selectorTakerAsk == 0x00000000 && selectorTakerBid == 0x00000000) revert StrategyHasNoSelector();
 
         _strategyInfo[countStrategies] = Strategy({
             isActive: true,
             standardProtocolFee: standardProtocolFee,
             minTotalFee: minTotalFee,
             maxProtocolFee: maxProtocolFee,
+            selectorTakerAsk: selectorTakerAsk,
+            selectorTakerBid: selectorTakerBid,
             implementation: implementation
         });
 
@@ -96,6 +108,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             standardProtocolFee: newStandardProtocolFee,
             minTotalFee: newMinTotalFee,
             maxProtocolFee: currentStrategyInfo.maxProtocolFee,
+            selectorTakerAsk: currentStrategyInfo.selectorTakerAsk,
+            selectorTakerBid: currentStrategyInfo.selectorTakerBid,
             implementation: currentStrategyInfo.implementation
         });
 
@@ -105,7 +119,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     /**
      * @notice View strategy information for a given strategy id
      * @param strategyId Strategy id
-     * @return strategy Information about the strategy (protocol fee, maximum protocol fee, implementation address)
+     * @return strategy Information about the strategy
      */
     function strategyInfo(uint16 strategyId) external view returns (Strategy memory strategy) {
         return _strategyInfo[strategyId];

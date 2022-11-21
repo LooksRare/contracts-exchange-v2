@@ -11,7 +11,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
  * @title StrategyFloorBasedCollectionOffer
- * @notice This contract allows a bidder to place a discounted floor price bid
+ * @notice This contract allows a bidder to place a discounted floor price bid.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeeds, StrategyChainlinkPriceLatency {
@@ -29,28 +29,11 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
     }
 
     /**
-     * @inheritdoc IExecutionStrategy
-     */
-    function executeStrategyWithTakerBid(OrderStructs.TakerBid calldata, OrderStructs.MakerAsk calldata)
-        external
-        pure
-        override
-        returns (
-            uint256,
-            uint256[] memory,
-            uint256[] memory,
-            bool
-        )
-    {
-        revert OrderInvalid();
-    }
-
-    /**
-     * @inheritdoc IExecutionStrategy
-     * @notice This strategy looks at the bidder's desired execution price in ETH (floor - discount)
-     *         and maximum execution price and chooses the lower price
-     * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price
-     *      as the additionalParameters
+     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     *         This strategy looks at the bidder's desired execution price in ETH (floor - discount) and maximum execution price and chooses the lower price.
+     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -58,7 +41,6 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
     )
         external
         view
-        override
         returns (
             uint256 price,
             uint256[] memory itemIds,

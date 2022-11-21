@@ -28,11 +28,11 @@ contract StrategyFloorPremium is StrategyChainlinkMultiplePriceFeeds, StrategyCh
     }
 
     /**
-     * @inheritdoc IExecutionStrategy
-     * @notice This strategy looks at the seller's desired execution price in ETH (floor + premium)
-     *         and minimum execution price and chooses the higher price
-     * @dev The client has to provide the bidder's desired premium amount in ETH from the floor price
-     *      as the additionalParameters
+     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     *         This strategy looks at the seller's desired execution price in ETH (floor + premium) and minimum execution price and chooses the higher price
+     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
+     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @dev The client has to provide the bidder's desired premium amount in ETH from the floor price as the additionalParameters.
      */
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -40,7 +40,6 @@ contract StrategyFloorPremium is StrategyChainlinkMultiplePriceFeeds, StrategyCh
     )
         external
         view
-        override
         returns (
             uint256 price,
             uint256[] memory itemIds,
@@ -82,22 +81,5 @@ contract StrategyFloorPremium is StrategyChainlinkMultiplePriceFeeds, StrategyCh
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
         isNonceInvalidated = true;
-    }
-
-    /**
-     * @inheritdoc IExecutionStrategy
-     */
-    function executeStrategyWithTakerAsk(OrderStructs.TakerAsk calldata, OrderStructs.MakerBid calldata)
-        external
-        pure
-        override
-        returns (
-            uint256,
-            uint256[] memory,
-            uint256[] memory,
-            bool
-        )
-    {
-        revert OrderInvalid();
     }
 }

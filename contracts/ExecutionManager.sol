@@ -9,7 +9,6 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
 import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
-import {IExecutionStrategy} from "./interfaces/IExecutionStrategy.sol";
 import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
 
 // Direct dependencies

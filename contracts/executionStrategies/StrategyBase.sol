@@ -6,7 +6,7 @@ import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 
 /**
  * @title StrategyBase
- * @dev StrategyBase is needed for multiple abstract contracts to inherit from OwnableTwoSteps
+ * @dev StrategyBase is needed for multiple abstract contracts to inherit from OwnableTwoSteps.
  * @author LooksRare protocol team (👀,💎)
  */
 abstract contract StrategyBase is IExecutionStrategy, OwnableTwoSteps {

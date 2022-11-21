@@ -12,6 +12,8 @@ import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
     StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
+    bytes4 public selectorTakerAsk = _emptyBytes4;
+    bytes4 public selectorTakerBid = StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector;
 
     // At block 15740567
     // roundId         uint80  :  92233720368547793259
@@ -35,6 +37,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
+            selectorTakerAsk,
+            selectorTakerBid,
             address(strategyUSDDynamicAsk)
         );
     }

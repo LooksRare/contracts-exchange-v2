@@ -22,26 +22,10 @@ contract StrategyTokenIdsRange is StrategyBase {
     }
 
     /**
-     * @inheritdoc IExecutionStrategy
-     */
-    function executeStrategyWithTakerBid(OrderStructs.TakerBid calldata, OrderStructs.MakerAsk calldata)
-        external
-        pure
-        override
-        returns (
-            uint256,
-            uint256[] memory,
-            uint256[] memory,
-            bool
-        )
-    {
-        revert OrderInvalid();
-    }
-
-    /**
-     * @inheritdoc IExecutionStrategy
-     * @notice Bidder picks a token ID range (e.g. 1-100) and a seller
-     *         can fulfill the order with any tokens within the specificed ID range
+     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     *         Bidder picks a token ID range (e.g. 1-100) and a seller can fulfill the order with any tokens within the specificed ID range
+     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -49,7 +33,6 @@ contract StrategyTokenIdsRange is StrategyBase {
     )
         external
         view
-        override
         returns (
             uint256 price,
             uint256[] memory itemIds,

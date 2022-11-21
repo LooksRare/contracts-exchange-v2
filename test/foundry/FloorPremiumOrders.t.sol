@@ -14,7 +14,10 @@ import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 
 contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant GOERLI_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
-    StrategyFloorPremium public strategy;
+    StrategyFloorPremium public strategyFloorPremium;
+    bytes4 public selectorTakerAsk = _emptyBytes4;
+    bytes4 public selectorTakerBid = StrategyFloorPremium.executeStrategyWithTakerBid.selector;
+
     // At block 15740567
     // roundId         uint80  : 18446744073709552305
     // answer          int256  : 9700000000000000000
@@ -33,8 +36,15 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategy = new StrategyFloorPremium(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(_standardProtocolFee, _minTotalFee, _maxProtocolFee, address(strategy));
+        strategyFloorPremium = new StrategyFloorPremium(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            selectorTakerAsk,
+            selectorTakerBid,
+            address(strategyFloorPremium)
+        );
     }
 
     function _createMakerAskAndTakerBid(uint256 premium)
@@ -79,7 +89,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         assertTrue(newStrategy.isActive);
         assertEq(newStrategy.standardProtocolFee, _standardProtocolFee);
         assertEq(newStrategy.maxProtocolFee, uint16(300));
-        assertEq(newStrategy.implementation, address(strategy));
+        assertEq(newStrategy.implementation, address(strategyFloorPremium));
     }
 
     function testSetMaximumLatency() public {
@@ -99,17 +109,17 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     function testSetPriceFeed() public asPrankedUser(_owner) {
         vm.expectEmit(true, true, true, false);
         emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        assertEq(strategy.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        assertEq(strategyFloorPremium.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
     }
 
     function testSetPriceFeedNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
     function testFloorOPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.7 ETH
@@ -120,8 +130,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.prank(takerUser);
@@ -144,7 +154,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testFloorOPremiumDesiredSalePriceLessThanMinPrice() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.9 ETH
@@ -158,8 +168,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.prank(takerUser);
@@ -183,7 +193,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testPriceFeedNotAvailable() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -192,7 +202,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
+        strategyFloorPremium.setMaximumLatency(3600);
         vm.stopPrank();
 
         vm.expectRevert(StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
@@ -209,7 +219,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testOraclePriceNotRecentEnough() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -218,7 +228,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.expectRevert(StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
@@ -236,7 +246,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
 
     function testChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -245,8 +255,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), address(aggregator));
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
         vm.expectRevert(StrategyFloorPremium.InvalidChainlinkPrice.selector);
@@ -276,7 +286,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testCallerNotLooksRareProtocol() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -285,18 +295,18 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        strategy.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
         vm.stopPrank();
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        strategy.executeStrategyWithTakerBid(takerBid, makerAsk);
+        strategyFloorPremium.executeStrategyWithTakerBid(takerBid, makerAsk);
     }
 
     function testMakerAskItemIdsLengthNotOne() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -308,8 +318,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -326,7 +336,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskAmountsLengthNotOne() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -338,8 +348,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -356,7 +366,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskAmountNotOne() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -369,8 +379,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -387,7 +397,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testTakerBidAmountNotOne() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -400,8 +410,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -418,7 +428,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskTakerBidItemIdsMismatch() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -431,8 +441,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -449,7 +459,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testBidTooLow() public {
-        strategy = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
+        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -460,8 +470,8 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategy.setMaximumLatency(3600);
-        strategy.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);

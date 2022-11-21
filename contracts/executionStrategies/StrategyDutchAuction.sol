@@ -15,16 +15,18 @@ contract StrategyDutchAuction is StrategyBase {
 
     /**
      * @notice Constructor
-     * @param _looksRareProtocol Address of the LooksRare protocol
+     * @param _looksRareProtocol Address of the LooksRare protocol.
      */
     constructor(address _looksRareProtocol) {
         LOOKSRARE_PROTOCOL = _looksRareProtocol;
     }
 
     /**
-     * @inheritdoc IExecutionStrategy
-     * @notice The execution price decreases linearly within the defined period
-     * @dev The client has to provide the Dutch auction's start price as the additionalParameters
+     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     *         The execution price set by the seller decreases linearly within the defined period.
+     * @param takerBid Taker bid struct (contains the taker ask-specific parameters for the execution of the transaction)
+     * @param makerAsk Maker ask struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
      */
     function executeStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -32,7 +34,6 @@ contract StrategyDutchAuction is StrategyBase {
     )
         external
         view
-        override
         returns (
             uint256 price,
             uint256[] memory itemIds,
@@ -71,22 +72,5 @@ contract StrategyDutchAuction is StrategyBase {
 
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
-    }
-
-    /**
-     * @inheritdoc IExecutionStrategy
-     */
-    function executeStrategyWithTakerAsk(OrderStructs.TakerAsk calldata, OrderStructs.MakerBid calldata)
-        external
-        pure
-        override
-        returns (
-            uint256,
-            uint256[] memory,
-            uint256[] memory,
-            bool
-        )
-    {
-        revert OrderInvalid();
     }
 }

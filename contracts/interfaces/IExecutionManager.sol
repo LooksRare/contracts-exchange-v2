@@ -7,6 +7,8 @@ pragma solidity ^0.8.17;
  */
 interface IExecutionManager {
     // Custom errors
+    error NoSelectorForTakerAsk();
+    error NoSelectorForTakerBid();
     error OutsideOfTimeRange();
     error SlippageAsk();
     error SlippageBid();

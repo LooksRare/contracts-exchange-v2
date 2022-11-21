@@ -31,7 +31,6 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
     function executeStrategyWithTakerBid(OrderStructs.TakerBid calldata, OrderStructs.MakerAsk calldata)
         external
         pure
-        override
         returns (
             uint256,
             uint256[] calldata,
@@ -52,7 +51,6 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
         OrderStructs.MakerBid calldata makerBid
     )
         external
-        override
         returns (
             uint256 price,
             uint256[] calldata itemIds,
@@ -102,6 +100,9 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
 }
 
 contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
+    bytes4 public selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
+    bytes4 public selectorTakerBid = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerBid.selector;
+
     StrategyTestMultiFillCollectionOrder public strategyMultiFillCollectionOrder;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
@@ -110,6 +111,8 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
+            selectorTakerAsk,
+            selectorTakerBid,
             address(strategyMultiFillCollectionOrder)
         );
     }

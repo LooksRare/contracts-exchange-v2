@@ -9,6 +9,7 @@ interface IStrategyManager {
     // Custom errors
     error StrategyNotUsed();
     error StrategyProtocolFeeTooHigh();
+    error StrategyHasNoSelector();
 
     // Events
     event NewStrategy(uint16 strategyId, address implementation);
@@ -20,6 +21,8 @@ interface IStrategyManager {
         uint16 standardProtocolFee;
         uint16 minTotalFee;
         uint16 maxProtocolFee;
+        bytes4 selectorTakerAsk;
+        bytes4 selectorTakerBid;
         address implementation;
     }
 }

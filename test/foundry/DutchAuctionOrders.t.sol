@@ -9,6 +9,9 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
+    bytes4 public selectorTakerAsk = _emptyBytes4;
+    bytes4 public selectorTakerBid = StrategyDutchAuction.executeStrategyWithTakerBid.selector;
+
     uint256 private startPrice = 10 ether;
     uint256 private endPrice = 1 ether;
     uint256 private decayPerSecond = 0.0025 ether;
@@ -19,6 +22,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
+            selectorTakerAsk,
+            selectorTakerBid,
             address(strategyDutchAuction)
         );
     }

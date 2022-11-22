@@ -10,7 +10,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Core contracts
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-import {CreatorFeeManagerV2A} from "../../contracts/CreatorFeeManagerV2A.sol";
+import {CreatorFeeManagerWithRebates} from "../../contracts/CreatorFeeManagerWithRebates.sol";
 
 // Mock files
 import {MockERC20} from "../mock/MockERC20.sol";
@@ -33,7 +33,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     LooksRareProtocol public looksRareProtocol;
     TransferManager public transferManager;
     MockRoyaltyFeeRegistry public royaltyFeeRegistry;
-    CreatorFeeManagerV2A public creatorFeeManager;
+    CreatorFeeManagerWithRebates public creatorFeeManager;
 
     WETH public weth;
 
@@ -76,7 +76,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
         transferManager = new TransferManager();
         royaltyFeeRegistry = new MockRoyaltyFeeRegistry(9500);
-        creatorFeeManager = new CreatorFeeManagerV2A(address(royaltyFeeRegistry));
+        creatorFeeManager = new CreatorFeeManagerWithRebates(address(royaltyFeeRegistry));
         looksRareProtocol = new LooksRareProtocol(address(transferManager));
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 

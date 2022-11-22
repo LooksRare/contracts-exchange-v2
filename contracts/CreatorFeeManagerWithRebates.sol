@@ -9,10 +9,10 @@ import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
 import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
- * @title CreatorFeeManagerV2A
+ * @title CreatorFeeManagerWithRebates
  * @notice It distributes a royalty rebate.
  */
-contract CreatorFeeManagerV2A is ICreatorFeeManager {
+contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
     // Standard royalty fee (in basis point)
     uint256 public constant STANDARD_ROYALTY_FEE_BP = 50;
 

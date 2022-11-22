@@ -10,10 +10,10 @@ import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
 import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
- * @title CreatorFeeManagerV2B
+ * @title CreatorFeeManagerWithRoyalties
  * @notice It distributes the proper royalties.
  */
-contract CreatorFeeManagerV2B is OwnableTwoSteps, ICreatorFeeManager {
+contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
     event NewMaximumRoyaltyFeeBp(uint256 maximumRoyaltyFeeBp);
     error MaximumRoyaltyFeeBpTooHigh();
 

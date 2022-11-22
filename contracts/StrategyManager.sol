@@ -20,13 +20,13 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     uint16 public countStrategies = 2;
 
     // Track strategy information for a strategy id
-    mapping(uint16 => Strategy) internal _strategyInfo;
+    mapping(uint16 => Strategy) public strategyInfo;
 
     /**
      * @notice Constructor
      */
     constructor() {
-        _strategyInfo[0] = Strategy({
+        strategyInfo[0] = Strategy({
             isActive: true,
             standardProtocolFee: 150,
             maxProtocolFee: 300,
@@ -36,7 +36,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             implementation: address(0)
         });
 
-        _strategyInfo[1] = Strategy({
+        strategyInfo[1] = Strategy({
             isActive: true,
             standardProtocolFee: 150,
             maxProtocolFee: 300,
@@ -71,7 +71,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             if (selectorTakerBid == bytes4(0)) revert StrategyHasNoSelector();
         }
 
-        _strategyInfo[countStrategies] = Strategy({
+        strategyInfo[countStrategies] = Strategy({
             isActive: true,
             standardProtocolFee: standardProtocolFee,
             minTotalFee: minTotalFee,
@@ -97,7 +97,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         uint16 newMinTotalFee,
         bool isActive
     ) external onlyOwner {
-        Strategy memory currentStrategyInfo = _strategyInfo[strategyId];
+        Strategy memory currentStrategyInfo = strategyInfo[strategyId];
         if (strategyId >= countStrategies) revert StrategyNotUsed();
 
         if (
@@ -105,7 +105,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             newMinTotalFee > currentStrategyInfo.maxProtocolFee
         ) revert StrategyProtocolFeeTooHigh();
 
-        _strategyInfo[strategyId] = Strategy({
+        strategyInfo[strategyId] = Strategy({
             isActive: isActive,
             standardProtocolFee: newStandardProtocolFee,
             minTotalFee: newMinTotalFee,
@@ -116,14 +116,5 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         });
 
         emit StrategyUpdated(strategyId, isActive, newStandardProtocolFee, newMinTotalFee);
-    }
-
-    /**
-     * @notice View strategy information for a given strategy id
-     * @param strategyId Strategy id
-     * @return strategy Information about the strategy
-     */
-    function strategyInfo(uint16 strategyId) external view returns (Strategy memory strategy) {
-        return _strategyInfo[strategyId];
     }
 }

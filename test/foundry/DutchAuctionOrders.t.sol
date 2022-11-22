@@ -75,11 +75,24 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
     function testNewStrategy() public {
         _setUpNewStrategy();
-        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(strategy.isActive);
-        assertEq(strategy.standardProtocolFee, _standardProtocolFee);
-        assertEq(strategy.maxProtocolFee, uint16(300));
-        assertEq(strategy.implementation, address(strategyDutchAuction));
+
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelectorTakerAsk,
+            bytes4 strategySelectorTakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(2);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
+        assertEq(strategyMinTotalFee, _minTotalFee);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
+        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategyImplementation, address(strategyDutchAuction));
     }
 
     function testDutchAuction(uint256 elapsedTime) public {

@@ -85,23 +85,35 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testNewStrategy() public {
-        Strategy memory newStrategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(newStrategy.isActive);
-        assertEq(newStrategy.standardProtocolFee, _standardProtocolFee);
-        assertEq(newStrategy.maxProtocolFee, uint16(300));
-        assertEq(newStrategy.implementation, address(strategyFloorPremium));
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelectorTakerAsk,
+            bytes4 strategySelectorTakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(2);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
+        assertEq(strategyMinTotalFee, _minTotalFee);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
+        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategyImplementation, address(strategyFloorPremium));
     }
 
     function testSetMaximumLatency() public {
-        _testSetMaximumLatency(looksRareProtocol.strategyInfo(2).implementation);
+        _testSetMaximumLatency(address(strategyFloorPremium));
     }
 
     function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(looksRareProtocol.strategyInfo(2).implementation);
+        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloorPremium));
     }
 
     function testSetMaximumLatencyNotOwner() public {
-        _testSetMaximumLatencyNotOwner(looksRareProtocol.strategyInfo(2).implementation);
+        _testSetMaximumLatencyNotOwner(address(strategyFloorPremium));
     }
 
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
@@ -119,14 +131,9 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testFloorOPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.7 ETH
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
-
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
@@ -154,13 +161,9 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testFloorOPremiumDesiredSalePriceLessThanMinPrice() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.9 ETH
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         makerAsk.minPrice = 9.9 ether;
         takerBid.maxPrice = makerAsk.minPrice;
@@ -193,11 +196,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testPriceFeedNotAvailable() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -219,8 +218,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testOraclePriceNotRecentEnough() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
         });
@@ -246,7 +243,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
 
     function testChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
@@ -286,8 +282,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testCallerNotLooksRareProtocol() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
         });
@@ -306,8 +300,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskItemIdsLengthNotOne() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
         });
@@ -336,8 +328,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskAmountsLengthNotOne() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
         });
@@ -366,8 +356,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskAmountNotOne() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
         });
@@ -397,8 +385,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testTakerBidAmountNotOne() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
         });
@@ -428,8 +414,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskTakerBidItemIdsMismatch() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
         });
@@ -459,8 +443,6 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testBidTooLow() public {
-        strategyFloorPremium = StrategyFloorPremium(looksRareProtocol.strategyInfo(2).implementation);
-
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 0.1 ether
         });

@@ -77,13 +77,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         {
             // 0 --> Creator fee and adjustment of protocol fee
             (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
-            uint256 minTotalFee = (price * _strategyInfo[makerBid.strategyId].minTotalFee) / 10000;
+            uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFee) / 10000;
 
             // 1 --> Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
                 fees[0] = minTotalFee;
             } else {
-                uint256 standardProtocolFee = (price * _strategyInfo[makerBid.strategyId].standardProtocolFee) / 10000;
+                uint256 standardProtocolFee = (price * strategyInfo[makerBid.strategyId].standardProtocolFee) / 10000;
 
                 if (fees[1] + standardProtocolFee > minTotalFee) {
                     fees[0] = standardProtocolFee;
@@ -127,13 +127,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         {
             // 0 --> Creator fee and adjustment of protocol fee
             (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
-            uint256 minTotalFee = (price * _strategyInfo[makerAsk.strategyId].minTotalFee) / 10000;
+            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFee) / 10000;
 
             // 1 --> Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
                 fees[0] = minTotalFee;
             } else {
-                uint256 standardProtocolFee = (price * _strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10000;
+                uint256 standardProtocolFee = (price * strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10000;
 
                 if (fees[1] + standardProtocolFee > minTotalFee) {
                     fees[0] = standardProtocolFee;
@@ -176,13 +176,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // Collection offer is not available for taker bid
             revert StrategyNotAvailable(makerAsk.strategyId);
         } else {
-            if (_strategyInfo[makerAsk.strategyId].isActive) {
+            if (strategyInfo[makerAsk.strategyId].isActive) {
                 bool isNonceInvalidated;
 
-                bytes4 selector = _strategyInfo[makerAsk.strategyId].selectorTakerBid;
+                bytes4 selector = strategyInfo[makerAsk.strategyId].selectorTakerBid;
                 if (selector == bytes4(0)) revert NoSelectorForTakerBid();
 
-                (bool status, bytes memory data) = _strategyInfo[makerAsk.strategyId].implementation.call(
+                (bool status, bytes memory data) = strategyInfo[makerAsk.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerBid, makerAsk)
                 );
 
@@ -230,13 +230,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             (price, itemIds, amounts) = _executeCollectionStrategyWithTakerAsk(takerAsk, makerBid);
             userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
         } else {
-            if (_strategyInfo[makerBid.strategyId].isActive) {
+            if (strategyInfo[makerBid.strategyId].isActive) {
                 bool isNonceInvalidated;
 
-                bytes4 selector = _strategyInfo[makerBid.strategyId].selectorTakerAsk;
+                bytes4 selector = strategyInfo[makerBid.strategyId].selectorTakerAsk;
                 if (selector == bytes4(0)) revert NoSelectorForTakerAsk();
 
-                (bool status, bytes memory data) = _strategyInfo[makerBid.strategyId].implementation.call(
+                (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerAsk, makerBid)
                 );
 

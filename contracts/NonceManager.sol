@@ -16,7 +16,7 @@ import {INonceManager} from "./interfaces/INonceManager.sol";
  */
 contract NonceManager is INonceManager {
     // Track bid and ask nonces for a user
-    mapping(address => UserBidAskNonces) internal _userBidAskNonces;
+    mapping(address => UserBidAskNonces) public userBidAskNonces;
 
     // Check whether the order nonce for a user was executed or cancelled
     mapping(address => mapping(uint112 => bool)) public userOrderNonce;
@@ -65,21 +65,12 @@ contract NonceManager is INonceManager {
      */
     function incrementBidAskNonces(bool bid, bool ask) external {
         if (bid) {
-            _userBidAskNonces[msg.sender].bidNonce++;
+            userBidAskNonces[msg.sender].bidNonce++;
         }
         if (ask) {
-            _userBidAskNonces[msg.sender].askNonce++;
+            userBidAskNonces[msg.sender].askNonce++;
         }
 
-        emit NewBidAskNonces(_userBidAskNonces[msg.sender].bidNonce, _userBidAskNonces[msg.sender].askNonce);
-    }
-
-    /**
-     * @notice Check the bid/ask nonce
-     * @param user User address
-     * @return bidAskNonces User bid ask nonces
-     */
-    function viewUserBidAskNonces(address user) external view returns (UserBidAskNonces memory bidAskNonces) {
-        return _userBidAskNonces[user];
+        emit NewBidAskNonces(userBidAskNonces[msg.sender].bidNonce, userBidAskNonces[msg.sender].askNonce);
     }
 }

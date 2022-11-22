@@ -289,7 +289,7 @@ contract LooksRareProtocol is
         {
             // Verify nonces
             if (
-                _userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
+                userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
                 userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
                 userOrderNonce[makerBid.signer][makerBid.orderNonce]
             ) revert WrongNonces();
@@ -361,7 +361,7 @@ contract LooksRareProtocol is
 
         // Verify nonces
         if (
-            _userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
+            userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
             userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
             userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
         ) revert WrongNonces();

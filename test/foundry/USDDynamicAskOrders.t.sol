@@ -87,23 +87,35 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function testNewStrategy() public {
-        Strategy memory strategy = looksRareProtocol.strategyInfo(2);
-        assertTrue(strategy.isActive);
-        assertEq(strategy.standardProtocolFee, _standardProtocolFee);
-        assertEq(strategy.maxProtocolFee, uint16(300));
-        assertEq(strategy.implementation, address(strategyUSDDynamicAsk));
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelectorTakerAsk,
+            bytes4 strategySelectorTakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(2);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
+        assertEq(strategyMinTotalFee, _minTotalFee);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
+        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategyImplementation, address(strategyUSDDynamicAsk));
     }
 
     function testSetMaximumLatency() public {
-        _testSetMaximumLatency(looksRareProtocol.strategyInfo(2).implementation);
+        _testSetMaximumLatency(address(strategyUSDDynamicAsk));
     }
 
     function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(looksRareProtocol.strategyInfo(2).implementation);
+        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyUSDDynamicAsk));
     }
 
     function testSetMaximumLatencyNotOwner() public {
-        _testSetMaximumLatencyNotOwner(looksRareProtocol.strategyInfo(2).implementation);
+        _testSetMaximumLatencyNotOwner(address(strategyUSDDynamicAsk));
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {

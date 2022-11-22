@@ -21,11 +21,23 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         emit StrategyUpdated(strategyId, isActive, standardProtocolFee, minTotalFee);
         looksRareProtocol.updateStrategy(strategyId, standardProtocolFee, minTotalFee, isActive);
 
-        Strategy memory strategy = looksRareProtocol.strategyInfo(strategyId);
-        assertTrue(strategy.isActive);
-        assertEq(strategy.standardProtocolFee, standardProtocolFee);
-        assertEq(strategy.minTotalFee, minTotalFee);
-        assertEq(strategy.implementation, address(0));
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelectorTakerAsk,
+            bytes4 strategySelectorTakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(strategyId);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, standardProtocolFee);
+        assertEq(strategyMinTotalFee, minTotalFee);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategySelectorTakerAsk, _emptyBytes4);
+        assertEq(strategySelectorTakerBid, _emptyBytes4);
+        assertEq(strategyImplementation, address(0));
     }
 
     /**
@@ -41,11 +53,23 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         emit StrategyUpdated(strategyId, isActive, standardProtocolFee, minTotalFee);
         looksRareProtocol.updateStrategy(strategyId, standardProtocolFee, minTotalFee, isActive);
 
-        Strategy memory strategy = looksRareProtocol.strategyInfo(strategyId);
-        assertFalse(strategy.isActive);
-        assertEq(strategy.standardProtocolFee, standardProtocolFee);
-        assertEq(strategy.minTotalFee, minTotalFee);
-        assertEq(strategy.implementation, address(0));
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelectorTakerAsk,
+            bytes4 strategySelectorTakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(strategyId);
+
+        assertFalse(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, standardProtocolFee);
+        assertEq(strategyMinTotalFee, minTotalFee);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategySelectorTakerAsk, _emptyBytes4);
+        assertEq(strategySelectorTakerBid, _emptyBytes4);
+        assertEq(strategyImplementation, address(0));
     }
 
     /**

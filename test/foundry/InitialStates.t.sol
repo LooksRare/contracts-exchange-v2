@@ -26,11 +26,23 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
         assertEq(domainSeparator, expectedDomainSeparator);
 
         for (uint16 i = 0; i < 2; i++) {
-            Strategy memory strategy = looksRareProtocol.strategyInfo(i);
-            assertTrue(strategy.isActive);
-            assertEq(strategy.standardProtocolFee, _standardProtocolFee);
-            assertEq(strategy.maxProtocolFee, uint16(300));
-            assertEq(strategy.implementation, address(0));
+            (
+                bool strategyIsActive,
+                uint16 strategyStandardProtocolFee,
+                uint16 strategyMinTotalFee,
+                uint16 strategyMaxProtocolFee,
+                bytes4 strategySelectorTakerAsk,
+                bytes4 strategySelectorTakerBid,
+                address strategyImplementation
+            ) = looksRareProtocol.strategyInfo(i);
+
+            assertTrue(strategyIsActive);
+            assertEq(strategyStandardProtocolFee, _standardProtocolFee);
+            assertEq(strategyMinTotalFee, _minTotalFee);
+            assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+            assertEq(strategySelectorTakerAsk, _emptyBytes4);
+            assertEq(strategySelectorTakerBid, _emptyBytes4);
+            assertEq(strategyImplementation, address(0));
         }
     }
 }

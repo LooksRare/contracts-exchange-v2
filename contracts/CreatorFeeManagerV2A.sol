@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// LooksRare unopinionated libraries
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 
 // Interfaces
@@ -57,8 +58,7 @@ contract CreatorFeeManagerV2A is ICreatorFeeManager {
                             receiver = newReceiver;
                         } else {
                             if (newReceiver != receiver) {
-                                receiver = address(0);
-                                break;
+                                revert BundleEIP2981NotAllowed(collection);
                             }
                         }
                     }

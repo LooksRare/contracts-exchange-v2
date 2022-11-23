@@ -14,15 +14,15 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
  * @notice It distributes the proper royalties.
  */
 contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
-    event NewMaximumRoyaltyFeeBp(uint256 maximumRoyaltyFeeBp);
-    error MaximumRoyaltyFeeBpTooHigh();
     error CreatorFeeTooHigh(address collection);
-
-    // Maximum royalty fee (in basis point)
-    uint256 public maximumRoyaltyFeeBp = 2500;
+    error MaximumCreatorFeeBpTooHigh();
+    event NewMaximumCreatorFeeBp(uint256 maximumCreatorFeeBp);
 
     // Royalty fee registry
     IRoyaltyFeeRegistry public immutable royaltyFeeRegistry;
+
+    // Maximum creator fee (in basis point)
+    uint256 public maximumCreatorFeeBp = 2500;
 
     /**
      * @notice Constructor
@@ -33,14 +33,14 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
     }
 
     /**
-     * @notice Update the maximum royalty fee (in bp)
-     * @param newMaximumRoyaltyFeeBp New maximum royalty fee (in basis point)
+     * @notice Update the maximum creator fee (in bp)
+     * @param newMaximumCreatorFeeBp New maximum creator fee (in basis point)
      */
-    function updateMaximumRoyaltyFeeBp(uint256 newMaximumRoyaltyFeeBp) external onlyOwner {
-        if (newMaximumRoyaltyFeeBp > 10000) revert MaximumRoyaltyFeeBpTooHigh();
-        maximumRoyaltyFeeBp = newMaximumRoyaltyFeeBp;
+    function updateMaximumCreatorFeeBp(uint256 newMaximumCreatorFeeBp) external onlyOwner {
+        if (newMaximumCreatorFeeBp > 10000) revert MaximumCreatorFeeBpTooHigh();
+        maximumCreatorFeeBp = newMaximumCreatorFeeBp;
 
-        emit NewMaximumRoyaltyFeeBp(newMaximumRoyaltyFeeBp);
+        emit NewMaximumCreatorFeeBp(newMaximumCreatorFeeBp);
     }
 
     /**
@@ -84,9 +84,9 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
             }
         }
 
-        // Revert if royalty is too high
+        // Revert if creator fee is too high
         if (receiver != address(0)) {
-            uint256 maximumCreatorFee = (price * maximumRoyaltyFeeBp) / 10000;
+            uint256 maximumCreatorFee = (price * maximumCreatorFeeBp) / 10000;
 
             if (maximumCreatorFee > creatorFee) {
                 revert CreatorFeeTooHigh(collection);

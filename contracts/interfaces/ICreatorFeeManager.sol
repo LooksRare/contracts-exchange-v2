@@ -6,6 +6,8 @@ pragma solidity ^0.8.17;
  * @author LooksRare protocol team (👀,💎)
  */
 interface ICreatorFeeManager {
+    error BundleEIP2981NotAllowed(address collection);
+
     function viewCreatorFee(
         address collection,
         uint256 price,

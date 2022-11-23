@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// LooksRare unopinionated libraries
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 
 // Interfaces
@@ -8,10 +9,10 @@ import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
 import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
- * @title CreatorFeeManagerV2A
+ * @title CreatorFeeManagerWithRebates
  * @notice It distributes a royalty rebate.
  */
-contract CreatorFeeManagerV2A is ICreatorFeeManager {
+contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
     // Standard royalty fee (in basis point)
     uint256 public constant STANDARD_ROYALTY_FEE_BP = 50;
 
@@ -57,8 +58,7 @@ contract CreatorFeeManagerV2A is ICreatorFeeManager {
                             receiver = newReceiver;
                         } else {
                             if (newReceiver != receiver) {
-                                receiver = address(0);
-                                break;
+                                revert BundleEIP2981NotAllowed(collection);
                             }
                         }
                     }

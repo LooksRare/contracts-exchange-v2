@@ -88,7 +88,7 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
         if (receiver != address(0)) {
             uint256 maximumCreatorFee = (price * maximumCreatorFeeBp) / 10000;
 
-            if (maximumCreatorFee > creatorFee) {
+            if (creatorFee > maximumCreatorFee) {
                 revert CreatorFeeTooHigh(collection);
             }
         }

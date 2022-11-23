@@ -22,7 +22,7 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
     IRoyaltyFeeRegistry public immutable royaltyFeeRegistry;
 
     // Maximum creator fee (in basis point)
-    uint256 public maximumCreatorFeeBp = 2500;
+    uint256 public maximumCreatorFeeBp = 1000;
 
     /**
      * @notice Constructor

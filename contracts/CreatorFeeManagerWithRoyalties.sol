@@ -16,6 +16,7 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
     event NewMaximumRoyaltyFeeBp(uint256 maximumRoyaltyFeeBp);
     error MaximumRoyaltyFeeBpTooHigh();
+    error CreatorFeeTooHigh(address collection);
 
     // Maximum royalty fee (in basis point)
     uint256 public maximumRoyaltyFeeBp = 2500;
@@ -83,10 +84,13 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
             }
         }
 
-        // Do a downward adjustment if necessary
+        // Revert if royalty is too high
         if (receiver != address(0)) {
-            uint256 maximumCreatorFee = price * maximumRoyaltyFeeBp;
-            creatorFee = maximumCreatorFee > creatorFee ? creatorFee : maximumCreatorFee;
+            uint256 maximumCreatorFee = (price * maximumRoyaltyFeeBp) / 10000;
+
+            if (maximumCreatorFee > creatorFee) {
+                revert CreatorFeeTooHigh(collection);
+            }
         }
     }
 }

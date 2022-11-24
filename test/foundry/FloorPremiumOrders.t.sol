@@ -218,9 +218,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testOraclePriceNotRecentEnough() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -244,9 +242,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     function testChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -282,9 +278,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testCallerNotLooksRareProtocol() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -300,9 +294,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskItemIdsLengthNotOne() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         uint256[] memory itemIds = new uint256[](0);
         makerAsk.itemIds = itemIds;
@@ -328,9 +320,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskAmountsLengthNotOne() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         uint256[] memory amounts = new uint256[](0);
         makerAsk.amounts = amounts;
@@ -356,9 +346,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskAmountNotOne() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
@@ -385,9 +373,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testTakerBidAmountNotOne() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
@@ -414,9 +400,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testMakerAskTakerBidItemIdsMismatch() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 2;
@@ -443,9 +427,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
     }
 
     function testBidTooLow() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: 0.1 ether
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
 
         takerBid.maxPrice = makerAsk.minPrice - 0.1 ether;
 

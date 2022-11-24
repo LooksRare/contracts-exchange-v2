@@ -497,6 +497,6 @@ contract LooksRareProtocol is
         bytes32 root,
         bytes32 orderHash
     ) internal pure {
-        if (!MerkleProof.verify(proof, root, orderHash)) revert WrongMerkleProof();
+        if (!MerkleProof.verifyCalldata(proof, root, orderHash)) revert WrongMerkleProof();
     }
 }

@@ -19,6 +19,7 @@ interface ILooksRareProtocol {
 
     event TakerBid(
         bytes32 orderHash,
+        bool isNonceInvalidated,
         uint128 orderNonce,
         address bidUser,
         address bidRecipient,
@@ -34,6 +35,7 @@ interface ILooksRareProtocol {
 
     event TakerAsk(
         bytes32 orderHash,
+        bool isNonceInvalidated,
         uint128 orderNonce,
         address bidUser,
         address bidRecipient,

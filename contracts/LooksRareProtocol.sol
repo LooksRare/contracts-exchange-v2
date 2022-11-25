@@ -98,7 +98,7 @@ contract LooksRareProtocol is
             }
 
             // Execute the transaction and fetch protocol fee
-            totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
+            totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, orderHash);
         }
 
         // Pay protocol fee (and affiliate fee if any)
@@ -239,7 +239,7 @@ contract LooksRareProtocol is
         OrderStructs.MakerAsk calldata makerAsk,
         address sender,
         bytes32 orderHash
-    ) external returns (uint256) {
+    ) external returns (uint256 protocolFeeAmount) {
         if (msg.sender != address(this)) revert WrongCaller();
         return _executeTakerBid(takerBid, makerAsk, sender, orderHash);
     }
@@ -271,14 +271,12 @@ contract LooksRareProtocol is
      * @notice Sell with taker ask (against maker bid)
      * @param takerAsk Taker ask order struct
      * @param makerBid Maker bid order struct
-     * @param sender Sender of the transaction (i.e., msg.sender)
      * @param orderHash Hash of the maker bid order
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
-        address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
         {
@@ -301,7 +299,7 @@ contract LooksRareProtocol is
             address[] memory recipients,
             uint256[] memory fees,
             bool isNonceInvalidated
-        ) = _executeStrategyForTakerAsk(takerAsk, makerBid, sender);
+        ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
 
         {
             // It starts at 1 since the protocol fee is transferred at the very end
@@ -319,28 +317,32 @@ contract LooksRareProtocol is
             _transferNFT(
                 makerBid.collection,
                 makerBid.assetType,
-                sender,
+                msg.sender,
                 makerBid.recipient == address(0) ? makerBid.signer : makerBid.recipient,
                 itemIds,
                 amounts
             );
-
-            emit TakerAsk(
-                orderHash,
-                isNonceInvalidated,
-                makerBid.orderNonce,
-                makerBid.signer,
-                makerBid.recipient,
-                sender,
-                makerBid.strategyId,
-                makerBid.currency,
-                makerBid.collection,
-                itemIds,
-                amounts,
-                recipients,
-                fees
-            );
         }
+
+        SignatureParameters memory signatureParameters = SignatureParameters({
+            orderHash: orderHash,
+            orderNonce: makerBid.orderNonce,
+            isNonceInvalidated: isNonceInvalidated,
+            signer: makerBid.signer
+        });
+
+        emit TakerAsk(
+            signatureParameters,
+            msg.sender,
+            makerBid.recipient,
+            makerBid.strategyId,
+            makerBid.currency,
+            makerBid.collection,
+            itemIds,
+            amounts,
+            recipients,
+            fees
+        );
 
         // Return protocol fee
         return fees[0];
@@ -401,23 +403,27 @@ contract LooksRareProtocol is
                     ++i;
                 }
             }
-
-            emit TakerBid(
-                orderHash,
-                isNonceInvalidated,
-                makerAsk.orderNonce,
-                sender,
-                takerBid.recipient == address(0) ? sender : takerBid.recipient,
-                makerAsk.signer,
-                makerAsk.strategyId,
-                makerAsk.currency,
-                makerAsk.collection,
-                itemIds,
-                amounts,
-                recipients,
-                fees
-            );
         }
+
+        SignatureParameters memory signatureParameters = SignatureParameters({
+            orderHash: orderHash,
+            orderNonce: makerAsk.orderNonce,
+            isNonceInvalidated: isNonceInvalidated,
+            signer: makerAsk.signer
+        });
+
+        emit TakerBid(
+            signatureParameters,
+            sender,
+            takerBid.recipient == address(0) ? sender : takerBid.recipient,
+            makerAsk.strategyId,
+            makerAsk.currency,
+            makerAsk.collection,
+            itemIds,
+            amounts,
+            recipients,
+            fees
+        );
 
         return fees[0];
     }

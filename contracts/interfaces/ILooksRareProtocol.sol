@@ -17,13 +17,17 @@ interface ILooksRareProtocol {
     event NewDomainSeparator();
     event AffiliatePayment(address affiliate, uint256 affiliateFee);
 
+    struct SignatureParameters {
+        bytes32 orderHash;
+        uint128 orderNonce;
+        bool isNonceInvalidated;
+        address signer;
+    }
+
     event TakerBid(
-        bytes32 orderHash,
-        bool isNonceInvalidated,
-        uint128 orderNonce,
+        SignatureParameters signatureParameters,
         address bidUser,
         address bidRecipient,
-        address askUser,
         uint256 strategyId,
         address currency,
         address collection,
@@ -34,12 +38,9 @@ interface ILooksRareProtocol {
     );
 
     event TakerAsk(
-        bytes32 orderHash,
-        bool isNonceInvalidated,
-        uint128 orderNonce,
-        address bidUser,
-        address bidRecipient,
+        SignatureParameters signatureParameters,
         address askUser,
+        address bidRecipient,
         uint256 strategyId,
         address currency,
         address collection,

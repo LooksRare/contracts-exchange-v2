@@ -7,15 +7,11 @@ import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChe
 // Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
-// Interfaces
-import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
-import {IStrategyManager} from "../interfaces/IStrategyManager.sol";
-
 // Other dependencies
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";
 
 /**
- * @title LooksRareProtocolHelpers
+ * @title ProtocolHelpers
  * @notice This contract contains helper view functions for order creation.
  * @author LooksRare protocol team (👀,💎)
  */
@@ -75,7 +71,7 @@ contract LooksRareProtocolHelpers is SignatureChecker {
      */
     function verifyMakerAskOrder(
         OrderStructs.MakerAsk memory makerAsk,
-        bytes memory makerSignature,
+        bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {
         bytes32 digest = computeDigestMakerAsk(makerAsk);
@@ -91,7 +87,7 @@ contract LooksRareProtocolHelpers is SignatureChecker {
      */
     function verifyMakerBidOrder(
         OrderStructs.MakerBid memory makerBid,
-        bytes memory makerSignature,
+        bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {
         bytes32 digest = computeDigestMakerBid(makerBid);
@@ -107,7 +103,7 @@ contract LooksRareProtocolHelpers is SignatureChecker {
      */
     function verifyMerkleRoot(
         OrderStructs.MerkleRoot memory merkleRoot,
-        bytes memory makerSignature,
+        bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {
         bytes32 digest = computeDigestMerkleRoot(merkleRoot);

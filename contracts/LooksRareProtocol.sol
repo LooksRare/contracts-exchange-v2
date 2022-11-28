@@ -515,7 +515,7 @@ contract LooksRareProtocol is
      */
     function _computeDigestAndVerify(
         bytes32 computedHash,
-        bytes memory makerSignature,
+        bytes calldata makerSignature,
         address signer
     ) internal view {
         // \x19\x01 is the encoding prefix

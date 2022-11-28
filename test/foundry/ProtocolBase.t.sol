@@ -19,6 +19,7 @@ import {MockERC721WithRoyalties} from "../mock/MockERC721WithRoyalties.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
 
 // Utils
+import {ProtocolHelpers} from "./utils/ProtocolHelpers.sol";
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
 import {MockRoyaltyFeeRegistry} from "./utils/MockRoyaltyFeeRegistry.sol";
 
@@ -34,6 +35,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     TransferManager public transferManager;
     MockRoyaltyFeeRegistry public royaltyFeeRegistry;
     CreatorFeeManagerWithRebates public creatorFeeManager;
+    ProtocolHelpers public protocolHelpers;
 
     WETH public weth;
 
@@ -78,6 +80,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         royaltyFeeRegistry = new MockRoyaltyFeeRegistry(9500);
         creatorFeeManager = new CreatorFeeManagerWithRebates(address(royaltyFeeRegistry));
         looksRareProtocol = new LooksRareProtocol(address(transferManager));
+        protocolHelpers = new ProtocolHelpers();
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 
         // Operations

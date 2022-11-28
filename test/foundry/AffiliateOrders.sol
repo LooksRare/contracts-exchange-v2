@@ -111,7 +111,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }
 
     /**
@@ -191,13 +191,13 @@ contract AffiliateOrdersTest is ProtocolBase {
             // Taker user has received the first two assets
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the first two nonces are marked as executed
-            assertTrue(looksRareProtocol.userOrderNonce(makerUser, uint112(i)));
+            assertEq(looksRareProtocol.userOrderNonce(makerUser, uint112(i)), MAGIC_VALUE_NONCE_EXECUTED);
         }
 
         // Taker user has not received the asset
         assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
         // Verify the nonce is NOT marked as executed
-        assertFalse(looksRareProtocol.userOrderNonce(makerUser, uint112(faultyTokenId)));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, uint112(faultyTokenId)), bytes32(0));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
@@ -291,6 +291,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         // Owner receives 80% of protocol fee
         assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + ((price * _minTotalFee) / 10000 - affiliateFee));
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }
 }

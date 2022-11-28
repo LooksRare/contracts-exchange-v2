@@ -165,7 +165,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     }
 
     function _signMakerBid(OrderStructs.MakerBid memory _makerBid, uint256 _signerKey) internal returns (bytes memory) {
-        bytes32 orderHash = _computeOrderHashMakerBid(_makerBid);
+        bytes32 orderHash = computeOrderHashMakerBid(_makerBid);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,
@@ -189,11 +189,11 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         return abi.encodePacked(r, s, v);
     }
 
-    function _computeOrderHashMakerBid(OrderStructs.MakerBid memory _makerBid) internal pure returns (bytes32) {
+    function computeOrderHashMakerBid(OrderStructs.MakerBid memory _makerBid) public pure returns (bytes32) {
         return _makerBid.hash();
     }
 
-    function _computeOrderHashMakerAsk(OrderStructs.MakerAsk memory _makerAsk) internal pure returns (bytes32) {
+    function computeOrderHashMakerAsk(OrderStructs.MakerAsk memory _makerAsk) public pure returns (bytes32) {
         return _makerAsk.hash();
     }
 }

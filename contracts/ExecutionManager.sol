@@ -178,7 +178,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
         if (makerAsk.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
-            userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
+            isNonceInvalidated = true;
         } else if (makerAsk.strategyId == 1) {
             // Collection offer is not available for taker bid
             revert StrategyNotAvailable(makerAsk.strategyId);
@@ -198,11 +198,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 }
 
                 (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
-
-                if (isNonceInvalidated) {
-                    // Invalidate order at this nonce for future execution
-                    userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = true;
-                }
             } else {
                 revert StrategyNotAvailable(makerAsk.strategyId);
             }
@@ -231,10 +226,10 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
         if (makerBid.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
-            userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
+            isNonceInvalidated = true;
         } else if (makerBid.strategyId == 1) {
             (price, itemIds, amounts) = _executeCollectionStrategyWithTakerAsk(takerAsk, makerBid);
-            userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
+            isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
                 bytes4 selector = strategyInfo[makerBid.strategyId].selectorTakerAsk;
@@ -251,11 +246,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 }
 
                 (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
-
-                if (isNonceInvalidated) {
-                    // Invalidate order at this nonce for future execution
-                    userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
-                }
             } else {
                 revert StrategyNotAvailable(makerBid.strategyId);
             }

@@ -35,7 +35,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 i // itemId
             );
 
-            orderHashes[i] = _computeOrderHashMakerAsk(makerAsk);
+            orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
         }
 
         OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({root: m.getRoot(orderHashes)});
@@ -97,7 +97,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }
 
     function testTakerAskMultipleOrdersSignedERC721() public {
@@ -126,7 +126,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 i // itemId
             );
 
-            orderHashes[i] = _computeOrderHashMakerBid(makerBid);
+            orderHashes[i] = computeOrderHashMakerBid(makerBid);
         }
 
         OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({root: m.getRoot(orderHashes)});
@@ -183,6 +183,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }
 }

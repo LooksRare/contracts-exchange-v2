@@ -82,4 +82,45 @@ contract StrategyFloorPremium is StrategyChainlinkMultiplePriceFeeds, StrategyCh
         amounts = makerAsk.amounts;
         isNonceInvalidated = true;
     }
+
+    function isValid(OrderStructs.TakerBid calldata takerBid, OrderStructs.MakerAsk calldata makerAsk)
+        external
+        view
+        returns (bool, bytes4)
+    {
+        if (
+            makerAsk.itemIds.length != 1 ||
+            makerAsk.amounts.length != 1 ||
+            makerAsk.amounts[0] != 1 ||
+            makerAsk.itemIds[0] != takerBid.itemIds[0] ||
+            takerBid.amounts[0] != 1
+        ) {
+            return (false, OrderInvalid.selector);
+        }
+
+        address priceFeed = priceFeeds[makerAsk.collection];
+        if (priceFeed == address(0)) {
+            return (false, PriceFeedNotAvailable.selector);
+        }
+
+        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
+        if (answer <= 0) {
+            return (false, InvalidChainlinkPrice.selector);
+        }
+        if (block.timestamp > maximumLatency + updatedAt) {
+            return (false, PriceNotRecentEnough.selector);
+        }
+
+        uint256 premiumAmount = abi.decode(makerAsk.additionalParameters, (uint256));
+        uint256 floorPrice = uint256(answer);
+        uint256 desiredPrice = floorPrice + premiumAmount;
+
+        if (takerBid.maxPrice < desiredPrice) {
+            if (takerBid.maxPrice < makerAsk.minPrice) {
+                return (false, BidTooLow.selector);
+            }
+        }
+
+        return (true, bytes4(0));
+    }
 }

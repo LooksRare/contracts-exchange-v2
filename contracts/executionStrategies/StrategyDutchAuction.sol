@@ -43,20 +43,30 @@ contract StrategyDutchAuction is StrategyBase {
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
-        (bool isValidOrder, bytes4 errorSelector) = isValid(takerBid, makerAsk);
+        uint256 itemIdsLength = makerAsk.itemIds.length;
 
-        if (!isValidOrder) {
-            if (errorSelector == OrderInvalid.selector) revert OrderInvalid();
-            if (errorSelector == BidTooLow.selector) revert BidTooLow();
+        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();
+        for (uint256 i; i < itemIdsLength; ) {
+            uint256 amount = makerAsk.amounts[i];
+            if (amount == 0) revert OrderInvalid();
+            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) revert OrderInvalid();
+
+            unchecked {
+                ++i;
+            }
         }
 
         uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
+
+        if (startPrice < makerAsk.minPrice) revert OrderInvalid();
 
         uint256 duration = makerAsk.endTime - makerAsk.startTime;
         uint256 decayPerSecond = (startPrice - makerAsk.minPrice) / duration;
 
         uint256 elapsedTime = block.timestamp - makerAsk.startTime;
         price = startPrice - elapsedTime * decayPerSecond;
+
+        if (takerBid.maxPrice < price) revert BidTooLow();
 
         isNonceInvalidated = true;
 
@@ -65,7 +75,7 @@ contract StrategyDutchAuction is StrategyBase {
     }
 
     function isValid(OrderStructs.TakerBid calldata takerBid, OrderStructs.MakerAsk calldata makerAsk)
-        public
+        external
         view
         returns (bool, bytes4)
     {

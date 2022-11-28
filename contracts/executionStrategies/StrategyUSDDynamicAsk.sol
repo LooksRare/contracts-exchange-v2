@@ -86,4 +86,53 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         amounts = makerAsk.amounts;
         isNonceInvalidated = true;
     }
+
+    function isValid(OrderStructs.TakerBid calldata takerBid, OrderStructs.MakerAsk calldata makerAsk)
+        external
+        view
+        returns (bool, bytes4)
+    {
+        uint256 itemIdsLength = makerAsk.itemIds.length;
+
+        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
+            return (false, OrderInvalid.selector);
+        }
+        for (uint256 i; i < itemIdsLength; ) {
+            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || makerAsk.amounts[i] != takerBid.amounts[i]) {
+                return (false, OrderInvalid.selector);
+            }
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
+        if (answer < 0) {
+            return (false, InvalidChainlinkPrice.selector);
+        }
+        if (block.timestamp - updatedAt > maximumLatency) {
+            return (false, PriceNotRecentEnough.selector);
+        }
+
+        // The client has to provide a USD value that is augmented by 1e18.
+        uint256 desiredSalePriceInUSD = abi.decode(makerAsk.additionalParameters, (uint256));
+
+        uint256 ethPriceInUSD = uint256(answer);
+        uint256 minPriceInETH = makerAsk.minPrice;
+        uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * 1e8) / ethPriceInUSD;
+
+        uint256 price;
+        if (minPriceInETH > desiredSalePriceInETH) {
+            price = minPriceInETH;
+        } else {
+            price = desiredSalePriceInETH;
+        }
+
+        if (takerBid.maxPrice < price) {
+            return (false, BidTooLow.selector);
+        }
+
+        return (true, bytes4(0));
+    }
 }

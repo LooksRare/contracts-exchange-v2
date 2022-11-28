@@ -34,3 +34,7 @@ test = 'test/foundry'
 tx_origin = '0x00a329c0648769a73afac7f9381e08fb43dbea72'
 verbosity = 0
 via_ir = false
+
+[rpc_endpoints]
+mainnet = "${MAINNET_RPC_URL}"
+goerli = "${GOERLI_RPC_URL}"

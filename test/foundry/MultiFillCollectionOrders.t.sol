@@ -216,7 +216,10 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is not marked as executed
-        assertFalse(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
+        assertEq(
+            looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce),
+            protocolHelpers.computeOrderHashMakerBid(makerBid)
+        );
 
         // Second taker user actions
         address secondTakerUser = address(420);
@@ -267,6 +270,6 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(secondTakerUser), _initialWETHBalanceUser + 3 * ((price * 9800) / 10000));
         // Verify the nonce is now marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }
 }

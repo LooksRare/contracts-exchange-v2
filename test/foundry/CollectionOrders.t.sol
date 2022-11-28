@@ -76,7 +76,7 @@ contract CollectionOrdersTest is ProtocolBase {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }
 
     /**
@@ -170,6 +170,6 @@ contract CollectionOrdersTest is ProtocolBase {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
-        assertTrue(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }
 }

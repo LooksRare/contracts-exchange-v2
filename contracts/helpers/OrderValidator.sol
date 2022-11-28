@@ -143,7 +143,17 @@ contract OrderValidator is SignatureChecker {
         view
         returns (uint256 validationCode)
     {
-        //
+        // 1. Check global ask nonce
+        (, uint112 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerAsk.signer);
+        if (makerAsk.askNonce < globalAskNonce) return USER_GLOBAL_ASK_NONCE_HIGHER;
+        if (makerAsk.askNonce > globalAskNonce) return USER_GLOBAL_ASK_NONCE_LOWER;
+
+        // 2. Check subset nonce
+        if (looksRareProtocol.userSubsetNonce(makerAsk.signer, makerAsk.subsetNonce))
+            return USER_SUBSET_NONCE_CANCELLED;
+
+        // 3. Check order nonce
+        // TODO: post refactor
     }
 
     /**
@@ -156,7 +166,17 @@ contract OrderValidator is SignatureChecker {
         view
         returns (uint256 validationCode)
     {
-        //
+        // 1. Check global ask nonce
+        (uint112 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerBid.signer);
+        if (makerBid.bidNonce < globalBidNonce) return USER_GLOBAL_ASK_NONCE_HIGHER;
+        if (makerBid.bidNonce > globalBidNonce) return USER_GLOBAL_ASK_NONCE_LOWER;
+
+        // 2. Check subset nonce
+        if (looksRareProtocol.userSubsetNonce(makerBid.signer, makerBid.subsetNonce))
+            return USER_SUBSET_NONCE_CANCELLED;
+
+        // 3. Check order nonce
+        // TODO: post refactor
     }
 
     /**

@@ -10,7 +10,6 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
-    string private constant MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
     StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
     bytes4 public selectorTakerAsk = _emptyBytes4;
     bytes4 public selectorTakerBid = StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector;
@@ -25,7 +24,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     uint256 private constant LATEST_CHAINLINK_ANSWER_IN_WAD = 126533075631 * 1e10;
 
     function setUp() public override {
-        vm.createSelectFork(MAINNET_RPC_URL, FORKED_BLOCK_NUMBER);
+        vm.createSelectFork(vm.rpcUrl("mainnet"), FORKED_BLOCK_NUMBER);
         super.setUp();
         _setUpUsers();
         _setUpNewStrategy();

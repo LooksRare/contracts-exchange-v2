@@ -13,7 +13,6 @@ import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 
 contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
-    string private constant GOERLI_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
     StrategyFloorBasedCollectionOffer public strategyFloorBasedCollectionOffer;
     bytes4 public selectorTakerAsk = StrategyFloorBasedCollectionOffer.executeStrategyWithTakerAsk.selector;
     bytes4 public selectorTakerBid = _emptyBytes4;
@@ -29,7 +28,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
     address private constant AZUKI_PRICE_FEED = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;
 
     function setUp() public override {
-        vm.createSelectFork(GOERLI_RPC_URL, FORKED_BLOCK_NUMBER);
+        vm.createSelectFork(vm.rpcUrl("goerli"), FORKED_BLOCK_NUMBER);
         super.setUp();
         _setUpUsers();
         _setUpNewStrategy();

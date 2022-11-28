@@ -84,4 +84,48 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
         amounts = takerAsk.amounts;
         isNonceInvalidated = true;
     }
+
+    function isValid(OrderStructs.TakerAsk calldata takerAsk, OrderStructs.MakerBid calldata makerBid)
+        external
+        view
+        returns (bool, bytes4)
+    {
+        if (
+            takerAsk.itemIds.length != 1 ||
+            takerAsk.amounts.length != 1 ||
+            takerAsk.amounts[0] != 1 ||
+            makerBid.amounts.length != 1 ||
+            makerBid.amounts[0] != 1
+        ) {
+            return (false, OrderInvalid.selector);
+        }
+
+        address priceFeed = priceFeeds[makerBid.collection];
+        if (priceFeed == address(0)) {
+            return (false, PriceFeedNotAvailable.selector);
+        }
+
+        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
+        if (answer <= 0) {
+            return (false, InvalidChainlinkPrice.selector);
+        }
+        if (block.timestamp > maximumLatency + updatedAt) {
+            return (false, PriceNotRecentEnough.selector);
+        }
+
+        uint256 discountAmount = abi.decode(makerBid.additionalParameters, (uint256));
+        uint256 floorPrice = uint256(answer);
+        if (floorPrice <= discountAmount) {
+            return (false, OrderInvalid.selector);
+        }
+        uint256 desiredPrice = floorPrice - discountAmount;
+
+        if (takerAsk.minPrice > desiredPrice) {
+            if (takerAsk.minPrice > makerBid.maxPrice) {
+                return (false, BidTooLow.selector);
+            }
+        }
+
+        return (true, bytes4(0));
+    }
 }

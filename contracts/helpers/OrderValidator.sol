@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 // LooksRare unopinionated libraries
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {IERC20} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC20.sol";
-import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
 import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1155.sol";
 
@@ -25,22 +24,21 @@ import "./ValidationCodeConstants.sol";
  * @notice This contract is used to check the validity of a maker ask/bid order in the LooksRareProtocol (v2).
  *         It performs checks for:
  *         1. Nonce-related issues (e.g., nonce executed or cancelled)
- *         2. Amount-related issues (e.g. order amount being 0)
- *         3. Signature-related issues
- *         4. Internal whitelist-related issues (i.e., currency or strategy not whitelisted)
- *         5. Creator fee related
- *         6. Timestamp-related issues (e.g., order expired)
- *         7. Transfer-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
- *         8. Other potential restrictions where it can tap into specific contracts with specific validation codes
+ *         2. Signature-related issues and merkle tree parameters
+ *         3. Internal whitelist-related issues (i.e., currency or strategy not whitelisted)
+ *         4. Creator-fee related
+ *         5. Timestamp-related issues (e.g., order expired)
+ *         6. Transfer-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
+ *         7. Other potential restrictions where it can tap into specific contracts with specific validation codes
  * @author LooksRare protocol team (👀,💎)
  */
-contract OrderValidatorV2A is SignatureChecker {
+contract OrderValidator is SignatureChecker {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;
 
     // Number of distinct criteria groups checked to evaluate the validity of an order
-    uint256 public immutable CRITERIA_GROUPS = 8;
+    uint256 public immutable CRITERIA_GROUPS = 7;
 
     // LooksRareProtocol domain separator
     bytes32 public domainSeparator;
@@ -64,6 +62,7 @@ contract OrderValidatorV2A is SignatureChecker {
 
     /**
      * @notice Adjust external parameters. Anyone can call this function.
+     * @dev It is meant to be adjustable if domain separator or creator fee manager were to change
      */
     function adjustExternalParameters() external {
         domainSeparator = looksRareProtocol.domainSeparator();
@@ -173,8 +172,22 @@ contract OrderValidatorV2A is SignatureChecker {
         // Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(makerAsk.currency)) return CURRENCY_NOT_WHITELISTED;
 
-        // Verify whether the strategy is whitelisted
-        // TODO
+        // Verify whether the strategy is valid
+        (
+            bool strategyIsActive,
+            ,
+            ,
+            ,
+            ,
+            bytes4 strategySelectorTakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(makerAsk.strategyId);
+
+        if (makerAsk.strategyId > 1 && strategyImplementation == address(0)) return STRATEGY_NOT_IMPLEMENTED;
+        // @dev Native collection offers (strategyId = 1) only exist for maker bid orders
+        if (makerAsk.strategyId != 0 && strategySelectorTakerBid == bytes32(0))
+            return STRATEGY_TAKER_BID_SELECTOR_INVALID;
+        if (!strategyIsActive) return STRATEGY_NOT_ACTIVE;
     }
 
     /**
@@ -190,12 +203,25 @@ contract OrderValidatorV2A is SignatureChecker {
         // Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(makerBid.currency)) return CURRENCY_NOT_WHITELISTED;
 
-        // Verify whether the strategy is whitelisted
-        // TODO
+        // Verify whether the strategy is valid
+        (
+            bool strategyIsActive,
+            ,
+            ,
+            ,
+            bytes4 strategySelectorTakerAsk,
+            ,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(makerBid.strategyId);
+
+        if (makerBid.strategyId > 1 && strategyImplementation == address(0)) return STRATEGY_NOT_IMPLEMENTED;
+        if (makerBid.strategyId > 1 && strategySelectorTakerAsk == bytes32(0))
+            return STRATEGY_TAKER_ASK_SELECTOR_INVALID;
+        if (!strategyIsActive) return STRATEGY_NOT_ACTIVE;
     }
 
     /**
-     * @notice Check the validity of order timestamps
+     * @notice Check the validity for order timestamps
      * @param makerAsk Maker ask order struct
      * @return validationCode Validation code
      */
@@ -209,7 +235,7 @@ contract OrderValidatorV2A is SignatureChecker {
     }
 
     /**
-     * @notice Check the validity of order timestamps
+     * @notice Check the validity for order timestamps
      * @param makerBid Maker bid order struct
      * @return validationCode Validation code
      */
@@ -241,26 +267,38 @@ contract OrderValidatorV2A is SignatureChecker {
     /**
      * @notice Check the validity of ERC721 approvals and balances required to process the maker ask order
      * @param collection Collection address
+     * @param assetType Asset type (e.g., 0 = ERC721)
      * @param user User address
-     * @param transferManager Transfer manager address
-     * @param tokenId TokenId
+     * @param itemIds Array of item ids
      */
     function _validateERC721AndEquivalents(
         address collection,
+        uint8 assetType,
         address user,
-        address transferManager,
-        uint256 tokenId
+        uint256[] memory itemIds
     ) internal view returns (uint256 validationCode) {
-        // 1. Verify tokenId is owned by user and catch revertion if ERC721 ownerOf fails
+        // 1. Verify transfer manager exists for assetType
+        (address transferManager, ) = looksRareProtocol.managerSelectorOfAssetType(assetType);
+        if (transferManager == address(0)) return NO_TRANSFER_MANAGER_SELECTOR;
+
+        // 2. Verify itemId is owned by user and catch revertion if ERC721 ownerOf fails
+        uint256 length = itemIds.length;
+
+        for (uint256 i; i < length; ) {
+            (bool success, bytes memory data) = collection.staticcall(
+                abi.encodeWithSelector(IERC721.ownerOf.selector, itemIds[i])
+            );
+
+            if (!success) return ERC721_ITEM_ID_DOES_NOT_EXIST;
+            if (abi.decode(data, (address)) != user) return ERC721_ITEM_ID_NOT_IN_BALANCE;
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        // 3. Verify if collection is approved by transfer manager
         (bool success, bytes memory data) = collection.staticcall(
-            abi.encodeWithSelector(IERC721.ownerOf.selector, tokenId)
-        );
-
-        if (!success) return ERC721_TOKEN_ID_DOES_NOT_EXIST;
-        if (abi.decode(data, (address)) != user) return ERC721_TOKEN_ID_NOT_IN_BALANCE;
-
-        // 2. Verify if collection is approved by transfer manager
-        (success, data) = collection.staticcall(
             abi.encodeWithSelector(IERC721.isApprovedForAll.selector, user, transferManager)
         );
 
@@ -270,45 +308,102 @@ contract OrderValidatorV2A is SignatureChecker {
         }
 
         if (!isApprovedAll) {
-            // 3. If collection is not approved by transfer manager, try to see if it is approved individually
-            (success, data) = collection.staticcall(abi.encodeWithSelector(IERC721.getApproved.selector, tokenId));
+            for (uint256 i; i < length; ) {
+                // 4. If collection is not approved by transfer manager, try to see if it is approved individually
+                (success, data) = collection.staticcall(
+                    abi.encodeWithSelector(IERC721.getApproved.selector, itemIds[i])
+                );
 
-            address approvedAddress;
-            if (success) {
-                approvedAddress = abi.decode(data, (address));
+                address approvedAddress;
+                if (success) {
+                    approvedAddress = abi.decode(data, (address));
+                }
+
+                if (approvedAddress != transferManager) return ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID;
+
+                unchecked {
+                    ++i;
+                }
             }
-
-            if (approvedAddress != transferManager) return ERC721_NO_APPROVAL_FOR_ALL_OR_TOKEN_ID;
         }
     }
 
     /**
      * @notice Check the validity of ERC1155 approvals and balances required to process the maker ask order
      * @param collection Collection address
+     * @param assetType Asset type (e.g., 0 = ERC721)
      * @param user User address
-     * @param transferManager Transfer manager address
-     * @param tokenId TokenId
-     * @param amount Amount
+     * @param itemIds Array of item ids
+     * @param amounts Array of amounts
      */
     function _validateERC1155(
         address collection,
+        uint8 assetType,
         address user,
-        address transferManager,
-        uint256 tokenId,
-        uint256 amount
+        uint256[] memory itemIds,
+        uint256[] memory amounts
     ) internal view returns (uint256 validationCode) {
+        // 1. Verify transfer manager exists for assetType
+        (address transferManager, ) = looksRareProtocol.managerSelectorOfAssetType(assetType);
+        if (transferManager == address(0)) return NO_TRANSFER_MANAGER_SELECTOR;
+
+        // 2. Verify each itemId is owned by user and catch revertion if ERC1155 ownerOf fails
+        address[] memory users = new address[](1);
+        users[0] = user;
+
+        uint256 length = itemIds.length;
+
+        // 2.1 Use balanceOfBatch
         (bool success, bytes memory data) = collection.staticcall(
-            abi.encodeWithSelector(IERC1155.balanceOf.selector, user, tokenId)
+            abi.encodeWithSelector(IERC1155.balanceOfBatch.selector, users, itemIds)
         );
 
-        if (!success) return ERC1155_BALANCE_OF_DOES_NOT_EXIST;
-        if (abi.decode(data, (uint256)) < amount) return ERC1155_BALANCE_OF_TOKEN_ID_INFERIOR_TO_AMOUNT;
+        if (success) {
+            uint256[] memory balances = abi.decode(data, (uint256[]));
+            for (uint256 i; i < length; ) {
+                if (balances[i] < amounts[i]) return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
+            }
+        } else {
+            // 2.2 If the balanceOfBatch doesn't work, use loop with balanceOf function
+            for (uint256 i; i < length; ) {
+                (success, data) = collection.staticcall(
+                    abi.encodeWithSelector(IERC1155.balanceOf.selector, user, itemIds[i])
+                );
+                if (!success) return ERC1155_BALANCE_OF_DOES_NOT_EXIST;
+                if (abi.decode(data, (uint256)) < amounts[i]) return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
+            }
+        }
 
+        // 3. Verify if collection is approved by transfer manager
         (success, data) = collection.staticcall(
             abi.encodeWithSelector(IERC1155.isApprovedForAll.selector, user, transferManager)
         );
 
         if (!success) return ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST;
         if (!abi.decode(data, (bool))) return ERC1155_NO_APPROVAL_FOR_ALL;
+    }
+
+    /**
+     * @notice Check all itemIds differ
+     * @param itemIds Array of item ids
+     */
+    function _verifyAllItemIdsDiffer(uint256[] memory itemIds) internal returns (uint256 validationCode) {
+        uint256 length = itemIds.length;
+
+        if (length > 1) {
+            for (uint256 i = 0; i < length; ) {
+                for (uint256 j = i; j < length; ) {
+                    if (itemIds[i] == itemIds[j]) {
+                        return SAME_ITEM_ID_IN_BUNDLE;
+                    }
+                    unchecked {
+                        ++j;
+                    }
+                }
+                unchecked {
+                    ++i;
+                }
+            }
+        }
     }
 }

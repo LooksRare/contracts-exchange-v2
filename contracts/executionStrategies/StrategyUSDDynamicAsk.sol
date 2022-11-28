@@ -64,7 +64,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         }
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
-        if (answer < 0) revert InvalidChainlinkPrice();
+        if (answer <= 0) revert InvalidChainlinkPrice();
         if (block.timestamp - updatedAt > maximumLatency) revert PriceNotRecentEnough();
 
         // The client has to provide a USD value that is augmented by 1e18.
@@ -108,7 +108,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         }
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
-        if (answer < 0) {
+        if (answer <= 0) {
             return (false, InvalidChainlinkPrice.selector);
         }
         if (block.timestamp - updatedAt > maximumLatency) {

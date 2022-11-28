@@ -8,6 +8,7 @@ import {StrategyUSDDynamicAsk} from "../../contracts/executionStrategies/Strateg
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
+import {InvalidChainlinkPriceFeed} from "./utils/InvalidChainlinkPriceFeed.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     string private constant MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
@@ -104,6 +105,56 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
     function testSetMaximumLatencyNotOwner() public {
         _testSetMaximumLatencyNotOwner(looksRareProtocol.strategyInfo(2).implementation);
+    }
+
+    function testUSDDynamicAskInvalidChainlinkPrice() public {
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
+        });
+
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.prank(_owner);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
+
+        InvalidChainlinkPriceFeed priceFeed = new InvalidChainlinkPriceFeed();
+        vm.etch(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419, address(priceFeed).code);
+
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
+
+        vm.expectRevert(errorSelector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyAffiliate
+        );
+
+        // Set price to 0
+        vm.store(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419, bytes32(uint256(0)), bytes32(uint256(1)));
+        (isValid, errorSelector) = strategyUSDDynamicAsk.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
+
+        vm.expectRevert(errorSelector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyAffiliate
+        );
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {

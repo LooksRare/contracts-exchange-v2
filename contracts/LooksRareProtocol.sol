@@ -290,11 +290,12 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) internal returns (uint256) {
         {
+            bytes32 userOrderNonceStatus = userOrderNonce[makerBid.signer][makerBid.orderNonce];
             // Verify nonces
             if (
                 userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
                 userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
-                userOrderNonce[makerBid.signer][makerBid.orderNonce]
+                (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) revert WrongNonces();
         }
 
@@ -305,6 +306,14 @@ contract LooksRareProtocol is
             uint256[] memory fees,
             bool isNonceInvalidated
         ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
+
+        if (isNonceInvalidated) {
+            // Invalidate order at this nonce for future execution
+            userOrderNonce[makerBid.signer][makerBid.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
+        } else {
+            // Set the order hash at this nonce
+            userOrderNonce[makerBid.signer][makerBid.orderNonce] = orderHash;
+        }
 
         {
             // It starts at 1 since the protocol fee is transferred at the very end
@@ -369,10 +378,12 @@ contract LooksRareProtocol is
     ) internal returns (uint256) {
         {
             // Verify nonces
+            bytes32 userOrderNonceStatus = userOrderNonce[makerAsk.signer][makerAsk.orderNonce];
+
             if (
                 userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
                 userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
-                userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
+                (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) revert WrongNonces();
         }
 
@@ -383,6 +394,14 @@ contract LooksRareProtocol is
             uint256[] memory fees,
             bool isNonceInvalidated
         ) = _executeStrategyForTakerBid(takerBid, makerAsk);
+
+        if (isNonceInvalidated) {
+            // Invalidate order at this nonce for future execution
+            userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
+        } else {
+            // Set the order hash at this nonce
+            userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = orderHash;
+        }
 
         {
             _transferNFT(

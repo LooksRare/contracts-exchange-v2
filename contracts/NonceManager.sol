@@ -15,11 +15,14 @@ import {INonceManager} from "./interfaces/INonceManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract NonceManager is INonceManager {
+    bytes32 public immutable MAGIC_VALUE_NONCE_EXECUTED =
+        0x000000000000000000000000000000000000000000000000000000000000002a;
+
     // Track bid and ask nonces for a user
     mapping(address => UserBidAskNonces) public userBidAskNonces;
 
     // Check whether the order nonce for a user was executed or cancelled
-    mapping(address => mapping(uint112 => bool)) public userOrderNonce;
+    mapping(address => mapping(uint112 => bytes32)) public userOrderNonce;
 
     // Check whether the subset nonce for a user was cancelled
     mapping(address => mapping(uint112 => bool)) public userSubsetNonce;
@@ -32,7 +35,7 @@ contract NonceManager is INonceManager {
         if (orderNonces.length == 0) revert WrongLengths();
 
         for (uint256 i; i < orderNonces.length; ) {
-            userOrderNonce[msg.sender][orderNonces[i]] = true;
+            userOrderNonce[msg.sender][orderNonces[i]] = MAGIC_VALUE_NONCE_EXECUTED;
             unchecked {
                 ++i;
             }

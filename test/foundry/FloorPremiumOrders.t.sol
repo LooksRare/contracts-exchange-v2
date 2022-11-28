@@ -139,6 +139,10 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(isValid);
+        assertEq(error, bytes4(0));
+
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -173,6 +177,10 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(isValid);
+        assertEq(error, bytes4(0));
+
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -202,7 +210,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setMaximumLatency(3600);
         vm.stopPrank();
 
-        vm.expectRevert(StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -224,7 +236,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        vm.expectRevert(StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -249,7 +265,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
-        vm.expectRevert(StrategyFloorPremium.InvalidChainlinkPrice.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, StrategyFloorPremium.InvalidChainlinkPrice.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -285,6 +305,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setMaximumLatency(3600);
         vm.stopPrank();
 
+        // Valid, but wrong caller
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(isValid);
+        assertEq(error, bytes4(0));
+
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
@@ -304,7 +329,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -330,7 +359,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -357,7 +390,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -384,7 +421,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -411,7 +452,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -436,7 +481,11 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        (bool isValid, bytes4 error) = strategyFloorPremium.isValid(takerBid, makerAsk);
+        assertTrue(!isValid);
+        assertEq(error, IExecutionStrategy.BidTooLow.selector);
+
+        vm.expectRevert(error);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(

@@ -178,7 +178,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
         if (makerAsk.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
-            userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
+            isNonceInvalidated = true;
         } else if (makerAsk.strategyId == 1) {
             // Collection offer is not available for taker bid
             revert StrategyNotAvailable(makerAsk.strategyId);
@@ -226,10 +226,10 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
         if (makerBid.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
-            userOrderNonce[makerBid.signer][makerBid.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
+            isNonceInvalidated = true;
         } else if (makerBid.strategyId == 1) {
             (price, itemIds, amounts) = _executeCollectionStrategyWithTakerAsk(takerAsk, makerBid);
-            userOrderNonce[makerBid.signer][makerBid.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
+            isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
                 bytes4 selector = strategyInfo[makerBid.strategyId].selectorTakerAsk;
@@ -246,11 +246,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 }
 
                 (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
-
-                if (isNonceInvalidated) {
-                    // Invalidate order at this nonce for future execution
-                    userOrderNonce[makerBid.signer][makerBid.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
-                }
             } else {
                 revert StrategyNotAvailable(makerBid.strategyId);
             }

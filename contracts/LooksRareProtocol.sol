@@ -86,6 +86,9 @@ contract LooksRareProtocol is
         bytes32[] calldata merkleProof,
         address affiliate
     ) external nonReentrant {
+        // Verify whether the currency is whitelisted but is not ETH (address(0))
+        if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) revert WrongCurrency();
+
         uint256 totalProtocolFee;
         {
             bytes32 orderHash = makerBid.hash();
@@ -123,6 +126,10 @@ contract LooksRareProtocol is
         address affiliate
     ) external payable nonReentrant {
         uint256 totalProtocolFee;
+
+        // Verify whether the currency is whitelisted
+        if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
+
         {
             bytes32 orderHash = makerAsk.hash();
             // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
@@ -172,6 +179,9 @@ contract LooksRareProtocol is
                 merkleProofs.length != length
             ) revert WrongLengths();
         }
+
+        // Verify whether the currency at array = 0 is whitelisted
+        if (!isCurrencyWhitelisted[makerAsks[0].currency]) revert WrongCurrency();
 
         {
             // Initialize protocol fee
@@ -280,11 +290,6 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) internal returns (uint256) {
         {
-            // Verify whether the currency is whitelisted but is not ETH (address(0))
-            if (!isCurrencyWhitelisted[makerBid.currency]) {
-                if (makerBid.currency != address(0)) revert WrongCurrency();
-            }
-
             // Verify nonces
             if (
                 userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
@@ -363,9 +368,6 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) internal returns (uint256) {
         {
-            // Verify whether the currency is available
-            if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
-
             // Verify nonces
             if (
                 userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||

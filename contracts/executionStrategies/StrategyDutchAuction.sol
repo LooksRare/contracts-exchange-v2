@@ -38,13 +38,45 @@ contract StrategyDutchAuction is StrategyBase {
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
+        (bool isValidOrder, bytes4 errorSelector) = isValid(takerBid, makerAsk);
+
+        if (!isValidOrder) {
+            if (errorSelector == OrderInvalid.selector) revert OrderInvalid();
+            if (errorSelector == BidTooLow.selector) revert BidTooLow();
+        }
+
+        uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
+
+        uint256 duration = makerAsk.endTime - makerAsk.startTime;
+        uint256 decayPerSecond = (startPrice - makerAsk.minPrice) / duration;
+
+        uint256 elapsedTime = block.timestamp - makerAsk.startTime;
+        price = startPrice - elapsedTime * decayPerSecond;
+
+        isNonceInvalidated = true;
+
+        itemIds = makerAsk.itemIds;
+        amounts = makerAsk.amounts;
+    }
+
+    function isValid(OrderStructs.TakerBid calldata takerBid, OrderStructs.MakerAsk calldata makerAsk)
+        public
+        view
+        returns (bool, bytes4)
+    {
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
-        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();
+        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
+            return (false, OrderInvalid.selector);
+        }
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
-            if (amount == 0) revert OrderInvalid();
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) revert OrderInvalid();
+            if (amount == 0) {
+                return (false, OrderInvalid.selector);
+            }
+            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) {
+                return (false, OrderInvalid.selector);
+            }
 
             unchecked {
                 ++i;
@@ -53,19 +85,20 @@ contract StrategyDutchAuction is StrategyBase {
 
         uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
 
-        if (startPrice < makerAsk.minPrice) revert OrderInvalid();
+        if (startPrice < makerAsk.minPrice) {
+            return (false, OrderInvalid.selector);
+        }
 
         uint256 duration = makerAsk.endTime - makerAsk.startTime;
         uint256 decayPerSecond = (startPrice - makerAsk.minPrice) / duration;
 
         uint256 elapsedTime = block.timestamp - makerAsk.startTime;
-        price = startPrice - elapsedTime * decayPerSecond;
+        uint256 price = startPrice - elapsedTime * decayPerSecond;
 
-        if (takerBid.maxPrice < price) revert BidTooLow();
+        if (takerBid.maxPrice < price) {
+            return (false, BidTooLow.selector);
+        }
 
-        isNonceInvalidated = true;
-
-        itemIds = makerAsk.itemIds;
-        amounts = makerAsk.amounts;
+        return (true, bytes4(0));
     }
 }

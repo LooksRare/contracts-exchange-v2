@@ -37,9 +37,28 @@ contract StrategyTokenIdsRange is StrategyBase {
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
+        (bool isValidOrder, bytes4 errorSelector) = isValid(takerAsk, makerBid);
+
+        if (!isValidOrder) {
+            if (errorSelector == OrderInvalid.selector) revert OrderInvalid();
+        }
+
+        price = makerBid.maxPrice;
+        itemIds = takerAsk.itemIds;
+        amounts = takerAsk.amounts;
+        isNonceInvalidated = true;
+    }
+
+    function isValid(OrderStructs.TakerAsk calldata takerAsk, OrderStructs.MakerBid calldata makerBid)
+        public
+        pure
+        returns (bool, bytes4)
+    {
         uint256 minTokenId = makerBid.itemIds[0];
         uint256 maxTokenId = makerBid.itemIds[1];
-        if (minTokenId >= maxTokenId) revert OrderInvalid();
+        if (minTokenId >= maxTokenId) {
+            return (false, OrderInvalid.selector);
+        }
 
         uint256 desiredAmount = makerBid.amounts[0];
         uint256 totalOfferedAmount;
@@ -50,10 +69,14 @@ contract StrategyTokenIdsRange is StrategyBase {
             // Force the client to sort the token IDs in ascending order,
             // in order to prevent taker ask from providing duplicated
             // token IDs
-            if (offeredTokenId <= lastTokenId) revert OrderInvalid();
+            if (offeredTokenId <= lastTokenId) {
+                return (false, OrderInvalid.selector);
+            }
 
             uint256 offeredAmount = makerBid.assetType == 0 ? 1 : takerAsk.amounts[i];
-            if (offeredAmount == 0) revert OrderInvalid();
+            if (offeredAmount == 0) {
+                return (false, OrderInvalid.selector);
+            }
 
             if (offeredTokenId >= minTokenId) {
                 if (offeredTokenId <= maxTokenId) {
@@ -68,13 +91,14 @@ contract StrategyTokenIdsRange is StrategyBase {
             }
         }
 
-        if (totalOfferedAmount != desiredAmount) revert OrderInvalid();
+        if (totalOfferedAmount != desiredAmount) {
+            return (false, OrderInvalid.selector);
+        }
 
-        price = makerBid.maxPrice;
-        if (price != takerAsk.minPrice) revert OrderInvalid();
+        if (makerBid.maxPrice != takerAsk.minPrice) {
+            return (false, OrderInvalid.selector);
+        }
 
-        itemIds = takerAsk.itemIds;
-        amounts = takerAsk.amounts;
-        isNonceInvalidated = true;
+        return (true, bytes4(0));
     }
 }

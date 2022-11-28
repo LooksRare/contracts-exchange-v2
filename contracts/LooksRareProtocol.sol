@@ -86,6 +86,9 @@ contract LooksRareProtocol is
         bytes32[] calldata merkleProof,
         address affiliate
     ) external nonReentrant {
+        // Verify whether the currency is whitelisted but is not ETH (address(0))
+        if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) revert WrongCurrency();
+
         uint256 totalProtocolFee;
         {
             bytes32 orderHash = makerBid.hash();
@@ -98,7 +101,7 @@ contract LooksRareProtocol is
             }
 
             // Execute the transaction and fetch protocol fee
-            totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
+            totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, orderHash);
         }
 
         // Pay protocol fee (and affiliate fee if any)
@@ -123,6 +126,10 @@ contract LooksRareProtocol is
         address affiliate
     ) external payable nonReentrant {
         uint256 totalProtocolFee;
+
+        // Verify whether the currency is whitelisted
+        if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
+
         {
             bytes32 orderHash = makerAsk.hash();
             // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
@@ -172,6 +179,9 @@ contract LooksRareProtocol is
                 merkleProofs.length != length
             ) revert WrongLengths();
         }
+
+        // Verify whether the currency at array = 0 is whitelisted
+        if (!isCurrencyWhitelisted[makerAsks[0].currency]) revert WrongCurrency();
 
         {
             // Initialize protocol fee
@@ -239,7 +249,7 @@ contract LooksRareProtocol is
         OrderStructs.MakerAsk calldata makerAsk,
         address sender,
         bytes32 orderHash
-    ) external returns (uint256) {
+    ) external returns (uint256 protocolFeeAmount) {
         if (msg.sender != address(this)) revert WrongCaller();
         return _executeTakerBid(takerBid, makerAsk, sender, orderHash);
     }
@@ -271,21 +281,14 @@ contract LooksRareProtocol is
      * @notice Sell with taker ask (against maker bid)
      * @param takerAsk Taker ask order struct
      * @param makerBid Maker bid order struct
-     * @param sender Sender of the transaction (i.e., msg.sender)
      * @param orderHash Hash of the maker bid order
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
-        address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
-        // Verify whether the currency is whitelisted but is not ETH (address(0))
-        if (!isCurrencyWhitelisted[makerBid.currency]) {
-            if (makerBid.currency != address(0)) revert WrongCurrency();
-        }
-
         {
             // Verify nonces
             if (
@@ -299,36 +302,44 @@ contract LooksRareProtocol is
             uint256[] memory itemIds,
             uint256[] memory amounts,
             address[] memory recipients,
-            uint256[] memory fees
-        ) = _executeStrategyForTakerAsk(takerAsk, makerBid, sender);
+            uint256[] memory fees,
+            bool isNonceInvalidated
+        ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
 
-        // It starts at 1 since the protocol fee is transferred at the very end
-        for (uint256 i = 1; i < 3; ) {
-            if (recipients[i] != address(0)) {
-                if (fees[i] != 0) {
-                    _transferFungibleTokens(makerBid.currency, makerBid.signer, recipients[i], fees[i]);
+        {
+            // It starts at 1 since the protocol fee is transferred at the very end
+            for (uint256 i = 1; i < 3; ) {
+                if (recipients[i] != address(0)) {
+                    if (fees[i] != 0) {
+                        _transferFungibleTokens(makerBid.currency, makerBid.signer, recipients[i], fees[i]);
+                    }
+                }
+                unchecked {
+                    ++i;
                 }
             }
-            unchecked {
-                ++i;
-            }
+
+            _transferNFT(
+                makerBid.collection,
+                makerBid.assetType,
+                msg.sender,
+                makerBid.recipient == address(0) ? makerBid.signer : makerBid.recipient,
+                itemIds,
+                amounts
+            );
         }
 
-        _transferNFT(
-            makerBid.collection,
-            makerBid.assetType,
-            sender,
-            makerBid.recipient == address(0) ? makerBid.signer : makerBid.recipient,
-            itemIds,
-            amounts
-        );
+        SignatureParameters memory signatureParameters = SignatureParameters({
+            orderHash: orderHash,
+            orderNonce: makerBid.orderNonce,
+            isNonceInvalidated: isNonceInvalidated,
+            signer: makerBid.signer
+        });
 
         emit TakerAsk(
-            orderHash,
-            makerBid.orderNonce,
-            makerBid.signer,
-            makerBid.recipient == address(0) ? makerBid.signer : makerBid.recipient,
-            sender,
+            signatureParameters,
+            msg.sender,
+            makerBid.recipient,
             makerBid.strategyId,
             makerBid.currency,
             makerBid.collection,
@@ -356,50 +367,57 @@ contract LooksRareProtocol is
         address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
-        // Verify whether the currency is available
-        if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
-
-        // Verify nonces
-        if (
-            userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
-            userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
-            userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
-        ) revert WrongNonces();
+        {
+            // Verify nonces
+            if (
+                userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
+                userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
+                userOrderNonce[makerAsk.signer][makerAsk.orderNonce]
+            ) revert WrongNonces();
+        }
 
         (
             uint256[] memory itemIds,
             uint256[] memory amounts,
             address[] memory recipients,
-            uint256[] memory fees
+            uint256[] memory fees,
+            bool isNonceInvalidated
         ) = _executeStrategyForTakerBid(takerBid, makerAsk);
 
-        _transferNFT(
-            makerAsk.collection,
-            makerAsk.assetType,
-            makerAsk.signer,
-            takerBid.recipient == address(0) ? sender : takerBid.recipient,
-            itemIds,
-            amounts
-        );
+        {
+            _transferNFT(
+                makerAsk.collection,
+                makerAsk.assetType,
+                makerAsk.signer,
+                takerBid.recipient == address(0) ? sender : takerBid.recipient,
+                itemIds,
+                amounts
+            );
 
-        // @dev It starts at 1 since 0 is the protocol fee
-        for (uint256 i = 1; i < 3; ) {
-            if (recipients[i] != address(0)) {
-                if (fees[i] != 0) {
-                    _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
+            // @dev It starts at 1 since 0 is the protocol fee
+            for (uint256 i = 1; i < 3; ) {
+                if (recipients[i] != address(0)) {
+                    if (fees[i] != 0) {
+                        _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
+                    }
                 }
-            }
-            unchecked {
-                ++i;
+                unchecked {
+                    ++i;
+                }
             }
         }
 
+        SignatureParameters memory signatureParameters = SignatureParameters({
+            orderHash: orderHash,
+            orderNonce: makerAsk.orderNonce,
+            isNonceInvalidated: isNonceInvalidated,
+            signer: makerAsk.signer
+        });
+
         emit TakerBid(
-            orderHash,
-            makerAsk.orderNonce,
+            signatureParameters,
             sender,
             takerBid.recipient == address(0) ? sender : takerBid.recipient,
-            makerAsk.signer,
             makerAsk.strategyId,
             makerAsk.currency,
             makerAsk.collection,

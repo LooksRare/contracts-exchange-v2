@@ -64,7 +64,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             uint256[] memory itemIds,
             uint256[] memory amounts,
             address[] memory recipients,
-            uint256[] memory fees
+            uint256[] memory fees,
+            bool isNonceInvalidated
         )
     {
         uint256 price;
@@ -72,11 +73,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         recipients = new address[](3);
         fees = new uint256[](3);
 
-        (price, itemIds, amounts) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
+        (price, itemIds, amounts, isNonceInvalidated) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
         {
             // 0 --> Creator fee and adjustment of protocol fee
-            (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
+            if (address(creatorFeeManager) != address(0)) {
+                (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
+            }
             uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFee) / 10000;
 
             // 1 --> Protocol fee
@@ -114,7 +117,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             uint256[] memory itemIds,
             uint256[] memory amounts,
             address[] memory recipients,
-            uint256[] memory fees
+            uint256[] memory fees,
+            bool isNonceInvalidated
         )
     {
         uint256 price;
@@ -122,11 +126,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         recipients = new address[](3);
         fees = new uint256[](3);
 
-        (price, itemIds, amounts) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
+        (price, itemIds, amounts, isNonceInvalidated) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 
         {
             // 0 --> Creator fee and adjustment of protocol fee
-            (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
+            if (address(creatorFeeManager) != address(0)) {
+                (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
+            }
             uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFee) / 10000;
 
             // 1 --> Protocol fee
@@ -163,7 +169,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         returns (
             uint256 price,
             uint256[] memory itemIds,
-            uint256[] memory amounts
+            uint256[] memory amounts,
+            bool isNonceInvalidated
         )
     {
         // Verify the order validity for timestamps
@@ -177,8 +184,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             revert StrategyNotAvailable(makerAsk.strategyId);
         } else {
             if (strategyInfo[makerAsk.strategyId].isActive) {
-                bool isNonceInvalidated;
-
                 bytes4 selector = strategyInfo[makerAsk.strategyId].selectorTakerBid;
                 if (selector == bytes4(0)) revert NoSelectorForTakerBid();
 
@@ -217,7 +222,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         returns (
             uint256 price,
             uint256[] memory itemIds,
-            uint256[] memory amounts
+            uint256[] memory amounts,
+            bool isNonceInvalidated
         )
     {
         // Verify the order validity for timestamps
@@ -231,8 +237,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             userOrderNonce[makerBid.signer][makerBid.orderNonce] = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
-                bool isNonceInvalidated;
-
                 bytes4 selector = strategyInfo[makerBid.strategyId].selectorTakerAsk;
                 if (selector == bytes4(0)) revert NoSelectorForTakerAsk();
 

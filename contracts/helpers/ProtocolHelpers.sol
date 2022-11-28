@@ -15,7 +15,7 @@ import {LooksRareProtocol} from "../LooksRareProtocol.sol";
  * @notice This contract contains helper view functions for order creation.
  * @author LooksRare protocol team (👀,💎)
  */
-contract LooksRareProtocolHelpers is SignatureChecker {
+contract ProtocolHelpers is SignatureChecker {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;

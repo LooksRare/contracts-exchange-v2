@@ -147,7 +147,7 @@ contract LooksRareProtocol is
         _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFee);
 
         // Return ETH if any
-        _returnETHIfAny();
+        _returnETHIfAnyWithOneWeiLeft();
     }
 
     /**
@@ -232,7 +232,7 @@ contract LooksRareProtocol is
         }
 
         // Return ETH if any
-        _returnETHIfAny();
+        _returnETHIfAnyWithOneWeiLeft();
     }
 
     /**

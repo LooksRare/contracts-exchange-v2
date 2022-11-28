@@ -365,7 +365,7 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(address(takerUser).balance, _initialETHBalanceUser - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9800) * (numberPurchases - 1)) / 10000);
-        // No leftover in the balance of the contract
-        assertEq(address(looksRareProtocol).balance, 0);
+        // 1 wei left in the balance of the contract
+        assertEq(address(looksRareProtocol).balance, 1);
     }
 }

@@ -6,6 +6,7 @@ import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChe
 import {IERC20} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC20.sol";
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
 import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1155.sol";
+import {IERC1271} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1271.sol";
 
 // Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
@@ -407,6 +408,57 @@ contract OrderValidator is SignatureChecker {
                     ++i;
                 }
             }
+        }
+    }
+
+    /**
+     * @notice Validate signature
+     * @param hash Message hash
+     * @param signer Signer address
+     * @param signature A 64 or 65 bytes signature
+     * @return validationCode Validation code
+     */
+    function _validateSignature(
+        bytes32 hash,
+        address signer,
+        bytes calldata signature
+    ) internal view returns (uint256 validationCode) {
+        // 1. Logic if EOA
+        if (signer.code.length == 0) {
+            bytes32 r;
+            bytes32 s;
+            uint8 v;
+
+            if (signature.length == 64) {
+                bytes32 vs;
+                assembly {
+                    r := calldataload(signature.offset)
+                    vs := calldataload(add(signature.offset, 0x20))
+                    s := and(vs, 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
+                    v := add(shr(255, vs), 27)
+                }
+            } else if (signature.length == 65) {
+                assembly {
+                    r := calldataload(signature.offset)
+                    s := calldataload(add(signature.offset, 0x20))
+                    v := byte(0, calldataload(add(signature.offset, 0x40)))
+                }
+            } else {
+                return WRONG_SIGNATURE_LENGTH;
+            }
+
+            if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0)
+                return INVALID_S_PARAMETER_EOA;
+
+            if (v != 27 && v != 28) return INVALID_V_PARAMETER_EOA;
+
+            address recoveredSigner = ecrecover(hash, v, r, s);
+            if (signer == address(0)) return NULL_SIGNER_EOA;
+
+            if (signer != recoveredSigner) return WRONG_SIGNER_EOA;
+        } else {
+            // 2. Logic if ERC1271
+            if (IERC1271(signer).isValidSignature(hash, signature) == 0x1626ba7e) return SIGNATURE_INVALID_EIP1271;
         }
     }
 }

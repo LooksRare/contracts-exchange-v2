@@ -28,16 +28,10 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
      * @notice Execute collection strategy with taker bid
      * @dev It always reverts.
      */
-    function executeStrategyWithTakerBid(OrderStructs.TakerBid calldata, OrderStructs.MakerAsk calldata)
-        external
-        pure
-        returns (
-            uint256,
-            uint256[] calldata,
-            uint256[] calldata,
-            bool
-        )
-    {
+    function executeStrategyWithTakerBid(
+        OrderStructs.TakerBid calldata,
+        OrderStructs.MakerAsk calldata
+    ) external pure returns (uint256, uint256[] calldata, uint256[] calldata, bool) {
         revert OrderInvalid();
     }
 
@@ -51,12 +45,7 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
         OrderStructs.MakerBid calldata makerBid
     )
         external
-        returns (
-            uint256 price,
-            uint256[] calldata itemIds,
-            uint256[] calldata amounts,
-            bool isNonceInvalidated
-        )
+        returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert OrderInvalid();
         // Only available for ERC721

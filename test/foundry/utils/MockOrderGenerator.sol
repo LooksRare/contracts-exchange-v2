@@ -6,11 +6,9 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {ProtocolHelpers} from "./ProtocolHelpers.sol";
 
 contract MockOrderGenerator is ProtocolHelpers {
-    function _createMockMakerAskAndTakerBid(address collection)
-        internal
-        view
-        returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid)
-    {
+    function _createMockMakerAskAndTakerBid(
+        address collection
+    ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
         uint8 assetType;
 
         // If ERC1155, adjust asset type
@@ -40,11 +38,10 @@ contract MockOrderGenerator is ProtocolHelpers {
         );
     }
 
-    function _createMockMakerBidAndTakerAsk(address collection, address currency)
-        internal
-        view
-        returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk)
-    {
+    function _createMockMakerBidAndTakerAsk(
+        address collection,
+        address currency
+    ) internal view returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
         uint8 assetType;
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0x4e2312e0)) {
@@ -73,11 +70,10 @@ contract MockOrderGenerator is ProtocolHelpers {
         );
     }
 
-    function _createMockMakerAskAndTakerBidWithBundle(address collection, uint256 numberTokens)
-        internal
-        view
-        returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid)
-    {
+    function _createMockMakerAskAndTakerBidWithBundle(
+        address collection,
+        uint256 numberTokens
+    ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
         uint8 assetType;
 
         // If ERC1155, adjust asset type

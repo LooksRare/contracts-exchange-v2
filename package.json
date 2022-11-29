@@ -15,6 +15,11 @@
     "type": "git",
     "url": "https://github.com/LooksRare/contracts-exchange-v2.git"
   },
+  "files": [
+    "/abis/*.json",
+    "/contracts/**/*.sol",
+    "/test/foundry/utils/MockRoyaltyFeeRegistry.sol"
+  ],
   "scripts": {
     "compile": "hardhat compile",
     "compile:forge": "forge compile",

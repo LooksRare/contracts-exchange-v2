@@ -80,18 +80,8 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
         isNonceInvalidated = true;
     }
 
-    function isValid(OrderStructs.TakerAsk calldata takerAsk, OrderStructs.MakerBid calldata makerBid)
-        external
-        view
-        returns (bool, bytes4)
-    {
-        if (
-            takerAsk.itemIds.length != 1 ||
-            takerAsk.amounts.length != 1 ||
-            takerAsk.amounts[0] != 1 ||
-            makerBid.amounts.length != 1 ||
-            makerBid.amounts[0] != 1
-        ) {
+    function isValid(OrderStructs.MakerBid calldata makerBid) external view returns (bool, bytes4) {
+        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
             return (false, OrderInvalid.selector);
         }
 
@@ -112,13 +102,6 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
         uint256 floorPrice = uint256(answer);
         if (floorPrice <= discountAmount) {
             return (false, OrderInvalid.selector);
-        }
-        uint256 desiredPrice = floorPrice - discountAmount;
-
-        if (takerAsk.minPrice > desiredPrice) {
-            if (takerAsk.minPrice > makerBid.maxPrice) {
-                return (false, BidTooLow.selector);
-            }
         }
 
         return (true, bytes4(0));

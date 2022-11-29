@@ -28,10 +28,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function _createMakerAskAndTakerBid(
-        uint256 numberOfItems,
-        uint256 numberOfAmounts
-    ) private returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
+    function _createMakerAskAndTakerBid(uint256 numberOfItems, uint256 numberOfAmounts)
+        private
+        returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid)
+    {
         uint256[] memory itemIds = new uint256[](numberOfItems);
         for (uint256 i; i < numberOfItems; ) {
             mockERC721.mint(makerUser, i + 1);

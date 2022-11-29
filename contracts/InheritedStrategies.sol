@@ -26,7 +26,15 @@ contract InheritedStrategies is IInheritedStrategies {
     function _executeStandardSaleStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
-    ) internal pure returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts) {
+    )
+        internal
+        pure
+        returns (
+            uint256 price,
+            uint256[] calldata itemIds,
+            uint256[] calldata amounts
+        )
+    {
         price = makerAsk.minPrice;
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
@@ -61,7 +69,15 @@ contract InheritedStrategies is IInheritedStrategies {
     function _executeStandardSaleStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
-    ) internal pure returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts) {
+    )
+        internal
+        pure
+        returns (
+            uint256 price,
+            uint256[] calldata itemIds,
+            uint256[] calldata amounts
+        )
+    {
         price = makerBid.maxPrice;
         itemIds = makerBid.itemIds;
         amounts = makerBid.amounts;
@@ -96,7 +112,15 @@ contract InheritedStrategies is IInheritedStrategies {
     function _executeCollectionStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
-    ) internal pure returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts) {
+    )
+        internal
+        pure
+        returns (
+            uint256 price,
+            uint256[] calldata itemIds,
+            uint256[] calldata amounts
+        )
+    {
         price = makerBid.maxPrice;
         itemIds = takerAsk.itemIds;
         amounts = makerBid.amounts;

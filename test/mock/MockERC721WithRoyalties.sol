@@ -26,10 +26,12 @@ contract MockERC721WithRoyalties is MockERC721, IERC2981 {
         _royaltyFeeForTokenId[tokenId] = royaltyFee;
     }
 
-    function royaltyInfo(
-        uint256 tokenId,
-        uint256 salePrice
-    ) external view override returns (address royaltyRecipient, uint256 royaltyAmount) {
+    function royaltyInfo(uint256 tokenId, uint256 salePrice)
+        external
+        view
+        override
+        returns (address royaltyRecipient, uint256 royaltyAmount)
+    {
         address recipient = _royaltyRecipientForTokenId[tokenId] == address(0)
             ? DEFAULT_ROYALTY_RECIPIENT
             : _royaltyRecipientForTokenId[tokenId];

@@ -46,9 +46,10 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         );
     }
 
-    function _createMakerBidAndTakerAsk(
-        uint256 discount
-    ) private returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
+    function _createMakerBidAndTakerAsk(uint256 discount)
+        private
+        returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk)
+    {
         mockERC721.mint(takerUser, 1);
 
         // Prepare the order hash

@@ -164,7 +164,15 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     function _executeStrategyHooksForTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
-    ) internal returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
+    )
+        internal
+        returns (
+            uint256 price,
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
+            bool isNonceInvalidated
+        )
+    {
         // Verify the order validity for timestamps
         _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
 
@@ -204,7 +212,15 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     function _executeStrategyHooksForTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
-    ) internal returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
+    )
+        internal
+        returns (
+            uint256 price,
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
+            bool isNonceInvalidated
+        )
+    {
         // Verify the order validity for timestamps
         _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
 

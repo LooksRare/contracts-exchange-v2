@@ -175,10 +175,10 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         return abi.encodePacked(r, s, v);
     }
 
-    function _signMerkleProof(
-        OrderStructs.MerkleRoot memory _merkleRoot,
-        uint256 _signerKey
-    ) internal returns (bytes memory) {
+    function _signMerkleProof(OrderStructs.MerkleRoot memory _merkleRoot, uint256 _signerKey)
+        internal
+        returns (bytes memory)
+    {
         bytes32 merkleRootHash = _merkleRoot.hash();
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(

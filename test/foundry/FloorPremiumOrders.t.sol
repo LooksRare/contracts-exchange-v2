@@ -46,9 +46,10 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         );
     }
 
-    function _createMakerAskAndTakerBid(
-        uint256 premium
-    ) private returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
+    function _createMakerAskAndTakerBid(uint256 premium)
+        private
+        returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid)
+    {
         mockERC721.mint(makerUser, 1);
 
         // Prepare the order hash

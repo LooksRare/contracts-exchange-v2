@@ -6,8 +6,8 @@ pragma solidity ^0.8.0;
  * @author LooksRare protocol team (👀,💎)
  */
 interface IRoyaltyFeeRegistry {
-    function royaltyInfo(
-        address collection,
-        uint256 price
-    ) external view returns (address receiver, uint256 royaltyFee);
+    function royaltyInfo(address collection, uint256 price)
+        external
+        view
+        returns (address receiver, uint256 royaltyFee);
 }

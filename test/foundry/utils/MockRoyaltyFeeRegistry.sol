@@ -83,7 +83,15 @@ contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
      * @notice View royalty info for a collection address
      * @param collection collection address
      */
-    function royaltyFeeInfoCollection(address collection) external view returns (address, address, uint256) {
+    function royaltyFeeInfoCollection(address collection)
+        external
+        view
+        returns (
+            address,
+            address,
+            uint256
+        )
+    {
         return (
             _royaltyFeeInfoCollection[collection].setter,
             _royaltyFeeInfoCollection[collection].receiver,

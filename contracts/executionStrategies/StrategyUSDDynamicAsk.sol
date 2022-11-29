@@ -82,6 +82,11 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         isNonceInvalidated = true;
     }
 
+    /**
+     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     */
     function isValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
         uint256 itemIdsLength = makerAsk.itemIds.length;
 

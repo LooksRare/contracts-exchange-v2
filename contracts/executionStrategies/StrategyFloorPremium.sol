@@ -78,6 +78,11 @@ contract StrategyFloorPremium is StrategyChainlinkMultiplePriceFeeds, StrategyCh
         isNonceInvalidated = true;
     }
 
+    /**
+     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     */
     function isValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
         if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
             return (false, OrderInvalid.selector);

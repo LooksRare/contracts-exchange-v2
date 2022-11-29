@@ -13,9 +13,6 @@ import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyManager is IStrategyManager, OwnableTwoSteps {
-    // Maximum protocol fee
-    uint16 private immutable _MAX_PROTOCOL_FEE = 5000;
-
     // Count how many strategies exist (it includes strategies that have been removed)
     uint16 public countStrategies = 2;
 
@@ -64,7 +61,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         bytes4 selectorTakerBid,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > _MAX_PROTOCOL_FEE)
+        if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > 5000)
             revert StrategyProtocolFeeTooHigh();
 
         if (selectorTakerAsk == bytes4(0)) {

@@ -10,11 +10,10 @@ contract AffiliateOrdersTest is ProtocolBase {
 
     uint16 internal _affiliateRate = 2000;
 
-    function _calculateAffiliateFee(uint256 originalAmount, uint256 tierRate)
-        private
-        pure
-        returns (uint256 affiliateFee)
-    {
+    function _calculateAffiliateFee(
+        uint256 originalAmount,
+        uint256 tierRate
+    ) private pure returns (uint256 affiliateFee) {
         return (originalAmount * tierRate) / (10000 * 10000);
     }
 
@@ -199,7 +198,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, uint112(faultyTokenId)), bytes32(0));
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - ((numberPurchases - 1) * price));
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9800) * (numberPurchases - 1)) / 10000);
         // Affiliate user receives 20% of protocol fee
@@ -210,8 +209,8 @@ contract AffiliateOrdersTest is ProtocolBase {
             address(_owner).balance,
             _initialETHBalanceOwner + (((numberPurchases - 1) * (price * _minTotalFee)) / 10000 - affiliateFee)
         );
-        // No leftover in the balance of the contract
-        assertEq(address(looksRareProtocol).balance, 0);
+        // Only 1 wei left in the balance of the contract
+        assertEq(address(looksRareProtocol).balance, 1);
     }
 
     /**

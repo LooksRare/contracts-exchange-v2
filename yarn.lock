@@ -1034,10 +1034,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@looksrare/contracts-libs@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.0.2.tgz#75fee42ba211bdf054ca7eba3e197d7e35f6c02c"
-  integrity sha512-dI6oyz8RxL90yxBr4WAlTMYLZA5WbxruP9AY90sbbMd1idz7FdVUIsTLXtmEDXbZtSU0JrU0chNQ/mrjREJV6g==
+"@looksrare/contracts-libs@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.3.0.tgz#e829e30c46a64d9784685cee30b713a2e4102357"
+  integrity sha512-hgWmq+dN45e2nNqIV55J7AmtkG5OCOuNuEbvw4xbRJN6xlKf3+1Ge8Wn9RvvKtH5rlr+QS/MXLR9z9Zegcvegw==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
@@ -1362,6 +1362,13 @@
   version "0.14.1"
   resolved "https://registry.yarnpkg.com/@solidity-parser/parser/-/parser-0.14.1.tgz#179afb29f4e295a77cc141151f26b3848abc3c46"
   integrity sha512-eLjj2L6AuQjBB6s/ibwCAc0DwrR5Ge+ys+wgWo+bviU7fV2nTMQhU63CGaDKXg9iTmMxwhkyoggdIR7ZGRfMgw==
+  dependencies:
+    antlr4ts "^0.5.0-alpha.4"
+
+"@solidity-parser/parser@^0.14.5":
+  version "0.14.5"
+  resolved "https://registry.yarnpkg.com/@solidity-parser/parser/-/parser-0.14.5.tgz#87bc3cc7b068e08195c219c91cd8ddff5ef1a804"
+  integrity sha512-6dKnHZn7fg/iQATVEzqyUOyEidbn05q7YA2mQ9hC0MMXhhV3/JrsxmFSYZAcr7j1yUP700LLhTruvJ3MiQmjJg==
   dependencies:
     antlr4ts "^0.5.0-alpha.4"
 
@@ -4250,10 +4257,10 @@ elliptic@6.5.4, elliptic@^6.4.0, elliptic@^6.5.2, elliptic@^6.5.3, elliptic@^6.5
     minimalistic-assert "^1.0.1"
     minimalistic-crypto-utils "^1.0.1"
 
-emoji-regex@^10.0.0:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.1.0.tgz#d50e383743c0f7a5945c47087295afc112e3cf66"
-  integrity sha512-xAEnNCT3w2Tg6MA7ly6QqYJvEoY1tm9iIjJ3yMKK9JPlWuRHAMoe5iETwQnx3M9TVbFMfsrBgWKR+IsmswwNjg==
+emoji-regex@^10.2.1:
+  version "10.2.1"
+  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-10.2.1.tgz#a41c330d957191efd3d9dfe6e1e8e1e9ab048b3f"
+  integrity sha512-97g6QgOk8zlDRdgq1WxwgTMgEWGVAQvB5Fdpgc1MkNy56la5SKP9GsMXKDOdqwn90/41a8yPwIGk1Y6WVbeMQA==
 
 emoji-regex@^7.0.1:
   version "7.0.3"
@@ -7858,15 +7865,15 @@ lru_map@^0.3.3:
   resolved "https://registry.yarnpkg.com/lru_map/-/lru_map-0.3.3.tgz#b5c8351b9464cbd750335a79650a0ec0e56118dd"
   integrity sha512-Pn9cox5CsMYngeDbmChANltQl+5pi6XmTrraMSzhPmMBbmgcxmqWry0U3PGapCU1yB4/LqCcom7qhHZiF/jGfQ==
 
+ltgt@^2.1.2, ltgt@~2.2.0:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.2.1.tgz#f35ca91c493f7b73da0e07495304f17b31f87ee5"
+  integrity sha512-AI2r85+4MquTw9ZYqabu4nMwy9Oftlfa/e/52t9IjtfG+mGBbTNdAoZ3RQKLHR6r0wQnwZnPIEh/Ya6XTWAKNA==
+
 ltgt@~2.1.1:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.1.3.tgz#10851a06d9964b971178441c23c9e52698eece34"
   integrity sha512-5VjHC5GsENtIi5rbJd+feEpDKhfr7j0odoUR2Uh978g+2p93nd5o34cTjQWohXsPsCZeqoDnIqEf88mPCe0Pfw==
-
-ltgt@~2.2.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.2.1.tgz#f35ca91c493f7b73da0e07495304f17b31f87ee5"
-  integrity sha512-AI2r85+4MquTw9ZYqabu4nMwy9Oftlfa/e/52t9IjtfG+mGBbTNdAoZ3RQKLHR6r0wQnwZnPIEh/Ya6XTWAKNA==
 
 macos-release@^3.0.1:
   version "3.1.0"
@@ -9220,15 +9227,15 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier-plugin-solidity@^1.0.0-beta.13:
-  version "1.0.0-beta.19"
-  resolved "https://registry.yarnpkg.com/prettier-plugin-solidity/-/prettier-plugin-solidity-1.0.0-beta.19.tgz#7c3607fc4028f5e6a425259ff03e45eedf733df3"
-  integrity sha512-xxRQ5ZiiZyUoMFLE9h7HnUDXI/daf1tnmL1msEdcKmyh7ZGQ4YklkYLC71bfBpYU2WruTb5/SFLUaEb3RApg5g==
+prettier-plugin-solidity@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/prettier-plugin-solidity/-/prettier-plugin-solidity-1.0.0.tgz#5b23f48cc9c28a1246c6dd89af117234b813f48b"
+  integrity sha512-gRJCeZ7imbWtNYN2SudjJoPmka5r6jcd2cSTV6FC3pVCtY6LFZbeQQjpKufUEp88hXBAAnkOTOh7TA5xwj9M3A==
   dependencies:
-    "@solidity-parser/parser" "^0.14.0"
-    emoji-regex "^10.0.0"
+    "@solidity-parser/parser" "^0.14.5"
+    emoji-regex "^10.2.1"
     escape-string-regexp "^4.0.0"
-    semver "^7.3.5"
+    semver "^7.3.8"
     solidity-comments-extractor "^0.0.7"
     string-width "^4.2.3"
 
@@ -10159,6 +10166,13 @@ semver@^6.0.0, semver@^6.1.0, semver@^6.2.0, semver@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
+
+semver@^7.3.8:
+  version "7.3.8"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.8.tgz#07a78feafb3f7b32347d725e33de7e2a2df67798"
+  integrity sha512-NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==
+  dependencies:
+    lru-cache "^6.0.0"
 
 semver@~5.4.1:
   version "5.4.1"

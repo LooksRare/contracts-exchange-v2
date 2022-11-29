@@ -147,7 +147,7 @@ contract LooksRareProtocol is
         _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFee);
 
         // Return ETH if any
-        _returnETHIfAny();
+        _returnETHIfAnyWithOneWeiLeft();
     }
 
     /**
@@ -232,7 +232,7 @@ contract LooksRareProtocol is
         }
 
         // Return ETH if any
-        _returnETHIfAny();
+        _returnETHIfAnyWithOneWeiLeft();
     }
 
     /**
@@ -494,12 +494,7 @@ contract LooksRareProtocol is
      * @param recipient Recipient address
      * @param amount Amount (in fungible tokens)
      */
-    function _transferFungibleTokens(
-        address currency,
-        address sender,
-        address recipient,
-        uint256 amount
-    ) internal {
+    function _transferFungibleTokens(address currency, address sender, address recipient, uint256 amount) internal {
         if (currency == address(0)) {
             _transferETH(recipient, amount);
         } else {
@@ -515,7 +510,7 @@ contract LooksRareProtocol is
      */
     function _computeDigestAndVerify(
         bytes32 computedHash,
-        bytes memory makerSignature,
+        bytes calldata makerSignature,
         address signer
     ) internal view {
         // \x19\x01 is the encoding prefix
@@ -529,11 +524,7 @@ contract LooksRareProtocol is
      * @param root Merkle root
      * @param orderHash Order hash (can be maker bid hash or maker ask hash)
      */
-    function _verifyMerkleProofForOrderHash(
-        bytes32[] calldata proof,
-        bytes32 root,
-        bytes32 orderHash
-    ) internal pure {
+    function _verifyMerkleProofForOrderHash(bytes32[] calldata proof, bytes32 root, bytes32 orderHash) internal pure {
         if (!MerkleProof.verifyCalldata(proof, root, orderHash)) revert WrongMerkleProof();
     }
 }

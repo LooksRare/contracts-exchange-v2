@@ -28,16 +28,10 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
      * @notice Execute collection strategy with taker bid
      * @dev It always reverts.
      */
-    function executeStrategyWithTakerBid(OrderStructs.TakerBid calldata, OrderStructs.MakerAsk calldata)
-        external
-        pure
-        returns (
-            uint256,
-            uint256[] calldata,
-            uint256[] calldata,
-            bool
-        )
-    {
+    function executeStrategyWithTakerBid(
+        OrderStructs.TakerBid calldata,
+        OrderStructs.MakerAsk calldata
+    ) external pure returns (uint256, uint256[] calldata, uint256[] calldata, bool) {
         revert OrderInvalid();
     }
 
@@ -51,12 +45,7 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
         OrderStructs.MakerBid calldata makerBid
     )
         external
-        returns (
-            uint256 price,
-            uint256[] calldata itemIds,
-            uint256[] calldata amounts,
-            bool isNonceInvalidated
-        )
+        returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert OrderInvalid();
         // Only available for ERC721
@@ -216,10 +205,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is not marked as executed
-        assertEq(
-            looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce),
-            protocolHelpers.computeOrderHashMakerBid(makerBid)
-        );
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), computeOrderHashMakerBid(makerBid));
 
         // Second taker user actions
         address secondTakerUser = address(420);

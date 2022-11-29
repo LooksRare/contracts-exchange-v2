@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
  * @title InvalidChainlinkPriceFeed
  */
 contract InvalidChainlinkPriceFeed {
-    uint256 zeroPrice;
+    uint256 private zeroPrice;
 
     function latestRoundData()
         external

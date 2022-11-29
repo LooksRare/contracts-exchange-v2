@@ -77,53 +77,10 @@ contract StrategyTokenIdsRange is StrategyBase {
         isNonceInvalidated = true;
     }
 
-    function isValid(OrderStructs.TakerAsk calldata takerAsk, OrderStructs.MakerBid calldata makerBid)
-        external
-        pure
-        returns (bool, bytes4)
-    {
+    function isValid(OrderStructs.MakerBid calldata makerBid) external pure returns (bool, bytes4) {
         uint256 minTokenId = makerBid.itemIds[0];
         uint256 maxTokenId = makerBid.itemIds[1];
         if (minTokenId >= maxTokenId) {
-            return (false, OrderInvalid.selector);
-        }
-
-        uint256 desiredAmount = makerBid.amounts[0];
-        uint256 totalOfferedAmount;
-        uint256 lastTokenId;
-
-        for (uint256 i; i < takerAsk.itemIds.length; ) {
-            uint256 offeredTokenId = takerAsk.itemIds[i];
-            // Force the client to sort the token IDs in ascending order,
-            // in order to prevent taker ask from providing duplicated
-            // token IDs
-            if (offeredTokenId <= lastTokenId) {
-                return (false, OrderInvalid.selector);
-            }
-
-            uint256 offeredAmount = makerBid.assetType == 0 ? 1 : takerAsk.amounts[i];
-            if (offeredAmount == 0) {
-                return (false, OrderInvalid.selector);
-            }
-
-            if (offeredTokenId >= minTokenId) {
-                if (offeredTokenId <= maxTokenId) {
-                    totalOfferedAmount += offeredAmount;
-                }
-            }
-
-            lastTokenId = offeredTokenId;
-
-            unchecked {
-                ++i;
-            }
-        }
-
-        if (totalOfferedAmount != desiredAmount) {
-            return (false, OrderInvalid.selector);
-        }
-
-        if (makerBid.maxPrice != takerAsk.minPrice) {
             return (false, OrderInvalid.selector);
         }
 

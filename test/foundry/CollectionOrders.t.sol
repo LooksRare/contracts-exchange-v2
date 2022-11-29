@@ -3,16 +3,111 @@ pragma solidity ^0.8.0;
 
 import {Merkle} from "../../lib/murky/src/Merkle.sol";
 
+import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
+    StrategyCollectionOffer public strategyCollectionOffer;
+    bytes4 public selectorTakerAskNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
+    bytes4 public selectorTakerAskWithProof =
+        strategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
+
+    bytes4 public selectorTakerBid = _emptyBytes4;
+
+    function _setUpNewStrategies() private asPrankedUser(_owner) {
+        strategyCollectionOffer = new StrategyCollectionOffer(address(looksRareProtocol));
+
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            selectorTakerAskNoProof,
+            selectorTakerBid,
+            address(strategyCollectionOffer)
+        );
+
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            selectorTakerAskWithProof,
+            selectorTakerBid,
+            address(strategyCollectionOffer)
+        );
+    }
+
+    function testNewStrategies() public {
+        _setUpNewStrategies();
+
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelectorTakerAsk,
+            bytes4 strategySelectorTakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(1);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
+        assertEq(strategyMinTotalFee, _minTotalFee);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategySelectorTakerAsk, selectorTakerAskNoProof);
+        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategyImplementation, address(strategyCollectionOffer));
+
+        (
+            strategyIsActive,
+            strategyStandardProtocolFee,
+            strategyMinTotalFee,
+            strategyMaxProtocolFee,
+            strategySelectorTakerAsk,
+            strategySelectorTakerBid,
+            strategyImplementation
+        ) = looksRareProtocol.strategyInfo(2);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
+        assertEq(strategyMinTotalFee, _minTotalFee);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategySelectorTakerAsk, selectorTakerAskWithProof);
+        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategyImplementation, address(strategyCollectionOffer));
+    }
+
+    function testWrongOrderFormat() public {
+        _setUpNewStrategies();
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        // Adjust strategy for collection order and sign order
+        // Change array to make it bigger than expected
+        uint256[] memory itemIds = new uint256[](2);
+        itemIds[0] = 0;
+        makerBid.strategyId = 1;
+        makerBid.itemIds = itemIds;
+        takerAsk.itemIds = itemIds;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyAffiliate
+        );
+    }
+
     /**
      * Any itemId for ERC721 (where royalties come from the registry) is sold through a collection taker ask using WETH.
      * We use fuzzing to generate the tokenId that is sold.
      */
     function testTakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
+        _setUpNewStrategies();
 
         price = 1 ether; // Fixed price of sale
 
@@ -61,6 +156,7 @@ contract CollectionOrdersTest is ProtocolBase {
                 _emptyMerkleProof,
                 _emptyAffiliate
             );
+
             emit log_named_uint(
                 "TakerAsk // ERC721 // Protocol Fee // CollectionOrder // Registry Royalties",
                 gasLeft - gasleft()
@@ -84,6 +180,7 @@ contract CollectionOrdersTest is ProtocolBase {
      */
     function testTakerAskCollectionOrderWithMerkleTreeERC721() public {
         _setUpUsers();
+        _setUpNewStrategies();
 
         // Initialize Merkle Tree
         Merkle m = new Merkle();
@@ -104,7 +201,7 @@ contract CollectionOrdersTest is ProtocolBase {
             makerBid = _createSingleItemMakerBidOrder(
                 0, // bidNonce
                 0, // subsetNonce
-                1, // strategyId (Collection offer)
+                2, // strategyId (Collection offer with proofs)
                 0, // assetType ERC721,
                 0, // orderNonce
                 address(mockERC721),

@@ -116,7 +116,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             bytes4 strategySelectorTakerAsk,
             bytes4 strategySelectorTakerBid,
             address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(2);
+        ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
@@ -149,7 +149,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
                 makerBid = _createMultiItemMakerBidOrder(
                     0, // bidNonce
                     0, // subsetNonce
-                    2, // strategyId (Multi-fill bid offer)
+                    1, // strategyId (Multi-fill bid offer)
                     0, // assetType ERC721,
                     0, // orderNonce
                     address(mockERC721),

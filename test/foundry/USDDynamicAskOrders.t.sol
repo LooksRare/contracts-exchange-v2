@@ -8,7 +8,7 @@ import {StrategyUSDDynamicAsk} from "../../contracts/executionStrategies/Strateg
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
-import {InvalidChainlinkPriceFeed} from "./utils/InvalidChainlinkPriceFeed.sol";
+import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
@@ -130,9 +130,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
 
-        InvalidChainlinkPriceFeed priceFeed = new InvalidChainlinkPriceFeed();
-        vm.etch(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419, address(priceFeed).code);
+        MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
+        vm.etch(CHAINLINK_ETH_USD_PRICE_FEED, address(priceFeed).code);
 
+        MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(-1);
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertTrue(!isValid);
         assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
@@ -149,8 +150,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             _emptyAffiliate
         );
 
-        // Set price to 0
-        vm.store(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419, bytes32(uint256(0)), bytes32(uint256(1)));
+        MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
         (isValid, errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertTrue(!isValid);
         assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);

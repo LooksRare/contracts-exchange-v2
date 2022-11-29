@@ -304,10 +304,11 @@ contract OrderValidator is SignatureChecker {
         // 2. Verify itemId is owned by user and catch revertion if ERC721 ownerOf fails
         uint256 length = itemIds.length;
 
+        bool success;
+        bytes memory data;
+
         for (uint256 i; i < length; ) {
-            (bool success, bytes memory data) = collection.staticcall(
-                abi.encodeWithSelector(IERC721.ownerOf.selector, itemIds[i])
-            );
+            (success, data) = collection.staticcall(abi.encodeWithSelector(IERC721.ownerOf.selector, itemIds[i]));
 
             if (!success) return ERC721_ITEM_ID_DOES_NOT_EXIST;
             if (abi.decode(data, (address)) != user) return ERC721_ITEM_ID_NOT_IN_BALANCE;
@@ -318,7 +319,7 @@ contract OrderValidator is SignatureChecker {
         }
 
         // 3. Verify if collection is approved by transfer manager
-        (bool success, bytes memory data) = collection.staticcall(
+        (success, data) = collection.staticcall(
             abi.encodeWithSelector(IERC721.isApprovedForAll.selector, user, transferManager)
         );
 
@@ -404,12 +405,14 @@ contract OrderValidator is SignatureChecker {
     }
 
     /**
-     * @notice Check all itemIds differ
+     * @notice Check if any of the item id in an array of item ids is repeated
      * @param itemIds Array of item ids
+     * @dev This is to be used for bundles
      */
-    function _verifyAllItemIdsDiffer(uint256[] memory itemIds) internal returns (uint256 validationCode) {
+    function _verifyAllItemIdsDiffer(uint256[] memory itemIds) internal pure returns (uint256 validationCode) {
         uint256 length = itemIds.length;
 
+        // Only check if length of array is greater than 1
         if (length > 1) {
             for (uint256 i = 0; i < length; ) {
                 for (uint256 j = i; j < length; ) {

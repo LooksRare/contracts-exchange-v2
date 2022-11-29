@@ -8,6 +8,8 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
+    error OrderInvalid();
+
     StrategyCollectionOffer public strategyCollectionOffer;
     bytes4 public selectorTakerAskNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
     bytes4 public selectorTakerAskWithProof =

@@ -38,10 +38,15 @@ contract StrategyCollectionOffer is StrategyBase {
     function executeCollectionStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
-    ) external pure returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts) {
+    )
+        external
+        pure
+        returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
+    {
         price = makerBid.maxPrice;
         itemIds = takerAsk.itemIds;
         amounts = makerBid.amounts;
+        isNonceInvalidated = true;
 
         // A collection order can only be executable for 1 itemId but quantity to fill can vary
         {
@@ -63,10 +68,15 @@ contract StrategyCollectionOffer is StrategyBase {
     function executeCollectionStrategyWithTakerAskWithProof(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
-    ) external pure returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts) {
+    )
+        external
+        pure
+        returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
+    {
         price = makerBid.maxPrice;
         itemIds = takerAsk.itemIds;
         amounts = makerBid.amounts;
+        isNonceInvalidated = true;
 
         // A collection order can only be executable for 1 itemId but quantity to fill can vary
         {

@@ -21,8 +21,6 @@ abstract contract TestParameters is Test {
     bytes4 internal _emptyBytes4 = bytes4(0);
     bytes32 public MAGIC_VALUE_NONCE_EXECUTED = 0x000000000000000000000000000000000000000000000000000000000000002a;
 
-    bytes32 public MAGIC_VALUE_NONCE_EXECUTED = 0x000000000000000000000000000000000000000000000000000000000000002a;
-
     // Initial balances
     uint256 internal _initialETHBalanceUser = 100 ether;
     uint256 internal _initialWETHBalanceUser = 10 ether;

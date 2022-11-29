@@ -78,18 +78,8 @@ contract StrategyFloorPremium is StrategyChainlinkMultiplePriceFeeds, StrategyCh
         isNonceInvalidated = true;
     }
 
-    function isValid(OrderStructs.TakerBid calldata takerBid, OrderStructs.MakerAsk calldata makerAsk)
-        external
-        view
-        returns (bool, bytes4)
-    {
-        if (
-            makerAsk.itemIds.length != 1 ||
-            makerAsk.amounts.length != 1 ||
-            makerAsk.amounts[0] != 1 ||
-            makerAsk.itemIds[0] != takerBid.itemIds[0] ||
-            takerBid.amounts[0] != 1
-        ) {
+    function isValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
+        if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
             return (false, OrderInvalid.selector);
         }
 
@@ -104,16 +94,6 @@ contract StrategyFloorPremium is StrategyChainlinkMultiplePriceFeeds, StrategyCh
         }
         if (block.timestamp > maximumLatency + updatedAt) {
             return (false, PriceNotRecentEnough.selector);
-        }
-
-        uint256 premiumAmount = abi.decode(makerAsk.additionalParameters, (uint256));
-        uint256 floorPrice = uint256(answer);
-        uint256 desiredPrice = floorPrice + premiumAmount;
-
-        if (takerBid.maxPrice < desiredPrice) {
-            if (takerBid.maxPrice < makerAsk.minPrice) {
-                return (false, BidTooLow.selector);
-            }
         }
 
         return (true, bytes4(0));

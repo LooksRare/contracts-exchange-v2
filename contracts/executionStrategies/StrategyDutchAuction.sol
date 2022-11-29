@@ -69,11 +69,7 @@ contract StrategyDutchAuction is StrategyBase {
         amounts = makerAsk.amounts;
     }
 
-    function isValid(OrderStructs.TakerBid calldata takerBid, OrderStructs.MakerAsk calldata makerAsk)
-        external
-        view
-        returns (bool, bytes4)
-    {
+    function isValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
@@ -82,9 +78,6 @@ contract StrategyDutchAuction is StrategyBase {
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
             if (amount == 0) {
-                return (false, OrderInvalid.selector);
-            }
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) {
                 return (false, OrderInvalid.selector);
             }
 
@@ -97,16 +90,6 @@ contract StrategyDutchAuction is StrategyBase {
 
         if (startPrice < makerAsk.minPrice) {
             return (false, OrderInvalid.selector);
-        }
-
-        uint256 duration = makerAsk.endTime - makerAsk.startTime;
-        uint256 decayPerSecond = (startPrice - makerAsk.minPrice) / duration;
-
-        uint256 elapsedTime = block.timestamp - makerAsk.startTime;
-        uint256 price = startPrice - elapsedTime * decayPerSecond;
-
-        if (takerBid.maxPrice < price) {
-            return (false, BidTooLow.selector);
         }
 
         return (true, bytes4(0));

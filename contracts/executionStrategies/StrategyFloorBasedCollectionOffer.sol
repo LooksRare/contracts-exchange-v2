@@ -41,12 +41,7 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
     )
         external
         view
-        returns (
-            uint256 price,
-            uint256[] memory itemIds,
-            uint256[] memory amounts,
-            bool isNonceInvalidated
-        )
+        returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 

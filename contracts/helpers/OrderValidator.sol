@@ -73,11 +73,9 @@ contract OrderValidator is SignatureChecker {
      * @notice Verify the validity of an array of maker ask orders.
      * @param makerAsks Array of maker ask structs
      */
-    function verifyMultipleMakerAskOrders(OrderStructs.MakerAsk[] calldata makerAsks)
-        external
-        view
-        returns (uint256[][] memory validationCodes)
-    {
+    function verifyMultipleMakerAskOrders(
+        OrderStructs.MakerAsk[] calldata makerAsks
+    ) external view returns (uint256[][] memory validationCodes) {
         validationCodes = new uint256[][](makerAsks.length);
 
         for (uint256 i; i < makerAsks.length; ) {
@@ -92,11 +90,9 @@ contract OrderValidator is SignatureChecker {
      * @notice Verify the validity of an array of maker bid orders.
      * @param makerBids Array of maker bid structs
      */
-    function verifyMultipleMakerBidOrders(OrderStructs.MakerBid[] calldata makerBids)
-        external
-        view
-        returns (uint256[][] memory validationCodes)
-    {
+    function verifyMultipleMakerBidOrders(
+        OrderStructs.MakerBid[] calldata makerBids
+    ) external view returns (uint256[][] memory validationCodes) {
         validationCodes = new uint256[][](makerBids.length);
 
         for (uint256 i; i < makerBids.length; ) {
@@ -111,11 +107,9 @@ contract OrderValidator is SignatureChecker {
      * @notice Verify the validity of a maker ask order.
      * @param makerAsk Maker ask struct
      */
-    function checkMakerAskOrderValidity(OrderStructs.MakerAsk calldata makerAsk)
-        public
-        view
-        returns (uint256[] memory validationCodes)
-    {
+    function checkMakerAskOrderValidity(
+        OrderStructs.MakerAsk calldata makerAsk
+    ) public view returns (uint256[] memory validationCodes) {
         validationCodes = new uint256[](CRITERIA_GROUPS);
         validationCodes[0] = checkMakerAskValidityNonces(makerAsk);
     }
@@ -124,11 +118,9 @@ contract OrderValidator is SignatureChecker {
      * @notice Verify the validity of a maker bid order.
      * @param makerBid Maker bid struct
      */
-    function checkMakerBidOrderValidity(OrderStructs.MakerBid calldata makerBid)
-        public
-        view
-        returns (uint256[] memory validationCodes)
-    {
+    function checkMakerBidOrderValidity(
+        OrderStructs.MakerBid calldata makerBid
+    ) public view returns (uint256[] memory validationCodes) {
         validationCodes = new uint256[](CRITERIA_GROUPS);
         validationCodes[0] = checkMakerBidValidityNonces(makerBid);
     }
@@ -138,11 +130,9 @@ contract OrderValidator is SignatureChecker {
      * @param makerAsk Maker ask struct
      * @return validationCode Validation code
      */
-    function checkMakerAskValidityNonces(OrderStructs.MakerAsk calldata makerAsk)
-        public
-        view
-        returns (uint256 validationCode)
-    {
+    function checkMakerAskValidityNonces(
+        OrderStructs.MakerAsk calldata makerAsk
+    ) public view returns (uint256 validationCode) {
         // 1. Check global ask nonce
         (, uint112 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerAsk.signer);
         if (makerAsk.askNonce < globalAskNonce) return USER_GLOBAL_ASK_NONCE_HIGHER;
@@ -161,11 +151,9 @@ contract OrderValidator is SignatureChecker {
      * @param makerBid Maker bid struct
      * @return validationCode Validation code
      */
-    function checkMakerBidValidityNonces(OrderStructs.MakerBid calldata makerBid)
-        public
-        view
-        returns (uint256 validationCode)
-    {
+    function checkMakerBidValidityNonces(
+        OrderStructs.MakerBid calldata makerBid
+    ) public view returns (uint256 validationCode) {
         // 1. Check global ask nonce
         (uint112 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerBid.signer);
         if (makerBid.bidNonce < globalBidNonce) return USER_GLOBAL_ASK_NONCE_HIGHER;
@@ -184,11 +172,9 @@ contract OrderValidator is SignatureChecker {
      * @param makerAsk Maker ask order struct
      * @return validationCode Validation code
      */
-    function checkValidityMakerAskWhitelists(OrderStructs.MakerAsk calldata makerAsk)
-        public
-        view
-        returns (uint256 validationCode)
-    {
+    function checkValidityMakerAskWhitelists(
+        OrderStructs.MakerAsk calldata makerAsk
+    ) public view returns (uint256 validationCode) {
         // Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(makerAsk.currency)) return CURRENCY_NOT_WHITELISTED;
 
@@ -215,11 +201,9 @@ contract OrderValidator is SignatureChecker {
      * @param makerBid Maker bid order struct
      * @return validationCode Validation code
      */
-    function checkValidityMakerBidWhitelists(OrderStructs.MakerBid calldata makerBid)
-        public
-        view
-        returns (uint256 validationCode)
-    {
+    function checkValidityMakerBidWhitelists(
+        OrderStructs.MakerBid calldata makerBid
+    ) public view returns (uint256 validationCode) {
         // Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(makerBid.currency)) return CURRENCY_NOT_WHITELISTED;
 
@@ -245,11 +229,9 @@ contract OrderValidator is SignatureChecker {
      * @param makerAsk Maker ask order struct
      * @return validationCode Validation code
      */
-    function checkValidityMakerAskTimestamps(OrderStructs.MakerAsk calldata makerAsk)
-        public
-        view
-        returns (uint256 validationCode)
-    {
+    function checkValidityMakerAskTimestamps(
+        OrderStructs.MakerAsk calldata makerAsk
+    ) public view returns (uint256 validationCode) {
         if (makerAsk.endTime < block.timestamp) return TOO_LATE_TO_EXECUTE_ORDER;
         if (makerAsk.startTime + 5 minutes > block.timestamp) return TOO_EARLY_TO_EXECUTE_ORDER;
     }
@@ -259,11 +241,9 @@ contract OrderValidator is SignatureChecker {
      * @param makerBid Maker bid order struct
      * @return validationCode Validation code
      */
-    function checkValidityMakerBidTimestamps(OrderStructs.MakerBid calldata makerBid)
-        public
-        view
-        returns (uint256 validationCode)
-    {
+    function checkValidityMakerBidTimestamps(
+        OrderStructs.MakerBid calldata makerBid
+    ) public view returns (uint256 validationCode) {
         if (makerBid.endTime < block.timestamp) return TOO_LATE_TO_EXECUTE_ORDER;
         if (makerBid.startTime + 5 minutes > block.timestamp) return TOO_EARLY_TO_EXECUTE_ORDER;
     }

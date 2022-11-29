@@ -69,7 +69,7 @@ contract StrategyDutchAuction is StrategyBase {
         amounts = makerAsk.amounts;
     }
 
-    function isValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
+    function isValid(OrderStructs.MakerAsk calldata makerAsk) external pure returns (bool, bytes4) {
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {

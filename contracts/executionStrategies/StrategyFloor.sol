@@ -203,25 +203,20 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      */
-    function isMakerAskValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
+    function isMakerAskValid(
+        OrderStructs.MakerAsk calldata makerAsk
+    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
-            return (false, OrderInvalid.selector);
+            return (orderIsValid, OrderInvalid.selector);
         }
 
-        address priceFeed = priceFeeds[makerAsk.collection];
-        if (priceFeed == address(0)) {
-            return (false, PriceFeedNotAvailable.selector);
-        }
+        (, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerAsk.collection);
 
-        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) {
-            return (false, InvalidChainlinkPrice.selector);
+        if (priceFeedErrorSelector == bytes4(0)) {
+            orderIsValid = true;
+        } else {
+            errorSelector = priceFeedErrorSelector;
         }
-        if (block.timestamp > maximumLatency + updatedAt) {
-            return (false, PriceNotRecentEnough.selector);
-        }
-
-        return (true, bytes4(0));
     }
 
     /**
@@ -239,21 +234,13 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
             return (orderIsValid, OrderInvalid.selector);
         }
 
-        address priceFeed = priceFeeds[makerBid.collection];
-        if (priceFeed == address(0)) {
-            return (orderIsValid, PriceFeedNotAvailable.selector);
-        }
+        (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerBid.collection);
 
-        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) {
-            return (orderIsValid, InvalidChainlinkPrice.selector);
-        }
-        if (block.timestamp > maximumLatency + updatedAt) {
-            return (orderIsValid, PriceNotRecentEnough.selector);
+        if (priceFeedErrorSelector != bytes4(0)) {
+            return (orderIsValid, priceFeedErrorSelector);
         }
 
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-        uint256 floorPrice = uint256(answer);
         if (floorPrice <= discount) {
             return (orderIsValid, OrderInvalid.selector);
         }
@@ -276,17 +263,10 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
             return (orderIsValid, OrderInvalid.selector);
         }
 
-        address priceFeed = priceFeeds[makerBid.collection];
-        if (priceFeed == address(0)) {
-            return (orderIsValid, PriceFeedNotAvailable.selector);
-        }
+        (, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerBid.collection);
 
-        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) {
-            return (orderIsValid, InvalidChainlinkPrice.selector);
-        }
-        if (block.timestamp > maximumLatency + updatedAt) {
-            return (orderIsValid, PriceNotRecentEnough.selector);
+        if (priceFeedErrorSelector != bytes4(0)) {
+            return (orderIsValid, priceFeedErrorSelector);
         }
 
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
@@ -306,5 +286,24 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
         if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
 
         price = uint256(answer);
+    }
+
+    function _getFloorPriceNoRevert(
+        address collection
+    ) private view returns (uint256 floorPrice, bytes4 errorSelector) {
+        address priceFeed = priceFeeds[collection];
+        if (priceFeed == address(0)) {
+            return (floorPrice, PriceFeedNotAvailable.selector);
+        }
+
+        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
+        if (answer <= 0) {
+            return (floorPrice, InvalidChainlinkPrice.selector);
+        }
+        if (block.timestamp > maximumLatency + updatedAt) {
+            return (floorPrice, PriceNotRecentEnough.selector);
+        }
+
+        return (uint256(answer), bytes4(0));
     }
 }

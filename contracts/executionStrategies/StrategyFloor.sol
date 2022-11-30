@@ -53,15 +53,8 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
             takerBid.amounts[0] != 1
         ) revert OrderInvalid();
 
-        address priceFeed = priceFeeds[makerAsk.collection];
-        if (priceFeed == address(0)) revert PriceFeedNotAvailable();
-
-        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
-
+        uint256 floorPrice = _getFloorPrice(makerAsk.collection);
         uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
-        uint256 floorPrice = uint256(answer);
         uint256 desiredPrice = floorPrice + premium;
 
         if (desiredPrice >= makerAsk.minPrice) {
@@ -102,15 +95,8 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
             takerBid.amounts[0] != 1
         ) revert OrderInvalid();
 
-        address priceFeed = priceFeeds[makerAsk.collection];
-        if (priceFeed == address(0)) revert PriceFeedNotAvailable();
-
-        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
-
+        uint256 floorPrice = _getFloorPrice(makerAsk.collection);
         uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
-        uint256 floorPrice = uint256(answer);
         uint256 desiredPrice = (floorPrice * (10_000 + premium)) / 10_000;
 
         if (desiredPrice >= makerAsk.minPrice) {
@@ -151,15 +137,8 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
             makerBid.amounts[0] != 1
         ) revert OrderInvalid();
 
-        address priceFeed = priceFeeds[makerBid.collection];
-        if (priceFeed == address(0)) revert PriceFeedNotAvailable();
-
-        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
-
+        uint256 floorPrice = _getFloorPrice(makerBid.collection);
         uint256 discountAmount = abi.decode(makerBid.additionalParameters, (uint256));
-        uint256 floorPrice = uint256(answer);
         if (floorPrice <= discountAmount) revert OrderInvalid();
         uint256 desiredPrice = floorPrice - discountAmount;
 
@@ -201,15 +180,8 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
             makerBid.amounts[0] != 1
         ) revert OrderInvalid();
 
-        address priceFeed = priceFeeds[makerBid.collection];
-        if (priceFeed == address(0)) revert PriceFeedNotAvailable();
-
-        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
-
+        uint256 floorPrice = _getFloorPrice(makerBid.collection);
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-        uint256 floorPrice = uint256(answer);
         if (discount > 10_000) revert OrderInvalid();
         uint256 desiredPrice = (floorPrice * (10_000 - discount)) / 10_000;
 
@@ -323,5 +295,16 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
         }
 
         orderIsValid = true;
+    }
+
+    function _getFloorPrice(address collection) private view returns (uint256 price) {
+        address priceFeed = priceFeeds[collection];
+        if (priceFeed == address(0)) revert PriceFeedNotAvailable();
+
+        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
+        if (answer <= 0) revert InvalidChainlinkPrice();
+        if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
+
+        price = uint256(answer);
     }
 }

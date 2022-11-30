@@ -40,7 +40,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -81,7 +81,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 

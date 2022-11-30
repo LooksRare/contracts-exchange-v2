@@ -21,7 +21,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
@@ -75,7 +75,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
@@ -118,7 +118,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -148,7 +148,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -179,7 +179,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -210,7 +210,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -242,7 +242,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -272,7 +272,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -301,7 +301,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         vm.startPrank(_owner);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         vm.stopPrank();
 
         // Valid, but wrong caller

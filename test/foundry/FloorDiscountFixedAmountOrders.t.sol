@@ -25,7 +25,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -63,7 +63,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -99,7 +99,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
@@ -147,7 +147,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 

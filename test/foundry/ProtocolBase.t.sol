@@ -77,7 +77,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         transferManager = new TransferManager();
         royaltyFeeRegistry = new MockRoyaltyFeeRegistry(9500);
         creatorFeeManager = new CreatorFeeManagerWithRebates(address(royaltyFeeRegistry));
-        looksRareProtocol = new LooksRareProtocol(address(transferManager));
+        looksRareProtocol = new LooksRareProtocol(address(transferManager), address(weth));
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 
         // Operations

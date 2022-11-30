@@ -56,7 +56,7 @@ contract LooksRareProtocol is
     bytes32 public domainSeparator;
 
     // Gas limit
-    uint256 public gasLimitETHTransfer = 2300;
+    uint256 public gasLimitETHTransfer = 2_300;
 
     /**
      * @notice Constructor
@@ -469,7 +469,7 @@ contract LooksRareProtocol is
         // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
         if (affiliate != address(0)) {
             if (isAffiliateProgramActive) {
-                totalAffiliateFee = (totalProtocolFee * affiliateRates[affiliate]) / 10000;
+                totalAffiliateFee = (totalProtocolFee * affiliateRates[affiliate]) / 10_000;
                 totalProtocolFee -= totalAffiliateFee;
 
                 // If bid user isn't the affiliate, pay the affiliate.

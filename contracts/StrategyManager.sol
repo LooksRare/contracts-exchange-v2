@@ -51,7 +51,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         bytes4 selectorTakerBid,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > 5000)
+        if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > 5_000)
             revert StrategyProtocolFeeTooHigh();
 
         if (selectorTakerAsk == bytes4(0)) {

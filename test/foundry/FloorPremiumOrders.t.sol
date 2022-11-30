@@ -65,7 +65,7 @@ abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, Chai
             itemId: 1
         });
 
-        newMakerAsk.additionalParameters = abi.encode(premium, isFixedAmount);
+        newMakerAsk.additionalParameters = abi.encode(premium);
 
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 1;

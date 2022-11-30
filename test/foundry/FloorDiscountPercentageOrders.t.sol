@@ -35,16 +35,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -70,16 +61,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -104,15 +86,6 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 }

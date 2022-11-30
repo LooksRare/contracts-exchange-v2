@@ -28,16 +28,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         assertEq(errorSelector, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorDiscountOraclePriceNotRecentEnough() public {
@@ -55,16 +46,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorDiscountChainlinkPriceLessThanOrEqualToZero() public {
@@ -85,29 +67,11 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         assertEq(errorSelector, StrategyFloor.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
 
         aggregator.setAnswer(-1);
         vm.expectRevert(StrategyFloor.InvalidChainlinkPrice.selector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorDiscountCallerNotLooksRareProtocol() public {
@@ -136,17 +100,8 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerBid);
 
-        vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorDiscountTakerAskAmountsLengthNotOne() public {
@@ -161,17 +116,8 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerBid);
 
-        vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorDiscountMakerBidAmountsLengthNotOne() public {
@@ -185,17 +131,8 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
-        vm.prank(takerUser);
         vm.expectRevert(errorSelector);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorDiscountTakerAskZeroAmount() public {
@@ -213,17 +150,8 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerBid);
 
-        vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorDiscountMakerBidAmountNotOne() public {
@@ -240,17 +168,8 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
-        vm.prank(takerUser);
         vm.expectRevert(errorSelector);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorDiscountBidTooLow() public {
@@ -265,16 +184,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _assertOrderValid(makerBid);
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function _setDiscount(uint256 _discount) internal {
@@ -299,5 +209,22 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         return errorSelector;
+    }
+
+    function _executeTakerAsk(
+        OrderStructs.TakerAsk memory takerAsk,
+        OrderStructs.MakerBid memory makerBid,
+        bytes memory signature
+    ) internal {
+        vm.prank(takerUser);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyAffiliate
+        );
     }
 }

@@ -29,16 +29,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         _assertOrderValid(makerBid);
 
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -62,16 +53,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         _assertOrderValid(makerBid);
 
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -94,16 +76,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Floor price = 9.7 ETH, discount = 9.8 ETH, desired price = -0.1 ETH
         // Max price = -0.1 ETH
@@ -111,15 +84,6 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 }

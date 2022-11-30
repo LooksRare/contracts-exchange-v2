@@ -3,12 +3,12 @@ pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
-import {StrategyFloorPremium} from "../../contracts/executionStrategies/StrategyFloorPremium.sol";
+import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
 abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
-    StrategyFloorPremium internal strategyFloorPremium;
+    StrategyFloor internal strategyFloor;
     bytes4 internal selectorTakerAsk = _emptyBytes4;
 
     // At block 15740567
@@ -31,18 +31,18 @@ abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, Chai
     }
 
     function selectorTakerBid() internal pure virtual returns (bytes4) {
-        return StrategyFloorPremium.executeFixedPremiumStrategyWithTakerBid.selector;
+        return StrategyFloor.executeFixedPremiumStrategyWithTakerBid.selector;
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyFloorPremium = new StrategyFloorPremium(address(looksRareProtocol));
+        strategyFloor = new StrategyFloor(address(looksRareProtocol));
         looksRareProtocol.addStrategy(
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
             selectorTakerAsk,
             selectorTakerBid(),
-            address(strategyFloorPremium)
+            address(strategyFloor)
         );
     }
 

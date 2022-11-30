@@ -6,7 +6,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorPremium} from "../../contracts/executionStrategies/StrategyFloorPremium.sol";
+import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 import {FloorPremiumOrdersTest} from "./FloorPremiumOrders.t.sol";
 
@@ -33,19 +33,19 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
         assertEq(strategySelectorTakerAsk, selectorTakerAsk);
         assertEq(strategySelectorTakerBid, selectorTakerBid());
-        assertEq(strategyImplementation, address(strategyFloorPremium));
+        assertEq(strategyImplementation, address(strategyFloor));
     }
 
     function testSetMaximumLatency() public {
-        _testSetMaximumLatency(address(strategyFloorPremium));
+        _testSetMaximumLatency(address(strategyFloor));
     }
 
     function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloorPremium));
+        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloor));
     }
 
     function testSetMaximumLatencyNotOwner() public {
-        _testSetMaximumLatencyNotOwner(address(strategyFloorPremium));
+        _testSetMaximumLatencyNotOwner(address(strategyFloor));
     }
 
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
@@ -53,18 +53,18 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
     function testSetPriceFeed() public asPrankedUser(_owner) {
         vm.expectEmit(true, true, true, false);
         emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        assertEq(strategyFloorPremium.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        assertEq(strategyFloor.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
     }
 
     function testSetPriceFeedNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
     function testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloorPremium = StrategyFloorPremium(implementation);
+        strategyFloor = StrategyFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.7 ETH
@@ -72,11 +72,11 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -99,9 +99,9 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.604 ether);
     }
 
-    function testFloorPremiumDesiredSalePriceLessThanMinPrice() public {
+    function testFloorDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloorPremium = StrategyFloorPremium(implementation);
+        strategyFloor = StrategyFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.9 ETH
@@ -113,11 +113,11 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -147,10 +147,10 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloor.setMaximumLatency(3600);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
 
@@ -173,10 +173,10 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
@@ -201,13 +201,13 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), address(aggregator));
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyFloorPremium.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, StrategyFloor.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -222,7 +222,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         );
 
         aggregator.setAnswer(-1);
-        vm.expectRevert(StrategyFloorPremium.InvalidChainlinkPrice.selector);
+        vm.expectRevert(StrategyFloor.InvalidChainlinkPrice.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -241,19 +241,19 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        strategyFloorPremium.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
         vm.stopPrank();
 
         // Valid, but wrong caller
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        strategyFloorPremium.executeFixedPremiumStrategyWithTakerBid(takerBid, makerAsk);
+        strategyFloor.executeFixedPremiumStrategyWithTakerBid(takerBid, makerAsk);
     }
 
     function testMakerAskItemIdsLengthNotOne() public {
@@ -265,11 +265,11 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
@@ -295,11 +295,11 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
@@ -326,11 +326,11 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
@@ -357,12 +357,12 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -389,12 +389,12 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -419,12 +419,12 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 

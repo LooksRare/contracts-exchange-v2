@@ -6,7 +6,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorPremium} from "../../contracts/executionStrategies/StrategyFloorPremium.sol";
+import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 import {FloorPremiumOrdersTest} from "./FloorPremiumOrders.t.sol";
 
@@ -20,12 +20,12 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
     }
 
     function selectorTakerBid() internal pure override returns (bytes4) {
-        return StrategyFloorPremium.executePercentagePremiumStrategyWithTakerBid.selector;
+        return StrategyFloor.executePercentagePremiumStrategyWithTakerBid.selector;
     }
 
     function testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloorPremium = StrategyFloorPremium(implementation);
+        strategyFloor = StrategyFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
@@ -36,11 +36,11 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -65,7 +65,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
 
     function testFloorPremiumDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloorPremium = StrategyFloorPremium(implementation);
+        strategyFloor = StrategyFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.8 ETH
@@ -79,11 +79,11 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorPremium.setMaximumLatency(3600);
-        strategyFloorPremium.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setMaximumLatency(3600);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 

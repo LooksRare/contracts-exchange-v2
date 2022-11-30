@@ -281,7 +281,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         address(strategyFloor).call(abi.encodeWithSelector(selectorTakerBid, takerBid, makerAsk));
     }
 
-    function _assertOrderValid(OrderStructs.MakerAsk memory makerAsk) private returns (bytes4) {
+    function _assertOrderValid(OrderStructs.MakerAsk memory makerAsk) internal returns (bytes4) {
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
@@ -289,7 +289,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         return errorSelector;
     }
 
-    function _assertOrderInvalid(OrderStructs.MakerAsk memory makerAsk) private returns (bytes4) {
+    function _assertOrderInvalid(OrderStructs.MakerAsk memory makerAsk) internal returns (bytes4) {
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);

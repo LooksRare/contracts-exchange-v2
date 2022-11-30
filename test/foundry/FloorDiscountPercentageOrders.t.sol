@@ -115,33 +115,4 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
             _emptyAffiliate
         );
     }
-
-    function testFloorDiscountPercentageBidTooLow() public {
-        // Floor price = 9.7 ETH, discount = 3%, desired price = 9.409 ETH
-        // Maker bid max price = 9.4 ETH
-        // Taker ask min price = 9.5 ETH
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 300});
-        makerBid.maxPrice = 9.408 ether;
-
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        _setPriceFeed();
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isPercentageDiscountMakerBidValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
-
-        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
-    }
 }

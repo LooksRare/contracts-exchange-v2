@@ -253,6 +253,30 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         );
     }
 
+    function testFloorDiscountBidTooLow() public {
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        makerBid.maxPrice = takerAsk.minPrice - 1 wei;
+
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _setPriceFeed();
+
+        // Valid, taker struct validation only happens during execution
+        _assertOrderValid(makerBid);
+
+        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        vm.prank(takerUser);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(
+            takerAsk,
+            makerBid,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyAffiliate
+        );
+    }
+
     function _setDiscount(uint256 _discount) internal {
         discount = _discount;
     }

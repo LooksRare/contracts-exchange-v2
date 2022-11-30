@@ -122,31 +122,4 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
             _emptyAffiliate
         );
     }
-
-    function testFloorDiscountFixedAmountBidTooLow() public {
-        // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
-        // Maker bid max price = 9.4 ETH
-        // Taker ask min price = 9.41 ETH
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.3 ether});
-        takerAsk.minPrice = 9.41 ether;
-
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        _setPriceFeed();
-
-        // Valid, taker struct validation only happens during execution
-        _assertOrderValid(makerBid);
-
-        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
-        vm.prank(takerUser);
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
-    }
 }

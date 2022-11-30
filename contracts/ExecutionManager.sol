@@ -99,7 +99,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
             // 2 --> Amount for seller
             fees[2] = price - fees[1] - fees[0];
-            recipients[2] = sender;
+            recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
         }
     }
 

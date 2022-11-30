@@ -396,7 +396,14 @@ contract LooksRareProtocol is
         }
 
         {
-            _transferNFT(makerAsk.collection, makerAsk.assetType, makerAsk.signer, sender, itemIds, amounts);
+            _transferNFT(
+                makerAsk.collection,
+                makerAsk.assetType,
+                makerAsk.signer,
+                takerBid.recipient == address(0) ? sender : takerBid.recipient,
+                itemIds,
+                amounts
+            );
 
             // @dev It starts at 1 since 0 is the protocol fee
             for (uint256 i = 1; i < 3; ) {

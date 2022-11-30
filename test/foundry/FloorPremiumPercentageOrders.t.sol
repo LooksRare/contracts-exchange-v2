@@ -16,17 +16,17 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         super.setUp();
     }
 
-    function testFloorPremiumDesiredSalePriceGreaterThanMinPrice() public {
+    function testFloorPremiumPercentageDesiredSalePriceGreaterThanMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
-        _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function testFloorPremiumDesiredSalePriceEqualToMinPrice() public {
+    function testFloorPremiumPercentageDesiredSalePriceEqualToMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
@@ -34,10 +34,10 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         });
         makerAsk.minPrice = 9.797 ether;
 
-        _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(
+    function _testFloorPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(
         OrderStructs.MakerAsk memory makerAsk,
         OrderStructs.TakerBid memory takerBid
     ) public {
@@ -66,7 +66,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.60106 ether);
     }
 
-    function testFloorPremiumDesiredSalePriceLessThanMinPrice() public {
+    function testFloorPremiumPercentageDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloor = StrategyFloor(implementation);
 

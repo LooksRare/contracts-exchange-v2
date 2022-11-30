@@ -13,17 +13,17 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         super.setUp();
     }
 
-    function testFloorPremiumDesiredSalePriceGreaterThanMinPrice() public {
+    function testFloorPremiumFixedAmountDesiredSalePriceGreaterThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloor = StrategyFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.7 ETH
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
-        _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function testFloorPremiumDesiredSalePriceEqualToMinPrice() public {
+    function testFloorPremiumFixedAmountDesiredSalePriceEqualToMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloor = StrategyFloor(implementation);
 
@@ -31,10 +31,10 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         // Min price = 9.8 ETH
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
         makerAsk.minPrice = 9.8 ether;
-        _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(
+    function _testFloorPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(
         OrderStructs.MakerAsk memory makerAsk,
         OrderStructs.TakerBid memory takerBid
     ) public {
@@ -65,7 +65,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.604 ether);
     }
 
-    function testFloorPremiumDesiredSalePriceLessThanMinPrice() public {
+    function testFloorPremiumFixedAmountDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloor = StrategyFloor(implementation);
 

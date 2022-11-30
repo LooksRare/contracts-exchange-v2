@@ -19,7 +19,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         super.setUp();
     }
 
-    function testFloorBasedCollectionOfferDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
+    function testFloorDiscountPercentageDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 1%, desired price = 9.603 ETH
         // Max price = 9.5 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
@@ -55,7 +55,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.31 ether);
     }
 
-    function testFloorBasedCollectionOfferDesiredDiscountedPriceLessThanMaxPrice() public {
+    function testFloorDiscountPercentageDesiredDiscountedPriceLessThanMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 3%, desired price = 9.409 ETH
         // Max price = 9.5 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 300});
@@ -90,7 +90,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.22082 ether);
     }
 
-    function testFloorBasedCollectionOfferDesiredDiscountPercentageGreaterThan100() public {
+    function testFloorDiscountPercentageDesiredDiscountPercentageGreaterThan100() public {
         // Floor price = 9.7 ETH, discount = 101%, desired price = negative
         // Max price = negative
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 10_001});
@@ -116,7 +116,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         );
     }
 
-    function testBidTooLow() public {
+    function testFloorDiscountPercentageBidTooLow() public {
         // Floor price = 9.7 ETH, discount = 3%, desired price = 9.409 ETH
         // Maker bid max price = 9.4 ETH
         // Taker ask min price = 9.5 ETH

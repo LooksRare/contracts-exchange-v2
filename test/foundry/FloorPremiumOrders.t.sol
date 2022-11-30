@@ -238,6 +238,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
+    // TODO: Move back to individual tests
     function testFloorPremiumBidTooLow() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 

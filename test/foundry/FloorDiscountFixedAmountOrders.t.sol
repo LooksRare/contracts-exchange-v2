@@ -15,7 +15,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         super.setUp();
     }
 
-    function testFloorBasedCollectionOfferDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
+    function testFloorDiscountFixedAmountDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 0.1 ETH, desired price = 9.6 ETH
         // Max price = 9.5 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
@@ -49,7 +49,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.31 ether);
     }
 
-    function testFloorBasedCollectionOfferDesiredDiscountedPriceLessThanMaxPrice() public {
+    function testFloorDiscountFixedAmountDesiredDiscountedPriceLessThanMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Max price = 9.5 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.3 ether});
@@ -82,7 +82,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.212 ether);
     }
 
-    function testFloorBasedCollectionOfferDesiredDiscountedAmountGreaterThanOrEqualToFloorPrice() public {
+    function testFloorDiscountFixedAmountDesiredDiscountedAmountGreaterThanOrEqualToFloorPrice() public {
         // Floor price = 9.7 ETH, discount = 9.7 ETH, desired price = 0 ETH
         // Max price = 0 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 9.7 ether});
@@ -123,7 +123,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         );
     }
 
-    function testBidTooLow() public {
+    function testFloorDiscountFixedAmountBidTooLow() public {
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Maker bid max price = 9.4 ETH
         // Taker ask min price = 9.41 ETH

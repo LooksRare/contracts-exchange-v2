@@ -127,8 +127,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
     function testTakerAskItemIdsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
-        uint256[] memory itemIds = new uint256[](0);
-        takerAsk.itemIds = itemIds;
+        takerAsk.itemIds = new uint256[](0);
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -153,8 +152,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
     function testTakerAskAmountsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
-        uint256[] memory amounts = new uint256[](0);
-        takerAsk.amounts = amounts;
+        takerAsk.amounts = new uint256[](0);
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -179,8 +177,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
     function testMakerBidAmountsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
-        uint256[] memory amounts = new uint256[](0);
-        makerBid.amounts = amounts;
+        makerBid.amounts = new uint256[](0);
 
         signature = _signMakerBid(makerBid, makerUserPK);
 

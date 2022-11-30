@@ -113,8 +113,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
     function testMakerAskItemIdsLengthNotOne() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
-        uint256[] memory itemIds = new uint256[](0);
-        makerAsk.itemIds = itemIds;
+        makerAsk.itemIds = new uint256[](0);
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -138,8 +137,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
     function testMakerAskAmountsLengthNotOne() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
-        uint256[] memory amounts = new uint256[](0);
-        makerAsk.amounts = amounts;
+        makerAsk.amounts = new uint256[](0);
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 

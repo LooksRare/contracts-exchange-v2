@@ -8,7 +8,6 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
 abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
-    string private constant GOERLI_RPC_URL = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
     StrategyFloorPremium internal strategyFloorPremium;
     bytes4 internal selectorTakerAsk = _emptyBytes4;
 
@@ -25,7 +24,7 @@ abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, Chai
     uint256 private isFixedAmount;
 
     function setUp() public virtual override {
-        vm.createSelectFork(GOERLI_RPC_URL, FORKED_BLOCK_NUMBER);
+        vm.createSelectFork(vm.rpcUrl("goerli"), FORKED_BLOCK_NUMBER);
         super.setUp();
         _setUpUsers();
         _setUpNewStrategy();

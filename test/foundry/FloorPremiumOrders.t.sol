@@ -30,7 +30,7 @@ abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, Chai
         _setUpNewStrategy();
     }
 
-    function selectorTakerBid() internal virtual returns (bytes4) {
+    function selectorTakerBid() internal pure virtual returns (bytes4) {
         return StrategyFloorPremium.executeFixedPremiumStrategyWithTakerBid.selector;
     }
 

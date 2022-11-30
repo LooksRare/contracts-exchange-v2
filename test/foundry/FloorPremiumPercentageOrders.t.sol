@@ -19,7 +19,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         _setIsFixedAmount(0);
     }
 
-    function selectorTakerBid() internal override returns (bytes4) {
+    function selectorTakerBid() internal pure override returns (bytes4) {
         return StrategyFloorPremium.executePercentagePremiumStrategyWithTakerBid.selector;
     }
 

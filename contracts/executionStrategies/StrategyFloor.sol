@@ -288,4 +288,40 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
 
         orderIsValid = true;
     }
+
+    /**
+     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
+     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
+     * @return orderIsValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     */
+    function isPercentageDiscountMakerBidValid(
+        OrderStructs.MakerBid calldata makerBid
+    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
+        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
+            return (orderIsValid, OrderInvalid.selector);
+        }
+
+        address priceFeed = priceFeeds[makerBid.collection];
+        if (priceFeed == address(0)) {
+            return (orderIsValid, PriceFeedNotAvailable.selector);
+        }
+
+        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
+        if (answer <= 0) {
+            return (orderIsValid, InvalidChainlinkPrice.selector);
+        }
+        if (block.timestamp > maximumLatency + updatedAt) {
+            return (orderIsValid, PriceNotRecentEnough.selector);
+        }
+
+        uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
+        if (discount > 10_000) {
+            return (orderIsValid, OrderInvalid.selector);
+        }
+
+        orderIsValid = true;
+    }
 }

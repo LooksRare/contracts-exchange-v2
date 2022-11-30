@@ -12,7 +12,11 @@ import {StrategyBase} from "./StrategyBase.sol";
 
 /**
  * @title StrategyCollectionOffer
- * @notice This contract allows the owner to define the maximum acceptable Chainlink price latency.
+ * @notice This contract allows users to create maker bid offers for items in a collection.
+ *         There are two available functions:
+ *         1. executeCollectionStrategyWithTakerAsk --> it applies too all itemId in a collection, the second
+ *         2. executeCollectionStrategyWithTakerAskWithProof --> it is same except that it allows adding merkle proof criteria.
+ *            Use cases include trait-based offers or rarity score offers.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyCollectionOffer is StrategyBase {

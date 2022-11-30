@@ -107,4 +107,18 @@ contract StrategyCollectionOffer is StrategyBase {
             if (!MerkleProof.verify(proof, root, node)) revert OrderMerkleProofInvalid();
         }
     }
+
+    /**
+     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     */
+    function isValid(OrderStructs.MakerBid calldata makerBid) external pure returns (bool, bytes4) {
+        uint256[] memory amounts = makerBid.amounts;
+        if (amounts.length != 1 || amounts[0] == 0) {
+            return (false, OrderInvalid.selector);
+        }
+
+        return (true, bytes4(0));
+    }
 }

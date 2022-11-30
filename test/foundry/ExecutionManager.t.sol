@@ -2,12 +2,13 @@
 pragma solidity ^0.8.0;
 
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
-import {IInheritedStrategies} from "../../contracts/interfaces/IInheritedStrategies.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
+    error OrderInvalid();
+
     /**
      * Owner can change protocol fee and deactivate royalty
      */
@@ -44,7 +45,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
      * Owner can discontinue strategy
      */
     function testOwnerCanDiscontinueStrategy() public asPrankedUser(_owner) {
-        uint16 strategyId = 1;
+        uint16 strategyId = 0;
         uint16 standardProtocolFee = 299;
         uint16 minTotalFee = 250;
         bool isActive = false;
@@ -181,32 +182,10 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // (For takerBid tests)
         vm.deal(takerUser, 100 ether);
 
-        /**
-         * 1. COLLECTION STRATEGY: itemIds' length is greater than 1
-         */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
-
-        // Adjust strategy for collection order and sign order
-        // Change array to make it bigger than expected
         uint256[] memory itemIds = new uint256[](2);
-        itemIds[0] = 0;
-        makerBid.strategyId = 1;
-        makerBid.itemIds = itemIds;
-        takerAsk.itemIds = itemIds;
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
 
         /**
-         * 2. STANDARD STRATEGY/MAKER BID: itemIds' length is equal to 0
+         * 1. STANDARD STRATEGY/MAKER BID: itemIds' length is equal to 0
          */
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
@@ -215,7 +194,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -226,7 +205,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 3. STANDARD STRATEGY/MAKER BID: maker itemIds' length is not equal to maker amounts' length
+         * 2. STANDARD STRATEGY/MAKER BID: maker itemIds' length is not equal to maker amounts' length
          */
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
@@ -235,7 +214,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -246,7 +225,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 4. STANDARD STRATEGY/MAKER BID: itemIds' length of maker is not equal to length of taker
+         * 3. STANDARD STRATEGY/MAKER BID: itemIds' length of maker is not equal to length of taker
          */
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
@@ -255,7 +234,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerAsk.itemIds = itemIds;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -266,7 +245,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 5. STANDARD STRATEGY/MAKER BID: amounts' length of maker is not equal to length of taker
+         * 4. STANDARD STRATEGY/MAKER BID: amounts' length of maker is not equal to length of taker
          */
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
@@ -277,7 +256,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerAsk.amounts = amounts;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -288,7 +267,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 6. STANDARD STRATEGY/MAKER BID: maxPrice of maker is not equal to minPrice of taker
+         * 5. STANDARD STRATEGY/MAKER BID: maxPrice of maker is not equal to minPrice of taker
          */
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -296,7 +275,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change price of takerAsk to be higher than makerAsk price
         takerAsk.minPrice = makerBid.maxPrice + 1;
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -309,7 +288,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change price of takerAsk to be higher than makerAsk price
         takerAsk.minPrice = makerBid.maxPrice - 1;
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(
             takerAsk,
             makerBid,
@@ -320,7 +299,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 7. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is equal to 0
+         * 6. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is equal to 0
          */
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
 
@@ -329,7 +308,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -340,7 +319,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 8. STANDARD STRATEGY/MAKER ASK: maker itemIds' length is not equal to maker amounts' length
+         * 7. STANDARD STRATEGY/MAKER ASK: maker itemIds' length is not equal to maker amounts' length
          */
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
 
@@ -349,7 +328,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -360,7 +339,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 9. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is not equal to length of taker
+         * 8. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is not equal to length of taker
          */
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
 
@@ -369,7 +348,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerBid.itemIds = itemIds;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -380,7 +359,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 10. STANDARD STRATEGY/MAKER ASK: amounts' length of maker is not equal to length of taker
+         * 9. STANDARD STRATEGY/MAKER ASK: amounts' length of maker is not equal to length of taker
          */
 
         // Change amounts array' length to make it equal to 2
@@ -391,7 +370,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerBid.amounts = amounts;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -402,7 +381,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 11. STANDARD STRATEGY/MAKER ASK: minPrice of maker is not equal to maxPrice of taker
+         * 10. STANDARD STRATEGY/MAKER ASK: minPrice of maker is not equal to maxPrice of taker
          */
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -410,7 +389,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change price of takerBid to be lower than makerAsk price
         takerBid.maxPrice = makerAsk.minPrice - 1;
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,
@@ -423,7 +402,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change price of takerBid to be higher than makerAsk price
         takerBid.maxPrice = makerAsk.minPrice + 1;
 
-        vm.expectRevert(IInheritedStrategies.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,

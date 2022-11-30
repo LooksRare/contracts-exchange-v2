@@ -56,7 +56,7 @@ abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, Chai
         newMakerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
-            strategyId: 2,
+            strategyId: 1,
             assetType: 0,
             orderNonce: 0,
             collection: address(mockERC721),

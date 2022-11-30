@@ -152,7 +152,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
             // 2 --> Amount for seller
             fees[2] = price - fees[1] - fees[0];
-            recipients[2] = makerAsk.recipient == address(0) ? makerAsk.signer : makerAsk.recipient;
+            recipients[2] = makerAsk.signer;
         }
     }
 
@@ -171,9 +171,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         if (makerAsk.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
             isNonceInvalidated = true;
-        } else if (makerAsk.strategyId == 1) {
-            // Collection offer is not available for taker bid
-            revert StrategyNotAvailable(makerAsk.strategyId);
         } else {
             if (strategyInfo[makerAsk.strategyId].isActive) {
                 bytes4 selector = strategyInfo[makerAsk.strategyId].selectorTakerBid;
@@ -210,9 +207,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
         if (makerBid.strategyId == 0) {
             (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
-            isNonceInvalidated = true;
-        } else if (makerBid.strategyId == 1) {
-            (price, itemIds, amounts) = _executeCollectionStrategyWithTakerAsk(takerAsk, makerBid);
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {

@@ -8,12 +8,12 @@ pragma solidity ^0.8.17;
  */
 library OrderStructs {
     // Maker ask hash used to compute maker ask order hash
-    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_ASK_HASH = 0xc7a3b6254405d9b044a63d83e724f64f1b8c511097d23b2ec8922767c2dbcb06;
+    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_ASK_HASH = 0x53f94ec71943e0d4668607b00d3be3b36a84a2d7cbe7c56ece7bb71013b788cf;
 
     // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address recipient,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_BID_HASH = 0x997623e8963edba01cc5ac8ec02677d22a7ddf20f801ec6b7c03cafd3f224b07;
+    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_BID_HASH = 0x0bc6f8c7cbcae50dce9a802ad4a3ee8dc62c394cf460eafaffefce4f43d114e2;
 
     // Merkle root hash used to compute merkle root order
     // keccak256("MerkleRoot(bytes32 root)")
@@ -23,7 +23,22 @@ library OrderStructs {
      * 1. MAKER ORDERS
      */
 
-    // MakerAsk
+    /**
+     * @param askNonce Global user order nonce for maker ask orders
+     * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
+     * @param strategyId Strategy id
+     * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
+     * @param orderNonce Order nonce (can be shared across bid/ask maker orders)
+     * @param collection Collection address
+     * @param currency Currency address (@dev address(0) = ETH)
+     * @param signer Signer address
+     * @param startTime Start timestamp
+     * @param endTime End timestamp
+     * @param minPrice Minimum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order (e.g., it can contain start price for Dutch Auction)
+     */
     struct MakerAsk {
         uint112 askNonce;
         uint112 subsetNonce;
@@ -32,7 +47,6 @@ library OrderStructs {
         uint112 orderNonce;
         address collection;
         address currency;
-        address recipient;
         address signer;
         uint256 startTime;
         uint256 endTime;
@@ -42,7 +56,22 @@ library OrderStructs {
         bytes additionalParameters;
     }
 
-    // MakerBid
+    /**
+     * @param bidNonce Global user order nonce for maker bid orders
+     * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
+     * @param strategyId Strategy id
+     * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
+     * @param orderNonce Order nonce (can be shared across bid/ask maker orders)
+     * @param collection Collection address
+     * @param currency Currency address (@dev ETH is not valid for bidding)
+     * @param signer Signer address
+     * @param startTime Start timestamp
+     * @param endTime End timestamp
+     * @param maxPrice Maximum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order (e.g., it can contain a merkle root for specific strategies)
+     */
     struct MakerBid {
         uint112 bidNonce;
         uint112 subsetNonce;
@@ -51,7 +80,6 @@ library OrderStructs {
         uint112 orderNonce;
         address collection;
         address currency;
-        address recipient;
         address signer;
         uint256 startTime;
         uint256 endTime;
@@ -65,7 +93,13 @@ library OrderStructs {
      * 2. TAKER ORDERS
      */
 
-    // TakerBid
+    /**
+     * @param recipient Recipient address (to receive non fungible tokens)
+     * @param maxPrice Maximum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order
+     */
     struct TakerBid {
         address recipient;
         uint256 maxPrice;
@@ -74,7 +108,13 @@ library OrderStructs {
         bytes additionalParameters;
     }
 
-    // TakerAsk
+    /**
+     * @param recipient Recipient address (to receive non fungible tokens)
+     * @param minPrice Minimum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order
+     */
     struct TakerAsk {
         address recipient;
         uint256 minPrice;
@@ -87,7 +127,9 @@ library OrderStructs {
      * 3. MERKLE ROOT
      */
 
-    // MerkleRoot
+    /**
+     * @param root Merkle root
+     */
     struct MerkleRoot {
         bytes32 root;
     }
@@ -113,7 +155,6 @@ library OrderStructs {
                     ),
                     abi.encode(
                         makerAsk.currency,
-                        makerAsk.recipient,
                         makerAsk.signer,
                         makerAsk.startTime,
                         makerAsk.endTime,
@@ -146,7 +187,6 @@ library OrderStructs {
                         makerBid.currency
                     ),
                     abi.encode(
-                        makerBid.recipient,
                         makerBid.signer,
                         makerBid.startTime,
                         makerBid.endTime,

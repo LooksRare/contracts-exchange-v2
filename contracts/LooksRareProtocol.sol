@@ -328,14 +328,7 @@ contract LooksRareProtocol is
                 }
             }
 
-            _transferNFT(
-                makerBid.collection,
-                makerBid.assetType,
-                msg.sender,
-                makerBid.recipient == address(0) ? makerBid.signer : makerBid.recipient,
-                itemIds,
-                amounts
-            );
+            _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, makerBid.signer, itemIds, amounts);
         }
 
         SignatureParameters memory signatureParameters = SignatureParameters({
@@ -348,7 +341,6 @@ contract LooksRareProtocol is
         emit TakerAsk(
             signatureParameters,
             msg.sender,
-            makerBid.recipient,
             makerBid.strategyId,
             makerBid.currency,
             makerBid.collection,
@@ -436,7 +428,6 @@ contract LooksRareProtocol is
         emit TakerBid(
             signatureParameters,
             sender,
-            takerBid.recipient == address(0) ? sender : takerBid.recipient,
             makerAsk.strategyId,
             makerAsk.currency,
             makerAsk.collection,

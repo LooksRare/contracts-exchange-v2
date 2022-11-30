@@ -38,7 +38,7 @@ interface ILooksRareProtocol {
 
     event TakerAsk(
         SignatureParameters signatureParameters,
-        address bidRecipient,
+        address askUser,
         uint256 strategyId,
         address currency,
         address collection,

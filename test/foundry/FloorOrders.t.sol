@@ -197,4 +197,11 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
             address(strategyFloor)
         );
     }
+
+    function _setPriceFeed() internal {
+        vm.startPrank(_owner);
+        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        vm.stopPrank();
+    }
 }

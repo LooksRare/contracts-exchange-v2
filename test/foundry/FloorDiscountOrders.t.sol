@@ -113,10 +113,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
     function testCallerNotLooksRareProtocol() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, but wrong caller
         (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
@@ -138,10 +135,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
         (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
@@ -170,10 +164,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
         (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
@@ -202,10 +193,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
@@ -235,10 +223,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
         (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
@@ -269,10 +254,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));

@@ -40,10 +40,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
     ) public {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
@@ -81,10 +78,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);

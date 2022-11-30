@@ -117,10 +117,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
@@ -147,10 +144,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
@@ -178,10 +172,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
@@ -209,10 +200,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
@@ -241,10 +229,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
@@ -271,10 +256,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
@@ -299,10 +281,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, but wrong caller
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);

@@ -25,10 +25,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isFixedDiscountMakerBidValid(makerBid);
         assertTrue(isValid);
@@ -63,10 +60,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isFixedDiscountMakerBidValid(makerBid);
         assertTrue(isValid);
@@ -99,10 +93,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         (bool isValid, bytes4 errorSelector) = strategyFloor.isFixedDiscountMakerBidValid(makerBid);
         assertFalse(isValid);
@@ -147,10 +138,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
+        _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyFloor.isFixedDiscountMakerBidValid(makerBid);

@@ -40,7 +40,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -83,7 +83,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 

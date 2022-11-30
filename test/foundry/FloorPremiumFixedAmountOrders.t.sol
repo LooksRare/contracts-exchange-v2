@@ -76,7 +76,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -117,7 +117,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -150,7 +150,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setMaximumLatency(3600);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
 
@@ -176,7 +176,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
@@ -205,7 +205,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, StrategyFloor.InvalidChainlinkPrice.selector);
 
@@ -246,7 +246,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         vm.stopPrank();
 
         // Valid, but wrong caller
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -269,7 +269,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
@@ -299,7 +299,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
@@ -330,7 +330,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
@@ -362,7 +362,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         vm.stopPrank();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -394,7 +394,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         vm.stopPrank();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -424,7 +424,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         vm.stopPrank();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 

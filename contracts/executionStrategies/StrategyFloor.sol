@@ -212,7 +212,9 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
      * @return orderIsValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, return the error's 4 bytes selector
      */
-    function isMakerBidValid(OrderStructs.MakerBid calldata makerBid) external view returns (bool orderIsValid, bytes4 errorSelector) {
+    function isFixedDiscountMakerBidValid(
+        OrderStructs.MakerBid calldata makerBid
+    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
             return (orderIsValid, OrderInvalid.selector);
         }

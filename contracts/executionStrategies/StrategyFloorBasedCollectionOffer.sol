@@ -85,31 +85,35 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
+     * @return orderIsValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, return the error's 4 bytes selector
      */
-    function isValid(OrderStructs.MakerBid calldata makerBid) external view returns (bool, bytes4) {
+    function isValid(
+        OrderStructs.MakerBid calldata makerBid
+    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
-            return (false, OrderInvalid.selector);
+            return (orderIsValid, OrderInvalid.selector);
         }
 
         address priceFeed = priceFeeds[makerBid.collection];
         if (priceFeed == address(0)) {
-            return (false, PriceFeedNotAvailable.selector);
+            return (orderIsValid, PriceFeedNotAvailable.selector);
         }
 
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
         if (answer <= 0) {
-            return (false, InvalidChainlinkPrice.selector);
+            return (orderIsValid, InvalidChainlinkPrice.selector);
         }
         if (block.timestamp > maximumLatency + updatedAt) {
-            return (false, PriceNotRecentEnough.selector);
+            return (orderIsValid, PriceNotRecentEnough.selector);
         }
 
         uint256 discountAmount = abi.decode(makerBid.additionalParameters, (uint256));
         uint256 floorPrice = uint256(answer);
         if (floorPrice <= discountAmount) {
-            return (false, OrderInvalid.selector);
+            return (orderIsValid, OrderInvalid.selector);
         }
 
-        return (true, bytes4(0));
+        orderIsValid = true;
     }
 }

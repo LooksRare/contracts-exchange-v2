@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
@@ -29,6 +30,52 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
         _setUpNewStrategy();
     }
 
+    function testNewStrategy() public {
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelectorTakerAsk,
+            bytes4 strategySelectorTakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(1);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
+        assertEq(strategyMinTotalFee, _minTotalFee);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategySelectorTakerAsk, selectorTakerAsk());
+        assertEq(strategySelectorTakerBid, selectorTakerBid());
+        assertEq(strategyImplementation, address(strategyFloor));
+    }
+
+    function testSetMaximumLatency() public {
+        _testSetMaximumLatency(address(strategyFloor));
+    }
+
+    function testSetMaximumLatencyLatencyToleranceTooHigh() public {
+        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloor));
+    }
+
+    function testSetMaximumLatencyNotOwner() public {
+        _testSetMaximumLatencyNotOwner(address(strategyFloor));
+    }
+
+    event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
+
+    function testSetPriceFeed() public asPrankedUser(_owner) {
+        vm.expectEmit(true, true, true, false);
+        emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        assertEq(strategyFloor.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
+    }
+
+    function testSetPriceFeedNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+    }
+
     function selectorTakerBid() internal view virtual returns (bytes4 selector) {
         selector = _emptyBytes4;
     }
@@ -43,18 +90,6 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
 
     function selectorMakerAsk() internal view virtual returns (bytes4 selector) {
         selector = _emptyBytes4;
-    }
-
-    function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyFloor = new StrategyFloor(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
-            selectorTakerAsk(),
-            selectorTakerBid(),
-            address(strategyFloor)
-        );
     }
 
     function _createMakerAskAndTakerBid(
@@ -144,5 +179,17 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
 
     function _setIsFixedAmount(uint256 _isFixedAmount) internal {
         isFixedAmount = _isFixedAmount;
+    }
+
+    function _setUpNewStrategy() private asPrankedUser(_owner) {
+        strategyFloor = new StrategyFloor(address(looksRareProtocol));
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            selectorTakerAsk(),
+            selectorTakerBid(),
+            address(strategyFloor)
+        );
     }
 }

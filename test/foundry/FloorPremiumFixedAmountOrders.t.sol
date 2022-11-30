@@ -16,52 +16,6 @@ contract FloorPremiumFixedAmountOrdersTest is FloorOrdersTest {
         _setIsFixedAmount(1);
     }
 
-    function testNewStrategy() public {
-        (
-            bool strategyIsActive,
-            uint16 strategyStandardProtocolFee,
-            uint16 strategyMinTotalFee,
-            uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk());
-        assertEq(strategySelectorTakerBid, selectorTakerBid());
-        assertEq(strategyImplementation, address(strategyFloor));
-    }
-
-    function testSetMaximumLatency() public {
-        _testSetMaximumLatency(address(strategyFloor));
-    }
-
-    function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloor));
-    }
-
-    function testSetMaximumLatencyNotOwner() public {
-        _testSetMaximumLatencyNotOwner(address(strategyFloor));
-    }
-
-    event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
-
-    function testSetPriceFeed() public asPrankedUser(_owner) {
-        vm.expectEmit(true, true, true, false);
-        emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        assertEq(strategyFloor.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
-    }
-
-    function testSetPriceFeedNotOwner() public {
-        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-    }
-
     function testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloor = StrategyFloor(implementation);

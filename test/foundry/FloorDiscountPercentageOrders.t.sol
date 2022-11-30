@@ -11,6 +11,11 @@ import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 import {FloorOrdersTest} from "./FloorOrders.t.sol";
 
 contract FloorDiscountPercentageOrdersTest is FloorOrdersTest {
+    function setUp() public override {
+        super.setUp();
+        _setIsFixedAmount(0);
+    }
+
     function testFloorBasedCollectionOfferDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 1%, desired price = 9.603 ETH
         // Max price = 9.5 ETH

@@ -83,7 +83,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
     }
 
     /**
-     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      */

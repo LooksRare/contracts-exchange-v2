@@ -81,7 +81,7 @@ contract StrategyFloorBasedCollectionOffer is StrategyChainlinkMultiplePriceFeed
     }
 
     /**
-     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.

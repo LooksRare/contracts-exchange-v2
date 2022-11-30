@@ -29,7 +29,7 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
      */
     function updateAffiliateRate(address affiliate, uint256 bp) external {
         if (msg.sender != affiliateController) revert NotAffiliateController();
-        if (bp > 10000) revert PercentageTooHigh();
+        if (bp > 10_000) revert PercentageTooHigh();
 
         affiliateRates[affiliate] = bp;
         emit NewAffiliateRate(affiliate, bp);

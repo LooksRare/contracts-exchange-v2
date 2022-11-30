@@ -71,7 +71,7 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
 
         // A fixed royalty fee is applied
         if (receiver != address(0)) {
-            creatorFee = (STANDARD_ROYALTY_FEE_BP * price) / 10000;
+            creatorFee = (STANDARD_ROYALTY_FEE_BP * price) / 10_000;
         }
     }
 }

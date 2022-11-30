@@ -80,13 +80,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
             }
-            uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFee) / 10000;
+            uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFee) / 10_000;
 
             // 1 --> Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
                 fees[0] = minTotalFee;
             } else {
-                uint256 standardProtocolFee = (price * strategyInfo[makerBid.strategyId].standardProtocolFee) / 10000;
+                uint256 standardProtocolFee = (price * strategyInfo[makerBid.strategyId].standardProtocolFee) / 10_000;
 
                 if (fees[1] + standardProtocolFee > minTotalFee) {
                     fees[0] = standardProtocolFee;
@@ -133,13 +133,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
             }
-            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFee) / 10000;
+            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFee) / 10_000;
 
             // 1 --> Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
                 fees[0] = minTotalFee;
             } else {
-                uint256 standardProtocolFee = (price * strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10000;
+                uint256 standardProtocolFee = (price * strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10_000;
 
                 if (fees[1] + standardProtocolFee > minTotalFee) {
                     fees[0] = standardProtocolFee;

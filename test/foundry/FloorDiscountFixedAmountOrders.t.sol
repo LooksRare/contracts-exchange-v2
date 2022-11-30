@@ -12,7 +12,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 
-contract FloorDiscountOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
+contract FloorDiscountFixedAmountOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     StrategyFloor public strategyFloor;
     bytes4 public selectorTakerAsk = StrategyFloor.executeFixedDiscountStrategyWithTakerAsk.selector;
     bytes4 public selectorTakerBid = _emptyBytes4;

@@ -70,7 +70,7 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
             price = makerAsk.minPrice;
         }
 
-        if (takerBid.maxPrice < desiredPrice) revert BidTooLow();
+        if (takerBid.maxPrice < price) revert BidTooLow();
 
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
@@ -82,7 +82,7 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
      *         This strategy looks at the seller's desired execution price in ETH (floor * (1 + premium)) and minimum execution price and chooses the higher price
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
-     * @dev The client has to provide the bidder's desired premium amount in ETH from the floor price as the additionalParameters.
+     * @dev The client has to provide the bidder's desired premium basis points from the floor price as the additionalParameters.
      */
     function executePercentagePremiumStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -119,7 +119,7 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
             price = makerAsk.minPrice;
         }
 
-        if (takerBid.maxPrice < desiredPrice) revert BidTooLow();
+        if (takerBid.maxPrice < price) revert BidTooLow();
 
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
@@ -163,15 +163,63 @@ contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlink
         if (floorPrice <= discountAmount) revert OrderInvalid();
         uint256 desiredPrice = floorPrice - discountAmount;
 
-        if (takerAsk.minPrice > desiredPrice) {
-            if (takerAsk.minPrice > makerBid.maxPrice) revert BidTooLow();
+        if (desiredPrice >= makerBid.maxPrice) {
+            price = makerBid.maxPrice;
+        } else {
+            price = desiredPrice;
         }
+
+        if (takerAsk.minPrice > price) revert BidTooLow();
+
+        itemIds = takerAsk.itemIds;
+        amounts = takerAsk.amounts;
+        isNonceInvalidated = true;
+    }
+
+    /**
+     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     *         This strategy looks at the bidder's desired execution price in ETH (floor * (1 - discount)) and maximum execution price and chooses the lower price.
+     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
+     */
+    function executePercentageDiscountStrategyWithTakerAsk(
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid
+    )
+        external
+        view
+        returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
+    {
+        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
+
+        if (
+            takerAsk.itemIds.length != 1 ||
+            takerAsk.amounts.length != 1 ||
+            takerAsk.amounts[0] != 1 ||
+            makerBid.amounts.length != 1 ||
+            makerBid.amounts[0] != 1
+        ) revert OrderInvalid();
+
+        address priceFeed = priceFeeds[makerBid.collection];
+        if (priceFeed == address(0)) revert PriceFeedNotAvailable();
+
+        (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
+        if (answer <= 0) revert InvalidChainlinkPrice();
+        if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
+
+        uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
+        uint256 floorPrice = uint256(answer);
+        if (discount > 10_000) revert OrderInvalid();
+        uint256 desiredPrice = (floorPrice * (10_000 - discount)) / 10_000;
 
         if (desiredPrice >= makerBid.maxPrice) {
             price = makerBid.maxPrice;
         } else {
             price = desiredPrice;
         }
+
+        if (takerAsk.minPrice > price) revert BidTooLow();
 
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;

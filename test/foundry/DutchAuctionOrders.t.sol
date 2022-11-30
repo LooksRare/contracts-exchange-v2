@@ -157,7 +157,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
@@ -182,7 +182,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
@@ -243,7 +243,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
@@ -271,7 +271,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);

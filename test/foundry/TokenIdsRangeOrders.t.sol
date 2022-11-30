@@ -280,7 +280,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);

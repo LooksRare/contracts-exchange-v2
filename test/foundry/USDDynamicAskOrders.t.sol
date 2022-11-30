@@ -135,7 +135,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(-1);
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
@@ -152,7 +152,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
         (isValid, errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
@@ -331,7 +331,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
         vm.expectRevert(errorSelector);
@@ -380,7 +380,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
@@ -409,7 +409,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         strategyUSDDynamicAsk.setMaximumLatency(3600);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);

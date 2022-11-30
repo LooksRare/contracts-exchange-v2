@@ -211,7 +211,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
 
         vm.expectRevert(errorSelector);
@@ -237,7 +237,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
         vm.expectRevert(errorSelector);
@@ -266,7 +266,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyFloorPremium.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
@@ -330,7 +330,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
@@ -360,7 +360,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
@@ -391,7 +391,7 @@ contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaxi
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorPremium.isValid(makerAsk);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);

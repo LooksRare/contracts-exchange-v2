@@ -215,7 +215,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorBasedCollectionOffer.isValid(makerBid);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
@@ -258,7 +258,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorBasedCollectionOffer.isValid(makerBid);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
 
         vm.expectRevert(errorSelector);
@@ -284,7 +284,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorBasedCollectionOffer.isValid(makerBid);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
         vm.expectRevert(errorSelector);
@@ -313,7 +313,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorBasedCollectionOffer.isValid(makerBid);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, StrategyFloorBasedCollectionOffer.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
@@ -437,7 +437,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorBasedCollectionOffer.isValid(makerBid);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.prank(takerUser);
@@ -502,7 +502,7 @@ contract FloorBasedCollectionOrdersTest is ProtocolBase, IStrategyManager, Chain
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorBasedCollectionOffer.isValid(makerBid);
-        assertTrue(!isValid);
+        assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.prank(takerUser);

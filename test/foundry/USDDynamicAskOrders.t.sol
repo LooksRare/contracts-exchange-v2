@@ -8,6 +8,7 @@ import {StrategyUSDDynamicAsk} from "../../contracts/executionStrategies/Strateg
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
+import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
@@ -117,6 +118,56 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         _testSetMaximumLatencyNotOwner(address(strategyUSDDynamicAsk));
     }
 
+    function testUSDDynamicAskInvalidChainlinkPrice() public {
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
+        });
+
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.prank(_owner);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
+
+        MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
+        vm.etch(CHAINLINK_ETH_USD_PRICE_FEED, address(priceFeed).code);
+
+        MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(-1);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
+
+        vm.expectRevert(errorSelector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyAffiliate
+        );
+
+        MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
+        (isValid, errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
+
+        vm.expectRevert(errorSelector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyAffiliate
+        );
+    }
+
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -128,6 +179,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
+
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -159,6 +214,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
+
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -194,6 +253,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
+
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -235,6 +298,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         uint256 initialETHBalanceTakerUser = address(takerUser).balance;
         uint256 initialETHBalanceMakerUser = address(makerUser).balance;
 
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
@@ -263,7 +330,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+
+        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -283,6 +354,14 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
+        vm.prank(_owner);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
+
+        // Valid, but wrong caller
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
         strategyUSDDynamicAsk.executeStrategyWithTakerBid(takerBid, makerAsk);
@@ -300,7 +379,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -325,7 +408,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -356,6 +443,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
 
+        // Valid, taker struct validation only happens during execution
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -385,6 +477,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
 
+        // Valid, taker struct validation only happens during execution
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -411,6 +508,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.prank(_owner);
         strategyUSDDynamicAsk.setMaximumLatency(3600);
+
+        // Valid, taker struct validation only happens during execution
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);

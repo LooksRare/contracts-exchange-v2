@@ -19,7 +19,6 @@ abstract contract TestParameters is Test {
     OrderStructs.MerkleRoot internal _emptyMerkleRoot = OrderStructs.MerkleRoot({root: bytes32(0)});
     bytes32[] internal _emptyMerkleProof = new bytes32[](0);
     bytes4 internal _emptyBytes4 = bytes4(0);
-
     bytes32 public MAGIC_VALUE_NONCE_EXECUTED = 0x000000000000000000000000000000000000000000000000000000000000002a;
 
     // Initial balances
@@ -35,6 +34,8 @@ abstract contract TestParameters is Test {
     // Affiliate parameters
     address public _affiliate = address(2);
     uint256 public constant _timelock = 120;
+
+    address internal constant CHAINLINK_ETH_USD_PRICE_FEED = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
 
     // Reused parameters
     OrderStructs.MakerAsk public makerAsk;

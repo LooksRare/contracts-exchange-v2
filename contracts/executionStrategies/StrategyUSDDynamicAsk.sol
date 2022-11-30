@@ -59,7 +59,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         }
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
-        if (answer < 0) revert InvalidChainlinkPrice();
+        if (answer <= 0) revert InvalidChainlinkPrice();
         if (block.timestamp - updatedAt > maximumLatency) revert PriceNotRecentEnough();
 
         // The client has to provide a USD value that is augmented by 1e18.
@@ -80,5 +80,28 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
         isNonceInvalidated = true;
+    }
+
+    /**
+     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     */
+    function isValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
+        uint256 itemIdsLength = makerAsk.itemIds.length;
+
+        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
+            return (false, OrderInvalid.selector);
+        }
+
+        (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
+        if (answer <= 0) {
+            return (false, InvalidChainlinkPrice.selector);
+        }
+        if (block.timestamp - updatedAt > maximumLatency) {
+            return (false, PriceNotRecentEnough.selector);
+        }
+
+        return (true, bytes4(0));
     }
 }

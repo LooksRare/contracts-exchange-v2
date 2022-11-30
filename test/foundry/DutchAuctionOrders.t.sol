@@ -107,6 +107,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.warp(block.timestamp + elapsedTime);
 
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -134,6 +138,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpNewStrategy();
         (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
 
+        // Valid, but wrong caller
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
         strategyDutchAuction.executeStrategyWithTakerBid(takerBid, makerAsk);
@@ -147,7 +156,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -168,7 +181,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -195,6 +212,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
+        // Valid, taker struct validation only happens during execution
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -220,7 +242,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -244,7 +270,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+
+        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(
@@ -269,6 +299,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        // Valid, taker struct validation only happens during execution
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);

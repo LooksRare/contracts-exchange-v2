@@ -68,4 +68,36 @@ contract StrategyDutchAuction is StrategyBase {
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
     }
+
+    /**
+     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @param makerAsk Maker ask struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
+     */
+    function isValid(OrderStructs.MakerAsk calldata makerAsk) external pure returns (bool, bytes4) {
+        uint256 itemIdsLength = makerAsk.itemIds.length;
+
+        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
+            return (false, OrderInvalid.selector);
+        }
+        for (uint256 i; i < itemIdsLength; ) {
+            uint256 amount = makerAsk.amounts[i];
+            if (amount == 0) {
+                return (false, OrderInvalid.selector);
+            }
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
+
+        if (startPrice < makerAsk.minPrice) {
+            return (false, OrderInvalid.selector);
+        }
+
+        return (true, bytes4(0));
+    }
 }

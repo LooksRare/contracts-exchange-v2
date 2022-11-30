@@ -8,9 +8,9 @@ import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
-import {FloorPremiumOrdersTest} from "./FloorPremiumOrders.t.sol";
+import {FloorOrdersTest} from "./FloorOrders.t.sol";
 
-contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
+contract FloorPremiumFixedAmountOrdersTest is FloorOrdersTest {
     function setUp() public override {
         super.setUp();
         _setIsFixedAmount(1);
@@ -31,7 +31,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
+        assertEq(strategySelectorTakerAsk, selectorTakerAsk());
         assertEq(strategySelectorTakerBid, selectorTakerBid());
         assertEq(strategyImplementation, address(strategyFloor));
     }
@@ -439,5 +439,9 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
             _emptyMerkleProof,
             _emptyAffiliate
         );
+    }
+
+    function selectorTakerBid() internal pure override returns (bytes4) {
+        return StrategyFloor.executeFixedPremiumStrategyWithTakerBid.selector;
     }
 }

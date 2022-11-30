@@ -4,82 +4,16 @@ pragma solidity ^0.8.0;
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
-import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
-import {ProtocolBase} from "./ProtocolBase.t.sol";
-import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
+import {FloorOrdersTest} from "./FloorOrders.t.sol";
 
-contract FloorDiscountFixedAmountOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
-    StrategyFloor public strategyFloor;
-    bytes4 public selectorTakerAsk = StrategyFloor.executeFixedDiscountStrategyWithTakerAsk.selector;
-    bytes4 public selectorTakerBid = _emptyBytes4;
-
-    // At block 15740567
-    // roundId         uint80  : 18446744073709552305
-    // answer          int256  : 9700000000000000000
-    // startedAt       uint256 : 1666100016
-    // updatedAt       uint256 : 1666100016
-    // answeredInRound uint80  : 18446744073709552305
-    uint256 private constant FORKED_BLOCK_NUMBER = 7791270;
-    uint256 private constant LATEST_CHAINLINK_ANSWER_IN_WAD = 9.7 ether;
-    address private constant AZUKI_PRICE_FEED = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;
-
+contract FloorDiscountFixedAmountOrdersTest is FloorOrdersTest {
     function setUp() public override {
-        vm.createSelectFork(vm.rpcUrl("goerli"), FORKED_BLOCK_NUMBER);
         super.setUp();
-        _setUpUsers();
-        _setUpNewStrategy();
-    }
-
-    function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyFloor = new StrategyFloor(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
-            selectorTakerAsk,
-            selectorTakerBid,
-            address(strategyFloor)
-        );
-    }
-
-    function _createMakerBidAndTakerAsk(
-        uint256 discount
-    ) private returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
-        mockERC721.mint(takerUser, 1);
-
-        // Prepare the order hash
-        newMakerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: 1,
-            assetType: 0,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: 9.5 ether,
-            itemId: 0 // Doesn't matter, not used
-        });
-
-        newMakerBid.additionalParameters = abi.encode(discount);
-
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 1;
-
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1;
-
-        newTakerAsk = OrderStructs.TakerAsk({
-            recipient: takerUser,
-            minPrice: 9.5 ether,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
-        });
+        _setIsFixedAmount(1);
     }
 
     function testNewStrategyAndMaximumLatency() public {
@@ -97,8 +31,8 @@ contract FloorDiscountFixedAmountOrdersTest is ProtocolBase, IStrategyManager, C
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
-        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategySelectorTakerAsk, selectorTakerAsk());
+        assertEq(strategySelectorTakerBid, selectorTakerBid());
         assertEq(strategyImplementation, address(strategyFloor));
     }
 
@@ -132,6 +66,9 @@ contract FloorDiscountFixedAmountOrdersTest is ProtocolBase, IStrategyManager, C
         // Floor price = 9.7 ETH, discount = 0.1 ETH, desired price = 9.6 ETH
         // Max price = 9.5 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
+
+        makerBid.maxPrice = 9.5 ether;
+        takerAsk.minPrice = 9.5 ether;
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -518,12 +455,12 @@ contract FloorDiscountFixedAmountOrdersTest is ProtocolBase, IStrategyManager, C
         );
     }
 
-    function testMakerBidTooLow() public {
+    function testBidTooLow() public {
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Maker bid max price = 9.4 ETH
-        // Taker ask min price = 9.5 ETH
+        // Taker ask min price = 9.41 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.3 ether});
-        makerBid.maxPrice = 9.4 ether;
+        takerAsk.minPrice = 9.41 ether;
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -548,5 +485,13 @@ contract FloorDiscountFixedAmountOrdersTest is ProtocolBase, IStrategyManager, C
             _emptyMerkleProof,
             _emptyAffiliate
         );
+    }
+
+    function selectorTakerAsk() internal pure override returns (bytes4 selector) {
+        selector = StrategyFloor.executeFixedDiscountStrategyWithTakerAsk.selector;
+    }
+
+    function selectorTakerBid() internal view override returns (bytes4 selector) {
+        selector = _emptyBytes4;
     }
 }

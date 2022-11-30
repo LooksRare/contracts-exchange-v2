@@ -7,9 +7,8 @@ import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.s
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
-abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
+abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     StrategyFloor internal strategyFloor;
-    bytes4 internal selectorTakerAsk = _emptyBytes4;
 
     // At block 15740567
     // roundId         uint80  : 18446744073709552305
@@ -30,8 +29,20 @@ abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, Chai
         _setUpNewStrategy();
     }
 
-    function selectorTakerBid() internal pure virtual returns (bytes4) {
-        return StrategyFloor.executeFixedPremiumStrategyWithTakerBid.selector;
+    function selectorTakerBid() internal view virtual returns (bytes4 selector) {
+        selector = _emptyBytes4;
+    }
+
+    function selectorTakerAsk() internal view virtual returns (bytes4 selector) {
+        selector = _emptyBytes4;
+    }
+
+    function selectorMakerBid() internal view virtual returns (bytes4 selector) {
+        selector = _emptyBytes4;
+    }
+
+    function selectorMakerAsk() internal view virtual returns (bytes4 selector) {
+        selector = _emptyBytes4;
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
@@ -40,7 +51,7 @@ abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, Chai
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk,
+            selectorTakerAsk(),
             selectorTakerBid(),
             address(strategyFloor)
         );
@@ -82,6 +93,53 @@ abstract contract FloorPremiumOrdersTest is ProtocolBase, IStrategyManager, Chai
             amounts,
             abi.encode()
         );
+    }
+
+    function _createMakerBidAndTakerAsk(
+        uint256 discount
+    ) internal returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
+        mockERC721.mint(takerUser, 1);
+
+        uint256 price;
+        if (isFixedAmount != 0) {
+            price = LATEST_CHAINLINK_ANSWER_IN_WAD - discount;
+        } else {
+            if (discount > 10_000) {
+                price = 0;
+            } else {
+                price = (LATEST_CHAINLINK_ANSWER_IN_WAD * (10_000 - discount)) / 10_000;
+            }
+        }
+
+        // Prepare the order hash
+        newMakerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1,
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Doesn't matter, not used
+        });
+
+        newMakerBid.additionalParameters = abi.encode(discount);
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = 1;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
+        newTakerAsk = OrderStructs.TakerAsk({
+            recipient: takerUser,
+            minPrice: price,
+            itemIds: itemIds,
+            amounts: amounts,
+            additionalParameters: abi.encode()
+        });
     }
 
     function _setIsFixedAmount(uint256 _isFixedAmount) internal {

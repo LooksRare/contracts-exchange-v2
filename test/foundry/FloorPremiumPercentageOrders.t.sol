@@ -8,19 +8,15 @@ import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
-import {FloorPremiumOrdersTest} from "./FloorPremiumOrders.t.sol";
+import {FloorOrdersTest} from "./FloorOrders.t.sol";
 
 /**
  * @notice The primary scenarios are tested in FloorPremiumFixedAmountOrdersTest
  */
-contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
+contract FloorPremiumPercentageOrdersTest is FloorOrdersTest {
     function setUp() public override {
         super.setUp();
         _setIsFixedAmount(0);
-    }
-
-    function selectorTakerBid() internal pure override returns (bytes4) {
-        return StrategyFloor.executePercentagePremiumStrategyWithTakerBid.selector;
     }
 
     function testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
@@ -105,5 +101,9 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 9.8 ether);
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.604 ether);
+    }
+
+    function selectorTakerBid() internal pure override returns (bytes4) {
+        return StrategyFloor.executePercentagePremiumStrategyWithTakerBid.selector;
     }
 }

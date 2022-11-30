@@ -32,7 +32,7 @@ abstract contract StrategyChainlinkPriceLatency is StrategyBase {
      * @param _maximumLatency Maximum Chainlink price latency
      */
     function setMaximumLatency(uint256 _maximumLatency) external onlyOwner {
-        if (_maximumLatency > 3600) revert LatencyToleranceTooHigh();
+        if (_maximumLatency > 3_600) revert LatencyToleranceTooHigh();
         maximumLatency = _maximumLatency;
         emit MaximumLatencyUpdated(_maximumLatency);
     }

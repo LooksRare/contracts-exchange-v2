@@ -16,7 +16,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         premium = _premium;
     }
 
-    function testPriceFeedNotAvailable() public {
+    function testFloorPremiumPriceFeedNotAvailable() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -42,7 +42,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testOraclePriceNotRecentEnough() public {
+    function testFloorPremiumOraclePriceNotRecentEnough() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -68,7 +68,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testChainlinkPriceLessThanOrEqualToZero() public {
+    function testFloorPremiumChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
@@ -110,7 +110,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testMakerAskItemIdsLengthNotOne() public {
+    function testFloorPremiumMakerAskItemIdsLengthNotOne() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         makerAsk.itemIds = new uint256[](0);
@@ -134,7 +134,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testMakerAskAmountsLengthNotOne() public {
+    function testFloorPremiumMakerAskAmountsLengthNotOne() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         makerAsk.amounts = new uint256[](0);
@@ -158,7 +158,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testMakerAskAmountNotOne() public {
+    function testFloorPremiumMakerAskAmountNotOne() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         uint256[] memory amounts = new uint256[](1);
@@ -184,7 +184,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testTakerBidAmountNotOne() public {
+    function testFloorPremiumTakerBidAmountNotOne() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         uint256[] memory amounts = new uint256[](1);
@@ -211,7 +211,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testMakerAskTakerBidItemIdsMismatch() public {
+    function testFloorPremiumMakerAskTakerBidItemIdsMismatch() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         uint256[] memory itemIds = new uint256[](1);
@@ -238,7 +238,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testBidTooLow() public {
+    function testFloorPremiumBidTooLow() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         takerBid.maxPrice = makerAsk.minPrice - premium;
@@ -263,7 +263,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testCallerNotLooksRareProtocol() public {
+    function testFloorPremiumCallerNotLooksRareProtocol() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         signature = _signMakerAsk(makerAsk, makerUserPK);

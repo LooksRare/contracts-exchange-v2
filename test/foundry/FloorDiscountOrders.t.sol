@@ -13,7 +13,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
     uint256 internal discount;
     bytes4 private validityFunctionSelector;
 
-    function testPriceFeedNotAvailable() public {
+    function testFloorDiscountPriceFeedNotAvailable() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -40,7 +40,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testOraclePriceNotRecentEnough() public {
+    function testFloorDiscountOraclePriceNotRecentEnough() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -67,7 +67,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testChainlinkPriceLessThanOrEqualToZero() public {
+    function testFloorDiscountChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
@@ -110,7 +110,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testCallerNotLooksRareProtocol() public {
+    function testFloorDiscountCallerNotLooksRareProtocol() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         _setPriceFeed();
@@ -124,7 +124,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         address(strategyFloor).call(abi.encodeWithSelector(selectorTakerAsk, takerAsk, makerBid));
     }
 
-    function testTakerAskItemIdsLengthNotOne() public {
+    function testFloorDiscountTakerAskItemIdsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         takerAsk.itemIds = new uint256[](0);
@@ -149,7 +149,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testTakerAskAmountsLengthNotOne() public {
+    function testFloorDiscountTakerAskAmountsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         takerAsk.amounts = new uint256[](0);
@@ -174,7 +174,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testMakerBidAmountsLengthNotOne() public {
+    function testFloorDiscountMakerBidAmountsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         makerBid.amounts = new uint256[](0);
@@ -198,7 +198,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testTakerAskZeroAmount() public {
+    function testFloorDiscountTakerAskZeroAmount() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         uint256[] memory amounts = new uint256[](1);
@@ -226,7 +226,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         );
     }
 
-    function testMakerBidAmountNotOne() public {
+    function testFloorDiscountMakerBidAmountNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         uint256[] memory amounts = new uint256[](1);

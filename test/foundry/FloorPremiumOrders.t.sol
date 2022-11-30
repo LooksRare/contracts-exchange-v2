@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {FloorOrdersTest} from "./FloorOrders.t.sol";
+import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
@@ -119,9 +120,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
-        assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -146,9 +145,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
-        assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -174,9 +171,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
-        assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -292,5 +287,13 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
         address(strategyFloor).call(abi.encodeWithSelector(selectorTakerBid, takerBid, makerAsk));
+    }
+
+    function _assertOrderInvalid(OrderStructs.MakerAsk memory makerAsk) private returns (bytes4) {
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+
+        return errorSelector;
     }
 }

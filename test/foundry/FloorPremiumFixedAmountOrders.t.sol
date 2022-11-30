@@ -46,16 +46,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -84,16 +75,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);

@@ -30,16 +30,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         assertEq(errorSelector, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumOraclePriceNotRecentEnough() public {
@@ -56,16 +47,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumChainlinkPriceLessThanOrEqualToZero() public {
@@ -85,29 +67,11 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         assertEq(errorSelector, StrategyFloor.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
 
         aggregator.setAnswer(-1);
         vm.expectRevert(StrategyFloor.InvalidChainlinkPrice.selector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumMakerAskItemIdsLengthNotOne() public {
@@ -122,16 +86,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumMakerAskAmountsLengthNotOne() public {
@@ -146,16 +101,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumMakerAskAmountNotOne() public {
@@ -172,16 +118,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumTakerBidAmountNotOne() public {
@@ -199,16 +136,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumMakerAskTakerBidItemIdsMismatch() public {
@@ -226,16 +154,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumBidTooLow() public {
@@ -251,16 +170,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorPremiumCallerNotLooksRareProtocol() public {
@@ -291,5 +201,22 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         return errorSelector;
+    }
+
+    function _executeTakerBid(
+        OrderStructs.TakerBid memory takerBid,
+        OrderStructs.MakerAsk memory makerAsk,
+        bytes memory signature
+    ) internal {
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleRoot,
+            _emptyMerkleProof,
+            _emptyAffiliate
+        );
     }
 }

@@ -24,7 +24,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
     }
 
     function testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
-        (, , , , , , address implementation) = looksRareProtocol.strategyInfo(2);
+        (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloorPremium = StrategyFloorPremium(implementation);
 
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
@@ -64,7 +64,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
     }
 
     function testFloorPremiumDesiredSalePriceLessThanMinPrice() public {
-        (, , , , , , address implementation) = looksRareProtocol.strategyInfo(2);
+        (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloorPremium = StrategyFloorPremium(implementation);
 
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH

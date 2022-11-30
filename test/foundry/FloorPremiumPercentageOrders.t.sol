@@ -45,7 +45,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderValid(makerAsk);
+        _assertOrderValid(makerAsk);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -83,7 +83,7 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderValid(makerAsk);
+        _assertOrderValid(makerAsk);
 
         vm.prank(takerUser);
         // Execute taker bid transaction

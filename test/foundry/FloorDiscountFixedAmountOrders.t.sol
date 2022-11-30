@@ -27,7 +27,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderValid(makerBid);
+        _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         // Execute taker ask transaction
@@ -60,7 +60,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderValid(makerBid);
+        _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         // Execute taker ask transaction
@@ -135,7 +135,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        bytes4 errorSelector = _assertOrderValid(makerBid);
+        _assertOrderValid(makerBid);
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);

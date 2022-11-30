@@ -116,7 +116,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, but wrong caller
-        bytes4 errorSelector = _assertOrderValid(makerBid);
+        _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
@@ -134,7 +134,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        bytes4 errorSelector = _assertOrderValid(makerBid);
+        _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -159,7 +159,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        bytes4 errorSelector = _assertOrderValid(makerBid);
+        _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -211,7 +211,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        bytes4 errorSelector = _assertOrderValid(makerBid);
+        _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -261,13 +261,11 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         validityFunctionSelector = _validityFunctionSelector;
     }
 
-    function _assertOrderValid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {
+    function _assertOrderValid(OrderStructs.MakerBid memory makerBid) internal {
         (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
-
-        return errorSelector;
     }
 
     function _assertOrderInvalid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {

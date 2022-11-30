@@ -196,7 +196,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        bytes4 errorSelector = _assertOrderValid(makerAsk);
+        _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
@@ -223,7 +223,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        bytes4 errorSelector = _assertOrderValid(makerAsk);
+        _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
@@ -248,7 +248,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        bytes4 errorSelector = _assertOrderValid(makerAsk);
+        _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);
@@ -271,7 +271,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, but wrong caller
-        bytes4 errorSelector = _assertOrderValid(makerAsk);
+        _assertOrderValid(makerAsk);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
@@ -279,12 +279,10 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         address(strategyFloor).call(abi.encodeWithSelector(selectorTakerBid, takerBid, makerAsk));
     }
 
-    function _assertOrderValid(OrderStructs.MakerAsk memory makerAsk) internal returns (bytes4) {
+    function _assertOrderValid(OrderStructs.MakerAsk memory makerAsk) internal {
         (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
-
-        return errorSelector;
     }
 
     function _assertOrderInvalid(OrderStructs.MakerAsk memory makerAsk) internal returns (bytes4) {

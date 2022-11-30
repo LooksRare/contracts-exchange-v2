@@ -17,7 +17,7 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
     // startedAt       uint256 : 1666100016
     // updatedAt       uint256 : 1666100016
     // answeredInRound uint80  : 18446744073709552305
-    uint256 private constant FORKED_BLOCK_NUMBER = 7791270;
+    uint256 private constant FORKED_BLOCK_NUMBER = 7_791_270;
     uint256 internal constant LATEST_CHAINLINK_ANSWER_IN_WAD = 9.7 ether;
     uint256 internal constant MAXIMUM_LATENCY = 3_600 seconds;
     address internal constant AZUKI_PRICE_FEED = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;

@@ -53,7 +53,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
-            strategyId: 2,
+            strategyId: 1,
             assetType: 0,
             orderNonce: 0,
             collection: address(mockERC721),
@@ -84,7 +84,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             bytes4 strategySelectorTakerAsk,
             bytes4 strategySelectorTakerBid,
             address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(2);
+        ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);

@@ -245,6 +245,10 @@ contract CollectionOrdersTest is ProtocolBase {
             );
         }
 
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         {
             uint256 gasLeft = gasleft();
 

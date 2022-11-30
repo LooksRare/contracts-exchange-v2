@@ -116,10 +116,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, but wrong caller
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
-        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
@@ -138,10 +135,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
-        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -167,10 +161,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
-        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -195,10 +186,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         _setPriceFeed();
 
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
-        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
-        assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(errorSelector);
@@ -226,10 +214,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
-        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
@@ -256,10 +241,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
         _setPriceFeed();
 
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
-        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
-        assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
         vm.prank(takerUser);
         vm.expectRevert(errorSelector);
@@ -280,5 +262,23 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
 
     function _setValidityFunctionSelector(bytes4 _validityFunctionSelector) internal {
         validityFunctionSelector = _validityFunctionSelector;
+    }
+
+    function _assertOrderValid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {
+        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
+        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        return errorSelector;
+    }
+
+    function _assertOrderInvalid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {
+        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
+        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+
+        return errorSelector;
     }
 }

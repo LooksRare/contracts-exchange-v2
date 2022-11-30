@@ -27,9 +27,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isFixedDiscountMakerBidValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         // Execute taker ask transaction
@@ -62,9 +60,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isFixedDiscountMakerBidValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
         // Execute taker ask transaction
@@ -95,9 +91,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isFixedDiscountMakerBidValid(makerBid);
-        assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -141,9 +135,7 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isFixedDiscountMakerBidValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerBid);
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);

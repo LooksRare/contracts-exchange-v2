@@ -23,7 +23,22 @@ library OrderStructs {
      * 1. MAKER ORDERS
      */
 
-    // MakerAsk
+    /**
+     * @param askNonce Global user order nonce for maker ask orders
+     * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
+     * @param strategyId Strategy id
+     * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
+     * @param orderNonce Order nonce (can be shared across bid/ask maker orders)
+     * @param collection Collection address
+     * @param currency Currency address (@dev address(0) = ETH)
+     * @param signer Signer address
+     * @param startTime Start timestamp
+     * @param endTime End timestamp
+     * @param minPrice Minimum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order (e.g., it can contain start price for Dutch Auction)
+     */
     struct MakerAsk {
         uint112 askNonce;
         uint112 subsetNonce;
@@ -41,7 +56,22 @@ library OrderStructs {
         bytes additionalParameters;
     }
 
-    // MakerBid
+    /**
+     * @param bidNonce Global user order nonce for maker bid orders
+     * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
+     * @param strategyId Strategy id
+     * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
+     * @param orderNonce Order nonce (can be shared across bid/ask maker orders)
+     * @param collection Collection address
+     * @param currency Currency address (@dev ETH is not valid for bidding)
+     * @param signer Signer address
+     * @param startTime Start timestamp
+     * @param endTime End timestamp
+     * @param maxPrice Maximum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order (e.g., it can contain a merkle root for specific strategies)
+     */
     struct MakerBid {
         uint112 bidNonce;
         uint112 subsetNonce;
@@ -63,7 +93,13 @@ library OrderStructs {
      * 2. TAKER ORDERS
      */
 
-    // TakerBid
+    /**
+     * @param recipient Recipient address (to receive non fungible tokens)
+     * @param maxPrice Maximum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order
+     */
     struct TakerBid {
         address recipient;
         uint256 maxPrice;
@@ -72,7 +108,13 @@ library OrderStructs {
         bytes additionalParameters;
     }
 
-    // TakerAsk
+    /**
+     * @param recipient Recipient address (to receive non fungible tokens)
+     * @param minPrice Minimum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order
+     */
     struct TakerAsk {
         address recipient;
         uint256 minPrice;
@@ -85,7 +127,9 @@ library OrderStructs {
      * 3. MERKLE ROOT
      */
 
-    // MerkleRoot
+    /**
+     * @param root Merkle root
+     */
     struct MerkleRoot {
         bytes32 root;
     }

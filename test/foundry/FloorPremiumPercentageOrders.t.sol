@@ -18,16 +18,31 @@ contract FloorPremiumPercentageOrdersTest is FloorOrdersTest {
         _setIsFixedAmount(0);
     }
 
-    function testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
-        (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloor = StrategyFloor(implementation);
-
+    function testFloorPremiumDesiredSalePriceGreaterThanMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: 100
         });
 
+        _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+    }
+
+    function testFloorPremiumDesiredSalePriceEqualToMinPrice() public {
+        // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
+        // Min price = 9.7 ETH
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: 100
+        });
+        makerAsk.minPrice = 9.797 ether;
+
+        _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+    }
+
+    function _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(
+        OrderStructs.MakerAsk memory makerAsk,
+        OrderStructs.TakerBid memory takerBid
+    ) public {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);

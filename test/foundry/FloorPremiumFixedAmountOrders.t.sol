@@ -16,13 +16,31 @@ contract FloorPremiumFixedAmountOrdersTest is FloorOrdersTest {
         _setIsFixedAmount(1);
     }
 
-    function testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice() public {
+    function testFloorPremiumDesiredSalePriceGreaterThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloor = StrategyFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.7 ETH
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
+        _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+    }
+
+    function testFloorPremiumDesiredSalePriceEqualToMinPrice() public {
+        (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
+        strategyFloor = StrategyFloor(implementation);
+
+        // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
+        // Min price = 9.8 ETH
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: 0.1 ether});
+        makerAsk.minPrice = 9.8 ether;
+        _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+    }
+
+    function _testFloorPremiumDesiredSalePriceGreaterThanOrEqualToMinPrice(
+        OrderStructs.MakerAsk memory makerAsk,
+        OrderStructs.TakerBid memory takerBid
+    ) public {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
@@ -53,7 +71,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorOrdersTest {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.604 ether);
     }
 
-    function testFloorDesiredSalePriceLessThanMinPrice() public {
+    function testFloorPremiumDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloor = StrategyFloor(implementation);
 

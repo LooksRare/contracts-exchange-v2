@@ -127,7 +127,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        address(strategyFloor).call(abi.encodeWithSelector(selectorTakerAsk(), takerAsk, makerBid));
+        address(strategyFloor).call(abi.encodeWithSelector(selectorTakerAsk, takerAsk, makerBid));
     }
 
     function testTakerAskItemIdsLengthNotOne() public {

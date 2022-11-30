@@ -23,6 +23,10 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
     address internal constant AZUKI_PRICE_FEED = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;
 
     uint256 private isFixedAmount;
+    bytes4 internal selectorTakerBid;
+    bytes4 internal selectorTakerAsk;
+    bytes4 internal selectorMakerBid;
+    bytes4 internal selectorMakerAsk;
 
     function setUp() public virtual override {
         vm.createSelectFork(vm.rpcUrl("goerli"), FORKED_BLOCK_NUMBER);
@@ -46,8 +50,8 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk());
-        assertEq(strategySelectorTakerBid, selectorTakerBid());
+        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
+        assertEq(strategySelectorTakerBid, selectorTakerBid);
         assertEq(strategyImplementation, address(strategyFloor));
     }
 
@@ -77,20 +81,20 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
         strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
-    function selectorTakerBid() internal view virtual returns (bytes4 selector) {
-        selector = _emptyBytes4;
+    function _setSelectorTakerBid(bytes4 _selectorTakerBid) internal {
+        selectorTakerBid = _selectorTakerBid;
     }
 
-    function selectorTakerAsk() internal view virtual returns (bytes4 selector) {
-        selector = _emptyBytes4;
+    function _setSelectorTakerAsk(bytes4 _selectorTakerAsk) internal {
+        selectorTakerAsk = _selectorTakerAsk;
     }
 
-    function selectorMakerBid() internal view virtual returns (bytes4 selector) {
-        selector = _emptyBytes4;
+    function _setSelectorMakerBid(bytes4 _selectorMakerBid) internal {
+        selectorMakerBid = _selectorMakerBid;
     }
 
-    function selectorMakerAsk() internal view virtual returns (bytes4 selector) {
-        selector = _emptyBytes4;
+    function _setSelectorMakerAsk(bytes4 _selectorMakerAsk) internal {
+        selectorMakerAsk = _selectorMakerAsk;
     }
 
     function _createMakerAskAndTakerBid(
@@ -188,8 +192,8 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk(),
-            selectorTakerBid(),
+            selectorTakerAsk,
+            selectorTakerBid,
             address(strategyFloor)
         );
     }

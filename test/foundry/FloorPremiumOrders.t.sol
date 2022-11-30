@@ -312,6 +312,6 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        address(strategyFloor).call(abi.encodeWithSelector(selectorTakerBid(), takerBid, makerAsk));
+        address(strategyFloor).call(abi.encodeWithSelector(selectorTakerBid, takerBid, makerAsk));
     }
 }

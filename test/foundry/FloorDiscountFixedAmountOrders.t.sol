@@ -8,10 +8,11 @@ import {FloorDiscountOrdersTest} from "./FloorDiscountOrders.t.sol";
 
 contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
     function setUp() public override {
-        super.setUp();
         _setIsFixedAmount(1);
         _setDiscount(0.1 ether);
         _setValidityFunctionSelector(StrategyFloor.isFixedDiscountMakerBidValid.selector);
+        _setSelectorTakerAsk(StrategyFloor.executeFixedDiscountStrategyWithTakerAsk.selector);
+        super.setUp();
     }
 
     function testFloorBasedCollectionOfferDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
@@ -167,13 +168,5 @@ contract FloorDiscountFixedAmountOrdersTest is FloorDiscountOrdersTest {
             _emptyMerkleProof,
             _emptyAffiliate
         );
-    }
-
-    function selectorTakerAsk() internal pure override returns (bytes4 selector) {
-        selector = StrategyFloor.executeFixedDiscountStrategyWithTakerAsk.selector;
-    }
-
-    function selectorTakerBid() internal view override returns (bytes4 selector) {
-        selector = _emptyBytes4;
     }
 }

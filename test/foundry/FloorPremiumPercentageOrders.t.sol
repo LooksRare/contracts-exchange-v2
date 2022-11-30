@@ -10,9 +10,10 @@ import {FloorPremiumOrdersTest} from "./FloorPremiumOrders.t.sol";
  */
 contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
     function setUp() public override {
-        super.setUp();
         _setIsFixedAmount(0);
         _setPremium(100);
+        _setSelectorTakerBid(StrategyFloor.executePercentagePremiumStrategyWithTakerBid.selector);
+        super.setUp();
     }
 
     function testFloorPremiumDesiredSalePriceGreaterThanMinPrice() public {
@@ -112,9 +113,5 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 9.8 ether);
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.604 ether);
-    }
-
-    function selectorTakerBid() internal pure override returns (bytes4) {
-        return StrategyFloor.executePercentagePremiumStrategyWithTakerBid.selector;
     }
 }

@@ -198,9 +198,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
@@ -227,9 +225,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
@@ -254,9 +250,7 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);
@@ -279,14 +273,20 @@ abstract contract FloorPremiumOrdersTest is FloorOrdersTest {
         _setPriceFeed();
 
         // Valid, but wrong caller
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        bytes4 errorSelector = _assertOrderValid(makerAsk);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
         address(strategyFloor).call(abi.encodeWithSelector(selectorTakerBid, takerBid, makerAsk));
+    }
+
+    function _assertOrderValid(OrderStructs.MakerAsk memory makerAsk) private returns (bytes4) {
+        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        return errorSelector;
     }
 
     function _assertOrderInvalid(OrderStructs.MakerAsk memory makerAsk) private returns (bytes4) {

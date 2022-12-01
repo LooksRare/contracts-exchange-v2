@@ -7,6 +7,7 @@ import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePr
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
+import {WrongCurrency} from "../Errors.sol";
 
 /**
  * @title StrategyFloorFromChainlink
@@ -53,7 +54,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
         if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) revert CurrencyInvalid();
+            if (makerAsk.currency != WETH) revert WrongCurrency();
         }
 
         if (
@@ -103,7 +104,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
         if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) revert CurrencyInvalid();
+            if (makerAsk.currency != WETH) revert WrongCurrency();
         }
 
         if (
@@ -153,7 +154,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
         if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) revert CurrencyInvalid();
+            if (makerBid.currency != WETH) revert WrongCurrency();
         }
 
         if (
@@ -204,7 +205,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
         if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) revert CurrencyInvalid();
+            if (makerBid.currency != WETH) revert WrongCurrency();
         }
 
         if (
@@ -245,7 +246,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         if (makerAsk.currency != address(0)) {
             if (makerAsk.currency != WETH) {
-                return (orderIsValid, CurrencyInvalid.selector);
+                return (orderIsValid, WrongCurrency.selector);
             }
         }
 
@@ -275,7 +276,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         if (makerBid.currency != address(0)) {
             if (makerBid.currency != WETH) {
-                return (orderIsValid, CurrencyInvalid.selector);
+                return (orderIsValid, WrongCurrency.selector);
             }
         }
 
@@ -310,7 +311,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         if (makerBid.currency != address(0)) {
             if (makerBid.currency != WETH) {
-                return (orderIsValid, CurrencyInvalid.selector);
+                return (orderIsValid, WrongCurrency.selector);
             }
         }
 

@@ -23,6 +23,7 @@ import {AffiliateManager} from "./AffiliateManager.sol";
 import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
+import {WrongCurrency} from "./Errors.sol";
 
 /**
  * @title LooksRareProtocol

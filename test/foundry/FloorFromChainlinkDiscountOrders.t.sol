@@ -6,6 +6,7 @@ import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+import {WrongCurrency} from "../../contracts/Errors.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
 
@@ -186,7 +187,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountCurrencyInvalid() public {
+    function testFloorFromChainlinkDiscountWrongCurrency() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         vm.prank(_owner);
@@ -197,7 +198,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderInvalid(makerBid, IExecutionStrategy.CurrencyInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerBid, WrongCurrency.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);

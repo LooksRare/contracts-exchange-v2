@@ -2,13 +2,13 @@
 pragma solidity ^0.8.0;
 
 import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
+import {WrongCurrency} from "../../contracts/Errors.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
-import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
-import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
-import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
+import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
+import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
 
 abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrdersTest {
     uint256 internal premium;
@@ -186,7 +186,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         address(strategyFloorFromChainlink).call(abi.encodeWithSelector(selectorTakerBid, takerBid, makerAsk));
     }
 
-    function testFloorFromChainlinkPremiumCurrencyInvalid() public {
+    function testFloorFromChainlinkPremiumWrongCurrency() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         vm.prank(_owner);
@@ -197,7 +197,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderInvalid(makerAsk, IExecutionStrategy.CurrencyInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerAsk, WrongCurrency.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);

@@ -9,7 +9,6 @@ interface ILooksRareProtocol {
     // Custom errors
     error SameDomainSeparator();
     error WrongCaller();
-    error WrongCurrency();
     error WrongMerkleProof();
     error WrongNonces();
 

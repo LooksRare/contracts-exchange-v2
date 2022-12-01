@@ -13,10 +13,6 @@ import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
 abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrdersTest {
     uint256 internal premium;
 
-    function _setPremium(uint256 _premium) internal {
-        premium = _premium;
-    }
-
     function testFloorFromChainlinkPremiumPriceFeedNotAvailable() public {
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
@@ -243,5 +239,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
             _emptyMerkleProof,
             _emptyAffiliate
         );
+    }
+
+    function _setPremium(uint256 _premium) internal {
+        premium = _premium;
     }
 }

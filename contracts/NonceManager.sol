@@ -22,7 +22,7 @@ contract NonceManager is INonceManager {
     mapping(address => UserBidAskNonces) public userBidAskNonces;
 
     // Check whether the order nonce for a user was executed or cancelled
-    mapping(address => mapping(uint112 => bytes32)) public userOrderNonce;
+    mapping(address => mapping(uint256 => bytes32)) public userOrderNonce;
 
     // Check whether the subset nonce for a user was cancelled
     mapping(address => mapping(uint112 => bool)) public userSubsetNonce;

@@ -26,9 +26,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
-        assertFalse(isValid);
-        assertEq(errorSelector, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
+        bytes4 errorSelector = _assertOrderInvalid(
+            makerAsk,
+            StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector
+        );
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -43,9 +44,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
-        assertFalse(isValid);
-        assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+        bytes4 errorSelector = _assertOrderInvalid(
+            makerAsk,
+            StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector
+        );
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -63,9 +65,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
-        assertFalse(isValid);
-        assertEq(errorSelector, StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerAsk, StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -201,9 +201,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
-        assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.CurrencyInvalid.selector);
+        bytes4 errorSelector = _assertOrderInvalid(makerAsk, IExecutionStrategy.CurrencyInvalid.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -216,9 +214,16 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function _assertOrderInvalid(OrderStructs.MakerAsk memory makerAsk) internal returns (bytes4) {
+        return _assertOrderInvalid(makerAsk, IExecutionStrategy.OrderInvalid.selector);
+    }
+
+    function _assertOrderInvalid(
+        OrderStructs.MakerAsk memory makerAsk,
+        bytes4 expectedError
+    ) internal returns (bytes4) {
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, expectedError);
 
         return errorSelector;
     }

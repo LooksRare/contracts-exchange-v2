@@ -6,20 +6,20 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
+import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
-import {FloorDiscountOrdersTest} from "./FloorDiscountOrders.t.sol";
+import {FloorFromChainlinkDiscountOrdersTest} from "./FloorFromChainlinkDiscountOrders.t.sol";
 
-contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
+contract FloorFromChainlinkDiscountPercentageOrdersTest is FloorFromChainlinkDiscountOrdersTest {
     function setUp() public override {
         _setIsFixedAmount(0);
         _setDiscount(100);
-        _setValidityFunctionSelector(StrategyFloor.isPercentageDiscountMakerBidValid.selector);
-        _setSelectorTakerAsk(StrategyFloor.executePercentageDiscountStrategyWithTakerAsk.selector);
+        _setValidityFunctionSelector(StrategyFloorFromChainlink.isPercentageDiscountMakerBidValid.selector);
+        _setSelectorTakerAsk(StrategyFloorFromChainlink.executePercentageDiscountStrategyWithTakerAsk.selector);
         super.setUp();
     }
 
-    function testFloorDiscountPercentageDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
+    function testFloorFromChainlinkDiscountPercentageDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 1%, desired price = 9.603 ETH
         // Max price = 9.5 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
@@ -31,7 +31,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isPercentageDiscountMakerBidValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isPercentageDiscountMakerBidValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -46,7 +46,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.31 ether);
     }
 
-    function testFloorDiscountPercentageDesiredDiscountedPriceLessThanMaxPrice() public {
+    function testFloorFromChainlinkDiscountPercentageDesiredDiscountedPriceLessThanMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 3%, desired price = 9.409 ETH
         // Max price = 9.5 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 300});
@@ -57,7 +57,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isPercentageDiscountMakerBidValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isPercentageDiscountMakerBidValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -72,7 +72,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.22082 ether);
     }
 
-    function testFloorDiscountPercentageDesiredDiscountPercentageGreaterThan100() public {
+    function testFloorFromChainlinkDiscountPercentageDesiredDiscountPercentageGreaterThan100() public {
         // Floor price = 9.7 ETH, discount = 101%, desired price = negative
         // Max price = negative
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 10_001});
@@ -81,7 +81,7 @@ contract FloorDiscountPercentageOrdersTest is FloorDiscountOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isPercentageDiscountMakerBidValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isPercentageDiscountMakerBidValid(makerBid);
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 

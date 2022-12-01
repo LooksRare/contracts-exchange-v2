@@ -4,12 +4,12 @@ pragma solidity ^0.8.0;
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
-import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
+import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
-abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
-    StrategyFloor internal strategyFloor;
+abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
+    StrategyFloorFromChainlink internal strategyFloorFromChainlink;
 
     // At block 15740567
     // roundId         uint80  : 18446744073709552305
@@ -52,19 +52,19 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
         assertEq(strategySelectorTakerAsk, selectorTakerAsk);
         assertEq(strategySelectorTakerBid, selectorTakerBid);
-        assertEq(strategyImplementation, address(strategyFloor));
+        assertEq(strategyImplementation, address(strategyFloorFromChainlink));
     }
 
     function testSetMaximumLatency() public {
-        _testSetMaximumLatency(address(strategyFloor));
+        _testSetMaximumLatency(address(strategyFloorFromChainlink));
     }
 
     function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloor));
+        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloorFromChainlink));
     }
 
     function testSetMaximumLatencyNotOwner() public {
-        _testSetMaximumLatencyNotOwner(address(strategyFloor));
+        _testSetMaximumLatencyNotOwner(address(strategyFloorFromChainlink));
     }
 
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
@@ -72,13 +72,13 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
     function testSetPriceFeed() public asPrankedUser(_owner) {
         vm.expectEmit(true, true, true, false);
         emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        assertEq(strategyFloor.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
+        strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        assertEq(strategyFloorFromChainlink.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
     }
 
     function testSetPriceFeedNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
     function _setSelectorTakerBid(bytes4 _selectorTakerBid) internal {
@@ -187,21 +187,21 @@ abstract contract FloorOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMa
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyFloor = new StrategyFloor(address(looksRareProtocol));
+        strategyFloorFromChainlink = new StrategyFloorFromChainlink(address(looksRareProtocol));
         looksRareProtocol.addStrategy(
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
             selectorTakerAsk,
             selectorTakerBid,
-            address(strategyFloor)
+            address(strategyFloorFromChainlink)
         );
     }
 
     function _setPriceFeed() internal {
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
     }
 }

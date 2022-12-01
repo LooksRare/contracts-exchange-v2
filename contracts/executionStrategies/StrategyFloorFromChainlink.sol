@@ -9,12 +9,12 @@ import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
- * @title StrategyFloor
+ * @title StrategyFloorFromChainlink
  * @notice This contract allows a seller to make a floor price + premium ask
  *         and a buyer to make a floor price - discount collection bid
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlinkPriceLatency {
+contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, StrategyChainlinkPriceLatency {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 

@@ -5,24 +5,26 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
 import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
+import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
 import {MockChainlinkAggregator} from "../mock/MockChainlinkAggregator.sol";
-import {FloorOrdersTest} from "./FloorOrders.t.sol";
+import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
 
-abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
+abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrdersTest {
     uint256 internal discount;
     bytes4 private validityFunctionSelector;
 
-    function testFloorDiscountPriceFeedNotAvailable() public {
+    function testFloorFromChainlinkDiscountPriceFeedNotAvailable() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
         vm.stopPrank();
 
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
+        (, bytes memory data) = address(strategyFloorFromChainlink).call(
+            abi.encodeWithSelector(validityFunctionSelector, makerBid)
+        );
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
         assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
@@ -31,16 +33,18 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorDiscountOraclePriceNotRecentEnough() public {
+    function testFloorFromChainlinkDiscountOraclePriceNotRecentEnough() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+        strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
 
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
+        (, bytes memory data) = address(strategyFloorFromChainlink).call(
+            abi.encodeWithSelector(validityFunctionSelector, makerBid)
+        );
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
         assertFalse(isValid);
         assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
@@ -49,7 +53,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorDiscountChainlinkPriceLessThanOrEqualToZero() public {
+    function testFloorFromChainlinkDiscountChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
@@ -57,24 +61,26 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloor.setMaximumLatency(MAXIMUM_LATENCY);
-        strategyFloor.setPriceFeed(address(mockERC721), address(aggregator));
+        strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
+        (, bytes memory data) = address(strategyFloorFromChainlink).call(
+            abi.encodeWithSelector(validityFunctionSelector, makerBid)
+        );
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyFloor.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
 
         aggregator.setAnswer(-1);
-        vm.expectRevert(StrategyFloor.InvalidChainlinkPrice.selector);
+        vm.expectRevert(StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorDiscountCallerNotLooksRareProtocol() public {
+    function testFloorFromChainlinkDiscountCallerNotLooksRareProtocol() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         _setPriceFeed();
@@ -85,10 +91,10 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        address(strategyFloor).call(abi.encodeWithSelector(selectorTakerAsk, takerAsk, makerBid));
+        address(strategyFloorFromChainlink).call(abi.encodeWithSelector(selectorTakerAsk, takerAsk, makerBid));
     }
 
-    function testFloorDiscountTakerAskItemIdsLengthNotOne() public {
+    function testFloorFromChainlinkDiscountTakerAskItemIdsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         takerAsk.itemIds = new uint256[](0);
@@ -104,7 +110,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorDiscountTakerAskAmountsLengthNotOne() public {
+    function testFloorFromChainlinkDiscountTakerAskAmountsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         takerAsk.amounts = new uint256[](0);
@@ -120,7 +126,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorDiscountMakerBidAmountsLengthNotOne() public {
+    function testFloorFromChainlinkDiscountMakerBidAmountsLengthNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         makerBid.amounts = new uint256[](0);
@@ -135,7 +141,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorDiscountTakerAskZeroAmount() public {
+    function testFloorFromChainlinkDiscountTakerAskZeroAmount() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         uint256[] memory amounts = new uint256[](1);
@@ -154,7 +160,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorDiscountMakerBidAmountNotOne() public {
+    function testFloorFromChainlinkDiscountMakerBidAmountNotOne() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         uint256[] memory amounts = new uint256[](1);
@@ -172,7 +178,7 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorDiscountBidTooLow() public {
+    function testFloorFromChainlinkDiscountBidTooLow() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
         makerBid.maxPrice = takerAsk.minPrice - 1 wei;
 
@@ -196,14 +202,18 @@ abstract contract FloorDiscountOrdersTest is FloorOrdersTest {
     }
 
     function _assertOrderValid(OrderStructs.MakerBid memory makerBid) internal {
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
+        (, bytes memory data) = address(strategyFloorFromChainlink).call(
+            abi.encodeWithSelector(validityFunctionSelector, makerBid)
+        );
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
     }
 
     function _assertOrderInvalid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {
-        (, bytes memory data) = address(strategyFloor).call(abi.encodeWithSelector(validityFunctionSelector, makerBid));
+        (, bytes memory data) = address(strategyFloorFromChainlink).call(
+            abi.encodeWithSelector(validityFunctionSelector, makerBid)
+        );
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
         assertFalse(isValid);
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);

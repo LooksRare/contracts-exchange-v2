@@ -2,39 +2,39 @@
 pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
-import {FloorPremiumOrdersTest} from "./FloorPremiumOrders.t.sol";
+import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+import {FloorFromChainlinkPremiumOrdersTest} from "./FloorFromChainlinkPremiumOrders.t.sol";
 
-contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
+contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPremiumOrdersTest {
     function setUp() public override {
         _setPremium(0.1 ether);
         _setIsFixedAmount(1);
-        _setSelectorTakerBid(StrategyFloor.executeFixedPremiumStrategyWithTakerBid.selector);
+        _setSelectorTakerBid(StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector);
         super.setUp();
     }
 
-    function testFloorPremiumFixedAmountDesiredSalePriceGreaterThanMinPrice() public {
+    function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloor = StrategyFloor(implementation);
+        strategyFloorFromChainlink = StrategyFloorFromChainlink(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.7 ETH
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
-        _testFloorPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function testFloorPremiumFixedAmountDesiredSalePriceEqualToMinPrice() public {
+    function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceEqualToMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloor = StrategyFloor(implementation);
+        strategyFloorFromChainlink = StrategyFloorFromChainlink(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.8 ETH
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
         makerAsk.minPrice = 9.8 ether;
-        _testFloorPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function _testFloorPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(
+    function _testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(
         OrderStructs.MakerAsk memory makerAsk,
         OrderStructs.TakerBid memory takerBid
     ) public {
@@ -42,7 +42,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -56,9 +56,9 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.604 ether);
     }
 
-    function testFloorPremiumFixedAmountDesiredSalePriceLessThanMinPrice() public {
+    function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloor = StrategyFloor(implementation);
+        strategyFloorFromChainlink = StrategyFloorFromChainlink(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.9 ETH
@@ -71,7 +71,7 @@ contract FloorPremiumFixedAmountOrdersTest is FloorPremiumOrdersTest {
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloor.isMakerAskValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 

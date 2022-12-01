@@ -2,31 +2,31 @@
 pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {StrategyFloor} from "../../contracts/executionStrategies/StrategyFloor.sol";
-import {FloorPremiumOrdersTest} from "./FloorPremiumOrders.t.sol";
+import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+import {FloorFromChainlinkPremiumOrdersTest} from "./FloorFromChainlinkPremiumOrders.t.sol";
 
 /**
- * @notice The primary scenarios are tested in FloorPremiumFixedAmountOrdersTest
+ * @notice The primary scenarios are tested in FloorFromChainlinkPremiumFixedAmountOrdersTest
  */
-contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
+contract FloorFromChainlinkPremiumPercentageOrdersTest is FloorFromChainlinkPremiumOrdersTest {
     function setUp() public override {
         _setIsFixedAmount(0);
         _setPremium(100);
-        _setSelectorTakerBid(StrategyFloor.executePercentagePremiumStrategyWithTakerBid.selector);
+        _setSelectorTakerBid(StrategyFloorFromChainlink.executePercentagePremiumStrategyWithTakerBid.selector);
         super.setUp();
     }
 
-    function testFloorPremiumPercentageDesiredSalePriceGreaterThanMinPrice() public {
+    function testFloorFromChainlinkPremiumPercentageDesiredSalePriceGreaterThanMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
-        _testFloorPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorFromChainlinkPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function testFloorPremiumPercentageDesiredSalePriceEqualToMinPrice() public {
+    function testFloorFromChainlinkPremiumPercentageDesiredSalePriceEqualToMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
@@ -34,10 +34,10 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         });
         makerAsk.minPrice = 9.797 ether;
 
-        _testFloorPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorFromChainlinkPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function _testFloorPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(
+    function _testFloorFromChainlinkPremiumPercentageDesiredSalePriceGreaterThanOrEqualToMinPrice(
         OrderStructs.MakerAsk memory makerAsk,
         OrderStructs.TakerBid memory takerBid
     ) public {
@@ -57,9 +57,9 @@ contract FloorPremiumPercentageOrdersTest is FloorPremiumOrdersTest {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.60106 ether);
     }
 
-    function testFloorPremiumPercentageDesiredSalePriceLessThanMinPrice() public {
+    function testFloorFromChainlinkPremiumPercentageDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloor = StrategyFloor(implementation);
+        strategyFloorFromChainlink = StrategyFloorFromChainlink(implementation);
 
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.8 ETH

@@ -11,7 +11,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 /**
  * @title StrategyFloor
  * @notice This contract allows a seller to make a floor price + premium ask
- *         and a buyer to maker a floor price - discount collection bid
+ *         and a buyer to make a floor price - discount collection bid
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyFloor is StrategyChainlinkMultiplePriceFeeds, StrategyChainlinkPriceLatency {

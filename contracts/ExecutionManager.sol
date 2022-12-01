@@ -46,9 +46,10 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     /**
      * @notice Update the maximum creator fee (in bp)
      * @param newMaximumCreatorFeeBp New maximum creator fee (in basis point)
+     * @dev The maximum value that can be set is 25%.
      */
     function setMaximumCreatorFeeBp(uint256 newMaximumCreatorFeeBp) external onlyOwner {
-        if (newMaximumCreatorFeeBp > 10_000) revert CreatorFeeBpTooHigh();
+        if (newMaximumCreatorFeeBp > 2_500) revert CreatorFeeBpTooHigh();
         maximumCreatorFeeBp = newMaximumCreatorFeeBp;
 
         emit NewMaximumCreatorFeeBp(newMaximumCreatorFeeBp);

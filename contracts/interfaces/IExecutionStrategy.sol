@@ -9,6 +9,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  */
 interface IExecutionStrategy {
     // Custom errors
+    error AskTooHigh();
     error BidTooLow();
     error OrderInvalid();
     error WrongCaller();

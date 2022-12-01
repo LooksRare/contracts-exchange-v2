@@ -148,7 +148,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
             price = desiredPrice;
         }
 
-        if (takerAsk.minPrice > price) revert BidTooLow();
+        if (takerAsk.minPrice > price) revert AskTooHigh();
 
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;
@@ -191,7 +191,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
             price = desiredPrice;
         }
 
-        if (takerAsk.minPrice > price) revert BidTooLow();
+        if (takerAsk.minPrice > price) revert AskTooHigh();
 
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;

@@ -178,7 +178,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountBidTooLow() public {
+    function testFloorFromChainlinkDiscountAskTooHigh() public {
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
         makerBid.maxPrice = takerAsk.minPrice - 1 wei;
 
@@ -189,7 +189,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerBid);
 
-        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        vm.expectRevert(IExecutionStrategy.AskTooHigh.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 

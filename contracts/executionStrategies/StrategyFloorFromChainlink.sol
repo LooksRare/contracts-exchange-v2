@@ -33,6 +33,10 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      *         This strategy looks at the seller's desired execution price in ETH (floor + premium) and minimum execution price and chooses the higher price
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @return price The final execution price
+     * @return itemIds The final token IDs to be traded
+     * @return amounts The corresponding amounts for each token ID. It should always be 1 for ERC721 and it can be > 1 for ERC1155
+     * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired premium amount in ETH from the floor price as the additionalParameters.
      */
     function executeFixedPremiumStrategyWithTakerBid(
@@ -75,6 +79,10 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      *         This strategy looks at the seller's desired execution price in ETH (floor * (1 + premium)) and minimum execution price and chooses the higher price
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @return price The final execution price
+     * @return itemIds The final token IDs to be traded
+     * @return amounts The corresponding amounts for each token ID. It should always be 1 for ERC721 and it can be > 1 for ERC1155
+     * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired premium basis points from the floor price as the additionalParameters.
      */
     function executeBasisPointsPremiumStrategyWithTakerBid(
@@ -117,6 +125,10 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      *         This strategy looks at the bidder's desired execution price in ETH (floor - discount) and maximum execution price and chooses the lower price.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @return price The final execution price
+     * @return itemIds The final token IDs to be traded
+     * @return amounts The corresponding amounts for each token ID. It should always be 1 for ERC721 and it can be > 1 for ERC1155
+     * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
      */
     function executeFixedDiscountStrategyWithTakerAsk(
@@ -160,6 +172,10 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      *         This strategy looks at the bidder's desired execution price in ETH (floor * (1 - discount)) and maximum execution price and chooses the lower price.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @return price The final execution price
+     * @return itemIds The final token IDs to be traded
+     * @return amounts The corresponding amounts for each token ID. It should always be 1 for ERC721 and it can be > 1 for ERC1155
+     * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
      */
     function executeBasisPointsDiscountStrategyWithTakerAsk(
@@ -202,6 +218,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @return orderIsValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, return the error's 4 bytes selector
      */
     function isMakerAskValid(
         OrderStructs.MakerAsk calldata makerAsk
@@ -223,9 +241,9 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
-     * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
      * @return orderIsValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
      */
     function isFixedDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid
@@ -252,9 +270,9 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
-     * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
      * @return orderIsValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
      */
     function isBasisPointsDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid

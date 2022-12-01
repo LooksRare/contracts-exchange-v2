@@ -15,6 +15,7 @@ interface ILooksRareProtocol {
 
     // Events
     event NewDomainSeparator();
+    event NewGasLimitETHTransfer(uint256 gasLimitETHTransfer);
     event AffiliatePayment(address affiliate, uint256 affiliateFee);
 
     struct SignatureParameters {

@@ -7,6 +7,7 @@ pragma solidity ^0.8.17;
  */
 interface IExecutionManager {
     // Custom errors
+    error CreatorFeeBpTooHigh();
     error NoSelectorForTakerAsk();
     error NoSelectorForTakerBid();
     error OutsideOfTimeRange();
@@ -16,5 +17,6 @@ interface IExecutionManager {
 
     // Custom events
     event NewCreatorFeeManager(address creatorFeeManager);
+    event NewMaximumCreatorFeeBp(uint256 maximumCreatorFeeBp);
     event NewProtocolFeeRecipient(address protocolFeeRecipient);
 }

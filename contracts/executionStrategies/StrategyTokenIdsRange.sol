@@ -78,17 +78,21 @@ contract StrategyTokenIdsRange is StrategyBase {
     }
 
     /**
-     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @return orderIsValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, return the error's 4 bytes selector
      */
-    function isValid(OrderStructs.MakerBid calldata makerBid) external pure returns (bool, bytes4) {
+    function isValid(
+        OrderStructs.MakerBid calldata makerBid
+    ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
         uint256 minTokenId = makerBid.itemIds[0];
         uint256 maxTokenId = makerBid.itemIds[1];
         if (minTokenId >= maxTokenId) {
-            return (false, OrderInvalid.selector);
+            return (orderIsValid, OrderInvalid.selector);
         }
 
-        return (true, bytes4(0));
+        orderIsValid = true;
     }
 }

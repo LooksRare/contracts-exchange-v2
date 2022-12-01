@@ -5,6 +5,7 @@ pragma solidity ^0.8.17;
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
 import {LowLevelETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelETH.sol";
+import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelWETH.sol";
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // OpenZeppelin's library for verifying Merkle proofs
@@ -37,6 +38,7 @@ contract LooksRareProtocol is
     TransferSelectorNFT,
     ReentrancyGuard,
     LowLevelETH,
+    LowLevelWETH,
     LowLevelERC20Transfer,
     SignatureChecker
 {
@@ -44,17 +46,24 @@ contract LooksRareProtocol is
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;
 
+    // Wrapped ETH
+    address public immutable WETH;
+
     // Current chainId
     uint256 public chainId;
 
     // Current domain separator
     bytes32 public domainSeparator;
 
+    // Gas limit
+    uint256 public gasLimitETHTransfer = 2_300;
+
     /**
      * @notice Constructor
      * @param transferManager Transfer manager address
+     * @param weth Wrapped ETH address
      */
-    constructor(address transferManager) TransferSelectorNFT(transferManager) {
+    constructor(address transferManager, address weth) TransferSelectorNFT(transferManager) {
         // Compute and store the initial domain separator
         domainSeparator = keccak256(
             abi.encode(
@@ -67,6 +76,8 @@ contract LooksRareProtocol is
         );
         // Store initial chainId
         chainId = block.chainid;
+
+        WETH = weth;
     }
 
     /**
@@ -458,7 +469,7 @@ contract LooksRareProtocol is
         // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
         if (affiliate != address(0)) {
             if (isAffiliateProgramActive) {
-                totalAffiliateFee = (totalProtocolFee * affiliateRates[affiliate]) / 10000;
+                totalAffiliateFee = (totalProtocolFee * affiliateRates[affiliate]) / 10_000;
                 totalProtocolFee -= totalAffiliateFee;
 
                 // If bid user isn't the affiliate, pay the affiliate.
@@ -487,7 +498,7 @@ contract LooksRareProtocol is
      */
     function _transferFungibleTokens(address currency, address sender, address recipient, uint256 amount) internal {
         if (currency == address(0)) {
-            _transferETH(recipient, amount);
+            _transferETHAndWrapIfFailWithGasLimit(WETH, recipient, amount, gasLimitETHTransfer);
         } else {
             _executeERC20TransferFrom(currency, sender, recipient, amount);
         }
@@ -517,5 +528,15 @@ contract LooksRareProtocol is
      */
     function _verifyMerkleProofForOrderHash(bytes32[] calldata proof, bytes32 root, bytes32 orderHash) internal pure {
         if (!MerkleProof.verifyCalldata(proof, root, orderHash)) revert WrongMerkleProof();
+    }
+
+    /**
+     * @notice Adjust ETH gas limit for transfer
+     * @param newGasLimitETHTransfer New gas limit for ETH transfer
+     */
+    function adjustETHGasLimitForTransfer(uint256 newGasLimitETHTransfer) external onlyOwner {
+        gasLimitETHTransfer = newGasLimitETHTransfer;
+
+        emit NewGasLimitETHTransfer(newGasLimitETHTransfer);
     }
 }

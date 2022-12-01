@@ -15,14 +15,9 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
  */
 contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
     error CreatorFeeTooHigh(address collection);
-    error MaximumCreatorFeeBpTooHigh();
-    event NewMaximumCreatorFeeBp(uint256 maximumCreatorFeeBp);
 
     // Royalty fee registry
     IRoyaltyFeeRegistry public immutable royaltyFeeRegistry;
-
-    // Maximum creator fee (in basis point)
-    uint256 public maximumCreatorFeeBp = 1000;
 
     /**
      * @notice Constructor
@@ -30,17 +25,6 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
      */
     constructor(address _royaltyFeeRegistry) {
         royaltyFeeRegistry = IRoyaltyFeeRegistry(_royaltyFeeRegistry);
-    }
-
-    /**
-     * @notice Update the maximum creator fee (in bp)
-     * @param newMaximumCreatorFeeBp New maximum creator fee (in basis point)
-     */
-    function updateMaximumCreatorFeeBp(uint256 newMaximumCreatorFeeBp) external onlyOwner {
-        if (newMaximumCreatorFeeBp > 10000) revert MaximumCreatorFeeBpTooHigh();
-        maximumCreatorFeeBp = newMaximumCreatorFeeBp;
-
-        emit NewMaximumCreatorFeeBp(newMaximumCreatorFeeBp);
     }
 
     /**
@@ -81,15 +65,6 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
                         ++i;
                     }
                 }
-            }
-        }
-
-        // Revert if creator fee is too high
-        if (receiver != address(0)) {
-            uint256 maximumCreatorFee = (price * maximumCreatorFeeBp) / 10000;
-
-            if (creatorFee > maximumCreatorFee) {
-                revert CreatorFeeTooHigh(collection);
             }
         }
     }

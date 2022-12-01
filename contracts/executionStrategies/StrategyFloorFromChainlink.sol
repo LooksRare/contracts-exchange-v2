@@ -77,7 +77,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @dev The client has to provide the bidder's desired premium basis points from the floor price as the additionalParameters.
      */
-    function executePercentagePremiumStrategyWithTakerBid(
+    function executeBasisPointsPremiumStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
@@ -162,7 +162,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
      */
-    function executePercentageDiscountStrategyWithTakerAsk(
+    function executeBasisPointsDiscountStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
@@ -256,7 +256,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
      * @return orderIsValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, return the error's 4 bytes selector
      */
-    function isPercentageDiscountMakerBidValid(
+    function isBasisPointsDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {

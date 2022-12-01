@@ -86,22 +86,26 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
      * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @return orderIsValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, return the error's 4 bytes selector
      */
-    function isValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
+    function isValid(
+        OrderStructs.MakerAsk calldata makerAsk
+    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
-            return (false, OrderInvalid.selector);
+            return (orderIsValid, OrderInvalid.selector);
         }
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
         if (answer <= 0) {
-            return (false, InvalidChainlinkPrice.selector);
+            return (orderIsValid, InvalidChainlinkPrice.selector);
         }
         if (block.timestamp - updatedAt > maximumLatency) {
-            return (false, PriceNotRecentEnough.selector);
+            return (orderIsValid, PriceNotRecentEnough.selector);
         }
 
-        return (true, bytes4(0));
+        orderIsValid = true;
     }
 }

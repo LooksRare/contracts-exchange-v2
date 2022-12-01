@@ -74,17 +74,21 @@ contract StrategyDutchAuction is StrategyBase {
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
+     * @return orderIsValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, return the error's 4 bytes selector
      */
-    function isValid(OrderStructs.MakerAsk calldata makerAsk) external pure returns (bool, bytes4) {
+    function isValid(
+        OrderStructs.MakerAsk calldata makerAsk
+    ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
-            return (false, OrderInvalid.selector);
+            return (orderIsValid, OrderInvalid.selector);
         }
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
             if (amount == 0) {
-                return (false, OrderInvalid.selector);
+                return (orderIsValid, OrderInvalid.selector);
             }
 
             unchecked {
@@ -95,9 +99,9 @@ contract StrategyDutchAuction is StrategyBase {
         uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
 
         if (startPrice < makerAsk.minPrice) {
-            return (false, OrderInvalid.selector);
+            return (orderIsValid, OrderInvalid.selector);
         }
 
-        return (true, bytes4(0));
+        orderIsValid = true;
     }
 }

@@ -129,25 +129,29 @@ contract StrategyFloorPremium is StrategyChainlinkMultiplePriceFeeds, StrategyCh
      * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @return orderIsValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, return the error's 4 bytes selector
      */
-    function isValid(OrderStructs.MakerAsk calldata makerAsk) external view returns (bool, bytes4) {
+    function isValid(
+        OrderStructs.MakerAsk calldata makerAsk
+    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
         if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
-            return (false, OrderInvalid.selector);
+            return (orderIsValid, OrderInvalid.selector);
         }
 
         address priceFeed = priceFeeds[makerAsk.collection];
         if (priceFeed == address(0)) {
-            return (false, PriceFeedNotAvailable.selector);
+            return (orderIsValid, PriceFeedNotAvailable.selector);
         }
 
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
         if (answer <= 0) {
-            return (false, InvalidChainlinkPrice.selector);
+            return (orderIsValid, InvalidChainlinkPrice.selector);
         }
         if (block.timestamp > maximumLatency + updatedAt) {
-            return (false, PriceNotRecentEnough.selector);
+            return (orderIsValid, PriceNotRecentEnough.selector);
         }
 
-        return (true, bytes4(0));
+        orderIsValid = true;
     }
 }

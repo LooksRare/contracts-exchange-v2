@@ -27,6 +27,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     // Protocol fee recipient
     address public protocolFeeRecipient;
 
+    // Maximum creator fee (in basis point)
+    uint256 public maximumCreatorFeeBp = 1_000;
+
     // Creator fee manager
     ICreatorFeeManager public creatorFeeManager;
 
@@ -38,6 +41,18 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     function setCreatorFeeManager(address newCreatorFeeManager) external onlyOwner {
         creatorFeeManager = ICreatorFeeManager(newCreatorFeeManager);
         emit NewCreatorFeeManager(newCreatorFeeManager);
+    }
+
+    /**
+     * @notice Update the maximum creator fee (in bp)
+     * @param newMaximumCreatorFeeBp New maximum creator fee (in basis point)
+     * @dev The maximum value that can be set is 25%.
+     */
+    function setMaximumCreatorFeeBp(uint256 newMaximumCreatorFeeBp) external onlyOwner {
+        if (newMaximumCreatorFeeBp > 2_500) revert CreatorFeeBpTooHigh();
+        maximumCreatorFeeBp = newMaximumCreatorFeeBp;
+
+        emit NewMaximumCreatorFeeBp(newMaximumCreatorFeeBp);
     }
 
     /**
@@ -79,7 +94,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
+                if (fees[1] > (price * maximumCreatorFeeBp) / 10_000) revert CreatorFeeBpTooHigh();
             }
+
             uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFee) / 10_000;
 
             // 1 --> Protocol fee
@@ -132,6 +149,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
+                if (fees[1] > (price * maximumCreatorFeeBp) / 10_000) revert CreatorFeeBpTooHigh();
             }
             uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFee) / 10_000;
 

@@ -146,6 +146,10 @@ contract CollectionOrdersTest is ProtocolBase {
             takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, makerBid.amounts, abi.encode());
         }
 
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
         {
             uint256 gasLeft = gasleft();
 
@@ -240,6 +244,10 @@ contract CollectionOrdersTest is ProtocolBase {
                 abi.encode(proof)
             );
         }
+
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
 
         {
             uint256 gasLeft = gasleft();

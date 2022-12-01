@@ -193,6 +193,28 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
+    function testFloorFromChainlinkDiscountCurrencyInvalid() public {
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+
+        vm.prank(_owner);
+        looksRareProtocol.addCurrency(address(looksRareToken));
+        makerBid.currency = address(looksRareToken);
+
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _setPriceFeed();
+
+        (, bytes memory data) = address(strategyFloorFromChainlink).call(
+            abi.encodeWithSelector(validityFunctionSelector, makerBid)
+        );
+        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.CurrencyInvalid.selector);
+
+        vm.expectRevert(errorSelector);
+        _executeTakerAsk(takerAsk, makerBid, signature);
+    }
+
     function _setDiscount(uint256 _discount) internal {
         discount = _discount;
     }

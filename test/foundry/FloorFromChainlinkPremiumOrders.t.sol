@@ -190,6 +190,25 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         address(strategyFloorFromChainlink).call(abi.encodeWithSelector(selectorTakerBid, takerBid, makerAsk));
     }
 
+    function testFloorFromChainlinkPremiumCurrencyInvalid() public {
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+
+        vm.prank(_owner);
+        looksRareProtocol.addCurrency(address(looksRareToken));
+        makerAsk.currency = address(looksRareToken);
+
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        _setPriceFeed();
+
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, IExecutionStrategy.CurrencyInvalid.selector);
+
+        vm.expectRevert(errorSelector);
+        _executeTakerBid(takerBid, makerAsk, signature);
+    }
+
     function _assertOrderValid(OrderStructs.MakerAsk memory makerAsk) internal {
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
         assertTrue(isValid);

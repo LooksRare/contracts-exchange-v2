@@ -11,6 +11,7 @@ interface IExecutionStrategy {
     // Custom errors
     error AskTooHigh();
     error BidTooLow();
+    error CurrencyInvalid();
     error OrderInvalid();
     error WrongCaller();
 }

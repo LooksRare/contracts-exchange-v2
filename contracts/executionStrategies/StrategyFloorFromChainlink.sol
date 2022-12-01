@@ -17,15 +17,18 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, StrategyChainlinkPriceLatency {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
+    address public immutable WETH;
 
     error InvalidChainlinkPrice();
 
     /**
      * @notice Constructor
      * @param _looksRareProtocol Address of the LooksRare protocol
+     * @param _weth Address of WETH
      */
-    constructor(address _looksRareProtocol) {
+    constructor(address _looksRareProtocol, address _weth) {
         LOOKSRARE_PROTOCOL = _looksRareProtocol;
+        WETH = _weth;
     }
 
     /**
@@ -48,6 +51,10 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
+
+        if (makerAsk.currency != address(0)) {
+            if (makerAsk.currency != WETH) revert CurrencyInvalid();
+        }
 
         if (
             makerAsk.itemIds.length != 1 ||
@@ -95,6 +102,10 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
+        if (makerAsk.currency != address(0)) {
+            if (makerAsk.currency != WETH) revert CurrencyInvalid();
+        }
+
         if (
             makerAsk.itemIds.length != 1 ||
             makerAsk.amounts.length != 1 ||
@@ -140,6 +151,10 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
+
+        if (makerBid.currency != address(0)) {
+            if (makerBid.currency != WETH) revert CurrencyInvalid();
+        }
 
         if (
             takerAsk.itemIds.length != 1 ||
@@ -188,6 +203,10 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
     {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
 
+        if (makerBid.currency != address(0)) {
+            if (makerBid.currency != WETH) revert CurrencyInvalid();
+        }
+
         if (
             takerAsk.itemIds.length != 1 ||
             takerAsk.amounts.length != 1 ||
@@ -224,6 +243,12 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
     function isMakerAskValid(
         OrderStructs.MakerAsk calldata makerAsk
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
+        if (makerAsk.currency != address(0)) {
+            if (makerAsk.currency != WETH) {
+                return (orderIsValid, CurrencyInvalid.selector);
+            }
+        }
+
         if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
             return (orderIsValid, OrderInvalid.selector);
         }
@@ -248,6 +273,12 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
     function isFixedDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
+        if (makerBid.currency != address(0)) {
+            if (makerBid.currency != WETH) {
+                return (orderIsValid, CurrencyInvalid.selector);
+            }
+        }
+
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
             return (orderIsValid, OrderInvalid.selector);
         }
@@ -277,6 +308,12 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
     function isBasisPointsDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
+        if (makerBid.currency != address(0)) {
+            if (makerBid.currency != WETH) {
+                return (orderIsValid, CurrencyInvalid.selector);
+            }
+        }
+
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
             return (orderIsValid, OrderInvalid.selector);
         }

@@ -85,7 +85,10 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        address(strategyFloorFromChainlink).call(abi.encodeWithSelector(selectorTakerAsk, takerAsk, makerBid));
+        (bool success, ) = address(strategyFloorFromChainlink).call(
+            abi.encodeWithSelector(selectorTakerAsk, takerAsk, makerBid)
+        );
+        assertTrue(success);
     }
 
     function testFloorFromChainlinkDiscountTakerAskItemIdsLengthNotOne() public {

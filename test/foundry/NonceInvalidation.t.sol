@@ -264,6 +264,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
      * Cannot execute an order sharing the same order nonce as another that is being partially filled
      */
     function testCannotExecuteAnotherOrderAtNonceIfExecutionIsInProgress() public {
+        _setUpUsers();
+
+        // 0. Add the new strategy
         bytes4 selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
         bytes4 selectorTakerBid = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerBid.selector;
 
@@ -281,8 +284,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             address(strategyMultiFillCollectionOrder)
         );
 
-        _setUpUsers();
-
+        // 1. Maker signs a message and execute a partial fill on it
         price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
         uint112 orderNonce = 420;
@@ -293,24 +295,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             amounts[0] = amountsToFill;
 
             {
-                // Prepare the first order
-                makerBid = _createMultiItemMakerBidOrder(
-                    0, // bidNonce
-                    0, // subsetNonce
-                    1, // strategyId (Multi-fill bid offer)
-                    0, // assetType ERC721,
-                    orderNonce, // orderNonce
-                    address(mockERC721),
-                    address(weth),
-                    makerUser,
-                    price,
-                    itemIds,
-                    amounts
-                );
-
-                // Sign order
-                signature = _signMakerBid(makerBid, makerUserPK);
-
                 // Prepare the first order
                 makerBid = _createMultiItemMakerBidOrder(
                     0, // bidNonce
@@ -356,6 +340,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             );
         }
 
+        // 2. Second maker order is signed sharing the same order nonce as the first one
         {
             uint256 itemId = 420;
 
@@ -387,10 +372,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
             vm.prank(takerUser);
 
-            // Second one fails
+            // Second one fails when a taker user tries to execute
             vm.expectRevert(WrongNonces.selector);
-
-            // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(
                 takerAsk,
                 makerBid,

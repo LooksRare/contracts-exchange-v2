@@ -33,7 +33,7 @@ import "./ValidationCodeConstants.sol";
  *         7. Other potential restrictions where it can tap into specific contracts with specific validation codes
  * @author LooksRare protocol team (👀,💎)
  */
-contract OrderValidator is SignatureChecker {
+contract OrderValidator {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleRoot;

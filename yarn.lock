@@ -1034,10 +1034,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@looksrare/contracts-libs@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.3.0.tgz#e829e30c46a64d9784685cee30b713a2e4102357"
-  integrity sha512-hgWmq+dN45e2nNqIV55J7AmtkG5OCOuNuEbvw4xbRJN6xlKf3+1Ge8Wn9RvvKtH5rlr+QS/MXLR9z9Zegcvegw==
+"@looksrare/contracts-libs@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.4.1.tgz#4b9e4d8ab6b689dc29e28e038148355bb32e2118"
+  integrity sha512-1QLtd6dFaUQQiPOWhaOAT/FUGpO/oGAzKAU1IhVfdQvrqBFmQiq3DPZUUkvhJbQMBInxp1kzIcCLc04+Oz/kDg==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"

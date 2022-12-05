@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 // LooksRare unopinionated libraries
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
-import {LowLevelETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelETH.sol";
+import {LowLevelETHReturnETHIfAnyExceptOneWei} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelETHReturnETHIfAnyExceptOneWei.sol";
 import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelWETH.sol";
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
@@ -38,10 +38,9 @@ contract LooksRareProtocol is
     AffiliateManager,
     TransferSelectorNFT,
     ReentrancyGuard,
-    LowLevelETH,
+    LowLevelETHReturnETHIfAnyExceptOneWei,
     LowLevelWETH,
-    LowLevelERC20Transfer,
-    SignatureChecker
+    LowLevelERC20Transfer
 {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
@@ -518,7 +517,7 @@ contract LooksRareProtocol is
     ) internal view {
         // \x19\x01 is the encoding prefix
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash));
-        _verify(digest, signer, makerSignature);
+        SignatureChecker.verify(digest, signer, makerSignature);
     }
 
     /**

@@ -25,7 +25,7 @@ contract NonceManager is INonceManager {
     mapping(address => mapping(uint256 => bytes32)) public userOrderNonce;
 
     // Check whether the subset nonce for a user was cancelled
-    mapping(address => mapping(uint112 => bool)) public userSubsetNonce;
+    mapping(address => mapping(uint112 => uint256)) public userSubsetNonce;
 
     /**
      * @notice Cancel order nonces
@@ -53,7 +53,7 @@ contract NonceManager is INonceManager {
         if (subsetNonces.length == 0) revert WrongLengths();
 
         for (uint256 i; i < subsetNonces.length; ) {
-            userSubsetNonce[msg.sender][subsetNonces[i]] = true;
+            userSubsetNonce[msg.sender][subsetNonces[i]] = 1;
             unchecked {
                 ++i;
             }

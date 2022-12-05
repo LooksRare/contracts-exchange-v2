@@ -79,7 +79,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
      * @param isActive Whether the strategy is active
      */
     function updateStrategy(
-        uint16 strategyId,
+        uint256 strategyId,
         uint16 newStandardProtocolFee,
         uint16 newMinTotalFee,
         bool isActive

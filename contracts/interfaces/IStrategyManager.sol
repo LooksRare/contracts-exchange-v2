@@ -13,7 +13,7 @@ interface IStrategyManager {
 
     // Events
     event NewStrategy(uint256 strategyId, address implementation);
-    event StrategyUpdated(uint16 strategyId, bool isActive, uint16 standardProtocolFee, uint16 minTotalFee);
+    event StrategyUpdated(uint256 strategyId, bool isActive, uint16 standardProtocolFee, uint16 minTotalFee);
 
     // Custom structs
     struct Strategy {

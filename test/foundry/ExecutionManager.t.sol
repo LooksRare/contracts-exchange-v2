@@ -13,7 +13,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
      * Owner can change protocol fee and deactivate royalty
      */
     function testOwnerCanChangeStrategyProtocolFeeAndDeactivateRoyalty() public asPrankedUser(_owner) {
-        uint16 strategyId = 0;
+        uint256 strategyId = 0;
         uint16 standardProtocolFee = 250;
         uint16 minTotalFee = 250;
         bool isActive = true;
@@ -45,7 +45,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
      * Owner can discontinue strategy
      */
     function testOwnerCanDiscontinueStrategy() public asPrankedUser(_owner) {
-        uint16 strategyId = 0;
+        uint256 strategyId = 0;
         uint16 standardProtocolFee = 299;
         uint16 minTotalFee = 250;
         bool isActive = false;

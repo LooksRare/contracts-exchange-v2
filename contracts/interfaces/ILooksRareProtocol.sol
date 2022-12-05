@@ -20,7 +20,7 @@ interface ILooksRareProtocol {
 
     struct SignatureParameters {
         bytes32 orderHash;
-        uint128 orderNonce;
+        uint256 orderNonce;
         bool isNonceInvalidated;
         address signer;
     }

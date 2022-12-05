@@ -44,7 +44,7 @@ library OrderStructs {
         uint112 subsetNonce;
         uint16 strategyId;
         uint8 assetType;
-        uint112 orderNonce;
+        uint256 orderNonce;
         address collection;
         address currency;
         address signer;
@@ -77,7 +77,7 @@ library OrderStructs {
         uint112 subsetNonce;
         uint16 strategyId;
         uint8 assetType;
-        uint112 orderNonce;
+        uint256 orderNonce;
         address collection;
         address currency;
         address signer;

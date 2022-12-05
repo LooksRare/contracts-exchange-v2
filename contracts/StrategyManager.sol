@@ -14,10 +14,10 @@ import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
  */
 contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     // Count how many strategies exist (it includes strategies that have been removed)
-    uint16 public countStrategies = 1;
+    uint256 public countStrategies = 1;
 
     // Track strategy information for a strategy id
-    mapping(uint16 => Strategy) public strategyInfo;
+    mapping(uint256 => Strategy) public strategyInfo;
 
     /**
      * @notice Constructor

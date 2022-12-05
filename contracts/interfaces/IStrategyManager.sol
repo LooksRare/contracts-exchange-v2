@@ -12,7 +12,7 @@ interface IStrategyManager {
     error StrategyHasNoSelector();
 
     // Events
-    event NewStrategy(uint16 strategyId, address implementation);
+    event NewStrategy(uint256 strategyId, address implementation);
     event StrategyUpdated(uint16 strategyId, bool isActive, uint16 standardProtocolFee, uint16 minTotalFee);
 
     // Custom structs

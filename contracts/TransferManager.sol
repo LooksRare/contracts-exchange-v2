@@ -116,17 +116,18 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             if (itemIdsLengthForSingleCollection == 0 || amounts[i].length != itemIdsLengthForSingleCollection)
                 revert WrongLengths();
 
-            if (assetTypes[i] == 0) {
+            uint8 assetType = assetTypes[i];
+            if (assetType == 0) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     _executeERC721TransferFrom(collections[i], from, to, itemIds[i][j]);
                     unchecked {
                         ++j;
                     }
                 }
-            } else if (assetTypes[i] == 1) {
+            } else if (assetType == 1) {
                 _executeERC1155SafeBatchTransferFrom(collections[i], from, to, itemIds[i], amounts[i]);
             } else {
-                revert WrongAssetType(assetTypes[i]);
+                revert WrongAssetType(assetType);
             }
 
             unchecked {

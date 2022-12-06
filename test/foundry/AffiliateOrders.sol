@@ -138,7 +138,7 @@ contract AffiliateOrdersTest is ProtocolBase {
                 0, // subsetNonce
                 0, // strategyId (Standard sale for fixed price)
                 0, // assetType ERC721,
-                uint112(i), // orderNonce
+                i, // orderNonce
                 address(mockERC721),
                 address(0), // ETH,
                 makerUser,
@@ -190,13 +190,13 @@ contract AffiliateOrdersTest is ProtocolBase {
             // Taker user has received the first two assets
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the first two nonces are marked as executed
-            assertEq(looksRareProtocol.userOrderNonce(makerUser, uint112(i)), MAGIC_VALUE_NONCE_EXECUTED);
+            assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_NONCE_EXECUTED);
         }
 
         // Taker user has not received the asset
         assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
         // Verify the nonce is NOT marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, uint112(faultyTokenId)), bytes32(0));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)

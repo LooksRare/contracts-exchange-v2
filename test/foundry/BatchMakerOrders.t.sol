@@ -17,7 +17,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         price = 1 ether; // Fixed price of sale
 
-        for (uint112 i; i < numberOrders; i++) {
+        for (uint256 i; i < numberOrders; i++) {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
@@ -111,7 +111,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         price = 1 ether; // Fixed price of sale
 
-        for (uint112 i; i < numberOrders; i++) {
+        for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
             makerBid = _createSingleItemMakerBidOrder(
                 0, // askNonce

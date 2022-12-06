@@ -84,23 +84,18 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         uint16 newMinTotalFee,
         bool isActive
     ) external onlyOwner {
-        Strategy memory currentStrategyInfo = strategyInfo[strategyId];
         if (strategyId >= countStrategies) revert StrategyNotUsed();
+        Strategy storage currentStrategyInfo = strategyInfo[strategyId];
 
         if (
             newStandardProtocolFee > currentStrategyInfo.maxProtocolFee ||
             newMinTotalFee > currentStrategyInfo.maxProtocolFee
         ) revert StrategyProtocolFeeTooHigh();
 
-        strategyInfo[strategyId] = Strategy({
-            isActive: isActive,
-            standardProtocolFee: newStandardProtocolFee,
-            minTotalFee: newMinTotalFee,
-            maxProtocolFee: currentStrategyInfo.maxProtocolFee,
-            selectorTakerAsk: currentStrategyInfo.selectorTakerAsk,
-            selectorTakerBid: currentStrategyInfo.selectorTakerBid,
-            implementation: currentStrategyInfo.implementation
-        });
+        strategyInfo[strategyId].isActive = isActive;
+        strategyInfo[strategyId].standardProtocolFee = newStandardProtocolFee;
+        strategyInfo[strategyId].standardProtocolFee = newStandardProtocolFee;
+        strategyInfo[strategyId].minTotalFee = newMinTotalFee;
 
         emit StrategyUpdated(strategyId, isActive, newStandardProtocolFee, newMinTotalFee);
     }

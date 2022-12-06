@@ -88,20 +88,17 @@ contract LooksRareProtocol is
         // Verify whether the currency is whitelisted but is not ETH (address(0))
         if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) revert WrongCurrency();
 
-        uint256 totalProtocolFee;
-        {
-            bytes32 orderHash = makerBid.hash();
-            // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-            if (merkleProof.length == 0) {
-                _computeDigestAndVerify(orderHash, makerSignature, makerBid.signer);
-            } else {
-                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
-                _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
-            }
-
-            // Execute the transaction and fetch protocol fee
-            totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, orderHash);
+        bytes32 orderHash = makerBid.hash();
+        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+        if (merkleProof.length == 0) {
+            _computeDigestAndVerify(orderHash, makerSignature, makerBid.signer);
+        } else {
+            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
+            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
         }
+
+        // Execute the transaction and fetch protocol fee
+        uint256 totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, orderHash);
 
         // Pay protocol fee (and affiliate fee if any)
         _payProtocolFeeAndAffiliateFee(makerBid.currency, makerBid.signer, affiliate, totalProtocolFee);
@@ -124,24 +121,21 @@ contract LooksRareProtocol is
         bytes32[] calldata merkleProof,
         address affiliate
     ) external payable nonReentrant {
-        uint256 totalProtocolFee;
-
         // Verify whether the currency is whitelisted
         if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
 
-        {
-            bytes32 orderHash = makerAsk.hash();
-            // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-            if (merkleProof.length == 0) {
-                _computeDigestAndVerify(orderHash, makerSignature, makerAsk.signer);
-            } else {
-                _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
-                _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
-            }
-
-            // Execute the transaction and fetch protocol fee
-            totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
+        bytes32 orderHash = makerAsk.hash();
+        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+        if (merkleProof.length == 0) {
+            _computeDigestAndVerify(orderHash, makerSignature, makerAsk.signer);
+        } else {
+            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
+            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
         }
+
+        // Execute the transaction and fetch protocol fee
+        uint256 totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
+
         // Pay protocol fee (and affiliate fee if any)
         _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFee);
 

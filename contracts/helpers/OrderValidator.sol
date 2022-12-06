@@ -140,7 +140,7 @@ contract OrderValidator {
         if (makerAsk.askNonce > globalAskNonce) return USER_GLOBAL_ASK_NONCE_LOWER;
 
         // 2. Check subset nonce
-        if (looksRareProtocol.userSubsetNonce(makerAsk.signer, makerAsk.subsetNonce) != 0)
+        if (looksRareProtocol.userSubsetNonce(makerAsk.signer, makerAsk.subsetNonce) != bytes32(0))
             return USER_SUBSET_NONCE_CANCELLED;
 
         // 3. Check order nonce
@@ -161,7 +161,7 @@ contract OrderValidator {
         if (makerBid.bidNonce > globalBidNonce) return USER_GLOBAL_ASK_NONCE_LOWER;
 
         // 2. Check subset nonce
-        if (looksRareProtocol.userSubsetNonce(makerBid.signer, makerBid.subsetNonce) != 0)
+        if (looksRareProtocol.userSubsetNonce(makerBid.signer, makerBid.subsetNonce) != bytes32(0))
             return USER_SUBSET_NONCE_CANCELLED;
 
         // 3. Check order nonce

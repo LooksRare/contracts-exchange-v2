@@ -9,6 +9,23 @@ import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFil
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract NonceInvalidationTest is INonceManager, ProtocolBase {
+    function testCancelOrderNonces() public asPrankedUser(makerUser) {
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), bytes32(0));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), bytes32(0));
+
+        uint256[] memory orderNonces = new uint256[](2);
+        orderNonces[0] = 69;
+        orderNonces[1] = 420;
+        vm.expectEmit(true, false, false, true);
+        emit OrderNoncesCancelled(orderNonces);
+        looksRareProtocol.cancelOrderNonces(orderNonces);
+
+        bytes32 expectedMagicValue = 0x000000000000000000000000000000000000000000000000000000000000002a;
+
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), expectedMagicValue);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), expectedMagicValue);
+    }
+
     /**
      * Cannot execute an order if subset nonce is used
      */

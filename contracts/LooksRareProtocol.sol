@@ -64,19 +64,7 @@ contract LooksRareProtocol is
      * @param weth Wrapped ETH address
      */
     constructor(address transferManager, address weth) TransferSelectorNFT(transferManager) {
-        // Compute and store the initial domain separator
-        domainSeparator = keccak256(
-            abi.encode(
-                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                keccak256("LooksRareProtocol"),
-                keccak256(bytes("2")),
-                block.chainid,
-                address(this)
-            )
-        );
-        // Store initial chainId
-        chainId = block.chainid;
-
+        _updateDomainSeparator();
         WETH = weth;
     }
 
@@ -272,16 +260,7 @@ contract LooksRareProtocol is
      */
     function updateDomainSeparator() external {
         if (block.chainid != chainId) {
-            domainSeparator = keccak256(
-                abi.encode(
-                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                    keccak256("LooksRareProtocol"),
-                    keccak256(bytes("2")),
-                    block.chainid,
-                    address(this)
-                )
-            );
-            chainId = block.chainid;
+            _updateDomainSeparator();
             emit NewDomainSeparator();
         } else {
             revert SameDomainSeparator();
@@ -538,5 +517,18 @@ contract LooksRareProtocol is
         gasLimitETHTransfer = newGasLimitETHTransfer;
 
         emit NewGasLimitETHTransfer(newGasLimitETHTransfer);
+    }
+
+    function _updateDomainSeparator() private {
+        domainSeparator = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256("LooksRareProtocol"),
+                keccak256(bytes("2")),
+                block.chainid,
+                address(this)
+            )
+        );
+        chainId = block.chainid;
     }
 }

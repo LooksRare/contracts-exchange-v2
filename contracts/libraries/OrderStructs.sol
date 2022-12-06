@@ -8,12 +8,12 @@ pragma solidity ^0.8.17;
  */
 library OrderStructs {
     // Maker ask hash used to compute maker ask order hash
-    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_ASK_HASH = 0x53f94ec71943e0d4668607b00d3be3b36a84a2d7cbe7c56ece7bb71013b788cf;
+    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_ASK_HASH = 0xd68183dbe86d11ceada61f851ee998c9608c049d79f6c9d65bfba7d4b5db5e3e;
 
     // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint112 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_BID_HASH = 0x0bc6f8c7cbcae50dce9a802ad4a3ee8dc62c394cf460eafaffefce4f43d114e2;
+    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_BID_HASH = 0x0408e64fdd103ecf799bbabbd0370ad7c35a5711332d9d966e79c70ff3cb2aa3;
 
     // Merkle root hash used to compute merkle root order
     // keccak256("MerkleRoot(bytes32 root)")

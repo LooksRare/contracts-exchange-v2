@@ -192,14 +192,12 @@ contract LooksRareProtocol is
                 bytes32 orderHash = makerAsk.hash();
 
                 {
-                    {
-                        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-                        if (merkleProofs[i].length > 0) {
-                            _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
-                            _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsk.signer);
-                        } else {
-                            _computeDigestAndVerify(orderHash, makerSignatures[i], makerAsk.signer);
-                        }
+                    // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+                    if (merkleProofs[i].length > 0) {
+                        _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
+                        _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsk.signer);
+                    } else {
+                        _computeDigestAndVerify(orderHash, makerSignatures[i], makerAsk.signer);
                     }
 
                     // If atomic, it uses the executeTakerBid function, if not atomic, it uses a catch/revert pattern with external function

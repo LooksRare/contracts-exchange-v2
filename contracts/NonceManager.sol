@@ -31,7 +31,7 @@ contract NonceManager is INonceManager {
      * @notice Cancel order nonces
      * @param orderNonces Array of order nonces
      */
-    function cancelOrderNonces(uint112[] calldata orderNonces) external {
+    function cancelOrderNonces(uint256[] calldata orderNonces) external {
         if (orderNonces.length == 0) revert WrongLengths();
 
         for (uint256 i; i < orderNonces.length; ) {

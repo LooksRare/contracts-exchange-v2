@@ -287,7 +287,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // 1. Maker signs a message and execute a partial fill on it
         price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
-        uint112 orderNonce = 420;
+        uint256 orderNonce = 420;
 
         {
             uint256[] memory itemIds = new uint256[](0);

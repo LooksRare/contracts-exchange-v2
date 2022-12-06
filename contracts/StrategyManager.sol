@@ -14,10 +14,10 @@ import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
  */
 contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     // Count how many strategies exist (it includes strategies that have been removed)
-    uint16 public countStrategies = 1;
+    uint256 public countStrategies = 1;
 
     // Track strategy information for a strategy id
-    mapping(uint16 => Strategy) public strategyInfo;
+    mapping(uint256 => Strategy) public strategyInfo;
 
     /**
      * @notice Constructor
@@ -79,7 +79,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
      * @param isActive Whether the strategy is active
      */
     function updateStrategy(
-        uint16 strategyId,
+        uint256 strategyId,
         uint16 newStandardProtocolFee,
         uint16 newMinTotalFee,
         bool isActive

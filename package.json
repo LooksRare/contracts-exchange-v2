@@ -21,19 +21,19 @@
     "/test/foundry/utils/MockRoyaltyFeeRegistry.sol"
   ],
   "scripts": {
-    "compile": "hardhat compile",
-    "compile:forge": "forge compile",
-    "compile:force": "hardhat compile --force",
+    "compile": "hardhat build",
+    "compile:forge": "FOUNDRY_PROFILE=local forge build",
+    "compile:hardhat": "hardhat compile --force",
     "format:check": "prettier --check '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "format:write": "prettier --write '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "lint": "eslint '**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky install",
-    "test": "hardhat test",
-    "test:gas": "REPORT_GAS=true hardhat test",
-    "test:forge": "forge test -vv",
-    "test:forge:coverage": "forge test --gas-report",
-    "test:forge:watch": "forge test -vvv --watch",
-    "test:coverage": "hardhat coverage && hardhat compile --force"
+    "test:forge:gas:coverage": "FOUNDRY_PROFILE=local forge test --gas-report",
+    "test:forge": "FOUNDRY_PROFILE=local forge test -vv",
+    "test:forge:watch": "FOUNDRY_PROFILE=local forge test -vvv --watch",
+    "test:hardhat": "hardhat test",
+    "test:hardhat:gas": "REPORT_GAS=true hardhat test",
+    "test:hardhat:coverage": "hardhat coverage && hardhat compile --force"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",

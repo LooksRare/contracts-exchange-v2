@@ -9,23 +9,6 @@ import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFil
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract NonceInvalidationTest is INonceManager, ProtocolBase {
-    function testCancelOrderNonces() public asPrankedUser(makerUser) {
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), bytes32(0));
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), bytes32(0));
-
-        uint256[] memory orderNonces = new uint256[](2);
-        orderNonces[0] = 69;
-        orderNonces[1] = 420;
-        vm.expectEmit(true, false, false, true);
-        emit OrderNoncesCancelled(orderNonces);
-        looksRareProtocol.cancelOrderNonces(orderNonces);
-
-        bytes32 expectedMagicValue = 0x000000000000000000000000000000000000000000000000000000000000002a;
-
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), expectedMagicValue);
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), expectedMagicValue);
-    }
-
     /**
      * Cannot execute an order if subset nonce is used
      */
@@ -400,5 +383,90 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
                 _emptyAffiliate
             );
         }
+    }
+
+    function testCancelOrderNonces() public asPrankedUser(makerUser) {
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), bytes32(0));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), bytes32(0));
+
+        uint256[] memory orderNonces = new uint256[](2);
+        orderNonces[0] = 69;
+        orderNonces[1] = 420;
+        vm.expectEmit(true, false, false, true);
+        emit OrderNoncesCancelled(orderNonces);
+        looksRareProtocol.cancelOrderNonces(orderNonces);
+
+        bytes32 expectedMagicValue = 0x000000000000000000000000000000000000000000000000000000000000002a;
+
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), expectedMagicValue);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), expectedMagicValue);
+    }
+
+    /**
+     * Cannot execute an order if its nonce has been cancelled
+     */
+    function testCannotExecuteAnOrderWhoseNonceIsCancelled() public {
+        _setUpUsers();
+        _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
+
+        price = 1 ether; // Fixed price of sale
+        uint256 itemId = 0; // TokenId
+
+        uint256 orderNonce = 69;
+
+        uint256[] memory orderNonces = new uint256[](1);
+        orderNonces[0] = orderNonce;
+        vm.prank(makerUser);
+        looksRareProtocol.cancelOrderNonces(orderNonces);
+
+        {
+            // Prepare the order hash
+            makerBid = _createSingleItemMakerBidOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                orderNonce, // orderNonce
+                address(mockERC721),
+                address(weth),
+                makerUser,
+                price,
+                itemId
+            );
+
+            // Sign order
+            signature = _signMakerBid(makerBid, makerUserPK);
+        }
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        {
+            // Mint asset
+            mockERC721.mint(takerUser, itemId);
+
+            // Prepare the taker ask
+            takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.maxPrice,
+                makerBid.itemIds,
+                makerBid.amounts,
+                abi.encode()
+            );
+        }
+
+        {
+            vm.expectRevert(WrongNonces.selector);
+            looksRareProtocol.executeTakerAsk(
+                takerAsk,
+                makerBid,
+                signature,
+                _emptyMerkleRoot,
+                _emptyMerkleProof,
+                _emptyAffiliate
+            );
+        }
+
+        vm.stopPrank();
     }
 }

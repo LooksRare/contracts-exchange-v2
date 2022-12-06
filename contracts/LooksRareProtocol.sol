@@ -90,7 +90,7 @@ contract LooksRareProtocol is
 
         bytes32 orderHash = makerBid.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleProof.length > 0) {
+        if (merkleProof.length != 0) {
             _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
             _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
         } else {
@@ -126,7 +126,7 @@ contract LooksRareProtocol is
 
         bytes32 orderHash = makerAsk.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleProof.length > 0) {
+        if (merkleProof.length != 0) {
             _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
             _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
         } else {
@@ -193,7 +193,7 @@ contract LooksRareProtocol is
 
                 {
                     // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-                    if (merkleProofs[i].length > 0) {
+                    if (merkleProofs[i].length != 0) {
                         _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
                         _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsk.signer);
                     } else {

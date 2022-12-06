@@ -85,12 +85,10 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         bool isActive
     ) external onlyOwner {
         if (strategyId >= countStrategies) revert StrategyNotUsed();
-        Strategy storage currentStrategyInfo = strategyInfo[strategyId];
 
-        if (
-            newStandardProtocolFee > currentStrategyInfo.maxProtocolFee ||
-            newMinTotalFee > currentStrategyInfo.maxProtocolFee
-        ) revert StrategyProtocolFeeTooHigh();
+        uint256 maxProtocolFee = strategyInfo[strategyId].maxProtocolFee;
+        if (newStandardProtocolFee > maxProtocolFee || newMinTotalFee > maxProtocolFee)
+            revert StrategyProtocolFeeTooHigh();
 
         strategyInfo[strategyId].isActive = isActive;
         strategyInfo[strategyId].standardProtocolFee = newStandardProtocolFee;

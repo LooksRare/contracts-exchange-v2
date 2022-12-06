@@ -360,12 +360,11 @@ contract LooksRareProtocol is
     ) internal returns (uint256) {
         {
             // Verify nonces
-            bytes32 userOrderNonceStatus = userOrderNonce[makerAsk.signer][makerAsk.orderNonce];
 
             if (
                 userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
                 userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
-                (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
+                userOrderNonce[makerAsk.signer][makerAsk.orderNonce] == MAGIC_VALUE_NONCE_EXECUTED
             ) revert WrongNonces();
         }
 

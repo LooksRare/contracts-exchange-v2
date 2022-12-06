@@ -283,7 +283,7 @@ contract LooksRareProtocol is
             bytes32 userOrderNonceStatus = userOrderNonce[makerBid.signer][makerBid.orderNonce];
             // Verify nonces
             if (
-                userBidAskNonces[makerBid.signer].askNonce != makerBid.bidNonce ||
+                userBidAskNonces[makerBid.signer].bidNonce != makerBid.bidNonce ||
                 userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) revert WrongNonces();

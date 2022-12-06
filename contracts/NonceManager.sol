@@ -32,9 +32,10 @@ contract NonceManager is INonceManager {
      * @param orderNonces Array of order nonces
      */
     function cancelOrderNonces(uint256[] calldata orderNonces) external {
-        if (orderNonces.length == 0) revert WrongLengths();
+        uint256 length = orderNonces.length;
+        if (length == 0) revert WrongLengths();
 
-        for (uint256 i; i < orderNonces.length; ) {
+        for (uint256 i; i < length; ) {
             userOrderNonce[msg.sender][orderNonces[i]] = MAGIC_VALUE_NONCE_EXECUTED;
             unchecked {
                 ++i;

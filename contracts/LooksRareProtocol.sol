@@ -16,7 +16,6 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
-import {ITransferManager} from "./interfaces/ITransferManager.sol";
 
 // Other dependencies
 import {AffiliateManager} from "./AffiliateManager.sol";

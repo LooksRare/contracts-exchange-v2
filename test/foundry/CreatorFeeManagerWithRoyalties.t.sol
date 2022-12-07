@@ -90,6 +90,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        // Owner receives 2% of the whole price
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (price * _newProtocolFee) / 10000);
         // Taker ask user receives 95% of the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9500) / 10000);
         // Royalty recipient receives 3% of the whole price
@@ -152,6 +154,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         // Taker user has received the asset
         assertEq(mockERC721WithRoyalties.ownerOf(itemId), makerUser);
+        // Owner receives 2% of the whole price
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (price * _newProtocolFee) / 10000);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 95.5% of the whole price

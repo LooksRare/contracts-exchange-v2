@@ -25,7 +25,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     address public protocolFeeRecipient;
 
     // Maximum creator fee (in basis point)
-    uint16 public maximumCreatorFeeBp = 1_000;
+    uint256 public maximumCreatorFeeBp = 1_000;
 
     // Creator fee manager
     ICreatorFeeManager public creatorFeeManager;

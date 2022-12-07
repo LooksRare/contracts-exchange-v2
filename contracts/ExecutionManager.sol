@@ -13,8 +13,6 @@ import {InheritedStrategies} from "./InheritedStrategies.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
-import "hardhat/console.sol";
-
 /**
  * @title ExecutionManager
  * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain

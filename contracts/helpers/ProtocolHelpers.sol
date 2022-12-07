@@ -55,10 +55,10 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Compute digest for merkle root
+     * @notice Compute digest for merkle tree
      * @param merkleTree Merkle tree struct
      */
-    function computeDigestMerkleRoot(OrderStructs.MerkleTree memory merkleTree) public view returns (bytes32 digest) {
+    function computeDigestMerkleTree(OrderStructs.MerkleTree memory merkleTree) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleTree.hash()));
     }
@@ -106,7 +106,7 @@ contract ProtocolHelpers {
         bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {
-        bytes32 digest = computeDigestMerkleRoot(merkleTree);
+        bytes32 digest = computeDigestMerkleTree(merkleTree);
         SignatureChecker.verify(digest, signer, makerSignature);
         return true;
     }

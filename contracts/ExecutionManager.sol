@@ -13,6 +13,8 @@ import {InheritedStrategies} from "./InheritedStrategies.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title ExecutionManager
  * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain
@@ -91,7 +93,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
-                if (fees[1] > (price * uint256(maximumCreatorFeeBp)) / 10_000) revert CreatorFeeBpTooHigh();
+                if (fees[1] * 10_000 > (price * maximumCreatorFeeBp)) revert CreatorFeeBpTooHigh();
             }
 
             uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFee) / 10_000;
@@ -113,6 +115,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
             // 2 --> Amount for seller
             fees[2] = price - fees[1] - fees[0];
+
             recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
         }
     }
@@ -146,7 +149,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
-                if (fees[1] > (price * uint256(maximumCreatorFeeBp)) / 10_000) revert CreatorFeeBpTooHigh();
+                if (fees[1] * 10_000 > (price * maximumCreatorFeeBp)) revert CreatorFeeBpTooHigh();
             }
             uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFee) / 10_000;
 

@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract InitialStatesTest is ProtocolBase, IStrategyManager {

@@ -84,10 +84,10 @@ contract LooksRareProtocol is
         bytes32[] calldata merkleProof,
         address affiliate
     ) external nonReentrant {
-        address signer = makerBid.signer;
         // Verify whether the currency is whitelisted but is not ETH (address(0))
         if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) revert WrongCurrency();
 
+        address signer = makerBid.signer;
         bytes32 orderHash = makerBid.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         if (merkleProof.length != 0) {
@@ -121,10 +121,10 @@ contract LooksRareProtocol is
         bytes32[] calldata merkleProof,
         address affiliate
     ) external payable nonReentrant {
-        address signer = makerAsk.signer;
         // Verify whether the currency is whitelisted
         if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
 
+        address signer = makerAsk.signer;
         bytes32 orderHash = makerAsk.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         if (merkleProof.length != 0) {

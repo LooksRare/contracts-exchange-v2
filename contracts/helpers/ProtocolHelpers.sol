@@ -55,15 +55,6 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Compute digest for merkle tree
-     * @param merkleTree Merkle tree struct
-     */
-    function computeDigestMerkleTree(OrderStructs.MerkleTree memory merkleTree) public view returns (bytes32 digest) {
-        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleTree.hash()));
-    }
-
-    /**
      * @notice Verify maker ask order
      * @param makerAsk Maker ask struct
      * @param makerSignature Maker signature

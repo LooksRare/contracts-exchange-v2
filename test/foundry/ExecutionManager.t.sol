@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
@@ -8,6 +9,48 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     error OrderInvalid();
+
+    function testSetCreatorFeeManager() public asPrankedUser(_owner) {
+        vm.expectEmit(true, false, false, true);
+        emit NewCreatorFeeManager(address(1));
+        looksRareProtocol.setCreatorFeeManager(address(1));
+        assertEq(address(looksRareProtocol.creatorFeeManager()), address(1));
+    }
+
+    function testSetCreatorFeeManagerNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        looksRareProtocol.setCreatorFeeManager(address(1));
+    }
+
+    function testSetMaximumCreatorFeeBp() public asPrankedUser(_owner) {
+        uint16 newMaximumCreatorFeeBp = uint16(2_500);
+        vm.expectEmit(true, false, false, true);
+        emit NewMaximumCreatorFeeBp(newMaximumCreatorFeeBp);
+        looksRareProtocol.setMaximumCreatorFeeBp(newMaximumCreatorFeeBp);
+        assertEq(looksRareProtocol.maximumCreatorFeeBp(), newMaximumCreatorFeeBp);
+    }
+
+    function testSetMaximumCreatorFeeBpNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        looksRareProtocol.setMaximumCreatorFeeBp(uint16(2_500));
+    }
+
+    function testSetMaximumCreatorFeeBpTooHigh() public asPrankedUser(_owner) {
+        vm.expectRevert(CreatorFeeBpTooHigh.selector);
+        looksRareProtocol.setMaximumCreatorFeeBp(uint16(2_501));
+    }
+
+    function testSetProtocolFeeRecipient() public asPrankedUser(_owner) {
+        vm.expectEmit(true, false, false, true);
+        emit NewProtocolFeeRecipient(address(1));
+        looksRareProtocol.setProtocolFeeRecipient(address(1));
+        assertEq(looksRareProtocol.protocolFeeRecipient(), address(1));
+    }
+
+    function testSetProtocolFeeRecipientNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        looksRareProtocol.setProtocolFeeRecipient(address(1));
+    }
 
     function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {
         // Change timestamp to avoid underflow issues

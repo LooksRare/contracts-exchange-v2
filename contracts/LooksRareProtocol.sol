@@ -89,7 +89,7 @@ contract LooksRareProtocol is
         bytes32 orderHash = makerBid.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         if (merkleTree.proof.length != 0) {
-            _verifyMerkleProofForOrderHash(merkleTree.proof, merkleTree.root, orderHash);
+            _verifyMerkleProofForOrderHash(merkleTree, orderHash);
             _computeDigestAndVerify(merkleTree.hash(), makerSignature, signer);
         } else {
             _computeDigestAndVerify(orderHash, makerSignature, signer);
@@ -124,7 +124,7 @@ contract LooksRareProtocol is
         bytes32 orderHash = makerAsk.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         if (merkleTree.proof.length != 0) {
-            _verifyMerkleProofForOrderHash(merkleTree.proof, merkleTree.root, orderHash);
+            _verifyMerkleProofForOrderHash(merkleTree, orderHash);
             _computeDigestAndVerify(merkleTree.hash(), makerSignature, signer);
         } else {
             _computeDigestAndVerify(orderHash, makerSignature, signer);
@@ -189,7 +189,7 @@ contract LooksRareProtocol is
                     address signer = makerAsk.signer;
                     // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
                     if (merkleTrees[i].proof.length != 0) {
-                        _verifyMerkleProofForOrderHash(merkleTrees[i].proof, merkleTrees[i].root, orderHash);
+                        _verifyMerkleProofForOrderHash(merkleTrees[i], orderHash);
                         _computeDigestAndVerify(merkleTrees[i].hash(), makerSignatures[i], signer);
                     } else {
                         _computeDigestAndVerify(orderHash, makerSignatures[i], signer);
@@ -490,12 +490,14 @@ contract LooksRareProtocol is
 
     /**
      * @notice Verify whether the merkle proofs provided for the order hash are correct
-     * @param proof Array containing the merkle proof
-     * @param root Merkle root
+     * @param merkleTree Merkle tree
      * @param orderHash Order hash (can be maker bid hash or maker ask hash)
      */
-    function _verifyMerkleProofForOrderHash(bytes32[] calldata proof, bytes32 root, bytes32 orderHash) internal pure {
-        if (!MerkleProof.verifyCalldata(proof, root, orderHash)) revert WrongMerkleProof();
+    function _verifyMerkleProofForOrderHash(
+        OrderStructs.MerkleTree calldata merkleTree,
+        bytes32 orderHash
+    ) internal pure {
+        if (!MerkleProof.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) revert WrongMerkleProof();
     }
 
     /**

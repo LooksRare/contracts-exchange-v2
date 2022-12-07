@@ -100,14 +100,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
 
             emit log_named_uint(
                 "TakerAsk // 1 ERC721 Sold // Protocol Fee // Collection Order (Multi-fills) // Registry Royalties",
@@ -150,14 +143,7 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
 
             emit log_named_uint(
                 "TakerAsk // 3 ERC721 Sold // Protocol Fee // Collection Order (Multi-fills) // Registry Royalties",

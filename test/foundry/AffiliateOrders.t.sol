@@ -85,7 +85,6 @@ contract AffiliateOrdersTest is ProtocolBase {
                 makerAsk,
                 signature,
                 _emptyMerkleRoot,
-                _emptyMerkleProof,
                 _affiliate
             );
             emit log_named_uint(
@@ -170,7 +169,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         {
             // Other execution parameters
             OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
-            bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
 
             // Execute taker bid transaction
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
@@ -178,7 +176,6 @@ contract AffiliateOrdersTest is ProtocolBase {
                 makerAsks,
                 signatures,
                 merkleRoots,
-                merkleProofs,
                 _affiliate,
                 false
             );
@@ -263,14 +260,7 @@ contract AffiliateOrdersTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _affiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _affiliate);
             emit log_named_uint(
                 "TakerAsk // ERC721 // Protocol Fee with Affiliate // No Royalties",
                 gasLeft - gasleft()

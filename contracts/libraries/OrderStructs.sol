@@ -132,6 +132,7 @@ library OrderStructs {
      */
     struct MerkleRoot {
         bytes32 root;
+        bytes32[] proof;
     }
 
     /**

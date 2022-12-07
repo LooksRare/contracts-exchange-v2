@@ -66,7 +66,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             makerAsk,
             signature,
             _emptyMerkleRoot,
-            _emptyMerkleProof,
             _emptyAffiliate
         );
     }
@@ -120,7 +119,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             makerAsk,
             signature,
             _emptyMerkleRoot,
-            _emptyMerkleProof,
             _emptyAffiliate
         );
 
@@ -174,14 +172,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Taker user actions
         vm.prank(takerUser);
         vm.expectRevert(WrongNonces.selector);
-        looksRareProtocol.executeTakerAsk(
-            takerAsk,
-            makerBid,
-            signature,
-            _emptyMerkleRoot,
-            _emptyMerkleProof,
-            _emptyAffiliate
-        );
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
 
         vm.prank(makerUser);
         vm.expectEmit(false, false, false, false);
@@ -236,25 +227,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         }
 
         {
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
 
             // Second one fails
             vm.expectRevert(WrongNonces.selector);
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
         }
 
         vm.stopPrank();
@@ -330,14 +307,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             vm.prank(takerUser);
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
         }
 
         // 2. Second maker order is signed sharing the same order nonce as the first one
@@ -374,14 +344,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
             // Second one fails when a taker user tries to execute
             vm.expectRevert(WrongNonces.selector);
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
         }
     }
 
@@ -457,14 +420,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         {
             vm.expectRevert(WrongNonces.selector);
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
         }
 
         vm.stopPrank();

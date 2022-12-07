@@ -38,7 +38,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
         }
 
-        OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({root: m.getRoot(orderHashes)});
+        OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({
+            root: m.getRoot(orderHashes),
+            proof: m.getProof(orderHashes, numberOrders - 1)
+        });
 
         // Verify the merkle proof
         for (uint256 i; i < numberOrders; i++) {
@@ -65,21 +68,13 @@ contract BatchMakerOrdersTest is ProtocolBase {
             );
         }
 
-        bytes32[] memory merkleProof = m.getProof(orderHashes, numberOrders - 1);
         delete m;
 
         {
             uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                merkleRoot,
-                merkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleRoot, _emptyAffiliate);
             emit log_named_uint(
                 "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
                 gasLeft - gasleft()
@@ -129,7 +124,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderHashes[i] = computeOrderHashMakerBid(makerBid);
         }
 
-        OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({root: m.getRoot(orderHashes)});
+        OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({
+            root: m.getRoot(orderHashes),
+            proof: m.getProof(orderHashes, numberOrders - 1)
+        });
 
         // Verify the merkle proof
         for (uint256 i; i < numberOrders; i++) {
@@ -159,14 +157,13 @@ contract BatchMakerOrdersTest is ProtocolBase {
             );
         }
 
-        bytes32[] memory merkleProof = m.getProof(orderHashes, numberOrders - 1);
         delete m;
 
         {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, merkleProof, _emptyAffiliate);
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, _emptyAffiliate);
 
             emit log_named_uint(
                 "TakerAsk // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",

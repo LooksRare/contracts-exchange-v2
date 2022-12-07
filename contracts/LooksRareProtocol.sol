@@ -73,7 +73,6 @@ contract LooksRareProtocol is
      * @param makerBid Maker bid struct
      * @param makerSignature Maker signature
      * @param merkleRoot Merkle root struct (if the signature contains multiple maker orders)
-     * @param merkleProof Array containing the merkle proof (used only if multiple maker orders under the signature)
      * @param affiliate Affiliate address
      */
     function executeTakerAsk(
@@ -81,7 +80,6 @@ contract LooksRareProtocol is
         OrderStructs.MakerBid calldata makerBid,
         bytes calldata makerSignature,
         OrderStructs.MerkleRoot calldata merkleRoot,
-        bytes32[] calldata merkleProof,
         address affiliate
     ) external nonReentrant {
         // Verify whether the currency is whitelisted but is not ETH (address(0))
@@ -90,8 +88,8 @@ contract LooksRareProtocol is
         address signer = makerBid.signer;
         bytes32 orderHash = makerBid.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleProof.length != 0) {
-            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
+        if (merkleRoot.proof.length != 0) {
+            _verifyMerkleProofForOrderHash(merkleRoot.proof, merkleRoot.root, orderHash);
             _computeDigestAndVerify(merkleRoot.hash(), makerSignature, signer);
         } else {
             _computeDigestAndVerify(orderHash, makerSignature, signer);
@@ -110,7 +108,6 @@ contract LooksRareProtocol is
      * @param makerAsk Maker ask struct
      * @param makerSignature Maker signature
      * @param merkleRoot Merkle root struct (if the signature contains multiple maker orders)
-     * @param merkleProof Array containing the merkle proof (if multiple maker orders under the signature)
      * @param affiliate Affiliate address
      */
     function executeTakerBid(
@@ -118,7 +115,6 @@ contract LooksRareProtocol is
         OrderStructs.MakerAsk calldata makerAsk,
         bytes calldata makerSignature,
         OrderStructs.MerkleRoot calldata merkleRoot,
-        bytes32[] calldata merkleProof,
         address affiliate
     ) external payable nonReentrant {
         // Verify whether the currency is whitelisted
@@ -127,8 +123,8 @@ contract LooksRareProtocol is
         address signer = makerAsk.signer;
         bytes32 orderHash = makerAsk.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleProof.length != 0) {
-            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
+        if (merkleRoot.proof.length != 0) {
+            _verifyMerkleProofForOrderHash(merkleRoot.proof, merkleRoot.root, orderHash);
             _computeDigestAndVerify(merkleRoot.hash(), makerSignature, signer);
         } else {
             _computeDigestAndVerify(orderHash, makerSignature, signer);
@@ -150,7 +146,6 @@ contract LooksRareProtocol is
      * @param makerAsks Array maker ask struct
      * @param makerSignatures Array of maker signatures
      * @param merkleRoots Array of merkle root structs if the signature contains multiple maker orders
-     * @param merkleProofs Array containing the merkle proof (if multiple maker orders under the signature)
      * @param affiliate Affiliate address
      * @param isAtomic Whether the execution should be atomic i.e., whether it should revert if 1 or more order fails
      */
@@ -159,7 +154,6 @@ contract LooksRareProtocol is
         OrderStructs.MakerAsk[] calldata makerAsks,
         bytes[] calldata makerSignatures,
         OrderStructs.MerkleRoot[] calldata merkleRoots,
-        bytes32[][] calldata merkleProofs,
         address affiliate,
         bool isAtomic
     ) external payable nonReentrant {
@@ -169,8 +163,7 @@ contract LooksRareProtocol is
                 length == 0 ||
                 makerAsks.length != length ||
                 makerSignatures.length != length ||
-                merkleRoots.length != length ||
-                merkleProofs.length != length
+                merkleRoots.length != length
             ) revert WrongLengths();
         }
 
@@ -195,8 +188,8 @@ contract LooksRareProtocol is
                 {
                     address signer = makerAsk.signer;
                     // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-                    if (merkleProofs[i].length != 0) {
-                        _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
+                    if (merkleRoots[i].proof.length != 0) {
+                        _verifyMerkleProofForOrderHash(merkleRoots[i].proof, merkleRoots[i].root, orderHash);
                         _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], signer);
                     } else {
                         _computeDigestAndVerify(orderHash, makerSignatures[i], signer);

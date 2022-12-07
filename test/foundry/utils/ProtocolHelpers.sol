@@ -175,11 +175,9 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         OrderStructs.MerkleTree memory _merkleTree,
         uint256 _signerKey
     ) internal returns (bytes memory) {
-        bytes32 merkleTreeHash = _merkleTree.hash();
-
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,
-            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleTreeHash))
+            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, _merkleTree.hash()))
         );
 
         return abi.encodePacked(r, s, v);

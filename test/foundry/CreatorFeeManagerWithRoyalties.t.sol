@@ -11,11 +11,11 @@ import {ICreatorFeeManager} from "../../contracts/interfaces/ICreatorFeeManager.
 contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     CreatorFeeManagerWithRoyalties public creatorFeeManagerWithRoyalties;
 
+    // New protocol fee
+    uint16 internal _newProtocolFee = 200;
+
     // New creator royalty fee
     uint256 internal _newCreatorRoyaltyFee = 300;
-
-    // New protocol fee
-    uint256 internal _newProtocolFee = 200;
 
     function _setUpRoyaltiesRegistry(uint256 fee) internal {
         vm.prank(_owner);

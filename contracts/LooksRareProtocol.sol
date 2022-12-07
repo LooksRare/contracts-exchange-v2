@@ -87,20 +87,21 @@ contract LooksRareProtocol is
         // Verify whether the currency is whitelisted but is not ETH (address(0))
         if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) revert WrongCurrency();
 
+        address signer = makerBid.signer;
         bytes32 orderHash = makerBid.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         if (merkleProof.length != 0) {
             _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
-            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerBid.signer);
+            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, signer);
         } else {
-            _computeDigestAndVerify(orderHash, makerSignature, makerBid.signer);
+            _computeDigestAndVerify(orderHash, makerSignature, signer);
         }
 
         // Execute the transaction and fetch protocol fee
         uint256 totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, orderHash);
 
         // Pay protocol fee (and affiliate fee if any)
-        _payProtocolFeeAndAffiliateFee(makerBid.currency, makerBid.signer, affiliate, totalProtocolFee);
+        _payProtocolFeeAndAffiliateFee(makerBid.currency, signer, affiliate, totalProtocolFee);
     }
 
     /**
@@ -123,13 +124,14 @@ contract LooksRareProtocol is
         // Verify whether the currency is whitelisted
         if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
 
+        address signer = makerAsk.signer;
         bytes32 orderHash = makerAsk.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
         if (merkleProof.length != 0) {
             _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
-            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, makerAsk.signer);
+            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, signer);
         } else {
-            _computeDigestAndVerify(orderHash, makerSignature, makerAsk.signer);
+            _computeDigestAndVerify(orderHash, makerSignature, signer);
         }
 
         // Execute the transaction and fetch protocol fee
@@ -191,12 +193,13 @@ contract LooksRareProtocol is
                 bytes32 orderHash = makerAsk.hash();
 
                 {
+                    address signer = makerAsk.signer;
                     // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
                     if (merkleProofs[i].length != 0) {
                         _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
-                        _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], makerAsk.signer);
+                        _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], signer);
                     } else {
-                        _computeDigestAndVerify(orderHash, makerSignatures[i], makerAsk.signer);
+                        _computeDigestAndVerify(orderHash, makerSignatures[i], signer);
                     }
 
                     // If atomic, it uses the executeTakerBid function, if not atomic, it uses a catch/revert pattern with external function
@@ -270,12 +273,13 @@ contract LooksRareProtocol is
         OrderStructs.MakerBid calldata makerBid,
         bytes32 orderHash
     ) internal returns (uint256) {
+        address signer = makerBid.signer;
         {
-            bytes32 userOrderNonceStatus = userOrderNonce[makerBid.signer][makerBid.orderNonce];
+            bytes32 userOrderNonceStatus = userOrderNonce[signer][makerBid.orderNonce];
             // Verify nonces
             if (
-                userBidAskNonces[makerBid.signer].bidNonce != makerBid.bidNonce ||
-                userSubsetNonce[makerBid.signer][makerBid.subsetNonce] ||
+                userBidAskNonces[signer].bidNonce != makerBid.bidNonce ||
+                userSubsetNonce[signer][makerBid.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) revert WrongNonces();
         }
@@ -290,10 +294,10 @@ contract LooksRareProtocol is
 
         if (isNonceInvalidated) {
             // Invalidate order at this nonce for future execution
-            userOrderNonce[makerBid.signer][makerBid.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
+            userOrderNonce[signer][makerBid.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
         } else {
             // Set the order hash at this nonce
-            userOrderNonce[makerBid.signer][makerBid.orderNonce] = orderHash;
+            userOrderNonce[signer][makerBid.orderNonce] = orderHash;
         }
 
         {
@@ -301,7 +305,7 @@ contract LooksRareProtocol is
             for (uint256 i = 1; i < 3; ) {
                 if (recipients[i] != address(0)) {
                     if (fees[i] != 0) {
-                        _transferFungibleTokens(makerBid.currency, makerBid.signer, recipients[i], fees[i]);
+                        _transferFungibleTokens(makerBid.currency, signer, recipients[i], fees[i]);
                     }
                 }
                 unchecked {
@@ -309,14 +313,14 @@ contract LooksRareProtocol is
                 }
             }
 
-            _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, makerBid.signer, itemIds, amounts);
+            _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, signer, itemIds, amounts);
         }
 
         SignatureParameters memory signatureParameters = SignatureParameters({
             orderHash: orderHash,
             orderNonce: makerBid.orderNonce,
             isNonceInvalidated: isNonceInvalidated,
-            signer: makerBid.signer
+            signer: signer
         });
 
         emit TakerAsk(
@@ -349,13 +353,14 @@ contract LooksRareProtocol is
         address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
+        address signer = makerAsk.signer;
         {
             // Verify nonces
-            bytes32 userOrderNonceStatus = userOrderNonce[makerAsk.signer][makerAsk.orderNonce];
+            bytes32 userOrderNonceStatus = userOrderNonce[signer][makerAsk.orderNonce];
 
             if (
-                userBidAskNonces[makerAsk.signer].askNonce != makerAsk.askNonce ||
-                userSubsetNonce[makerAsk.signer][makerAsk.subsetNonce] ||
+                userBidAskNonces[signer].askNonce != makerAsk.askNonce ||
+                userSubsetNonce[signer][makerAsk.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) revert WrongNonces();
         }
@@ -370,17 +375,17 @@ contract LooksRareProtocol is
 
         if (isNonceInvalidated) {
             // Invalidate order at this nonce for future execution
-            userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
+            userOrderNonce[signer][makerAsk.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
         } else {
             // Set the order hash at this nonce
-            userOrderNonce[makerAsk.signer][makerAsk.orderNonce] = orderHash;
+            userOrderNonce[signer][makerAsk.orderNonce] = orderHash;
         }
 
         {
             _transferNFT(
                 makerAsk.collection,
                 makerAsk.assetType,
-                makerAsk.signer,
+                signer,
                 takerBid.recipient == address(0) ? sender : takerBid.recipient,
                 itemIds,
                 amounts
@@ -403,7 +408,7 @@ contract LooksRareProtocol is
             orderHash: orderHash,
             orderNonce: makerAsk.orderNonce,
             isNonceInvalidated: isNonceInvalidated,
-            signer: makerAsk.signer
+            signer: signer
         });
 
         emit TakerBid(

@@ -94,20 +94,4 @@ contract ProtocolHelpers {
         SignatureChecker.verify(digest, signer, makerSignature);
         return true;
     }
-
-    /**
-     * @notice Verify merkle root
-     * @param merkleTree Merkle tree struct
-     * @param makerSignature Maker signature
-     * @param signer Signer address
-     */
-    function verifyMerkleRoot(
-        OrderStructs.MerkleTree memory merkleTree,
-        bytes calldata makerSignature,
-        address signer
-    ) public view returns (bool) {
-        bytes32 digest = computeDigestMerkleTree(merkleTree);
-        SignatureChecker.verify(digest, signer, makerSignature);
-        return true;
-    }
 }

@@ -113,7 +113,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -156,7 +156,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testItemIdsAndAmountsLengthMismatch() public {
@@ -174,7 +174,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testItemIdsMismatch() public {
@@ -199,7 +199,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testZeroAmount() public {
@@ -221,7 +221,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testStartPriceTooLow() public {
@@ -242,7 +242,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testTakerBidTooLow(uint256 elapsedTime) public {
@@ -266,6 +266,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

@@ -16,8 +16,8 @@ abstract contract TestParameters is Test {
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);
     address internal takerUser = vm.addr(takerUserPK);
-    OrderStructs.MerkleRoot internal _emptyMerkleRoot =
-        OrderStructs.MerkleRoot({root: bytes32(0), proof: new bytes32[](0)});
+    OrderStructs.MerkleTree internal _emptyMerkleTree =
+        OrderStructs.MerkleTree({root: bytes32(0), proof: new bytes32[](0)});
     bytes4 internal _emptyBytes4 = bytes4(0);
     bytes32 public MAGIC_VALUE_NONCE_EXECUTED = 0x000000000000000000000000000000000000000000000000000000000000002a;
 

@@ -18,7 +18,7 @@ import {LooksRareProtocol} from "../LooksRareProtocol.sol";
 contract ProtocolHelpers {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
-    using OrderStructs for OrderStructs.MerkleRoot;
+    using OrderStructs for OrderStructs.MerkleTree;
 
     // Encoding prefix for EIP-712 signatures
     string internal constant _ENCODING_PREFIX = "\x19\x01";
@@ -56,11 +56,11 @@ contract ProtocolHelpers {
 
     /**
      * @notice Compute digest for merkle root
-     * @param merkleRoot Merkle root struct
+     * @param merkleTree Merkle tree struct
      */
-    function computeDigestMerkleRoot(OrderStructs.MerkleRoot memory merkleRoot) public view returns (bytes32 digest) {
+    function computeDigestMerkleRoot(OrderStructs.MerkleTree memory merkleTree) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleRoot.hash()));
+        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleTree.hash()));
     }
 
     /**
@@ -97,16 +97,16 @@ contract ProtocolHelpers {
 
     /**
      * @notice Verify merkle root
-     * @param merkleRoot Merkle root struct
+     * @param merkleTree Merkle tree struct
      * @param makerSignature Maker signature
      * @param signer Signer address
      */
     function verifyMerkleRoot(
-        OrderStructs.MerkleRoot memory merkleRoot,
+        OrderStructs.MerkleTree memory merkleTree,
         bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {
-        bytes32 digest = computeDigestMerkleRoot(merkleRoot);
+        bytes32 digest = computeDigestMerkleRoot(merkleTree);
         SignatureChecker.verify(digest, signer, makerSignature);
         return true;
     }

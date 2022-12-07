@@ -141,7 +141,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
 
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
         (isValid, errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
@@ -151,7 +151,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {
@@ -172,7 +172,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -200,7 +200,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -232,7 +232,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -273,7 +273,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleRoot,
+            _emptyMerkleTree,
             _emptyAffiliate
         );
 
@@ -301,7 +301,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testCallerNotLooksRareProtocol() public {
@@ -343,7 +343,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testItemIdsAndAmountsLengthMismatch() public {
@@ -365,7 +365,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testItemIdsMismatch() public {
@@ -394,7 +394,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testZeroAmount() public {
@@ -421,7 +421,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testTakerBidTooLow() public {
@@ -446,6 +446,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

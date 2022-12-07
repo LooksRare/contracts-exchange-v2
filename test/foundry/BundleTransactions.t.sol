@@ -29,7 +29,7 @@ contract BundleTransactionsTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
             emit log_named_uint(
                 "TakerAsk // ERC721 // Bundle (5 items) // Protocol Fee // No Royalties",
@@ -79,7 +79,7 @@ contract BundleTransactionsTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
             emit log_named_uint(
                 "TakerAsk // ERC721 // Bundle (5 items) // Protocol Fee // Registry Royalties",
@@ -129,7 +129,7 @@ contract BundleTransactionsTest is ProtocolBase {
                 takerBid,
                 makerAsk,
                 signature,
-                _emptyMerkleRoot,
+                _emptyMerkleTree,
                 _emptyAffiliate
             );
             emit log_named_uint(
@@ -180,7 +180,7 @@ contract BundleTransactionsTest is ProtocolBase {
                 takerBid,
                 makerAsk,
                 signature,
-                _emptyMerkleRoot,
+                _emptyMerkleTree,
                 _emptyAffiliate
             );
             emit log_named_uint(

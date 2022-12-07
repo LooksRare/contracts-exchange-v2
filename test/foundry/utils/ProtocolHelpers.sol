@@ -8,7 +8,7 @@ import {TestParameters} from "./TestParameters.sol";
 contract ProtocolHelpers is TestHelpers, TestParameters {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
-    using OrderStructs for OrderStructs.MerkleRoot;
+    using OrderStructs for OrderStructs.MerkleTree;
 
     receive() external payable {}
 
@@ -172,14 +172,14 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     }
 
     function _signMerkleProof(
-        OrderStructs.MerkleRoot memory _merkleRoot,
+        OrderStructs.MerkleTree memory _merkleTree,
         uint256 _signerKey
     ) internal returns (bytes memory) {
-        bytes32 merkleRootHash = _merkleRoot.hash();
+        bytes32 merkleTreeHash = _merkleTree.hash();
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,
-            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleRootHash))
+            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleTreeHash))
         );
 
         return abi.encodePacked(r, s, v);

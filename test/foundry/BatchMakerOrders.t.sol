@@ -38,7 +38,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
         }
 
-        OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({
+        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({
             root: m.getRoot(orderHashes),
             proof: m.getProof(orderHashes, numberOrders - 1)
         });
@@ -47,12 +47,12 @@ contract BatchMakerOrdersTest is ProtocolBase {
         for (uint256 i; i < numberOrders; i++) {
             {
                 bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleRoot.root, tempMerkleProof, orderHashes[i]));
+                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
             }
         }
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleRoot, makerUserPK);
+        signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -74,7 +74,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleRoot, _emptyAffiliate);
+            looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
             emit log_named_uint(
                 "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
                 gasLeft - gasleft()
@@ -124,7 +124,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderHashes[i] = computeOrderHashMakerBid(makerBid);
         }
 
-        OrderStructs.MerkleRoot memory merkleRoot = OrderStructs.MerkleRoot({
+        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({
             root: m.getRoot(orderHashes),
             proof: m.getProof(orderHashes, numberOrders - 1)
         });
@@ -133,12 +133,12 @@ contract BatchMakerOrdersTest is ProtocolBase {
         for (uint256 i; i < numberOrders; i++) {
             {
                 bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleRoot.root, tempMerkleProof, orderHashes[i]));
+                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
             }
         }
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleRoot, makerUserPK);
+        signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -163,7 +163,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleRoot, _emptyAffiliate);
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
 
             emit log_named_uint(
                 "TakerAsk // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",

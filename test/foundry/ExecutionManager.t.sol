@@ -65,7 +65,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         /**
          * 2. Too late to execute
@@ -77,7 +77,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         /**
          * 3. start time > end time
@@ -87,7 +87,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
@@ -107,7 +107,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         /**
          * 2. STANDARD STRATEGY/MAKER BID: maker itemIds' length is not equal to maker amounts' length
@@ -120,7 +120,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         /**
          * 3. STANDARD STRATEGY/MAKER BID: itemIds' length of maker is not equal to length of taker
@@ -133,7 +133,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         /**
          * 4. STANDARD STRATEGY/MAKER BID: amounts' length of maker is not equal to length of taker
@@ -148,7 +148,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         /**
          * 5. STANDARD STRATEGY/MAKER BID: maxPrice of maker is not equal to minPrice of taker
@@ -160,13 +160,13 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerAsk.minPrice = makerBid.maxPrice + 1;
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         // Change price of takerAsk to be higher than makerAsk price
         takerAsk.minPrice = makerBid.maxPrice - 1;
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleRoot, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         /**
          * 6. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is equal to 0
@@ -183,7 +183,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleRoot,
+            _emptyMerkleTree,
             _emptyAffiliate
         );
 
@@ -202,7 +202,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleRoot,
+            _emptyMerkleTree,
             _emptyAffiliate
         );
 
@@ -221,7 +221,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleRoot,
+            _emptyMerkleTree,
             _emptyAffiliate
         );
 
@@ -242,7 +242,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleRoot,
+            _emptyMerkleTree,
             _emptyAffiliate
         );
 
@@ -260,7 +260,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleRoot,
+            _emptyMerkleTree,
             _emptyAffiliate
         );
 
@@ -272,7 +272,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleRoot,
+            _emptyMerkleTree,
             _emptyAffiliate
         );
     }

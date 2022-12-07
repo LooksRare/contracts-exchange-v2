@@ -39,7 +39,7 @@ jobs:
         with:
           version: nightly
       - name: Compile code (Hardhat)
-        run: yarn compile:hardhat:force
+        run: yarn compile:hardhat
       - name: Run TypeScript/Waffle tests
         run: yarn test:hardhat
       - name: Run Solidity/Forge tests

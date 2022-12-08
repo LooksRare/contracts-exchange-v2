@@ -91,7 +91,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerBid.collection, price, itemIds);
-                if (fees[1] > (price * uint256(maximumCreatorFeeBp)) / 10_000) revert CreatorFeeBpTooHigh();
+                if (fees[1] * 10_000 > (price * uint256(maximumCreatorFeeBp))) revert CreatorFeeBpTooHigh();
             }
 
             uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFee) / 10_000;
@@ -146,7 +146,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFee(makerAsk.collection, price, itemIds);
-                if (fees[1] > (price * uint256(maximumCreatorFeeBp)) / 10_000) revert CreatorFeeBpTooHigh();
+                if (fees[1] * 10_000 > (price * uint256(maximumCreatorFeeBp))) revert CreatorFeeBpTooHigh();
             }
             uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFee) / 10_000;
 

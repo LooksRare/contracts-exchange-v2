@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
+import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
+import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
-import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFillCollectionOrder.sol";
-import {ProtocolBase} from "./ProtocolBase.t.sol";
+import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFillCollectionOrder.sol";
+import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
     bytes4 public selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;

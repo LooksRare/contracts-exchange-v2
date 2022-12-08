@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 // Royalty Fee Registry interface
-import {IRoyaltyFeeRegistry} from "../../../contracts/interfaces/IRoyaltyFeeRegistry.sol";
+import {IRoyaltyFeeRegistry} from "../../contracts/interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
  * @title MockRoyaltyFeeRegistry

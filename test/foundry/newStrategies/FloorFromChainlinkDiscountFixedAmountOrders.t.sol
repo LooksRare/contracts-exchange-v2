@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {IExecutionStrategy} from "../../contracts/interfaces/IExecutionStrategy.sol";
-import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
+import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
+import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
 import {FloorFromChainlinkDiscountOrdersTest} from "./FloorFromChainlinkDiscountOrders.t.sol";
 
 contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDiscountOrdersTest {

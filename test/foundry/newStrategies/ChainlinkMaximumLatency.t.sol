@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
-import {StrategyChainlinkPriceLatency} from "../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
-import {ProtocolBase} from "./ProtocolBase.t.sol";
+import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
+import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract ChainlinkMaximumLatencyTest is ProtocolBase {
     event MaximumLatencyUpdated(uint256 maximumLatency);

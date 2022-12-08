@@ -60,6 +60,14 @@ npx solhint 'contracts/**/*.sol' --fix
 
 ### Coverage
 
+It is required to install lcov.
+
+```shell
+brew install lcov
+```
+
+To run the coverage report, the below command can be executed.
+
 ```
 forge coverage --report lcov
 LCOV_EXCLUDE=("test/*" "contracts/libraries/OpenZeppelin/*")

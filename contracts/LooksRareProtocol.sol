@@ -43,7 +43,7 @@ contract LooksRareProtocol is
 {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
-    using OrderStructs for OrderStructs.MerkleRoot;
+    using OrderStructs for OrderStructs.MerkleTree;
 
     // Wrapped ETH
     address public immutable WETH;
@@ -72,16 +72,14 @@ contract LooksRareProtocol is
      * @param takerAsk Taker ask struct
      * @param makerBid Maker bid struct
      * @param makerSignature Maker signature
-     * @param merkleRoot Merkle root struct (if the signature contains multiple maker orders)
-     * @param merkleProof Array containing the merkle proof (used only if multiple maker orders under the signature)
+     * @param merkleTree Merkle tree struct (if the signature contains multiple maker orders)
      * @param affiliate Affiliate address
      */
     function executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         bytes calldata makerSignature,
-        OrderStructs.MerkleRoot calldata merkleRoot,
-        bytes32[] calldata merkleProof,
+        OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
     ) external nonReentrant {
         // Verify whether the currency is whitelisted but is not ETH (address(0))
@@ -90,9 +88,9 @@ contract LooksRareProtocol is
         address signer = makerBid.signer;
         bytes32 orderHash = makerBid.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleProof.length != 0) {
-            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
-            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, signer);
+        if (merkleTree.proof.length != 0) {
+            _verifyMerkleProofForOrderHash(merkleTree, orderHash);
+            _computeDigestAndVerify(merkleTree.hash(), makerSignature, signer);
         } else {
             _computeDigestAndVerify(orderHash, makerSignature, signer);
         }
@@ -109,16 +107,14 @@ contract LooksRareProtocol is
      * @param takerBid Taker bid struct
      * @param makerAsk Maker ask struct
      * @param makerSignature Maker signature
-     * @param merkleRoot Merkle root struct (if the signature contains multiple maker orders)
-     * @param merkleProof Array containing the merkle proof (if multiple maker orders under the signature)
+     * @param merkleTree Merkle tree struct (if the signature contains multiple maker orders)
      * @param affiliate Affiliate address
      */
     function executeTakerBid(
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         bytes calldata makerSignature,
-        OrderStructs.MerkleRoot calldata merkleRoot,
-        bytes32[] calldata merkleProof,
+        OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
     ) external payable nonReentrant {
         // Verify whether the currency is whitelisted
@@ -127,9 +123,9 @@ contract LooksRareProtocol is
         address signer = makerAsk.signer;
         bytes32 orderHash = makerAsk.hash();
         // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleProof.length != 0) {
-            _verifyMerkleProofForOrderHash(merkleProof, merkleRoot.root, orderHash);
-            _computeDigestAndVerify(merkleRoot.hash(), makerSignature, signer);
+        if (merkleTree.proof.length != 0) {
+            _verifyMerkleProofForOrderHash(merkleTree, orderHash);
+            _computeDigestAndVerify(merkleTree.hash(), makerSignature, signer);
         } else {
             _computeDigestAndVerify(orderHash, makerSignature, signer);
         }
@@ -149,8 +145,7 @@ contract LooksRareProtocol is
      * @param takerBids Array of taker bid struct
      * @param makerAsks Array maker ask struct
      * @param makerSignatures Array of maker signatures
-     * @param merkleRoots Array of merkle root structs if the signature contains multiple maker orders
-     * @param merkleProofs Array containing the merkle proof (if multiple maker orders under the signature)
+     * @param merkleTrees Array of merkle tree structs if the signature contains multiple maker orders
      * @param affiliate Affiliate address
      * @param isAtomic Whether the execution should be atomic i.e., whether it should revert if 1 or more order fails
      */
@@ -158,8 +153,7 @@ contract LooksRareProtocol is
         OrderStructs.TakerBid[] calldata takerBids,
         OrderStructs.MakerAsk[] calldata makerAsks,
         bytes[] calldata makerSignatures,
-        OrderStructs.MerkleRoot[] calldata merkleRoots,
-        bytes32[][] calldata merkleProofs,
+        OrderStructs.MerkleTree[] calldata merkleTrees,
         address affiliate,
         bool isAtomic
     ) external payable nonReentrant {
@@ -169,8 +163,7 @@ contract LooksRareProtocol is
                 length == 0 ||
                 makerAsks.length != length ||
                 makerSignatures.length != length ||
-                merkleRoots.length != length ||
-                merkleProofs.length != length
+                merkleTrees.length != length
             ) revert WrongLengths();
         }
 
@@ -195,9 +188,9 @@ contract LooksRareProtocol is
                 {
                     address signer = makerAsk.signer;
                     // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-                    if (merkleProofs[i].length != 0) {
-                        _verifyMerkleProofForOrderHash(merkleProofs[i], merkleRoots[i].root, orderHash);
-                        _computeDigestAndVerify(merkleRoots[i].hash(), makerSignatures[i], signer);
+                    if (merkleTrees[i].proof.length != 0) {
+                        _verifyMerkleProofForOrderHash(merkleTrees[i], orderHash);
+                        _computeDigestAndVerify(merkleTrees[i].hash(), makerSignatures[i], signer);
                     } else {
                         _computeDigestAndVerify(orderHash, makerSignatures[i], signer);
                     }
@@ -497,12 +490,14 @@ contract LooksRareProtocol is
 
     /**
      * @notice Verify whether the merkle proofs provided for the order hash are correct
-     * @param proof Array containing the merkle proof
-     * @param root Merkle root
+     * @param merkleTree Merkle tree
      * @param orderHash Order hash (can be maker bid hash or maker ask hash)
      */
-    function _verifyMerkleProofForOrderHash(bytes32[] calldata proof, bytes32 root, bytes32 orderHash) internal pure {
-        if (!MerkleProof.verifyCalldata(proof, root, orderHash)) revert WrongMerkleProof();
+    function _verifyMerkleProofForOrderHash(
+        OrderStructs.MerkleTree calldata merkleTree,
+        bytes32 orderHash
+    ) internal pure {
+        if (!MerkleProof.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) revert WrongMerkleProof();
     }
 
     /**

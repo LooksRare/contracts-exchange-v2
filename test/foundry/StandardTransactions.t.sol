@@ -60,8 +60,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 takerBid,
                 makerAsk,
                 signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
+                _emptyMerkleTree,
                 _emptyAffiliate
             );
             emit log_named_uint("TakerBid // ERC721 // Protocol Fee // Registry Royalties", gasLeft - gasleft());
@@ -136,14 +135,7 @@ contract StandardTransactionsTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(
-                takerAsk,
-                makerBid,
-                signature,
-                _emptyMerkleRoot,
-                _emptyMerkleProof,
-                _emptyAffiliate
-            );
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
             emit log_named_uint("TakerAsk // ERC721 // Protocol Fee // Registry Royalties", gasLeft - gasleft());
         }
 
@@ -212,8 +204,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         {
             // Other execution parameters
-            OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
-            bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
+            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
             uint256 gasLeft = gasleft();
 
@@ -222,8 +213,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 takerBids,
                 makerAsks,
                 signatures,
-                merkleRoots,
-                merkleProofs,
+                merkleTrees,
                 _emptyAffiliate,
                 false
             );
@@ -306,8 +296,7 @@ contract StandardTransactionsTest is ProtocolBase {
          */
         {
             // Other execution parameters
-            OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
-            bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
+            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
             // NFTTransferFail(address collection, uint8 assetType);
             vm.expectRevert(
@@ -321,8 +310,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 takerBids,
                 makerAsks,
                 signatures,
-                merkleRoots,
-                merkleProofs,
+                merkleTrees,
                 _emptyAffiliate,
                 true
             );
@@ -333,16 +321,14 @@ contract StandardTransactionsTest is ProtocolBase {
          */
         {
             // Other execution parameters
-            OrderStructs.MerkleRoot[] memory merkleRoots = new OrderStructs.MerkleRoot[](numberPurchases);
-            bytes32[][] memory merkleProofs = new bytes32[][](numberPurchases);
+            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
             // Execute taker bid transaction
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
                 takerBids,
                 makerAsks,
                 signatures,
-                merkleRoots,
-                merkleProofs,
+                merkleTrees,
                 _emptyAffiliate,
                 false
             );

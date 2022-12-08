@@ -15,9 +15,9 @@ library OrderStructs {
     // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint16 strategyId,uint8 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
     bytes32 internal constant _MAKER_BID_HASH = 0x0408e64fdd103ecf799bbabbd0370ad7c35a5711332d9d966e79c70ff3cb2aa3;
 
-    // Merkle root hash used to compute merkle root order
-    // keccak256("MerkleRoot(bytes32 root)")
-    bytes32 internal constant _MERKLE_ROOT_HASH = 0x0cb314254867c611b4ba06dea78882bd68b33649e1ddb950d6db2ee328a55ad0;
+    // Merkle root hash used to compute merkle root order (proof is not included in the hash)
+    // keccak256("MerkleTree(bytes32 root)")
+    bytes32 internal constant _MERKLE_TREE_HASH = 0x4339702fd09d392db18a2a980b04a717d48085f206207a9fe4472d7ba0ccbf0b;
 
     /**
      * 1. MAKER ORDERS
@@ -124,14 +124,16 @@ library OrderStructs {
     }
 
     /**
-     * 3. MERKLE ROOT
+     * 3. MERKLE TREE
      */
 
     /**
      * @param root Merkle root
+     * @param proof Merkle proof
      */
-    struct MerkleRoot {
+    struct MerkleTree {
         bytes32 root;
+        bytes32[] proof;
     }
 
     /**
@@ -202,10 +204,10 @@ library OrderStructs {
 
     /**
      * @notice Hash a merkle root
-     * @param merkleRoot Merkle root struct
-     * @return merkleRootHash Hash of the merkle root struct
+     * @param merkleTree Merkle tree struct
+     * @return merkleTreeHash Hash of the merkle tree struct
      */
-    function hash(MerkleRoot memory merkleRoot) internal pure returns (bytes32 merkleRootHash) {
-        return (keccak256(abi.encode(_MERKLE_ROOT_HASH, merkleRoot.root)));
+    function hash(MerkleTree memory merkleTree) internal pure returns (bytes32 merkleTreeHash) {
+        return (keccak256(abi.encode(_MERKLE_TREE_HASH, merkleTree.root)));
     }
 }

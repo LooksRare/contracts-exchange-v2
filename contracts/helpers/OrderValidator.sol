@@ -36,7 +36,7 @@ import "./ValidationCodeConstants.sol";
 contract OrderValidator {
     using OrderStructs for OrderStructs.MakerAsk;
     using OrderStructs for OrderStructs.MakerBid;
-    using OrderStructs for OrderStructs.MerkleRoot;
+    using OrderStructs for OrderStructs.MerkleTree;
 
     // Number of distinct criteria groups checked to evaluate the validity of an order
     uint256 public immutable CRITERIA_GROUPS = 7;

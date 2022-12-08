@@ -32,8 +32,8 @@ interface ILooksRareProtocol {
         address collection,
         uint256[] itemIds,
         uint256[] amounts,
-        address[] feeRecipients,
-        uint256[] feeAmounts
+        address[3] feeRecipients,
+        uint256[3] feeAmounts
     );
 
     event TakerAsk(
@@ -44,7 +44,7 @@ interface ILooksRareProtocol {
         address collection,
         uint256[] itemIds,
         uint256[] amounts,
-        address[] feeRecipients,
-        uint256[] feeAmounts
+        address[3] feeRecipients,
+        uint256[3] feeAmounts
     );
 }

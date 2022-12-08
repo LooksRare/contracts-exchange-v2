@@ -280,8 +280,8 @@ contract LooksRareProtocol is
         (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address[] memory recipients,
-            uint256[] memory fees,
+            address[3] memory recipients,
+            uint256[3] memory fees,
             bool isNonceInvalidated
         ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
 
@@ -359,8 +359,8 @@ contract LooksRareProtocol is
         (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address[] memory recipients,
-            uint256[] memory fees,
+            address[3] memory recipients,
+            uint256[3] memory fees,
             bool isNonceInvalidated
         ) = _executeStrategyForTakerBid(takerBid, makerAsk);
 

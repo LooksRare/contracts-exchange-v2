@@ -57,3 +57,13 @@ npx prettier '**/*.{json,sol,md}' --write
 npx solhint 'contracts/**/*.sol'
 npx solhint 'contracts/**/*.sol' --fix
 ```
+
+### Coverage
+
+```
+forge coverage --report lcov
+LCOV_EXCLUDE=("test/*" "contracts/libraries/OpenZeppelin/*")
+echo $LCOV_EXCLUDE | xargs lcov --output-file lcov-filtered.info --remove lcov.info
+genhtml lcov-filtered.info --output-directory out
+open out/index.html
+```

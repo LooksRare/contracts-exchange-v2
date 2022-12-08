@@ -486,13 +486,8 @@ contract LooksRareProtocol is
         uint256 orderNonce,
         bytes32 orderHash
     ) private {
-        if (isNonceInvalidated) {
-            // Invalidate order at this nonce for future execution
-            userOrderNonce[signer][orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
-        } else {
-            // Set the order hash at this nonce
-            userOrderNonce[signer][orderNonce] = orderHash;
-        }
+        // Invalidate order at this nonce for future execution or else set the order hash at this nonce
+        userOrderNonce[signer][orderNonce] = (isNonceInvalidated ? MAGIC_VALUE_NONCE_EXECUTED : orderHash);
     }
 
     function _transferToSellerAndCreator(

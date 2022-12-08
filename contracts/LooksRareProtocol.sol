@@ -480,8 +480,11 @@ contract LooksRareProtocol is
         address signer
     ) internal view {
         // \x19\x01 is the encoding prefix
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash));
-        SignatureChecker.verify(digest, signer, makerSignature);
+        SignatureChecker.verify(
+            keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash)),
+            signer,
+            makerSignature
+        );
     }
 
     /**

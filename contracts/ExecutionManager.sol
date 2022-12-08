@@ -75,15 +75,12 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         returns (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address[] memory recipients,
-            uint256[] memory fees,
+            address[3] memory recipients,
+            uint256[3] memory fees,
             bool isNonceInvalidated
         )
     {
         uint256 price;
-
-        recipients = new address[](3);
-        fees = new uint256[](3);
 
         (price, itemIds, amounts, isNonceInvalidated) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
 
@@ -130,15 +127,12 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         returns (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address[] memory recipients,
-            uint256[] memory fees,
+            address[3] memory recipients,
+            uint256[3] memory fees,
             bool isNonceInvalidated
         )
     {
         uint256 price;
-
-        recipients = new address[](3);
-        fees = new uint256[](3);
 
         (price, itemIds, amounts, isNonceInvalidated) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
 

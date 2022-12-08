@@ -17,10 +17,10 @@ import {MockERC20} from "../mock/MockERC20.sol";
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC721WithRoyalties} from "../mock/MockERC721WithRoyalties.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
+import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 
 // Utils
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
-import {MockRoyaltyFeeRegistry} from "./utils/MockRoyaltyFeeRegistry.sol";
 
 contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;

@@ -29,24 +29,16 @@ contract InheritedStrategies {
 
         uint256 targetLength = amounts.length;
 
-        {
-            if (
-                targetLength == 0 ||
-                itemIds.length != targetLength ||
-                takerBid.itemIds.length != targetLength ||
-                takerBid.amounts.length != targetLength ||
-                price != takerBid.maxPrice
-            ) revert OrderInvalid();
+        _verifyEqualLengthsAndMatchingPrice(
+            targetLength,
+            takerBid.amounts.length,
+            itemIds.length,
+            takerBid.itemIds.length,
+            price,
+            takerBid.maxPrice
+        );
 
-            for (uint256 i; i < targetLength; ) {
-                if ((takerBid.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerBid.itemIds[i] != itemIds[i]))
-                    revert OrderInvalid();
-
-                unchecked {
-                    ++i;
-                }
-            }
-        }
+        _verifyMatchingItemIdsAndAmounts(targetLength, amounts, takerBid.amounts, itemIds, takerBid.itemIds);
     }
 
     /**
@@ -64,22 +56,48 @@ contract InheritedStrategies {
 
         uint256 targetLength = amounts.length;
 
-        {
-            if (
-                targetLength == 0 ||
-                itemIds.length != targetLength ||
-                takerAsk.itemIds.length != targetLength ||
-                takerAsk.amounts.length != targetLength ||
-                price != takerAsk.minPrice
-            ) revert OrderInvalid();
+        _verifyEqualLengthsAndMatchingPrice(
+            targetLength,
+            takerAsk.amounts.length,
+            itemIds.length,
+            takerAsk.itemIds.length,
+            price,
+            takerAsk.minPrice
+        );
 
-            for (uint256 i; i < targetLength; ) {
-                if ((takerAsk.amounts[i] != amounts[i]) || amounts[i] == 0 || (takerAsk.itemIds[i] != itemIds[i]))
-                    revert OrderInvalid();
+        _verifyMatchingItemIdsAndAmounts(targetLength, amounts, takerAsk.amounts, itemIds, takerAsk.itemIds);
+    }
 
-                unchecked {
-                    ++i;
-                }
+    function _verifyEqualLengthsAndMatchingPrice(
+        uint256 amountsLength,
+        uint256 counterpartyAmountsLength,
+        uint256 itemIdsLength,
+        uint256 counterpartyItemIdsLength,
+        uint256 price,
+        uint256 counterpartyPrice
+    ) private pure {
+        if (
+            amountsLength == 0 ||
+            itemIdsLength != amountsLength ||
+            counterpartyItemIdsLength != amountsLength ||
+            counterpartyAmountsLength != amountsLength ||
+            price != counterpartyPrice
+        ) revert OrderInvalid();
+    }
+
+    function _verifyMatchingItemIdsAndAmounts(
+        uint256 length,
+        uint256[] calldata amounts,
+        uint256[] calldata counterpartyAmounts,
+        uint256[] calldata itemIds,
+        uint256[] calldata counterpartyItemIds
+    ) private pure {
+        for (uint256 i; i < length; ) {
+            if ((amounts[i] != counterpartyAmounts[i]) || amounts[i] == 0 || (itemIds[i] != counterpartyItemIds[i]))
+                revert OrderInvalid();
+
+            unchecked {
+                ++i;
             }
         }
     }

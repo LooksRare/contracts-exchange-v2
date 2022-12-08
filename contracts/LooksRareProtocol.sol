@@ -309,15 +309,13 @@ contract LooksRareProtocol is
             _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, signer, itemIds, amounts);
         }
 
-        SignatureParameters memory signatureParameters = SignatureParameters({
-            orderHash: orderHash,
-            orderNonce: makerBid.orderNonce,
-            isNonceInvalidated: isNonceInvalidated,
-            signer: signer
-        });
-
         emit TakerAsk(
-            signatureParameters,
+            SignatureParameters({
+                orderHash: orderHash,
+                orderNonce: makerBid.orderNonce,
+                isNonceInvalidated: isNonceInvalidated,
+                signer: signer
+            }),
             msg.sender,
             makerBid.strategyId,
             makerBid.currency,
@@ -397,15 +395,13 @@ contract LooksRareProtocol is
             }
         }
 
-        SignatureParameters memory signatureParameters = SignatureParameters({
-            orderHash: orderHash,
-            orderNonce: makerAsk.orderNonce,
-            isNonceInvalidated: isNonceInvalidated,
-            signer: signer
-        });
-
         emit TakerBid(
-            signatureParameters,
+            SignatureParameters({
+                orderHash: orderHash,
+                orderNonce: makerAsk.orderNonce,
+                isNonceInvalidated: isNonceInvalidated,
+                signer: signer
+            }),
             sender,
             makerAsk.strategyId,
             makerAsk.currency,

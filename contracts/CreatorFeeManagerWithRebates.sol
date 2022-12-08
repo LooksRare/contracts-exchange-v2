@@ -49,8 +49,7 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
                         abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
                     );
                     if (status) {
-                        address newReceiver;
-                        (newReceiver, ) = abi.decode(data, (address, uint256));
+                        (address newReceiver, ) = abi.decode(data, (address, uint256));
 
                         if (i == 0) {
                             if (newReceiver == address(0)) break;

@@ -11,4 +11,7 @@ cache
 artifacts
 abis/
 
+# Forge coverage and gas
 .gas-snapshot
+lcov*
+out/

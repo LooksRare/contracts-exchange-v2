@@ -63,13 +63,13 @@ contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
-        ManagerSelector memory managerSelector = managerSelectorOfAssetType[assetType];
+        address transferManager = managerSelectorOfAssetType[assetType].transferManager;
+        bytes4 selector = managerSelectorOfAssetType[assetType].selector;
 
-        if (managerSelector.transferManager == address(0) || managerSelector.selector == bytes4(0))
-            revert NoTransferManagerForAssetType(assetType);
+        if (transferManager == address(0) || selector == bytes4(0)) revert NoTransferManagerForAssetType(assetType);
 
-        (bool status, ) = managerSelector.transferManager.call(
-            abi.encodeWithSelector(managerSelector.selector, collection, sender, recipient, itemIds, amounts)
+        (bool status, ) = transferManager.call(
+            abi.encodeWithSelector(selector, collection, sender, recipient, itemIds, amounts)
         );
 
         if (!status) revert NFTTransferFail(collection, assetType);

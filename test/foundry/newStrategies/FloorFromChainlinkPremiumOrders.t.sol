@@ -190,7 +190,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         vm.prank(_owner);
-        looksRareProtocol.addCurrency(address(looksRareToken));
+        looksRareProtocol.updateCurrencyWhitelistStatus(address(looksRareToken), true);
         makerAsk.currency = address(looksRareToken);
 
         signature = _signMakerAsk(makerAsk, makerUserPK);

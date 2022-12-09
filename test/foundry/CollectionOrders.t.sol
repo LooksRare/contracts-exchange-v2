@@ -17,6 +17,11 @@ contract CollectionOrdersTest is ProtocolBase {
 
     bytes4 public selectorTakerBid = _emptyBytes4;
 
+    function setUp() public override {
+        super.setUp();
+        _setUpNewStrategies();
+    }
+
     function _setUpNewStrategies() private asPrankedUser(_owner) {
         strategyCollectionOffer = new StrategyCollectionOffer(address(looksRareProtocol));
 
@@ -40,8 +45,6 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testNewStrategies() public {
-        _setUpNewStrategies();
-
         (
             bool strategyIsActive,
             uint16 strategyStandardProtocolFee,
@@ -80,7 +83,6 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testWrongOrderFormat() public {
-        _setUpNewStrategies();
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         // Adjust strategy for collection order and sign order
@@ -114,7 +116,6 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testPriceMismatch() public {
-        _setUpNewStrategies();
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         takerAsk.minPrice = makerBid.maxPrice + 1;
@@ -134,7 +135,6 @@ contract CollectionOrdersTest is ProtocolBase {
      */
     function testTakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
-        _setUpNewStrategies();
 
         price = 1 ether; // Fixed price of sale
 
@@ -204,7 +204,6 @@ contract CollectionOrdersTest is ProtocolBase {
      */
     function testTakerAskCollectionOrderWithMerkleTreeERC721() public {
         _setUpUsers();
-        _setUpNewStrategies();
 
         // Initialize Merkle Tree
         Merkle m = new Merkle();

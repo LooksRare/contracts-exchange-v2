@@ -100,12 +100,8 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     ) external {
         uint256 collectionsLength = collections.length;
 
-        if (
-            collectionsLength == 0 ||
-            itemIds.length != collectionsLength ||
-            collections.length != collectionsLength ||
-            amounts.length != collectionsLength
-        ) revert WrongLengths();
+        if (collectionsLength == 0 || itemIds.length != collectionsLength || amounts.length != collectionsLength)
+            revert WrongLengths();
 
         if (from != msg.sender) {
             if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();

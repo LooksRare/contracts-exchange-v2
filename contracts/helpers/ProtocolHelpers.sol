@@ -101,7 +101,7 @@ contract ProtocolHelpers {
      * @param makerSignature Maker signature
      * @param signer Signer address
      */
-    function verifyMerkleRoot(
+    function verifyMerkleTree(
         OrderStructs.MerkleTree memory merkleTree,
         bytes calldata makerSignature,
         address signer

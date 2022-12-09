@@ -113,6 +113,21 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
+    function testPriceMismatch() public {
+        _setUpNewStrategies();
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        takerAsk.minPrice = makerBid.maxPrice + 1;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
     /**
      * Any itemId for ERC721 (where royalties come from the registry) is sold through a collection taker ask using WETH.
      * We use fuzzing to generate the tokenId that is sold.

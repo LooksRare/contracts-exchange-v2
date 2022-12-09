@@ -114,9 +114,8 @@ contract LooksRareProtocol is
         // Verify whether the currency is whitelisted
         if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
 
-        address signer = makerAsk.signer;
         bytes32 orderHash = makerAsk.hash();
-        _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, signer);
+        _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, makerAsk.signer);
 
         // Execute the transaction and fetch protocol fee
         uint256 totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
@@ -174,8 +173,7 @@ contract LooksRareProtocol is
                 bytes32 orderHash = makerAsk.hash();
 
                 {
-                    address signer = makerAsk.signer;
-                    _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
+                    _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
 
                     // If atomic, it uses the executeTakerBid function, if not atomic, it uses a catch/revert pattern with external function
                     if (isAtomic) {

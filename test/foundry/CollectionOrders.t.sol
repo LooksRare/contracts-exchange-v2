@@ -103,8 +103,6 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // With proof
         makerBid.strategyId = 2;
-        makerBid.amounts = amounts;
-        takerAsk.amounts = amounts;
         signature = _signMakerBid(makerBid, makerUserPK);
 
         (isValid, errorSelector) = strategyCollectionOffer.isValid(makerBid);

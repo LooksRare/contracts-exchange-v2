@@ -22,13 +22,13 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
         vm.expectEmit(true, false, false, true);
         emit CurrencyWhitelistStatusUpdated(address(mockERC20), true);
         currencyManager.updateCurrencyWhitelistStatus(address(mockERC20), true);
-        assertTrue(currencyManager.isCurrencyWhitelisted(address(mockERC20)));
+        assertTrue(currencyManager.isCurrencyWhitelisted(address(mockERC20)) == 1);
 
         // Set to false
         vm.expectEmit(true, false, false, true);
         emit CurrencyWhitelistStatusUpdated(address(mockERC20), false);
         currencyManager.updateCurrencyWhitelistStatus(address(mockERC20), false);
-        assertFalse(currencyManager.isCurrencyWhitelisted(address(mockERC20)));
+        assertTrue(currencyManager.isCurrencyWhitelisted(address(mockERC20)) == 0);
     }
 
     function testupdateCurrencyWhitelistStatusNotOwner() public {

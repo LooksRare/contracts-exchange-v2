@@ -83,7 +83,7 @@ contract LooksRareProtocol is
         address affiliate
     ) external nonReentrant {
         // Verify whether the currency is whitelisted but is not ETH (address(0))
-        if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) revert WrongCurrency();
+        if (isCurrencyWhitelisted[makerBid.currency] == 0 || makerBid.currency == address(0)) revert WrongCurrency();
 
         address signer = makerBid.signer;
         bytes32 orderHash = makerBid.hash();
@@ -112,7 +112,7 @@ contract LooksRareProtocol is
         address affiliate
     ) external payable nonReentrant {
         // Verify whether the currency is whitelisted
-        if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
+        if (isCurrencyWhitelisted[makerAsk.currency] == 0) revert WrongCurrency();
 
         bytes32 orderHash = makerAsk.hash();
         _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, makerAsk.signer);
@@ -155,7 +155,7 @@ contract LooksRareProtocol is
         }
 
         // Verify whether the currency at array = 0 is whitelisted
-        if (!isCurrencyWhitelisted[makerAsks[0].currency]) revert WrongCurrency();
+        if (isCurrencyWhitelisted[makerAsks[0].currency] == 0) revert WrongCurrency();
 
         {
             // Initialize protocol fee

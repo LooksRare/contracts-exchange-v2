@@ -177,7 +177,7 @@ contract OrderValidator {
         OrderStructs.MakerAsk calldata makerAsk
     ) public view returns (uint256 validationCode) {
         // Verify whether the currency is whitelisted
-        if (!looksRareProtocol.isCurrencyWhitelisted(makerAsk.currency)) return CURRENCY_NOT_WHITELISTED;
+        if (looksRareProtocol.isCurrencyWhitelisted(makerAsk.currency) == 0) return CURRENCY_NOT_WHITELISTED;
 
         // Verify whether the strategy is valid
         (
@@ -206,7 +206,7 @@ contract OrderValidator {
         OrderStructs.MakerBid calldata makerBid
     ) public view returns (uint256 validationCode) {
         // Verify whether the currency is whitelisted
-        if (!looksRareProtocol.isCurrencyWhitelisted(makerBid.currency)) return CURRENCY_NOT_WHITELISTED;
+        if (looksRareProtocol.isCurrencyWhitelisted(makerBid.currency) == 0) return CURRENCY_NOT_WHITELISTED;
 
         // Verify whether the strategy is valid
         (

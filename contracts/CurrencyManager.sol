@@ -14,7 +14,7 @@ import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
  */
 contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
     // Check whether the currency is whitelisted
-    mapping(address => bool) public isCurrencyWhitelisted;
+    mapping(address => uint256) public isCurrencyWhitelisted;
 
     /**
      * @notice Whitelist/blacklist currency for execution
@@ -22,7 +22,12 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
      * @param isWhitelisted Whether the currency is whitelisted
      */
     function updateCurrencyWhitelistStatus(address currency, bool isWhitelisted) external onlyOwner {
-        isCurrencyWhitelisted[currency] = isWhitelisted;
+        uint256 isWhitelistedUint;
+        // 1 if true, 0 if false
+        assembly {
+            isWhitelistedUint := isWhitelisted
+        }
+        isCurrencyWhitelisted[currency] = isWhitelistedUint;
         emit CurrencyWhitelistStatusUpdated(currency, isWhitelisted);
     }
 }

@@ -7,15 +7,9 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
+import {TestParameters} from "./utils/TestParameters.sol";
 
-abstract contract TestParameters is TestHelpers {
-    address internal _owner = address(42);
-    address internal _sender = address(88);
-    address internal _recipient = address(90);
-    address internal _transferrer = address(100);
-}
-
-contract TransferManagerTest is ITransferManager, TestParameters {
+contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     address[] public operators;
     MockERC721 public mockERC721;
     MockERC1155 public mockERC1155;

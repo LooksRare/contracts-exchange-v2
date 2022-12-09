@@ -6,6 +6,9 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 abstract contract TestParameters is Test {
     address internal _owner = address(42);
+    address internal _sender = address(88);
+    address internal _recipient = address(90);
+    address internal _transferrer = address(100);
     address internal _royaltyRecipient = address(22);
     address internal _emptyAffiliate = address(0);
     uint16 internal _standardProtocolFee = uint16(150);

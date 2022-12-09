@@ -69,13 +69,40 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         assertEq(strategyImplementation, address(0));
     }
 
-    function testUpdateStrategyStrategyNotUsed() public asPrankedUser(_owner) {
+    /**
+     * Owner functions for strategy updates revert as expected under multiple revertion scenarios
+     */
+    function testOwnerRevertionsForWrongParametersUpdateStrategy() public asPrankedUser(_owner) {
+        (
+            ,
+            uint16 currentStandardProtocolFee,
+            uint16 currentMinTotalFee,
+            uint16 maxProtocolFee,
+            ,
+            ,
+
+        ) = looksRareProtocol.strategyInfo(0);
+
+        // 1. newStandardProtocolFee is higher than maxProtocolFee
+        uint16 newStandardProtocolFee = maxProtocolFee + 1;
+        uint16 newMinTotalFee = currentMinTotalFee;
+        vm.expectRevert(StrategyProtocolFeeTooHigh.selector);
+        looksRareProtocol.updateStrategy(0, newStandardProtocolFee, newMinTotalFee, true);
+
+        // 2. newMinTotalFee is higher than maxProtocolFee
+        newStandardProtocolFee = currentStandardProtocolFee;
+        newMinTotalFee = maxProtocolFee + 1;
+        vm.expectRevert(StrategyProtocolFeeTooHigh.selector);
+        looksRareProtocol.updateStrategy(0, newStandardProtocolFee, newMinTotalFee, true);
+
+        // 3. It reverts if strategy doesn't exist
+        uint256 countStrategies = looksRareProtocol.countStrategies();
         vm.expectRevert(StrategyNotUsed.selector);
-        looksRareProtocol.updateStrategy(69, 250, 250, true);
+        looksRareProtocol.updateStrategy(countStrategies, currentStandardProtocolFee, currentMinTotalFee, true);
     }
 
     /**
-     * Owner functions for strategy additions/updates revert as expected under multiple cases
+     * Owner functions for strategy additions revert as expected under multiple revertion scenarios
      */
     function testOwnerRevertionsForWrongParametersAddStrategy() public asPrankedUser(_owner) {
         uint16 standardProtocolFee = 250;
@@ -83,7 +110,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         uint16 maxProtocolFee = 300;
         address implementation = address(0);
 
-        // 1. Strategy does not exist but maxProtocolFee is lower than standardProtocolFee
+        // 1. standardProtocolFee is higher than maxProtocolFee
         maxProtocolFee = standardProtocolFee - 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
         looksRareProtocol.addStrategy(
@@ -95,7 +122,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             implementation
         );
 
-        // 2. Strategy does not exist but maxProtocolFee is lower than minTotalFee
+        // 2. minTotalFee is higher than maxProtocolFee
         maxProtocolFee = minTotalFee - 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
         looksRareProtocol.addStrategy(
@@ -107,7 +134,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             implementation
         );
 
-        // 3. Strategy does not exist but maxProtocolFee is higher than _MAX_PROTOCOL_FEE
+        // 3. maxProtocolFee is higher than _MAX_PROTOCOL_FEE
         maxProtocolFee = 5000 + 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
         looksRareProtocol.addStrategy(

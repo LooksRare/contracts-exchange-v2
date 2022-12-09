@@ -82,8 +82,8 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
         // Operations
         transferManager.whitelistOperator(address(looksRareProtocol));
-        looksRareProtocol.addCurrency(address(0));
-        looksRareProtocol.addCurrency(address(weth));
+        looksRareProtocol.setIsCurrencyWhitelisted(address(0), true);
+        looksRareProtocol.setIsCurrencyWhitelisted(address(weth), true);
         looksRareProtocol.setProtocolFeeRecipient(_owner);
         looksRareProtocol.setCreatorFeeManager(address(creatorFeeManager));
 

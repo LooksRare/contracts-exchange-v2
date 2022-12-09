@@ -17,49 +17,22 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
         mockERC20 = new MockERC20();
     }
 
-    function testAddCurrency() public asPrankedUser(_owner) {
+    function testSetIsCurrencyWhitelisted() public asPrankedUser(_owner) {
+        // Set to true
         vm.expectEmit(true, false, false, true);
-        emit CurrencyWhitelisted(address(mockERC20));
-        currencyManager.addCurrency(address(mockERC20));
-        assertTrue(currencyManager.isCurrencyWhitelisted(address(mockERC20)));
-    }
-
-    function testAddCurrencyNotOwner() public {
-        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        currencyManager.addCurrency(address(mockERC20));
-    }
-
-    function testAddCurrencyNotContract() public asPrankedUser(_owner) {
-        vm.expectRevert(abi.encodeWithSelector(ICurrencyManager.CurrencyNotContract.selector, address(1)));
-        currencyManager.addCurrency(address(1));
-    }
-
-    function testAddCurrencyAlreadyWhitelisted() public asPrankedUser(_owner) {
-        currencyManager.addCurrency(address(mockERC20));
+        emit CurrencyWhitelistSet(address(mockERC20), true);
+        currencyManager.setIsCurrencyWhitelisted(address(mockERC20), true);
         assertTrue(currencyManager.isCurrencyWhitelisted(address(mockERC20)));
 
-        vm.expectRevert(
-            abi.encodeWithSelector(ICurrencyManager.CurrencyAlreadyWhitelisted.selector, address(mockERC20))
-        );
-        currencyManager.addCurrency(address(mockERC20));
-    }
-
-    function testRemoveCurrency() public asPrankedUser(_owner) {
-        currencyManager.addCurrency(address(mockERC20));
-
+        // Set to false
         vm.expectEmit(true, false, false, true);
-        emit CurrencyRemoved(address(mockERC20));
-        currencyManager.removeCurrency(address(mockERC20));
-        assertTrue(!currencyManager.isCurrencyWhitelisted(address(mockERC20)));
+        emit CurrencyWhitelistSet(address(mockERC20), false);
+        currencyManager.setIsCurrencyWhitelisted(address(mockERC20), false);
+        assertFalse(currencyManager.isCurrencyWhitelisted(address(mockERC20)));
     }
 
-    function testRemoveCurrencyNotOwner() public {
+    function testSetIsCurrencyWhitelistedNotOwner() public asPrankedUser(_owner) {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        currencyManager.removeCurrency(address(mockERC20));
-    }
-
-    function testRemoveCurrencyNotWhitelisted() public asPrankedUser(_owner) {
-        vm.expectRevert(abi.encodeWithSelector(ICurrencyManager.CurrencyNotWhitelisted.selector, address(mockERC20)));
-        currencyManager.removeCurrency(address(mockERC20));
+        currencyManager.setIsCurrencyWhitelisted(address(mockERC20), true);
     }
 }

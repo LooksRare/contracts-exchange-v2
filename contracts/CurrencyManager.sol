@@ -17,27 +17,12 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
     mapping(address => bool) public isCurrencyWhitelisted;
 
     /**
-     * @notice Whitelist currency for execution
+     * @notice Whitelist/blacklist currency for execution
      * @param currency Currency address (address(0) for ETH)
+     * @param isWhitelisted Whether the currency is whitelisted
      */
-    function addCurrency(address currency) external onlyOwner {
-        if (currency != address(0)) {
-            if (currency.code.length == 0) revert CurrencyNotContract(currency);
-        }
-        if (isCurrencyWhitelisted[currency]) revert CurrencyAlreadyWhitelisted(currency);
-
-        isCurrencyWhitelisted[currency] = true;
-        emit CurrencyWhitelisted(currency);
-    }
-
-    /**
-     * @notice Remove currency for execution
-     * @param currency Currency address (address(0) for ETH)
-     */
-    function removeCurrency(address currency) external onlyOwner {
-        if (!isCurrencyWhitelisted[currency]) revert CurrencyNotWhitelisted(currency);
-
-        delete isCurrencyWhitelisted[currency];
-        emit CurrencyRemoved(currency);
+    function setIsCurrencyWhitelisted(address currency, bool isWhitelisted) external onlyOwner {
+        isCurrencyWhitelisted[currency] = isWhitelisted;
+        emit CurrencyWhitelistSet(currency, isWhitelisted);
     }
 }

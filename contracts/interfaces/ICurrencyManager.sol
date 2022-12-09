@@ -6,12 +6,6 @@ pragma solidity ^0.8.17;
  * @author LooksRare protocol team (👀,💎)
  */
 interface ICurrencyManager {
-    // Custom errors
-    error CurrencyAlreadyWhitelisted(address currency);
-    error CurrencyNotContract(address currency);
-    error CurrencyNotWhitelisted(address currency);
-
     // Events
-    event CurrencyRemoved(address currency);
-    event CurrencyWhitelisted(address currency);
+    event CurrencyWhitelistSet(address currency, bool isWhitelisted);
 }

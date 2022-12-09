@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyDutchAuction} from "../../../contracts/executionStrategies/StrategyDutchAuction.sol";
 import {ProtocolBase} from "../ProtocolBase.t.sol";
@@ -139,6 +140,27 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
         strategyDutchAuction.executeStrategyWithTakerBid(takerBid, makerAsk);
+    }
+
+    function testInactiveStrategy() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+
+        vm.prank(_owner);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
     function testZeroItemIdsLength() public {

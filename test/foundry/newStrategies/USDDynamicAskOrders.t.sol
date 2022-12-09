@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyUSDDynamicAsk} from "../../../contracts/executionStrategies/StrategyUSDDynamicAsk.sol";
 import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
@@ -444,6 +445,31 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertEq(errorSelector, bytes4(0));
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testInactiveStrategy() public {
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
+        });
+
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.startPrank(_owner);
+        strategyUSDDynamicAsk.setMaximumLatency(3600);
+
+        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+        vm.stopPrank();
+
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);

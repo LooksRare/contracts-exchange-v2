@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
 import {FloorFromChainlinkPremiumOrdersTest} from "./FloorFromChainlinkPremiumOrders.t.sol";
@@ -14,6 +15,24 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         _setPremium(100);
         _setSelectorTakerBid(StrategyFloorFromChainlink.executeBasisPointsPremiumStrategyWithTakerBid.selector);
         super.setUp();
+    }
+
+    function testInactiveStrategy() public {
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
+
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        _setPriceFeed();
+
+        vm.prank(_owner);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+
+        _assertOrderValid(makerAsk);
+
+        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
+        _executeTakerBid(takerBid, makerAsk, signature);
     }
 
     function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanMinPrice() public {

@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
 import {FloorFromChainlinkDiscountOrdersTest} from "./FloorFromChainlinkDiscountOrders.t.sol";
 
@@ -13,6 +14,25 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         _setValidityFunctionSelector(StrategyFloorFromChainlink.isFixedDiscountMakerBidValid.selector);
         _setSelectorTakerAsk(StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector);
         super.setUp();
+    }
+
+    function testInactiveStrategy() public {
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
+
+        makerBid.maxPrice = 9.5 ether;
+        takerAsk.minPrice = 9.5 ether;
+
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _setPriceFeed();
+
+        _assertOrderValid(makerBid);
+
+        vm.prank(_owner);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+
+        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {

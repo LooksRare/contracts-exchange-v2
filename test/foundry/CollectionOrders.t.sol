@@ -150,9 +150,7 @@ contract CollectionOrdersTest is ProtocolBase {
         takerAsk.amounts = amounts;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -161,9 +159,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.strategyId = 2;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        (isValid, errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -177,9 +173,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.amounts = amounts;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -374,5 +368,11 @@ contract CollectionOrdersTest is ProtocolBase {
         (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
+    }
+
+    function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid) private {
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
     }
 }

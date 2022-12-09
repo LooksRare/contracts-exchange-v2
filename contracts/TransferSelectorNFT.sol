@@ -18,6 +18,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
 
     /**
      * @notice Constructor
+     * @param transferManager Address of the transfer manager for ERC721/ERC1155
      */
     constructor(address transferManager) {
         // Transfer manager with selectors for ERC721/ERC1155

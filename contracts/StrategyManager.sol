@@ -26,8 +26,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         strategyInfo[0] = Strategy({
             isActive: true,
             standardProtocolFee: 150,
-            maxProtocolFee: 300,
             minTotalFee: 200,
+            maxProtocolFee: 300,
             selectorTakerAsk: bytes4(0),
             selectorTakerBid: bytes4(0),
             implementation: address(0)
@@ -91,7 +91,6 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             revert StrategyProtocolFeeTooHigh();
 
         strategyInfo[strategyId].isActive = isActive;
-        strategyInfo[strategyId].standardProtocolFee = newStandardProtocolFee;
         strategyInfo[strategyId].standardProtocolFee = newStandardProtocolFee;
         strategyInfo[strategyId].minTotalFee = newMinTotalFee;
 

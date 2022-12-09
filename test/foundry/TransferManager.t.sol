@@ -278,10 +278,6 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256[][] memory itemIds = new uint256[][](2);
 
         {
-            mockERC721.mint(_sender, tokenIdERC721);
-            mockERC1155.mint(_sender, tokenId1ERC1155, amount1ERC1155);
-            mockERC1155.mint(_sender, tokenId2ERC1155, amount2ERC1155);
-
             assetTypes[0] = 1; // ERC1155
             assetTypes[1] = 0; // ERC721
 
@@ -321,7 +317,6 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
-        uint256 tokenIdERC721 = 55;
         uint256 tokenId1ERC1155 = 1;
         uint256 amount1ERC1155 = 2;
         uint256 tokenId2ERC1155 = 2;
@@ -333,10 +328,6 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256[][] memory itemIds = new uint256[][](1);
 
         {
-            mockERC721.mint(_sender, tokenIdERC721);
-            mockERC1155.mint(_sender, tokenId1ERC1155, amount1ERC1155);
-            mockERC1155.mint(_sender, tokenId2ERC1155, amount2ERC1155);
-
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 
@@ -387,10 +378,6 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256[][] memory itemIds = new uint256[][](2);
 
         {
-            mockERC721.mint(_sender, tokenIdERC721);
-            mockERC1155.mint(_sender, tokenId1ERC1155, amount1ERC1155);
-            mockERC1155.mint(_sender, tokenId2ERC1155, amount2ERC1155);
-
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 

@@ -131,12 +131,30 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
+    function testBidAskAmountMismatch() public {
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 2;
+        takerAsk.amounts = amounts;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Maker bid still valid
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
     function testPriceMismatch() public {
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         takerAsk.minPrice = makerBid.maxPrice + 1;
         signature = _signMakerBid(makerBid, makerUserPK);
 
+        // Maker bid still valid
         (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));

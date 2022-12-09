@@ -494,15 +494,14 @@ contract LooksRareProtocol is
         address currency,
         address sender
     ) private {
-        // It starts at 1 since the protocol fee is transferred at the very end
-        for (uint256 i = 1; i < 3; ) {
-            if (recipients[i] != address(0)) {
-                if (fees[i] != 0) {
-                    _transferFungibleTokens(currency, sender, recipients[i], fees[i]);
-                }
+        if (recipients[1] != address(0)) {
+            if (fees[1] != 0) {
+                _transferFungibleTokens(currency, sender, recipients[1], fees[1]);
             }
-            unchecked {
-                ++i;
+        }
+        if (recipients[2] != address(0)) {
+            if (fees[2] != 0) {
+                _transferFungibleTokens(currency, sender, recipients[2], fees[2]);
             }
         }
     }

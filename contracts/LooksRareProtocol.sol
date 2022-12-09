@@ -55,7 +55,7 @@ contract LooksRareProtocol is
     bytes32 public domainSeparator;
 
     // Gas limit
-    uint256 private gasLimitETHTransfer = 2_300;
+    uint256 private _gasLimitETHTransfer = 2_300;
 
     /**
      * @notice Constructor
@@ -407,7 +407,7 @@ contract LooksRareProtocol is
      */
     function _transferFungibleTokens(address currency, address sender, address recipient, uint256 amount) internal {
         if (currency == address(0)) {
-            _transferETHAndWrapIfFailWithGasLimit(WETH, recipient, amount, gasLimitETHTransfer);
+            _transferETHAndWrapIfFailWithGasLimit(WETH, recipient, amount, _gasLimitETHTransfer);
         } else {
             _executeERC20TransferFrom(currency, sender, recipient, amount);
         }
@@ -437,7 +437,7 @@ contract LooksRareProtocol is
      * @param newGasLimitETHTransfer New gas limit for ETH transfer
      */
     function adjustETHGasLimitForTransfer(uint256 newGasLimitETHTransfer) external onlyOwner {
-        gasLimitETHTransfer = newGasLimitETHTransfer;
+        _gasLimitETHTransfer = newGasLimitETHTransfer;
 
         emit NewGasLimitETHTransfer(newGasLimitETHTransfer);
     }

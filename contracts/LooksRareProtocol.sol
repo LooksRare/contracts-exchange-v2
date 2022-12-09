@@ -55,7 +55,7 @@ contract LooksRareProtocol is
     bytes32 public domainSeparator;
 
     // Gas limit
-    uint256 public gasLimitETHTransfer = 2_300;
+    uint256 private gasLimitETHTransfer = 2_300;
 
     /**
      * @notice Constructor

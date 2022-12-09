@@ -94,9 +94,7 @@ contract CollectionOrdersTest is ProtocolBase {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid is still valid
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -105,9 +103,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.strategyId = 2;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        (isValid, errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -127,9 +123,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.strategyId = 1;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -138,9 +132,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.strategyId = 2;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        (isValid, errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -202,9 +194,7 @@ contract CollectionOrdersTest is ProtocolBase {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid still valid
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -217,9 +207,7 @@ contract CollectionOrdersTest is ProtocolBase {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid still valid
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -267,9 +255,7 @@ contract CollectionOrdersTest is ProtocolBase {
             takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, makerBid.amounts, abi.encode());
         }
 
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         {
             uint256 gasLeft = gasleft();
@@ -358,9 +344,7 @@ contract CollectionOrdersTest is ProtocolBase {
             );
         }
 
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         {
             uint256 gasLeft = gasleft();
@@ -384,5 +368,11 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+    }
+
+    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) private {
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
     }
 }

@@ -194,7 +194,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
 
         vm.prank(_owner);
-        looksRareProtocol.setIsCurrencyWhitelisted(address(looksRareToken), true);
+        looksRareProtocol.updateCurrencyWhitelistStatus(address(looksRareToken), true);
         makerBid.currency = address(looksRareToken);
 
         signature = _signMakerBid(makerBid, makerUserPK);

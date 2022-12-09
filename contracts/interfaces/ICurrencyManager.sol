@@ -7,5 +7,5 @@ pragma solidity ^0.8.17;
  */
 interface ICurrencyManager {
     // Events
-    event CurrencyWhitelistSet(address currency, bool isWhitelisted);
+    event CurrencyWhitelistStatusUpdated(address currency, bool isWhitelisted);
 }

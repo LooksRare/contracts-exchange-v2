@@ -35,8 +35,8 @@ contract DeploymentNoCreate2 is Test {
         transferManager = new TransferManager();
         looksRareProtocol = new LooksRareProtocol(address(transferManager), weth);
         transferManager.whitelistOperator(address(looksRareProtocol));
-        looksRareProtocol.setIsCurrencyWhitelisted(address(0), true);
-        looksRareProtocol.setIsCurrencyWhitelisted(weth, true);
+        looksRareProtocol.updateCurrencyWhitelistStatus(address(0), true);
+        looksRareProtocol.updateCurrencyWhitelistStatus(weth, true);
         looksRareProtocol.setProtocolFeeRecipient(looksRareProtocol.owner());
 
         console.log("TransferManager address: ");

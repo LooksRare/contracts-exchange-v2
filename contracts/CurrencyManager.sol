@@ -21,8 +21,8 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
      * @param currency Currency address (address(0) for ETH)
      * @param isWhitelisted Whether the currency is whitelisted
      */
-    function setIsCurrencyWhitelisted(address currency, bool isWhitelisted) external onlyOwner {
+    function updateCurrencyWhitelistStatus(address currency, bool isWhitelisted) external onlyOwner {
         isCurrencyWhitelisted[currency] = isWhitelisted;
-        emit CurrencyWhitelistSet(currency, isWhitelisted);
+        emit CurrencyWhitelistStatusUpdated(currency, isWhitelisted);
     }
 }

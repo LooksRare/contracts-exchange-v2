@@ -17,22 +17,22 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
         mockERC20 = new MockERC20();
     }
 
-    function testSetIsCurrencyWhitelisted() public asPrankedUser(_owner) {
+    function testupdateCurrencyWhitelistStatus() public asPrankedUser(_owner) {
         // Set to true
         vm.expectEmit(true, false, false, true);
-        emit CurrencyWhitelistSet(address(mockERC20), true);
-        currencyManager.setIsCurrencyWhitelisted(address(mockERC20), true);
+        emit CurrencyWhitelistStatusUpdated(address(mockERC20), true);
+        currencyManager.updateCurrencyWhitelistStatus(address(mockERC20), true);
         assertTrue(currencyManager.isCurrencyWhitelisted(address(mockERC20)));
 
         // Set to false
         vm.expectEmit(true, false, false, true);
-        emit CurrencyWhitelistSet(address(mockERC20), false);
-        currencyManager.setIsCurrencyWhitelisted(address(mockERC20), false);
+        emit CurrencyWhitelistStatusUpdated(address(mockERC20), false);
+        currencyManager.updateCurrencyWhitelistStatus(address(mockERC20), false);
         assertFalse(currencyManager.isCurrencyWhitelisted(address(mockERC20)));
     }
 
-    function testSetIsCurrencyWhitelistedNotOwner() public asPrankedUser(_owner) {
+    function testupdateCurrencyWhitelistStatusNotOwner() public asPrankedUser(_owner) {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        currencyManager.setIsCurrencyWhitelisted(address(mockERC20), true);
+        currencyManager.updateCurrencyWhitelistStatus(address(mockERC20), true);
     }
 }

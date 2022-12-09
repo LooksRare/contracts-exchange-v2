@@ -53,15 +53,13 @@ contract StrategyCollectionOffer is StrategyBase {
         isNonceInvalidated = true;
 
         // A collection order can only be executable for 1 itemId but quantity to fill can vary
-        {
-            if (
-                itemIds.length != 1 ||
-                amounts.length != 1 ||
-                price != takerAsk.minPrice ||
-                takerAsk.amounts[0] != amounts[0] ||
-                amounts[0] == 0
-            ) revert OrderInvalid();
-        }
+        if (
+            itemIds.length != 1 ||
+            amounts.length != 1 ||
+            price != takerAsk.minPrice ||
+            takerAsk.amounts[0] != amounts[0] ||
+            amounts[0] == 0
+        ) revert OrderInvalid();
     }
 
     /**

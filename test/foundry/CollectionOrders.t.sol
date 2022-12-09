@@ -85,12 +85,29 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // Adjust strategy for collection order and sign order
         // Change array to make it bigger than expected
-        uint256[] memory itemIds = new uint256[](2);
-        itemIds[0] = 0;
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 1;
         makerBid.strategyId = 1;
-        makerBid.itemIds = itemIds;
-        takerAsk.itemIds = itemIds;
+        makerBid.amounts = amounts;
+        takerAsk.amounts = amounts;
         signature = _signMakerBid(makerBid, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+
+        // With proof
+        makerBid.strategyId = 2;
+        makerBid.amounts = amounts;
+        takerAsk.amounts = amounts;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        (isValid, errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);

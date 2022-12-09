@@ -6,8 +6,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 
 contract AffiliateOrdersTest is ProtocolBase {
-    MockERC20 public mockERC20; // It is used as LOOKS for this test
-
+    // Affiliate rate
     uint256 internal _affiliateRate = 2_000;
 
     function _calculateAffiliateFee(

@@ -54,7 +54,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
     function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {
         // Change timestamp to avoid underflow issues
-        vm.warp(12000000);
+        vm.warp(12_000_000);
 
         /**
          * 1. Too early to execute

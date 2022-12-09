@@ -9,7 +9,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         vm.expectEmit(true, false, false, true);
         emit NewGasLimitETHTransfer(10_000);
         looksRareProtocol.adjustETHGasLimitForTransfer(10_000);
-        assertEq(looksRareProtocol.gasLimitETHTransfer(), 10_000);
+        assertEq(uint256(vm.load(address(looksRareProtocol), bytes32(uint256(16)))), 10_000);
     }
 
     function testAdjustETHGasLimitForTransferNotOwner() public {

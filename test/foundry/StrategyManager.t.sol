@@ -146,4 +146,16 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             implementation
         );
     }
+
+    function testAddStrategyNoSelector() public asPrankedUser(_owner) {
+        vm.expectRevert(IStrategyManager.StrategyHasNoSelector.selector);
+        looksRareProtocol.addStrategy(
+            _standardProtocolFee,
+            _minTotalFee,
+            _maxProtocolFee,
+            _emptyBytes4,
+            _emptyBytes4,
+            address(0)
+        );
+    }
 }

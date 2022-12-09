@@ -54,9 +54,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > 5_000)
             revert StrategyProtocolFeeTooHigh();
 
-        if (selectorTakerAsk == bytes4(0)) {
-            if (selectorTakerBid == bytes4(0)) revert StrategyHasNoSelector();
-        }
+        // A OR B == bytes4(0) -> Both A and B are bytes4(0)
+        if (selectorTakerAsk | selectorTakerBid == bytes4(0)) revert StrategyHasNoSelector();
 
         strategyInfo[countStrategies] = Strategy({
             isActive: true,

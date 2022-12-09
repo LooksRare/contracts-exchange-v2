@@ -208,6 +208,6 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @param operator Operator address
      */
     function isOperatorValidForTransfer(address user, address operator) internal view returns (bool) {
-        return isOperatorWhitelisted[operator] != 0 && hasUserApprovedOperator[user][operator] != 0;
+        return (isOperatorWhitelisted[operator] & hasUserApprovedOperator[user][operator]) != 0;
     }
 }

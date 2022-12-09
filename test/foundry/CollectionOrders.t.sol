@@ -113,6 +113,39 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
+    function testAmountsMismatch() public {
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        uint256[] memory makerBidAmounts = new uint256[](1);
+        makerBidAmounts[0] = 1;
+        uint256[] memory takerAskAmounts = new uint256[](1);
+        takerAskAmounts[0] = 2;
+        makerBid.amounts = makerBidAmounts;
+        takerAsk.amounts = takerAskAmounts;
+
+        // Adjust strategy for collection order and sign order
+        makerBid.strategyId = 1;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+
+        // With proof
+        makerBid.strategyId = 2;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        (isValid, errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
     function testAmountsLengthNotOne() public {
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 

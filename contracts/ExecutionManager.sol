@@ -241,7 +241,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         uint16 strategyId,
         uint256 creatorFee,
         uint256 minTotalFee
-    ) private returns (uint256 protocolFee) {
+    ) private view returns (uint256 protocolFee) {
         uint256 standardProtocolFee = (price * strategyInfo[strategyId].standardProtocolFee) / 10_000;
 
         if (creatorFee + standardProtocolFee > minTotalFee) {

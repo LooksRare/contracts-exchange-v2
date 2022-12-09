@@ -18,7 +18,7 @@
   "files": [
     "/abis/*.json",
     "/contracts/**/*.sol",
-    "/test/foundry/mock/MockRoyaltyFeeRegistry.sol"
+    "/test/mock/MockRoyaltyFeeRegistry.sol"
   ],
   "scripts": {
     "compile:forge": "FOUNDRY_PROFILE=local forge build",

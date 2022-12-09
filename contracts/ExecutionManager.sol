@@ -97,13 +97,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             if (recipients[1] == address(0) || fees[1] == 0) {
                 fees[0] = minTotalFee;
             } else {
-                uint256 standardProtocolFee = (price * strategyInfo[makerBid.strategyId].standardProtocolFee) / 10_000;
-
-                if (fees[1] + standardProtocolFee > minTotalFee) {
-                    fees[0] = standardProtocolFee;
-                } else {
-                    fees[0] = minTotalFee - fees[1];
-                }
+                fees[0] = _calculateProtocolFee(price, makerBid.strategyId, fees[1], minTotalFee);
             }
 
             recipients[0] = protocolFeeRecipient;
@@ -148,13 +142,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             if (recipients[1] == address(0) || fees[1] == 0) {
                 fees[0] = minTotalFee;
             } else {
-                uint256 standardProtocolFee = (price * strategyInfo[makerAsk.strategyId].standardProtocolFee) / 10_000;
-
-                if (fees[1] + standardProtocolFee > minTotalFee) {
-                    fees[0] = standardProtocolFee;
-                } else {
-                    fees[0] = minTotalFee - fees[1];
-                }
+                fees[0] = _calculateProtocolFee(price, makerAsk.strategyId, fees[1], minTotalFee);
             }
 
             recipients[0] = protocolFeeRecipient;
@@ -246,5 +234,20 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      */
     function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) internal view {
         if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
+    }
+
+    function _calculateProtocolFee(
+        uint256 price,
+        uint16 strategyId,
+        uint256 creatorFee,
+        uint256 minTotalFee
+    ) private returns (uint256 protocolFee) {
+        uint256 standardProtocolFee = (price * strategyInfo[strategyId].standardProtocolFee) / 10_000;
+
+        if (creatorFee + standardProtocolFee > minTotalFee) {
+            protocolFee = standardProtocolFee;
+        } else {
+            protocolFee = minTotalFee - creatorFee;
+        }
     }
 }

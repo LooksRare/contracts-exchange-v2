@@ -87,13 +87,7 @@ contract LooksRareProtocol is
 
         address signer = makerBid.signer;
         bytes32 orderHash = makerBid.hash();
-        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleTree.proof.length != 0) {
-            _verifyMerkleProofForOrderHash(merkleTree, orderHash);
-            _computeDigestAndVerify(merkleTree.hash(), makerSignature, signer);
-        } else {
-            _computeDigestAndVerify(orderHash, makerSignature, signer);
-        }
+        _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, signer);
 
         // Execute the transaction and fetch protocol fee
         uint256 totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, orderHash);
@@ -122,13 +116,7 @@ contract LooksRareProtocol is
 
         address signer = makerAsk.signer;
         bytes32 orderHash = makerAsk.hash();
-        // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-        if (merkleTree.proof.length != 0) {
-            _verifyMerkleProofForOrderHash(merkleTree, orderHash);
-            _computeDigestAndVerify(merkleTree.hash(), makerSignature, signer);
-        } else {
-            _computeDigestAndVerify(orderHash, makerSignature, signer);
-        }
+        _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, signer);
 
         // Execute the transaction and fetch protocol fee
         uint256 totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
@@ -187,13 +175,7 @@ contract LooksRareProtocol is
 
                 {
                     address signer = makerAsk.signer;
-                    // Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
-                    if (merkleTrees[i].proof.length != 0) {
-                        _verifyMerkleProofForOrderHash(merkleTrees[i], orderHash);
-                        _computeDigestAndVerify(merkleTrees[i].hash(), makerSignatures[i], signer);
-                    } else {
-                        _computeDigestAndVerify(orderHash, makerSignatures[i], signer);
-                    }
+                    _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
 
                     // If atomic, it uses the executeTakerBid function, if not atomic, it uses a catch/revert pattern with external function
                     if (isAtomic) {
@@ -285,29 +267,10 @@ contract LooksRareProtocol is
             bool isNonceInvalidated
         ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
 
-        if (isNonceInvalidated) {
-            // Invalidate order at this nonce for future execution
-            userOrderNonce[signer][makerBid.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
-        } else {
-            // Set the order hash at this nonce
-            userOrderNonce[signer][makerBid.orderNonce] = orderHash;
-        }
+        _updateUserOrderNonce(isNonceInvalidated, signer, makerBid.orderNonce, orderHash);
 
-        {
-            // It starts at 1 since the protocol fee is transferred at the very end
-            for (uint256 i = 1; i < 3; ) {
-                if (recipients[i] != address(0)) {
-                    if (fees[i] != 0) {
-                        _transferFungibleTokens(makerBid.currency, signer, recipients[i], fees[i]);
-                    }
-                }
-                unchecked {
-                    ++i;
-                }
-            }
-
-            _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, signer, itemIds, amounts);
-        }
+        _transferToSellerAndCreator(recipients, fees, makerBid.currency, signer);
+        _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, signer, itemIds, amounts);
 
         emit TakerAsk(
             SignatureParameters({
@@ -364,13 +327,7 @@ contract LooksRareProtocol is
             bool isNonceInvalidated
         ) = _executeStrategyForTakerBid(takerBid, makerAsk);
 
-        if (isNonceInvalidated) {
-            // Invalidate order at this nonce for future execution
-            userOrderNonce[signer][makerAsk.orderNonce] = MAGIC_VALUE_NONCE_EXECUTED;
-        } else {
-            // Set the order hash at this nonce
-            userOrderNonce[signer][makerAsk.orderNonce] = orderHash;
-        }
+        _updateUserOrderNonce(isNonceInvalidated, signer, makerAsk.orderNonce, orderHash);
 
         {
             _transferNFT(
@@ -382,17 +339,7 @@ contract LooksRareProtocol is
                 amounts
             );
 
-            // @dev It starts at 1 since 0 is the protocol fee
-            for (uint256 i = 1; i < 3; ) {
-                if (recipients[i] != address(0)) {
-                    if (fees[i] != 0) {
-                        _transferFungibleTokens(makerAsk.currency, sender, recipients[i], fees[i]);
-                    }
-                }
-                unchecked {
-                    ++i;
-                }
-            }
+            _transferToSellerAndCreator(recipients, fees, makerAsk.currency, sender);
         }
 
         emit TakerBid(
@@ -488,18 +435,6 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Verify whether the merkle proofs provided for the order hash are correct
-     * @param merkleTree Merkle tree
-     * @param orderHash Order hash (can be maker bid hash or maker ask hash)
-     */
-    function _verifyMerkleProofForOrderHash(
-        OrderStructs.MerkleTree calldata merkleTree,
-        bytes32 orderHash
-    ) internal pure {
-        if (!MerkleProof.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) revert WrongMerkleProof();
-    }
-
-    /**
      * @notice Adjust ETH gas limit for transfer
      * @param newGasLimitETHTransfer New gas limit for ETH transfer
      */
@@ -507,6 +442,29 @@ contract LooksRareProtocol is
         gasLimitETHTransfer = newGasLimitETHTransfer;
 
         emit NewGasLimitETHTransfer(newGasLimitETHTransfer);
+    }
+
+    /**
+     * @notice Verify whether the merkle proofs provided for the order hash are correct,
+     *         or verify the order hash if it is not a merkle proof order
+     * @param merkleTree Merkle tree
+     * @param orderHash Order hash (can be maker bid hash or maker ask hash)
+     * @param signature Maker order signature
+     * @param signer Maker address
+     * @dev Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+     */
+    function _verifyMerkleProofOrOrderHash(
+        OrderStructs.MerkleTree calldata merkleTree,
+        bytes32 orderHash,
+        bytes calldata signature,
+        address signer
+    ) private view {
+        if (merkleTree.proof.length != 0) {
+            if (!MerkleProof.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) revert WrongMerkleProof();
+            _computeDigestAndVerify(merkleTree.hash(), signature, signer);
+        } else {
+            _computeDigestAndVerify(orderHash, signature, signer);
+        }
     }
 
     function _updateDomainSeparator() private {
@@ -520,5 +478,34 @@ contract LooksRareProtocol is
             )
         );
         chainId = block.chainid;
+    }
+
+    function _updateUserOrderNonce(
+        bool isNonceInvalidated,
+        address signer,
+        uint256 orderNonce,
+        bytes32 orderHash
+    ) private {
+        // Invalidate order at this nonce for future execution or else set the order hash at this nonce
+        userOrderNonce[signer][orderNonce] = (isNonceInvalidated ? MAGIC_VALUE_NONCE_EXECUTED : orderHash);
+    }
+
+    function _transferToSellerAndCreator(
+        address[3] memory recipients,
+        uint256[3] memory fees,
+        address currency,
+        address sender
+    ) private {
+        // It starts at 1 since the protocol fee is transferred at the very end
+        for (uint256 i = 1; i < 3; ) {
+            if (recipients[i] != address(0)) {
+                if (fees[i] != 0) {
+                    _transferFungibleTokens(currency, sender, recipients[i], fees[i]);
+                }
+            }
+            unchecked {
+                ++i;
+            }
+        }
     }
 }

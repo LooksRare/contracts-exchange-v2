@@ -78,9 +78,11 @@ contract InheritedStrategies {
     ) private pure {
         if (
             amountsLength == 0 ||
-            itemIdsLength != amountsLength ||
-            counterpartyItemIdsLength != amountsLength ||
-            counterpartyAmountsLength != amountsLength ||
+            // If A == B, then A XOR B == 0. So if all 4 are equal, it should be 0 | 0 | 0 == 0
+            ((amountsLength ^ itemIdsLength) |
+                (counterpartyItemIdsLength ^ counterpartyAmountsLength) |
+                (amountsLength ^ counterpartyItemIdsLength)) !=
+            0 ||
             price != counterpartyPrice
         ) revert OrderInvalid();
     }

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
-import {TransferManager} from "../../contracts/TransferManager.sol";
+import {ITransferManager, TransferManager} from "../../contracts/TransferManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
@@ -15,7 +15,7 @@ abstract contract TestParameters is TestHelpers {
     address internal _transferrer = address(100);
 }
 
-contract TransferManagerTest is TestParameters {
+contract TransferManagerTest is ITransferManager, TestParameters {
     address[] public operators;
     MockERC721 public mockERC721;
     MockERC1155 public mockERC1155;
@@ -42,6 +42,7 @@ contract TransferManagerTest is TestParameters {
         transferManager = new TransferManager();
         mockERC721 = new MockERC721();
         mockERC1155 = new MockERC1155();
+        operators.push(_transferrer);
 
         vm.deal(_transferrer, 100 ether);
         vm.deal(_sender, 100 ether);
@@ -55,40 +56,40 @@ contract TransferManagerTest is TestParameters {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
-        uint256 tokenId = 500;
+        uint256 itemId = 500;
 
         vm.prank(_sender);
-        mockERC721.mint(_sender, tokenId);
+        mockERC721.mint(_sender, itemId);
 
-        uint256[] memory tokenIds = new uint256[](1);
-        tokenIds[0] = tokenId;
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
 
         vm.prank(_transferrer);
-        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, tokenIds, amounts);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
 
-        assertEq(mockERC721.ownerOf(tokenId), _recipient);
+        assertEq(mockERC721.ownerOf(itemId), _recipient);
     }
 
     function testTransferSingleItemERC1155() public {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
-        uint256 tokenId = 1;
+        uint256 itemId = 1;
         uint256 amount = 2;
 
-        mockERC1155.mint(_sender, tokenId, amount);
+        mockERC1155.mint(_sender, itemId, amount);
 
-        uint256[] memory tokenIds = new uint256[](1);
-        tokenIds[0] = tokenId;
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
 
         vm.prank(_transferrer);
-        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, tokenIds, amounts);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
 
-        assertEq(mockERC1155.balanceOf(_recipient, tokenId), amount);
+        assertEq(mockERC1155.balanceOf(_recipient, itemId), amount);
     }
 
     function testTransferBatchItemsSameERC721() public {
@@ -98,18 +99,18 @@ contract TransferManagerTest is TestParameters {
         uint256 tokenId1 = 1;
         uint256 tokenId2 = 2;
 
-        uint256[] memory tokenIds = new uint256[](2);
-        tokenIds[0] = tokenId1;
-        tokenIds[1] = tokenId2;
+        uint256[] memory itemIds = new uint256[](2);
+        itemIds[0] = tokenId1;
+        itemIds[1] = tokenId2;
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 1;
         amounts[1] = 1;
 
-        mockERC721.batchMint(_sender, tokenIds);
+        mockERC721.batchMint(_sender, itemIds);
 
         vm.prank(_transferrer);
-        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, tokenIds, amounts);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
 
         assertEq(mockERC721.ownerOf(tokenId1), _recipient);
         assertEq(mockERC721.ownerOf(tokenId2), _recipient);
@@ -127,16 +128,16 @@ contract TransferManagerTest is TestParameters {
         mockERC1155.mint(_sender, tokenId1, amount1);
         mockERC1155.mint(_sender, tokenId2, amount2);
 
-        uint256[] memory tokenIds = new uint256[](2);
-        tokenIds[0] = tokenId1;
-        tokenIds[1] = tokenId2;
+        uint256[] memory itemIds = new uint256[](2);
+        itemIds[0] = tokenId1;
+        itemIds[1] = tokenId2;
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = amount1;
         amounts[1] = amount2;
 
         vm.prank(_transferrer);
-        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, tokenIds, amounts);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
 
         assertEq(mockERC1155.balanceOf(_recipient, tokenId1), amount1);
         assertEq(mockERC1155.balanceOf(_recipient, tokenId2), amount2);
@@ -267,7 +268,81 @@ contract TransferManagerTest is TestParameters {
      * 2. Revertion patterns
      */
 
+    function testCannotBatchTransferIfAssetTypeIsNotZeroOrOne() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        address[] memory collections = new address[](1);
+        uint8[] memory assetTypes = new uint8[](1);
+        uint256[][] memory amounts = new uint256[][](1);
+        uint256[][] memory itemIds = new uint256[][](1);
+
+        collections[0] = address(mockERC1155);
+        assetTypes[0] = 2; // WRONG ASSET TYPE
+
+        uint256[] memory subItemIds = new uint256[](1);
+        subItemIds[0] = 0;
+
+        uint256[] memory subAmounts = new uint256[](1);
+        subAmounts[0] = 1;
+
+        amounts[0] = subAmounts;
+        itemIds[0] = subItemIds;
+
+        vm.prank(_sender);
+        vm.expectRevert(abi.encodeWithSelector(WrongAssetType.selector, 2));
+
+        transferManager.transferBatchItemsAcrossCollections(
+            collections,
+            assetTypes,
+            _sender,
+            _recipient,
+            itemIds,
+            amounts
+        );
+    }
+
     function testCannotTransferIfOperatorRemoved() public {
-        //
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        // Owner removes the operators
+        vm.prank(_owner);
+        vm.expectEmit(false, false, false, false);
+        emit OperatorRemoved(_transferrer);
+        transferManager.removeOperator(_transferrer);
+
+        uint256 itemId = 500;
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemId;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
+    }
+
+    function testCannotTransferIfApprovalsRemoved() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        // Owner removes the operators
+        vm.prank(_sender);
+        vm.expectEmit(false, false, false, false);
+        emit ApprovalsRemoved(_sender, operators);
+        transferManager.revokeApprovals(operators);
+
+        uint256 itemId = 500;
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemId;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
     }
 }

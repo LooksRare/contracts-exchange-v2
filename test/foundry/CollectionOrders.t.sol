@@ -82,7 +82,38 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyImplementation, address(strategyCollectionOffer));
     }
 
-    function testWrongOrderFormat() public {
+    function testItemIdsLengthNotOne() public {
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        // Adjust strategy for collection order and sign order
+        // Change array to make it bigger than expected
+        uint256[] memory itemIds = new uint256[](2);
+        itemIds[0] = 1;
+        makerBid.strategyId = 1;
+        takerAsk.itemIds = itemIds;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Maker bid is still valid
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+
+        // With proof
+        makerBid.strategyId = 2;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        (isValid, errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testAmountsLengthNotOne() public {
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         // Adjust strategy for collection order and sign order

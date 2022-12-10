@@ -17,6 +17,11 @@ contract CollectionOrdersTest is ProtocolBase {
 
     bytes4 public selectorTakerBid = _emptyBytes4;
 
+    function setUp() public override {
+        super.setUp();
+        _setUpNewStrategies();
+    }
+
     function _setUpNewStrategies() private asPrankedUser(_owner) {
         strategyCollectionOffer = new StrategyCollectionOffer(address(looksRareProtocol));
 
@@ -40,8 +45,6 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testNewStrategies() public {
-        _setUpNewStrategies();
-
         (
             bool strategyIsActive,
             uint16 strategyStandardProtocolFee,
@@ -79,18 +82,126 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyImplementation, address(strategyCollectionOffer));
     }
 
-    function testWrongOrderFormat() public {
-        _setUpNewStrategies();
+    function testItemIdsLengthNotOne() public {
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         // Adjust strategy for collection order and sign order
         // Change array to make it bigger than expected
         uint256[] memory itemIds = new uint256[](2);
-        itemIds[0] = 0;
+        itemIds[0] = 1;
         makerBid.strategyId = 1;
-        makerBid.itemIds = itemIds;
         takerAsk.itemIds = itemIds;
         signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Maker bid is still valid
+        _assertOrderIsValid(makerBid);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+
+        // With proof
+        makerBid.strategyId = 2;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _assertOrderIsValid(makerBid);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testAmountsMismatch() public {
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        uint256[] memory makerBidAmounts = new uint256[](1);
+        makerBidAmounts[0] = 1;
+        uint256[] memory takerAskAmounts = new uint256[](1);
+        takerAskAmounts[0] = 2;
+        makerBid.amounts = makerBidAmounts;
+        takerAsk.amounts = takerAskAmounts;
+
+        // Adjust strategy for collection order and sign order
+        makerBid.strategyId = 1;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _assertOrderIsValid(makerBid);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+
+        // With proof
+        makerBid.strategyId = 2;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _assertOrderIsValid(makerBid);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testAmountsLengthNotOne() public {
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        // Adjust strategy for collection order and sign order
+        // Change array to make it bigger than expected
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 1;
+        makerBid.strategyId = 1;
+        makerBid.amounts = amounts;
+        takerAsk.amounts = amounts;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _assertOrderIsInvalid(makerBid);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+
+        // With proof
+        makerBid.strategyId = 2;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _assertOrderIsInvalid(makerBid);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testZeroAmount() public {
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 0;
+        makerBid.amounts = amounts;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _assertOrderIsInvalid(makerBid);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testBidAskAmountMismatch() public {
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 2;
+        takerAsk.amounts = amounts;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Maker bid still valid
+        _assertOrderIsValid(makerBid);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testPriceMismatch() public {
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        takerAsk.minPrice = makerBid.maxPrice + 1;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Maker bid still valid
+        _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -102,7 +213,6 @@ contract CollectionOrdersTest is ProtocolBase {
      */
     function testTakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
-        _setUpNewStrategies();
 
         price = 1 ether; // Fixed price of sale
 
@@ -139,9 +249,7 @@ contract CollectionOrdersTest is ProtocolBase {
             takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, makerBid.amounts, abi.encode());
         }
 
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         {
             uint256 gasLeft = gasleft();
@@ -172,7 +280,6 @@ contract CollectionOrdersTest is ProtocolBase {
      */
     function testTakerAskCollectionOrderWithMerkleTreeERC721() public {
         _setUpUsers();
-        _setUpNewStrategies();
 
         // Initialize Merkle Tree
         Merkle m = new Merkle();
@@ -231,9 +338,7 @@ contract CollectionOrdersTest is ProtocolBase {
             );
         }
 
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        _assertOrderIsValid(makerBid);
 
         {
             uint256 gasLeft = gasleft();
@@ -257,5 +362,17 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+    }
+
+    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) private {
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+    }
+
+    function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid) private {
+        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
     }
 }

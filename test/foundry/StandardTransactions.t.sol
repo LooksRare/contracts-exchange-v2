@@ -73,11 +73,11 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9800) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / 10_000);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             address(_royaltyRecipient).balance,
-            _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10000
+            _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
@@ -146,11 +146,11 @@ contract StandardTransactionsTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             weth.balanceOf(_royaltyRecipient),
-            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10000
+            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
         );
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
@@ -234,7 +234,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9800) * numberPurchases) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9_800) * numberPurchases) / 10_000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }
@@ -350,7 +350,10 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9800) * (numberPurchases - 1)) / 10000);
+        assertEq(
+            address(makerUser).balance,
+            _initialETHBalanceUser + ((price * 9_800) * (numberPurchases - 1)) / 10_000
+        );
         // 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
     }

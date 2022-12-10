@@ -32,7 +32,7 @@ contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
      * @param _royaltyFeeLimit new royalty fee limit (500 = 5%, 1,000 = 10%)
      */
     constructor(uint256 _royaltyFeeLimit) {
-        require(_royaltyFeeLimit <= 9500, "Owner: Royalty fee limit too high");
+        require(_royaltyFeeLimit <= 9_500, "Owner: Royalty fee limit too high");
         royaltyFeeLimit = _royaltyFeeLimit;
     }
 
@@ -41,7 +41,7 @@ contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
      * @param _royaltyFeeLimit new royalty fee limit (500 = 5%, 1,000 = 10%)
      */
     function updateRoyaltyFeeLimit(uint256 _royaltyFeeLimit) external onlyOwner {
-        require(_royaltyFeeLimit <= 9500, "Owner: Royalty fee limit too high");
+        require(_royaltyFeeLimit <= 9_500, "Owner: Royalty fee limit too high");
         royaltyFeeLimit = _royaltyFeeLimit;
 
         emit NewRoyaltyFeeLimit(_royaltyFeeLimit);
@@ -75,7 +75,7 @@ contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
     function royaltyInfo(address collection, uint256 amount) external view returns (address, uint256) {
         return (
             _royaltyFeeInfoCollection[collection].receiver,
-            (amount * _royaltyFeeInfoCollection[collection].fee) / 10000
+            (amount * _royaltyFeeInfoCollection[collection].fee) / 10_000
         );
     }
 

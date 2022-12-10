@@ -88,7 +88,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9800) / 10000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / 10_000);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -178,7 +178,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }

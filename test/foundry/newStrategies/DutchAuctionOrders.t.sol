@@ -124,7 +124,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - startPrice + discount);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startPrice - discount) * 9800) / 10000);
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startPrice - discount) * 9_800) / 10_000);
     }
 
     function testCallerNotLooksRareProtocol() public {

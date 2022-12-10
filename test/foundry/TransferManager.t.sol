@@ -7,15 +7,9 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
+import {TestParameters} from "./utils/TestParameters.sol";
 
-abstract contract TestParameters is TestHelpers {
-    address internal _owner = address(42);
-    address internal _sender = address(88);
-    address internal _recipient = address(90);
-    address internal _transferrer = address(100);
-}
-
-contract TransferManagerTest is ITransferManager, TestParameters {
+contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     address[] public operators;
     MockERC721 public mockERC721;
     MockERC1155 public mockERC1155;
@@ -267,6 +261,156 @@ contract TransferManagerTest is ITransferManager, TestParameters {
     /**
      * 2. Revertion patterns
      */
+
+    function testTransferBatchItemsAcrossCollectionZeroCollectionsLength() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        uint256 tokenIdERC721 = 55;
+        uint256 tokenId1ERC1155 = 1;
+        uint256 amount1ERC1155 = 2;
+        uint256 tokenId2ERC1155 = 2;
+        uint256 amount2ERC1155 = 5;
+
+        address[] memory collections = new address[](0);
+        uint8[] memory assetTypes = new uint8[](2);
+        uint256[][] memory amounts = new uint256[][](2);
+        uint256[][] memory itemIds = new uint256[][](2);
+
+        {
+            assetTypes[0] = 1; // ERC1155
+            assetTypes[1] = 0; // ERC721
+
+            uint256[] memory tokenIdsERC1155 = new uint256[](2);
+            tokenIdsERC1155[0] = tokenId1ERC1155;
+            tokenIdsERC1155[1] = tokenId2ERC1155;
+
+            uint256[] memory amountsERC1155 = new uint256[](2);
+            amountsERC1155[0] = amount1ERC1155;
+            amountsERC1155[1] = amount2ERC1155;
+
+            uint256[] memory tokenIdsERC721 = new uint256[](1);
+            tokenIdsERC721[0] = tokenIdERC721;
+
+            uint256[] memory amountsERC721 = new uint256[](1);
+            amountsERC721[0] = 1;
+
+            amounts[0] = amountsERC1155;
+            amounts[1] = amountsERC721;
+            itemIds[0] = tokenIdsERC1155;
+            itemIds[1] = tokenIdsERC721;
+        }
+
+        vm.expectRevert(ITransferManager.WrongLengths.selector);
+        vm.prank(_transferrer);
+        transferManager.transferBatchItemsAcrossCollections(
+            collections,
+            assetTypes,
+            _sender,
+            _recipient,
+            itemIds,
+            amounts
+        );
+    }
+
+    function testTransferBatchItemsAcrossCollectionWrongItemIdsLength() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        uint256 tokenId1ERC1155 = 1;
+        uint256 amount1ERC1155 = 2;
+        uint256 tokenId2ERC1155 = 2;
+        uint256 amount2ERC1155 = 5;
+
+        address[] memory collections = new address[](2);
+        uint8[] memory assetTypes = new uint8[](2);
+        uint256[][] memory amounts = new uint256[][](2);
+        uint256[][] memory itemIds = new uint256[][](1);
+
+        {
+            collections[0] = address(mockERC1155);
+            collections[1] = address(mockERC721);
+
+            assetTypes[0] = 1; // ERC1155
+            assetTypes[1] = 0; // ERC721
+
+            uint256[] memory tokenIdsERC1155 = new uint256[](2);
+            tokenIdsERC1155[0] = tokenId1ERC1155;
+            tokenIdsERC1155[1] = tokenId2ERC1155;
+
+            uint256[] memory amountsERC1155 = new uint256[](2);
+            amountsERC1155[0] = amount1ERC1155;
+            amountsERC1155[1] = amount2ERC1155;
+
+            uint256[] memory amountsERC721 = new uint256[](1);
+            amountsERC721[0] = 1;
+
+            amounts[0] = amountsERC1155;
+            amounts[1] = amountsERC721;
+            itemIds[0] = tokenIdsERC1155;
+        }
+
+        vm.expectRevert(ITransferManager.WrongLengths.selector);
+        vm.prank(_transferrer);
+        transferManager.transferBatchItemsAcrossCollections(
+            collections,
+            assetTypes,
+            _sender,
+            _recipient,
+            itemIds,
+            amounts
+        );
+    }
+
+    function testTransferBatchItemsAcrossCollectionWrongAmountsLength() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        uint256 tokenIdERC721 = 55;
+        uint256 tokenId1ERC1155 = 1;
+        uint256 amount1ERC1155 = 2;
+        uint256 tokenId2ERC1155 = 2;
+        uint256 amount2ERC1155 = 5;
+
+        address[] memory collections = new address[](2);
+        uint8[] memory assetTypes = new uint8[](2);
+        uint256[][] memory amounts = new uint256[][](1);
+        uint256[][] memory itemIds = new uint256[][](2);
+
+        {
+            collections[0] = address(mockERC1155);
+            collections[1] = address(mockERC721);
+
+            assetTypes[0] = 1; // ERC1155
+            assetTypes[1] = 0; // ERC721
+
+            uint256[] memory tokenIdsERC1155 = new uint256[](2);
+            tokenIdsERC1155[0] = tokenId1ERC1155;
+            tokenIdsERC1155[1] = tokenId2ERC1155;
+
+            uint256[] memory amountsERC1155 = new uint256[](2);
+            amountsERC1155[0] = amount1ERC1155;
+            amountsERC1155[1] = amount2ERC1155;
+
+            uint256[] memory tokenIdsERC721 = new uint256[](1);
+            tokenIdsERC721[0] = tokenIdERC721;
+
+            amounts[0] = amountsERC1155;
+            itemIds[0] = tokenIdsERC1155;
+            itemIds[1] = tokenIdsERC721;
+        }
+
+        vm.expectRevert(ITransferManager.WrongLengths.selector);
+        vm.prank(_transferrer);
+        transferManager.transferBatchItemsAcrossCollections(
+            collections,
+            assetTypes,
+            _sender,
+            _recipient,
+            itemIds,
+            amounts
+        );
+    }
 
     function testCannotBatchTransferIfAssetTypeIsNotZeroOrOne() public {
         _whitelistOperator(_transferrer);

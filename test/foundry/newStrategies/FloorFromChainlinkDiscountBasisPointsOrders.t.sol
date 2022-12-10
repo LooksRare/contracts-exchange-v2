@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
@@ -17,6 +18,27 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _setValidityFunctionSelector(StrategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid.selector);
         _setSelectorTakerAsk(StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector);
         super.setUp();
+    }
+
+    function testInactiveStrategy() public {
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+
+        makerBid.maxPrice = 9.5 ether;
+        takerAsk.minPrice = 9.5 ether;
+
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _setPriceFeed();
+
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.prank(_owner);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+
+        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
+        _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
     function testFloorFromChainlinkDiscountBasisPointsDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {

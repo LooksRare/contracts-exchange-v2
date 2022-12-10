@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 import {StrategyTokenIdsRange} from "../../../contracts/executionStrategies/StrategyTokenIdsRange.sol";
 import {ProtocolBase} from "../ProtocolBase.t.sol";
@@ -378,6 +379,28 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, bytes4(0));
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testInactiveStrategy() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.prank(_owner);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+
+        // Valid, taker struct validation only happens during execution
+        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        assertTrue(isValid);
+        assertEq(errorSelector, bytes4(0));
+
+        vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);

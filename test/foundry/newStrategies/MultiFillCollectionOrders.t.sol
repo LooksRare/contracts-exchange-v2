@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
@@ -162,5 +163,59 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(secondTakerUser), _initialWETHBalanceUser + 3 * ((price * 9800) / 10000));
         // Verify the nonce is now marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+    }
+
+    function testInactiveStrategy() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+
+        price = 1 ether; // Fixed price of sale
+        uint256 amountsToFill = 4;
+
+        {
+            uint256[] memory itemIds = new uint256[](0);
+            uint256[] memory amounts = new uint256[](1);
+            amounts[0] = amountsToFill;
+
+            // Prepare the order hash
+            makerBid = _createMultiItemMakerBidOrder(
+                0, // bidNonce
+                0, // subsetNonce
+                1, // strategyId (Multi-fill bid offer)
+                0, // assetType ERC721,
+                0, // orderNonce
+                address(mockERC721),
+                address(weth),
+                makerUser,
+                price,
+                itemIds,
+                amounts
+            );
+
+            // Sign order
+            signature = _signMakerBid(makerBid, makerUserPK);
+        }
+
+        vm.prank(_owner);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+
+        // First taker user actions
+        vm.startPrank(takerUser);
+        {
+            uint256[] memory itemIds = new uint256[](1);
+            uint256[] memory amounts = new uint256[](1);
+            itemIds[0] = 0;
+            amounts[0] = 1;
+
+            mockERC721.mint(takerUser, itemIds[0]);
+
+            // Prepare the taker ask
+            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+
+            vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
+            // Execute taker ask transaction
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        }
+        vm.stopPrank();
     }
 }

@@ -126,205 +126,64 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         vm.stopPrank();
     }
 
-    // /**
-    //  * Three ERC721 are sold through 3 taker bids in one transaction with non-atomicity.
-    //  */
-    // function testThreeTakerBidsERC721() public {
-    //     _setUpUsers();
+    function testExecuteMultipleTakerBidsReentrancy() public {
+        maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 
-    //     uint256 numberPurchases = 3;
-    //     price = 1 ether;
+        uint256 numberPurchases = 3;
+        price = 1 ether;
 
-    //     OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
-    //     OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
-    //     bytes[] memory signatures = new bytes[](numberPurchases);
+        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        bytes[] memory signatures = new bytes[](numberPurchases);
 
-    //     for (uint256 i; i < numberPurchases; i++) {
-    //         // Mint asset
-    //         mockERC721.mint(makerUser, i);
+        for (uint256 i; i < numberPurchases; i++) {
+            // Mint asset
+            mockERC721.mint(makerUser, i);
 
-    //         // Prepare the order hash
-    //         makerAsks[i] = _createSingleItemMakerAskOrder(
-    //             0, // askNonce
-    //             0, // subsetNonce
-    //             0, // strategyId (Standard sale for fixed price)
-    //             0, // assetType ERC721,
-    //             i, // orderNonce
-    //             address(mockERC721),
-    //             address(0), // ETH,
-    //             makerUser,
-    //             price, // Fixed
-    //             i // itemId (0, 1, etc.)
-    //         );
+            // Prepare the order hash
+            makerAsks[i] = _createSingleItemMakerAskOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                i, // orderNonce
+                address(mockERC721),
+                address(0), // ETH,
+                address(maliciousERC1271Wallet),
+                price, // Fixed
+                i // itemId (0, 1, etc.)
+            );
 
-    //         // Sign order
-    //         signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = new bytes(0);
 
-    //         takerBids[i] = OrderStructs.TakerBid(
-    //             takerUser,
-    //             makerAsks[i].minPrice,
-    //             makerAsks[i].itemIds,
-    //             makerAsks[i].amounts,
-    //             abi.encode()
-    //         );
-    //     }
+            takerBids[i] = OrderStructs.TakerBid(
+                takerUser,
+                makerAsks[i].minPrice,
+                makerAsks[i].itemIds,
+                makerAsks[i].amounts,
+                abi.encode()
+            );
+        }
 
-    //     // Taker user actions
-    //     vm.startPrank(takerUser);
+        // Taker user actions
+        vm.startPrank(takerUser);
 
-    //     {
-    //         // Other execution parameters
-    //         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+        {
+            // Other execution parameters
+            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-    //         uint256 gasLeft = gasleft();
+            vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
+            // Execute taker bid transaction
+            looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+                takerBids,
+                makerAsks,
+                signatures,
+                merkleTrees,
+                _emptyAffiliate,
+                false
+            );
+        }
 
-    //         // Execute taker bid transaction
-    //         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-    //             takerBids,
-    //             makerAsks,
-    //             signatures,
-    //             merkleTrees,
-    //             _emptyAffiliate,
-    //             false
-    //         );
-    //         emit log_named_uint(
-    //             "TakerBid (3 items) // Non-atomic // ERC721 // Protocol Fee // No Royalties",
-    //             gasLeft - gasleft()
-    //         );
-    //     }
-
-    //     vm.stopPrank();
-
-    //     for (uint256 i; i < numberPurchases; i++) {
-    //         // Taker user has received the asset
-    //         assertEq(mockERC721.ownerOf(i), takerUser);
-    //         // Verify the nonce is marked as executed
-    //         assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_NONCE_EXECUTED);
-    //     }
-    //     // Taker bid user pays the whole price
-    //     assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
-    //     // Maker ask user receives 98% of the whole price (2% protocol)
-    //     assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9_800) * numberPurchases) / 10_000);
-    //     // No leftover in the balance of the contract
-    //     assertEq(address(looksRareProtocol).balance, 0);
-    // }
-
-    // /**
-    //  * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
-    //  */
-    // function testThreeTakerBidsERC721OneFails() public {
-    //     _setUpUsers();
-
-    //     uint256 numberPurchases = 3;
-    //     price = 1 ether;
-    //     uint256 faultyTokenId = numberPurchases - 1;
-
-    //     OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
-    //     OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
-    //     bytes[] memory signatures = new bytes[](numberPurchases);
-
-    //     for (uint256 i; i < numberPurchases; i++) {
-    //         // Mint asset
-    //         mockERC721.mint(makerUser, i);
-
-    //         // Prepare the order hash
-    //         makerAsks[i] = _createSingleItemMakerAskOrder(
-    //             0, // askNonce
-    //             0, // subsetNonce
-    //             0, // strategyId (Standard sale for fixed price)
-    //             0, // assetType ERC721,
-    //             i, // orderNonce
-    //             address(mockERC721),
-    //             address(0), // ETH,
-    //             makerUser,
-    //             price, // Fixed
-    //             i // itemId (0, 1, etc.)
-    //         );
-
-    //         // Sign order
-    //         signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
-
-    //         takerBids[i] = OrderStructs.TakerBid(
-    //             takerUser,
-    //             makerAsks[i].minPrice,
-    //             makerAsks[i].itemIds,
-    //             makerAsks[i].amounts,
-    //             abi.encode()
-    //         );
-    //     }
-
-    //     // Transfer tokenId=2 to random user
-    //     address randomUser = address(55);
-    //     vm.prank(makerUser);
-    //     mockERC721.transferFrom(makerUser, randomUser, faultyTokenId);
-
-    //     // Taker user actions
-    //     vm.startPrank(takerUser);
-
-    //     /**
-    //      * 1. The whole purchase fails if execution is atomic
-    //      */
-    //     {
-    //         // Other execution parameters
-    //         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
-
-    //         // NFTTransferFail(address collection, uint8 assetType);
-    //         vm.expectRevert(
-    //             abi.encodeWithSelector(
-    //                 ITransferSelectorNFT.NFTTransferFail.selector,
-    //                 makerAsks[faultyTokenId].collection,
-    //                 uint8(0)
-    //             )
-    //         );
-    //         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-    //             takerBids,
-    //             makerAsks,
-    //             signatures,
-    //             merkleTrees,
-    //             _emptyAffiliate,
-    //             true
-    //         );
-    //     }
-
-    //     /**
-    //      * 2. The whole purchase doesn't fail if execution is not-atomic
-    //      */
-    //     {
-    //         // Other execution parameters
-    //         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
-
-    //         // Execute taker bid transaction
-    //         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-    //             takerBids,
-    //             makerAsks,
-    //             signatures,
-    //             merkleTrees,
-    //             _emptyAffiliate,
-    //             false
-    //         );
-    //     }
-
-    //     vm.stopPrank();
-
-    //     for (uint256 i; i < faultyTokenId; i++) {
-    //         // Taker user has received the first two assets
-    //         assertEq(mockERC721.ownerOf(i), takerUser);
-    //         // Verify the first two nonces are marked as executed
-    //         assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_NONCE_EXECUTED);
-    //     }
-
-    //     // Taker user has not received the asset
-    //     assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
-    //     // Verify the nonce is NOT marked as executed
-    //     assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
-    //     // Taker bid user pays the whole price
-    //     assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * price));
-    //     // Maker ask user receives 98% of the whole price (2% protocol)
-    //     assertEq(
-    //         address(makerUser).balance,
-    //         _initialETHBalanceUser + ((price * 9_800) * (numberPurchases - 1)) / 10_000
-    //     );
-    //     // 1 wei left in the balance of the contract
-    //     assertEq(address(looksRareProtocol).balance, 1);
-    // }
+        vm.stopPrank();
+    }
 }

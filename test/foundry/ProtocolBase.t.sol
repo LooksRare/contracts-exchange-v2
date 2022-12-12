@@ -103,6 +103,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         vm.stopPrank();
     }
 
+    // NOTE: It inherits from ILooksRareProtocol
     function executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
@@ -117,5 +118,14 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
+    ) external payable {}
+
+    function executeMultipleTakerBids(
+        OrderStructs.TakerBid[] calldata takerBids,
+        OrderStructs.MakerAsk[] calldata makerAsks,
+        bytes[] calldata makerSignatures,
+        OrderStructs.MerkleTree[] calldata merkleTrees,
+        address affiliate,
+        bool isAtomic
     ) external payable {}
 }

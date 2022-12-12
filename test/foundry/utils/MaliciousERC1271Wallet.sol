@@ -24,7 +24,9 @@ contract MaliciousERC1271Wallet {
             _executeTakerAsk(signature);
         } else if (functionToReenter == FunctionToReenter.ExecuteTakerBid) {
             _executeTakerBid(signature);
-        } else if (functionToReenter == FunctionToReenter.ExecuteMultipleTakerBids) {}
+        } else if (functionToReenter == FunctionToReenter.ExecuteMultipleTakerBids) {
+            _executeMultipleTakerBids();
+        }
 
         magicValue = this.isValidSignature.selector;
     }
@@ -47,5 +49,14 @@ contract MaliciousERC1271Wallet {
         OrderStructs.MerkleTree memory merkleTree;
 
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, merkleTree, address(this));
+    }
+
+    function _executeMultipleTakerBids() private {
+        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](2);
+        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](2);
+        bytes[] memory signatures = new bytes[](2);
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](2);
+
+        looksRareProtocol.executeMultipleTakerBids(takerBids, makerAsks, signatures, merkleTrees, address(this), false);
     }
 }

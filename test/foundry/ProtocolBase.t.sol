@@ -102,4 +102,20 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         weth.deposit{value: _initialWETHBalanceRoyaltyRecipient}();
         vm.stopPrank();
     }
+
+    function executeTakerAsk(
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid,
+        bytes calldata makerSignature,
+        OrderStructs.MerkleTree calldata merkleTree,
+        address affiliate
+    ) external {}
+
+    function executeTakerBid(
+        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.MakerAsk calldata makerAsk,
+        bytes calldata makerSignature,
+        OrderStructs.MerkleTree calldata merkleTree,
+        address affiliate
+    ) external payable {}
 }

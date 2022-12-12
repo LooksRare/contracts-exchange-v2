@@ -68,12 +68,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Sell with taker ask (against maker bid)
-     * @param takerAsk Taker ask struct
-     * @param makerBid Maker bid struct
-     * @param makerSignature Maker signature
-     * @param merkleTree Merkle tree struct (if the signature contains multiple maker orders)
-     * @param affiliate Affiliate address
+     * @inheritdoc ILooksRareProtocol
      */
     function executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -97,12 +92,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Buy with taker bid (against maker ask)
-     * @param takerBid Taker bid struct
-     * @param makerAsk Maker ask struct
-     * @param makerSignature Maker signature
-     * @param merkleTree Merkle tree struct (if the signature contains multiple maker orders)
-     * @param affiliate Affiliate address
+     * @inheritdoc ILooksRareProtocol
      */
     function executeTakerBid(
         OrderStructs.TakerBid calldata takerBid,

@@ -9,7 +9,7 @@ import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // OpenZeppelin's library for verifying Merkle proofs
-import {MerkleProof} from "./libraries/OpenZeppelin/MerkleProof.sol";
+import {MerkleProofCalldata} from "./libraries/OpenZeppelin/MerkleProofCalldata.sol";
 
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
@@ -458,7 +458,8 @@ contract LooksRareProtocol is
         address signer
     ) private view {
         if (merkleTree.proof.length != 0) {
-            if (!MerkleProof.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) revert WrongMerkleProof();
+            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash))
+                revert WrongMerkleProof();
             _computeDigestAndVerify(merkleTree.hash(), signature, signer);
         } else {
             _computeDigestAndVerify(orderHash, signature, signer);

@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // OpenZeppelin's library for verifying Merkle proofs
-import {MerkleProof} from "../libraries/OpenZeppelin/MerkleProof.sol";
+import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Others
 import {StrategyBase} from "./StrategyBase.sol";
@@ -102,7 +102,7 @@ contract StrategyCollectionOffer is StrategyBase {
             bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
 
             // Verify proof
-            if (!MerkleProof.verify(proof, root, node)) revert OrderMerkleProofInvalid();
+            if (!MerkleProofMemory.verify(proof, root, node)) revert OrderMerkleProofInvalid();
         }
     }
 

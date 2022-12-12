@@ -52,13 +52,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             proof: m.getProof(orderHashes, numberOrders - 1)
         });
 
-        // Verify the merkle proof
-        for (uint256 i; i < numberOrders; i++) {
-            {
-                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
-            }
-        }
+        _verifyMerkleProof(orderHashes, m, merkleTree);
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -133,13 +127,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             proof: m.getProof(orderHashes, numberOrders - 1)
         });
 
-        // Verify the merkle proof
-        for (uint256 i; i < numberOrders; i++) {
-            {
-                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
-            }
-        }
+        _verifyMerkleProof(orderHashes, m, merkleTree);
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -289,5 +277,18 @@ contract BatchMakerOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
 
         vm.stopPrank();
+    }
+
+    function _verifyMerkleProof(
+        bytes32[] memory orderHashes,
+        Merkle m,
+        OrderStructs.MerkleTree memory merkleTree
+    ) private {
+        for (uint256 i; i < numberOrders; i++) {
+            {
+                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
+                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
+            }
+        }
     }
 }

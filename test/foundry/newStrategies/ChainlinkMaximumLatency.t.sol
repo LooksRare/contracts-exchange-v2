@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// LooksRare libraries
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
+
+// Strategies
 import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
+
+// Other tests
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract ChainlinkMaximumLatencyTest is ProtocolBase {

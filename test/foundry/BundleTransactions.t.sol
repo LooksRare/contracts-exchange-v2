@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+
+// Other tests
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract BundleTransactionsTest is ProtocolBase {

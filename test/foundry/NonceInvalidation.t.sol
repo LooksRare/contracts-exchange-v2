@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Libraries and interfaces
+import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {INonceManager} from "../../contracts/interfaces/INonceManager.sol";
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
+// Other utils and tests
 import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFillCollectionOrder.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 

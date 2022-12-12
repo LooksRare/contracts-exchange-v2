@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Murky (third-party) library is used to compute Merkle trees in Solidity
 import {Merkle} from "../../lib/murky/src/Merkle.sol";
 
-import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
+// Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+
+// Strategies
+import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
+
+// Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract CollectionOrdersTest is ProtocolBase {

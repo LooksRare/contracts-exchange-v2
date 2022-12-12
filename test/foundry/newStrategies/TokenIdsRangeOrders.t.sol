@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
 import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
+
+// Strategies
 import {StrategyTokenIdsRange} from "../../../contracts/executionStrategies/StrategyTokenIdsRange.sol";
+
+// Base test
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {

@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// LooksRare unopinionated libraries
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
 
+// Libraries and interfaces
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {ProtocolBase} from "./ProtocolBase.t.sol";
-
-import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 import {ICreatorFeeManager} from "../../contracts/interfaces/ICreatorFeeManager.sol";
+import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
+
+// Base test
+import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
     function _setUpRoyaltiesRegistry(uint256 fee) private {

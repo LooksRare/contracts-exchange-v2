@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {StrategyBase} from "../../../contracts/executionStrategies/StrategyBase.sol";
 

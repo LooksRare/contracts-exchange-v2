@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// LooksRare unopinionated libraries
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
+
+// Libraries and interfaces
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+
+// Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {

@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
 import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
+
+// Strategies
 import {StrategyUSDDynamicAsk} from "../../../contracts/executionStrategies/StrategyUSDDynamicAsk.sol";
 import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
+
+// Mocks and other tests
 import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";

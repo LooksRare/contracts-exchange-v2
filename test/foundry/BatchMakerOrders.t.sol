@@ -46,11 +46,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
         }
 
-        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({
-            root: m.getRoot(orderHashes),
-            proof: m.getProof(orderHashes, numberOrders - 1)
-        });
-
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
         _verifyMerkleProof(merkleTree);
 
         // Maker signs the root
@@ -110,11 +106,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderHashes[i] = computeOrderHashMakerBid(makerBid);
         }
 
-        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({
-            root: m.getRoot(orderHashes),
-            proof: m.getProof(orderHashes, numberOrders - 1)
-        });
-
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
         _verifyMerkleProof(merkleTree);
 
         // Maker signs the root
@@ -176,11 +168,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
         }
 
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
-        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({
-            root: tamperedRoot,
-            proof: m.getProof(orderHashes, numberOrders - 1)
-        });
+        merkleTree.root = tamperedRoot;
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -223,11 +213,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderHashes[i] = computeOrderHashMakerBid(makerBid);
         }
 
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
-        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({
-            root: tamperedRoot,
-            proof: m.getProof(orderHashes, numberOrders - 1)
-        });
+        merkleTree.root = tamperedRoot;
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -249,6 +237,13 @@ contract BatchMakerOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
 
         vm.stopPrank();
+    }
+
+    function _getMerkleTree() private view returns (OrderStructs.MerkleTree memory merkleTree) {
+        merkleTree = OrderStructs.MerkleTree({
+            root: m.getRoot(orderHashes),
+            proof: m.getProof(orderHashes, numberOrders - 1)
+        });
     }
 
     function _verifyMerkleProof(OrderStructs.MerkleTree memory merkleTree) private {

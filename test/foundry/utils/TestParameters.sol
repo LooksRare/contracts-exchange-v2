@@ -35,7 +35,6 @@ abstract contract TestParameters is Test {
 
     // Affiliate parameters
     address public _affiliate = address(2);
-    uint256 public constant _timelock = 120;
 
     // Chainlink ETH/USD price feed mainnet
     address internal constant CHAINLINK_ETH_USD_PRICE_FEED = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;

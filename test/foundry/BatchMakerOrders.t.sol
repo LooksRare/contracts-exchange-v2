@@ -136,14 +136,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
             abi.encode()
         );
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
+        vm.prank(takerUser);
         vm.expectRevert(WrongMerkleProof.selector);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
-
-        vm.stopPrank();
     }
 
     function testTakerAskMultipleOrdersSignedERC721WrongMerkleProof() public {
@@ -165,14 +161,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
             abi.encode()
         );
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
+        vm.prank(takerUser);
         vm.expectRevert(WrongMerkleProof.selector);
         // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
-
-        vm.stopPrank();
     }
 
     function _getMerkleTree() private view returns (OrderStructs.MerkleTree memory merkleTree) {

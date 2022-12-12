@@ -103,7 +103,10 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         vm.stopPrank();
     }
 
-    // NOTE: It inherits from ILooksRareProtocol
+    /**
+     * NOTE: It inherits from ILooksRareProtocol, so it
+     *       needs to at least define the functions below.
+     */
     function executeTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,

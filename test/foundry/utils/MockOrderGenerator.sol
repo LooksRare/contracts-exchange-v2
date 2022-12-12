@@ -53,18 +53,18 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType = 1;
         }
 
-        newMakerBid = _createSingleItemMakerBidOrder(
-            0,
-            0,
-            0,
-            assetType,
-            0,
-            collection,
-            currency,
-            makerUser,
-            1 ether,
-            0
-        );
+        newMakerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: assetType,
+            orderNonce: 0,
+            collection: collection,
+            currency: currency,
+            signer: makerUser,
+            maxPrice: 1 ether,
+            itemId: 0
+        });
 
         newTakerAsk = OrderStructs.TakerAsk(
             takerUser,

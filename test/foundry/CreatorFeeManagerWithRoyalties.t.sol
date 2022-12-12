@@ -51,18 +51,18 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder(
-            0, // askNonce
-            0, // subsetNonce
-            0, // strategyId (Standard sale for fixed price)
-            0, // assetType ERC721,
-            0, // orderNonce
-            address(mockERC721),
-            address(weth),
-            makerUser,
-            price,
-            itemId
-        );
+        makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -110,18 +110,18 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(itemId, _royaltyRecipient, _newCreatorRoyaltyFee);
 
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder(
-            0, // askNonce
-            0, // subsetNonce
-            0, // strategyId (Standard sale for fixed price)
-            0, // assetType ERC721,
-            0, // orderNonce
-            address(mockERC721WithRoyalties),
-            address(weth),
-            makerUser,
-            price,
-            itemId
-        );
+        makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721WithRoyalties),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -335,18 +335,18 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder(
-            0, // askNonce
-            0, // subsetNonce
-            0, // strategyId (Standard sale for fixed price)
-            0, // assetType ERC721,
-            0, // orderNonce
-            address(mockERC721),
-            address(weth),
-            makerUser,
-            price,
-            itemId
-        );
+        makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);

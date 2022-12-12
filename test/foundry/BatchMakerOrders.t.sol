@@ -113,18 +113,18 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder(
-                0, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                i, // orderNonce (incremental)
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                i // itemId
-            );
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721,
+                orderNonce: i, // incremental
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: i
+            });
 
             orderHashes[i] = computeOrderHashMakerBid(makerBid);
         }

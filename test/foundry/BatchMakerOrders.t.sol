@@ -26,25 +26,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
     function testTakerBidMultipleOrdersSignedERC721() public {
         for (uint256 i; i < numberOrders; i++) {
-            // Mint asset
             mockERC721.mint(makerUser, i);
-
-            // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: i, // incremental
-                collection: address(mockERC721),
-                currency: address(0), // ETH,
-                signer: makerUser,
-                minPrice: price,
-                itemId: i
-            });
-
-            orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
         }
+        _createBatchMakerAskOrderHashes();
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
         _verifyMerkleProof(merkleTree);
@@ -88,23 +72,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721() public {
-        for (uint256 i; i < numberOrders; i++) {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: i, // incremental
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: i
-            });
-
-            orderHashes[i] = computeOrderHashMakerBid(makerBid);
-        }
+        _createBatchMakerBidOrderHashes();
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
         _verifyMerkleProof(merkleTree);
@@ -150,23 +118,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerBidMultipleOrdersSignedERC721WrongMerkleProof() public {
-        for (uint256 i; i < numberOrders; i++) {
-            // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder({
-                askNonce: 0, // askNonce
-                subsetNonce: 0, // subsetNonce
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721
-                orderNonce: i, // incremental
-                collection: address(mockERC721),
-                currency: address(0), // ETH,
-                signer: makerUser,
-                minPrice: price,
-                itemId: i
-            });
-
-            orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
-        }
+        _createBatchMakerAskOrderHashes();
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
@@ -195,23 +147,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721WrongMerkleProof() public {
-        for (uint256 i; i < numberOrders; i++) {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721
-                orderNonce: i, // incremental
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: i
-            });
-
-            orderHashes[i] = computeOrderHashMakerBid(makerBid);
-        }
+        _createBatchMakerBidOrderHashes();
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
@@ -252,6 +188,46 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
                 assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
             }
+        }
+    }
+
+    function _createBatchMakerAskOrderHashes() private {
+        for (uint256 i; i < numberOrders; i++) {
+            // Prepare the order hash
+            makerAsk = _createSingleItemMakerAskOrder({
+                askNonce: 0, // askNonce
+                subsetNonce: 0, // subsetNonce
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721
+                orderNonce: i, // incremental
+                collection: address(mockERC721),
+                currency: address(0), // ETH,
+                signer: makerUser,
+                minPrice: price,
+                itemId: i
+            });
+
+            orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
+        }
+    }
+
+    function _createBatchMakerBidOrderHashes() private {
+        for (uint256 i; i < numberOrders; i++) {
+            // Prepare the order hash
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721
+                orderNonce: i, // incremental
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: i
+            });
+
+            orderHashes[i] = computeOrderHashMakerBid(makerBid);
         }
     }
 }

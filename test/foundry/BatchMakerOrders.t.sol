@@ -13,19 +13,18 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 contract BatchMakerOrdersTest is ProtocolBase {
     // The test will sell itemId = numberOrders - 1
     uint256 numberOrders = 1_000;
+    Merkle m;
+    bytes32[] orderHashes;
 
     function setUp() public override {
         super.setUp();
         _setUpUsers();
         price = 1 ether; // Fixed price of sale
+        m = new Merkle();
+        orderHashes = new bytes32[](numberOrders);
     }
 
     function testTakerBidMultipleOrdersSignedERC721() public {
-        // Initialize Merkle Tree
-        Merkle m = new Merkle();
-
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
-
         for (uint256 i; i < numberOrders; i++) {
             // Mint asset
             mockERC721.mint(makerUser, i);
@@ -52,7 +51,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             proof: m.getProof(orderHashes, numberOrders - 1)
         });
 
-        _verifyMerkleProof(orderHashes, m, merkleTree);
+        _verifyMerkleProof(merkleTree);
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -93,11 +92,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721() public {
-        // Initialize Merkle Tree
-        Merkle m = new Merkle();
-
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
-
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
             makerBid = _createSingleItemMakerBidOrder({
@@ -121,7 +115,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             proof: m.getProof(orderHashes, numberOrders - 1)
         });
 
-        _verifyMerkleProof(orderHashes, m, merkleTree);
+        _verifyMerkleProof(merkleTree);
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -164,11 +158,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerBidMultipleOrdersSignedERC721WrongMerkleProof() public {
-        // Initialize Merkle Tree
-        Merkle m = new Merkle();
-
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
-
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
             makerAsk = _createSingleItemMakerAskOrder({
@@ -216,11 +205,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721WrongMerkleProof() public {
-        // Initialize Merkle Tree
-        Merkle m = new Merkle();
-
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
-
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
             makerBid = _createSingleItemMakerBidOrder({
@@ -267,11 +251,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         vm.stopPrank();
     }
 
-    function _verifyMerkleProof(
-        bytes32[] memory orderHashes,
-        Merkle m,
-        OrderStructs.MerkleTree memory merkleTree
-    ) private {
+    function _verifyMerkleProof(OrderStructs.MerkleTree memory merkleTree) private {
         for (uint256 i; i < numberOrders; i++) {
             {
                 bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);

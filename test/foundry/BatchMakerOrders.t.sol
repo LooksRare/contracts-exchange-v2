@@ -60,29 +60,23 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Prepare the taker bid
-            takerBid = OrderStructs.TakerBid(
-                takerUser,
-                makerAsk.minPrice,
-                makerAsk.itemIds,
-                makerAsk.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker bid
+        takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            abi.encode()
+        );
 
-        delete m;
+        uint256 gasLeft = gasleft();
 
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
-            emit log_named_uint(
-                "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
+        emit log_named_uint(
+            "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
+            gasLeft - gasleft()
+        );
 
         vm.stopPrank();
 
@@ -135,33 +129,27 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, numberOrders - 1);
+        // Mint asset
+        mockERC721.mint(takerUser, numberOrders - 1);
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker ask
+        takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
-        delete m;
+        uint256 gasLeft = gasleft();
 
-        {
-            uint256 gasLeft = gasleft();
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
 
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
-
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
+        emit log_named_uint(
+            "TakerAsk // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
+            gasLeft - gasleft()
+        );
 
         vm.stopPrank();
 

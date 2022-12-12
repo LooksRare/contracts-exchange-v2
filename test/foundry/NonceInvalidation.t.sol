@@ -275,19 +275,19 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
             {
                 // Prepare the first order
-                makerBid = _createMultiItemMakerBidOrder(
-                    0, // bidNonce
-                    0, // subsetNonce
-                    1, // strategyId (Multi-fill bid offer)
-                    0, // assetType ERC721,
-                    orderNonce, // orderNonce
-                    address(mockERC721),
-                    address(weth),
-                    makerUser,
-                    price,
-                    itemIds,
-                    amounts
-                );
+                makerBid = _createMultiItemMakerBidOrder({
+                    bidNonce: 0,
+                    subsetNonce: 0,
+                    strategyId: 1, // Multi-fill bid offer
+                    assetType: 0,
+                    orderNonce: orderNonce,
+                    collection: address(mockERC721),
+                    currency: address(weth),
+                    signer: makerUser,
+                    maxPrice: price,
+                    itemIds: itemIds,
+                    amounts: amounts
+                });
 
                 // Sign order
                 signature = _signMakerBid(makerBid, makerUserPK);
@@ -322,19 +322,19 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             amounts[0] = 1;
 
             // Prepare the second order
-            makerBid = _createMultiItemMakerBidOrder(
-                0, // bidNonce
-                0, // subsetNonce
-                0, // strategyId (normal offer)
-                0, // assetType ERC721,
-                orderNonce, // orderNonce
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                itemIds,
-                amounts
-            );
+            makerBid = _createMultiItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // normal offer
+                assetType: 0,
+                orderNonce: orderNonce,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemIds: itemIds,
+                amounts: amounts
+            });
 
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);

@@ -70,19 +70,19 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
 
             {
                 // Prepare the order hash
-                makerBid = _createMultiItemMakerBidOrder(
-                    0, // bidNonce
-                    0, // subsetNonce
-                    1, // strategyId (Multi-fill bid offer)
-                    0, // assetType ERC721,
-                    0, // orderNonce
-                    address(mockERC721),
-                    address(weth),
-                    makerUser,
-                    price,
-                    itemIds,
-                    amounts
-                );
+                makerBid = _createMultiItemMakerBidOrder({
+                    bidNonce: 0,
+                    subsetNonce: 0,
+                    strategyId: 1, // Multi-fill bid offer
+                    assetType: 0,
+                    orderNonce: 0,
+                    collection: address(mockERC721),
+                    currency: address(weth),
+                    signer: makerUser,
+                    maxPrice: price,
+                    itemIds: itemIds,
+                    amounts: amounts
+                });
 
                 // Sign order
                 signature = _signMakerBid(makerBid, makerUserPK);
@@ -182,19 +182,19 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             amounts[0] = amountsToFill;
 
             // Prepare the order hash
-            makerBid = _createMultiItemMakerBidOrder(
-                0, // bidNonce
-                0, // subsetNonce
-                1, // strategyId (Multi-fill bid offer)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                itemIds,
-                amounts
-            );
+            makerBid = _createMultiItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 1, // Multi-fill bid offer
+                assetType: 0,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemIds: itemIds,
+                amounts: amounts
+            });
 
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);

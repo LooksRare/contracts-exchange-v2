@@ -18,91 +18,68 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
     function setUp() public override {
         super.setUp();
         maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
-    }
-
-    // /**
-    //  * One ERC721 (where royalties come from the registry) is sold through a taker bid
-    //  */
-    // function testTakerBidERC721WithRoyaltiesFromRegistry() public {
-    //     _setUpUsers();
-    //     _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
-
-    //     price = 1 ether; // Fixed price of sale
-    //     uint256 itemId = 0; // TokenId
-
-    //     {
-    //         // Mint asset
-    //         mockERC721.mint(makerUser, itemId);
-
-    //         // Prepare the order hash
-    //         makerAsk = _createSingleItemMakerAskOrder(
-    //             0, // askNonce
-    //             0, // subsetNonce
-    //             0, // strategyId (Standard sale for fixed price)
-    //             0, // assetType ERC721,
-    //             0, // orderNonce
-    //             address(mockERC721),
-    //             address(0), // ETH,
-    //             makerUser,
-    //             price,
-    //             itemId
-    //         );
-
-    //         // Sign order
-    //         signature = _signMakerAsk(makerAsk, makerUserPK);
-    //     }
-
-    //     // Taker user actions
-    //     vm.startPrank(takerUser);
-
-    //     {
-    //         // Prepare the taker bid
-    //         takerBid = OrderStructs.TakerBid(
-    //             takerUser,
-    //             makerAsk.minPrice,
-    //             makerAsk.itemIds,
-    //             makerAsk.amounts,
-    //             abi.encode()
-    //         );
-    //     }
-
-    //     {
-    //         uint256 gasLeft = gasleft();
-
-    //         // Execute taker bid transaction
-    //         looksRareProtocol.executeTakerBid{value: price}(
-    //             takerBid,
-    //             makerAsk,
-    //             signature,
-    //             _emptyMerkleTree,
-    //             _emptyAffiliate
-    //         );
-    //         emit log_named_uint("TakerBid // ERC721 // Protocol Fee // Registry Royalties", gasLeft - gasleft());
-    //     }
-
-    //     vm.stopPrank();
-
-    //     // Taker user has received the asset
-    //     assertEq(mockERC721.ownerOf(itemId), takerUser);
-    //     // Taker bid user pays the whole price
-    //     assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-    //     // Maker ask user receives 98% of the whole price (2%)
-    //     assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / 10_000);
-    //     // Royalty recipient receives 0.5% of the whole price
-    //     assertEq(
-    //         address(_royaltyRecipient).balance,
-    //         _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
-    //     );
-    //     // No leftover in the balance of the contract
-    //     assertEq(address(looksRareProtocol).balance, 0);
-    //     // Verify the nonce is marked as executed
-    //     assertEq(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
-    // }
-
-    function testTakerAskReentrancy() public {
         _setUpUser(address(maliciousERC1271Wallet));
         _setUpUser(takerUser);
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
+    }
+
+    /**
+     * One ERC721 (where royalties come from the registry) is sold through a taker bid
+     */
+    function testTakerBidReentrancy() public {
+        maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
+
+        price = 1 ether; // Fixed price of sale
+        uint256 itemId = 0; // TokenId
+
+        {
+            // Mint asset
+            mockERC721.mint(makerUser, itemId);
+
+            // Prepare the order hash
+            makerAsk = _createSingleItemMakerAskOrder(
+                0, // askNonce
+                0, // subsetNonce
+                0, // strategyId (Standard sale for fixed price)
+                0, // assetType ERC721,
+                0, // orderNonce
+                address(mockERC721),
+                address(0), // ETH,
+                address(maliciousERC1271Wallet),
+                price,
+                itemId
+            );
+
+            signature = new bytes(0);
+        }
+
+        // Taker user actions
+        vm.startPrank(takerUser);
+
+        // Prepare the taker bid
+        takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            abi.encode()
+        );
+
+        vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleTree,
+            _emptyAffiliate
+        );
+
+        vm.stopPrank();
+    }
+
+    function testTakerAskReentrancy() public {
+        maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
@@ -122,7 +99,6 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
                 itemId
             );
 
-            // Sign order
             signature = new bytes(0);
         }
 

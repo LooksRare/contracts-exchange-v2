@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// LooksRare unopinionated libraries
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
+
+// Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract LooksRareProtocolTest is ProtocolBase {

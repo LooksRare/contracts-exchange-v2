@@ -1,13 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ProtocolBase} from "./ProtocolBase.t.sol";
+// LooksRare unopinionated libraries
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
+
+// Interfaces
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 
+// Base test
+import {ProtocolBase} from "./ProtocolBase.t.sol";
+
 contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
-    address newTransferManager = address(69_420);
-    bytes4 newSelector = 0x69696969;
+    address public newTransferManager = address(69_420);
+
+    // Wrong selector
+    bytes4 public newSelector = 0x69696969;
 
     function testInitialStates() public {
         (address transferManager0, bytes4 selector0) = looksRareProtocol.managerSelectorOfAssetType(0);

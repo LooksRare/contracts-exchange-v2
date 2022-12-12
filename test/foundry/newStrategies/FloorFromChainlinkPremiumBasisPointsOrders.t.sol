@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
+// Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
+
+// Strategies
 import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+
+// Other tests
 import {FloorFromChainlinkPremiumOrdersTest} from "./FloorFromChainlinkPremiumOrders.t.sol";
 
 /**
@@ -18,9 +23,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
     }
 
     function testInactiveStrategy() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: premium
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -38,9 +41,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
     function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: premium
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
@@ -48,25 +49,21 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
     function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceEqualToMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: premium
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
         makerAsk.minPrice = 9.797 ether;
 
         _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
     function _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(
-        OrderStructs.MakerAsk memory makerAsk,
-        OrderStructs.TakerBid memory takerBid
-    ) public {
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        OrderStructs.MakerAsk memory newMakerAsk,
+        OrderStructs.TakerBid memory newTakerBid
+    ) private {
+        signature = _signMakerAsk(newMakerAsk, makerUserPK);
 
         _setPriceFeed();
-
-        _assertOrderValid(makerAsk);
-
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _assertOrderValid(newMakerAsk);
+        _executeTakerBid(newTakerBid, newMakerAsk, signature);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -82,9 +79,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
 
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.8 ETH
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: premium
-        });
+        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
         makerAsk.minPrice = 9.8 ether;
         takerBid.maxPrice = makerAsk.minPrice;
@@ -92,9 +87,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
-
         _assertOrderValid(makerAsk);
-
         _executeTakerBid(takerBid, makerAsk, signature);
 
         // Taker user has received the asset

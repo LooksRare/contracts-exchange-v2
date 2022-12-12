@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Interfaces
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
+
+// Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract StrategyManagerTest is ProtocolBase, IStrategyManager {

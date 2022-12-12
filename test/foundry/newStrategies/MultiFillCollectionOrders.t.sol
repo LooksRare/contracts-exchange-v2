@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
+// Libraries
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
+
+// Interfaces
+import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
+// Mock files and other tests
 import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFillCollectionOrder.sol";
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
@@ -199,8 +203,6 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
 
-        // First taker user actions
-        vm.startPrank(takerUser);
         {
             uint256[] memory itemIds = new uint256[](1);
             uint256[] memory amounts = new uint256[](1);
@@ -212,10 +214,10 @@ contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
 
+            vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
             // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
         }
-        vm.stopPrank();
     }
 }

@@ -16,13 +16,13 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
+import {WrongCurrency} from "./interfaces/SharedErrors.sol";
 
 // Other dependencies
 import {AffiliateManager} from "./AffiliateManager.sol";
 import {CurrencyManager} from "./CurrencyManager.sol";
 import {ExecutionManager} from "./ExecutionManager.sol";
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
-import {WrongCurrency} from "./Errors.sol";
 
 /**
  * @title LooksRareProtocol

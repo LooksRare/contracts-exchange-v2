@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// LooksRare unopinionated libraries
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
+
+// Core contracts
+import {CurrencyManager, ICurrencyManager} from "../../contracts/CurrencyManager.sol";
+
+// Other mocks and utils
 import {TestHelpers} from "./utils/TestHelpers.sol";
 import {TestParameters} from "./utils/TestParameters.sol";
-import {CurrencyManager} from "../../contracts/CurrencyManager.sol";
-import {ICurrencyManager} from "../../contracts/interfaces/ICurrencyManager.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 
 contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+
+// Mocks and other tests
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 

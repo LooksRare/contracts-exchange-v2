@@ -7,7 +7,7 @@ import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePr
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
 import {OrderStructs} from "../libraries/OrderStructs.sol";
-import {WrongCurrency} from "../Errors.sol";
+import {WrongCurrency} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyFloorFromChainlink

@@ -361,10 +361,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         emit OrderNoncesCancelled(orderNonces);
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
-        bytes32 expectedMagicValue = 0x000000000000000000000000000000000000000000000000000000000000002a;
-
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), expectedMagicValue);
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), expectedMagicValue);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), MAGIC_VALUE_NONCE_EXECUTED);
     }
 
     /**

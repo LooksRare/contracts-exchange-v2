@@ -72,7 +72,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.itemIds = itemIds;
         newMakerAsk.amounts = amounts;
 
-        // 0.0025 ether cheaper per second -> (10 - 1) / 3600
+        // 0.0025 ether cheaper per second -> (10 - 1) / 3_600
         newMakerAsk.endTime = block.timestamp + 1 hours;
         newMakerAsk.additionalParameters = abi.encode(startPrice);
 
@@ -102,7 +102,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testDutchAuction(uint256 elapsedTime) public {
-        vm.assume(elapsedTime <= 3600);
+        vm.assume(elapsedTime <= 3_600);
 
         _setUpUsers();
         _setUpNewStrategy();
@@ -273,7 +273,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testTakerBidTooLow(uint256 elapsedTime) public {
-        vm.assume(elapsedTime <= 3600);
+        vm.assume(elapsedTime <= 3_600);
 
         _setUpUsers();
         _setUpNewStrategy();

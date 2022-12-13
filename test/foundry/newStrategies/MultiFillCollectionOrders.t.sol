@@ -37,7 +37,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
             bytes4 strategySelector,
-            bool isTakerBid,
+            bool strategyIsTakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -46,7 +46,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
         assertEq(strategySelector, selector);
-        assertFalse(isTakerBid);
+        assertFalse(strategyIsTakerBid);
         assertEq(strategyImplementation, address(strategyMultiFillCollectionOrder));
     }
 

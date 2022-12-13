@@ -11,29 +11,25 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
-    bytes32[] orderHashes;
-
     function setUp() public override {
-        uint256 numberOrders = 1_000;
-
         super.setUp();
         _setUpUsers();
         price = 1 ether; // Fixed price of sale
-        orderHashes = new bytes32[](numberOrders);
     }
 
     function testTakerBidMultipleOrdersSignedERC721() public {
         Merkle m = new Merkle();
         // The test will sell itemId = numberOrders - 1
         uint256 numberOrders = 1_000;
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         for (uint256 i; i < numberOrders; i++) {
             mockERC721.mint(makerUser, i);
         }
-        _createBatchMakerAskOrderHashes();
+        _createBatchMakerAskOrderHashes(orderHashes);
 
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m);
-        _verifyMerkleProof(m, merkleTree);
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
+        _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -77,11 +73,12 @@ contract BatchMakerOrdersTest is ProtocolBase {
         Merkle m = new Merkle();
         // The test will sell itemId = numberOrders - 1
         uint256 numberOrders = 1_000;
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
-        _createBatchMakerBidOrderHashes();
+        _createBatchMakerBidOrderHashes(orderHashes);
 
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m);
-        _verifyMerkleProof(m, merkleTree);
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
+        _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -125,9 +122,11 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
     function testTakerBidMultipleOrdersSignedERC721WrongMerkleProof() public {
         Merkle m = new Merkle();
-        _createBatchMakerAskOrderHashes();
+        uint256 numberOrders = 1_000;
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        _createBatchMakerAskOrderHashes(orderHashes);
 
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m);
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
         merkleTree.root = tamperedRoot;
 
@@ -151,9 +150,11 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
     function testTakerAskMultipleOrdersSignedERC721WrongMerkleProof() public {
         Merkle m = new Merkle();
-        _createBatchMakerBidOrderHashes();
+        uint256 numberOrders = 1_000;
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        _createBatchMakerBidOrderHashes(orderHashes);
 
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m);
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
         merkleTree.root = tamperedRoot;
 
@@ -175,7 +176,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
     }
 
-    function _getMerkleTree(Merkle m) private view returns (OrderStructs.MerkleTree memory merkleTree) {
+    function _getMerkleTree(
+        Merkle m,
+        bytes32[] memory orderHashes
+    ) private view returns (OrderStructs.MerkleTree memory merkleTree) {
         uint256 numberOrders = 1_000;
         merkleTree = OrderStructs.MerkleTree({
             root: m.getRoot(orderHashes),
@@ -183,7 +187,11 @@ contract BatchMakerOrdersTest is ProtocolBase {
         });
     }
 
-    function _verifyMerkleProof(Merkle m, OrderStructs.MerkleTree memory merkleTree) private {
+    function _verifyMerkleProof(
+        Merkle m,
+        OrderStructs.MerkleTree memory merkleTree,
+        bytes32[] memory orderHashes
+    ) private {
         uint256 numberOrders = 1_000;
 
         for (uint256 i; i < numberOrders; i++) {
@@ -194,7 +202,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         }
     }
 
-    function _createBatchMakerAskOrderHashes() private {
+    function _createBatchMakerAskOrderHashes(bytes32[] memory orderHashes) private {
         uint256 numberOrders = 1_000;
 
         for (uint256 i; i < numberOrders; i++) {
@@ -216,7 +224,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         }
     }
 
-    function _createBatchMakerBidOrderHashes() private {
+    function _createBatchMakerBidOrderHashes(bytes32[] memory orderHashes) private {
         uint256 numberOrders = 1_000;
 
         for (uint256 i; i < numberOrders; i++) {

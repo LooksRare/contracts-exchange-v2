@@ -28,7 +28,6 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             uint16 strategyMaxProtocolFee,
             bytes4 strategySelector,
             bool isTakerBid,
-            bytes4 strategySelectorTakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(strategyId);
 

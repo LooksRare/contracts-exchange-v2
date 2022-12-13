@@ -23,7 +23,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _setIsFixedAmount(0);
         _setDiscount(100);
         _setValidityFunctionSelector(StrategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid.selector);
-        _setSelectorTakerAsk(StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector);
+        _setSelector(StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector, false);
         super.setUp();
     }
 

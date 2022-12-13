@@ -13,12 +13,8 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MaliciousERC1271Wallet} from "./utils/MaliciousERC1271Wallet.sol";
 
 contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
-    MaliciousERC1271Wallet maliciousERC1271Wallet;
-
     function setUp() public override {
         super.setUp();
-        maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
-        _setUpUser(address(maliciousERC1271Wallet));
         _setUpUser(takerUser);
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
     }
@@ -27,6 +23,8 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
     function testTakerBidReentrancy() public {
+        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
         price = 1 ether; // Fixed price of sale
@@ -79,6 +77,8 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
     }
 
     function testTakerAskReentrancy() public {
+        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
         price = 1 ether; // Fixed price of sale
@@ -127,6 +127,8 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
     }
 
     function testExecuteMultipleTakerBidsReentrancy() public {
+        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 
         uint256 numberPurchases = 3;

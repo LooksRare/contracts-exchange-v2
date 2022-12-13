@@ -39,7 +39,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
      * @param standardProtocolFee Protocol fee
      * @param maxProtocolFee Maximum protocol fee
      * @param selector Selector
-     * @param isTakerBid Whether the function selector is taker bid
+     * @param isTakerBid Whether the function selector is for taker bids
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      */

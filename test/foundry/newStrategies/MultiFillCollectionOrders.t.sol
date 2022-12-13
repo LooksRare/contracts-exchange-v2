@@ -14,7 +14,6 @@ import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
     bytes4 public selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
-    bytes4 public selectorTakerBid = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerBid.selector;
 
     StrategyTestMultiFillCollectionOrder public strategyMultiFillCollectionOrder;
 
@@ -25,7 +24,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             _minTotalFee,
             _maxProtocolFee,
             selectorTakerAsk,
-            selectorTakerBid,
+            false,
             address(strategyMultiFillCollectionOrder)
         );
     }
@@ -37,8 +36,8 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool isTakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -46,8 +45,8 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
-        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategySelector, selectorTakerAsk);
+        assertFalse(isTakerBid);
         assertEq(strategyImplementation, address(strategyMultiFillCollectionOrder));
     }
 

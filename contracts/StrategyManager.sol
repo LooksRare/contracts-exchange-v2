@@ -28,8 +28,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             standardProtocolFee: 150,
             minTotalFee: 200,
             maxProtocolFee: 300,
-            selectorTakerAsk: bytes4(0),
-            selectorTakerBid: bytes4(0),
+            selector: bytes4(0),
+            isTakerBid: false,
             implementation: address(0)
         });
     }
@@ -38,8 +38,8 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
      * @notice Add a new strategy
      * @param standardProtocolFee Protocol fee
      * @param maxProtocolFee Maximum protocol fee
-     * @param selectorTakerAsk Selector for takerAsk
-     * @param selectorTakerBid Selector for takerBid
+     * @param selector Selector
+     * @param isTakerBid Whether the function selector is taker bid
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      */
@@ -47,23 +47,23 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         uint16 standardProtocolFee,
         uint16 minTotalFee,
         uint16 maxProtocolFee,
-        bytes4 selectorTakerAsk,
-        bytes4 selectorTakerBid,
+        bytes4 selector,
+        bool isTakerBid,
         address implementation
     ) external onlyOwner {
         if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > 5_000)
             revert StrategyProtocolFeeTooHigh();
 
         // A OR B == bytes4(0) -> Both A and B are bytes4(0)
-        if (selectorTakerAsk | selectorTakerBid == bytes4(0)) revert StrategyHasNoSelector();
+        if (selector == bytes4(0)) revert StrategyHasNoSelector();
 
         strategyInfo[countStrategies] = Strategy({
             isActive: true,
             standardProtocolFee: standardProtocolFee,
             minTotalFee: minTotalFee,
             maxProtocolFee: maxProtocolFee,
-            selectorTakerAsk: selectorTakerAsk,
-            selectorTakerBid: selectorTakerBid,
+            selector: selector,
+            isTakerBid: isTakerBid,
             implementation: implementation
         });
 

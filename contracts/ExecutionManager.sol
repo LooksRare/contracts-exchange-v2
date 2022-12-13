@@ -207,8 +207,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
-                bytes4 selector = strategyInfo[makerBid.strategyId].selectorTakerAsk;
-                if (selector == bytes4(0)) revert NoSelectorForTakerAsk();
+                bytes4 selector = strategyInfo[makerBid.strategyId].selector;
+                if (selector == bytes4(0) || strategyInfo[makerBid.strategyId].isTakerBid)
+                    revert NoSelectorForTakerAsk();
 
                 (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerAsk, makerBid)

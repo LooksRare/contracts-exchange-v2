@@ -11,50 +11,25 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
-    function testTakerBidMultipleOrdersSignedERC721() public {
+    function setUp() public override {
+        super.setUp();
         _setUpUsers();
+        price = 1 ether; // Fixed price of sale
+    }
 
-        // Initialize Merkle Tree
+    function testTakerBidMultipleOrdersSignedERC721() public {
         Merkle m = new Merkle();
-
-        uint256 numberOrders = 1000; // The test will sell itemId = numberOrders - 1
+        // The test will sell itemId = numberOrders - 1
+        uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
-        price = 1 ether; // Fixed price of sale
-
         for (uint256 i; i < numberOrders; i++) {
-            // Mint asset
             mockERC721.mint(makerUser, i);
-
-            // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: i, // incremental
-                collection: address(mockERC721),
-                currency: address(0), // ETH,
-                signer: makerUser,
-                minPrice: price,
-                itemId: i
-            });
-
-            orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
         }
+        _createBatchMakerAskOrderHashes(orderHashes);
 
-        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({
-            root: m.getRoot(orderHashes),
-            proof: m.getProof(orderHashes, numberOrders - 1)
-        });
-
-        // Verify the merkle proof
-        for (uint256 i; i < numberOrders; i++) {
-            {
-                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
-            }
-        }
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
+        _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -62,29 +37,23 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Prepare the taker bid
-            takerBid = OrderStructs.TakerBid(
-                takerUser,
-                makerAsk.minPrice,
-                makerAsk.itemIds,
-                makerAsk.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker bid
+        takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            abi.encode()
+        );
 
-        delete m;
+        uint256 gasLeft = gasleft();
 
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
-            emit log_named_uint(
-                "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
+        emit log_named_uint(
+            "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
+            gasLeft - gasleft()
+        );
 
         vm.stopPrank();
 
@@ -101,46 +70,15 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721() public {
-        _setUpUsers();
-
-        // Initialize Merkle Tree
         Merkle m = new Merkle();
-
-        uint256 numberOrders = 1000; // The test will sell itemId = numberOrders - 1
+        // The test will sell itemId = numberOrders - 1
+        uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
-        price = 1 ether; // Fixed price of sale
+        _createBatchMakerBidOrderHashes(orderHashes);
 
-        for (uint256 i; i < numberOrders; i++) {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: i, // incremental
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: i
-            });
-
-            orderHashes[i] = computeOrderHashMakerBid(makerBid);
-        }
-
-        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({
-            root: m.getRoot(orderHashes),
-            proof: m.getProof(orderHashes, numberOrders - 1)
-        });
-
-        // Verify the merkle proof
-        for (uint256 i; i < numberOrders; i++) {
-            {
-                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
-            }
-        }
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
+        _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
@@ -148,33 +86,27 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, numberOrders - 1);
+        // Mint asset
+        mockERC721.mint(takerUser, numberOrders - 1);
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker ask
+        takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
-        delete m;
+        uint256 gasLeft = gasleft();
 
-        {
-            uint256 gasLeft = gasleft();
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
 
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
-
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
+        emit log_named_uint(
+            "TakerAsk // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
+            gasLeft - gasleft()
+        );
 
         vm.stopPrank();
 
@@ -186,5 +118,131 @@ contract BatchMakerOrdersTest is ProtocolBase {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+    }
+
+    function testTakerBidMultipleOrdersSignedERC721WrongMerkleProof() public {
+        Merkle m = new Merkle();
+        uint256 numberOrders = 1_000;
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        _createBatchMakerAskOrderHashes(orderHashes);
+
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
+        bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
+        merkleTree.root = tamperedRoot;
+
+        // Maker signs the root
+        signature = _signMerkleProof(merkleTree, makerUserPK);
+
+        // Prepare the taker bid
+        takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            abi.encode()
+        );
+
+        vm.prank(takerUser);
+        vm.expectRevert(WrongMerkleProof.selector);
+        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
+    }
+
+    function testTakerAskMultipleOrdersSignedERC721WrongMerkleProof() public {
+        Merkle m = new Merkle();
+        uint256 numberOrders = 1_000;
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        _createBatchMakerBidOrderHashes(orderHashes);
+
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
+        bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
+        merkleTree.root = tamperedRoot;
+
+        // Maker signs the root
+        signature = _signMerkleProof(merkleTree, makerUserPK);
+
+        // Prepare the taker ask
+        takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
+
+        vm.prank(takerUser);
+        vm.expectRevert(WrongMerkleProof.selector);
+        // Execute taker ask transaction
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
+    }
+
+    function _getMerkleTree(
+        Merkle m,
+        bytes32[] memory orderHashes
+    ) private pure returns (OrderStructs.MerkleTree memory merkleTree) {
+        uint256 numberOrders = 1_000;
+        merkleTree = OrderStructs.MerkleTree({
+            root: m.getRoot(orderHashes),
+            proof: m.getProof(orderHashes, numberOrders - 1)
+        });
+    }
+
+    function _verifyMerkleProof(
+        Merkle m,
+        OrderStructs.MerkleTree memory merkleTree,
+        bytes32[] memory orderHashes
+    ) private {
+        uint256 numberOrders = 1_000;
+
+        for (uint256 i; i < numberOrders; i++) {
+            {
+                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
+                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
+            }
+        }
+    }
+
+    function _createBatchMakerAskOrderHashes(bytes32[] memory orderHashes) private {
+        uint256 numberOrders = 1_000;
+
+        for (uint256 i; i < numberOrders; i++) {
+            // Prepare the order hash
+            makerAsk = _createSingleItemMakerAskOrder({
+                askNonce: 0, // askNonce
+                subsetNonce: 0, // subsetNonce
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721
+                orderNonce: i, // incremental
+                collection: address(mockERC721),
+                currency: address(0), // ETH,
+                signer: makerUser,
+                minPrice: price,
+                itemId: i
+            });
+
+            orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
+        }
+    }
+
+    function _createBatchMakerBidOrderHashes(bytes32[] memory orderHashes) private {
+        uint256 numberOrders = 1_000;
+
+        for (uint256 i; i < numberOrders; i++) {
+            // Prepare the order hash
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721
+                orderNonce: i, // incremental
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: i
+            });
+
+            orderHashes[i] = computeOrderHashMakerBid(makerBid);
+        }
     }
 }

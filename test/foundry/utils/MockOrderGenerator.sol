@@ -21,18 +21,18 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType = 1;
         }
 
-        newMakerAsk = _createSingleItemMakerAskOrder(
-            0,
-            0,
-            0,
-            assetType,
-            0,
-            collection,
-            address(0), // ETH
-            makerUser,
-            1 ether,
-            0
-        );
+        newMakerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: assetType,
+            orderNonce: 0,
+            collection: collection,
+            currency: address(0), // ETH
+            signer: makerUser,
+            minPrice: 1 ether,
+            itemId: 0
+        });
 
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
@@ -53,18 +53,18 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType = 1;
         }
 
-        newMakerBid = _createSingleItemMakerBidOrder(
-            0,
-            0,
-            0,
-            assetType,
-            0,
-            collection,
-            currency,
-            makerUser,
-            1 ether,
-            0
-        );
+        newMakerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: assetType,
+            orderNonce: 0,
+            collection: collection,
+            currency: currency,
+            signer: makerUser,
+            maxPrice: 1 ether,
+            itemId: 0
+        });
 
         newTakerAsk = OrderStructs.TakerAsk(
             takerUser,
@@ -94,19 +94,19 @@ contract MockOrderGenerator is ProtocolHelpers {
             amounts[i] = 1;
         }
 
-        newMakerAsk = _createMultiItemMakerAskOrder(
-            0,
-            0,
-            0,
-            assetType,
-            0,
-            collection,
-            address(0),
-            makerUser,
-            1 ether,
-            itemIds,
-            amounts
-        );
+        newMakerAsk = _createMultiItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: assetType,
+            orderNonce: 0,
+            collection: collection,
+            currency: address(0),
+            signer: makerUser,
+            minPrice: 1 ether,
+            itemIds: itemIds,
+            amounts: amounts
+        });
 
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
@@ -136,19 +136,19 @@ contract MockOrderGenerator is ProtocolHelpers {
             amounts[i] = 1;
         }
 
-        newMakerBid = _createMultiItemMakerBidOrder(
-            0,
-            0,
-            0,
-            assetType,
-            0,
-            collection,
-            currency,
-            makerUser,
-            1 ether,
-            itemIds,
-            amounts
-        );
+        newMakerBid = _createMultiItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: assetType,
+            orderNonce: 0,
+            collection: collection,
+            currency: currency,
+            signer: makerUser,
+            maxPrice: 1 ether,
+            itemIds: itemIds,
+            amounts: amounts
+        });
 
         newTakerAsk = OrderStructs.TakerAsk(
             takerUser,

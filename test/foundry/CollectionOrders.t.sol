@@ -224,18 +224,18 @@ contract CollectionOrdersTest is ProtocolBase {
 
         {
             // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder(
-                0, // bidNonce
-                0, // subsetNonce
-                1, // strategyId (Collection offer)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                0 // itemId (not used)
-            );
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 1,
+                assetType: 0, // ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: 0 // Not used
+            });
 
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);
@@ -303,18 +303,18 @@ contract CollectionOrdersTest is ProtocolBase {
 
         {
             // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder(
-                0, // bidNonce
-                0, // subsetNonce
-                2, // strategyId (Collection offer with proofs)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                0 // itemId (not used)
-            );
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 2,
+                assetType: 0, // ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: 0 // Not used
+            });
 
             makerBid.additionalParameters = abi.encode(merkleRoot);
 

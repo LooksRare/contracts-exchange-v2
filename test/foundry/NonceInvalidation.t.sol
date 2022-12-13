@@ -23,18 +23,18 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             mockERC721.mint(makerUser, itemId);
 
             // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder(
-                0, // askNonce
-                subsetNonce, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(0), // ETH,
-                makerUser,
-                price,
-                itemId
-            );
+            makerAsk = _createSingleItemMakerAskOrder({
+                askNonce: 0,
+                subsetNonce: subsetNonce,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(0), // ETH,
+                signer: makerUser,
+                minPrice: price,
+                itemId: itemId
+            });
 
             // Sign order
             signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -84,18 +84,18 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             mockERC721.mint(makerUser, itemId);
 
             // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder(
-                userGlobalAskNonce, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(0), // ETH,
-                makerUser,
-                price,
-                itemId
-            );
+            makerAsk = _createSingleItemMakerAskOrder({
+                askNonce: userGlobalAskNonce,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(0), // ETH,
+                signer: makerUser,
+                minPrice: price,
+                itemId: itemId
+            });
 
             // Sign order
             signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -139,18 +139,18 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         {
             // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder(
-                userGlobalBidNonce, // bidNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                itemId
-            );
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: userGlobalBidNonce,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: itemId
+            });
 
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);
@@ -194,18 +194,18 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         {
             // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder(
-                0, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                itemId
-            );
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: itemId
+            });
 
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);
@@ -275,19 +275,19 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
             {
                 // Prepare the first order
-                makerBid = _createMultiItemMakerBidOrder(
-                    0, // bidNonce
-                    0, // subsetNonce
-                    1, // strategyId (Multi-fill bid offer)
-                    0, // assetType ERC721,
-                    orderNonce, // orderNonce
-                    address(mockERC721),
-                    address(weth),
-                    makerUser,
-                    price,
-                    itemIds,
-                    amounts
-                );
+                makerBid = _createMultiItemMakerBidOrder({
+                    bidNonce: 0,
+                    subsetNonce: 0,
+                    strategyId: 1, // Multi-fill bid offer
+                    assetType: 0,
+                    orderNonce: orderNonce,
+                    collection: address(mockERC721),
+                    currency: address(weth),
+                    signer: makerUser,
+                    maxPrice: price,
+                    itemIds: itemIds,
+                    amounts: amounts
+                });
 
                 // Sign order
                 signature = _signMakerBid(makerBid, makerUserPK);
@@ -322,19 +322,19 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             amounts[0] = 1;
 
             // Prepare the second order
-            makerBid = _createMultiItemMakerBidOrder(
-                0, // bidNonce
-                0, // subsetNonce
-                0, // strategyId (normal offer)
-                0, // assetType ERC721,
-                orderNonce, // orderNonce
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                itemIds,
-                amounts
-            );
+            makerBid = _createMultiItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // normal offer
+                assetType: 0,
+                orderNonce: orderNonce,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemIds: itemIds,
+                amounts: amounts
+            });
 
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);
@@ -386,18 +386,18 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         {
             // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder(
-                0, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                orderNonce, // orderNonce
-                address(mockERC721),
-                address(weth),
-                makerUser,
-                price,
-                itemId
-            );
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721,
+                orderNonce: orderNonce,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: itemId
+            });
 
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);

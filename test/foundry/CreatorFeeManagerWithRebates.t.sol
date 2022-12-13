@@ -47,18 +47,18 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         }
 
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder(
-            0, // askNonce
-            0, // subsetNonce
-            0, // strategyId (Standard sale for fixed price)
-            0, // assetType ERC721,
-            0, // orderNonce
-            erc721,
-            address(weth),
-            makerUser,
-            price,
-            itemId
-        );
+        makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: erc721,
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);

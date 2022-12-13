@@ -163,7 +163,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: 0,
+            assetType: 0, // ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

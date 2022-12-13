@@ -216,7 +216,6 @@ contract OrderValidator {
             ,
             bytes4 strategySelector,
             bool isTakerBid,
-            ,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(makerBid.strategyId);
 

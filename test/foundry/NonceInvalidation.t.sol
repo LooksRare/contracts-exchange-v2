@@ -247,21 +247,31 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         // 0. Add the new strategy
         bytes4 selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
-        bytes4 selectorTakerBid = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerBid.selector;
+        // bytes4 selectorTakerBid = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerBid.selector;
 
         StrategyTestMultiFillCollectionOrder strategyMultiFillCollectionOrder = new StrategyTestMultiFillCollectionOrder(
                 address(looksRareProtocol)
             );
 
-        vm.prank(_owner);
+        vm.startPrank(_owner);
         looksRareProtocol.addStrategy(
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
             selectorTakerAsk,
-            selectorTakerBid,
+            false,
             address(strategyMultiFillCollectionOrder)
         );
+
+        // looksRareProtocol.addStrategy(
+        //     _standardProtocolFee,
+        //     _minTotalFee,
+        //     _maxProtocolFee,
+        //     selectorTakerBid,
+        //     true,
+        //     address(strategyMultiFillCollectionOrder)
+        // );
+        vm.stopPrank();
 
         // 1. Maker signs a message and execute a partial fill on it
         price = 1 ether; // Fixed price of sale

@@ -13,7 +13,7 @@ import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFi
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
-    bytes4 public selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
+    bytes4 public selector = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
 
     StrategyTestMultiFillCollectionOrder public strategyMultiFillCollectionOrder;
 
@@ -23,7 +23,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk,
+            selector,
             false,
             address(strategyMultiFillCollectionOrder)
         );
@@ -45,7 +45,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelector, selectorTakerAsk);
+        assertEq(strategySelector, selector);
         assertFalse(isTakerBid);
         assertEq(strategyImplementation, address(strategyMultiFillCollectionOrder));
     }

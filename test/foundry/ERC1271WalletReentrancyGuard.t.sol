@@ -37,18 +37,18 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             mockERC721.mint(makerUser, itemId);
 
             // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder(
-                0, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(0), // ETH,
-                address(maliciousERC1271Wallet),
-                price,
-                itemId
-            );
+            makerAsk = _createSingleItemMakerAskOrder({
+                askNonce: 0,
+                subsetNonce: 0, // subsetNonce
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721,
+                orderNonce: 0, // orderNonce
+                collection: address(mockERC721),
+                currency: address(0), // ETH,
+                signer: address(maliciousERC1271Wallet),
+                minPrice: price,
+                itemId: itemId
+            });
 
             signature = new bytes(0);
         }
@@ -86,18 +86,18 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
 
         {
             // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder(
-                0, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                0, // orderNonce
-                address(mockERC721),
-                address(weth),
-                address(maliciousERC1271Wallet),
-                price,
-                itemId
-            );
+            makerBid = _createSingleItemMakerBidOrder({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: address(maliciousERC1271Wallet),
+                maxPrice: price,
+                itemId: itemId
+            });
 
             signature = new bytes(0);
         }
@@ -141,18 +141,18 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             mockERC721.mint(makerUser, i);
 
             // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder(
-                0, // askNonce
-                0, // subsetNonce
-                0, // strategyId (Standard sale for fixed price)
-                0, // assetType ERC721,
-                i, // orderNonce
-                address(mockERC721),
-                address(0), // ETH,
-                address(maliciousERC1271Wallet),
-                price, // Fixed
-                i // itemId (0, 1, etc.)
-            );
+            makerAsks[i] = _createSingleItemMakerAskOrder({
+                askNonce: 0,
+                subsetNonce: 0,
+                strategyId: 0, // Standard sale for fixed price
+                assetType: 0, // ERC721
+                orderNonce: i,
+                collection: address(mockERC721),
+                currency: address(0), // ETH,
+                signer: address(maliciousERC1271Wallet),
+                minPrice: price,
+                itemId: i // 0, 1, etc.
+            });
 
             signatures[i] = new bytes(0);
 

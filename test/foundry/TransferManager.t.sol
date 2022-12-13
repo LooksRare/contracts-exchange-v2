@@ -7,6 +7,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Core contracts
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {ITransferManager, TransferManager} from "../../contracts/TransferManager.sol";
+import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 
 // Mocks and other utils
 import {MockERC721} from "../mock/MockERC721.sol";
@@ -306,7 +307,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             itemIds[1] = tokenIdsERC721;
         }
 
-        vm.expectRevert(ITransferManager.WrongLengths.selector);
+        vm.expectRevert(WrongLengths.selector);
         vm.prank(_transferrer);
         transferManager.transferBatchItemsAcrossCollections(
             collections,
@@ -355,7 +356,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             itemIds[0] = tokenIdsERC1155;
         }
 
-        vm.expectRevert(ITransferManager.WrongLengths.selector);
+        vm.expectRevert(WrongLengths.selector);
         vm.prank(_transferrer);
         transferManager.transferBatchItemsAcrossCollections(
             collections,
@@ -405,7 +406,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             itemIds[1] = tokenIdsERC721;
         }
 
-        vm.expectRevert(ITransferManager.WrongLengths.selector);
+        vm.expectRevert(WrongLengths.selector);
         vm.prank(_transferrer);
         transferManager.transferBatchItemsAcrossCollections(
             collections,

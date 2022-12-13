@@ -11,6 +11,7 @@ import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/I
 
 // Interfaces
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
+import {WrongLengths} from "./interfaces/SharedErrors.sol";
 
 /**
  * @title TransferManager

@@ -17,9 +17,8 @@ contract CollectionOrdersTest is ProtocolBase {
     error OrderInvalid();
 
     StrategyCollectionOffer public strategyCollectionOffer;
-    bytes4 public selectorTakerAskNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
-    bytes4 public selectorTakerAskWithProof =
-        strategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
+    bytes4 public selectorNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
+    bytes4 public selectorWithProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
 
     function setUp() public override {
         super.setUp();
@@ -33,7 +32,7 @@ contract CollectionOrdersTest is ProtocolBase {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAskNoProof,
+            selectorNoProof,
             false,
             address(strategyCollectionOffer)
         );
@@ -42,7 +41,7 @@ contract CollectionOrdersTest is ProtocolBase {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAskWithProof,
+            selectorWithProof,
             false,
             address(strategyCollectionOffer)
         );
@@ -64,7 +63,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelector, selectorTakerAskNoProof);
+        assertEq(strategySelector, selectorNoProof);
         assertFalse(isTakerBid);
         assertEq(strategyImplementation, address(strategyCollectionOffer));
 
@@ -82,7 +81,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelector, selectorTakerAskWithProof);
+        assertEq(strategySelector, selectorWithProof);
         assertFalse(isTakerBid);
         assertEq(strategyImplementation, address(strategyCollectionOffer));
     }

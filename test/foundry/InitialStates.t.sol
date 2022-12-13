@@ -31,8 +31,8 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool isTakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(0);
 
@@ -40,8 +40,8 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, _emptyBytes4);
-        assertEq(strategySelectorTakerBid, _emptyBytes4);
+        assertEq(strategySelector, _emptyBytes4);
+        assertFalse(isTakerBid);
         assertEq(strategyImplementation, address(0));
     }
 }

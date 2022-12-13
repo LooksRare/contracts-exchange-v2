@@ -54,7 +54,7 @@ contract CollectionOrdersTest is ProtocolBase {
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
             bytes4 strategySelector,
-            bool isTakerBid,
+            bool strategyIsTakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -63,7 +63,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
         assertEq(strategySelector, selectorNoProof);
-        assertFalse(isTakerBid);
+        assertFalse(strategyIsTakerBid);
         assertEq(strategyImplementation, address(strategyCollectionOffer));
 
         (
@@ -72,7 +72,7 @@ contract CollectionOrdersTest is ProtocolBase {
             strategyMinTotalFee,
             strategyMaxProtocolFee,
             strategySelector,
-            isTakerBid,
+            strategyIsTakerBid,
             strategyImplementation
         ) = looksRareProtocol.strategyInfo(2);
 
@@ -81,7 +81,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
         assertEq(strategySelector, selectorWithProof);
-        assertFalse(isTakerBid);
+        assertFalse(strategyIsTakerBid);
         assertEq(strategyImplementation, address(strategyCollectionOffer));
     }
 

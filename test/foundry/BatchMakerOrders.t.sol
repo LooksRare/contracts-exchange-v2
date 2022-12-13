@@ -11,12 +11,12 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
-    // The test will sell itemId = numberOrders - 1
-    uint256 numberOrders = 1_000;
     Merkle m;
     bytes32[] orderHashes;
 
     function setUp() public override {
+        uint256 numberOrders = 1_000;
+
         super.setUp();
         _setUpUsers();
         price = 1 ether; // Fixed price of sale
@@ -25,6 +25,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerBidMultipleOrdersSignedERC721() public {
+        // The test will sell itemId = numberOrders - 1
+        uint256 numberOrders = 1_000;
+
         for (uint256 i; i < numberOrders; i++) {
             mockERC721.mint(makerUser, i);
         }
@@ -72,6 +75,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721() public {
+        // The test will sell itemId = numberOrders - 1
+        uint256 numberOrders = 1_000;
+
         _createBatchMakerBidOrderHashes();
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree();
@@ -168,6 +174,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function _getMerkleTree() private view returns (OrderStructs.MerkleTree memory merkleTree) {
+        uint256 numberOrders = 1_000;
         merkleTree = OrderStructs.MerkleTree({
             root: m.getRoot(orderHashes),
             proof: m.getProof(orderHashes, numberOrders - 1)
@@ -175,6 +182,8 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function _verifyMerkleProof(OrderStructs.MerkleTree memory merkleTree) private {
+        uint256 numberOrders = 1_000;
+
         for (uint256 i; i < numberOrders; i++) {
             {
                 bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
@@ -184,6 +193,8 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function _createBatchMakerAskOrderHashes() private {
+        uint256 numberOrders = 1_000;
+
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
             makerAsk = _createSingleItemMakerAskOrder({
@@ -204,6 +215,8 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function _createBatchMakerBidOrderHashes() private {
+        uint256 numberOrders = 1_000;
+
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
             makerBid = _createSingleItemMakerBidOrder({

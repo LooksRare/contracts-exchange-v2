@@ -12,7 +12,7 @@ import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.s
 import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFillCollectionOrder.sol";
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
-contract CollectionOrdersTest is ProtocolBase, IStrategyManager {
+contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
     bytes4 public selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
     bytes4 public selectorTakerBid = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerBid.selector;
 

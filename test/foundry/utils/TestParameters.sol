@@ -19,8 +19,7 @@ abstract contract TestParameters is Test {
     uint256 internal takerUserPK = 2;
     address internal makerUser = vm.addr(makerUserPK);
     address internal takerUser = vm.addr(takerUserPK);
-    OrderStructs.MerkleTree internal _emptyMerkleTree =
-        OrderStructs.MerkleTree({root: bytes32(0), proof: new bytes32[](0)});
+    OrderStructs.MerkleTree internal _emptyMerkleTree;
     bytes4 internal _emptyBytes4 = bytes4(0);
     bytes32 public MAGIC_VALUE_NONCE_EXECUTED = 0x000000000000000000000000000000000000000000000000000000000000002a;
 
@@ -36,7 +35,6 @@ abstract contract TestParameters is Test {
 
     // Affiliate parameters
     address public _affiliate = address(2);
-    uint256 public constant _timelock = 120;
 
     // Chainlink ETH/USD price feed mainnet
     address internal constant CHAINLINK_ETH_USD_PRICE_FEED = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;

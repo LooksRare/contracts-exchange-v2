@@ -179,7 +179,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     function _getMerkleTree(
         Merkle m,
         bytes32[] memory orderHashes
-    ) private view returns (OrderStructs.MerkleTree memory merkleTree) {
+    ) private pure returns (OrderStructs.MerkleTree memory merkleTree) {
         uint256 numberOrders = 1_000;
         merkleTree = OrderStructs.MerkleTree({
             root: m.getRoot(orderHashes),

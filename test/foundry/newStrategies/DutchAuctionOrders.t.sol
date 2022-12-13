@@ -15,8 +15,7 @@ import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
-    bytes4 public selectorTakerAsk = _emptyBytes4;
-    bytes4 public selectorTakerBid = StrategyDutchAuction.executeStrategyWithTakerBid.selector;
+    bytes4 public selector = StrategyDutchAuction.executeStrategyWithTakerBid.selector;
 
     uint256 private startPrice = 10 ether;
     uint256 private endPrice = 1 ether;
@@ -28,8 +27,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk,
-            selectorTakerBid,
+            selector,
+            true,
             address(strategyDutchAuction)
         );
     }
@@ -87,8 +86,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool isTakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -96,8 +95,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
-        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategySelector, selector);
+        assertTrue(isTakerBid);
         assertEq(strategyImplementation, address(strategyDutchAuction));
     }
 

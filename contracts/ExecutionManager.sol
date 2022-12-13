@@ -170,9 +170,10 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerAsk.strategyId].isActive) {
+                if (!strategyInfo[makerAsk.strategyId].isTakerBid) revert NoSelectorForTakerBid();
+
                 bytes4 selector = strategyInfo[makerAsk.strategyId].selector;
-                if (selector == bytes4(0) || !strategyInfo[makerAsk.strategyId].isTakerBid)
-                    revert NoSelectorForTakerBid();
+                if (selector == bytes4(0)) revert NoSelectorForTakerBid();
 
                 (bool status, bytes memory data) = strategyInfo[makerAsk.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerBid, makerAsk)
@@ -208,9 +209,10 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
+                if (strategyInfo[makerBid.strategyId].isTakerBid) revert NoSelectorForTakerAsk();
+
                 bytes4 selector = strategyInfo[makerBid.strategyId].selector;
-                if (selector == bytes4(0) || strategyInfo[makerBid.strategyId].isTakerBid)
-                    revert NoSelectorForTakerAsk();
+                if (selector == bytes4(0)) revert NoSelectorForTakerAsk();
 
                 (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerAsk, makerBid)

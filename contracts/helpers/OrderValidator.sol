@@ -190,9 +190,9 @@ contract OrderValidator {
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(makerAsk.strategyId);
 
-        if (makerAsk.strategyId > 1 && strategyImplementation == address(0)) return STRATEGY_NOT_IMPLEMENTED;
+        if (makerAsk.strategyId != 0 && strategyImplementation == address(0)) return STRATEGY_NOT_IMPLEMENTED;
         // @dev Native collection offers (strategyId = 1) only exist for maker bid orders
-        if (makerAsk.strategyId != 0 && (strategySelector == bytes32(0) || !strategyIsTakerBid))
+        if (makerAsk.strategyId != 0 && (strategySelector == bytes4(0) || !strategyIsTakerBid))
             return STRATEGY_TAKER_BID_SELECTOR_INVALID;
         if (!strategyIsActive) return STRATEGY_NOT_ACTIVE;
     }
@@ -219,8 +219,8 @@ contract OrderValidator {
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(makerBid.strategyId);
 
-        if (makerBid.strategyId > 1 && strategyImplementation == address(0)) return STRATEGY_NOT_IMPLEMENTED;
-        if (makerBid.strategyId > 1 && (strategySelector == bytes32(0) || strategyIsTakerBid))
+        if (makerBid.strategyId != 0 && strategyImplementation == address(0)) return STRATEGY_NOT_IMPLEMENTED;
+        if (makerBid.strategyId != 0 && (strategySelector == bytes4(0) || strategyIsTakerBid))
             return STRATEGY_TAKER_ASK_SELECTOR_INVALID;
         if (!strategyIsActive) return STRATEGY_NOT_ACTIVE;
     }

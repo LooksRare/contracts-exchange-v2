@@ -18,8 +18,7 @@ import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
-    bytes4 public selectorTakerAsk = _emptyBytes4;
-    bytes4 public selectorTakerBid = StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector;
+    bytes4 public selector = StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector;
 
     // At block 15740567
     // roundId         uint80  :  92233720368547793259
@@ -43,8 +42,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk,
-            selectorTakerBid,
+            selector,
+            true,
             address(strategyUSDDynamicAsk)
         );
     }
@@ -98,8 +97,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool isTakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -107,8 +106,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
-        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategySelector, selector);
+        assertTrue(isTakerBid);
         assertEq(strategyImplementation, address(strategyUSDDynamicAsk));
     }
 

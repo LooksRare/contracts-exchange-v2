@@ -131,24 +131,22 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint112 userGlobalBidNonce = 1;
         uint256 itemId = 420;
 
-        {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: userGlobalBidNonce,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: itemId
-            });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: userGlobalBidNonce,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
-            // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
-        }
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
 
         {
             // Mint asset
@@ -186,24 +184,22 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
-        {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: itemId
-            });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
-            // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
-        }
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -261,36 +257,32 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 amountsToFill = 4;
         uint256 orderNonce = 420;
 
-        {
-            uint256[] memory itemIds = new uint256[](0);
-            uint256[] memory amounts = new uint256[](1);
-            amounts[0] = amountsToFill;
+        uint256[] memory itemIds = new uint256[](0);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amountsToFill;
 
-            {
-                // Prepare the first order
-                makerBid = _createMultiItemMakerBidOrder({
-                    bidNonce: 0,
-                    subsetNonce: 0,
-                    strategyId: 1, // Multi-fill bid offer
-                    assetType: 0,
-                    orderNonce: orderNonce,
-                    collection: address(mockERC721),
-                    currency: address(weth),
-                    signer: makerUser,
-                    maxPrice: price,
-                    itemIds: itemIds,
-                    amounts: amounts
-                });
+        // Prepare the first order
+        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1, // Multi-fill bid offer
+            assetType: 0,
+            orderNonce: orderNonce,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemIds: itemIds,
+            amounts: amounts
+        });
 
-                // Sign order
-                signature = _signMakerBid(makerBid, makerUserPK);
-            }
-        }
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
 
         // First taker user actions
         {
-            uint256[] memory itemIds = new uint256[](1);
-            uint256[] memory amounts = new uint256[](1);
+            itemIds = new uint256[](1);
+            amounts = new uint256[](1);
             itemIds[0] = 0;
             amounts[0] = 1;
 
@@ -309,8 +301,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         {
             uint256 itemId = 420;
 
-            uint256[] memory itemIds = new uint256[](1);
-            uint256[] memory amounts = new uint256[](1);
+            itemIds = new uint256[](1);
+            amounts = new uint256[](1);
             itemIds[0] = itemId;
             amounts[0] = 1;
 
@@ -375,24 +367,22 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.prank(makerUser);
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
-        {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: orderNonce,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: itemId
-            });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: orderNonce,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
-            // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
-        }
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);

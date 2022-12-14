@@ -51,7 +51,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0,
@@ -110,7 +110,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(itemId, _royaltyRecipient, _newCreatorRoyaltyFee);
 
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0,
@@ -167,11 +167,10 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         uint256 numberItemsInBundle = 5;
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
-            address(mockERC721),
-            address(weth),
-            numberItemsInBundle
-        );
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk
+        ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         price = makerBid.maxPrice;
 
@@ -212,11 +211,14 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         uint256 numberItemsInBundle = 5;
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
-            address(mockERC721WithRoyalties),
-            address(weth),
-            numberItemsInBundle
-        );
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk
+        ) = _createMockMakerBidAndTakerAskWithBundle(
+                address(mockERC721WithRoyalties),
+                address(weth),
+                numberItemsInBundle
+            );
 
         price = makerBid.maxPrice;
 
@@ -262,11 +264,14 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         uint256 numberItemsInBundle = 5;
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
-            address(mockERC721WithRoyalties),
-            address(weth),
-            numberItemsInBundle
-        );
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk
+        ) = _createMockMakerBidAndTakerAskWithBundle(
+                address(mockERC721WithRoyalties),
+                address(weth),
+                numberItemsInBundle
+            );
 
         price = makerBid.maxPrice;
 
@@ -335,7 +340,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0,

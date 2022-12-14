@@ -64,7 +64,10 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         /**
          * 1. Too early to execute
          */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         vm.warp(block.timestamp - 1);
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -104,7 +107,10 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         /**
          * 1. STANDARD STRATEGY/MAKER BID: itemIds' length is equal to 0
          */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         // Change makerBid itemIds array's length to make it equal to 0
         itemIds = new uint256[](0);

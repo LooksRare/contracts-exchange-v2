@@ -75,7 +75,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
-        _createBatchMakerBidOrderHashes(orderHashes);
+        OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
@@ -152,7 +152,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         Merkle m = new Merkle();
         uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
-        _createBatchMakerBidOrderHashes(orderHashes);
+        OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
@@ -226,7 +226,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         }
     }
 
-    function _createBatchMakerBidOrderHashes(bytes32[] memory orderHashes) private {
+    function _createBatchMakerBidOrderHashes(
+        bytes32[] memory orderHashes
+    ) private view returns (OrderStructs.MakerBid memory makerBid) {
         uint256 numberOrders = 1_000;
 
         for (uint256 i; i < numberOrders; i++) {

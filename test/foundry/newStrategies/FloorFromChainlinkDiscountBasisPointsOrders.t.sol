@@ -28,7 +28,9 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
     }
 
     function testInactiveStrategy() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         makerBid.maxPrice = 9.5 ether;
         takerAsk.minPrice = 9.5 ether;
@@ -51,7 +53,9 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountBasisPointsDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 1%, desired price = 9.603 ETH
         // Max price = 9.5 ETH
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         makerBid.maxPrice = 9.5 ether;
         takerAsk.minPrice = 9.5 ether;
@@ -78,7 +82,9 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountBasisPointsDesiredDiscountedPriceLessThanMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 3%, desired price = 9.409 ETH
         // Max price = 9.5 ETH
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 300});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 300
+        });
 
         makerBid.maxPrice = 9.41 ether;
 
@@ -104,7 +110,9 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountBasisPointsDesiredDiscountBasisPointsGreaterThan10000() public {
         // Floor price = 9.7 ETH, discount = 101%, desired price = negative
         // Max price = negative
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 10_001});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 10_001
+        });
 
         signature = _signMakerBid(makerBid, makerUserPK);
 

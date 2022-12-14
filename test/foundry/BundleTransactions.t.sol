@@ -12,11 +12,10 @@ contract BundleTransactionsTest is ProtocolBase {
         _setUpUsers();
         uint256 numberItemsInBundle = 5;
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
-            address(mockERC721),
-            address(weth),
-            numberItemsInBundle
-        );
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk
+        ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         price = makerBid.maxPrice;
 
@@ -62,11 +61,10 @@ contract BundleTransactionsTest is ProtocolBase {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
         uint256 numberItemsInBundle = 5;
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
-            address(mockERC721),
-            address(weth),
-            numberItemsInBundle
-        );
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk
+        ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         price = makerBid.maxPrice;
 

@@ -86,7 +86,10 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testItemIdsLengthNotOne() public {
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         // Adjust strategy for collection order and sign order
         // Change array to make it bigger than expected
@@ -113,7 +116,10 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testAmountsMismatch() public {
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 1;
@@ -142,7 +148,10 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testAmountsLengthNotOne() public {
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         // Adjust strategy for collection order and sign order
         // Change array to make it bigger than expected
@@ -169,7 +178,10 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testZeroAmount() public {
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
@@ -183,7 +195,10 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testBidAskAmountMismatch() public {
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 2;
@@ -198,7 +213,10 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testPriceMismatch() public {
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         takerAsk.minPrice = makerBid.maxPrice + 1;
         signature = _signMakerBid(makerBid, makerUserPK);
@@ -219,24 +237,22 @@ contract CollectionOrdersTest is ProtocolBase {
 
         price = 1 ether; // Fixed price of sale
 
-        {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 1,
-                assetType: 0, // ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: 0 // Not used
-            });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1,
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Not used
+        });
 
-            // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
-        }
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -298,26 +314,24 @@ contract CollectionOrdersTest is ProtocolBase {
 
         price = 1 ether; // Fixed price of sale
 
-        {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 2,
-                assetType: 0, // ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: 0 // Not used
-            });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Not used
+        });
 
-            makerBid.additionalParameters = abi.encode(merkleRoot);
+        makerBid.additionalParameters = abi.encode(merkleRoot);
 
-            // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
-        }
+        // Sign order
+        signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);

@@ -64,7 +64,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         signature = _signMakerBid(makerBid, makerUserPK);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,

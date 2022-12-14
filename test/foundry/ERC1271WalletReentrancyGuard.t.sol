@@ -105,7 +105,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,

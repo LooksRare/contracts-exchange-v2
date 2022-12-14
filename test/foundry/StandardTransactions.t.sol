@@ -115,19 +115,17 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, itemId);
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
         {
             uint256 gasLeft = gasleft();

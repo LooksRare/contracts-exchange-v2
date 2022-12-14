@@ -146,19 +146,17 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, itemId);
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
         // Execute taker ask transaction
         // Taker user actions
@@ -202,19 +200,17 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, itemId);
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
         {
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -287,7 +283,13 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.maxPrice,
+                itemIds,
+                amounts,
+                abi.encode()
+            );
 
             vm.prank(takerUser);
 
@@ -323,7 +325,13 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             signature = _signMakerBid(makerBid, makerUserPK);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.maxPrice,
+                itemIds,
+                amounts,
+                abi.encode()
+            );
 
             vm.prank(takerUser);
 
@@ -385,19 +393,17 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, itemId);
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
         {
             vm.expectRevert(WrongNonces.selector);

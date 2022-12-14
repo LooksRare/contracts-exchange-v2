@@ -257,16 +257,20 @@ contract CollectionOrdersTest is ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, tokenId);
+        // Mint asset
+        mockERC721.mint(takerUser, tokenId);
 
-            uint256[] memory itemIds = new uint256[](1);
-            itemIds[0] = tokenId;
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = tokenId;
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, makerBid.amounts, abi.encode());
-        }
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
         _assertOrderIsValid(makerBid);
 
@@ -341,19 +345,17 @@ contract CollectionOrdersTest is ProtocolBase {
 
         assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[2]));
 
-        {
-            uint256[] memory itemIds = new uint256[](1);
-            itemIds[0] = itemIdSold;
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemIdSold;
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                itemIds,
-                makerBid.amounts,
-                abi.encode(proof)
-            );
-        }
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            itemIds,
+            makerBid.amounts,
+            abi.encode(proof)
+        );
 
         _assertOrderIsValid(makerBid);
 

@@ -166,7 +166,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAskAmounts[1] = 2;
         takerAskAmounts[2] = 2;
 
-        takerAsk = OrderStructs.TakerAsk({
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: makerBid.maxPrice,
             itemIds: takerAskItemIds,

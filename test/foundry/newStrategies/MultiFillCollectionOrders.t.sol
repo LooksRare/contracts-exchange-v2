@@ -95,7 +95,13 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.maxPrice,
+                itemIds,
+                amounts,
+                abi.encode()
+            );
 
             uint256 gasLeft = gasleft();
 
@@ -138,7 +144,13 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.batchMint(secondTakerUser, itemIds);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(secondTakerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+                secondTakerUser,
+                makerBid.maxPrice,
+                itemIds,
+                amounts,
+                abi.encode()
+            );
 
             uint256 gasLeft = gasleft();
 
@@ -205,7 +217,13 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.maxPrice,
+                itemIds,
+                amounts,
+                abi.encode()
+            );
 
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));

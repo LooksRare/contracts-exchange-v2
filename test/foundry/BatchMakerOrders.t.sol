@@ -90,7 +90,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         mockERC721.mint(takerUser, numberOrders - 1);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,
@@ -162,7 +162,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,

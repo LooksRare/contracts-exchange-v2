@@ -71,7 +71,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,
@@ -130,7 +130,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721WithRoyalties.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,
@@ -360,7 +360,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,

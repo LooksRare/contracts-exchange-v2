@@ -40,7 +40,6 @@ abstract contract TestParameters is Test {
     address internal constant CHAINLINK_ETH_USD_PRICE_FEED = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
 
     // Reused parameters
-    OrderStructs.MakerAsk public makerAsk;
     OrderStructs.MakerBid public makerBid;
     OrderStructs.TakerBid public takerBid;
     OrderStructs.TakerAsk public takerAsk;

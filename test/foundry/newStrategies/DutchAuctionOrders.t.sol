@@ -105,7 +105,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            1,
+            1
+        );
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -134,7 +137,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testCallerNotLooksRareProtocol() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            1,
+            1
+        );
 
         // Valid, but wrong caller
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
@@ -149,7 +155,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testInactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            1,
+            1
+        );
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
@@ -170,7 +179,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testZeroItemIdsLength() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(0, 0);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            0,
+            0
+        );
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -188,7 +200,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testItemIdsAndAmountsLengthMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 2);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            1,
+            2
+        );
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -206,7 +221,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testItemIdsMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            1,
+            1
+        );
 
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 2;
@@ -231,7 +249,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testZeroAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            1,
+            1
+        );
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
@@ -253,7 +274,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testStartPriceTooLow() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            1,
+            1
+        );
 
         // startPrice is 10 ether
         makerAsk.minPrice = 10 ether + 1 wei;
@@ -276,7 +300,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         _setUpUsers();
         _setUpNewStrategy();
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid(1, 1);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
+            1,
+            1
+        );
 
         uint256 currentPrice = startPrice - decayPerSecond * elapsedTime;
         takerBid.maxPrice = currentPrice - 1 wei;

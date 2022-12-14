@@ -19,7 +19,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     uint256 internal premium;
 
     function testFloorFromChainlinkPremiumPriceFeedNotAvailable() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -37,7 +39,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumOraclePriceNotRecentEnough() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -57,7 +61,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     function testFloorFromChainlinkPremiumChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -77,7 +83,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumMakerAskItemIdsLengthNotOne() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         makerAsk.itemIds = new uint256[](0);
 
@@ -92,7 +100,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumMakerAskAmountsLengthNotOne() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         makerAsk.amounts = new uint256[](0);
 
@@ -107,7 +117,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumMakerAskAmountNotOne() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
@@ -124,7 +136,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumTakerBidAmountNotOne() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
@@ -142,7 +156,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumMakerAskTakerBidItemIdsMismatch() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 2;
@@ -160,7 +176,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumBidTooLow() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         takerBid.maxPrice = makerAsk.minPrice - 1 wei;
 
@@ -176,7 +194,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumCallerNotLooksRareProtocol() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -192,7 +212,9 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumWrongCurrency() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         vm.prank(_owner);
         looksRareProtocol.updateCurrencyWhitelistStatus(address(looksRareToken), true);

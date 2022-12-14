@@ -176,7 +176,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         /**
          * 6. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is equal to 0
          */
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
         // Change maker itemIds array to make its length equal to 0
         itemIds = new uint256[](0);

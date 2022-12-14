@@ -33,7 +33,7 @@ contract GasGriefingTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
@@ -50,7 +50,7 @@ contract GasGriefingTest is ProtocolBase {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,

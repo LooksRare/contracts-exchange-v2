@@ -26,7 +26,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         for (uint256 i; i < numberOrders; i++) {
             mockERC721.mint(makerUser, i);
         }
-        _createBatchMakerAskOrderHashes(orderHashes);
+        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
@@ -38,7 +38,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         vm.startPrank(takerUser);
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,
@@ -124,7 +124,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         Merkle m = new Merkle();
         uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
-        _createBatchMakerAskOrderHashes(orderHashes);
+        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
@@ -202,7 +202,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         }
     }
 
-    function _createBatchMakerAskOrderHashes(bytes32[] memory orderHashes) private {
+    function _createBatchMakerAskOrderHashes(
+        bytes32[] memory orderHashes
+    ) private view returns (OrderStructs.MakerAsk memory makerAsk) {
         uint256 numberOrders = 1_000;
 
         for (uint256 i; i < numberOrders; i++) {

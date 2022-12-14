@@ -42,27 +42,25 @@ contract AffiliateOrdersTest is ProtocolBase {
         price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
-        {
-            // Mint asset
-            mockERC721.mint(makerUser, itemId);
+        // Mint asset
+        mockERC721.mint(makerUser, itemId);
 
-            // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(0), // ETH,
-                signer: makerUser,
-                minPrice: price,
-                itemId: itemId
-            });
+        // Prepare the order hash
+        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(0), // ETH,
+            signer: makerUser,
+            minPrice: price,
+            itemId: itemId
+        });
 
-            // Sign order
-            signature = _signMakerAsk(makerAsk, makerUserPK);
-        }
+        // Sign order
+        signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);

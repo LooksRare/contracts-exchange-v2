@@ -17,8 +17,10 @@ abstract contract TestParameters is Test {
     uint16 internal constant _standardRoyaltyFee = uint16(50);
     uint256 internal constant makerUserPK = 1;
     uint256 internal constant takerUserPK = 2;
-    address internal makerUser = vm.addr(makerUserPK);
-    address internal takerUser = vm.addr(takerUserPK);
+    // it is equal to vm.addr(makerUserPK)
+    address internal constant makerUser = 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf;
+    // it is equal to vm.addr(takerUserPK)
+    address internal constant takerUser = 0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF;
     OrderStructs.MerkleTree internal _emptyMerkleTree;
     bytes4 internal constant _emptyBytes4 = bytes4(0);
     bytes32 public constant MAGIC_VALUE_NONCE_EXECUTED =

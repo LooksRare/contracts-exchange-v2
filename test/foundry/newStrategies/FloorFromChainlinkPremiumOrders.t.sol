@@ -198,8 +198,6 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
             premium: premium
         });
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
         _setPriceFeed();
 
         // Valid, but wrong caller

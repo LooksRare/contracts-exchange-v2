@@ -240,9 +240,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
         strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);

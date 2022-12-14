@@ -187,8 +187,6 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
                 numberItemsInBundle
             );
 
-        uint256 price = makerBid.maxPrice;
-
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 

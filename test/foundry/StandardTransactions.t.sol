@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 // Libraries and interfaces
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -359,5 +360,61 @@ contract StandardTransactionsTest is ProtocolBase {
         );
         // 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
+    }
+
+    function testThreeTakerBidsERC721WrongLengths() public {
+        _setUpUsers();
+
+        uint256 numberPurchases = 3;
+        price = 1 ether;
+
+        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        bytes[] memory signatures = new bytes[](numberPurchases);
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+
+        // 1. Wrong maker asks length
+        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases - 1);
+
+        vm.startPrank(takerUser);
+
+        vm.expectRevert(WrongLengths.selector);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            takerBids,
+            makerAsks,
+            signatures,
+            merkleTrees,
+            _emptyAffiliate,
+            false
+        );
+
+        // 2. Wrong signatures length
+        makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        signatures = new bytes[](numberPurchases - 1);
+
+        vm.expectRevert(WrongLengths.selector);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            takerBids,
+            makerAsks,
+            signatures,
+            merkleTrees,
+            _emptyAffiliate,
+            false
+        );
+
+        // 3. Wrong merkle trees length
+        signatures = new bytes[](numberPurchases);
+        merkleTrees = new OrderStructs.MerkleTree[](numberPurchases - 1);
+
+        vm.expectRevert(WrongLengths.selector);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            takerBids,
+            makerAsks,
+            signatures,
+            merkleTrees,
+            _emptyAffiliate,
+            false
+        );
+
+        vm.stopPrank();
     }
 }

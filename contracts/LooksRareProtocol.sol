@@ -16,7 +16,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
-import {WrongCurrency} from "./interfaces/SharedErrors.sol";
+import {WrongCurrency, WrongLengths} from "./interfaces/SharedErrors.sol";
 
 // Other dependencies
 import {AffiliateManager} from "./AffiliateManager.sol";

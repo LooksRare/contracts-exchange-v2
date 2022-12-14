@@ -8,7 +8,6 @@ pragma solidity ^0.8.17;
 interface INonceManager {
     // Custom errors
     error NoNonceToIncrement();
-    error WrongLengths();
 
     // Events
     event NewBidAskNonces(uint112 bidNonce, uint112 askNonce);

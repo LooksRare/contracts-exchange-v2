@@ -13,7 +13,6 @@ interface ITransferManager {
     error NotWhitelisted();
     error TransferCallerInvalid();
     error WrongAssetType(uint8 assetType);
-    error WrongLengths();
 
     // Events
     event ApprovalsGranted(address user, address[] operators);

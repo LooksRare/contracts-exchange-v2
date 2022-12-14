@@ -33,7 +33,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         assertEq(errorSelector, bytes4(0));
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanMinPrice() public {
@@ -69,7 +69,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -98,7 +98,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);

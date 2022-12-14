@@ -33,7 +33,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         );
 
         vm.expectRevert(errorSelector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumOraclePriceNotRecentEnough() public {
@@ -51,7 +51,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         );
 
         vm.expectRevert(errorSelector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumChainlinkPriceLessThanOrEqualToZero() public {
@@ -69,11 +69,11 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         bytes4 errorSelector = _assertOrderInvalid(makerAsk, StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
 
         aggregator.setAnswer(-1);
         vm.expectRevert(StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumMakerAskItemIdsLengthNotOne() public {
@@ -88,7 +88,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumMakerAskAmountsLengthNotOne() public {
@@ -103,7 +103,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumMakerAskAmountNotOne() public {
@@ -120,7 +120,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         bytes4 errorSelector = _assertOrderInvalid(makerAsk);
 
         vm.expectRevert(errorSelector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumTakerBidAmountNotOne() public {
@@ -138,7 +138,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumMakerAskTakerBidItemIdsMismatch() public {
@@ -156,7 +156,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumBidTooLow() public {
@@ -172,7 +172,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _assertOrderValid(makerAsk);
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumCallerNotLooksRareProtocol() public {
@@ -205,7 +205,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         bytes4 errorSelector = _assertOrderInvalid(makerAsk, WrongCurrency.selector);
 
         vm.expectRevert(errorSelector);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function _assertOrderValid(OrderStructs.MakerAsk memory makerAsk) internal {
@@ -229,11 +229,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         return errorSelector;
     }
 
-    function _executeTakerBid(
-        OrderStructs.TakerBid memory takerBid,
-        OrderStructs.MakerAsk memory makerAsk,
-        bytes memory signature
-    ) internal {
+    function _executeTakerBid() internal {
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);

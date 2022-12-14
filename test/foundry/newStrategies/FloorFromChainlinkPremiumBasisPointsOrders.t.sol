@@ -35,7 +35,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         _assertOrderValid(makerAsk);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
     }
 
     function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanMinPrice() public {
@@ -43,7 +43,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         // Min price = 9.7 ETH
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
 
-        _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice();
     }
 
     function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceEqualToMinPrice() public {
@@ -52,18 +52,15 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
         makerAsk.minPrice = 9.797 ether;
 
-        _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
+        _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice();
     }
 
-    function _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(
-        OrderStructs.MakerAsk memory newMakerAsk,
-        OrderStructs.TakerBid memory newTakerBid
-    ) private {
-        signature = _signMakerAsk(newMakerAsk, makerUserPK);
+    function _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice() private {
+        signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
-        _assertOrderValid(newMakerAsk);
-        _executeTakerBid(newTakerBid, newMakerAsk, signature);
+        _assertOrderValid(makerAsk);
+        _executeTakerBid();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -88,7 +85,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
 
         _setPriceFeed();
         _assertOrderValid(makerAsk);
-        _executeTakerBid(takerBid, makerAsk, signature);
+        _executeTakerBid();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);

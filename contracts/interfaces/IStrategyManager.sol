@@ -22,7 +22,7 @@ interface IStrategyManager {
         uint16 minTotalFee;
         uint16 maxProtocolFee;
         bytes4 selector;
-        bool isTakerBid;
+        bool isMakerBid;
         address implementation;
     }
 }

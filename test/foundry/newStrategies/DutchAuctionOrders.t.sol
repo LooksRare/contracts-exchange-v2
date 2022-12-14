@@ -28,7 +28,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             _minTotalFee,
             _maxProtocolFee,
             selector,
-            true,
+            false,
             address(strategyDutchAuction)
         );
     }
@@ -87,7 +87,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
             bytes4 strategySelector,
-            bool strategyIsTakerBid,
+            bool strategyIsMakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -96,7 +96,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
         assertEq(strategySelector, selector);
-        assertTrue(strategyIsTakerBid);
+        assertFalse(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyDutchAuction));
     }
 

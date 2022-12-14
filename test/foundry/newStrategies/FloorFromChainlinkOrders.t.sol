@@ -31,7 +31,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
     uint256 private isFixedAmount;
     bytes4 internal selector;
-    bool internal isTakerBid;
+    bool internal isMakerBid;
 
     function setUp() public virtual override {
         vm.createSelectFork(vm.rpcUrl("goerli"), FORKED_BLOCK_NUMBER);
@@ -47,7 +47,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
             bytes4 strategySelector,
-            bool strategyIsTakerBid,
+            bool strategyIsMakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -56,7 +56,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
         assertEq(strategySelector, selector);
-        assertEq(strategyIsTakerBid, isTakerBid);
+        assertEq(strategyIsMakerBid, isMakerBid);
         assertEq(strategyImplementation, address(strategyFloorFromChainlink));
     }
 
@@ -86,9 +86,9 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
-    function _setSelector(bytes4 _selector, bool _isTakerBid) internal {
+    function _setSelector(bytes4 _selector, bool _isMakerBid) internal {
         selector = _selector;
-        isTakerBid = _isTakerBid;
+        isMakerBid = _isMakerBid;
     }
 
     function _createMakerAskAndTakerBid(
@@ -187,7 +187,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             _minTotalFee,
             _maxProtocolFee,
             selector,
-            isTakerBid,
+            isMakerBid,
             address(strategyFloorFromChainlink)
         );
     }

@@ -17,7 +17,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         _setIsFixedAmount(1);
         _setDiscount(0.1 ether);
         _setValidityFunctionSelector(StrategyFloorFromChainlink.isFixedDiscountMakerBidValid.selector);
-        _setSelector(StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector, false);
+        _setSelector(StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector, true);
         super.setUp();
     }
 

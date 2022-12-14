@@ -29,7 +29,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             minTotalFee: 200,
             maxProtocolFee: 300,
             selector: bytes4(0),
-            isTakerBid: false,
+            isMakerBid: false,
             implementation: address(0)
         });
     }
@@ -39,7 +39,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
      * @param standardProtocolFee Protocol fee
      * @param maxProtocolFee Maximum protocol fee
      * @param selector Selector
-     * @param isTakerBid Whether the function selector is for taker bids
+     * @param isMakerBid Whether the function selector is for maker bids
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      */
@@ -48,7 +48,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
         uint16 minTotalFee,
         uint16 maxProtocolFee,
         bytes4 selector,
-        bool isTakerBid,
+        bool isMakerBid,
         address implementation
     ) external onlyOwner {
         if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > 5_000)
@@ -62,7 +62,7 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
             minTotalFee: minTotalFee,
             maxProtocolFee: maxProtocolFee,
             selector: selector,
-            isTakerBid: isTakerBid,
+            isMakerBid: isMakerBid,
             implementation: implementation
         });
 

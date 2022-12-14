@@ -258,7 +258,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             _minTotalFee,
             _maxProtocolFee,
             selector,
-            false,
+            true,
             address(strategyMultiFillCollectionOrder)
         );
 

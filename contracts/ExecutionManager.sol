@@ -170,7 +170,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerAsk.strategyId].isActive) {
-                if (!strategyInfo[makerAsk.strategyId].isTakerBid) revert NoSelectorForTakerBid();
+                if (strategyInfo[makerAsk.strategyId].isMakerBid) revert NoSelectorForTakerBid();
 
                 bytes4 selector = strategyInfo[makerAsk.strategyId].selector;
                 if (selector == bytes4(0)) revert NoSelectorForTakerBid();
@@ -209,7 +209,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
-                if (strategyInfo[makerBid.strategyId].isTakerBid) revert NoSelectorForTakerAsk();
+                if (!strategyInfo[makerBid.strategyId].isMakerBid) revert NoSelectorForTakerAsk();
 
                 bytes4 selector = strategyInfo[makerBid.strategyId].selector;
                 if (selector == bytes4(0)) revert NoSelectorForTakerAsk();

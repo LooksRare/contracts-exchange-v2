@@ -18,7 +18,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
     function setUp() public override {
         _setIsFixedAmount(0);
         _setPremium(100);
-        _setSelector(StrategyFloorFromChainlink.executeBasisPointsPremiumStrategyWithTakerBid.selector, true);
+        _setSelector(StrategyFloorFromChainlink.executeBasisPointsPremiumStrategyWithTakerBid.selector, false);
         super.setUp();
     }
 

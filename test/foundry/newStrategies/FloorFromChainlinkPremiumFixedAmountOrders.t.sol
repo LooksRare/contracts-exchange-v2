@@ -15,7 +15,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
     function setUp() public override {
         _setPremium(0.1 ether);
         _setIsFixedAmount(1);
-        _setSelector(StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector, true);
+        _setSelector(StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector, false);
         super.setUp();
     }
 

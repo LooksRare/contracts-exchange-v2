@@ -34,9 +34,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Maker signs the root
         signature = _signMerkleProof(merkleTree, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Prepare the taker bid
         takerBid = OrderStructs.TakerBid(
             takerUser,
@@ -47,15 +44,12 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
 
         uint256 gasLeft = gasleft();
-
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
+        _executeTakerBid(merkleTree);
         emit log_named_uint(
             "TakerBid // ERC721 // Protocol Fee // Multiple Orders Signed // No Royalties",
             gasLeft - gasleft()
         );
-
-        vm.stopPrank();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(numberOrders - 1), takerUser);
@@ -142,10 +136,8 @@ contract BatchMakerOrdersTest is ProtocolBase {
             abi.encode()
         );
 
-        vm.prank(takerUser);
         vm.expectRevert(WrongMerkleProof.selector);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
+        _executeTakerBid(merkleTree);
     }
 
     function testTakerAskMultipleOrdersSignedERC721WrongMerkleProof() public {
@@ -244,5 +236,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
             orderHashes[i] = computeOrderHashMakerBid(makerBid);
         }
+    }
+
+    function _executeTakerBid(OrderStructs.MerkleTree memory merkleTree) private {
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
     }
 }

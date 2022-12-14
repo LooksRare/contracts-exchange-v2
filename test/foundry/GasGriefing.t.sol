@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 // Libraries and interfaces
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+import {WETH} from "solmate/src/tokens/WETH.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -12,6 +13,10 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {GasGriefer} from "./utils/GasGriefer.sol";
 
 contract GasGriefingTest is ProtocolBase {
+    // WETH events
+    event Deposit(address indexed from, uint256 amount);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+
     function setUp() public override {
         super.setUp();
         makerUser = address(new GasGriefer());
@@ -53,6 +58,14 @@ contract GasGriefingTest is ProtocolBase {
             abi.encode()
         );
 
+        uint256 sellerProceed = (price * 9_800) / 10_000;
+
+        vm.expectEmit(true, true, false, true);
+        emit Deposit(address(looksRareProtocol), sellerProceed);
+
+        vm.expectEmit(true, true, true, true);
+        emit Transfer(address(looksRareProtocol), address(makerUser), sellerProceed);
+
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid{value: price}(
@@ -68,7 +81,7 @@ contract GasGriefingTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + sellerProceed);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             address(_royaltyRecipient).balance,
@@ -121,6 +134,14 @@ contract GasGriefingTest is ProtocolBase {
         // Other execution parameters
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
+        uint256 sellerProceedPerItem = (price * 9_800) / 10_000;
+
+        vm.expectEmit(true, true, false, true);
+        emit Deposit(address(looksRareProtocol), sellerProceedPerItem);
+
+        vm.expectEmit(true, true, true, true);
+        emit Transfer(address(looksRareProtocol), address(makerUser), sellerProceedPerItem);
+
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
@@ -141,7 +162,7 @@ contract GasGriefingTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((price * 9_800) * numberPurchases) / 10_000);
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + sellerProceedPerItem * numberPurchases);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }

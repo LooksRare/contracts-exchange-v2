@@ -47,7 +47,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_newCreatorRoyaltyFee);
 
-        price = 1 ether; // Fixed price of sale
+        uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash
@@ -102,7 +102,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
     function testCreatorRoyaltiesGetPaidForERC2981() public {
         uint256 itemId = 0; // TokenId
-        price = 1 ether; // Fixed price of sale
+        uint256 price = 1 ether; // Fixed price of sale
 
         _setUpUsers();
 
@@ -172,7 +172,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             OrderStructs.TakerAsk memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
-        price = makerBid.maxPrice;
+        uint256 price = makerBid.maxPrice;
 
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -220,7 +220,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 numberItemsInBundle
             );
 
-        price = makerBid.maxPrice;
+        uint256 price = makerBid.maxPrice;
 
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -273,7 +273,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 numberItemsInBundle
             );
 
-        price = makerBid.maxPrice;
+        uint256 price = makerBid.maxPrice;
 
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -336,7 +336,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_creatorRoyaltyFeeTooHigh);
 
-        price = 1 ether; // Fixed price of sale
+        uint256 price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash

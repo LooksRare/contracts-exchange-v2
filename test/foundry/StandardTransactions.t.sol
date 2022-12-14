@@ -10,6 +10,8 @@ import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract StandardTransactionsTest is ProtocolBase {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
@@ -17,7 +19,6 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Mint asset
@@ -92,7 +93,6 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash
@@ -159,7 +159,6 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
 
         uint256 numberPurchases = 3;
-        price = 1 ether;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
@@ -242,7 +241,6 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
 
         uint256 numberPurchases = 3;
-        price = 1 ether;
         uint256 faultyTokenId = numberPurchases - 1;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
@@ -358,7 +356,6 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
 
         uint256 numberPurchases = 3;
-        price = 1 ether;
 
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);

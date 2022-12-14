@@ -13,6 +13,8 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {GasGriefer} from "./utils/GasGriefer.sol";
 
 contract GasGriefingTest is ProtocolBase {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     // WETH events
     event Deposit(address indexed from, uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 amount);
@@ -26,7 +28,6 @@ contract GasGriefingTest is ProtocolBase {
     function testTakerBidGasGriefing() public {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Mint asset
@@ -95,7 +96,6 @@ contract GasGriefingTest is ProtocolBase {
 
     function testThreeTakerBidsGasGriefing() public {
         uint256 numberPurchases = 3;
-        price = 1 ether;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);

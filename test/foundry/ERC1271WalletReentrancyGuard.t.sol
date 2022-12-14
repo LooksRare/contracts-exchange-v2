@@ -13,6 +13,8 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MaliciousERC1271Wallet} from "./utils/MaliciousERC1271Wallet.sol";
 
 contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     function setUp() public override {
         super.setUp();
         _setUpUser(takerUser);
@@ -27,7 +29,6 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Mint asset
@@ -79,7 +80,6 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash
@@ -126,7 +126,6 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 
         uint256 numberPurchases = 3;
-        price = 1 ether;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);

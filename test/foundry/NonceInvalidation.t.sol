@@ -11,6 +11,8 @@ import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFil
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract NonceInvalidationTest is INonceManager, ProtocolBase {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     /**
      * Cannot execute an order if subset nonce is used
      */
@@ -54,6 +56,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             makerAsk.amounts,
             abi.encode()
         );
+
+        vm.deal(takerUser, price);
 
         // Execute taker bid transaction
         // Taker user actions
@@ -103,6 +107,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             makerAsk.amounts,
             abi.encode()
         );
+
+        vm.deal(takerUser, price);
 
         // Execute taker bid transaction
         // Taker user actions
@@ -177,7 +183,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash
@@ -247,7 +252,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         );
 
         // 1. Maker signs a message and execute a partial fill on it
-        price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
         uint256 orderNonce = 420;
 
@@ -363,7 +367,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         uint256 orderNonce = 69;

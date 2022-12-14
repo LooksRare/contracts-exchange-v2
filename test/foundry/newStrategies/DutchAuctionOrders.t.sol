@@ -17,9 +17,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
     bytes4 public selector = StrategyDutchAuction.executeStrategyWithTakerBid.selector;
 
-    uint256 private startPrice = 10 ether;
-    uint256 private endPrice = 1 ether;
-    uint256 private decayPerSecond = 0.0025 ether;
+    uint256 private constant startPrice = 10 ether;
+    uint256 private constant endPrice = 1 ether;
+    uint256 private constant decayPerSecond = 0.0025 ether;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyDutchAuction = new StrategyDutchAuction(address(looksRareProtocol));

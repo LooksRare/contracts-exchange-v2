@@ -17,7 +17,7 @@ contract BundleTransactionsTest is ProtocolBase {
             OrderStructs.TakerAsk memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
-        price = makerBid.maxPrice;
+        uint256 price = makerBid.maxPrice;
 
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -66,7 +66,7 @@ contract BundleTransactionsTest is ProtocolBase {
             OrderStructs.TakerAsk memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
-        price = makerBid.maxPrice;
+        uint256 price = makerBid.maxPrice;
 
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -117,7 +117,7 @@ contract BundleTransactionsTest is ProtocolBase {
             OrderStructs.TakerBid memory takerBid
         ) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
-        price = makerAsk.minPrice;
+        uint256 price = makerAsk.minPrice;
 
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
@@ -171,7 +171,7 @@ contract BundleTransactionsTest is ProtocolBase {
             OrderStructs.TakerBid memory takerBid
         ) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
-        price = makerAsk.minPrice;
+        uint256 price = makerAsk.minPrice;
 
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);

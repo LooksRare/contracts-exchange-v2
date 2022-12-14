@@ -20,6 +20,8 @@ contract CollectionOrdersTest is ProtocolBase {
     bytes4 public selectorNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
     bytes4 public selectorWithProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
 
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     function setUp() public override {
         super.setUp();
         _setUpNewStrategies();
@@ -235,8 +237,6 @@ contract CollectionOrdersTest is ProtocolBase {
     function testTakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
 
-        price = 1 ether; // Fixed price of sale
-
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
@@ -315,8 +315,6 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // Compute merkle root
         bytes32 merkleRoot = m.getRoot(merkleTreeIds);
-
-        price = 1 ether; // Fixed price of sale
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({

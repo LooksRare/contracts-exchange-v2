@@ -11,6 +11,7 @@ import {MockERC20} from "../mock/MockERC20.sol";
 contract AffiliateOrdersTest is ProtocolBase {
     // Affiliate rate
     uint256 internal _affiliateRate = 2_000;
+    uint256 private constant price = 1 ether; // Fixed price of sale
 
     function _calculateAffiliateFee(
         uint256 originalAmount,
@@ -39,7 +40,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Mint asset
@@ -117,7 +117,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        price = 1 ether;
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
 
@@ -218,7 +217,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Prepare the order hash

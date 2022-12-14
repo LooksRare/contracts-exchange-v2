@@ -13,6 +13,8 @@ import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFi
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     bytes4 public selector = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
 
     StrategyTestMultiFillCollectionOrder public strategyMultiFillCollectionOrder;
@@ -59,7 +61,6 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
 
-        price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
 
         uint256[] memory itemIds = new uint256[](0);
@@ -180,7 +181,6 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
 
-        price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
 
         uint256[] memory itemIds = new uint256[](0);

@@ -27,7 +27,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         _setUpUsers();
 
         // Parameters
-        price = 1 ether;
+        uint256 price = 1 ether;
         uint256 itemId = 42;
 
         if (erc721 == address(mockERC721)) {
@@ -107,7 +107,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         ) = _createMockMakerBidAndTakerAskWithBundle(erc721, address(weth), numberItemsInBundle);
 
         // Adjust price
-        price = makerBid.maxPrice;
+        uint256 price = makerBid.maxPrice;
 
         if (erc721 == address(mockERC721)) {
             // Adjust royalties
@@ -187,7 +187,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
                 numberItemsInBundle
             );
 
-        price = makerBid.maxPrice;
+        uint256 price = makerBid.maxPrice;
 
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);

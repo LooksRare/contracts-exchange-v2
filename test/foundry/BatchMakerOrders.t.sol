@@ -11,10 +11,11 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     function setUp() public override {
         super.setUp();
         _setUpUsers();
-        price = 1 ether; // Fixed price of sale
     }
 
     function testTakerBidMultipleOrdersSignedERC721() public {

@@ -27,7 +27,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
             premium: premium
         });
 
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
 
@@ -65,7 +65,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         OrderStructs.MakerAsk memory newMakerAsk,
         OrderStructs.TakerBid memory newTakerBid
     ) private {
-        signature = _signMakerAsk(newMakerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(newMakerAsk, makerUserPK);
 
         _setPriceFeed();
         _assertOrderValid(newMakerAsk);
@@ -92,7 +92,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         makerAsk.minPrice = 9.8 ether;
         takerBid.maxPrice = makerAsk.minPrice;
 
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
         _assertOrderValid(makerAsk);

@@ -111,7 +111,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.warp(block.timestamp + elapsedTime);
 
@@ -164,7 +164,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertTrue(isValid);
@@ -185,7 +185,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertFalse(isValid);
@@ -206,7 +206,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertFalse(isValid);
@@ -233,7 +233,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         takerBid.itemIds = itemIds;
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
@@ -259,7 +259,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         makerAsk.amounts = amounts;
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertFalse(isValid);
@@ -283,7 +283,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         makerAsk.minPrice = 10 ether + 1 wei;
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertFalse(isValid);
@@ -309,7 +309,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         takerBid.maxPrice = currentPrice - 1 wei;
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);

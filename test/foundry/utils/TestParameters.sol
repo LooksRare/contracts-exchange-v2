@@ -40,6 +40,5 @@ abstract contract TestParameters is Test {
     address internal constant CHAINLINK_ETH_USD_PRICE_FEED = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
 
     // Reused parameters
-    bytes public signature;
     uint256 public price;
 }

@@ -47,7 +47,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             itemId: itemId
         });
 
-        signature = new bytes(0);
+        bytes memory signature = new bytes(0);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -96,7 +96,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             itemId: itemId
         });
 
-        signature = new bytes(0);
+        bytes memory signature = new bytes(0);
 
         // Taker user actions
         vm.startPrank(takerUser);

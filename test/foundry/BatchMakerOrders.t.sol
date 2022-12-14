@@ -32,7 +32,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleTree, makerUserPK);
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -81,7 +81,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleTree, makerUserPK);
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -131,7 +131,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         merkleTree.root = tamperedRoot;
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleTree, makerUserPK);
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
@@ -159,7 +159,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         merkleTree.root = tamperedRoot;
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleTree, makerUserPK);
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Prepare the taker ask
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(

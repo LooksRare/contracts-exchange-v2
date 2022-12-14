@@ -97,7 +97,7 @@ contract CollectionOrdersTest is ProtocolBase {
         itemIds[0] = 1;
         makerBid.strategyId = 1;
         takerAsk.itemIds = itemIds;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid is still valid
         _assertOrderIsValid(makerBid);
@@ -130,7 +130,7 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // Adjust strategy for collection order and sign order
         makerBid.strategyId = 1;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
 
@@ -160,7 +160,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.strategyId = 1;
         makerBid.amounts = amounts;
         takerAsk.amounts = amounts;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid);
 
@@ -186,7 +186,7 @@ contract CollectionOrdersTest is ProtocolBase {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
         makerBid.amounts = amounts;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid);
 
@@ -203,7 +203,7 @@ contract CollectionOrdersTest is ProtocolBase {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 2;
         takerAsk.amounts = amounts;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid still valid
         _assertOrderIsValid(makerBid);
@@ -219,7 +219,7 @@ contract CollectionOrdersTest is ProtocolBase {
         );
 
         takerAsk.minPrice = makerBid.maxPrice + 1;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid still valid
         _assertOrderIsValid(makerBid);
@@ -252,7 +252,7 @@ contract CollectionOrdersTest is ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -335,7 +335,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.additionalParameters = abi.encode(merkleRoot);
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);

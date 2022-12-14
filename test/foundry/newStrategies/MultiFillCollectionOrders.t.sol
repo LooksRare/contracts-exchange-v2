@@ -82,7 +82,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // First taker user actions
         vm.startPrank(takerUser);
@@ -203,7 +203,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);

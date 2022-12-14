@@ -36,7 +36,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         uint112[] memory subsetNonces = new uint112[](1);
         subsetNonces[0] = subsetNonce;
@@ -93,7 +93,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
@@ -144,7 +144,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -195,7 +195,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -271,7 +271,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // First taker user actions
         {
@@ -388,7 +388,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);

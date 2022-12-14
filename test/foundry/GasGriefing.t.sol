@@ -47,7 +47,7 @@ contract GasGriefingTest is ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(

@@ -61,7 +61,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Prepare the taker ask
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
@@ -128,7 +128,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         }
 
         // Sign the order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -190,7 +190,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         price = makerBid.maxPrice;
 
         // Sign the order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);

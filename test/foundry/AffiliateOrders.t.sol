@@ -60,7 +60,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -236,7 +236,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);

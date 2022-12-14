@@ -103,8 +103,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
             uint256 gasLeft = gasleft();
 
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+            _executeTakerAsk();
 
             emit log_named_uint(
                 "TakerAsk // 1 ERC721 Sold // Protocol Fee // Collection Order (Multi-fills) // Registry Royalties",
@@ -146,8 +145,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
             uint256 gasLeft = gasleft();
 
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+            _executeTakerAsk();
 
             emit log_named_uint(
                 "TakerAsk // 3 ERC721 Sold // Protocol Fee // Collection Order (Multi-fills) // Registry Royalties",
@@ -215,8 +213,11 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+            _executeTakerAsk();
         }
+    }
+
+    function _executeTakerAsk() private {
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

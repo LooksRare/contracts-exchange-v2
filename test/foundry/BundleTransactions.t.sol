@@ -127,14 +127,7 @@ contract BundleTransactionsTest is ProtocolBase {
         {
             uint256 gasLeft = gasleft();
 
-            // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                _emptyMerkleTree,
-                _emptyAffiliate
-            );
+            _executeTakerBid();
             emit log_named_uint(
                 "TakerBid // ERC721 // Bundle (5 items) // Protocol Fee // No Royalties",
                 gasLeft - gasleft()
@@ -178,14 +171,7 @@ contract BundleTransactionsTest is ProtocolBase {
         {
             uint256 gasLeft = gasleft();
 
-            // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                _emptyMerkleTree,
-                _emptyAffiliate
-            );
+            _executeTakerBid();
             emit log_named_uint(
                 "TakerBid // ERC721 // Bundle (5 items) // Protocol Fee // Registry Royalties",
                 gasLeft - gasleft()
@@ -212,5 +198,15 @@ contract BundleTransactionsTest is ProtocolBase {
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+    }
+
+    function _executeTakerBid() private {
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleTree,
+            _emptyAffiliate
+        );
     }
 }

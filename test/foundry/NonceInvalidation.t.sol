@@ -59,17 +59,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             );
         }
 
-        // Execute taker bid transaction
-        // Taker user actions
-        vm.prank(takerUser);
         vm.expectRevert(WrongNonces.selector);
-        looksRareProtocol.executeTakerBid{value: price}(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
-        );
+        _executeTakerBid();
     }
 
     /**
@@ -112,17 +103,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             );
         }
 
-        // Execute taker bid transaction
-        // Taker user actions
-        vm.prank(takerUser);
         vm.expectRevert(WrongNonces.selector);
-        looksRareProtocol.executeTakerBid{value: price}(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
-        );
+        _executeTakerBid();
 
         vm.prank(makerUser);
         vm.expectEmit(false, false, false, false);
@@ -423,5 +405,16 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         }
 
         vm.stopPrank();
+    }
+
+    function _executeTakerBid() private {
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleTree,
+            _emptyAffiliate
+        );
     }
 }

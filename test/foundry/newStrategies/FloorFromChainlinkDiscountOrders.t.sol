@@ -32,7 +32,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         );
 
         vm.expectRevert(errorSelector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountOraclePriceNotRecentEnough() public {
@@ -50,7 +50,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         );
 
         vm.expectRevert(errorSelector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountChainlinkPriceLessThanOrEqualToZero() public {
@@ -68,13 +68,13 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = _assertOrderInvalid(makerBid, StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
 
         aggregator.setAnswer(-1);
         errorSelector = _assertOrderInvalid(makerBid, StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountCallerNotLooksRareProtocol() public {
@@ -107,7 +107,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _assertOrderValid(makerBid);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountTakerAskAmountsLengthNotOne() public {
@@ -123,7 +123,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _assertOrderValid(makerBid);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountMakerBidAmountsLengthNotOne() public {
@@ -138,7 +138,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
         vm.expectRevert(errorSelector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountTakerAskZeroAmount() public {
@@ -157,7 +157,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _assertOrderValid(makerBid);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountMakerBidAmountNotOne() public {
@@ -175,7 +175,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
         vm.expectRevert(errorSelector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountAskTooHigh() public {
@@ -190,7 +190,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _assertOrderValid(makerBid);
 
         vm.expectRevert(IExecutionStrategy.AskTooHigh.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountWrongCurrency() public {
@@ -207,7 +207,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = _assertOrderInvalid(makerBid, WrongCurrency.selector);
 
         vm.expectRevert(errorSelector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function _setDiscount(uint256 _discount) internal {
@@ -245,11 +245,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         return errorSelector;
     }
 
-    function _executeTakerAsk(
-        OrderStructs.TakerAsk memory takerAsk,
-        OrderStructs.MakerBid memory makerBid,
-        bytes memory signature
-    ) internal {
+    function _executeTakerAsk() internal {
         vm.prank(takerUser);
         // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);

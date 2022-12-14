@@ -37,7 +37,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
@@ -54,7 +54,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         _assertOrderValid(makerBid);
 
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -78,7 +78,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         _assertOrderValid(makerBid);
 
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -101,7 +101,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         bytes4 errorSelector = _assertOrderInvalid(makerBid);
 
         vm.expectRevert(errorSelector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
 
         // Floor price = 9.7 ETH, discount = 9.8 ETH, desired price = -0.1 ETH
         // Max price = -0.1 ETH
@@ -109,6 +109,6 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 }

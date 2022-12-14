@@ -45,7 +45,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 
     function testFloorFromChainlinkDiscountBasisPointsDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
@@ -64,7 +64,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -90,7 +90,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -115,6 +115,6 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
+        _executeTakerAsk();
     }
 }

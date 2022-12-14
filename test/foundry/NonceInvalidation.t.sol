@@ -152,11 +152,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             );
         }
 
-        // Execute taker ask transaction
-        // Taker user actions
-        vm.prank(takerUser);
         vm.expectRevert(WrongNonces.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         vm.prank(makerUser);
         vm.expectEmit(false, false, false, false);
@@ -193,32 +190,23 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             signature = _signMakerBid(makerBid, makerUserPK);
         }
 
-        // Taker user actions
-        vm.startPrank(takerUser);
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, itemId);
+        // Prepare the taker ask
+        takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        _executeTakerAsk();
 
-        {
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-
-            // Second one fails
-            vm.expectRevert(WrongNonces.selector);
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-        }
-
-        vm.stopPrank();
+        // Second one fails
+        vm.expectRevert(WrongNonces.selector);
+        _executeTakerAsk();
     }
 
     /**
@@ -287,10 +275,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
 
-            vm.prank(takerUser);
-
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+            _executeTakerAsk();
         }
 
         // 2. Second maker order is signed sharing the same order nonce as the first one
@@ -323,11 +308,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             // Prepare the taker ask
             takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
 
-            vm.prank(takerUser);
-
             // Second one fails when a taker user tries to execute
             vm.expectRevert(WrongNonces.selector);
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+            _executeTakerAsk();
         }
     }
 
@@ -382,29 +365,20 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             signature = _signMakerBid(makerBid, makerUserPK);
         }
 
-        // Taker user actions
-        vm.startPrank(takerUser);
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, itemId);
+        // Prepare the taker ask
+        takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
-
-        {
-            vm.expectRevert(WrongNonces.selector);
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-        }
-
-        vm.stopPrank();
+        vm.expectRevert(WrongNonces.selector);
+        _executeTakerAsk();
     }
 
     function _executeTakerBid() private {
@@ -416,5 +390,10 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             _emptyMerkleTree,
             _emptyAffiliate
         );
+    }
+
+    function _executeTakerAsk() private {
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

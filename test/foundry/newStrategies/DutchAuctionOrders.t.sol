@@ -116,9 +116,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerBid();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
@@ -162,9 +160,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, bytes4(0));
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerBid();
     }
 
     function testZeroItemIdsLength() public {
@@ -180,9 +176,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerBid();
     }
 
     function testItemIdsAndAmountsLengthMismatch() public {
@@ -198,9 +192,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerBid();
     }
 
     function testItemIdsMismatch() public {
@@ -223,9 +215,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, bytes4(0));
 
         vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerBid();
     }
 
     function testZeroAmount() public {
@@ -245,9 +235,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerBid();
     }
 
     function testStartPriceTooLow() public {
@@ -266,9 +254,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerBid();
     }
 
     function testTakerBidTooLow(uint256 elapsedTime) public {
@@ -290,8 +276,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, bytes4(0));
 
         vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        _executeTakerBid();
+    }
+
+    function _executeTakerBid() private {
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

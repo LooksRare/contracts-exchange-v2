@@ -100,7 +100,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // With proof
         makerBid.strategyId = 2;
@@ -109,7 +109,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
     }
 
     function testAmountsMismatch() public {
@@ -129,7 +129,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // With proof
         makerBid.strategyId = 2;
@@ -138,7 +138,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
     }
 
     function testAmountsLengthNotOne() public {
@@ -156,7 +156,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // With proof
         makerBid.strategyId = 2;
@@ -165,7 +165,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
     }
 
     function testZeroAmount() public {
@@ -179,7 +179,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
     }
 
     function testBidAskAmountMismatch() public {
@@ -194,7 +194,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
     }
 
     function testPriceMismatch() public {
@@ -207,7 +207,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
     }
 
     /**
@@ -254,17 +254,14 @@ contract CollectionOrdersTest is ProtocolBase {
 
         _assertOrderIsValid(makerBid);
 
-        {
-            uint256 gasLeft = gasleft();
+        uint256 gasLeft = gasleft();
 
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Protocol Fee // CollectionOrder // Registry Royalties",
-                gasLeft - gasleft()
-            );
-        }
+        emit log_named_uint(
+            "TakerAsk // ERC721 // Protocol Fee // CollectionOrder // Registry Royalties",
+            gasLeft - gasleft()
+        );
 
         vm.stopPrank();
 
@@ -343,17 +340,14 @@ contract CollectionOrdersTest is ProtocolBase {
 
         _assertOrderIsValid(makerBid);
 
-        {
-            uint256 gasLeft = gasleft();
+        uint256 gasLeft = gasleft();
 
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Protocol Fee // Collection Order with Merkle Tree // Registry Royalties",
-                gasLeft - gasleft()
-            );
-        }
+        emit log_named_uint(
+            "TakerAsk // ERC721 // Protocol Fee // Collection Order with Merkle Tree // Registry Royalties",
+            gasLeft - gasleft()
+        );
 
         vm.stopPrank();
 
@@ -377,5 +371,9 @@ contract CollectionOrdersTest is ProtocolBase {
         (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
+    }
+
+    function _executeTakerAsk() private {
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

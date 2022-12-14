@@ -15,8 +15,7 @@ import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     StrategyTokenIdsRange public strategyTokenIdsRange;
-    bytes4 public selectorTakerAsk = StrategyTokenIdsRange.executeStrategyWithTakerAsk.selector;
-    bytes4 public selectorTakerBid = _emptyBytes4;
+    bytes4 public selector = StrategyTokenIdsRange.executeStrategyWithTakerAsk.selector;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
@@ -24,8 +23,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk,
-            selectorTakerBid,
+            selector,
+            true,
             address(strategyTokenIdsRange)
         );
     }
@@ -87,8 +86,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool strategyIsMakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -96,8 +95,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
-        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategySelector, selector);
+        assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyTokenIdsRange));
     }
 

@@ -26,8 +26,8 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool strategyIsMakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(strategyId);
 
@@ -35,8 +35,8 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, standardProtocolFee);
         assertEq(strategyMinTotalFee, minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, _emptyBytes4);
-        assertEq(strategySelectorTakerBid, _emptyBytes4);
+        assertEq(strategySelector, _emptyBytes4);
+        assertFalse(strategyIsMakerBid);
         assertEq(strategyImplementation, address(0));
     }
 
@@ -58,8 +58,8 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool strategyIsMakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(strategyId);
 
@@ -67,8 +67,8 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, standardProtocolFee);
         assertEq(strategyMinTotalFee, minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, _emptyBytes4);
-        assertEq(strategySelectorTakerBid, _emptyBytes4);
+        assertEq(strategySelector, _emptyBytes4);
+        assertFalse(strategyIsMakerBid);
         assertEq(strategyImplementation, address(0));
     }
 
@@ -121,7 +121,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             minTotalFee,
             maxProtocolFee,
             _emptyBytes4,
-            _emptyBytes4,
+            true,
             implementation
         );
 
@@ -133,7 +133,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             minTotalFee,
             maxProtocolFee,
             _emptyBytes4,
-            _emptyBytes4,
+            true,
             implementation
         );
 
@@ -145,7 +145,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             minTotalFee,
             maxProtocolFee,
             _emptyBytes4,
-            _emptyBytes4,
+            true,
             implementation
         );
     }
@@ -157,7 +157,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             _minTotalFee,
             _maxProtocolFee,
             _emptyBytes4,
-            _emptyBytes4,
+            true,
             address(0)
         );
     }

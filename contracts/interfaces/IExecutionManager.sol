@@ -8,8 +8,8 @@ pragma solidity ^0.8.17;
 interface IExecutionManager {
     // Custom errors
     error CreatorFeeBpTooHigh();
-    error NoSelectorForTakerAsk();
-    error NoSelectorForTakerBid();
+    error NoSelectorForMakerBid();
+    error NoSelectorForMakerAsk();
     error OutsideOfTimeRange();
     error SlippageAsk();
     error SlippageBid();

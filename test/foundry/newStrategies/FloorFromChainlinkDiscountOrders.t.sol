@@ -89,7 +89,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
         (bool success, ) = address(strategyFloorFromChainlink).call(
-            abi.encodeWithSelector(selectorTakerAsk, takerAsk, makerBid)
+            abi.encodeWithSelector(selector, takerAsk, makerBid)
         );
         assertTrue(success);
     }

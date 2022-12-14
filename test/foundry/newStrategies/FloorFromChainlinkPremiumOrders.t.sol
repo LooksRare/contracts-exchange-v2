@@ -188,7 +188,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         vm.prank(takerUser);
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
-        address(strategyFloorFromChainlink).call(abi.encodeWithSelector(selectorTakerBid, takerBid, makerAsk));
+        address(strategyFloorFromChainlink).call(abi.encodeWithSelector(selector, takerBid, makerAsk));
     }
 
     function testFloorFromChainlinkPremiumWrongCurrency() public {

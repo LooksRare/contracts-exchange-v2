@@ -21,8 +21,8 @@ interface IStrategyManager {
         uint16 standardProtocolFee;
         uint16 minTotalFee;
         uint16 maxProtocolFee;
-        bytes4 selectorTakerAsk;
-        bytes4 selectorTakerBid;
+        bytes4 selector;
+        bool isMakerBid;
         address implementation;
     }
 }

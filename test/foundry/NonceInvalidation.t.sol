@@ -246,8 +246,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _setUpUsers();
 
         // 0. Add the new strategy
-        bytes4 selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
-        bytes4 selectorTakerBid = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerBid.selector;
+        bytes4 selector = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
 
         StrategyTestMultiFillCollectionOrder strategyMultiFillCollectionOrder = new StrategyTestMultiFillCollectionOrder(
                 address(looksRareProtocol)
@@ -258,8 +257,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk,
-            selectorTakerBid,
+            selector,
+            true,
             address(strategyMultiFillCollectionOrder)
         );
 

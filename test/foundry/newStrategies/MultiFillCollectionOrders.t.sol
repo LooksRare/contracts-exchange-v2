@@ -13,8 +13,7 @@ import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFi
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
-    bytes4 public selectorTakerAsk = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
-    bytes4 public selectorTakerBid = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerBid.selector;
+    bytes4 public selector = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
 
     StrategyTestMultiFillCollectionOrder public strategyMultiFillCollectionOrder;
 
@@ -24,8 +23,8 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk,
-            selectorTakerBid,
+            selector,
+            true,
             address(strategyMultiFillCollectionOrder)
         );
     }
@@ -37,8 +36,8 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool strategyIsMakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -46,8 +45,8 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
-        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategySelector, selector);
+        assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyMultiFillCollectionOrder));
     }
 

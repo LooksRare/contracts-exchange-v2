@@ -30,10 +30,8 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     address internal constant AZUKI_PRICE_FEED = 0x9F6d70CDf08d893f0063742b51d3E9D1e18b7f74;
 
     uint256 private isFixedAmount;
-    bytes4 internal selectorTakerBid;
-    bytes4 internal selectorTakerAsk;
-    bytes4 internal selectorMakerBid;
-    bytes4 internal selectorMakerAsk;
+    bytes4 internal selector;
+    bool internal isMakerBid;
 
     function setUp() public virtual override {
         vm.createSelectFork(vm.rpcUrl("goerli"), FORKED_BLOCK_NUMBER);
@@ -48,8 +46,8 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             uint16 strategyStandardProtocolFee,
             uint16 strategyMinTotalFee,
             uint16 strategyMaxProtocolFee,
-            bytes4 strategySelectorTakerAsk,
-            bytes4 strategySelectorTakerBid,
+            bytes4 strategySelector,
+            bool strategyIsMakerBid,
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(1);
 
@@ -57,8 +55,8 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(strategyStandardProtocolFee, _standardProtocolFee);
         assertEq(strategyMinTotalFee, _minTotalFee);
         assertEq(strategyMaxProtocolFee, _maxProtocolFee);
-        assertEq(strategySelectorTakerAsk, selectorTakerAsk);
-        assertEq(strategySelectorTakerBid, selectorTakerBid);
+        assertEq(strategySelector, selector);
+        assertEq(strategyIsMakerBid, isMakerBid);
         assertEq(strategyImplementation, address(strategyFloorFromChainlink));
     }
 
@@ -88,20 +86,9 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
-    function _setSelectorTakerBid(bytes4 _selectorTakerBid) internal {
-        selectorTakerBid = _selectorTakerBid;
-    }
-
-    function _setSelectorTakerAsk(bytes4 _selectorTakerAsk) internal {
-        selectorTakerAsk = _selectorTakerAsk;
-    }
-
-    function _setSelectorMakerBid(bytes4 _selectorMakerBid) internal {
-        selectorMakerBid = _selectorMakerBid;
-    }
-
-    function _setSelectorMakerAsk(bytes4 _selectorMakerAsk) internal {
-        selectorMakerAsk = _selectorMakerAsk;
+    function _setSelector(bytes4 _selector, bool _isMakerBid) internal {
+        selector = _selector;
+        isMakerBid = _isMakerBid;
     }
 
     function _createMakerAskAndTakerBid(
@@ -199,8 +186,8 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             _standardProtocolFee,
             _minTotalFee,
             _maxProtocolFee,
-            selectorTakerAsk,
-            selectorTakerBid,
+            selector,
+            isMakerBid,
             address(strategyFloorFromChainlink)
         );
     }

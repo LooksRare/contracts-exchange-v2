@@ -72,9 +72,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             abi.encode()
         );
 
-        // Execute taker ask transaction
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // Verify ownership is transferred
         assertEq(IERC721(erc721).ownerOf(itemId), makerUser);
@@ -127,11 +125,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Sign the order
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        // Taker user actions
-        vm.prank(takerUser);
-
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // Verify ownership is transferred
         for (uint256 i; i < makerBid.itemIds.length; i++) {
@@ -202,13 +196,17 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             );
         }
 
-        vm.prank(takerUser);
         vm.expectRevert(
             abi.encodeWithSelector(
                 ICreatorFeeManager.BundleEIP2981NotAllowed.selector,
                 address(mockERC721WithRoyalties)
             )
         );
+        _executeTakerAsk();
+    }
+
+    function _executeTakerAsk() private {
+        vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

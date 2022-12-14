@@ -70,7 +70,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         // Max price = 9.5 ETH
         (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.3 ether});
 
-        takerAsk.minPrice = 9.4 ether;
+        makerBid.maxPrice = 9.41 ether;
 
         signature = _signMakerBid(makerBid, makerUserPK);
 

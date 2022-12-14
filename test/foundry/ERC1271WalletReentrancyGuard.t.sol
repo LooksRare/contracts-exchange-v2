@@ -53,7 +53,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         vm.startPrank(takerUser);
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,

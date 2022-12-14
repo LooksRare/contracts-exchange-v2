@@ -46,16 +46,14 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         emit SubsetNoncesCancelled(subsetNonces);
         looksRareProtocol.cancelSubsetNonces(subsetNonces);
 
-        {
-            // Prepare the taker bid
-            takerBid = OrderStructs.TakerBid(
-                takerUser,
-                makerAsk.minPrice,
-                makerAsk.itemIds,
-                makerAsk.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker bid
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            abi.encode()
+        );
 
         // Execute taker bid transaction
         // Taker user actions

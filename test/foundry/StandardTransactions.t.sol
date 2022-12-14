@@ -43,16 +43,14 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Prepare the taker bid
-            takerBid = OrderStructs.TakerBid(
-                takerUser,
-                makerAsk.minPrice,
-                makerAsk.itemIds,
-                makerAsk.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker bid
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            abi.encode()
+        );
 
         {
             uint256 gasLeft = gasleft();

@@ -70,7 +70,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         /**
          * 2. Too late to execute
@@ -82,7 +82,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         /**
          * 3. start time > end time
@@ -92,7 +92,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
     }
 
     function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
@@ -112,7 +112,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         /**
          * 2. STANDARD STRATEGY/MAKER BID: maker itemIds' length is not equal to maker amounts' length
@@ -125,7 +125,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         /**
          * 3. STANDARD STRATEGY/MAKER BID: itemIds' length of maker is not equal to length of taker
@@ -138,7 +138,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         /**
          * 4. STANDARD STRATEGY/MAKER BID: amounts' length of maker is not equal to length of taker
@@ -153,7 +153,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         /**
          * 5. STANDARD STRATEGY/MAKER BID: maxPrice of maker is not equal to minPrice of taker
@@ -165,13 +165,13 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerAsk.minPrice = makerBid.maxPrice + 1;
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // Change price of takerAsk to be higher than makerAsk price
         takerAsk.minPrice = makerBid.maxPrice - 1;
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         /**
          * 6. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is equal to 0
@@ -254,5 +254,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _emptyMerkleTree,
             _emptyAffiliate
         );
+    }
+
+    function _executeTakerAsk() private {
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

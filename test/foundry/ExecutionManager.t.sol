@@ -184,13 +184,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
-        );
+        _executeTakerBid();
 
         /**
          * 7. STANDARD STRATEGY/MAKER ASK: maker itemIds' length is not equal to maker amounts' length
@@ -203,13 +197,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
-        );
+        _executeTakerBid();
 
         /**
          * 8. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is not equal to length of taker
@@ -222,13 +210,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
-        );
+        _executeTakerBid();
 
         /**
          * 9. STANDARD STRATEGY/MAKER ASK: amounts' length of maker is not equal to length of taker
@@ -243,13 +225,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
-        );
+        _executeTakerBid();
 
         /**
          * 10. STANDARD STRATEGY/MAKER ASK: minPrice of maker is not equal to maxPrice of taker
@@ -261,18 +237,16 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         takerBid.maxPrice = makerAsk.minPrice - 1;
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
-        );
+        _executeTakerBid();
 
         // Change price of takerBid to be higher than makerAsk price
         takerBid.maxPrice = makerAsk.minPrice + 1;
 
         vm.expectRevert(OrderInvalid.selector);
+        _executeTakerBid();
+    }
+
+    function _executeTakerBid() private {
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
             makerAsk,

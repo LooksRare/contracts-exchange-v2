@@ -79,9 +79,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             abi.encode()
         );
 
-        // Execute taker ask transaction
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
@@ -138,9 +136,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             abi.encode()
         );
 
-        // Execute taker ask transaction
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // Taker user has received the asset
         assertEq(mockERC721WithRoyalties.ownerOf(itemId), makerUser);
@@ -181,11 +177,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Mint the items
         mockERC721.batchMint(takerUser, makerBid.itemIds);
 
-        // Taker user actions
-        vm.prank(takerUser);
-
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         for (uint256 i; i < makerBid.itemIds.length; i++) {
             // Maker user has received all the assets in the bundle
@@ -235,11 +227,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        // Taker user actions
-        vm.prank(takerUser);
-
-        // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
@@ -289,16 +277,13 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        // Taker user action should revert
-        vm.prank(takerUser);
         vm.expectRevert(
             abi.encodeWithSelector(
                 ICreatorFeeManager.BundleEIP2981NotAllowed.selector,
                 address(mockERC721WithRoyalties)
             )
         );
-
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         /**
          * 2. Same fee structure but different recipient
@@ -313,15 +298,13 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        vm.prank(takerUser);
         vm.expectRevert(
             abi.encodeWithSelector(
                 ICreatorFeeManager.BundleEIP2981NotAllowed.selector,
                 address(mockERC721WithRoyalties)
             )
         );
-
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
     }
 
     function testCreatorRoyaltiesRevertIfFeeHigherThanLimit() public {
@@ -365,8 +348,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        _executeTakerAsk();
 
         // 2. Maker ask
         itemId = 1; // The itemId changes as it is already minted before
@@ -412,5 +394,10 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             _emptyMerkleTree,
             _emptyAffiliate
         );
+    }
+
+    function _executeTakerAsk() private {
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 }

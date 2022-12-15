@@ -11,6 +11,7 @@ import {MockERC20} from "../mock/MockERC20.sol";
 contract AffiliateOrdersTest is ProtocolBase {
     // Affiliate rate
     uint256 internal _affiliateRate = 2_000;
+    uint256 private constant price = 1 ether; // Fixed price of sale
 
     function _calculateAffiliateFee(
         uint256 originalAmount,
@@ -39,44 +40,39 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
-        {
-            // Mint asset
-            mockERC721.mint(makerUser, itemId);
+        // Mint asset
+        mockERC721.mint(makerUser, itemId);
 
-            // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(0), // ETH,
-                signer: makerUser,
-                minPrice: price,
-                itemId: itemId
-            });
+        // Prepare the order hash
+        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(0), // ETH,
+            signer: makerUser,
+            minPrice: price,
+            itemId: itemId
+        });
 
-            // Sign order
-            signature = _signMakerAsk(makerAsk, makerUserPK);
-        }
+        // Sign order
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Prepare the taker bid
-            takerBid = OrderStructs.TakerBid(
-                takerUser,
-                makerAsk.minPrice,
-                makerAsk.itemIds,
-                makerAsk.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker bid
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            abi.encode()
+        );
 
         {
             uint256 gasLeft = gasleft();
@@ -121,7 +117,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        price = 1 ether;
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
 
@@ -222,44 +217,39 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
-        {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: itemId
-            });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
-            // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
-        }
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, itemId);
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
         {
             uint256 gasLeft = gasleft();

@@ -27,7 +27,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         _setUpUsers();
 
         // Parameters
-        price = 1 ether;
+        uint256 price = 1 ether;
         uint256 itemId = 42;
 
         if (erc721 == address(mockERC721)) {
@@ -47,7 +47,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         }
 
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0,
@@ -61,10 +61,10 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,
@@ -101,10 +101,13 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         // Create order
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(erc721, address(weth), numberItemsInBundle);
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk
+        ) = _createMockMakerBidAndTakerAskWithBundle(erc721, address(weth), numberItemsInBundle);
 
         // Adjust price
-        price = makerBid.maxPrice;
+        uint256 price = makerBid.maxPrice;
 
         if (erc721 == address(mockERC721)) {
             // Adjust royalties
@@ -125,7 +128,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         }
 
         // Sign the order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -175,16 +178,17 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         uint256 numberItemsInBundle = 5;
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAskWithBundle(
-            address(mockERC721WithRoyalties),
-            address(weth),
-            numberItemsInBundle
-        );
-
-        price = makerBid.maxPrice;
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk
+        ) = _createMockMakerBidAndTakerAskWithBundle(
+                address(mockERC721WithRoyalties),
+                address(weth),
+                numberItemsInBundle
+            );
 
         // Sign the order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);

@@ -22,12 +22,14 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     }
 
     function testInactiveStrategy() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 0.1 ether
+        });
 
         makerBid.maxPrice = 9.5 ether;
         takerAsk.minPrice = 9.5 ether;
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -43,12 +45,14 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 0.1 ETH, desired price = 9.6 ETH
         // Max price = 9.5 ETH
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.1 ether});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 0.1 ether
+        });
 
         makerBid.maxPrice = 9.5 ether;
         takerAsk.minPrice = 9.5 ether;
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -68,11 +72,13 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedPriceLessThanMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Max price = 9.5 ETH
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 0.3 ether});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 0.3 ether
+        });
 
         makerBid.maxPrice = 9.41 ether;
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -92,9 +98,11 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedAmountGreaterThanOrEqualToFloorPrice() public {
         // Floor price = 9.7 ETH, discount = 9.7 ETH, desired price = 0 ETH
         // Max price = 0 ETH
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: 9.7 ether});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: 9.7 ether
+        });
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 

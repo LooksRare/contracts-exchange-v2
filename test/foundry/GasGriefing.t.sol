@@ -13,27 +13,30 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {GasGriefer} from "./utils/GasGriefer.sol";
 
 contract GasGriefingTest is ProtocolBase {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+    address private gasGriefer;
+
     // WETH events
     event Deposit(address indexed from, uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
     function setUp() public override {
         super.setUp();
-        makerUser = address(new GasGriefer());
-        _setUpUsers();
+        gasGriefer = address(new GasGriefer());
+        _setUpUser(gasGriefer);
+        _setUpUser(takerUser);
     }
 
     function testTakerBidGasGriefing() public {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
+        mockERC721.mint(gasGriefer, itemId);
 
         // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
@@ -41,16 +44,15 @@ contract GasGriefingTest is ProtocolBase {
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(0), // ETH,
-            signer: makerUser,
+            signer: gasGriefer,
             minPrice: price,
             itemId: itemId
         });
 
-        // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature;
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,
@@ -64,7 +66,7 @@ contract GasGriefingTest is ProtocolBase {
         emit Deposit(address(looksRareProtocol), sellerProceed);
 
         vm.expectEmit(true, true, true, true);
-        emit Transfer(address(looksRareProtocol), address(makerUser), sellerProceed);
+        emit Transfer(address(looksRareProtocol), gasGriefer, sellerProceed);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -81,7 +83,7 @@ contract GasGriefingTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + sellerProceed);
+        assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceed);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             address(_royaltyRecipient).balance,
@@ -90,12 +92,11 @@ contract GasGriefingTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(gasGriefer, makerAsk.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
     }
 
     function testThreeTakerBidsGasGriefing() public {
         uint256 numberPurchases = 3;
-        price = 1 ether;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
@@ -103,7 +104,7 @@ contract GasGriefingTest is ProtocolBase {
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
-            mockERC721.mint(makerUser, i);
+            mockERC721.mint(gasGriefer, i);
 
             // Prepare the order hash
             makerAsks[i] = _createSingleItemMakerAskOrder({
@@ -114,13 +115,10 @@ contract GasGriefingTest is ProtocolBase {
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: address(0), // ETH,
-                signer: makerUser,
+                signer: gasGriefer,
                 minPrice: price, // Fixed
                 itemId: i // (0, 1, etc.)
             });
-
-            // Sign order
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.TakerBid(
                 takerUser,
@@ -140,7 +138,7 @@ contract GasGriefingTest is ProtocolBase {
         emit Deposit(address(looksRareProtocol), sellerProceedPerItem);
 
         vm.expectEmit(true, true, true, true);
-        emit Transfer(address(looksRareProtocol), address(makerUser), sellerProceedPerItem);
+        emit Transfer(address(looksRareProtocol), gasGriefer, sellerProceedPerItem);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
@@ -157,12 +155,12 @@ contract GasGriefingTest is ProtocolBase {
             // Taker user has received the asset
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the nonce is marked as executed
-            assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_NONCE_EXECUTED);
+            assertEq(looksRareProtocol.userOrderNonce(gasGriefer, i), MAGIC_VALUE_NONCE_EXECUTED);
         }
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + sellerProceedPerItem * numberPurchases);
+        assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceedPerItem * numberPurchases);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }

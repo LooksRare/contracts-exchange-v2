@@ -13,6 +13,8 @@ import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFi
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     bytes4 public selector = StrategyTestMultiFillCollectionOrder.executeStrategyWithTakerAsk.selector;
 
     StrategyTestMultiFillCollectionOrder public strategyMultiFillCollectionOrder;
@@ -59,47 +61,48 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
 
-        price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
 
-        {
-            uint256[] memory itemIds = new uint256[](0);
-            uint256[] memory amounts = new uint256[](1);
-            amounts[0] = amountsToFill;
+        uint256[] memory itemIds = new uint256[](0);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amountsToFill;
 
-            {
-                // Prepare the order hash
-                makerBid = _createMultiItemMakerBidOrder({
-                    bidNonce: 0,
-                    subsetNonce: 0,
-                    strategyId: 1, // Multi-fill bid offer
-                    assetType: 0,
-                    orderNonce: 0,
-                    collection: address(mockERC721),
-                    currency: address(weth),
-                    signer: makerUser,
-                    maxPrice: price,
-                    itemIds: itemIds,
-                    amounts: amounts
-                });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1, // Multi-fill bid offer
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemIds: itemIds,
+            amounts: amounts
+        });
 
-                // Sign order
-                signature = _signMakerBid(makerBid, makerUserPK);
-            }
-        }
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // First taker user actions
         vm.startPrank(takerUser);
         {
-            uint256[] memory itemIds = new uint256[](1);
-            uint256[] memory amounts = new uint256[](1);
+            itemIds = new uint256[](1);
+            amounts = new uint256[](1);
             itemIds[0] = 0;
             amounts[0] = 1;
 
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.maxPrice,
+                itemIds,
+                amounts,
+                abi.encode()
+            );
 
             uint256 gasLeft = gasleft();
 
@@ -129,8 +132,8 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         vm.startPrank(secondTakerUser);
 
         {
-            uint256[] memory itemIds = new uint256[](3);
-            uint256[] memory amounts = new uint256[](3);
+            itemIds = new uint256[](3);
+            amounts = new uint256[](3);
 
             itemIds[0] = 1; // tokenId = 1
             itemIds[1] = 2; // tokenId = 2
@@ -142,7 +145,13 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.batchMint(secondTakerUser, itemIds);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(secondTakerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+                secondTakerUser,
+                makerBid.maxPrice,
+                itemIds,
+                amounts,
+                abi.encode()
+            );
 
             uint256 gasLeft = gasleft();
 
@@ -172,46 +181,49 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
 
-        price = 1 ether; // Fixed price of sale
         uint256 amountsToFill = 4;
 
-        {
-            uint256[] memory itemIds = new uint256[](0);
-            uint256[] memory amounts = new uint256[](1);
-            amounts[0] = amountsToFill;
+        uint256[] memory itemIds = new uint256[](0);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amountsToFill;
 
-            // Prepare the order hash
-            makerBid = _createMultiItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 1, // Multi-fill bid offer
-                assetType: 0,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemIds: itemIds,
-                amounts: amounts
-            });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1, // Multi-fill bid offer
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemIds: itemIds,
+            amounts: amounts
+        });
 
-            // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
-        }
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
 
         {
-            uint256[] memory itemIds = new uint256[](1);
-            uint256[] memory amounts = new uint256[](1);
+            itemIds = new uint256[](1);
+            amounts = new uint256[](1);
             itemIds[0] = 0;
             amounts[0] = 1;
 
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+                takerUser,
+                makerBid.maxPrice,
+                itemIds,
+                amounts,
+                abi.encode()
+            );
 
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));

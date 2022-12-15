@@ -11,10 +11,11 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     function setUp() public override {
         super.setUp();
         _setUpUsers();
-        price = 1 ether; // Fixed price of sale
     }
 
     function testTakerBidMultipleOrdersSignedERC721() public {
@@ -26,19 +27,19 @@ contract BatchMakerOrdersTest is ProtocolBase {
         for (uint256 i; i < numberOrders; i++) {
             mockERC721.mint(makerUser, i);
         }
-        _createBatchMakerAskOrderHashes(orderHashes);
+        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleTree, makerUserPK);
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,
@@ -75,13 +76,13 @@ contract BatchMakerOrdersTest is ProtocolBase {
         uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
-        _createBatchMakerBidOrderHashes(orderHashes);
+        OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleTree, makerUserPK);
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Taker user actions
         vm.startPrank(takerUser);
@@ -90,7 +91,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         mockERC721.mint(takerUser, numberOrders - 1);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,
@@ -124,17 +125,17 @@ contract BatchMakerOrdersTest is ProtocolBase {
         Merkle m = new Merkle();
         uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
-        _createBatchMakerAskOrderHashes(orderHashes);
+        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
         merkleTree.root = tamperedRoot;
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleTree, makerUserPK);
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,
@@ -152,17 +153,17 @@ contract BatchMakerOrdersTest is ProtocolBase {
         Merkle m = new Merkle();
         uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
-        _createBatchMakerBidOrderHashes(orderHashes);
+        OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
         merkleTree.root = tamperedRoot;
 
         // Maker signs the root
-        signature = _signMerkleProof(merkleTree, makerUserPK);
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
             makerBid.itemIds,
@@ -202,7 +203,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         }
     }
 
-    function _createBatchMakerAskOrderHashes(bytes32[] memory orderHashes) private {
+    function _createBatchMakerAskOrderHashes(
+        bytes32[] memory orderHashes
+    ) private view returns (OrderStructs.MakerAsk memory makerAsk) {
         uint256 numberOrders = 1_000;
 
         for (uint256 i; i < numberOrders; i++) {
@@ -224,7 +227,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         }
     }
 
-    function _createBatchMakerBidOrderHashes(bytes32[] memory orderHashes) private {
+    function _createBatchMakerBidOrderHashes(
+        bytes32[] memory orderHashes
+    ) private view returns (OrderStructs.MakerBid memory makerBid) {
         uint256 numberOrders = 1_000;
 
         for (uint256 i; i < numberOrders; i++) {

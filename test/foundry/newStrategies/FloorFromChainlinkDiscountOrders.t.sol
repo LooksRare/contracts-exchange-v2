@@ -18,9 +18,11 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     bytes4 private validityFunctionSelector;
 
     function testFloorFromChainlinkDiscountPriceFeedNotAvailable() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
         strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
@@ -36,9 +38,11 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountOraclePriceNotRecentEnough() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
@@ -56,9 +60,11 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     function testFloorFromChainlinkDiscountChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
         strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
@@ -78,7 +84,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountCallerNotLooksRareProtocol() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         _setPriceFeed();
 
@@ -95,11 +103,13 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountTakerAskItemIdsLengthNotOne() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         takerAsk.itemIds = new uint256[](0);
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -111,11 +121,13 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountTakerAskAmountsLengthNotOne() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         takerAsk.amounts = new uint256[](0);
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -127,11 +139,13 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountMakerBidAmountsLengthNotOne() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         makerBid.amounts = new uint256[](0);
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -142,14 +156,16 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountTakerAskZeroAmount() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         uint256[] memory amounts = new uint256[](1);
         // Seller will probably try 0
         amounts[0] = 0;
         takerAsk.amounts = amounts;
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -161,14 +177,16 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountMakerBidAmountNotOne() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         uint256[] memory amounts = new uint256[](1);
         // Bidder will probably try a higher number
         amounts[0] = 2;
         makerBid.amounts = amounts;
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -179,10 +197,12 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountAskTooHigh() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
         makerBid.maxPrice = takerAsk.minPrice - 1 wei;
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -194,13 +214,15 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountWrongCurrency() public {
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk({discount: discount});
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+            discount: discount
+        });
 
         vm.prank(_owner);
         looksRareProtocol.updateCurrencyWhitelistStatus(address(looksRareToken), true);
         makerBid.currency = address(looksRareToken);
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
 

@@ -64,10 +64,13 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         /**
          * 1. Too early to execute
          */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         vm.warp(block.timestamp - 1);
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -104,12 +107,15 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         /**
          * 1. STANDARD STRATEGY/MAKER BID: itemIds' length is equal to 0
          */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         // Change makerBid itemIds array's length to make it equal to 0
         itemIds = new uint256[](0);
         makerBid.itemIds = itemIds;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -176,7 +182,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         /**
          * 6. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is equal to 0
          */
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
         // Change maker itemIds array to make its length equal to 0
         itemIds = new uint256[](0);

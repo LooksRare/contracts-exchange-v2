@@ -23,9 +23,11 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
     }
 
     function testInactiveStrategy() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
 
@@ -41,7 +43,9 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
     function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
@@ -49,7 +53,9 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
     function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceEqualToMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
         makerAsk.minPrice = 9.797 ether;
 
         _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
@@ -59,7 +65,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         OrderStructs.MakerAsk memory newMakerAsk,
         OrderStructs.TakerBid memory newTakerBid
     ) private {
-        signature = _signMakerAsk(newMakerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(newMakerAsk, makerUserPK);
 
         _setPriceFeed();
         _assertOrderValid(newMakerAsk);
@@ -79,12 +85,14 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
 
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.8 ETH
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         makerAsk.minPrice = 9.8 ether;
         takerBid.maxPrice = makerAsk.minPrice;
 
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
         _assertOrderValid(makerAsk);

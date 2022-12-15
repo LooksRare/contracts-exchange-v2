@@ -20,8 +20,10 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
     }
 
     function testInactiveStrategy() public {
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
 
@@ -42,7 +44,9 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.7 ETH
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
         _testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
@@ -52,7 +56,9 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.8 ETH
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
         makerAsk.minPrice = 9.8 ether;
         _testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
@@ -61,7 +67,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         OrderStructs.MakerAsk memory makerAsk,
         OrderStructs.TakerBid memory takerBid
     ) public {
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
 
@@ -85,12 +91,14 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.9 ETH
-        (makerAsk, takerBid) = _createMakerAskAndTakerBid({premium: premium});
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
 
         makerAsk.minPrice = 9.9 ether;
         takerBid.maxPrice = makerAsk.minPrice;
 
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
 

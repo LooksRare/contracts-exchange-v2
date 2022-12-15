@@ -103,10 +103,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTokenIdsRangeERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
         assertTrue(isValid);
@@ -138,7 +138,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 6;
 
-        makerBid = _createMultiItemMakerBidOrder({
+        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
@@ -166,7 +166,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAskAmounts[1] = 2;
         takerAskAmounts[2] = 2;
 
-        takerAsk = OrderStructs.TakerAsk({
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: makerBid.maxPrice,
             itemIds: takerAskItemIds,
@@ -175,7 +175,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
         assertTrue(isValid);
@@ -199,7 +199,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskForceAmountOneIfERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidAmounts = new uint256[](3);
         invalidAmounts[0] = 1;
@@ -209,7 +209,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.amounts = invalidAmounts;
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
         assertTrue(isValid);
@@ -233,15 +233,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testCallerNotLooksRareProtocol() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         // Valid, but wrong caller
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
-
-        // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
         // Call the function directly
@@ -251,7 +248,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](2);
         invalidItemIds[0] = 5;
@@ -261,7 +258,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         makerBid.itemIds = invalidItemIds;
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
         assertFalse(isValid);
@@ -289,7 +286,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskDuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](3);
         invalidItemIds[0] = 5;
@@ -299,7 +296,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.itemIds = invalidItemIds;
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
@@ -315,7 +312,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskUnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory invalidItemIds = new uint256[](3);
         invalidItemIds[0] = 5;
@@ -325,7 +322,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.itemIds = invalidItemIds;
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
         assertTrue(isValid);
@@ -340,7 +337,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         uint256[] memory itemIds = new uint256[](2);
         itemIds[0] = 5;
@@ -355,7 +352,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.amounts = invalidAmounts;
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
         assertTrue(isValid);
@@ -370,12 +367,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskPriceTooHigh() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         takerAsk.minPrice = makerBid.maxPrice + 1 wei;
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
@@ -391,10 +388,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (makerBid, takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);

@@ -13,6 +13,8 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MaliciousERC1271Wallet} from "./utils/MaliciousERC1271Wallet.sol";
 
 contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
+    uint256 private constant price = 1 ether; // Fixed price of sale
+
     function setUp() public override {
         super.setUp();
         _setUpUser(takerUser);
@@ -27,35 +29,32 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
-        {
-            // Mint asset
-            mockERC721.mint(makerUser, itemId);
+        // Mint asset
+        mockERC721.mint(makerUser, itemId);
 
-            // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder({
-                askNonce: 0,
-                subsetNonce: 0, // subsetNonce
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: 0, // orderNonce
-                collection: address(mockERC721),
-                currency: address(0), // ETH,
-                signer: address(maliciousERC1271Wallet),
-                minPrice: price,
-                itemId: itemId
-            });
+        // Prepare the order hash
+        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0, // subsetNonce
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: 0, // orderNonce
+            collection: address(mockERC721),
+            currency: address(0), // ETH,
+            signer: address(maliciousERC1271Wallet),
+            minPrice: price,
+            itemId: itemId
+        });
 
-            signature = new bytes(0);
-        }
+        bytes memory signature = new bytes(0);
 
         // Taker user actions
         vm.startPrank(takerUser);
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
             makerAsk.itemIds,
@@ -81,43 +80,38 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
-        price = 1 ether; // Fixed price of sale
         uint256 itemId = 0; // TokenId
 
-        {
-            // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: address(maliciousERC1271Wallet),
-                maxPrice: price,
-                itemId: itemId
-            });
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: address(maliciousERC1271Wallet),
+            maxPrice: price,
+            itemId: itemId
+        });
 
-            signature = new bytes(0);
-        }
+        bytes memory signature = new bytes(0);
 
         // Taker user actions
         vm.startPrank(takerUser);
 
-        {
-            // Mint asset
-            mockERC721.mint(takerUser, itemId);
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-            // Prepare the taker ask
-            takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                makerBid.itemIds,
-                makerBid.amounts,
-                abi.encode()
-            );
-        }
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
         // Execute taker ask transaction
@@ -132,7 +126,6 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 
         uint256 numberPurchases = 3;
-        price = 1 ether;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);

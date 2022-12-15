@@ -74,7 +74,7 @@ contract OrderValidatorV2A {
 
     /**
      * @notice Adjust external parameters. Anyone can call this function.
-     * @dev It is meant to be adjustable if domain separator or creator fee manager were to change.
+     * @dev It allows adjusting if the domain separator or creator fee manager address were to change.
      */
     function adjustExternalParameters() external {
         _adjustExternalParameters();

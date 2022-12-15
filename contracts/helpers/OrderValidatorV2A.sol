@@ -199,7 +199,7 @@ contract OrderValidatorV2A {
         address makerSigner,
         uint112 askNonce,
         uint256 orderNonce,
-        uint112 subsetNonce,
+        uint256 subsetNonce,
         bytes32 orderHash
     ) internal view returns (uint256 validationCode) {
         validationCode = _checkSubsetAndOrderNonceValidity(makerSigner, orderNonce, subsetNonce, orderHash);
@@ -224,7 +224,7 @@ contract OrderValidatorV2A {
         address makerSigner,
         uint112 bidNonce,
         uint256 orderNonce,
-        uint112 subsetNonce,
+        uint256 subsetNonce,
         bytes32 orderHash
     ) internal view returns (uint256 validationCode) {
         validationCode = _checkSubsetAndOrderNonceValidity(makerSigner, orderNonce, subsetNonce, orderHash);
@@ -247,7 +247,7 @@ contract OrderValidatorV2A {
     function _checkSubsetAndOrderNonceValidity(
         address makerSigner,
         uint256 orderNonce,
-        uint112 subsetNonce,
+        uint256 subsetNonce,
         bytes32 orderHash
     ) internal view returns (uint256 validationCode) {
         // 1. Check subset nonce
@@ -267,7 +267,7 @@ contract OrderValidatorV2A {
      */
     function _checkMakerAskValidityWhitelists(
         address currency,
-        uint16 strategyId
+        uint256 strategyId
     ) public view returns (uint256 validationCode) {
         // Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(currency)) return CURRENCY_NOT_WHITELISTED;
@@ -297,7 +297,7 @@ contract OrderValidatorV2A {
      */
     function _checkMakerBidValidityWhitelists(
         address currency,
-        uint16 strategyId
+        uint256 strategyId
     ) public view returns (uint256 validationCode) {
         // Verify whether the currency is whitelisted
         if (currency == address(0) || !looksRareProtocol.isCurrencyWhitelisted(currency))
@@ -344,7 +344,7 @@ contract OrderValidatorV2A {
      */
     function _checkIfPotentialWrongAssetTypes(
         address collection,
-        uint8 assetType
+        uint256 assetType
     ) internal view returns (uint256 validationCode) {
         if (assetType == 0) {
             // 0x5b5e139f // 0x80ac58cd are potential ERC721 interfaceIds
@@ -385,7 +385,7 @@ contract OrderValidatorV2A {
      */
     function _checkMakerAskValidityNFTAssets(
         address collection,
-        uint8 assetType,
+        uint256 assetType,
         address user,
         uint256[] memory itemIds,
         uint256[] memory amounts

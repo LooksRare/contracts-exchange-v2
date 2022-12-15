@@ -7,13 +7,13 @@ pragma solidity ^0.8.17;
  */
 interface INonceManager {
     // Events
-    event NewBidAskNonces(uint112 bidNonce, uint112 askNonce);
+    event NewBidAskNonces(uint128 bidNonce, uint128 askNonce);
     event OrderNoncesCancelled(uint256[] orderNonces);
     event SubsetNoncesCancelled(uint256[] subsetNonces);
 
     // Custom structs
     struct UserBidAskNonces {
-        uint112 bidNonce;
-        uint112 askNonce;
+        uint128 bidNonce;
+        uint128 askNonce;
     }
 }

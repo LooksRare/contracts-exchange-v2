@@ -69,8 +69,8 @@ contract NonceManager is INonceManager {
      * @param ask Whether to increment the user ask nonce
      */
     function incrementBidAskNonces(bool bid, bool ask) external {
-        uint112 _bidNonce = userBidAskNonces[msg.sender].bidNonce;
-        uint112 _askNonce = userBidAskNonces[msg.sender].askNonce;
+        uint128 _bidNonce = userBidAskNonces[msg.sender].bidNonce;
+        uint128 _askNonce = userBidAskNonces[msg.sender].askNonce;
         if (bid) {
             _bidNonce++;
             userBidAskNonces[msg.sender].bidNonce = _bidNonce;

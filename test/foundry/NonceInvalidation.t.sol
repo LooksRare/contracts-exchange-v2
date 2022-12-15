@@ -76,7 +76,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
      * Cannot execute an order if maker is at a different global ask nonce than signed
      */
     function testCannotExecuteOrderIfWrongUserGlobalAskNonce() public {
-        uint112 userGlobalAskNonce = 1;
+        uint128 userGlobalAskNonce = 1;
         uint256 itemId = 420;
 
         // Mint asset
@@ -132,7 +132,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
      * Cannot execute an order if maker is at a different global bid nonce than signed
      */
     function testCannotExecuteOrderIfWrongUserGlobalBidNonce() public {
-        uint112 userGlobalBidNonce = 1;
+        uint128 userGlobalBidNonce = 1;
         uint256 itemId = 420;
 
         // Prepare the order hash

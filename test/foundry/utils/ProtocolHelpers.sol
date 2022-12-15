@@ -18,7 +18,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     bytes32 internal _domainSeparator;
 
     function _createSingleItemMakerAskOrder(
-        uint112 askNonce,
+        uint128 askNonce,
         uint256 subsetNonce,
         uint256 strategyId,
         uint256 assetType,
@@ -53,7 +53,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     }
 
     function _createMultiItemMakerAskOrder(
-        uint112 askNonce,
+        uint128 askNonce,
         uint256 subsetNonce,
         uint256 strategyId,
         uint256 assetType,
@@ -84,7 +84,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     }
 
     function _createSingleItemMakerBidOrder(
-        uint112 bidNonce,
+        uint128 bidNonce,
         uint256 subsetNonce,
         uint256 strategyId,
         uint256 assetType,
@@ -118,7 +118,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     }
 
     function _createMultiItemMakerBidOrder(
-        uint112 bidNonce,
+        uint128 bidNonce,
         uint256 subsetNonce,
         uint256 strategyId,
         uint256 assetType,

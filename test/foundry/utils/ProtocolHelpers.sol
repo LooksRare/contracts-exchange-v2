@@ -34,23 +34,22 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
 
-        return
-            OrderStructs.MakerAsk({
-                askNonce: askNonce,
-                subsetNonce: subsetNonce,
-                strategyId: strategyId,
-                assetType: assetType,
-                orderNonce: orderNonce,
-                collection: collection,
-                currency: currency,
-                signer: signer,
-                startTime: block.timestamp,
-                endTime: block.timestamp,
-                minPrice: minPrice,
-                itemIds: itemIds,
-                amounts: amounts,
-                additionalParameters: abi.encode()
-            });
+        newMakerAsk = OrderStructs.MakerAsk({
+            askNonce: askNonce,
+            subsetNonce: subsetNonce,
+            strategyId: strategyId,
+            assetType: assetType,
+            orderNonce: orderNonce,
+            collection: collection,
+            currency: currency,
+            signer: signer,
+            startTime: block.timestamp,
+            endTime: block.timestamp,
+            minPrice: minPrice,
+            itemIds: itemIds,
+            amounts: amounts,
+            additionalParameters: abi.encode()
+        });
     }
 
     function _createMultiItemMakerAskOrder(
@@ -66,23 +65,22 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk) {
-        return
-            OrderStructs.MakerAsk({
-                askNonce: askNonce,
-                subsetNonce: subsetNonce,
-                strategyId: strategyId,
-                assetType: assetType,
-                orderNonce: orderNonce,
-                collection: collection,
-                currency: currency,
-                signer: signer,
-                startTime: block.timestamp,
-                endTime: block.timestamp,
-                minPrice: minPrice,
-                itemIds: itemIds,
-                amounts: amounts,
-                additionalParameters: abi.encode()
-            });
+        newMakerAsk = OrderStructs.MakerAsk({
+            askNonce: askNonce,
+            subsetNonce: subsetNonce,
+            strategyId: strategyId,
+            assetType: assetType,
+            orderNonce: orderNonce,
+            collection: collection,
+            currency: currency,
+            signer: signer,
+            startTime: block.timestamp,
+            endTime: block.timestamp,
+            minPrice: minPrice,
+            itemIds: itemIds,
+            amounts: amounts,
+            additionalParameters: abi.encode()
+        });
     }
 
     function _createSingleItemMakerBidOrder(
@@ -101,23 +99,22 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
-        return
-            OrderStructs.MakerBid({
-                bidNonce: bidNonce,
-                subsetNonce: subsetNonce,
-                strategyId: strategyId,
-                assetType: assetType,
-                orderNonce: orderNonce,
-                collection: collection,
-                currency: currency,
-                signer: signer,
-                startTime: block.timestamp,
-                endTime: block.timestamp,
-                maxPrice: maxPrice,
-                itemIds: itemIds,
-                amounts: amounts,
-                additionalParameters: abi.encode()
-            });
+        newMakerBid = OrderStructs.MakerBid({
+            bidNonce: bidNonce,
+            subsetNonce: subsetNonce,
+            strategyId: strategyId,
+            assetType: assetType,
+            orderNonce: orderNonce,
+            collection: collection,
+            currency: currency,
+            signer: signer,
+            startTime: block.timestamp,
+            endTime: block.timestamp,
+            maxPrice: maxPrice,
+            itemIds: itemIds,
+            amounts: amounts,
+            additionalParameters: abi.encode()
+        });
     }
 
     function _createMultiItemMakerBidOrder(
@@ -133,23 +130,22 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal view returns (OrderStructs.MakerBid memory newMakerBid) {
-        return
-            OrderStructs.MakerBid({
-                bidNonce: bidNonce,
-                subsetNonce: subsetNonce,
-                strategyId: strategyId,
-                assetType: assetType,
-                orderNonce: orderNonce,
-                collection: collection,
-                currency: currency,
-                signer: signer,
-                startTime: block.timestamp,
-                endTime: block.timestamp,
-                maxPrice: maxPrice,
-                itemIds: itemIds,
-                amounts: amounts,
-                additionalParameters: abi.encode()
-            });
+        newMakerBid = OrderStructs.MakerBid({
+            bidNonce: bidNonce,
+            subsetNonce: subsetNonce,
+            strategyId: strategyId,
+            assetType: assetType,
+            orderNonce: orderNonce,
+            collection: collection,
+            currency: currency,
+            signer: signer,
+            startTime: block.timestamp,
+            endTime: block.timestamp,
+            maxPrice: maxPrice,
+            itemIds: itemIds,
+            amounts: amounts,
+            additionalParameters: abi.encode()
+        });
     }
 
     function _signMakerAsk(OrderStructs.MakerAsk memory _makerAsk, uint256 _signerKey) internal returns (bytes memory) {

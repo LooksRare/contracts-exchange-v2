@@ -30,11 +30,12 @@ contract MockERC721WithRoyalties is MockERC721, IERC2981 {
         uint256 tokenId,
         uint256 salePrice
     ) external view override returns (address royaltyRecipient, uint256 royaltyAmount) {
-        address recipient = _royaltyRecipientForTokenId[tokenId] == address(0)
+        royaltyRecipient = _royaltyRecipientForTokenId[tokenId] == address(0)
             ? DEFAULT_ROYALTY_RECIPIENT
             : _royaltyRecipientForTokenId[tokenId];
-        uint256 royaltyFee = _royaltyFeeForTokenId[tokenId] == 0 ? DEFAULT_ROYALTY_FEE : _royaltyFeeForTokenId[tokenId];
-        return (recipient, (royaltyFee * salePrice) / 10_000);
+        uint256 _royaltyFee = _royaltyFeeForTokenId[tokenId];
+        uint256 royaltyFee = _royaltyFee == 0 ? DEFAULT_ROYALTY_FEE : _royaltyFee;
+        royaltyAmount = (royaltyFee * salePrice) / 10_000;
     }
 
     function supportsInterface(bytes4 interfaceId) public view override(MockERC721, IERC165) returns (bool) {

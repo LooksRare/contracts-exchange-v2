@@ -128,27 +128,26 @@ contract LooksRareProtocol is
         address affiliate,
         bool isAtomic
     ) external payable nonReentrant {
-        {
-            uint256 length = takerBids.length;
-            if (
-                length == 0 ||
-                (makerAsks.length ^ length) | (makerSignatures.length ^ length) | (merkleTrees.length ^ length) != 0
-            ) revert WrongLengths();
-        }
+        uint256 length = takerBids.length;
+        if (
+            length == 0 ||
+            (makerAsks.length ^ length) | (makerSignatures.length ^ length) | (merkleTrees.length ^ length) != 0
+        ) revert WrongLengths();
 
         // Verify whether the currency at array = 0 is whitelisted
-        if (!isCurrencyWhitelisted[makerAsks[0].currency]) revert WrongCurrency();
+        address currency = makerAsks[0].currency;
+        if (!isCurrencyWhitelisted[currency]) revert WrongCurrency();
 
         {
             // Initialize protocol fee
             uint256 totalProtocolFee;
 
-            for (uint256 i; i < takerBids.length; ) {
+            for (uint256 i; i < length; ) {
                 OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
 
                 // Verify currency is the same
                 if (i != 0) {
-                    if (makerAsk.currency != makerAsks[i - 1].currency) revert WrongCurrency();
+                    if (makerAsk.currency != currency) revert WrongCurrency();
                 }
 
                 OrderStructs.TakerBid calldata takerBid = takerBids[i];
@@ -176,7 +175,7 @@ contract LooksRareProtocol is
             }
 
             // Pay protocol fee (and affiliate fee if any)
-            _payProtocolFeeAndAffiliateFee(makerAsks[0].currency, msg.sender, affiliate, totalProtocolFee);
+            _payProtocolFeeAndAffiliateFee(currency, msg.sender, affiliate, totalProtocolFee);
         }
 
         // Return ETH if any

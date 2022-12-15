@@ -8,12 +8,12 @@ pragma solidity ^0.8.17;
  */
 library OrderStructs {
     // Maker ask hash used to compute maker ask order hash
-    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_ASK_HASH = 0xd68183dbe86d11ceada61f851ee998c9608c049d79f6c9d65bfba7d4b5db5e3e;
+    // keccak256("MakerAsk(uint112 askNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_ASK_HASH = 0x4d568682d7de9faaf25c7c39fe3f61abb6b26fdba5919d8faaa138520f33f199;
 
     // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_BID_HASH = 0x0408e64fdd103ecf799bbabbd0370ad7c35a5711332d9d966e79c70ff3cb2aa3;
+    // keccak256("MakerBid(uint112 bidNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_BID_HASH = 0xd63d06f35a2b56e3d4553a6a5dfcf486da7dcd5a93c2a10b9a78b47c61b485a1;
 
     // Merkle root hash used to compute merkle root order (proof is not included in the hash)
     // keccak256("MerkleTree(bytes32 root)")
@@ -41,7 +41,7 @@ library OrderStructs {
      */
     struct MakerAsk {
         uint112 askNonce;
-        uint112 subsetNonce;
+        uint256 subsetNonce;
         uint256 strategyId;
         uint256 assetType;
         uint256 orderNonce;
@@ -74,7 +74,7 @@ library OrderStructs {
      */
     struct MakerBid {
         uint112 bidNonce;
-        uint112 subsetNonce;
+        uint256 subsetNonce;
         uint256 strategyId;
         uint256 assetType;
         uint256 orderNonce;

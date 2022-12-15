@@ -217,6 +217,16 @@ contract LooksRareProtocol is
     }
 
     /**
+     * @notice Adjust ETH gas limit for transfer
+     * @param newGasLimitETHTransfer New gas limit for ETH transfer
+     */
+    function adjustETHGasLimitForTransfer(uint256 newGasLimitETHTransfer) external onlyOwner {
+        _gasLimitETHTransfer = newGasLimitETHTransfer;
+
+        emit NewGasLimitETHTransfer(newGasLimitETHTransfer);
+    }
+
+    /**
      * @notice Sell with taker ask (against maker bid)
      * @param takerAsk Taker ask order struct
      * @param makerBid Maker bid order struct
@@ -412,16 +422,6 @@ contract LooksRareProtocol is
             signer,
             makerSignature
         );
-    }
-
-    /**
-     * @notice Adjust ETH gas limit for transfer
-     * @param newGasLimitETHTransfer New gas limit for ETH transfer
-     */
-    function adjustETHGasLimitForTransfer(uint256 newGasLimitETHTransfer) external onlyOwner {
-        _gasLimitETHTransfer = newGasLimitETHTransfer;
-
-        emit NewGasLimitETHTransfer(newGasLimitETHTransfer);
     }
 
     /**

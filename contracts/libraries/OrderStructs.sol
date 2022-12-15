@@ -8,11 +8,11 @@ pragma solidity ^0.8.17;
  */
 library OrderStructs {
     // Maker ask hash used to compute maker ask order hash
-    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint256 strategyId,uint8 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    // keccak256("MakerAsk(uint112 askNonce,uint112 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
     bytes32 internal constant _MAKER_ASK_HASH = 0xd68183dbe86d11ceada61f851ee998c9608c049d79f6c9d65bfba7d4b5db5e3e;
 
     // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint256 strategyId,uint8 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    // keccak256("MakerBid(uint112 bidNonce,uint112 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
     bytes32 internal constant _MAKER_BID_HASH = 0x0408e64fdd103ecf799bbabbd0370ad7c35a5711332d9d966e79c70ff3cb2aa3;
 
     // Merkle root hash used to compute merkle root order (proof is not included in the hash)
@@ -43,7 +43,7 @@ library OrderStructs {
         uint112 askNonce;
         uint112 subsetNonce;
         uint256 strategyId;
-        uint8 assetType;
+        uint256 assetType;
         uint256 orderNonce;
         address collection;
         address currency;
@@ -76,7 +76,7 @@ library OrderStructs {
         uint112 bidNonce;
         uint112 subsetNonce;
         uint256 strategyId;
-        uint8 assetType;
+        uint256 assetType;
         uint256 orderNonce;
         address collection;
         address currency;

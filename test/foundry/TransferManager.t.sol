@@ -154,7 +154,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256 amount2ERC1155 = 5;
 
         address[] memory collections = new address[](2);
-        uint8[] memory assetTypes = new uint8[](2);
+        uint256[] memory assetTypes = new uint256[](2);
         uint256[][] memory amounts = new uint256[][](2);
         uint256[][] memory itemIds = new uint256[][](2);
 
@@ -215,7 +215,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256 amount2ERC1155 = 5;
 
         address[] memory collections = new address[](2);
-        uint8[] memory assetTypes = new uint8[](2);
+        uint256[] memory assetTypes = new uint256[](2);
         uint256[][] memory amounts = new uint256[][](2);
         uint256[][] memory itemIds = new uint256[][](2);
 
@@ -279,7 +279,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256 amount2ERC1155 = 5;
 
         address[] memory collections = new address[](0);
-        uint8[] memory assetTypes = new uint8[](2);
+        uint256[] memory assetTypes = new uint256[](2);
         uint256[][] memory amounts = new uint256[][](2);
         uint256[][] memory itemIds = new uint256[][](2);
 
@@ -329,7 +329,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256 amount2ERC1155 = 5;
 
         address[] memory collections = new address[](2);
-        uint8[] memory assetTypes = new uint8[](2);
+        uint256[] memory assetTypes = new uint256[](2);
         uint256[][] memory amounts = new uint256[][](2);
         uint256[][] memory itemIds = new uint256[][](1);
 
@@ -379,7 +379,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256 amount2ERC1155 = 5;
 
         address[] memory collections = new address[](2);
-        uint8[] memory assetTypes = new uint8[](2);
+        uint256[] memory assetTypes = new uint256[](2);
         uint256[][] memory amounts = new uint256[][](1);
         uint256[][] memory itemIds = new uint256[][](2);
 
@@ -423,7 +423,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         _grantApprovals(_sender);
 
         address[] memory collections = new address[](1);
-        uint8[] memory assetTypes = new uint8[](1);
+        uint256[] memory assetTypes = new uint256[](1);
         uint256[][] memory amounts = new uint256[][](1);
         uint256[][] memory itemIds = new uint256[][](1);
 
@@ -463,7 +463,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256 amount2ERC1155 = 5;
 
         address[] memory collections = new address[](2);
-        uint8[] memory assetTypes = new uint8[](2);
+        uint256[] memory assetTypes = new uint256[](2);
         uint256[][] memory amounts = new uint256[][](2);
         uint256[][] memory itemIds = new uint256[][](2);
 
@@ -517,7 +517,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256 amount2ERC1155 = 5;
 
         address[] memory collections = new address[](2);
-        uint8[] memory assetTypes = new uint8[](2);
+        uint256[] memory assetTypes = new uint256[](2);
         uint256[][] memory amounts = new uint256[][](2);
         uint256[][] memory itemIds = new uint256[][](2);
 

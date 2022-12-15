@@ -14,7 +14,7 @@ contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerAskAndTakerBid(
         address collection
     ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
-        uint8 assetType;
+        uint256 assetType;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
@@ -47,7 +47,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         address currency
     ) internal view returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
-        uint8 assetType;
+        uint256 assetType;
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0x4e2312e0)) {
             assetType = 1;
@@ -79,7 +79,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         uint256 numberTokens
     ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
-        uint8 assetType;
+        uint256 assetType;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
@@ -122,7 +122,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         address currency,
         uint256 numberTokens
     ) internal view returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
-        uint8 assetType;
+        uint256 assetType;
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0x4e2312e0)) {
             assetType = 1;

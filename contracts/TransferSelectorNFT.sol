@@ -14,7 +14,7 @@ import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
  */
 contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
     // Tracks manager address and associated selector to transfer asset type
-    mapping(uint8 => ManagerSelector) public managerSelectorOfAssetType;
+    mapping(uint256 => ManagerSelector) public managerSelectorOfAssetType;
 
     /**
      * @notice Constructor
@@ -33,7 +33,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
      * @param selectorForAssetType Selector for the function to call to transfer this asset type
      */
     function addTransferManagerForAssetType(
-        uint8 assetType,
+        uint256 assetType,
         address transferManagerForAssetType,
         bytes4 selectorForAssetType
     ) external onlyOwner {
@@ -58,7 +58,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
      */
     function _transferNFT(
         address collection,
-        uint8 assetType,
+        uint256 assetType,
         address sender,
         address recipient,
         uint256[] memory itemIds,

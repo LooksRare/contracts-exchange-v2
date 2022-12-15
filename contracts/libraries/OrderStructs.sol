@@ -208,6 +208,6 @@ library OrderStructs {
      * @return merkleTreeHash Hash of the merkle tree struct
      */
     function hash(MerkleTree memory merkleTree) internal pure returns (bytes32 merkleTreeHash) {
-        return (keccak256(abi.encode(_MERKLE_TREE_HASH, merkleTree.root)));
+        merkleTreeHash = (keccak256(abi.encode(_MERKLE_TREE_HASH, merkleTree.root)));
     }
 }

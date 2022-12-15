@@ -199,7 +199,7 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) external returns (uint256 protocolFeeAmount) {
         if (msg.sender != address(this)) revert WrongCaller();
-        return _executeTakerBid(takerBid, makerAsk, sender, orderHash);
+        protocolFeeAmount = _executeTakerBid(takerBid, makerAsk, sender, orderHash);
     }
 
     /**

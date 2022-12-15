@@ -17,7 +17,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         uint256 originalAmount,
         uint256 tierRate
     ) private pure returns (uint256 affiliateFee) {
-        return (originalAmount * tierRate) / (10_000 * 10_000);
+        affiliateFee = (originalAmount * tierRate) / (10_000 * 10_000);
     }
 
     function _setUpAffiliate() private {

@@ -35,7 +35,7 @@ uint256 constant TOO_LATE_TO_EXECUTE_ORDER = 401; // OK
 uint256 constant TOO_EARLY_TO_EXECUTE_ORDER = 402; // OK
 
 // 5. Transfer-related (ERC20, ERC721, ERC1155 tokens), including transfers and approvals, errors
-uint256 constant NO_TRANSFER_MANAGER_SELECTOR = 501; // OK
+uint256 constant ASSET_TYPE_NOT_SUPPORTED = 501; // OK
 uint256 constant SAME_ITEM_ID_IN_BUNDLE = 502; // OK
 uint256 constant ERC20_BALANCE_INFERIOR_TO_PRICE = 511; // OK
 uint256 constant ERC20_APPROVAL_INFERIOR_TO_PRICE = 512; // OK
@@ -51,7 +51,7 @@ uint256 constant TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE = 542; 
 uint256 constant POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721 = 551; // OK
 uint256 constant POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155 = 552; // OK
 
-// 6. Maker order struc-related errors
+// 6. Maker order struct-related errors
 uint256 constant MAKER_ORDER_INVALID_STANDARD_SALE = 601; // OK
 uint256 constant MAKER_ORDER_INVALID_NON_STANDARD_SALE = 602; // OK
 

@@ -274,7 +274,7 @@ contract OrderValidator {
      */
     function _validateERC721AndEquivalents(
         address collection,
-        uint8 assetType,
+        uint256 assetType,
         address user,
         uint256[] memory itemIds
     ) internal view returns (uint256 validationCode) {
@@ -340,7 +340,7 @@ contract OrderValidator {
      */
     function _validateERC1155(
         address collection,
-        uint8 assetType,
+        uint256 assetType,
         address user,
         uint256[] memory itemIds,
         uint256[] memory amounts

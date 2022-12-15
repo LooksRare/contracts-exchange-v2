@@ -19,9 +19,9 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
     function _createSingleItemMakerAskOrder(
         uint112 askNonce,
-        uint112 subsetNonce,
-        uint16 strategyId,
-        uint8 assetType,
+        uint256 subsetNonce,
+        uint256 strategyId,
+        uint256 assetType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -55,9 +55,9 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
     function _createMultiItemMakerAskOrder(
         uint112 askNonce,
-        uint112 subsetNonce,
-        uint16 strategyId,
-        uint8 assetType,
+        uint256 subsetNonce,
+        uint256 strategyId,
+        uint256 assetType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -87,9 +87,9 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
     function _createSingleItemMakerBidOrder(
         uint112 bidNonce,
-        uint112 subsetNonce,
-        uint16 strategyId,
-        uint8 assetType,
+        uint256 subsetNonce,
+        uint256 strategyId,
+        uint256 assetType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -122,9 +122,9 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
     function _createMultiItemMakerBidOrder(
         uint112 bidNonce,
-        uint112 subsetNonce,
-        uint16 strategyId,
-        uint8 assetType,
+        uint256 subsetNonce,
+        uint256 strategyId,
+        uint256 assetType,
         uint256 orderNonce,
         address collection,
         address currency,

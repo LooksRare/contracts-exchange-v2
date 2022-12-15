@@ -13,7 +13,7 @@ interface IExecutionManager {
     error OutsideOfTimeRange();
     error SlippageAsk();
     error SlippageBid();
-    error StrategyNotAvailable(uint16 strategyId);
+    error StrategyNotAvailable(uint256 strategyId);
 
     // Custom events
     event NewCreatorFeeManager(address creatorFeeManager);

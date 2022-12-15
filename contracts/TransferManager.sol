@@ -93,7 +93,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      */
     function transferBatchItemsAcrossCollections(
         address[] calldata collections,
-        uint8[] calldata assetTypes,
+        uint256[] calldata assetTypes,
         address from,
         address to,
         uint256[][] calldata itemIds,
@@ -113,7 +113,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             if (itemIdsLengthForSingleCollection == 0 || amounts[i].length != itemIdsLengthForSingleCollection)
                 revert WrongLengths();
 
-            uint8 assetType = assetTypes[i];
+            uint256 assetType = assetTypes[i];
             if (assetType == 0) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     _executeERC721TransferFrom(collections[i], from, to, itemIds[i][j]);

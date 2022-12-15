@@ -226,7 +226,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             );
 
             vm.prank(takerUser);
-            vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, uint16(1)));
+            vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
             // Execute taker ask transaction
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
         }

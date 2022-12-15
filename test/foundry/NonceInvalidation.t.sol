@@ -17,7 +17,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
      * Cannot execute an order if subset nonce is used
      */
     function testCannotExecuteOrderIfSubsetNonceIsUsed() public {
-        uint112 subsetNonce = 3;
+        uint256 subsetNonce = 3;
         uint256 itemId = 420;
 
         // Mint asset
@@ -40,7 +40,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        uint112[] memory subsetNonces = new uint112[](1);
+        uint256[] memory subsetNonces = new uint256[](1);
         subsetNonces[0] = subsetNonce;
 
         vm.prank(makerUser);

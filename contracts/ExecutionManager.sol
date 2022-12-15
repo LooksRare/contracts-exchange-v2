@@ -242,7 +242,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
     function _calculateProtocolFee(
         uint256 price,
-        uint16 strategyId,
+        uint256 strategyId,
         uint256 creatorFee,
         uint256 minTotalFee
     ) private view returns (uint256 protocolFee) {

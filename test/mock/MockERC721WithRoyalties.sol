@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 import {IERC165, IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 import {MockERC721} from "./MockERC721.sol";

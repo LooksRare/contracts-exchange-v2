@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 uint256 constant ORDER_EXPECTED_TO_BE_VALID = 0;
 uint256 constant USER_GLOBAL_BID_NONCE_HIGHER = 101;

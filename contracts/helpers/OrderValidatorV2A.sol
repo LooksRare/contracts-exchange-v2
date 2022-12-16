@@ -33,9 +33,12 @@ import "./ValidationCodeConstants.sol";
  *         2. Signature-related issues and merkle tree parameters
  *         3. Internal whitelist-related issues (i.e., currency or strategy not whitelisted)
  *         4. Timestamp-related issues (e.g., order expired)
- *         5. Transfer-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
- *         6. Maker order struct-related issues
- *         7. Creator-fee related issues (e.g., creator fee too high)
+ *         5. Asset-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
+ *         6. Asset-type suggestions
+ *         7. Transfer manager-related issues
+ *         8. Maker order struct-related issues
+ *         9. Creator-fee related issues (e.g., creator fee too high, ERC2981 bundles)
+ * @dev This version does not handle strategies, which support partial fills.
  * @author LooksRare protocol team (👀,💎)
  */
 contract OrderValidatorV2A {
@@ -44,7 +47,7 @@ contract OrderValidatorV2A {
     using OrderStructs for OrderStructs.MerkleTree;
 
     // Number of distinct criteria groups checked to evaluate the validity of an order
-    uint256 public immutable CRITERIA_GROUPS = 7;
+    uint256 public immutable CRITERIA_GROUPS = 9;
 
     // Magic value nonce returned if executed
     bytes32 public immutable MAGIC_VALUE_NONCE_EXECUTED =
@@ -69,6 +72,9 @@ contract OrderValidatorV2A {
      */
     constructor(address _looksRareProtocol) {
         looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
+        (address transferManagerAddress, ) = looksRareProtocol.managerSelectorOfAssetType(0);
+        transferManager = TransferManager(transferManagerAddress);
+
         _adjustExternalParameters();
     }
 
@@ -85,6 +91,7 @@ contract OrderValidatorV2A {
      * @param makerAsks Array of maker ask structs
      * @param signatures Array of signatures
      * @param merkleTrees Array of merkle trees
+     * @return validationCodes Arrays of validation codes
      */
     function verifyMultipleMakerAskOrders(
         OrderStructs.MakerAsk[] calldata makerAsks,
@@ -108,6 +115,7 @@ contract OrderValidatorV2A {
      * @param makerBids Array of maker bid structs
      * @param signatures Array of signatures
      * @param merkleTrees Array of merkle trees
+     * @return validationCodes Arrays of validation codes
      */
     function verifyMultipleMakerBidOrders(
         OrderStructs.MakerBid[] calldata makerBids,
@@ -131,6 +139,7 @@ contract OrderValidatorV2A {
      * @param makerAsk Maker ask struct
      * @param signature Signature
      * @param merkleTree Merkle tree
+     * @return validationCodes Array of validation codes
      */
     function checkMakerAskOrderValidity(
         OrderStructs.MakerAsk calldata makerAsk,
@@ -157,6 +166,8 @@ contract OrderValidatorV2A {
             makerAsk.itemIds,
             makerAsk.amounts
         );
+        validationCodes[5] = _checkIfPotentialWrongAssetTypes(makerAsk.collection, makerAsk.assetType);
+        validationCodes[6] = _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(makerAsk.signer);
     }
 
     /**
@@ -164,6 +175,7 @@ contract OrderValidatorV2A {
      * @param makerBid Maker bid struct
      * @param signature Signature
      * @param merkleTree Merkle tree
+     * @return validationCodes Array of validation codes
      */
     function checkMakerBidOrderValidity(
         OrderStructs.MakerBid calldata makerBid,
@@ -184,6 +196,11 @@ contract OrderValidatorV2A {
         validationCodes[3] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
         // @dev It is possible the order is still valid in some cases since the price can be lower
         validationCodes[4] = _checkMakerBidValidityERC20Assets(makerBid.currency, makerBid.signer, makerBid.maxPrice);
+        validationCodes[5] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
+        // Criteria 6 is irrelevant in the context of maker bid
+        validationCodes[6] = ORDER_EXPECTED_TO_BE_VALID;
+        validationCodes[7];
+        validationCodes[8];
     }
 
     /**
@@ -268,7 +285,7 @@ contract OrderValidatorV2A {
     function _checkMakerAskValidityWhitelists(
         address currency,
         uint256 strategyId
-    ) public view returns (uint256 validationCode) {
+    ) internal view returns (uint256 validationCode) {
         // Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(currency)) return CURRENCY_NOT_WHITELISTED;
 
@@ -298,7 +315,7 @@ contract OrderValidatorV2A {
     function _checkMakerBidValidityWhitelists(
         address currency,
         uint256 strategyId
-    ) public view returns (uint256 validationCode) {
+    ) internal view returns (uint256 validationCode) {
         // Verify whether the currency is whitelisted
         if (currency == address(0) || !looksRareProtocol.isCurrencyWhitelisted(currency))
             return CURRENCY_NOT_WHITELISTED;
@@ -354,6 +371,8 @@ contract OrderValidatorV2A {
         } else if (assetType == 1) {
             // 0xd9b67a26 is ERC1155 interfaceId
             if (!IERC165(collection).supportsInterface(0xd9b67a26)) return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155;
+        } else {
+            return ASSET_TYPE_NOT_SUPPORTED;
         }
     }
 
@@ -397,14 +416,7 @@ contract OrderValidatorV2A {
             validationCode = _checkValidityERC721AndEquivalents(collection, user, itemIds);
         } else if (assetType == 1) {
             validationCode = _checkValidityERC1155(collection, user, itemIds, amounts);
-        } else {
-            // @dev If new asset types are supported, this contract needs to be deprecated
-            return ASSET_TYPE_NOT_SUPPORTED;
         }
-
-        if (validationCode != ORDER_EXPECTED_TO_BE_VALID) return validationCode;
-        validationCode = _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(user);
-        if (validationCode != ORDER_EXPECTED_TO_BE_VALID) return validationCode;
     }
 
     /**
@@ -505,6 +517,10 @@ contract OrderValidatorV2A {
                 );
                 if (!success) return ERC1155_BALANCE_OF_DOES_NOT_EXIST;
                 if (abi.decode(data, (uint256)) < amounts[i]) return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
+
+                unchecked {
+                    ++i;
+                }
             }
         }
 
@@ -599,7 +615,7 @@ contract OrderValidatorV2A {
         bytes calldata signature,
         address signer
     ) internal view returns (uint256 validationCode) {
-        // 1. Logic if EOA
+        // Logic if EOA
         if (signer.code.length == 0) {
             bytes32 r;
             bytes32 s;
@@ -630,10 +646,9 @@ contract OrderValidatorV2A {
 
             address recoveredSigner = ecrecover(hash, v, r, s);
             if (signer == address(0)) return NULL_SIGNER_EOA;
-
             if (signer != recoveredSigner) return WRONG_SIGNER_EOA;
         } else {
-            // 2. Logic if ERC1271
+            // Logic if ERC1271
             (bool success, bytes memory data) = signer.staticcall(
                 abi.encodeWithSelector(IERC1271.isValidSignature.selector, signer)
             );
@@ -658,6 +673,9 @@ contract OrderValidatorV2A {
 
         for (uint256 i; i < length; ) {
             if (amounts[i] == 0) return MAKER_ORDER_INVALID_STANDARD_SALE;
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -683,8 +701,5 @@ contract OrderValidatorV2A {
     function _adjustExternalParameters() internal {
         domainSeparator = looksRareProtocol.domainSeparator();
         creatorFeeManager = looksRareProtocol.creatorFeeManager();
-
-        (address transferManagerAddress, ) = looksRareProtocol.managerSelectorOfAssetType(0);
-        transferManager = TransferManager(transferManagerAddress);
     }
 }

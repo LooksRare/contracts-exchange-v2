@@ -8,6 +8,7 @@ import {IERC20} from "@looksrare/contracts-libs/contracts/interfaces/generic/IER
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
 import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1155.sol";
 import {IERC1271} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1271.sol";
+import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 
 // Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
@@ -17,6 +18,7 @@ import {MerkleProofCalldata} from "../libraries/OpenZeppelin/MerkleProofCalldata
 import {ICreatorFeeManager} from "../interfaces/ICreatorFeeManager.sol";
 import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../interfaces/IStrategyManager.sol";
+import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 
 // Other dependencies
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";
@@ -56,11 +58,17 @@ contract OrderValidatorV2A {
     // LooksRareProtocol domain separator
     bytes32 public domainSeparator;
 
+    // Maximum creator fee (in bp)
+    uint256 public maximumCreatorFeeBp;
+
     // CreatorFeeManager
     ICreatorFeeManager public creatorFeeManager;
 
     // LooksRareProtocol
     LooksRareProtocol public looksRareProtocol;
+
+    // Royalty fee registry
+    IRoyaltyFeeRegistry public royaltyFeeRegistry;
 
     // TransferManager
     TransferManager public transferManager;
@@ -167,6 +175,8 @@ contract OrderValidatorV2A {
         );
         validationCodes[5] = _checkIfPotentialWrongAssetTypes(makerAsk.collection, makerAsk.assetType);
         validationCodes[6] = _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(makerAsk.signer);
+        validationCodes[7];
+        validationCodes[8] = _checkCreatorFeeValidationCodes(makerAsk.collection, makerAsk.minPrice, makerAsk.itemIds);
     }
 
     /**
@@ -198,7 +208,7 @@ contract OrderValidatorV2A {
         // Criteria 6 is irrelevant in the context of maker bid
         validationCodes[6] = ORDER_EXPECTED_TO_BE_VALID;
         validationCodes[7];
-        validationCodes[8];
+        validationCodes[8] = _checkCreatorFeeValidationCodes(makerBid.collection, makerBid.maxPrice, makerBid.itemIds);
     }
 
     /**
@@ -593,8 +603,37 @@ contract OrderValidatorV2A {
         uint256 price,
         uint256[] calldata itemIds
     ) internal view returns (uint256 validationCode) {
-        // IF native registry, ok to check
-        // IF EIP-2981 skip... the check if it is a maker bid
+        // Check if there is a royalty info in the system
+        (address receiver, uint256 creatorFee) = royaltyFeeRegistry.royaltyInfo(collection, price);
+
+        if (receiver == address(0)) {
+            if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
+                uint256 length = itemIds.length;
+
+                for (uint256 i; i < length; ) {
+                    (bool status, bytes memory data) = collection.staticcall(
+                        abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
+                    );
+
+                    if (status) {
+                        (address newReceiver, uint256 newCreatorFee) = abi.decode(data, (address, uint256));
+
+                        if (i == 0) {
+                            receiver = newReceiver;
+                            creatorFee = newCreatorFee;
+                        } else {
+                            if (newReceiver != receiver || newCreatorFee != creatorFee)
+                                return BUNDLE_ERC2981_NOT_SUPPORTED;
+                        }
+                    }
+                    unchecked {
+                        ++i;
+                    }
+                }
+
+                if (creatorFee * 10_000 > (price * uint256(maximumCreatorFeeBp))) return CREATOR_FEE_TOO_HIGH;
+            }
+        }
     }
 
     /**
@@ -715,5 +754,7 @@ contract OrderValidatorV2A {
     function _adjustExternalParameters() internal {
         domainSeparator = looksRareProtocol.domainSeparator();
         creatorFeeManager = looksRareProtocol.creatorFeeManager();
+        maximumCreatorFeeBp = looksRareProtocol.maximumCreatorFeeBp();
+        royaltyFeeRegistry = creatorFeeManager.royaltyFeeRegistry();
     }
 }

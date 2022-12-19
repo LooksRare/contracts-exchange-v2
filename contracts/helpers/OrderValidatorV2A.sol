@@ -97,10 +97,10 @@ contract OrderValidatorV2A {
         OrderStructs.MakerAsk[] calldata makerAsks,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
-    ) external view returns (uint256[][] memory validationCodes) {
+    ) external view returns (uint256[9][] memory validationCodes) {
         uint256 length = makerAsks.length;
 
-        validationCodes = new uint256[][](length);
+        validationCodes = new uint256[9][](length);
 
         for (uint256 i; i < length; ) {
             validationCodes[i] = checkMakerAskOrderValidity(makerAsks[i], signatures[i], merkleTrees[i]);
@@ -121,10 +121,10 @@ contract OrderValidatorV2A {
         OrderStructs.MakerBid[] calldata makerBids,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
-    ) external view returns (uint256[][] memory validationCodes) {
+    ) external view returns (uint256[9][] memory validationCodes) {
         uint256 length = makerBids.length;
 
-        validationCodes = new uint256[][](length);
+        validationCodes = new uint256[9][](length);
 
         for (uint256 i; i < length; ) {
             validationCodes[i] = checkMakerBidOrderValidity(makerBids[i], signatures[i], merkleTrees[i]);
@@ -145,8 +145,7 @@ contract OrderValidatorV2A {
         OrderStructs.MakerAsk calldata makerAsk,
         bytes calldata signature,
         OrderStructs.MerkleTree calldata merkleTree
-    ) public view returns (uint256[] memory validationCodes) {
-        validationCodes = new uint256[](CRITERIA_GROUPS);
+    ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerAsk.hash();
 
         validationCodes[0] = _checkMakerAskValidityForNonces(
@@ -181,8 +180,7 @@ contract OrderValidatorV2A {
         OrderStructs.MakerBid calldata makerBid,
         bytes calldata signature,
         OrderStructs.MerkleTree calldata merkleTree
-    ) public view returns (uint256[] memory validationCodes) {
-        validationCodes = new uint256[](CRITERIA_GROUPS);
+    ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerBid.hash();
         validationCodes[0] = _checkMakerBidValidityForNonces(
             makerBid.signer,
@@ -273,7 +271,8 @@ contract OrderValidatorV2A {
         // 2. Check order nonce
         bytes32 orderNonceStatus = looksRareProtocol.userOrderNonce(makerSigner, orderNonce);
         if (orderNonceStatus == MAGIC_VALUE_NONCE_EXECUTED) return USER_ORDER_NONCE_EXECUTED_OR_CANCELLED;
-        if (orderNonceStatus != orderHash) return USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH;
+        if (orderNonceStatus != bytes32(0) && orderNonceStatus != orderHash)
+            return USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH;
     }
 
     /**
@@ -348,7 +347,7 @@ contract OrderValidatorV2A {
         uint256 endTime
     ) internal view returns (uint256 validationCode) {
         if (endTime < block.timestamp) return TOO_LATE_TO_EXECUTE_ORDER;
-        if (startTime + 5 minutes > block.timestamp) return TOO_EARLY_TO_EXECUTE_ORDER;
+        if (startTime > block.timestamp + 5 minutes) return TOO_EARLY_TO_EXECUTE_ORDER;
     }
 
     /**
@@ -581,6 +580,21 @@ contract OrderValidatorV2A {
         } else {
             return _computeDigestAndVerify(orderHash, signature, signer);
         }
+    }
+
+    /**
+     * @notice Check creator fee and validation codes
+     * @param collection Collection address
+     * @param itemIds Item ids
+     * @return validationCode Validation code
+     */
+    function _checkCreatorFeeValidationCodes(
+        address collection,
+        uint256 price,
+        uint256[] calldata itemIds
+    ) internal view returns (uint256 validationCode) {
+        // IF native registry, ok to check
+        // IF EIP-2981 skip... the check if it is a maker bid
     }
 
     /**

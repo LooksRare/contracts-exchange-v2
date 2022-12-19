@@ -135,7 +135,7 @@ contract OrderValidator {
         OrderStructs.MakerAsk calldata makerAsk
     ) public view returns (uint256 validationCode) {
         // 1. Check global ask nonce
-        (, uint112 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerAsk.signer);
+        (, uint256 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerAsk.signer);
         if (makerAsk.askNonce < globalAskNonce) return USER_GLOBAL_ASK_NONCE_HIGHER;
         if (makerAsk.askNonce > globalAskNonce) return USER_GLOBAL_ASK_NONCE_LOWER;
 
@@ -156,7 +156,7 @@ contract OrderValidator {
         OrderStructs.MakerBid calldata makerBid
     ) public view returns (uint256 validationCode) {
         // 1. Check global ask nonce
-        (uint112 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerBid.signer);
+        (uint256 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerBid.signer);
         if (makerBid.bidNonce < globalBidNonce) return USER_GLOBAL_ASK_NONCE_HIGHER;
         if (makerBid.bidNonce > globalBidNonce) return USER_GLOBAL_ASK_NONCE_LOWER;
 

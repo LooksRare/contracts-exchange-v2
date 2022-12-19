@@ -8,12 +8,12 @@ pragma solidity ^0.8.17;
  */
 library OrderStructs {
     // Maker ask hash used to compute maker ask order hash
-    // keccak256("MakerAsk(uint112 askNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_ASK_HASH = 0x4d568682d7de9faaf25c7c39fe3f61abb6b26fdba5919d8faaa138520f33f199;
+    // keccak256("MakerAsk(uint256 askNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_ASK_HASH = 0x88210d05352c99907588dddb658b9abce78f141d1415d7be787f6120b718fe02;
 
     // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint112 bidNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
-    bytes32 internal constant _MAKER_BID_HASH = 0xd63d06f35a2b56e3d4553a6a5dfcf486da7dcd5a93c2a10b9a78b47c61b485a1;
+    // keccak256("MakerBid(uint256 bidNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    bytes32 internal constant _MAKER_BID_HASH = 0xc69763700afbfcdc70a0b138ea120a08fc78dfc5532f1e7232fa8d8cfb26f96a;
 
     // Merkle root hash used to compute merkle root order (proof is not included in the hash)
     // keccak256("MerkleTree(bytes32 root)")
@@ -40,7 +40,7 @@ library OrderStructs {
      * @param additionalParameters Extra data specific for the order (e.g., it can contain start price for Dutch Auction)
      */
     struct MakerAsk {
-        uint112 askNonce;
+        uint256 askNonce;
         uint256 subsetNonce;
         uint256 strategyId;
         uint256 assetType;
@@ -73,7 +73,7 @@ library OrderStructs {
      * @param additionalParameters Extra data specific for the order (e.g., it can contain a merkle root for specific strategies)
      */
     struct MakerBid {
-        uint112 bidNonce;
+        uint256 bidNonce;
         uint256 subsetNonce;
         uint256 strategyId;
         uint256 assetType;

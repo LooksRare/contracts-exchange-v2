@@ -156,7 +156,7 @@ contract OrderValidatorV2A {
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerAsk.hash();
 
-        validationCodes[0] = _checkMakerAskValidityForNonces(
+        validationCodes[0] = _checkValidityMakerAskNonces(
             makerAsk.signer,
             makerAsk.askNonce,
             makerAsk.orderNonce,
@@ -164,16 +164,16 @@ contract OrderValidatorV2A {
             orderHash
         );
         validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
-        validationCodes[2] = _checkMakerAskValidityWhitelists(makerAsk.currency, makerAsk.strategyId);
+        validationCodes[2] = _checkValidityMakerAskWhitelists(makerAsk.currency, makerAsk.strategyId);
         validationCodes[3] = _checkValidityTimestamps(makerAsk.startTime, makerAsk.endTime);
         (
             uint256 validationCode4,
             uint256[] memory itemIds,
             uint256[] memory amounts,
             uint256 price
-        ) = _validateMakerAskItemIdsAndAmountsAndPrice(makerAsk);
+        ) = _checkValidityMakerAskItemIdsAndAmountsAndPrice(makerAsk);
         validationCodes[4] = validationCode4;
-        validationCodes[5] = _checkMakerAskValidityNFTAssets(
+        validationCodes[5] = _checkValidityMakerAskNFTAssets(
             makerAsk.collection,
             makerAsk.assetType,
             makerAsk.signer,
@@ -181,8 +181,8 @@ contract OrderValidatorV2A {
             amounts
         );
         validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerAsk.collection, makerAsk.assetType);
-        validationCodes[7] = _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(makerAsk.signer);
-        validationCodes[8] = _checkCreatorFeeValidationCodes(makerAsk.collection, price, itemIds);
+        validationCodes[7] = _checkValidityTransferManagerApprovals(makerAsk.signer);
+        validationCodes[8] = _checkValidityCreatorFee(makerAsk.collection, price, itemIds);
     }
 
     /**
@@ -198,7 +198,7 @@ contract OrderValidatorV2A {
         OrderStructs.MerkleTree calldata merkleTree
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerBid.hash();
-        validationCodes[0] = _checkMakerBidValidityForNonces(
+        validationCodes[0] = _checkValidityMakerBidNonces(
             makerBid.signer,
             makerBid.bidNonce,
             makerBid.orderNonce,
@@ -206,21 +206,19 @@ contract OrderValidatorV2A {
             orderHash
         );
         validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
-        validationCodes[2] = _checkMakerBidValidityWhitelists(makerBid.currency, makerBid.strategyId);
+        validationCodes[2] = _checkValidityMakerBidWhitelists(makerBid.currency, makerBid.strategyId);
         validationCodes[3] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
         (
             uint256 validationCode4,
             uint256[] memory itemIds,
             ,
             uint256 price
-        ) = _validateMakerBidItemIdsAndAmountsAndPrice(makerBid);
+        ) = _checkValidityMakerBidItemIdsAndAmountsAndPrice(makerBid);
         validationCodes[4] = validationCode4;
-        validationCodes[5] = _checkMakerBidValidityERC20Assets(makerBid.currency, makerBid.signer, price);
+        validationCodes[5] = _checkValidityMakerBidERC20Assets(makerBid.currency, makerBid.signer, price);
         validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
-        // Criteria 6 is irrelevant in the context of maker bid
         validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID;
-        validationCodes[8];
-        validationCodes[8] = _checkCreatorFeeValidationCodes(makerBid.collection, price, itemIds);
+        validationCodes[8] = _checkValidityCreatorFee(makerBid.collection, price, itemIds);
     }
 
     /**
@@ -232,14 +230,14 @@ contract OrderValidatorV2A {
      * @param orderHash Order hash
      * @return validationCode Validation code
      */
-    function _checkMakerAskValidityForNonces(
+    function _checkValidityMakerAskNonces(
         address makerSigner,
         uint256 askNonce,
         uint256 orderNonce,
         uint256 subsetNonce,
         bytes32 orderHash
     ) internal view returns (uint256 validationCode) {
-        validationCode = _checkSubsetAndOrderNonceValidity(makerSigner, orderNonce, subsetNonce, orderHash);
+        validationCode = _checkValiditySubsetAndOrderNonce(makerSigner, orderNonce, subsetNonce, orderHash);
 
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
             (, uint256 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
@@ -257,14 +255,14 @@ contract OrderValidatorV2A {
      * @param orderHash Order hash
      * @return validationCode Validation code
      */
-    function _checkMakerBidValidityForNonces(
+    function _checkValidityMakerBidNonces(
         address makerSigner,
         uint256 bidNonce,
         uint256 orderNonce,
         uint256 subsetNonce,
         bytes32 orderHash
     ) internal view returns (uint256 validationCode) {
-        validationCode = _checkSubsetAndOrderNonceValidity(makerSigner, orderNonce, subsetNonce, orderHash);
+        validationCode = _checkValiditySubsetAndOrderNonce(makerSigner, orderNonce, subsetNonce, orderHash);
 
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
             (uint256 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerSigner);
@@ -281,7 +279,7 @@ contract OrderValidatorV2A {
      * @param orderHash Order hash
      * @return validationCode Validation code
      */
-    function _checkSubsetAndOrderNonceValidity(
+    function _checkValiditySubsetAndOrderNonce(
         address makerSigner,
         uint256 orderNonce,
         uint256 subsetNonce,
@@ -303,7 +301,7 @@ contract OrderValidatorV2A {
      * @param strategyId Strategy id
      * @return validationCode Validation code
      */
-    function _checkMakerAskValidityWhitelists(
+    function _checkValidityMakerAskWhitelists(
         address currency,
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
@@ -333,7 +331,7 @@ contract OrderValidatorV2A {
      * @param strategyId Strategy id
      * @return validationCode Validation code
      */
-    function _checkMakerBidValidityWhitelists(
+    function _checkValidityMakerBidWhitelists(
         address currency,
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
@@ -404,7 +402,7 @@ contract OrderValidatorV2A {
      * @param price Price (defined by the maker order)
      * @return validationCode Validation code
      */
-    function _checkMakerBidValidityERC20Assets(
+    function _checkValidityMakerBidERC20Assets(
         address currency,
         address user,
         uint256 price
@@ -423,7 +421,7 @@ contract OrderValidatorV2A {
      * @param amounts Array of amounts
      * @return validationCode Validation code
      */
-    function _checkMakerAskValidityNFTAssets(
+    function _checkValidityMakerAskNFTAssets(
         address collection,
         uint256 assetType,
         address user,
@@ -610,7 +608,7 @@ contract OrderValidatorV2A {
      * @param itemIds Item ids
      * @return validationCode Validation code
      */
-    function _checkCreatorFeeValidationCodes(
+    function _checkValidityCreatorFee(
         address collection,
         uint256 price,
         uint256[] memory itemIds
@@ -729,9 +727,7 @@ contract OrderValidatorV2A {
      * @param user Address of the user
      * @return validationCode Validation code
      */
-    function _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(
-        address user
-    ) internal view returns (uint256 validationCode) {
+    function _checkValidityTransferManagerApprovals(address user) internal view returns (uint256 validationCode) {
         if (!transferManager.hasUserApprovedOperator(user, address(looksRareProtocol)))
             return NO_TRANSFER_MANAGER_APPROVAL_BY_USER_FOR_EXCHANGE;
 
@@ -739,7 +735,7 @@ contract OrderValidatorV2A {
             return TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE;
     }
 
-    function _validateMakerAskItemIdsAndAmountsAndPrice(
+    function _checkValidityMakerAskItemIdsAndAmountsAndPrice(
         OrderStructs.MakerAsk memory makerAsk
     )
         internal
@@ -769,7 +765,7 @@ contract OrderValidatorV2A {
         }
     }
 
-    function _validateMakerBidItemIdsAndAmountsAndPrice(
+    function _checkValidityMakerBidItemIdsAndAmountsAndPrice(
         OrderStructs.MakerBid memory makerBid
     )
         internal

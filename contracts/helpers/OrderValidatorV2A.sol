@@ -26,16 +26,16 @@ import {TransferManager} from "../TransferManager.sol";
 import "./ValidationCodeConstants.sol";
 
 /**
- * @title OrderValidator
- * @notice This contract is used to check the validity of a maker ask/bid order in the LooksRareProtocol (v2).
+ * @title OrderValidatorV2A
+ * @notice This contract is used to check the validity of maker ask/bid orders in the LooksRareProtocol (v2).
  *         It performs checks for:
  *         1. Nonce-related issues (e.g., nonce executed or cancelled)
  *         2. Signature-related issues and merkle tree parameters
  *         3. Internal whitelist-related issues (i.e., currency or strategy not whitelisted)
- *         4. Creator-fee related
- *         5. Timestamp-related issues (e.g., order expired)
- *         6. Transfer-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
- *         7. Other potential restrictions where it can tap into specific contracts with specific validation codes
+ *         4. Timestamp-related issues (e.g., order expired)
+ *         5. Transfer-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
+ *         6. Maker order struct-related issues
+ *         7. Creator-fee related issues (e.g., creator fee too high)
  * @author LooksRare protocol team (👀,💎)
  */
 contract OrderValidatorV2A {
@@ -53,11 +53,11 @@ contract OrderValidatorV2A {
     // LooksRareProtocol domain separator
     bytes32 public domainSeparator;
 
-    // LooksRareProtocol
-    LooksRareProtocol public looksRareProtocol;
-
     // CreatorFeeManager
     ICreatorFeeManager public creatorFeeManager;
+
+    // LooksRareProtocol
+    LooksRareProtocol public looksRareProtocol;
 
     // TransferManager
     TransferManager public transferManager;
@@ -69,23 +69,15 @@ contract OrderValidatorV2A {
      */
     constructor(address _looksRareProtocol) {
         looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
-        domainSeparator = LooksRareProtocol(_looksRareProtocol).domainSeparator();
-        creatorFeeManager = LooksRareProtocol(_looksRareProtocol).creatorFeeManager();
-
-        (address transferManagerAddress, ) = looksRareProtocol.managerSelectorOfAssetType(0);
-        transferManager = TransferManager(transferManagerAddress);
+        _adjustExternalParameters();
     }
 
     /**
      * @notice Adjust external parameters. Anyone can call this function.
-     * @dev It is meant to be adjustable if domain separator or creator fee manager were to change
+     * @dev It is meant to be adjustable if domain separator or creator fee manager were to change.
      */
     function adjustExternalParameters() external {
-        domainSeparator = looksRareProtocol.domainSeparator();
-        creatorFeeManager = looksRareProtocol.creatorFeeManager();
-
-        (address transferManagerAddress, ) = looksRareProtocol.managerSelectorOfAssetType(0);
-        transferManager = TransferManager(transferManagerAddress);
+        _adjustExternalParameters();
     }
 
     /**
@@ -156,8 +148,15 @@ contract OrderValidatorV2A {
             orderHash
         );
         validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
-        validationCodes[2] = checkValidityMakerAskWhitelists(makerAsk.currency, makerAsk.strategyId);
-        validationCodes[3] = _checkValidityMakerTimestamps(makerAsk.startTime, makerAsk.endTime);
+        validationCodes[2] = _checkMakerAskValidityWhitelists(makerAsk.currency, makerAsk.strategyId);
+        validationCodes[3] = _checkValidityTimestamps(makerAsk.startTime, makerAsk.endTime);
+        validationCodes[4] = _checkMakerAskValidityNFTAssets(
+            makerAsk.collection,
+            makerAsk.assetType,
+            makerAsk.signer,
+            makerAsk.itemIds,
+            makerAsk.amounts
+        );
     }
 
     /**
@@ -181,10 +180,10 @@ contract OrderValidatorV2A {
             orderHash
         );
         validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
-        validationCodes[2] = checkValidityMakerAskWhitelists(makerBid.currency, makerBid.strategyId);
-        validationCodes[3] = _checkValidityMakerTimestamps(makerBid.startTime, makerBid.endTime);
+        validationCodes[2] = _checkMakerBidValidityWhitelists(makerBid.currency, makerBid.strategyId);
+        validationCodes[3] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
         // @dev It is possible the order is still valid in some cases since the price can be lower
-        validationCodes[4] = _validateERC20(makerBid.currency, makerBid.signer, makerBid.maxPrice);
+        validationCodes[4] = _checkMakerBidValidityERC20Assets(makerBid.currency, makerBid.signer, makerBid.maxPrice);
     }
 
     /**
@@ -203,7 +202,7 @@ contract OrderValidatorV2A {
         uint112 subsetNonce,
         bytes32 orderHash
     ) internal view returns (uint256 validationCode) {
-        validationCode = _checkSubsetAndOrderNonce(makerSigner, orderNonce, subsetNonce, orderHash);
+        validationCode = _checkSubsetAndOrderNonceValidity(makerSigner, orderNonce, subsetNonce, orderHash);
 
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
             (, uint112 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
@@ -228,7 +227,7 @@ contract OrderValidatorV2A {
         uint112 subsetNonce,
         bytes32 orderHash
     ) internal view returns (uint256 validationCode) {
-        validationCode = _checkSubsetAndOrderNonce(makerSigner, orderNonce, subsetNonce, orderHash);
+        validationCode = _checkSubsetAndOrderNonceValidity(makerSigner, orderNonce, subsetNonce, orderHash);
 
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
             (uint112 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerSigner);
@@ -245,7 +244,7 @@ contract OrderValidatorV2A {
      * @param orderHash Order hash
      * @return validationCode Validation code
      */
-    function _checkSubsetAndOrderNonce(
+    function _checkSubsetAndOrderNonceValidity(
         address makerSigner,
         uint256 orderNonce,
         uint112 subsetNonce,
@@ -266,7 +265,7 @@ contract OrderValidatorV2A {
      * @param strategyId Strategy id
      * @return validationCode Validation code
      */
-    function checkValidityMakerAskWhitelists(
+    function _checkMakerAskValidityWhitelists(
         address currency,
         uint16 strategyId
     ) public view returns (uint256 validationCode) {
@@ -296,7 +295,7 @@ contract OrderValidatorV2A {
      * @param strategyId Strategy id
      * @return validationCode Validation code
      */
-    function checkValidityMakerBidWhitelists(
+    function _checkMakerBidValidityWhitelists(
         address currency,
         uint16 strategyId
     ) public view returns (uint256 validationCode) {
@@ -327,7 +326,7 @@ contract OrderValidatorV2A {
      * @param endTime End time
      * @return validationCode Validation code
      */
-    function _checkValidityMakerTimestamps(
+    function _checkValidityTimestamps(
         uint256 startTime,
         uint256 endTime
     ) internal view returns (uint256 validationCode) {
@@ -341,6 +340,7 @@ contract OrderValidatorV2A {
      * @param assetType Asset type in the maker order
      * @return validationCode Validation code
      * @dev This function may return false positives (i.e., assets that are tradable but don't implement the proper interfaceId). Use with care.
+     *      If ERC165 is not implemented, it will revert.
      */
     function _checkIfPotentialWrongAssetTypes(
         address collection,
@@ -348,15 +348,12 @@ contract OrderValidatorV2A {
     ) internal view returns (uint256 validationCode) {
         if (assetType == 0) {
             // 0x5b5e139f // 0x80ac58cd are potential ERC721 interfaceIds
-            bool isERC721 = IERC165(collection).supportsInterface(0x5b5e139f) &&
+            bool isERC721 = IERC165(collection).supportsInterface(0x5b5e139f) ||
                 IERC165(collection).supportsInterface(0x80ac58cd);
             if (!isERC721) return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721;
         } else if (assetType == 1) {
+            // 0xd9b67a26 is ERC1155 interfaceId
             if (!IERC165(collection).supportsInterface(0xd9b67a26)) return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155;
-        } else {
-            // Verify transfer manager exists for assetType
-            (address specificTransferManager, ) = looksRareProtocol.managerSelectorOfAssetType(assetType);
-            if (specificTransferManager == address(0)) return NO_TRANSFER_MANAGER_SELECTOR;
         }
     }
 
@@ -365,8 +362,9 @@ contract OrderValidatorV2A {
      * @param currency Currency address
      * @param user User address
      * @param price Price (defined by the maker order)
+     * @return validationCode Validation code
      */
-    function _validateERC20(
+    function _checkMakerBidValidityERC20Assets(
         address currency,
         address user,
         uint256 price
@@ -377,12 +375,46 @@ contract OrderValidatorV2A {
     }
 
     /**
+     * @notice Check the validity of NFT assets (approvals, balances, and others)
+     * @param collection Collection address
+     * @param assetType Asset type
+     * @param user User address
+     * @param itemIds Array of item ids
+     * @param amounts Array of amounts
+     * @return validationCode Validation code
+     */
+    function _checkMakerAskValidityNFTAssets(
+        address collection,
+        uint8 assetType,
+        address user,
+        uint256[] memory itemIds,
+        uint256[] memory amounts
+    ) internal view returns (uint256 validationCode) {
+        validationCode = _checkIfItemIdsDiffer(itemIds);
+        if (validationCode != ORDER_EXPECTED_TO_BE_VALID) return validationCode;
+
+        if (assetType == 0) {
+            validationCode = _checkValidityERC721AndEquivalents(collection, user, itemIds);
+        } else if (assetType == 1) {
+            validationCode = _checkValidityERC1155(collection, user, itemIds, amounts);
+        } else {
+            // @dev If new asset types are supported, this contract needs to be deprecated
+            return ASSET_TYPE_NOT_SUPPORTED;
+        }
+
+        if (validationCode != ORDER_EXPECTED_TO_BE_VALID) return validationCode;
+        validationCode = _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(user);
+        if (validationCode != ORDER_EXPECTED_TO_BE_VALID) return validationCode;
+    }
+
+    /**
      * @notice Check the validity of ERC721 approvals and balances required to process the maker ask order
      * @param collection Collection address
      * @param user User address
      * @param itemIds Array of item ids
+     * @return validationCode Validation code
      */
-    function _validateERC721AndEquivalents(
+    function _checkValidityERC721AndEquivalents(
         address collection,
         address user,
         uint256[] memory itemIds
@@ -441,8 +473,9 @@ contract OrderValidatorV2A {
      * @param user User address
      * @param itemIds Array of item ids
      * @param amounts Array of amounts
+     * @return validationCode Validation code
      */
-    function _validateERC1155(
+    function _checkValidityERC1155(
         address collection,
         address user,
         uint256[] memory itemIds,
@@ -488,8 +521,9 @@ contract OrderValidatorV2A {
      * @notice Check if any of the item id in an array of item ids is repeated
      * @param itemIds Array of item ids
      * @dev This is to be used for bundles
+     * @return validationCode Validation code
      */
-    function _verifyAllItemIdsDiffer(uint256[] memory itemIds) internal pure returns (uint256 validationCode) {
+    function _checkIfItemIdsDiffer(uint256[] memory itemIds) internal pure returns (uint256 validationCode) {
         uint256 length = itemIds.length;
 
         // Only check if length of array is greater than 1
@@ -510,6 +544,14 @@ contract OrderValidatorV2A {
         }
     }
 
+    /**
+     * @notice Verify validity merkle proof and order hash
+     * @param merkleTree Merkle tree struct
+     * @param orderHash Order hash
+     * @param signature Signature
+     * @param signer Signer address
+     * @return validationCode Validation code
+     */
     function _checkValidityMerkleProofAndOrderHash(
         OrderStructs.MerkleTree calldata merkleTree,
         bytes32 orderHash,
@@ -530,6 +572,7 @@ contract OrderValidatorV2A {
      * @param computedHash Hash of order (maker bid or maker ask) or merkle root
      * @param makerSignature Signature of the maker
      * @param signer Signer address
+     * @return validationCode Validation code
      */
     function _computeDigestAndVerify(
         bytes32 computedHash,
@@ -596,7 +639,6 @@ contract OrderValidatorV2A {
             );
 
             if (!success) return MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271;
-
             if (abi.decode(data, (bytes4)) != 0x1626ba7e) return SIGNATURE_INVALID_EIP1271;
         }
     }
@@ -605,6 +647,7 @@ contract OrderValidatorV2A {
      * @notice Validate maker order itemIds and amounts for standard sale
      * @param itemIds Array of itemIds
      * @param amounts Array of amounts
+     * @return validationCode Validation code
      */
     function _validateMakerOrderItemIdsAndAmountsForStandardSale(
         uint256[] memory itemIds,
@@ -621,6 +664,7 @@ contract OrderValidatorV2A {
     /**
      * @notice Verify transfer manager approvals are not revoked by user, nor owner
      * @param user Address of the user
+     * @return validationCode Validation code
      */
     function _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(
         address user
@@ -630,5 +674,17 @@ contract OrderValidatorV2A {
 
         if (!transferManager.isOperatorWhitelisted(address(looksRareProtocol)))
             return TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE;
+    }
+
+    /**
+     * @notice Adjust external parameters. Anyone can call this function.
+     * @dev It is meant to be adjustable if domain separator or creator fee manager were to change.
+     */
+    function _adjustExternalParameters() internal {
+        domainSeparator = looksRareProtocol.domainSeparator();
+        creatorFeeManager = looksRareProtocol.creatorFeeManager();
+
+        (address transferManagerAddress, ) = looksRareProtocol.managerSelectorOfAssetType(0);
+        transferManager = TransferManager(transferManagerAddress);
     }
 }

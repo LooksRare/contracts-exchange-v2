@@ -166,17 +166,21 @@ contract OrderValidatorV2A {
         validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
         validationCodes[2] = _checkMakerAskValidityWhitelists(makerAsk.currency, makerAsk.strategyId);
         validationCodes[3] = _checkValidityTimestamps(makerAsk.startTime, makerAsk.endTime);
+
+        (uint256[] memory itemIds, uint256[] memory amounts, uint256 price) = _getMakerAskItemIdsAndAmountsAndPrice(
+            makerAsk
+        );
         validationCodes[4] = _checkMakerAskValidityNFTAssets(
             makerAsk.collection,
             makerAsk.assetType,
             makerAsk.signer,
-            makerAsk.itemIds,
-            makerAsk.amounts
+            itemIds,
+            amounts
         );
         validationCodes[5] = _checkIfPotentialWrongAssetTypes(makerAsk.collection, makerAsk.assetType);
         validationCodes[6] = _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(makerAsk.signer);
         validationCodes[7];
-        validationCodes[8] = _checkCreatorFeeValidationCodes(makerAsk.collection, makerAsk.minPrice, makerAsk.itemIds);
+        validationCodes[8] = _checkCreatorFeeValidationCodes(makerAsk.collection, price, itemIds);
     }
 
     /**
@@ -203,12 +207,14 @@ contract OrderValidatorV2A {
         validationCodes[2] = _checkMakerBidValidityWhitelists(makerBid.currency, makerBid.strategyId);
         validationCodes[3] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
         // @dev It is possible the order is still valid in some cases since the price can be lower
-        validationCodes[4] = _checkMakerBidValidityERC20Assets(makerBid.currency, makerBid.signer, makerBid.maxPrice);
+        (uint256[] memory itemIds, , uint256 price) = _getMakerBidItemIdsAndAmountsAndPrice(makerBid);
+
+        validationCodes[4] = _checkMakerBidValidityERC20Assets(makerBid.currency, makerBid.signer, price);
         validationCodes[5] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
         // Criteria 6 is irrelevant in the context of maker bid
         validationCodes[6] = ORDER_EXPECTED_TO_BE_VALID;
         validationCodes[7];
-        validationCodes[8] = _checkCreatorFeeValidationCodes(makerBid.collection, makerBid.maxPrice, makerBid.itemIds);
+        validationCodes[8] = _checkCreatorFeeValidationCodes(makerBid.collection, price, itemIds);
     }
 
     /**
@@ -601,15 +607,16 @@ contract OrderValidatorV2A {
     function _checkCreatorFeeValidationCodes(
         address collection,
         uint256 price,
-        uint256[] calldata itemIds
+        uint256[] memory itemIds
     ) internal view returns (uint256 validationCode) {
         // Check if there is a royalty info in the system
         (address receiver, uint256 creatorFee) = royaltyFeeRegistry.royaltyInfo(collection, price);
 
-        if (receiver == address(0)) {
-            if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
-                uint256 length = itemIds.length;
+        // If it is a collection offer, itemIds would be empty
+        uint256 length = itemIds.length;
 
+        if (receiver == address(0) && length > 0) {
+            if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
                 for (uint256 i; i < length; ) {
                     (bool status, bytes memory data) = collection.staticcall(
                         abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
@@ -745,6 +752,30 @@ contract OrderValidatorV2A {
 
         if (!transferManager.isOperatorWhitelisted(address(looksRareProtocol)))
             return TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE;
+    }
+
+    function _getMakerAskItemIdsAndAmountsAndPrice(
+        OrderStructs.MakerAsk memory makerAsk
+    ) internal view returns (uint256[] memory itemIds, uint256[] memory amounts, uint256 price) {
+        if (makerAsk.strategyId == 0) {
+            itemIds = makerAsk.itemIds;
+            amounts = makerAsk.amounts;
+            price = makerAsk.minPrice;
+        } else {
+            //
+        }
+    }
+
+    function _getMakerBidItemIdsAndAmountsAndPrice(
+        OrderStructs.MakerBid memory makerBid
+    ) internal view returns (uint256[] memory itemIds, uint256[] memory amounts, uint256 price) {
+        if (makerBid.strategyId == 0) {
+            itemIds = makerBid.itemIds;
+            amounts = makerBid.amounts;
+            price = makerBid.maxPrice;
+        } else {
+            //
+        }
     }
 
     /**

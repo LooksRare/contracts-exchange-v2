@@ -3,7 +3,6 @@ pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
-import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 // Interfaces
 import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
@@ -11,9 +10,9 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
  * @title CreatorFeeManagerWithRoyalties
- * @notice It distributes the proper royalties.
+ * @notice It distributes royalties.
  */
-contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
+contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
     error CreatorFeeTooHigh(address collection);
 
     // Royalty fee registry
@@ -28,12 +27,7 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
     }
 
     /**
-     * @notice View receiver and creator fee
-     * @param collection Collection address
-     * @param price Transaction price
-     * @param itemIds Array of item ids
-     * @return receiver Creator address
-     * @return creatorFee Creator fee (in basis point)
+     * @inheritdoc ICreatorFeeManager
      * @dev There are two onchain sources for the royalty fee to distribute.
      *      1. RoyaltyFeeRegistry: It is an onchain registry where royalty fee is defined across all items of a collection.
      *      2. ERC2981: The NFT Royalty Standard where royalty fee is defined at a tokenId level for each item of a collection.
@@ -45,15 +39,15 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
      *      If any contract relies on it to build an on-chain royalty logic, the contract should implement protection against (1) high
      *      royalties or (2) potential unexpected royalty changes that can occur.
      */
-    function viewCreatorFee(
+    function viewCreatorFeeInfo(
         address collection,
         uint256 price,
         uint256[] memory itemIds
-    ) external view returns (address receiver, uint256 creatorFee) {
+    ) external view returns (address creator, uint256 creatorFeeBp) {
         // Check if there is a royalty info in the system
-        (receiver, creatorFee) = royaltyFeeRegistry.royaltyInfo(collection, price);
+        (creator, creatorFeeBp) = royaltyFeeRegistry.royaltyInfo(collection, price);
 
-        if (receiver == address(0)) {
+        if (creator == address(0)) {
             if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
                 uint256 length = itemIds.length;
 
@@ -62,13 +56,13 @@ contract CreatorFeeManagerWithRoyalties is OwnableTwoSteps, ICreatorFeeManager {
                         abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
                     );
                     if (status) {
-                        (address newReceiver, uint256 newCreatorFee) = abi.decode(data, (address, uint256));
+                        (address newCreator, uint256 newCreatorFeeBp) = abi.decode(data, (address, uint256));
 
                         if (i == 0) {
-                            receiver = newReceiver;
-                            creatorFee = newCreatorFee;
+                            creator = newCreator;
+                            creatorFeeBp = newCreatorFeeBp;
                         } else {
-                            if (newReceiver != receiver || newCreatorFee != creatorFee) {
+                            if (newCreator != creator || newCreatorFeeBp != creatorFeeBp) {
                                 revert BundleEIP2981NotAllowed(collection);
                             }
                         }

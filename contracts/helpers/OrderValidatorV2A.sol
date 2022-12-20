@@ -31,15 +31,15 @@ import "./ValidationCodeConstants.sol";
  * @title OrderValidatorV2A
  * @notice This contract is used to check the validity of maker ask/bid orders in the LooksRareProtocol (v2).
  *         It performs checks for:
- *         1. Nonce-related issues (e.g., nonce executed or cancelled)
- *         2. Signature-related issues and merkle tree parameters
- *         3. Internal whitelist-related issues (i.e., currency or strategy not whitelisted)
- *         4. Timestamp-related issues (e.g., order expired)
- *         5. Maker order struct-related issues
- *         6. Asset-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
- *         7. Asset-type suggestions
- *         8. Transfer manager-related issues
- *         9. Creator-fee related issues (e.g., creator fee too high, ERC2981 bundles)
+ *         1. Nonce related issues (e.g., nonce executed or cancelled)
+ *         2. Signature related issues and merkle tree parameters
+ *         3. Internal whitelist related issues (i.e., currency or strategy not whitelisted)
+ *         4. Timestamp related issues (e.g., order expired)
+ *         5. Maker order struct related issues
+ *         6. Asset related issues for ERC20/ERC721/ERC1155 (approvals and balances)
+ *         7. Asset type suggestions
+ *         8. Transfer manager related issues
+ *         9. Creator fee related issues (e.g., creator fee too high, ERC2981 bundles)
  * @dev This version does not handle strategies, which support partial fills.
  * @author LooksRare protocol team (👀,💎)
  */

@@ -28,16 +28,16 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
 
     /**
      * @inheritdoc ICreatorFeeManager
-     * @dev There are two onchain sources for the royalty fee to distribute.
-     *      1. RoyaltyFeeRegistry: It is an onchain registry where royalty fee is defined across all items of a collection.
+     * @dev There are two on-chain sources for the royalty fee to distribute.
+     *      1. RoyaltyFeeRegistry: It is an on-chain registry where royalty fee is defined across all items of a collection.
      *      2. ERC2981: The NFT Royalty Standard where royalty fee is defined at a tokenId level for each item of a collection.
-     *      The onchain logic looks up the registry first. If it doesn't find anything, it checks if a collection is ERC2981.
+     *      The on-chain logic looks up the registry first. If it doesn't find anything, it checks if a collection is ERC2981.
      *      If so, it fetches the proper royalty information for the itemId.
      *      For a bundle that contains multiple itemIds (for a collection using ERC2981), if the royalty fee/recipient differ among the itemIds
      *      part of the bundle, the trade reverts.
-     *      This contract DOES NOT enforce any restriction for extremely high creator fee, not verifies the creator fee fetched is inferior to 10,000.
+     *      This contract DOES NOT enforce any restriction for extremely high creator fee, not verifies the creator fee fetched is inferior to the total price.
      *      If any contract relies on it to build an on-chain royalty logic, the contract should implement protection against (1) high
-     *      royalties or (2) potential unexpected royalty changes that can occur.
+     *      royalties or (2) potential unexpected royalty changes that can occur after the creation of the order.
      */
     function viewCreatorFeeInfo(
         address collection,

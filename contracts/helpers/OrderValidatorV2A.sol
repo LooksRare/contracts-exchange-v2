@@ -222,7 +222,7 @@ contract OrderValidatorV2A {
      */
     function _checkMakerAskValidityForNonces(
         address makerSigner,
-        uint112 askNonce,
+        uint256 askNonce,
         uint256 orderNonce,
         uint256 subsetNonce,
         bytes32 orderHash
@@ -230,7 +230,7 @@ contract OrderValidatorV2A {
         validationCode = _checkSubsetAndOrderNonceValidity(makerSigner, orderNonce, subsetNonce, orderHash);
 
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
-            (, uint112 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
+            (, uint256 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
             if (askNonce < globalAskNonce) return USER_GLOBAL_ASK_NONCE_HIGHER;
             if (askNonce > globalAskNonce) return USER_GLOBAL_ASK_NONCE_LOWER;
         }
@@ -247,7 +247,7 @@ contract OrderValidatorV2A {
      */
     function _checkMakerBidValidityForNonces(
         address makerSigner,
-        uint112 bidNonce,
+        uint256 bidNonce,
         uint256 orderNonce,
         uint256 subsetNonce,
         bytes32 orderHash
@@ -255,7 +255,7 @@ contract OrderValidatorV2A {
         validationCode = _checkSubsetAndOrderNonceValidity(makerSigner, orderNonce, subsetNonce, orderHash);
 
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
-            (uint112 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerSigner);
+            (uint256 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerSigner);
             if (bidNonce < globalBidNonce) return USER_GLOBAL_BID_NONCE_HIGHER;
             if (bidNonce > globalBidNonce) return USER_GLOBAL_BID_NONCE_LOWER;
         }

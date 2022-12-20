@@ -34,30 +34,30 @@ uint256 constant STRATEGY_NOT_ACTIVE = 314; // OK
 uint256 constant TOO_LATE_TO_EXECUTE_ORDER = 401; // OK
 uint256 constant TOO_EARLY_TO_EXECUTE_ORDER = 402; // OK
 
-// 5. Transfer-related (ERC20, ERC721, ERC1155 tokens), including transfers and approvals, errors
-uint256 constant SAME_ITEM_ID_IN_BUNDLE = 502; // OK
-uint256 constant ERC20_BALANCE_INFERIOR_TO_PRICE = 511; // OK
-uint256 constant ERC20_APPROVAL_INFERIOR_TO_PRICE = 512; // OK
-uint256 constant ERC721_ITEM_ID_DOES_NOT_EXIST = 521; // OK
-uint256 constant ERC721_ITEM_ID_NOT_IN_BALANCE = 522; // OK
-uint256 constant ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID = 523; // OK
-uint256 constant ERC1155_BALANCE_OF_DOES_NOT_EXIST = 531; // OK
-uint256 constant ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT = 532; // OK
-uint256 constant ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST = 533; // OK
-uint256 constant ERC1155_NO_APPROVAL_FOR_ALL = 534; // OK
+// 5. Maker order struct-related errors
+uint256 constant MAKER_ORDER_INVALID_STANDARD_SALE = 501; // OK
+uint256 constant MAKER_ORDER_INVALID_NON_STANDARD_SALE = 502; // OK
 
-// 6. Asset-type suggestion
+// 6. Transfer-related (ERC20, ERC721, ERC1155 tokens), including transfers and approvals, errors
+uint256 constant SAME_ITEM_ID_IN_BUNDLE = 602; // OK
+uint256 constant ERC20_BALANCE_INFERIOR_TO_PRICE = 611; // OK
+uint256 constant ERC20_APPROVAL_INFERIOR_TO_PRICE = 612; // OK
+uint256 constant ERC721_ITEM_ID_DOES_NOT_EXIST = 621; // OK
+uint256 constant ERC721_ITEM_ID_NOT_IN_BALANCE = 622; // OK
+uint256 constant ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID = 623; // OK
+uint256 constant ERC1155_BALANCE_OF_DOES_NOT_EXIST = 631; // OK
+uint256 constant ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT = 632; // OK
+uint256 constant ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST = 633; // OK
+uint256 constant ERC1155_NO_APPROVAL_FOR_ALL = 634; // OK
+
+// 7. Asset-type suggestion
 uint256 constant POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721 = 701; // OK
 uint256 constant POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155 = 702; // OK
 uint256 constant ASSET_TYPE_NOT_SUPPORTED = 711; // OK
 
-// 7. Transfer manager-related
-uint256 constant NO_TRANSFER_MANAGER_APPROVAL_BY_USER_FOR_EXCHANGE = 611; // OK
-uint256 constant TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE = 612; // OK
-
-// 8. Maker order struct-related errors
-uint256 constant MAKER_ORDER_INVALID_STANDARD_SALE = 801; // OK
-uint256 constant MAKER_ORDER_INVALID_NON_STANDARD_SALE = 802; // OK
+// 8. Transfer manager-related
+uint256 constant NO_TRANSFER_MANAGER_APPROVAL_BY_USER_FOR_EXCHANGE = 811; // OK
+uint256 constant TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE = 812; // OK
 
 // 9. Creator fee-related errors
 uint256 constant BUNDLE_ERC2981_NOT_SUPPORTED = 901;

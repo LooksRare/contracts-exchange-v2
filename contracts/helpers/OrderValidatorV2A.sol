@@ -35,10 +35,10 @@ import "./ValidationCodeConstants.sol";
  *         2. Signature-related issues and merkle tree parameters
  *         3. Internal whitelist-related issues (i.e., currency or strategy not whitelisted)
  *         4. Timestamp-related issues (e.g., order expired)
- *         5. Asset-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
- *         6. Asset-type suggestions
- *         7. Transfer manager-related issues
- *         8. Maker order struct-related issues
+ *         5. Maker order struct-related issues
+ *         6. Asset-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
+ *         7. Asset-type suggestions
+ *         8. Transfer manager-related issues
  *         9. Creator-fee related issues (e.g., creator fee too high, ERC2981 bundles)
  * @dev This version does not handle strategies, which support partial fills.
  * @author LooksRare protocol team (👀,💎)
@@ -166,20 +166,22 @@ contract OrderValidatorV2A {
         validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
         validationCodes[2] = _checkMakerAskValidityWhitelists(makerAsk.currency, makerAsk.strategyId);
         validationCodes[3] = _checkValidityTimestamps(makerAsk.startTime, makerAsk.endTime);
-
-        (uint256[] memory itemIds, uint256[] memory amounts, uint256 price) = _getMakerAskItemIdsAndAmountsAndPrice(
-            makerAsk
-        );
-        validationCodes[4] = _checkMakerAskValidityNFTAssets(
+        (
+            uint256 validationCode4,
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
+            uint256 price
+        ) = _validateMakerAskItemIdsAndAmountsAndPrice(makerAsk);
+        validationCodes[4] = validationCode4;
+        validationCodes[5] = _checkMakerAskValidityNFTAssets(
             makerAsk.collection,
             makerAsk.assetType,
             makerAsk.signer,
             itemIds,
             amounts
         );
-        validationCodes[5] = _checkIfPotentialWrongAssetTypes(makerAsk.collection, makerAsk.assetType);
-        validationCodes[6] = _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(makerAsk.signer);
-        validationCodes[7];
+        validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerAsk.collection, makerAsk.assetType);
+        validationCodes[7] = _verifyTransferManagerApprovalAreNotRevokedByUserNorOwner(makerAsk.signer);
         validationCodes[8] = _checkCreatorFeeValidationCodes(makerAsk.collection, price, itemIds);
     }
 
@@ -206,14 +208,18 @@ contract OrderValidatorV2A {
         validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
         validationCodes[2] = _checkMakerBidValidityWhitelists(makerBid.currency, makerBid.strategyId);
         validationCodes[3] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
-        // @dev It is possible the order is still valid in some cases since the price can be lower
-        (uint256[] memory itemIds, , uint256 price) = _getMakerBidItemIdsAndAmountsAndPrice(makerBid);
-
-        validationCodes[4] = _checkMakerBidValidityERC20Assets(makerBid.currency, makerBid.signer, price);
-        validationCodes[5] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
+        (
+            uint256 validationCode4,
+            uint256[] memory itemIds,
+            ,
+            uint256 price
+        ) = _validateMakerBidItemIdsAndAmountsAndPrice(makerBid);
+        validationCodes[4] = validationCode4;
+        validationCodes[5] = _checkMakerBidValidityERC20Assets(makerBid.currency, makerBid.signer, price);
+        validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
         // Criteria 6 is irrelevant in the context of maker bid
-        validationCodes[6] = ORDER_EXPECTED_TO_BE_VALID;
-        validationCodes[7];
+        validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID;
+        validationCodes[8];
         validationCodes[8] = _checkCreatorFeeValidationCodes(makerBid.collection, price, itemIds);
     }
 
@@ -719,27 +725,6 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Validate maker order itemIds and amounts for standard sale
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
-     * @return validationCode Validation code
-     */
-    function _validateMakerOrderItemIdsAndAmountsForStandardSale(
-        uint256[] memory itemIds,
-        uint256[] memory amounts
-    ) internal pure returns (uint256 validationCode) {
-        uint256 length = itemIds.length;
-        if (length == 0 || (amounts.length != length)) return MAKER_ORDER_INVALID_STANDARD_SALE;
-
-        for (uint256 i; i < length; ) {
-            if (amounts[i] == 0) return MAKER_ORDER_INVALID_STANDARD_SALE;
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /**
      * @notice Verify transfer manager approvals are not revoked by user, nor owner
      * @param user Address of the user
      * @return validationCode Validation code
@@ -754,25 +739,61 @@ contract OrderValidatorV2A {
             return TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE;
     }
 
-    function _getMakerAskItemIdsAndAmountsAndPrice(
+    function _validateMakerAskItemIdsAndAmountsAndPrice(
         OrderStructs.MakerAsk memory makerAsk
-    ) internal view returns (uint256[] memory itemIds, uint256[] memory amounts, uint256 price) {
+    )
+        internal
+        view
+        returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price)
+    {
         if (makerAsk.strategyId == 0) {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
             price = makerAsk.minPrice;
+
+            uint256 length = itemIds.length;
+            if (length == 0 || (amounts.length != length)) {
+                validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+            }
+
+            for (uint256 i; i < length; ) {
+                if (amounts[i] == 0) {
+                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                }
+                unchecked {
+                    ++i;
+                }
+            }
         } else {
             //
         }
     }
 
-    function _getMakerBidItemIdsAndAmountsAndPrice(
+    function _validateMakerBidItemIdsAndAmountsAndPrice(
         OrderStructs.MakerBid memory makerBid
-    ) internal view returns (uint256[] memory itemIds, uint256[] memory amounts, uint256 price) {
+    )
+        internal
+        view
+        returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price)
+    {
         if (makerBid.strategyId == 0) {
             itemIds = makerBid.itemIds;
             amounts = makerBid.amounts;
             price = makerBid.maxPrice;
+
+            uint256 length = itemIds.length;
+            if (length == 0 || (amounts.length != length)) {
+                validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+            }
+
+            for (uint256 i; i < length; ) {
+                if (amounts[i] == 0) {
+                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                }
+                unchecked {
+                    ++i;
+                }
+            }
         } else {
             //
         }

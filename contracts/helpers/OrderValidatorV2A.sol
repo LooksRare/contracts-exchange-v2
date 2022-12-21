@@ -727,7 +727,7 @@ contract OrderValidatorV2A {
             );
 
             if (!success) return MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271;
-            if (abi.decode(data, (bytes4)) != 0x1626ba7e) return SIGNATURE_INVALID_EIP1271;
+            if (abi.decode(data, (bytes4)) != IERC1271.isValidSignature.selector) return SIGNATURE_INVALID_EIP1271;
         }
     }
 

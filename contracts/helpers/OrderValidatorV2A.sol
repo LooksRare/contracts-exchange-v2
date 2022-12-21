@@ -748,7 +748,7 @@ contract OrderValidatorV2A {
         OrderStructs.MakerAsk memory makerAsk
     )
         internal
-        view
+        pure
         returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price)
     {
         if (makerAsk.strategyId == 0) {
@@ -778,7 +778,7 @@ contract OrderValidatorV2A {
         OrderStructs.MakerBid memory makerBid
     )
         internal
-        view
+        pure
         returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price)
     {
         if (makerBid.strategyId == 0) {

@@ -23,17 +23,6 @@ contract StrategyTestMultiFillCollectionOrder is StrategyBase {
     }
 
     /**
-     * @notice Execute collection strategy with taker bid
-     * @dev It always reverts.
-     */
-    function executeStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata,
-        OrderStructs.MakerAsk calldata
-    ) external pure returns (uint256, uint256[] calldata, uint256[] calldata, bool) {
-        revert OrderInvalid();
-    }
-
-    /**
      * @notice Execute collection strategy with taker ask order
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)

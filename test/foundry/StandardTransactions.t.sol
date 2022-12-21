@@ -41,6 +41,9 @@ contract StandardTransactionsTest is ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
+        // Verify validity of maker ask order
+        _isMakerAskOrderValid(makerAsk, signature);
+
         // Taker user actions
         vm.startPrank(takerUser);
 
@@ -111,6 +114,9 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Verify maker bid order
+        _isMakerBidOrderValid(makerBid, signature);
 
         // Taker user actions
         vm.startPrank(takerUser);

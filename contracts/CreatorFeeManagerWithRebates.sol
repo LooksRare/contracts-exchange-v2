@@ -28,19 +28,17 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
     }
 
     /**
-     * @notice View receiver and creator fee
-     * @param collection Collection address
-     * @param price Trade price
+     * @inheritdoc ICreatorFeeManager
      */
-    function viewCreatorFee(
+    function viewCreatorFeeInfo(
         address collection,
         uint256 price,
         uint256[] memory itemIds
-    ) external view returns (address receiver, uint256 creatorFee) {
+    ) external view returns (address creator, uint256 creatorFeeBp) {
         // Check if there is a royalty info in the system
-        (receiver, ) = royaltyFeeRegistry.royaltyInfo(collection, price);
+        (creator, ) = royaltyFeeRegistry.royaltyInfo(collection, price);
 
-        if (receiver == address(0)) {
+        if (creator == address(0)) {
             if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
                 uint256 length = itemIds.length;
 
@@ -49,14 +47,13 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
                         abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
                     );
                     if (status) {
-                        (address newReceiver, ) = abi.decode(data, (address, uint256));
+                        (address newCreator, ) = abi.decode(data, (address, uint256));
 
                         if (i == 0) {
-                            if (newReceiver == address(0)) break;
-
-                            receiver = newReceiver;
+                            if (newCreator == address(0)) break;
+                            creator = newCreator;
                         } else {
-                            if (newReceiver != receiver) {
+                            if (newCreator != creator) {
                                 revert BundleEIP2981NotAllowed(collection);
                             }
                         }
@@ -69,8 +66,8 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
         }
 
         // A fixed royalty fee is applied
-        if (receiver != address(0)) {
-            creatorFee = (STANDARD_ROYALTY_FEE_BP * price) / 10_000;
+        if (creator != address(0)) {
+            creatorFeeBp = (STANDARD_ROYALTY_FEE_BP * price) / 10_000;
         }
     }
 }

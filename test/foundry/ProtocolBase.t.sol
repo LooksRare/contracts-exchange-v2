@@ -10,7 +10,10 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Core contracts
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
+
+// Other contracts
 import {CreatorFeeManagerWithRebates} from "../../contracts/CreatorFeeManagerWithRebates.sol";
+import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 
 // Mock files
 import {MockERC20} from "../mock/MockERC20.sol";
@@ -34,8 +37,33 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     TransferManager public transferManager;
     MockRoyaltyFeeRegistry public royaltyFeeRegistry;
     CreatorFeeManagerWithRebates public creatorFeeManager;
+    OrderValidatorV2A public orderValidator;
 
     WETH public weth;
+
+    function _isMakerAskOrderValid(OrderStructs.MakerAsk memory makerAsk, bytes memory signature) internal {
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+            makerAsk,
+            signature,
+            _emptyMerkleTree
+        );
+
+        for (uint256 i; i < 9; i++) {
+            assertEq(validationCodes[i], 0);
+        }
+    }
+
+    function _isMakerBidOrderValid(OrderStructs.MakerBid memory makerBid, bytes memory signature) internal {
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+            makerBid,
+            signature,
+            _emptyMerkleTree
+        );
+
+        for (uint256 i; i < 9; i++) {
+            assertEq(validationCodes[i], 0);
+        }
+    }
 
     function _setUpUser(address user) internal asPrankedUser(user) {
         // Do approvals for collections and WETH
@@ -90,6 +118,9 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         // Fetch domain separator and store it as one of the operators
         _domainSeparator = looksRareProtocol.domainSeparator();
         operators.push(address(looksRareProtocol));
+
+        // Deploy order validator contract
+        orderValidator = new OrderValidatorV2A(address(looksRareProtocol));
 
         // Distribute ETH and WETH to protocol owner
         vm.deal(_owner, _initialETHBalanceOwner + _initialWETHBalanceOwner);

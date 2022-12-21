@@ -48,8 +48,17 @@ contract OrderValidatorV2A {
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleTree;
 
+    // ERC721 potential interfaceId
+    bytes4 public constant ERC721_INTERFACE_ID_1 = 0x5b5e139f;
+
+    // ERC721 potential interfaceId
+    bytes4 public constant ERC721_INTERFACE_ID_2 = 0x80ac58cd;
+
+    // ERC1155 interfaceId
+    bytes4 public constant ERC1155_INTERFACE_ID = 0xd9b67a26;
+
     // Number of distinct criteria groups checked to evaluate the validity of an order
-    uint256 public immutable CRITERIA_GROUPS = 9;
+    uint256 public constant CRITERIA_GROUPS = 9;
 
     // Magic value nonce returned if executed
     bytes32 public immutable MAGIC_VALUE_NONCE_EXECUTED =
@@ -198,6 +207,7 @@ contract OrderValidatorV2A {
         OrderStructs.MerkleTree calldata merkleTree
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerBid.hash();
+
         validationCodes[0] = _checkValidityMakerBidNonces(
             makerBid.signer,
             makerBid.bidNonce,
@@ -305,10 +315,10 @@ contract OrderValidatorV2A {
         address currency,
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
-        // Verify whether the currency is whitelisted
+        // 1. Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(currency)) return CURRENCY_NOT_WHITELISTED;
 
-        // Verify whether the strategy is valid
+        // 2. Verify whether the strategy is valid
         (
             bool strategyIsActive,
             ,
@@ -335,11 +345,11 @@ contract OrderValidatorV2A {
         address currency,
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
-        // Verify whether the currency is whitelisted
+        // 1. Verify whether the currency is whitelisted
         if (currency == address(0) || !looksRareProtocol.isCurrencyWhitelisted(currency))
             return CURRENCY_NOT_WHITELISTED;
 
-        // Verify whether the strategy is valid
+        // 2. Verify whether the strategy is valid
         (
             bool strategyIsActive,
             ,
@@ -383,13 +393,12 @@ contract OrderValidatorV2A {
         uint256 assetType
     ) internal view returns (uint256 validationCode) {
         if (assetType == 0) {
-            // 0x5b5e139f // 0x80ac58cd are potential ERC721 interfaceIds
-            bool isERC721 = IERC165(collection).supportsInterface(0x5b5e139f) ||
-                IERC165(collection).supportsInterface(0x80ac58cd);
+            bool isERC721 = IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_1) ||
+                IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
             if (!isERC721) return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721;
         } else if (assetType == 1) {
-            // 0xd9b67a26 is ERC1155 interfaceId
-            if (!IERC165(collection).supportsInterface(0xd9b67a26)) return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155;
+            if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID))
+                return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155;
         } else {
             return ASSET_TYPE_NOT_SUPPORTED;
         }
@@ -563,8 +572,8 @@ contract OrderValidatorV2A {
 
         // Only check if length of array is greater than 1
         if (length > 1) {
-            for (uint256 i = 0; i < length; ) {
-                for (uint256 j = i; j < length; ) {
+            for (uint256 i = 0; i < length - 1; ) {
+                for (uint256 j = i + 1; j < length; ) {
                     if (itemIds[i] == itemIds[j]) {
                         return SAME_ITEM_ID_IN_BUNDLE;
                     }
@@ -603,7 +612,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check creator fee and validation codes
+     * @notice Check the validity of creator fee
      * @param collection Collection address
      * @param itemIds Item ids
      * @return validationCode Validation code
@@ -620,7 +629,7 @@ contract OrderValidatorV2A {
         uint256 length = itemIds.length;
 
         if (receiver == address(0) && length > 0) {
-            if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
+            if (IERC165(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
                 for (uint256 i; i < length; ) {
                     (bool status, bytes memory data) = collection.staticcall(
                         abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
@@ -761,7 +770,7 @@ contract OrderValidatorV2A {
                 }
             }
         } else {
-            //
+            // TODO
         }
     }
 

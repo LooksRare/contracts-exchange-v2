@@ -23,13 +23,12 @@ interface ILooksRareProtocol {
         bytes32 orderHash;
         uint256 orderNonce;
         bool isNonceInvalidated;
-        address signer;
     }
 
     event TakerBid(
         SignatureParameters signatureParameters,
-        address bidUser,
-        address bidRecipient,
+        address bidUser, // taker (initiates the transaction)
+        address bidRecipient, // taker (receives the NFT)
         uint256 strategyId,
         address currency,
         address collection,
@@ -41,7 +40,8 @@ interface ILooksRareProtocol {
 
     event TakerAsk(
         SignatureParameters signatureParameters,
-        address askUser,
+        address askUser, // taker (initiates the transaction)
+        address bidUser, // maker (receives the NFT)
         uint256 strategyId,
         address currency,
         address collection,

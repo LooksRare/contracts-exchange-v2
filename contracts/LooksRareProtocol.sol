@@ -339,6 +339,7 @@ contract LooksRareProtocol is
                 signer: signer
             }),
             sender,
+            takerBid.recipient,
             makerAsk.strategyId,
             makerAsk.currency,
             makerAsk.collection,

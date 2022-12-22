@@ -265,10 +265,10 @@ contract LooksRareProtocol is
             SignatureParameters({
                 orderHash: orderHash,
                 orderNonce: makerBid.orderNonce,
-                isNonceInvalidated: isNonceInvalidated,
-                signer: signer
+                isNonceInvalidated: isNonceInvalidated
             }),
             msg.sender,
+            signer,
             makerBid.strategyId,
             makerBid.currency,
             makerBid.collection,
@@ -335,10 +335,10 @@ contract LooksRareProtocol is
             SignatureParameters({
                 orderHash: orderHash,
                 orderNonce: makerAsk.orderNonce,
-                isNonceInvalidated: isNonceInvalidated,
-                signer: signer
+                isNonceInvalidated: isNonceInvalidated
             }),
             sender,
+            takerBid.recipient == address(0) ? sender : takerBid.recipient,
             makerAsk.strategyId,
             makerAsk.currency,
             makerAsk.collection,

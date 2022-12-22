@@ -329,24 +329,24 @@ contract LooksRareProtocol is
             );
 
             _transferToSellerAndCreator(recipients, fees, makerAsk.currency, sender);
-
-            emit TakerBid(
-                SignatureParameters({
-                    orderHash: orderHash,
-                    orderNonce: makerAsk.orderNonce,
-                    isNonceInvalidated: isNonceInvalidated
-                }),
-                sender,
-                takerBid.recipient == address(0) ? sender : takerBid.recipient,
-                makerAsk.strategyId,
-                makerAsk.currency,
-                makerAsk.collection,
-                itemIds,
-                amounts,
-                recipients,
-                fees
-            );
         }
+
+        emit TakerBid(
+            SignatureParameters({
+                orderHash: orderHash,
+                orderNonce: makerAsk.orderNonce,
+                isNonceInvalidated: isNonceInvalidated
+            }),
+            sender,
+            takerBid.recipient == address(0) ? sender : takerBid.recipient,
+            makerAsk.strategyId,
+            makerAsk.currency,
+            makerAsk.collection,
+            itemIds,
+            amounts,
+            recipients,
+            fees
+        );
 
         return fees[0];
     }

@@ -25,10 +25,16 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     address public protocolFeeRecipient;
 
     // Maximum creator fee (in basis point)
-    uint16 public maximumCreatorFeeBp = 1_000;
+    uint16 public maxCreatorFeeBp = 1_000;
 
     // Creator fee manager
     ICreatorFeeManager public creatorFeeManager;
+
+    /**
+     * @notice Constructor
+     * @param _owner Owner address
+     */
+    constructor(address _owner) StrategyManager(_owner) {}
 
     /**
      * @notice Set collection staking registry
@@ -42,14 +48,14 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
     /**
      * @notice Update the maximum creator fee (in bp)
-     * @param newMaximumCreatorFeeBp New maximum creator fee (in basis point)
+     * @param newMaxCreatorFeeBp New maximum creator fee (in basis point)
      * @dev The maximum value that can be set is 25%.
      */
-    function setMaximumCreatorFeeBp(uint16 newMaximumCreatorFeeBp) external onlyOwner {
-        if (newMaximumCreatorFeeBp > 2_500) revert CreatorFeeBpTooHigh();
-        maximumCreatorFeeBp = newMaximumCreatorFeeBp;
+    function setMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) external onlyOwner {
+        if (newMaxCreatorFeeBp > 2_500) revert CreatorFeeBpTooHigh();
+        maxCreatorFeeBp = newMaxCreatorFeeBp;
 
-        emit NewMaximumCreatorFeeBp(newMaximumCreatorFeeBp);
+        emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
     }
 
     /**
@@ -88,10 +94,10 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerBid.collection, price, itemIds);
-                if (fees[1] * 10_000 > (price * uint256(maximumCreatorFeeBp))) revert CreatorFeeBpTooHigh();
+                if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
             }
 
-            uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFee) / 10_000;
+            uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
 
             // 1 --> Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
@@ -134,9 +140,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
-                if (fees[1] * 10_000 > (price * uint256(maximumCreatorFeeBp))) revert CreatorFeeBpTooHigh();
+                if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
             }
-            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFee) / 10_000;
+            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
 
             // 1 --> Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
@@ -244,14 +250,14 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         uint256 price,
         uint256 strategyId,
         uint256 creatorFee,
-        uint256 minTotalFee
+        uint256 minTotalFeeBp
     ) private view returns (uint256 protocolFee) {
-        uint256 standardProtocolFee = (price * strategyInfo[strategyId].standardProtocolFee) / 10_000;
+        uint256 standardProtocolFeeBp = (price * strategyInfo[strategyId].standardProtocolFeeBp) / 10_000;
 
-        if (creatorFee + standardProtocolFee > minTotalFee) {
-            protocolFee = standardProtocolFee;
+        if (creatorFee + standardProtocolFeeBp > minTotalFeeBp) {
+            protocolFee = standardProtocolFeeBp;
         } else {
-            protocolFee = minTotalFee - creatorFee;
+            protocolFee = minTotalFeeBp - creatorFee;
         }
     }
 }

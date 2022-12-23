@@ -7,6 +7,9 @@ import {Merkle} from "../../lib/murky/src/Merkle.sol";
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
+// Shared errors
+import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
+
 // Strategies
 import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
 
@@ -14,8 +17,6 @@ import {StrategyCollectionOffer} from "../../contracts/executionStrategies/Strat
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
-    error OrderInvalid();
-
     StrategyCollectionOffer public strategyCollectionOffer;
     bytes4 public selectorNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
     bytes4 public selectorWithProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
@@ -31,18 +32,18 @@ contract CollectionOrdersTest is ProtocolBase {
         strategyCollectionOffer = new StrategyCollectionOffer(address(looksRareProtocol));
 
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selectorNoProof,
             true,
             address(strategyCollectionOffer)
         );
 
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selectorWithProof,
             true,
             address(strategyCollectionOffer)
@@ -61,9 +62,9 @@ contract CollectionOrdersTest is ProtocolBase {
         ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selectorNoProof);
         assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyCollectionOffer));
@@ -79,9 +80,9 @@ contract CollectionOrdersTest is ProtocolBase {
         ) = looksRareProtocol.strategyInfo(2);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selectorWithProof);
         assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyCollectionOffer));
@@ -382,14 +383,15 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) private {
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(orderIsValid);
         assertEq(errorSelector, bytes4(0));
     }
 
     function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid) private {
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertFalse(isValid);
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+
+        assertFalse(orderIsValid);
         assertEq(errorSelector, OrderInvalid.selector);
     }
 }

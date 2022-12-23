@@ -3,13 +3,15 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
 import {WrongCurrency} from "../../../contracts/interfaces/SharedErrors.sol";
 
+// Shared errors
+import "../../../contracts/interfaces/SharedErrors.sol";
+
 // Strategies
-import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkMultiplePriceFeeds.sol";
+import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkPriceLatency.sol";
+import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Mock files and other tests
 import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
@@ -72,13 +74,16 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
-        bytes4 errorSelector = _assertOrderInvalid(makerAsk, StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
+        bytes4 errorSelector = _assertOrderInvalid(
+            makerAsk,
+            StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector
+        );
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
 
         aggregator.setAnswer(-1);
-        vm.expectRevert(StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
+        vm.expectRevert(StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
@@ -151,7 +156,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerAsk);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
@@ -171,7 +176,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerAsk);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
@@ -189,7 +194,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerAsk);
 
-        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        vm.expectRevert(BidTooLow.selector);
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
@@ -204,7 +209,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _assertOrderValid(makerAsk);
 
         vm.prank(takerUser);
-        vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
+        vm.expectRevert(WrongCaller.selector);
         // Call the function directly
         address(strategyFloorFromChainlink).call(abi.encodeWithSelector(selector, takerBid, makerAsk));
     }
@@ -235,7 +240,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function _assertOrderInvalid(OrderStructs.MakerAsk memory makerAsk) internal returns (bytes4) {
-        return _assertOrderInvalid(makerAsk, IExecutionStrategy.OrderInvalid.selector);
+        return _assertOrderInvalid(makerAsk, OrderInvalid.selector);
     }
 
     function _assertOrderInvalid(

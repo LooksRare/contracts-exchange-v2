@@ -11,9 +11,9 @@ abstract contract TestParameters is Test {
     address internal constant _transferrer = address(100);
     address internal constant _royaltyRecipient = address(22);
     address internal constant _emptyAffiliate = address(0);
-    uint16 internal constant _standardProtocolFee = uint16(150);
-    uint16 internal constant _minTotalFee = uint16(200);
-    uint16 internal constant _maxProtocolFee = uint16(300);
+    uint16 internal constant _standardProtocolFeeBp = uint16(150);
+    uint16 internal constant _minTotalFeeBp = uint16(200);
+    uint16 internal constant _maxProtocolFeeBp = uint16(300);
     uint16 internal constant _standardRoyaltyFee = uint16(50);
     uint256 internal constant makerUserPK = 1;
     uint256 internal constant takerUserPK = 2;

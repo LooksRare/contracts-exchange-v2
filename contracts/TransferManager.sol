@@ -29,6 +29,12 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     mapping(address => bool) public isOperatorWhitelisted;
 
     /**
+     * @notice Constructor
+     * @param _owner Owner address
+     */
+    constructor(address _owner) OwnableTwoSteps(_owner) {}
+
+    /**
      * @notice Transfer items for ERC721 collection
      * @param collection Collection address
      * @param from Sender address

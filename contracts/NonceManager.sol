@@ -43,7 +43,7 @@ contract NonceManager is INonceManager {
             }
         }
 
-        emit OrderNoncesCancelled(orderNonces);
+        emit OrderNoncesCancelled(msg.sender, orderNonces);
     }
 
     /**
@@ -60,7 +60,7 @@ contract NonceManager is INonceManager {
             }
         }
 
-        emit SubsetNoncesCancelled(subsetNonces);
+        emit SubsetNoncesCancelled(msg.sender, subsetNonces);
     }
 
     /**
@@ -80,6 +80,6 @@ contract NonceManager is INonceManager {
             userBidAskNonces[msg.sender].askNonce = _askNonce;
         }
 
-        emit NewBidAskNonces(_bidNonce, _askNonce);
+        emit NewBidAskNonces(msg.sender, _bidNonce, _askNonce);
     }
 }

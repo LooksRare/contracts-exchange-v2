@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {StrategyBase} from "./StrategyBase.sol";
-import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
+// Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
+
+// Shared errors
+import {BidTooLow, OrderInvalid, WrongCaller} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyDutchAuction
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyDutchAuction is StrategyBase {
+contract StrategyDutchAuction {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 

@@ -45,7 +45,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         vm.prank(makerUser);
         vm.expectEmit(false, false, false, false);
-        emit SubsetNoncesCancelled(subsetNonces);
+        emit SubsetNoncesCancelled(makerUser, subsetNonces);
         looksRareProtocol.cancelSubsetNonces(subsetNonces);
 
         // Prepare the taker bid
@@ -124,7 +124,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         vm.prank(makerUser);
         vm.expectEmit(false, false, false, false);
-        emit NewBidAskNonces(0, 1);
+        emit NewBidAskNonces(makerUser, 0, 1);
         looksRareProtocol.incrementBidAskNonces(false, true);
     }
 
@@ -172,7 +172,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         vm.prank(makerUser);
         vm.expectEmit(false, false, false, false);
-        emit NewBidAskNonces(1, 0);
+        emit NewBidAskNonces(makerUser, 1, 0);
         looksRareProtocol.incrementBidAskNonces(true, false);
     }
 
@@ -243,9 +243,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         vm.prank(_owner);
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selector,
             true,
             address(strategyMultiFillCollectionOrder)
@@ -353,7 +353,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         orderNonces[0] = 69;
         orderNonces[1] = 420;
         vm.expectEmit(true, false, false, true);
-        emit OrderNoncesCancelled(orderNonces);
+        emit OrderNoncesCancelled(makerUser, orderNonces);
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
         assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), MAGIC_VALUE_NONCE_EXECUTED);

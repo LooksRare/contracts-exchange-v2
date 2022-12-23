@@ -7,8 +7,8 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 // OpenZeppelin's library for verifying Merkle proofs
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
-// Others
-import {StrategyBase} from "./StrategyBase.sol";
+// Shared errors
+import {OrderInvalid, WrongCaller, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyCollectionOffer
@@ -19,10 +19,7 @@ import {StrategyBase} from "./StrategyBase.sol";
  *            Use cases include trait-based offers or rarity score offers.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyCollectionOffer is StrategyBase {
-    // If Merkle proof is invalid
-    error OrderMerkleProofInvalid();
-
+contract StrategyCollectionOffer {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 
@@ -102,7 +99,7 @@ contract StrategyCollectionOffer is StrategyBase {
             bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
 
             // Verify proof
-            if (!MerkleProofMemory.verify(proof, root, node)) revert OrderMerkleProofInvalid();
+            if (!MerkleProofMemory.verify(proof, root, node)) revert WrongMerkleProof();
         }
     }
 
@@ -116,11 +113,10 @@ contract StrategyCollectionOffer is StrategyBase {
     function isValid(
         OrderStructs.MakerBid calldata makerBid
     ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
-        uint256[] memory amounts = makerBid.amounts;
-        if (amounts.length != 1 || amounts[0] == 0) {
-            return (orderIsValid, OrderInvalid.selector);
+        if (makerBid.amounts.length != 1 || makerBid.amounts[0] == 0) {
+            errorSelector = OrderInvalid.selector;
+        } else {
+            orderIsValid = true;
         }
-
-        orderIsValid = true;
     }
 }

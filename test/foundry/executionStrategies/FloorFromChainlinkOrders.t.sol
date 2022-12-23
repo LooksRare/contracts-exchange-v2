@@ -9,7 +9,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Strategies
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Other tests
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
@@ -52,9 +52,9 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selector);
         assertEq(strategyIsMakerBid, isMakerBid);
         assertEq(strategyImplementation, address(strategyFloorFromChainlink));
@@ -181,11 +181,11 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyFloorFromChainlink = new StrategyFloorFromChainlink(address(looksRareProtocol), address(weth));
+        strategyFloorFromChainlink = new StrategyFloorFromChainlink(_owner, address(looksRareProtocol), address(weth));
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selector,
             isMakerBid,
             address(strategyFloorFromChainlink)

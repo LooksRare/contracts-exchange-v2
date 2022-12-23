@@ -329,7 +329,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
     function testCreatorRoyaltiesRevertIfFeeHigherThanLimit() public {
         _setUpUsers();
-        uint256 _creatorRoyaltyFeeTooHigh = looksRareProtocol.maximumCreatorFeeBp() + 1;
+        uint256 _creatorRoyaltyFeeTooHigh = looksRareProtocol.maxCreatorFeeBp() + 1;
 
         // Adjust royalties
         _setUpRoyaltiesRegistry(_creatorRoyaltyFeeTooHigh);

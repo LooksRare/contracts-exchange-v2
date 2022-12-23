@@ -37,9 +37,9 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
         ) = looksRareProtocol.strategyInfo(0);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, _emptyBytes4);
         assertFalse(strategyIsMakerBid);
         assertEq(strategyImplementation, address(0));

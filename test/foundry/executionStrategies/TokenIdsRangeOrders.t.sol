@@ -3,9 +3,11 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
 import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
+
+// Shared errors
+import "../../../contracts/interfaces/SharedErrors.sol";
 
 // Strategies
 import {StrategyTokenIdsRange} from "../../../contracts/executionStrategies/StrategyTokenIdsRange.sol";
@@ -20,9 +22,9 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selector,
             true,
             address(strategyTokenIdsRange)
@@ -92,9 +94,9 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selector);
         assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyTokenIdsRange));
@@ -240,7 +242,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
+        vm.expectRevert(WrongCaller.selector);
         // Call the function directly
         strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
@@ -262,7 +264,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -277,7 +279,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -303,7 +305,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -328,7 +330,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -358,7 +360,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -379,7 +381,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -394,7 +396,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);

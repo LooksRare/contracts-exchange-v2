@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-// LooksRare unopinionated libraries
-import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+// Dependencies
+import {ExecutionManager} from "./ExecutionManager.sol";
 
 // Interfaces
 import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
@@ -12,15 +12,16 @@ import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
  * @notice This contract handles the logic for transferring items.
  * @author LooksRare protocol team (👀,💎)
  */
-contract TransferSelectorNFT is ITransferSelectorNFT, OwnableTwoSteps {
+contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
     // Tracks manager address and associated selector to transfer asset type
     mapping(uint256 => ManagerSelector) public managerSelectorOfAssetType;
 
     /**
      * @notice Constructor
+     * @param _owner Owner address
      * @param transferManager Address of the transfer manager for ERC721/ERC1155
      */
-    constructor(address transferManager) {
+    constructor(address _owner, address transferManager) ExecutionManager(_owner) {
         // Transfer manager with selectors for ERC721/ERC1155
         managerSelectorOfAssetType[0] = ManagerSelector({transferManager: transferManager, selector: 0xa7bc96d3});
         managerSelectorOfAssetType[1] = ManagerSelector({transferManager: transferManager, selector: 0xa0a406c6});

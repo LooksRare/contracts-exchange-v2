@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
-import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+import {CurrencyManager} from "./CurrencyManager.sol";
 
 // Interfaces
 import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
@@ -12,7 +12,7 @@ import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
  * @notice This contract handles the addition and the update of execution strategies.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyManager is IStrategyManager, OwnableTwoSteps {
+contract StrategyManager is IStrategyManager, CurrencyManager {
     // Count how many strategies exist (it includes strategies that have been removed)
     uint256 public countStrategies = 1;
 
@@ -21,13 +21,14 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
 
     /**
      * @notice Constructor
+     * @param _owner Owner address
      */
-    constructor() {
+    constructor(address _owner) CurrencyManager(_owner) {
         strategyInfo[0] = Strategy({
             isActive: true,
-            standardProtocolFee: 150,
-            minTotalFee: 200,
-            maxProtocolFee: 300,
+            standardProtocolFeeBp: 150,
+            minTotalFeeBp: 200,
+            maxProtocolFeeBp: 300,
             selector: bytes4(0),
             isMakerBid: false,
             implementation: address(0)
@@ -36,37 +37,45 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
 
     /**
      * @notice Add a new strategy
-     * @param standardProtocolFee Protocol fee
-     * @param maxProtocolFee Maximum protocol fee
+     * @param standardProtocolFeeBp Protocol fee
+     * @param maxProtocolFeeBp Maximum protocol fee
      * @param selector Selector
      * @param isMakerBid Whether the function selector is for maker bids
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      */
     function addStrategy(
-        uint16 standardProtocolFee,
-        uint16 minTotalFee,
-        uint16 maxProtocolFee,
+        uint16 standardProtocolFeeBp,
+        uint16 minTotalFeeBp,
+        uint16 maxProtocolFeeBp,
         bytes4 selector,
         bool isMakerBid,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > 5_000)
+        if (maxProtocolFeeBp < standardProtocolFeeBp || maxProtocolFeeBp < minTotalFeeBp || maxProtocolFeeBp > 5_000)
             revert StrategyProtocolFeeTooHigh();
 
         if (selector == bytes4(0)) revert StrategyHasNoSelector();
 
         strategyInfo[countStrategies] = Strategy({
             isActive: true,
-            standardProtocolFee: standardProtocolFee,
-            minTotalFee: minTotalFee,
-            maxProtocolFee: maxProtocolFee,
+            standardProtocolFeeBp: standardProtocolFeeBp,
+            minTotalFeeBp: minTotalFeeBp,
+            maxProtocolFeeBp: maxProtocolFeeBp,
             selector: selector,
             isMakerBid: isMakerBid,
             implementation: implementation
         });
 
-        emit NewStrategy(countStrategies++, implementation);
+        emit NewStrategy(
+            countStrategies++,
+            standardProtocolFeeBp,
+            minTotalFeeBp,
+            maxProtocolFeeBp,
+            selector,
+            isMakerBid,
+            implementation
+        );
     }
 
     /**
@@ -84,13 +93,13 @@ contract StrategyManager is IStrategyManager, OwnableTwoSteps {
     ) external onlyOwner {
         if (strategyId >= countStrategies) revert StrategyNotUsed();
 
-        uint256 maxProtocolFee = strategyInfo[strategyId].maxProtocolFee;
-        if (newStandardProtocolFee > maxProtocolFee || newMinTotalFee > maxProtocolFee)
+        uint256 maxProtocolFeeBp = strategyInfo[strategyId].maxProtocolFeeBp;
+        if (newStandardProtocolFee > maxProtocolFeeBp || newMinTotalFee > maxProtocolFeeBp)
             revert StrategyProtocolFeeTooHigh();
 
         strategyInfo[strategyId].isActive = isActive;
-        strategyInfo[strategyId].standardProtocolFee = newStandardProtocolFee;
-        strategyInfo[strategyId].minTotalFee = newMinTotalFee;
+        strategyInfo[strategyId].standardProtocolFeeBp = newStandardProtocolFee;
+        strategyInfo[strategyId].minTotalFeeBp = newMinTotalFee;
 
         emit StrategyUpdated(strategyId, isActive, newStandardProtocolFee, newMinTotalFee);
     }

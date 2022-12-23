@@ -16,25 +16,53 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
-import {WrongCurrency, WrongLengths} from "./interfaces/SharedErrors.sol";
+
+// Shared errors
+import {WrongCaller, WrongCurrency, WrongLengths, WrongMerkleProof} from "./interfaces/SharedErrors.sol";
 
 // Other dependencies
-import {AffiliateManager} from "./AffiliateManager.sol";
-import {CurrencyManager} from "./CurrencyManager.sol";
-import {ExecutionManager} from "./ExecutionManager.sol";
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 /**
  * @title LooksRareProtocol
- * @notice This contract is the primary contract of the LooksRare protocol (v2).
- *         It inherits other core contracts such as CurrencyManager, ExecutionManager, and NonceManager.
+ * @notice This contract is the core contract of the LooksRare protocol (v2).
+LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRAR'''''''''''''''''''''''''''''''''''OOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKS:.                                        .;OOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOO,.                                            .,KSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRAREL'                ..',;:LOOKS::;,'..                'RARELOOKSRARELOOKSR
+LOOKSRARELOOKSRAR.              .,:LOOKSRARELOOKSRARELO:,.              .RELOOKSRARELOOKSR
+LOOKSRARELOOKS:.             .;RARELOOKSRARELOOKSRARELOOKSl;.             .:OOKSRARELOOKSR
+LOOKSRARELOO;.            .'OKSRARELOOKSRARELOOKSRARELOOKSRARE'.            .;KSRARELOOKSR
+LOOKSRAREL,.            .,LOOKSRARELOOK:;;:"""":;;;lELOOKSRARELO,.            .,RARELOOKSR
+LOOKSRAR.             .;okLOOKSRAREx:.              .;OOKSRARELOOK;.             .RELOOKSR
+LOOKS:.             .:dOOOLOOKSRARE'      .''''..     .OKSRARELOOKSR:.             .LOOKSR
+LOx;.             .cKSRARELOOKSRAR'     'LOOKSRAR'     .KSRARELOOKSRARc..            .OKSR
+L;.             .cxOKSRARELOOKSRAR.    .LOOKS.RARE'     ;kRARELOOKSRARExc.             .;R
+LO'             .;oOKSRARELOOKSRAl.    .LOOKS.RARE.     :kRARELOOKSRAREo;.             'SR
+LOOK;.            .,KSRARELOOKSRAx,     .;LOOKSR;.     .oSRARELOOKSRAo,.            .;OKSR
+LOOKSk:.            .'RARELOOKSRARd;.      ....       'oOOOOOOOOOOxc'.            .:LOOKSR
+LOOKSRARc.             .:dLOOKSRAREko;.            .,lxOOOOOOOOOd:.             .ARELOOKSR
+LOOKSRARELo'             .;oOKSRARELOOxoc;,....,;:ldkOOOOOOOOkd;.             'SRARELOOKSR
+LOOKSRARELOOd,.            .,lSRARELOOKSRARELOOKSRARELOOKSRkl,.            .,OKSRARELOOKSR
+LOOKSRARELOOKSx;.            ..;oxELOOKSRARELOOKSRARELOkxl:..            .:LOOKSRARELOOKSR
+LOOKSRARELOOKSRARc.              .':cOKSRARELOOKSRALOc;'.              .ARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELl'                 ...'',,,,''...                 'SRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOo,.                                          .,OKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSx;.                                      .;xOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLO:.                                  .:SRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKl.                              .lOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRo'.                        .'oLOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRARd;.                    .;xRELOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRARELO:.                .:kRARELOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKl.            .cOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRo'        'oLOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARE,.  .,dRELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
  * @author LooksRare protocol team (👀,💎)
  */
 contract LooksRareProtocol is
     ILooksRareProtocol,
-    CurrencyManager,
-    ExecutionManager,
-    AffiliateManager,
     TransferSelectorNFT,
     ReentrancyGuard,
     LowLevelETHReturnETHIfAnyExceptOneWei,
@@ -59,12 +87,13 @@ contract LooksRareProtocol is
 
     /**
      * @notice Constructor
-     * @param transferManager Transfer manager address
-     * @param weth Wrapped ETH address
+     * @param _owner Owner address
+     * @param _transferManager Transfer manager address
+     * @param _weth Wrapped ETH address
      */
-    constructor(address transferManager, address weth) TransferSelectorNFT(transferManager) {
+    constructor(address _owner, address _transferManager, address _weth) TransferSelectorNFT(_owner, _transferManager) {
         _updateDomainSeparator();
-        WETH = weth;
+        WETH = _weth;
     }
 
     /**
@@ -385,7 +414,7 @@ contract LooksRareProtocol is
         _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFee);
 
         if (totalAffiliateFee != 0) {
-            emit AffiliatePayment(affiliate, totalAffiliateFee);
+            emit AffiliatePayment(affiliate, currency, totalAffiliateFee);
         }
     }
 

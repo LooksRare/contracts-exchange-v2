@@ -23,6 +23,12 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     mapping(address => uint256) public affiliateRates;
 
     /**
+     * @notice Constructor
+     * @param _owner Owner address
+     */
+    constructor(address _owner) OwnableTwoSteps(_owner) {}
+
+    /**
      * @notice Update affiliate rate
      * @param affiliate Affiliate address
      * @param bp Rate basis point to collect (e.g., 100 = 1%) per referred trade

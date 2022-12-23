@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// Libraries
+import {OrderStructs} from "../../libraries/OrderStructs.sol";
+
+// Interfaces
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+
+// Shared errors
+import {BidTooLow, OrderInvalid, WrongCaller} from "../../interfaces/SharedErrors.sol";
+
+// Base strategy
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
-import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
-import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
  * @title StrategyUSDDynamicAsk
@@ -14,18 +21,18 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
+
     /**
      * @dev Chainlink ETH/USD Price Feed
      */
     AggregatorV3Interface public priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
 
-    error InvalidChainlinkPrice();
-
     /**
      * @notice Constructor
+     * @param _owner Owner address
      * @param _looksRareProtocol Address of the LooksRare protocol
      */
-    constructor(address _looksRareProtocol) {
+    constructor(address _owner, address _looksRareProtocol) StrategyChainlinkPriceLatency(_owner) {
         LOOKSRARE_PROTOCOL = _looksRareProtocol;
     }
 
@@ -60,7 +67,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
         if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp - updatedAt > maximumLatency) revert PriceNotRecentEnough();
+        if (block.timestamp - updatedAt > maxLatency) revert PriceNotRecentEnough();
 
         // The client has to provide a USD value that is augmented by 1e18.
         uint256 desiredSalePriceInUSD = abi.decode(makerAsk.additionalParameters, (uint256));
@@ -102,7 +109,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         if (answer <= 0) {
             return (orderIsValid, InvalidChainlinkPrice.selector);
         }
-        if (block.timestamp - updatedAt > maximumLatency) {
+        if (block.timestamp - updatedAt > maxLatency) {
             return (orderIsValid, PriceNotRecentEnough.selector);
         }
 

@@ -43,9 +43,9 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
         address collection,
         uint256 price,
         uint256[] memory itemIds
-    ) external view returns (address creator, uint256 creatorFeeBp) {
+    ) external view returns (address creator, uint256 creatorFee) {
         // Check if there is a royalty info in the system
-        (creator, creatorFeeBp) = royaltyFeeRegistry.royaltyInfo(collection, price);
+        (creator, creatorFee) = royaltyFeeRegistry.royaltyInfo(collection, price);
 
         if (creator == address(0)) {
             if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
@@ -56,13 +56,13 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
                         abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
                     );
                     if (status) {
-                        (address newCreator, uint256 newCreatorFeeBp) = abi.decode(data, (address, uint256));
+                        (address newCreator, uint256 newcreatorFee) = abi.decode(data, (address, uint256));
 
                         if (i == 0) {
                             creator = newCreator;
-                            creatorFeeBp = newCreatorFeeBp;
+                            creatorFee = newcreatorFee;
                         } else {
-                            if (newCreator != creator || newCreatorFeeBp != creatorFeeBp) {
+                            if (newCreator != creator || newcreatorFee != creatorFee) {
                                 revert BundleEIP2981NotAllowed(collection);
                             }
                         }

@@ -7,6 +7,9 @@ import {Merkle} from "../../lib/murky/src/Merkle.sol";
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
+// Shared errors
+import {WrongMerkleProof} from "../../contracts/interfaces/SharedErrors.sol";
+
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 

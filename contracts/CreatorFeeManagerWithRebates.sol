@@ -34,7 +34,7 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
         address collection,
         uint256 price,
         uint256[] memory itemIds
-    ) external view returns (address creator, uint256 creatorFeeBp) {
+    ) external view returns (address creator, uint256 creatorFee) {
         // Check if there is a royalty info in the system
         (creator, ) = royaltyFeeRegistry.royaltyInfo(collection, price);
 
@@ -67,7 +67,7 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
 
         // A fixed royalty fee is applied
         if (creator != address(0)) {
-            creatorFeeBp = (STANDARD_ROYALTY_FEE_BP * price) / 10_000;
+            creatorFee = (STANDARD_ROYALTY_FEE_BP * price) / 10_000;
         }
     }
 }

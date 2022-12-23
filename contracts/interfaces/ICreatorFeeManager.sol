@@ -20,7 +20,7 @@ interface ICreatorFeeManager {
     function royaltyFeeRegistry() external view returns (IRoyaltyFeeRegistry);
 
     /**
-     * @notice View creator address and calculate creator fee
+     * @notice View creator address and calculate creator fee.
      * @param collection Collection address
      * @param price Trade price
      * @param itemIds Array of item ids

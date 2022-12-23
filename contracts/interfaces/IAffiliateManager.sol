@@ -7,16 +7,6 @@ pragma solidity ^0.8.17;
  */
 interface IAffiliateManager {
     /**
-     * @notice It is returned if the function is called by another address than the affiliate controller.
-     */
-    error NotAffiliateController();
-
-    /**
-     * @notice It is returned if the affiliate controller is trying to set an affiliate rate higher than 10,000
-     */
-    error PercentageTooHigh();
-
-    /**
      * @notice It is emitted when there is an update of affliate controller
      * @param affiliateController Address of the new affiliate controller
      */
@@ -34,4 +24,14 @@ interface IAffiliateManager {
      * @param rate Affiliate rate (in basis point)
      */
     event NewAffiliateRate(address affiliate, uint256 rate);
+
+    /**
+     * @notice It is returned if the function is called by another address than the affiliate controller.
+     */
+    error NotAffiliateController();
+
+    /**
+     * @notice It is returned if the affiliate controller is trying to set an affiliate rate higher than 10,000
+     */
+    error PercentageTooHigh();
 }

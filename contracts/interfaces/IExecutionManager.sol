@@ -7,6 +7,24 @@ pragma solidity ^0.8.17;
  */
 interface IExecutionManager {
     /**
+     * @notice It is issued when there is a new creator fee manager
+     * @param creatorFeeManager Address of the new creator fee manager
+     */
+    event NewCreatorFeeManager(address creatorFeeManager);
+
+    /**
+     * @notice It is issued when there is a new maximum creator fee (in basis point)
+     * @param maximumCreatorFeeBp New maximum creator fee (in basis point)
+     */
+    event NewMaximumCreatorFeeBp(uint256 maximumCreatorFeeBp);
+
+    /**
+     * @notice It is issued when there is a new protocol fee recipient address
+     * @param protocolFeeRecipient Address of the new protocol fee recipient
+     */
+    event NewProtocolFeeRecipient(address protocolFeeRecipient);
+
+    /**
      * @notice It is returned if the creator fee (in basis point) is too high
      */
     error CreatorFeeBpTooHigh();
@@ -31,22 +49,4 @@ interface IExecutionManager {
      * @dev It would be returned if there is no implementation address while the strategyId is strictly greater than 0.
      */
     error StrategyNotAvailable(uint256 strategyId);
-
-    /**
-     * @notice It is issued when there is a new creator fee manager
-     * @param creatorFeeManager Address of the new creator fee manager
-     */
-    event NewCreatorFeeManager(address creatorFeeManager);
-
-    /**
-     * @notice It is issued when there is a new maximum creator fee (in basis point)
-     * @param maximumCreatorFeeBp New maximum creator fee (in basis point)
-     */
-    event NewMaximumCreatorFeeBp(uint256 maximumCreatorFeeBp);
-
-    /**
-     * @notice It is issued when there is a new protocol fee recipient address
-     * @param protocolFeeRecipient Address of the new protocol fee recipient
-     */
-    event NewProtocolFeeRecipient(address protocolFeeRecipient);
 }

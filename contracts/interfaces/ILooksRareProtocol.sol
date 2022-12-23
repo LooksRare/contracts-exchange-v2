@@ -10,6 +10,18 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  */
 interface ILooksRareProtocol {
     /**
+     * @notice Custom struct that contains signature parameters
+     * @param orderHash Maker order hash
+     * @param orderNonce Order nonce
+     * @param isNonceInvalidated Whether this maker order is not fully executed
+     */
+    struct SignatureParameters {
+        bytes32 orderHash;
+        uint256 orderNonce;
+        bool isNonceInvalidated;
+    }
+
+    /**
      * @notice It is emitted when there is an affiliate fee paid.
      * @param affiliate Affiliate address
      * @param currency Address of the currency
@@ -29,21 +41,44 @@ interface ILooksRareProtocol {
     event NewGasLimitETHTransfer(uint256 gasLimitETHTransfer);
 
     /**
-     * @notice It is returned if the domain separator cannot be updated (i.e., the chainId is the same).
+     * @notice It is emitted when there a taker ask transaction is completed
+     * @param signatureParameters Struct about signature parameters
+     * @param askUser Address of the ask user
+     * @param bidUser Address of the bid user
+     * @param strategyId Id of the strategy
+     * @param currency Address of the currency
+     * @param collection Address of the collection
+     * @param itemIds Array of item ids
+     * @param amounts Array of amounts (for item ids)
+     * @param feeRecipients Array of fee recipients
+     * @param feeAmounts Array of fee amounts
      */
-    error SameDomainSeparator();
+    event TakerAsk(
+        SignatureParameters signatureParameters,
+        address askUser, // taker (initiates the transaction)
+        address bidUser, // maker (receives the NFT)
+        uint256 strategyId,
+        address currency,
+        address collection,
+        uint256[] itemIds,
+        uint256[] amounts,
+        address[3] feeRecipients,
+        uint256[3] feeAmounts
+    );
 
     /**
-     * @notice It is returned if the nonces are not valid.
+     * @notice It is emitted when there a taker bid transaction is completed
+     * @param signatureParameters Struct about signature parameters
+     * @param bidUser Address of the bid user
+     * @param bidRecipient Address of the recipient of the bid
+     * @param strategyId Id of the strategy
+     * @param currency Address of the currency
+     * @param collection Address of the collection
+     * @param itemIds Array of item ids
+     * @param amounts Array of amounts (for item ids)
+     * @param feeRecipients Array of fee recipients
+     * @param feeAmounts Array of fee amounts
      */
-    error WrongNonces();
-
-    struct SignatureParameters {
-        bytes32 orderHash;
-        uint256 orderNonce;
-        bool isNonceInvalidated;
-    }
-
     event TakerBid(
         SignatureParameters signatureParameters,
         address bidUser, // taker (initiates the transaction)
@@ -57,18 +92,15 @@ interface ILooksRareProtocol {
         uint256[3] feeAmounts
     );
 
-    event TakerAsk(
-        SignatureParameters signatureParameters,
-        address askUser, // taker (initiates the transaction)
-        address bidUser, // maker (receives the NFT)
-        uint256 strategyId,
-        address currency,
-        address collection,
-        uint256[] itemIds,
-        uint256[] amounts,
-        address[3] feeRecipients,
-        uint256[3] feeAmounts
-    );
+    /**
+     * @notice It is returned if the domain separator cannot be updated (i.e., the chainId is the same).
+     */
+    error SameDomainSeparator();
+
+    /**
+     * @notice It is returned if the nonces are not valid.
+     */
+    error WrongNonces();
 
     /**
      * @notice Sell with taker ask (against maker bid)

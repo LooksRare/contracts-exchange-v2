@@ -7,6 +7,15 @@ pragma solidity ^0.8.17;
  */
 interface INonceManager {
     /**
+     * @notice This struct contains the global bid and ask nonces of a user.
+     * @param bidNonce Bid nonce
+     * @param askNonce Ask nonce
+     */
+    struct UserBidAskNonces {
+        uint256 bidNonce;
+        uint256 askNonce;
+    }
+    /**
      * @notice It is emitted when there is an update of the global bid/ask nonces for a user.
      * @param user Address of the user
      * @param bidNonce New bid nonce
@@ -27,14 +36,4 @@ interface INonceManager {
      * @param subsetNonces Array of subset nonces cancelled
      */
     event SubsetNoncesCancelled(address user, uint256[] subsetNonces);
-
-    /**
-     * @notice This struct contains the global bid and ask nonces of a user.
-     * @param bidNonce Bid nonce
-     * @param askNonce Ask nonce
-     */
-    struct UserBidAskNonces {
-        uint256 bidNonce;
-        uint256 askNonce;
-    }
 }

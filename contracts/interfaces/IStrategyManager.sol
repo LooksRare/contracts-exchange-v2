@@ -7,21 +7,24 @@ pragma solidity ^0.8.17;
  */
 interface IStrategyManager {
     /**
-     * @notice It is returned if the strategyId is not valid.
+     * @notice This struct contains the parameter of an execution strategy.
+     * @param strategyId Id of the new strategy
+     * @param standardProtocolFee Standard protocol fee (in basis point)
+     * @param minTotalFee Minimum total fee (in basis point)
+     * @param maxProtocolFee Maximum protocol fee (in basis point)
+     * @param selector Function selector for the transaction to be executed
+     * @param isMakerBid Whether the strategyId is for maker bid
+     * @param implementation Address of the implementation of the strategy
      */
-    error StrategyNotUsed();
-
-    /**
-     * @notice It is returned if the strategy's protocol fee is too high.
-     * @dev It can only be returned for owner operations.
-     */
-    error StrategyProtocolFeeTooHigh();
-
-    /**
-     * @notice If the strategy has no selector.
-     * @dev The only exception is strategyId = 0
-     */
-    error StrategyHasNoSelector();
+    struct Strategy {
+        bool isActive;
+        uint16 standardProtocolFee;
+        uint16 minTotalFee;
+        uint16 maxProtocolFee;
+        bytes4 selector;
+        bool isMakerBid;
+        address implementation;
+    }
 
     /**
      * @notice It is emitted when a new strategy is added.
@@ -53,22 +56,19 @@ interface IStrategyManager {
     event StrategyUpdated(uint256 strategyId, bool isActive, uint16 standardProtocolFee, uint16 minTotalFee);
 
     /**
-     * @notice This struct contains the parameter of an execution strategy.
-     * @param strategyId Id of the new strategy
-     * @param standardProtocolFee Standard protocol fee (in basis point)
-     * @param minTotalFee Minimum total fee (in basis point)
-     * @param maxProtocolFee Maximum protocol fee (in basis point)
-     * @param selector Function selector for the transaction to be executed
-     * @param isMakerBid Whether the strategyId is for maker bid
-     * @param implementation Address of the implementation of the strategy
+     * @notice It is returned if the strategyId is not valid.
      */
-    struct Strategy {
-        bool isActive;
-        uint16 standardProtocolFee;
-        uint16 minTotalFee;
-        uint16 maxProtocolFee;
-        bytes4 selector;
-        bool isMakerBid;
-        address implementation;
-    }
+    error StrategyNotUsed();
+
+    /**
+     * @notice It is returned if the strategy's protocol fee is too high.
+     * @dev It can only be returned for owner operations.
+     */
+    error StrategyProtocolFeeTooHigh();
+
+    /**
+     * @notice If the strategy has no selector.
+     * @dev The only exception is strategyId = 0
+     */
+    error StrategyHasNoSelector();
 }

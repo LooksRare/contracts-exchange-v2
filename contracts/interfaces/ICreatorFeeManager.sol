@@ -8,8 +8,15 @@ import {IRoyaltyFeeRegistry} from "./IRoyaltyFeeRegistry.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 interface ICreatorFeeManager {
+    /**
+     * @notice It is returned if the bundle contains multiple itemIds with different creator fee structure.
+     */
     error BundleEIP2981NotAllowed(address collection);
 
+    /**
+     * @notice It returns the royalty fee registry address/interface.
+     * @return IRoyaltyFeeRegistry Interface of the royalty fee registry
+     */
     function royaltyFeeRegistry() external view returns (IRoyaltyFeeRegistry);
 
     /**

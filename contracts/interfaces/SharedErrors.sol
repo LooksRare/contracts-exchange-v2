@@ -36,3 +36,8 @@ error WrongCurrency();
  * @notice There is either a mismatch or an error in the length of the array(s).
  */
 error WrongLengths();
+
+/**
+ * @notice It is returned if the Merkle Proof is incorrect
+ */
+error WrongMerkleProof();

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
@@ -8,10 +9,14 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 interface ILooksRareProtocol {
-    // Custom errors
+    /**
+     * @notice It is returned if the domain separator cannot be updated (i.e., the chainId is the same)
+     */
     error SameDomainSeparator();
-    error WrongCaller();
-    error WrongMerkleProof();
+
+    /**
+     * @notice It is returned if the nonces are not valid
+     */
     error WrongNonces();
 
     // Events

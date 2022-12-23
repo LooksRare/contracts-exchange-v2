@@ -8,7 +8,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, WrongCaller} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongCaller, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyCollectionOffer
@@ -20,9 +20,6 @@ import {OrderInvalid, WrongCaller} from "../interfaces/SharedErrors.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyCollectionOffer {
-    // If Merkle proof is invalid
-    error OrderMerkleProofInvalid();
-
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
 
@@ -102,7 +99,7 @@ contract StrategyCollectionOffer {
             bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
 
             // Verify proof
-            if (!MerkleProofMemory.verify(proof, root, node)) revert OrderMerkleProofInvalid();
+            if (!MerkleProofMemory.verify(proof, root, node)) revert WrongMerkleProof();
         }
     }
 

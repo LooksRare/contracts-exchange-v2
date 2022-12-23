@@ -16,7 +16,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Interfaces
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
-import {WrongCurrency, WrongLengths} from "./interfaces/SharedErrors.sol";
+import {WrongCaller, WrongCurrency, WrongLengths, WrongMerkleProof} from "./interfaces/SharedErrors.sol";
 
 // Other dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";

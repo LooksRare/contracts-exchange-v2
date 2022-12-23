@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {StrategyBase} from "./StrategyBase.sol";
+// Dependencies
+import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
 
 /**
  * @title StrategyChainlinkMultiplePriceFeeds
- * @notice This contract allows a strategy to store Chainlink price feeds for price retrieval
+ * @notice This contract allows a strategy to store Chainlink price feeds for price retrieval.
  * @author LooksRare protocol team (👀,💎)
  */
-abstract contract StrategyChainlinkMultiplePriceFeeds is StrategyBase {
+contract StrategyChainlinkMultiplePriceFeeds is StrategyChainlinkPriceLatency {
     /**
      * @dev NFT collection address to Chainlink price feed address mapping
      */
@@ -22,6 +23,12 @@ abstract contract StrategyChainlinkMultiplePriceFeeds is StrategyBase {
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
 
     error PriceFeedNotAvailable();
+
+    /**
+     * @notice Constructor
+     * @param _owner Owner address
+     */
+    constructor(address _owner) StrategyChainlinkPriceLatency(_owner) {}
 
     /**
      * @notice Set an NFT collection's Chainlink price feed address.

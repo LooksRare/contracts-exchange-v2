@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// Chainlink aggregator interface
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
+
+// Libraries
+import {OrderStructs} from "../../libraries/OrderStructs.sol";
+
+// Other dependencies
 import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
-import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
-import {OrderStructs} from "../libraries/OrderStructs.sol";
-import {WrongCurrency} from "../interfaces/SharedErrors.sol";
+
+// Shared errors
+import {AskTooHigh, BidTooLow, OrderInvalid, WrongCaller, WrongCurrency} from "../../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyFloorFromChainlink
@@ -15,7 +19,7 @@ import {WrongCurrency} from "../interfaces/SharedErrors.sol";
  *         and a buyer to make a floor price - discount collection bid
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, StrategyChainlinkPriceLatency {
+contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
     address public immutable WETH;
@@ -24,10 +28,11 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds, Stra
 
     /**
      * @notice Constructor
+     * @param _owner Owner address
      * @param _looksRareProtocol Address of the LooksRare protocol
      * @param _weth Address of WETH
      */
-    constructor(address _looksRareProtocol, address _weth) {
+    constructor(address _owner, address _looksRareProtocol, address _weth) StrategyChainlinkMultiplePriceFeeds(_owner) {
         LOOKSRARE_PROTOCOL = _looksRareProtocol;
         WETH = _weth;
     }

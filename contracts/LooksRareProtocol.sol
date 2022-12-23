@@ -19,9 +19,6 @@ import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 import {WrongCurrency, WrongLengths} from "./interfaces/SharedErrors.sol";
 
 // Other dependencies
-import {AffiliateManager} from "./AffiliateManager.sol";
-import {CurrencyManager} from "./CurrencyManager.sol";
-import {ExecutionManager} from "./ExecutionManager.sol";
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 /**
@@ -31,8 +28,6 @@ import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
  */
 contract LooksRareProtocol is
     ILooksRareProtocol,
-    ExecutionManager,
-    AffiliateManager,
     TransferSelectorNFT,
     ReentrancyGuard,
     LowLevelETHReturnETHIfAnyExceptOneWei,
@@ -61,11 +56,7 @@ contract LooksRareProtocol is
      * @param _transferManager Transfer manager address
      * @param _weth Wrapped ETH address
      */
-    constructor(
-        address _owner,
-        address _transferManager,
-        address _weth
-    ) TransferSelectorNFT(_transferManager) ExecutionManager(_owner) {
+    constructor(address _owner, address _transferManager, address _weth) TransferSelectorNFT(_owner, _transferManager) {
         _updateDomainSeparator();
         WETH = _weth;
     }

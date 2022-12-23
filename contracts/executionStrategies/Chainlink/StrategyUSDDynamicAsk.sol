@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// Libraries
+import {OrderStructs} from "../../libraries/OrderStructs.sol";
+
+// Interfaces
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+
+// Shared errors
+import {BidTooLow, OrderInvalid, WrongCaller} from "../../interfaces/SharedErrors.sol";
+
+// Base strategy
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
-import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
-import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 /**
  * @title StrategyUSDDynamicAsk
@@ -14,6 +21,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
+
     /**
      * @dev Chainlink ETH/USD Price Feed
      */
@@ -23,9 +31,10 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
 
     /**
      * @notice Constructor
+     * @param _owner Owner address
      * @param _looksRareProtocol Address of the LooksRare protocol
      */
-    constructor(address _looksRareProtocol) {
+    constructor(address _owner, address _looksRareProtocol) StrategyChainlinkPriceLatency(_owner) {
         LOOKSRARE_PROTOCOL = _looksRareProtocol;
     }
 

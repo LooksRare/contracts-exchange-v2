@@ -4,6 +4,9 @@ pragma solidity ^0.8.17;
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
+// Shared errors
+import {OrderInvalid} from "./interfaces/SharedErrors.sol";
+
 /**
  * @title InheritedStrategies
  * @notice This contract handles the execution of inherited strategies.
@@ -11,9 +14,6 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract InheritedStrategies {
-    // Custom errors
-    error OrderInvalid();
-
     /**
      * @notice Execute standard sale strategy with taker bid order
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)

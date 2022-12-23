@@ -1,14 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {StrategyBase} from "./StrategyBase.sol";
+// LooksRare unopinionated libraries
+import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 /**
  * @title StrategyChainlinkPriceLatency
  * @notice This contract allows the owner to define the maximum acceptable Chainlink price latency.
  * @author LooksRare protocol team (👀,💎)
  */
-abstract contract StrategyChainlinkPriceLatency is StrategyBase {
+contract StrategyChainlinkPriceLatency is OwnableTwoSteps {
+    /**
+     * @notice Constructor
+     * @param _owner Owner address
+     */
+    constructor(address _owner) OwnableTwoSteps(_owner) {}
+
     /**
      * @notice Maximum latency accepted after which
      *         the execution strategy rejects the retrieved price

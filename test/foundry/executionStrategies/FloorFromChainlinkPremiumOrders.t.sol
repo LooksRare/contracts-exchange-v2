@@ -74,13 +74,16 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
-        bytes4 errorSelector = _assertOrderInvalid(makerAsk, StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
+        bytes4 errorSelector = _assertOrderInvalid(
+            makerAsk,
+            StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector
+        );
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
 
         aggregator.setAnswer(-1);
-        vm.expectRevert(StrategyFloorFromChainlink.InvalidChainlinkPrice.selector);
+        vm.expectRevert(StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 

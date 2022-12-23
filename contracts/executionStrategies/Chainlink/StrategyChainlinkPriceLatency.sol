@@ -11,12 +11,6 @@ import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSte
  */
 contract StrategyChainlinkPriceLatency is OwnableTwoSteps {
     /**
-     * @notice Constructor
-     * @param _owner Owner address
-     */
-    constructor(address _owner) OwnableTwoSteps(_owner) {}
-
-    /**
      * @notice Maximum latency accepted after which
      *         the execution strategy rejects the retrieved price
      */
@@ -28,8 +22,26 @@ contract StrategyChainlinkPriceLatency is OwnableTwoSteps {
      */
     event MaximumLatencyUpdated(uint256 maxLatency);
 
+    /**
+     * @notice It is returned if the Chainlink price is invalid (e.g., negative).
+     */
+    error InvalidChainlinkPrice();
+
+    /**
+     * @notice It is returned if the latency tolerance is set too high (i.e., greater than 3,600 sec)
+     */
     error LatencyToleranceTooHigh();
+
+    /**
+     * @notice It is returned if the current block time relative to the latest price's update time is greater than the latency tolerance.
+     */
     error PriceNotRecentEnough();
+
+    /**
+     * @notice Constructor
+     * @param _owner Owner address
+     */
+    constructor(address _owner) OwnableTwoSteps(_owner) {}
 
     /**
      * @notice Set maximum Chainlink price latency. It cannot be higher than 3,600

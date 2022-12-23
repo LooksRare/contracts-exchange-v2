@@ -22,9 +22,9 @@ import {AskTooHigh, BidTooLow, OrderInvalid, WrongCaller, WrongCurrency} from ".
 contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
-    address public immutable WETH;
 
-    error InvalidChainlinkPrice();
+    // WETH
+    address public immutable WETH;
 
     /**
      * @notice Constructor

@@ -16,13 +16,16 @@ contract StrategyChainlinkMultiplePriceFeeds is StrategyChainlinkPriceLatency {
     mapping(address => address) public priceFeeds;
 
     /**
+     * @notice It is returned when the price feed is not available.
+     */
+    error PriceFeedNotAvailable();
+
+    /**
      * @notice Emitted when a collection's price feed address is updated
      * @param collection NFT collection address
      * @param priceFeed Chainlink price feed address
      */
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
-
-    error PriceFeedNotAvailable();
 
     /**
      * @notice Constructor

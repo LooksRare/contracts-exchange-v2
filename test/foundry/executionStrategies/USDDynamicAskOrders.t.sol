@@ -143,7 +143,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(-1);
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -153,7 +153,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
         (isValid, errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyUSDDynamicAsk.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);

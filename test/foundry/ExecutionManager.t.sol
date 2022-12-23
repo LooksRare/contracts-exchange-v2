@@ -27,22 +27,22 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.setCreatorFeeManager(address(1));
     }
 
-    function testSetMaximumCreatorFeeBp() public asPrankedUser(_owner) {
-        uint16 newMaximumCreatorFeeBp = uint16(2_500);
+    function testSetMaxCreatorFeeBp() public asPrankedUser(_owner) {
+        uint16 newMaxCreatorFeeBp = uint16(2_500);
         vm.expectEmit(true, false, false, true);
-        emit NewMaximumCreatorFeeBp(newMaximumCreatorFeeBp);
-        looksRareProtocol.setMaximumCreatorFeeBp(newMaximumCreatorFeeBp);
-        assertEq(looksRareProtocol.maximumCreatorFeeBp(), newMaximumCreatorFeeBp);
+        emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
+        looksRareProtocol.setMaxCreatorFeeBp(newMaxCreatorFeeBp);
+        assertEq(looksRareProtocol.maxCreatorFeeBp(), newMaxCreatorFeeBp);
     }
 
-    function testSetMaximumCreatorFeeBpNotOwner() public {
+    function testSetMaxCreatorFeeBpNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        looksRareProtocol.setMaximumCreatorFeeBp(uint16(2_500));
+        looksRareProtocol.setMaxCreatorFeeBp(uint16(2_500));
     }
 
-    function testSetMaximumCreatorFeeBpTooHigh() public asPrankedUser(_owner) {
+    function testSetMaxCreatorFeeBpTooHigh() public asPrankedUser(_owner) {
         vm.expectRevert(CreatorFeeBpTooHigh.selector);
-        looksRareProtocol.setMaximumCreatorFeeBp(uint16(2_501));
+        looksRareProtocol.setMaxCreatorFeeBp(uint16(2_501));
     }
 
     function testSetProtocolFeeRecipient() public asPrankedUser(_owner) {

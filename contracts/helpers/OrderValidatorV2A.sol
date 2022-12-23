@@ -68,7 +68,7 @@ contract OrderValidatorV2A {
     bytes32 public domainSeparator;
 
     // Maximum creator fee (in bp)
-    uint256 public maximumCreatorFeeBp;
+    uint256 public maxCreatorFeeBp;
 
     // CreatorFeeManager
     ICreatorFeeManager public creatorFeeManager;
@@ -651,7 +651,7 @@ contract OrderValidatorV2A {
                     }
                 }
 
-                if (creatorFee * 10_000 > (price * uint256(maximumCreatorFeeBp))) return CREATOR_FEE_TOO_HIGH;
+                if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) return CREATOR_FEE_TOO_HIGH;
             }
         }
     }
@@ -811,7 +811,7 @@ contract OrderValidatorV2A {
     function _adjustExternalParameters() internal {
         domainSeparator = looksRareProtocol.domainSeparator();
         creatorFeeManager = looksRareProtocol.creatorFeeManager();
-        maximumCreatorFeeBp = looksRareProtocol.maximumCreatorFeeBp();
+        maxCreatorFeeBp = looksRareProtocol.maxCreatorFeeBp();
         royaltyFeeRegistry = creatorFeeManager.royaltyFeeRegistry();
     }
 }

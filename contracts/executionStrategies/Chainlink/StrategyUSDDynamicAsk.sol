@@ -69,7 +69,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
         if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp - updatedAt > maximumLatency) revert PriceNotRecentEnough();
+        if (block.timestamp - updatedAt > maxLatency) revert PriceNotRecentEnough();
 
         // The client has to provide a USD value that is augmented by 1e18.
         uint256 desiredSalePriceInUSD = abi.decode(makerAsk.additionalParameters, (uint256));
@@ -111,7 +111,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         if (answer <= 0) {
             return (orderIsValid, InvalidChainlinkPrice.selector);
         }
-        if (block.timestamp - updatedAt > maximumLatency) {
+        if (block.timestamp - updatedAt > maxLatency) {
             return (orderIsValid, PriceNotRecentEnough.selector);
         }
 

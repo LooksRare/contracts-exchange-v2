@@ -344,7 +344,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
 
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
         if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp > maximumLatency + updatedAt) revert PriceNotRecentEnough();
+        if (block.timestamp > maxLatency + updatedAt) revert PriceNotRecentEnough();
 
         price = uint256(answer);
     }
@@ -361,7 +361,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         if (answer <= 0) {
             return (floorPrice, InvalidChainlinkPrice.selector);
         }
-        if (block.timestamp > maximumLatency + updatedAt) {
+        if (block.timestamp > maxLatency + updatedAt) {
             return (floorPrice, PriceNotRecentEnough.selector);
         }
 

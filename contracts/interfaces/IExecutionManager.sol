@@ -14,9 +14,9 @@ interface IExecutionManager {
 
     /**
      * @notice It is issued when there is a new maximum creator fee (in basis point)
-     * @param maximumCreatorFeeBp New maximum creator fee (in basis point)
+     * @param maxCreatorFeeBp New maximum creator fee (in basis point)
      */
-    event NewMaximumCreatorFeeBp(uint256 maximumCreatorFeeBp);
+    event NewMaxCreatorFeeBp(uint256 maxCreatorFeeBp);
 
     /**
      * @notice It is issued when there is a new protocol fee recipient address

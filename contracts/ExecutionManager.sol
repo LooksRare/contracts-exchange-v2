@@ -31,6 +31,12 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     ICreatorFeeManager public creatorFeeManager;
 
     /**
+     * @notice Constructor
+     * @param _owner Owner address
+     */
+    constructor(address _owner) StrategyManager(_owner) {}
+
+    /**
      * @notice Set collection staking registry
      * @param newCreatorFeeManager Address of the creator fee manager
      * @dev Only callable by owner.

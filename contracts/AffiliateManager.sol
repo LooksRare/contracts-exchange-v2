@@ -12,7 +12,7 @@ import {IAffiliateManager} from "./interfaces/IAffiliateManager.sol";
  * @notice This contract handles the list of affiliates for the LooksRare protocol.
  * @author LooksRare protocol team (👀,💎)
  */
-contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
+abstract contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     // Whether the affiliate program is active
     bool public isAffiliateProgramActive;
 

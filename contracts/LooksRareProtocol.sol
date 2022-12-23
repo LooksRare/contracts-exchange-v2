@@ -27,12 +27,10 @@ import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 /**
  * @title LooksRareProtocol
  * @notice This contract is the primary contract of the LooksRare protocol (v2).
- *         It inherits other core contracts such as CurrencyManager, ExecutionManager, and NonceManager.
  * @author LooksRare protocol team (👀,💎)
  */
 contract LooksRareProtocol is
     ILooksRareProtocol,
-    CurrencyManager,
     ExecutionManager,
     AffiliateManager,
     TransferSelectorNFT,
@@ -59,12 +57,17 @@ contract LooksRareProtocol is
 
     /**
      * @notice Constructor
-     * @param transferManager Transfer manager address
-     * @param weth Wrapped ETH address
+     * @param _owner Owner address
+     * @param _transferManager Transfer manager address
+     * @param _weth Wrapped ETH address
      */
-    constructor(address transferManager, address weth) TransferSelectorNFT(transferManager) {
+    constructor(
+        address _owner,
+        address _transferManager,
+        address _weth
+    ) TransferSelectorNFT(_transferManager) ExecutionManager(_owner) {
         _updateDomainSeparator();
-        WETH = weth;
+        WETH = _weth;
     }
 
     /**

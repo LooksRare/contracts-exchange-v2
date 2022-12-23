@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDXLicenseIdentifier: MIT
 pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
@@ -9,12 +9,18 @@ import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
 
 /**
  * @title CurrencyManager
- * @notice This contract manages the whitelist of valid currencies for exchanging NFTs on the exchange.
+ * @notice This contract manages the whitelist of valid fungible currencies.
  * @author LooksRare protocol team (👀,💎)
  */
 contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
     // Check whether the currency is whitelisted
     mapping(address => bool) public isCurrencyWhitelisted;
+
+    /**
+     * @notice Constructor
+     * @param _owner Owner address
+     */
+    constructor(address _owner) OwnableTwoSteps(_owner) {}
 
     /**
      * @notice Whitelist/blacklist currency for execution

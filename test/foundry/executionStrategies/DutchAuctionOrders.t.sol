@@ -3,9 +3,11 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
 import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
+
+// Shared errors
+import "../../../contracts/interfaces/SharedErrors.sol";
 
 // Strategies
 import {StrategyDutchAuction} from "../../../contracts/executionStrategies/StrategyDutchAuction.sol";
@@ -147,7 +149,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
+        vm.expectRevert(WrongCaller.selector);
         // Call the function directly
         strategyDutchAuction.executeStrategyWithTakerBid(takerBid, makerAsk);
     }
@@ -189,7 +191,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -210,7 +212,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -240,7 +242,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -263,7 +265,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -287,7 +289,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -316,7 +318,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        vm.expectRevert(BidTooLow.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);

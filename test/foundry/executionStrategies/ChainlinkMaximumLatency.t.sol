@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 
 // Strategies
-import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
+import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkPriceLatency.sol";
 
 // Other tests
 import {ProtocolBase} from "../ProtocolBase.t.sol";

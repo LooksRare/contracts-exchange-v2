@@ -3,13 +3,15 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
 import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
+// Shared errors
+import "../../../contracts/interfaces/SharedErrors.sol";
+
 // Strategies
-import {StrategyUSDDynamicAsk} from "../../../contracts/executionStrategies/StrategyUSDDynamicAsk.sol";
-import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
+import {StrategyUSDDynamicAsk} from "../../../contracts/executionStrategies/Chainlink/StrategyUSDDynamicAsk.sol";
+import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkPriceLatency.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
@@ -37,7 +39,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(address(looksRareProtocol));
+        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(_owner, address(looksRareProtocol));
         looksRareProtocol.addStrategy(
             _standardProtocolFee,
             _minTotalFee,
@@ -324,7 +326,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
+        vm.expectRevert(WrongCaller.selector);
         // Call the function directly
         strategyUSDDynamicAsk.executeStrategyWithTakerBid(takerBid, makerAsk);
     }
@@ -343,7 +345,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -365,7 +367,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -396,7 +398,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -423,7 +425,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
@@ -448,7 +450,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
-        vm.expectRevert(IExecutionStrategy.BidTooLow.selector);
+        vm.expectRevert(BidTooLow.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);

@@ -17,7 +17,7 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
     MockERC20 private mockERC20;
 
     function setUp() public asPrankedUser(_owner) {
-        currencyManager = new CurrencyManager();
+        currencyManager = new CurrencyManager(_owner);
         mockERC20 = new MockERC20();
     }
 

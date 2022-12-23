@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-// Libraries and interfaces
+// Libraries
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {StrategyBase} from "../../../contracts/executionStrategies/StrategyBase.sol";
 
-contract StrategyTestMultiFillCollectionOrder is StrategyBase {
+// Custom errors
+import {OrderInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
+
+contract StrategyTestMultiFillCollectionOrder {
     using OrderStructs for OrderStructs.MakerBid;
 
     // Address of the protocol

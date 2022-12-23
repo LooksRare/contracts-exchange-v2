@@ -6,13 +6,15 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
 import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 
+// Shared errors
+import "../../../contracts/interfaces/SharedErrors.sol";
+
 // Strategies
-import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
-import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkPriceLatency.sol";
+import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkMultiplePriceFeeds.sol";
+import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
@@ -120,9 +122,9 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
         assertFalse(isValid);
-        assertEq(errorSelector, IExecutionStrategy.OrderInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 }

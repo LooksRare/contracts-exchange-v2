@@ -7,6 +7,9 @@ import {Merkle} from "../../lib/murky/src/Merkle.sol";
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
+// Shared errors
+import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
+
 // Strategies
 import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
 
@@ -14,8 +17,6 @@ import {StrategyCollectionOffer} from "../../contracts/executionStrategies/Strat
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
-    error OrderInvalid();
-
     StrategyCollectionOffer public strategyCollectionOffer;
     bytes4 public selectorNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
     bytes4 public selectorWithProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
@@ -382,14 +383,15 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) private {
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertTrue(isValid);
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+        assertTrue(orderIsValid);
         assertEq(errorSelector, bytes4(0));
     }
 
     function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid) private {
-        (bool isValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
-        assertFalse(isValid);
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+
+        assertFalse(orderIsValid);
         assertEq(errorSelector, OrderInvalid.selector);
     }
 }

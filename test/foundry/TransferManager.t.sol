@@ -39,7 +39,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function setUp() public asPrankedUser(_owner) {
-        transferManager = new TransferManager();
+        transferManager = new TransferManager(_owner);
         mockERC721 = new MockERC721();
         mockERC1155 = new MockERC1155();
         operators.push(_transferrer);

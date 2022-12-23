@@ -3,11 +3,12 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IExecutionStrategy} from "../../../contracts/interfaces/IExecutionStrategy.sol";
-import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/StrategyChainlinkPriceLatency.sol";
-import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/StrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
-import {WrongCurrency} from "../../../contracts/interfaces/SharedErrors.sol";
+import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkPriceLatency.sol";
+import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkMultiplePriceFeeds.sol";
+import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+
+// Shared errors
+import "../../../contracts/interfaces/SharedErrors.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
@@ -94,7 +95,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _assertOrderValid(makerBid);
 
         vm.prank(takerUser);
-        vm.expectRevert(IExecutionStrategy.WrongCaller.selector);
+        vm.expectRevert(WrongCaller.selector);
         // Call the function directly
         (bool success, ) = address(strategyFloorFromChainlink).call(
             abi.encodeWithSelector(selector, takerAsk, makerBid)
@@ -116,7 +117,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerBid);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
@@ -134,7 +135,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerBid);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
@@ -172,7 +173,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerBid);
 
-        vm.expectRevert(IExecutionStrategy.OrderInvalid.selector);
+        vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
@@ -209,7 +210,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         // Valid, taker struct validation only happens during execution
         _assertOrderValid(makerBid);
 
-        vm.expectRevert(IExecutionStrategy.AskTooHigh.selector);
+        vm.expectRevert(AskTooHigh.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
@@ -250,7 +251,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function _assertOrderInvalid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {
-        return _assertOrderInvalid(makerBid, IExecutionStrategy.OrderInvalid.selector);
+        return _assertOrderInvalid(makerBid, OrderInvalid.selector);
     }
 
     function _assertOrderInvalid(

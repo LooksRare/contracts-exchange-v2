@@ -6,7 +6,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
 
 // Strategies
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/StrategyFloorFromChainlink.sol";
+import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Other tests
 import {FloorFromChainlinkPremiumOrdersTest} from "./FloorFromChainlinkPremiumOrders.t.sol";

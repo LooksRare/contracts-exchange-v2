@@ -29,9 +29,10 @@ contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
 
     /**
      * @notice Constructor
+     * @param _owner Owner address
      * @param _royaltyFeeLimit new royalty fee limit (500 = 5%, 1,000 = 10%)
      */
-    constructor(uint256 _royaltyFeeLimit) {
+    constructor(address _owner, uint256 _royaltyFeeLimit) OwnableTwoSteps(_owner) {
         require(_royaltyFeeLimit <= 9_500, "Owner: Royalty fee limit too high");
         royaltyFeeLimit = _royaltyFeeLimit;
     }

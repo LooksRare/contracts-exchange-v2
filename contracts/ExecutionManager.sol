@@ -97,13 +97,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
             }
 
-            uint256 minTotalFeeBp = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
+            uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
 
             // 1 --> Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
-                fees[0] = minTotalFeeBp;
+                fees[0] = minTotalFee;
             } else {
-                fees[0] = _calculateProtocolFee(price, makerBid.strategyId, fees[1], minTotalFeeBp);
+                fees[0] = _calculateProtocolFee(price, makerBid.strategyId, fees[1], minTotalFee);
             }
 
             recipients[0] = protocolFeeRecipient;
@@ -142,13 +142,13 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
                 if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
             }
-            uint256 minTotalFeeBp = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
+            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
 
             // 1 --> Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
-                fees[0] = minTotalFeeBp;
+                fees[0] = minTotalFee;
             } else {
-                fees[0] = _calculateProtocolFee(price, makerAsk.strategyId, fees[1], minTotalFeeBp);
+                fees[0] = _calculateProtocolFee(price, makerAsk.strategyId, fees[1], minTotalFee);
             }
 
             recipients[0] = protocolFeeRecipient;

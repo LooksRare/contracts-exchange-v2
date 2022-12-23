@@ -13,7 +13,7 @@ interface ILooksRareProtocol {
      * @notice Custom struct that contains signature parameters
      * @param orderHash Maker order hash
      * @param orderNonce Order nonce
-     * @param isNonceInvalidated Whether this maker order is not fully executed
+     * @param isNonceInvalidated Whether this transaction invalidated the maker user's order nonce at the protocol level
      */
     struct SignatureParameters {
         bytes32 orderHash;
@@ -51,6 +51,9 @@ interface ILooksRareProtocol {
      * @param itemIds Array of item ids
      * @param amounts Array of amounts (for item ids)
      * @param feeRecipients Array of fee recipients
+     *        feeRecipients[0] Protocol fee recipient (prior to potential affiliate payment)
+     *        feeRecipients[1] Creator fee recipient (if none, address(0))
+     *        feeRecipients[2] User who receives the proceeds of the sale (it can be the taker ask user or different)
      * @param feeAmounts Array of fee amounts
      */
     event TakerAsk(
@@ -77,6 +80,9 @@ interface ILooksRareProtocol {
      * @param itemIds Array of item ids
      * @param amounts Array of amounts (for item ids)
      * @param feeRecipients Array of fee recipients
+     *        feeRecipients[0] Protocol fee recipient (prior to potential affiliate payment)
+     *        feeRecipients[1] Creator fee recipient (if none, address(0))
+     *        feeRecipients[2] User who receives the proceeds of the sale (it is always the maker ask user)
      * @param feeAmounts Array of fee amounts
      */
     event TakerBid(
@@ -136,12 +142,12 @@ interface ILooksRareProtocol {
 
     /**
      * @notice Batch buy with taker bids (against maker asks)
-     * @param takerBids Array of taker bid struct
-     * @param makerAsks Array maker ask struct
+     * @param takerBids Array of taker bid structs
+     * @param makerAsks Array of maker ask structs
      * @param makerSignatures Array of maker signatures
      * @param merkleTrees Array of merkle tree structs if the signature contains multiple maker orders
      * @param affiliate Affiliate address
-     * @param isAtomic Whether the execution should be atomic i.e., whether it should revert if 1 or more order fails
+     * @param isAtomic Whether the execution should be atomic i.e., whether it should revert if 1 or more transactions fail
      */
     function executeMultipleTakerBids(
         OrderStructs.TakerBid[] calldata takerBids,

@@ -35,8 +35,8 @@ contract DeploymentNoCreate2 is Test {
         }
 
         vm.startBroadcast();
-        transferManager = new TransferManager();
-        looksRareProtocol = new LooksRareProtocol(address(transferManager), weth);
+        transferManager = new TransferManager(msg.sender);
+        looksRareProtocol = new LooksRareProtocol(msg.sender, address(transferManager), weth);
         transferManager.whitelistOperator(address(looksRareProtocol));
         looksRareProtocol.updateCurrencyWhitelistStatus(address(0), true);
         looksRareProtocol.updateCurrencyWhitelistStatus(weth, true);

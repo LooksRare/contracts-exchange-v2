@@ -67,7 +67,15 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
             implementation: implementation
         });
 
-        emit NewStrategy(countStrategies++, implementation);
+        emit NewStrategy(
+            countStrategies++,
+            standardProtocolFee,
+            minTotalFee,
+            maxProtocolFee,
+            selector,
+            isMakerBid,
+            implementation
+        );
     }
 
     /**

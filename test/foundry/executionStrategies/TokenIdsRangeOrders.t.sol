@@ -22,9 +22,9 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selector,
             true,
             address(strategyTokenIdsRange)
@@ -94,9 +94,9 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selector);
         assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyTokenIdsRange));
@@ -396,7 +396,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);

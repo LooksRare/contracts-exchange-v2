@@ -26,9 +26,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyDutchAuction = new StrategyDutchAuction(address(looksRareProtocol));
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selector,
             false,
             address(strategyDutchAuction)
@@ -94,9 +94,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selector);
         assertFalse(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyDutchAuction));
@@ -163,7 +163,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
 
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);

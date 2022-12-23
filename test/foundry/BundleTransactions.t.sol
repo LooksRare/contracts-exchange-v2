@@ -49,7 +49,7 @@ contract BundleTransactionsTest is ProtocolBase {
         // Royalty recipient receives no royalty
         assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient);
         // Owner receives protocol fee
-        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (price * _minTotalFee) / 10_000);
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (price * _minTotalFeeBp) / 10_000);
         // Taker ask user receives 98% of the whole price (no royalties are paid)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
         // Verify the nonce is marked as executed
@@ -101,7 +101,7 @@ contract BundleTransactionsTest is ProtocolBase {
             _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
         );
         // Owner receives protocol fee
-        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (price * _standardProtocolFee) / 10_000);
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / 10_000);
         // Taker ask user receives 98% of the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
         // Verify the nonce is marked as executed
@@ -152,7 +152,7 @@ contract BundleTransactionsTest is ProtocolBase {
         // Royalty recipient receives no royalty
         assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient);
         // Owner receives protocol fee
-        assertEq(address(_owner).balance, _initialETHBalanceOwner + (price * _minTotalFee) / 10_000);
+        assertEq(address(_owner).balance, _initialETHBalanceOwner + (price * _minTotalFeeBp) / 10_000);
         // Maker ask user receives 98% of the whole price (no royalties are paid)
         assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / 10_000);
         // No leftover in the balance of the contract
@@ -209,7 +209,7 @@ contract BundleTransactionsTest is ProtocolBase {
             _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
         );
         // Owner receives protocol fee
-        assertEq(address(_owner).balance, _initialETHBalanceOwner + (price * _standardProtocolFee) / 10_000);
+        assertEq(address(_owner).balance, _initialETHBalanceOwner + (price * _standardProtocolFeeBp) / 10_000);
         // Maker ask user receives 98% of the whole price
         assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / 10_000);
         // No leftover in the balance of the contract

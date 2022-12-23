@@ -32,7 +32,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         _setPriceFeed();
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
 
         _assertOrderValid(makerAsk);
 

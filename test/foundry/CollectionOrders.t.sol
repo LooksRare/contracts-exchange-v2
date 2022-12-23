@@ -32,18 +32,18 @@ contract CollectionOrdersTest is ProtocolBase {
         strategyCollectionOffer = new StrategyCollectionOffer(address(looksRareProtocol));
 
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selectorNoProof,
             true,
             address(strategyCollectionOffer)
         );
 
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selectorWithProof,
             true,
             address(strategyCollectionOffer)
@@ -62,9 +62,9 @@ contract CollectionOrdersTest is ProtocolBase {
         ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selectorNoProof);
         assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyCollectionOffer));
@@ -80,9 +80,9 @@ contract CollectionOrdersTest is ProtocolBase {
         ) = looksRareProtocol.strategyInfo(2);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selectorWithProof);
         assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyCollectionOffer));

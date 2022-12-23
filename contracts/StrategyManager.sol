@@ -26,9 +26,9 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
     constructor(address _owner) CurrencyManager(_owner) {
         strategyInfo[0] = Strategy({
             isActive: true,
-            standardProtocolFee: 150,
-            minTotalFee: 200,
-            maxProtocolFee: 300,
+            standardProtocolFeeBp: 150,
+            minTotalFeeBp: 200,
+            maxProtocolFeeBp: 300,
             selector: bytes4(0),
             isMakerBid: false,
             implementation: address(0)
@@ -37,31 +37,31 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
 
     /**
      * @notice Add a new strategy
-     * @param standardProtocolFee Protocol fee
-     * @param maxProtocolFee Maximum protocol fee
+     * @param standardProtocolFeeBp Protocol fee
+     * @param maxProtocolFeeBp Maximum protocol fee
      * @param selector Selector
      * @param isMakerBid Whether the function selector is for maker bids
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      */
     function addStrategy(
-        uint16 standardProtocolFee,
-        uint16 minTotalFee,
-        uint16 maxProtocolFee,
+        uint16 standardProtocolFeeBp,
+        uint16 minTotalFeeBp,
+        uint16 maxProtocolFeeBp,
         bytes4 selector,
         bool isMakerBid,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFee < standardProtocolFee || maxProtocolFee < minTotalFee || maxProtocolFee > 5_000)
+        if (maxProtocolFeeBp < standardProtocolFeeBp || maxProtocolFeeBp < minTotalFeeBp || maxProtocolFeeBp > 5_000)
             revert StrategyProtocolFeeTooHigh();
 
         if (selector == bytes4(0)) revert StrategyHasNoSelector();
 
         strategyInfo[countStrategies] = Strategy({
             isActive: true,
-            standardProtocolFee: standardProtocolFee,
-            minTotalFee: minTotalFee,
-            maxProtocolFee: maxProtocolFee,
+            standardProtocolFeeBp: standardProtocolFeeBp,
+            minTotalFeeBp: minTotalFeeBp,
+            maxProtocolFeeBp: maxProtocolFeeBp,
             selector: selector,
             isMakerBid: isMakerBid,
             implementation: implementation
@@ -69,9 +69,9 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
 
         emit NewStrategy(
             countStrategies++,
-            standardProtocolFee,
-            minTotalFee,
-            maxProtocolFee,
+            standardProtocolFeeBp,
+            minTotalFeeBp,
+            maxProtocolFeeBp,
             selector,
             isMakerBid,
             implementation
@@ -93,13 +93,13 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
     ) external onlyOwner {
         if (strategyId >= countStrategies) revert StrategyNotUsed();
 
-        uint256 maxProtocolFee = strategyInfo[strategyId].maxProtocolFee;
-        if (newStandardProtocolFee > maxProtocolFee || newMinTotalFee > maxProtocolFee)
+        uint256 maxProtocolFeeBp = strategyInfo[strategyId].maxProtocolFeeBp;
+        if (newStandardProtocolFee > maxProtocolFeeBp || newMinTotalFee > maxProtocolFeeBp)
             revert StrategyProtocolFeeTooHigh();
 
         strategyInfo[strategyId].isActive = isActive;
-        strategyInfo[strategyId].standardProtocolFee = newStandardProtocolFee;
-        strategyInfo[strategyId].minTotalFee = newMinTotalFee;
+        strategyInfo[strategyId].standardProtocolFeeBp = newStandardProtocolFee;
+        strategyInfo[strategyId].minTotalFeeBp = newMinTotalFee;
 
         emit StrategyUpdated(strategyId, isActive, newStandardProtocolFee, newMinTotalFee);
     }

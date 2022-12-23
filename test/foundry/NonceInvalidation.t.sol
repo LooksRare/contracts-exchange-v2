@@ -243,9 +243,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         vm.prank(_owner);
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selector,
             true,
             address(strategyMultiFillCollectionOrder)

@@ -22,9 +22,9 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyMultiFillCollectionOrder = new StrategyTestMultiFillCollectionOrder(address(looksRareProtocol));
         looksRareProtocol.addStrategy(
-            _standardProtocolFee,
-            _minTotalFee,
-            _maxProtocolFee,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selector,
             true,
             address(strategyMultiFillCollectionOrder)
@@ -44,9 +44,9 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         ) = looksRareProtocol.strategyInfo(1);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFee);
-        assertEq(strategyMinTotalFee, _minTotalFee);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFee);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selector);
         assertTrue(strategyIsMakerBid);
         assertEq(strategyImplementation, address(strategyMultiFillCollectionOrder));
@@ -206,7 +206,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFee, _minTotalFee, false);
+        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
 
         {
             itemIds = new uint256[](1);

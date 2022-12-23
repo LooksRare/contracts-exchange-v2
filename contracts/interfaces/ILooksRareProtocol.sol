@@ -10,19 +10,33 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  */
 interface ILooksRareProtocol {
     /**
-     * @notice It is returned if the domain separator cannot be updated (i.e., the chainId is the same)
+     * @notice It is emitted when there is an affiliate fee paid.
+     * @param affiliate Affiliate address
+     * @param currency Address of the currency
+     * @param affiliateFee Affiliate fee (in the currency)
+     */
+    event AffiliatePayment(address affiliate, address currency, uint256 affiliateFee);
+
+    /**
+     * @notice It is emitted if there is a new domain separator.
+     */
+    event NewDomainSeparator();
+
+    /**
+     * @notice It is emitted when there is a new gas limit for a ETH transfer (before it is wrapped to WETH).
+     * @param gasLimitETHTransfer Gas limit for an ETH transfer
+     */
+    event NewGasLimitETHTransfer(uint256 gasLimitETHTransfer);
+
+    /**
+     * @notice It is returned if the domain separator cannot be updated (i.e., the chainId is the same).
      */
     error SameDomainSeparator();
 
     /**
-     * @notice It is returned if the nonces are not valid
+     * @notice It is returned if the nonces are not valid.
      */
     error WrongNonces();
-
-    // Events
-    event NewDomainSeparator();
-    event NewGasLimitETHTransfer(uint256 gasLimitETHTransfer);
-    event AffiliatePayment(address affiliate, uint256 affiliateFee);
 
     struct SignatureParameters {
         bytes32 orderHash;

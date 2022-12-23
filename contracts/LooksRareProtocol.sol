@@ -379,7 +379,7 @@ contract LooksRareProtocol is
         _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFee);
 
         if (totalAffiliateFee != 0) {
-            emit AffiliatePayment(affiliate, totalAffiliateFee);
+            emit AffiliatePayment(affiliate, currency, totalAffiliateFee);
         }
     }
 

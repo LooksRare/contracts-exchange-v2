@@ -1,10 +1,10 @@
-// SPDXLicenseIdentifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 // Interfaces
 import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
 
-// Other dependencies
+// Dependencies
 import {AffiliateManager} from "./AffiliateManager.sol";
 
 /**

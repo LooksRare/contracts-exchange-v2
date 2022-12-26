@@ -138,7 +138,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         );
 
         // 3. maxProtocolFeeBp is higher than _MAX_PROTOCOL_FEE
-        maxProtocolFeeBp = 5000 + 1;
+        maxProtocolFeeBp = 500 + 1;
         vm.expectRevert(abi.encodeWithSelector(IStrategyManager.StrategyProtocolFeeTooHigh.selector));
         looksRareProtocol.addStrategy(
             standardProtocolFeeBp,

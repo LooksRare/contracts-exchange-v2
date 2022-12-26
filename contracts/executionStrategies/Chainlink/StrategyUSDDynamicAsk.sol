@@ -19,6 +19,7 @@ import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
+    // WETH
     address public immutable WETH;
 
     /**

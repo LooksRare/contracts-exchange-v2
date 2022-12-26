@@ -147,9 +147,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) revert WrongCurrency();
-        }
+        if (makerBid.currency != WETH) revert WrongCurrency();
 
         if (
             takerAsk.itemIds.length != 1 ||
@@ -196,9 +194,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) revert WrongCurrency();
-        }
+        if (makerBid.currency != WETH) revert WrongCurrency();
 
         if (
             takerAsk.itemIds.length != 1 ||
@@ -266,10 +262,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
     function isFixedDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
-        if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) {
-                return (orderIsValid, WrongCurrency.selector);
-            }
+        if (makerBid.currency != WETH) {
+            return (orderIsValid, WrongCurrency.selector);
         }
 
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
@@ -301,10 +295,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
     function isBasisPointsDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
-        if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) {
-                return (orderIsValid, WrongCurrency.selector);
-            }
+        if (makerBid.currency != WETH) {
+            return (orderIsValid, WrongCurrency.selector);
         }
 
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {

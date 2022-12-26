@@ -10,24 +10,24 @@ import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.s
 import "../../../contracts/interfaces/SharedErrors.sol";
 
 // Strategies
-import {StrategyTokenIdsRange} from "../../../contracts/executionStrategies/StrategyTokenIdsRange.sol";
+import {StrategyItemIdsRange} from "../../../contracts/executionStrategies/StrategyItemIdsRange.sol";
 
 // Base test
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
-    StrategyTokenIdsRange public strategyTokenIdsRange;
-    bytes4 public selector = StrategyTokenIdsRange.executeStrategyWithTakerAsk.selector;
+    StrategyItemIdsRange public strategyItemIdsRange;
+    bytes4 public selector = StrategyItemIdsRange.executeStrategyWithTakerAsk.selector;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyTokenIdsRange = new StrategyTokenIdsRange();
+        strategyItemIdsRange = new StrategyItemIdsRange();
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,
             _minTotalFeeBp,
             _maxProtocolFeeBp,
             selector,
             true,
-            address(strategyTokenIdsRange)
+            address(strategyItemIdsRange)
         );
     }
 
@@ -99,7 +99,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, selector);
         assertTrue(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyTokenIdsRange));
+        assertEq(strategyImplementation, address(strategyItemIdsRange));
     }
 
     function testTokenIdsRangeERC721() public {
@@ -110,7 +110,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -179,7 +179,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -213,7 +213,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -247,7 +247,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
@@ -286,7 +286,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -311,7 +311,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -341,7 +341,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -362,7 +362,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 
@@ -384,7 +384,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, bytes4(0));
 

@@ -8,10 +8,10 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {OrderInvalid} from "../interfaces/SharedErrors.sol";
 
 /**
- * @title StrategyTokenIdsRange
+ * @title StrategyItemIdsRange
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyTokenIdsRange {
+contract StrategyItemIdsRange {
     /**
      * @notice Constructor
      */
@@ -31,34 +31,34 @@ contract StrategyTokenIdsRange {
         pure
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        uint256 minTokenId = makerBid.itemIds[0];
-        uint256 maxTokenId = makerBid.itemIds[1];
-        if (minTokenId >= maxTokenId) revert OrderInvalid();
+        uint256 minItemId = makerBid.itemIds[0];
+        uint256 maxItemId = makerBid.itemIds[1];
+        if (minItemId >= maxItemId) revert OrderInvalid();
 
         uint256 desiredAmount = makerBid.amounts[0];
         uint256 totalOfferedAmount;
-        uint256 lastTokenId;
+        uint256 lastItemId;
 
         uint256 length = takerAsk.itemIds.length;
 
         for (uint256 i; i < length; ) {
-            uint256 offeredTokenId = takerAsk.itemIds[i];
+            uint256 offeredItemId = takerAsk.itemIds[i];
             // Force the client to sort the token IDs in ascending order,
             // in order to prevent taker ask from providing duplicated
             // token IDs
-            if (offeredTokenId <= lastTokenId && i != 0) revert OrderInvalid();
+            if (offeredItemId <= lastItemId && i != 0) revert OrderInvalid();
 
             // If ERC721, force amount to be 1.
             uint256 offeredAmount = makerBid.assetType == 0 ? 1 : takerAsk.amounts[i];
             if (offeredAmount == 0) revert OrderInvalid();
 
-            if (offeredTokenId >= minTokenId) {
-                if (offeredTokenId <= maxTokenId) {
+            if (offeredItemId >= minItemId) {
+                if (offeredItemId <= maxItemId) {
                     totalOfferedAmount += offeredAmount;
                 }
             }
 
-            lastTokenId = offeredTokenId;
+            lastItemId = offeredItemId;
 
             unchecked {
                 ++i;
@@ -84,9 +84,9 @@ contract StrategyTokenIdsRange {
     function isValid(
         OrderStructs.MakerBid calldata makerBid
     ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
-        uint256 minTokenId = makerBid.itemIds[0];
-        uint256 maxTokenId = makerBid.itemIds[1];
-        if (minTokenId >= maxTokenId) {
+        uint256 minItemId = makerBid.itemIds[0];
+        uint256 maxItemId = makerBid.itemIds[1];
+        if (minItemId >= maxItemId) {
             return (orderIsValid, OrderInvalid.selector);
         }
 

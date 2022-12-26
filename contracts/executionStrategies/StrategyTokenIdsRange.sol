@@ -39,13 +39,16 @@ contract StrategyTokenIdsRange {
         uint256 totalOfferedAmount;
         uint256 lastTokenId;
 
-        for (uint256 i; i < takerAsk.itemIds.length; ) {
+        uint256 length = takerAsk.itemIds.length;
+
+        for (uint256 i; i < length; ) {
             uint256 offeredTokenId = takerAsk.itemIds[i];
             // Force the client to sort the token IDs in ascending order,
             // in order to prevent taker ask from providing duplicated
             // token IDs
-            if (offeredTokenId <= lastTokenId) revert OrderInvalid();
+            if (offeredTokenId <= lastTokenId && i != 0) revert OrderInvalid();
 
+            // If ERC721, force amount to be 1.
             uint256 offeredAmount = makerBid.assetType == 0 ? 1 : takerAsk.amounts[i];
             if (offeredAmount == 0) revert OrderInvalid();
 

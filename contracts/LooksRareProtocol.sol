@@ -245,10 +245,11 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Adjust ETH gas limit for transfer
+     * @notice Update ETH gas limit for transfer
      * @param newGasLimitETHTransfer New gas limit for ETH transfer
+     * @dev Only callable by owner.
      */
-    function adjustETHGasLimitForTransfer(uint256 newGasLimitETHTransfer) external onlyOwner {
+    function updateETHGasLimitForTransfer(uint256 newGasLimitETHTransfer) external onlyOwner {
         if (newGasLimitETHTransfer < 2_300) revert NewGasLimitETHTransferTooLow();
         _gasLimitETHTransfer = newGasLimitETHTransfer;
 

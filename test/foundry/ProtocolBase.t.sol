@@ -112,8 +112,8 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         transferManager.whitelistOperator(address(looksRareProtocol));
         looksRareProtocol.updateCurrencyWhitelistStatus(address(0), true);
         looksRareProtocol.updateCurrencyWhitelistStatus(address(weth), true);
-        looksRareProtocol.setProtocolFeeRecipient(_owner);
-        looksRareProtocol.setCreatorFeeManager(address(creatorFeeManager));
+        looksRareProtocol.updateProtocolFeeRecipient(_owner);
+        looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
 
         // Fetch domain separator and store it as one of the operators
         _domainSeparator = looksRareProtocol.domainSeparator();

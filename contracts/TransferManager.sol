@@ -184,6 +184,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     /**
      * @notice Whitelist an operator in the system
      * @param operator Operator address to add
+     * @dev Only callable by owner.
      */
     function whitelistOperator(address operator) external onlyOwner {
         if (isOperatorWhitelisted[operator]) revert AlreadyWhitelisted();
@@ -196,6 +197,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     /**
      * @notice Remove an operator from the system
      * @param operator Operator address to remove
+     * @dev Only callable by owner.
      */
     function removeOperator(address operator) external onlyOwner {
         if (!isOperatorWhitelisted[operator]) revert NotWhitelisted();
@@ -209,8 +211,9 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @notice Check (internally) whether transfer (by an operator) is valid
      * @param user User address
      * @param operator Operator address
+     * @return isOperatorValid Whether the operator is valid for transfer on behalf of the user
      */
-    function isOperatorValidForTransfer(address user, address operator) internal view returns (bool) {
+    function isOperatorValidForTransfer(address user, address operator) internal view returns (bool isOperatorValid) {
         return isOperatorWhitelisted[operator] && hasUserApprovedOperator[user][operator];
     }
 }

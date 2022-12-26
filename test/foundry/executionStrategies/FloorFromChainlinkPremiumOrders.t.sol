@@ -28,7 +28,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorFromChainlink.setMaxLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.updateMaxLatency(MAXIMUM_LATENCY);
         vm.stopPrank();
 
         bytes4 errorSelector = _assertOrderInvalid(
@@ -70,7 +70,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorFromChainlink.setMaxLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.updateMaxLatency(MAXIMUM_LATENCY);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 

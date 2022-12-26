@@ -37,11 +37,11 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     constructor(address _owner) StrategyManager(_owner) {}
 
     /**
-     * @notice Set collection staking registry
+     * @notice Update the creator fee manager
      * @param newCreatorFeeManager Address of the creator fee manager
      * @dev Only callable by owner.
      */
-    function setCreatorFeeManager(address newCreatorFeeManager) external onlyOwner {
+    function updateCreatorFeeManager(address newCreatorFeeManager) external onlyOwner {
         creatorFeeManager = ICreatorFeeManager(newCreatorFeeManager);
         emit NewCreatorFeeManager(newCreatorFeeManager);
     }
@@ -50,8 +50,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      * @notice Update the maximum creator fee (in bp)
      * @param newMaxCreatorFeeBp New maximum creator fee (in basis point)
      * @dev The maximum value that can be set is 25%.
+     *       Only callable by owner.
      */
-    function setMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) external onlyOwner {
+    function updateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) external onlyOwner {
         if (newMaxCreatorFeeBp > 2_500) revert CreatorFeeBpTooHigh();
         maxCreatorFeeBp = newMaxCreatorFeeBp;
 
@@ -59,10 +60,11 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     }
 
     /**
-     * @notice Set protocol fee recipient
+     * @notice Update protocol fee recipient
      * @param newProtocolFeeRecipient New protocol fee recipient address
+     * @dev Only callable by owner.
      */
-    function setProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
+    function updateProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
         protocolFeeRecipient = newProtocolFeeRecipient;
         emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
     }

@@ -108,6 +108,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 );
 
                 if (!status) {
+                    // @dev It forwards the revertion message from the low-level call
                     assembly {
                         revert(add(data, 32), mload(data))
                     }
@@ -179,6 +180,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 );
 
                 if (!status) {
+                    // @dev It forwards the revertion message from the low-level call
                     assembly {
                         revert(add(data, 32), mload(data))
                     }

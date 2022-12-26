@@ -99,6 +99,11 @@ interface ILooksRareProtocol {
     );
 
     /**
+     * @notice It is returned if the gas limit for a standard ETH transfer is too low.
+     */
+    error NewGasLimitETHTransferTooLow();
+
+    /**
      * @notice It is returned if the domain separator cannot be updated (i.e., the chainId is the same).
      */
     error SameDomainSeparator();

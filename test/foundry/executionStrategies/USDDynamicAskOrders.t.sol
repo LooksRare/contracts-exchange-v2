@@ -15,6 +15,7 @@ import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrateg
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
+import {MockERC20} from "../../mock/MockERC20.sol";
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
@@ -39,7 +40,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(_owner);
+        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(address(weth), _owner);
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,
             _minTotalFeeBp,
@@ -307,7 +308,31 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
+    }
+
+    function testCannotExecuteIfNotWETHOrETH() public {
+        MockERC20 fakeCurrency = new MockERC20();
+        vm.prank(_owner);
+        looksRareProtocol.updateCurrencyWhitelistStatus(address(fakeCurrency), true);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
+        });
+
+        // Adjust the currency to something creative
+        makerAsk.currency = address(fakeCurrency);
+
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
+        assertFalse(isValid);
+        assertEq(errorSelector, WrongCurrency.selector);
+
+        vm.expectRevert(errorSelector);
+        vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 

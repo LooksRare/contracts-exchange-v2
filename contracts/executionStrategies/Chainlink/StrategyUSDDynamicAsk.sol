@@ -8,7 +8,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid} from "../../interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, WrongCurrency} from "../../interfaces/SharedErrors.sol";
 
 // Base strategy
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
@@ -19,6 +19,8 @@ import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
+    address public immutable WETH;
+
     /**
      * @dev Chainlink ETH/USD Price Feed
      */
@@ -26,9 +28,12 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
 
     /**
      * @notice Constructor
+     * @param _weth Wrapped ether address
      * @param _owner Owner address
      */
-    constructor(address _owner) StrategyChainlinkPriceLatency(_owner) {}
+    constructor(address _weth, address _owner) StrategyChainlinkPriceLatency(_owner) {
+        WETH = _weth;
+    }
 
     /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
@@ -54,6 +59,12 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
 
             unchecked {
                 ++i;
+            }
+        }
+
+        if (makerAsk.currency != address(0)) {
+            if (makerAsk.currency != WETH) {
+                revert WrongCurrency();
             }
         }
 
@@ -97,10 +108,18 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
             return (orderIsValid, OrderInvalid.selector);
         }
 
+        if (makerAsk.currency != address(0)) {
+            if (makerAsk.currency != WETH) {
+                return (orderIsValid, WrongCurrency.selector);
+            }
+        }
+
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
+
         if (answer <= 0) {
             return (orderIsValid, InvalidChainlinkPrice.selector);
         }
+
         if (block.timestamp - updatedAt > maxLatency) {
             return (orderIsValid, PriceNotRecentEnough.selector);
         }

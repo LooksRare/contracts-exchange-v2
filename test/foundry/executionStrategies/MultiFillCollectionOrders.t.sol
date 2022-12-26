@@ -174,7 +174,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(secondTakerUser), _initialWETHBalanceUser + 3 * ((price * 9_800) / 10_000));
         // Verify the nonce is now marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     function testInactiveStrategy() public {

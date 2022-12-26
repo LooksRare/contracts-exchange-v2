@@ -57,12 +57,11 @@ contract OrderValidatorV2A {
     // ERC1155 interfaceId
     bytes4 public constant ERC1155_INTERFACE_ID = 0xd9b67a26;
 
+    // Magic value nonce returned if executed (or cancelled)
+    bytes32 public constant MAGIC_VALUE_ORDER_NONCE_EXECUTED = keccak256("ORDER_NONCE_EXECUTED");
+
     // Number of distinct criteria groups checked to evaluate the validity of an order
     uint256 public constant CRITERIA_GROUPS = 9;
-
-    // Magic value nonce returned if executed
-    bytes32 public immutable MAGIC_VALUE_NONCE_EXECUTED =
-        0x000000000000000000000000000000000000000000000000000000000000002a;
 
     // LooksRareProtocol domain separator
     bytes32 public domainSeparator;
@@ -300,7 +299,7 @@ contract OrderValidatorV2A {
 
         // 2. Check order nonce
         bytes32 orderNonceStatus = looksRareProtocol.userOrderNonce(makerSigner, orderNonce);
-        if (orderNonceStatus == MAGIC_VALUE_NONCE_EXECUTED) return USER_ORDER_NONCE_EXECUTED_OR_CANCELLED;
+        if (orderNonceStatus == MAGIC_VALUE_ORDER_NONCE_EXECUTED) return USER_ORDER_NONCE_EXECUTED_OR_CANCELLED;
         if (orderNonceStatus != bytes32(0) && orderNonceStatus != orderHash)
             return USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH;
     }

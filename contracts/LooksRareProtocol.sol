@@ -497,7 +497,7 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) private {
         // Invalidate order at this nonce for future execution or else set the order hash at this nonce
-        userOrderNonce[signer][orderNonce] = (isNonceInvalidated ? MAGIC_VALUE_NONCE_EXECUTED : orderHash);
+        userOrderNonce[signer][orderNonce] = (isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash);
     }
 
     function _transferToSellerAndCreator(

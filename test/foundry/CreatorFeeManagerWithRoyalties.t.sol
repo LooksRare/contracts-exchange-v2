@@ -97,7 +97,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             _initialWETHBalanceRoyaltyRecipient + (price * _newCreatorRoyaltyFee) / 10_000
         );
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     function testCreatorRoyaltiesGetPaidForERC2981() public {
@@ -156,7 +156,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             _initialWETHBalanceRoyaltyRecipient + (price * _newCreatorRoyaltyFee) / 10_000
         );
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     function testCreatorRoyaltiesGetPaidForRoyaltyFeeManagerWithBundles() public {
@@ -203,7 +203,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Taker ask user receives 95% of the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_500) / 10_000);
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     function testCreatorRoyaltiesGetPaidForERC2981WithBundles() public {
@@ -256,7 +256,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Taker ask user receives 95% of the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_500) / 10_000);
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     function testCreatorRoyaltiesRevertForEIP2981WithBundlesIfInfoDiffer() public {

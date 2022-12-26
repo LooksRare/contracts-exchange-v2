@@ -92,7 +92,7 @@ contract GasGriefingTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(gasGriefer, makerAsk.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(gasGriefer, makerAsk.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     function testThreeTakerBidsGasGriefing() public {
@@ -155,7 +155,7 @@ contract GasGriefingTest is ProtocolBase {
             // Taker user has received the asset
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the nonce is marked as executed
-            assertEq(looksRareProtocol.userOrderNonce(gasGriefer, i), MAGIC_VALUE_NONCE_EXECUTED);
+            assertEq(looksRareProtocol.userOrderNonce(gasGriefer, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));

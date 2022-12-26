@@ -90,7 +90,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10000
         );
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     function _testCreatorFeeRebatesArePaidForBundles(address erc721) private {
@@ -154,7 +154,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Taker ask user receives 98% of the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10000);
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     function testCreatorRebatesArePaidForRoyaltyFeeManager() public {

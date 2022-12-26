@@ -38,8 +38,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @return price The final execution price
-     * @return itemIds The final token IDs to be traded
-     * @return amounts The corresponding amounts for each token ID. It should always be 1 for any asset type.
+     * @return itemIds The final item ids to be traded
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired premium amount in ETH from the floor price as the additionalParameters.
      */
@@ -86,8 +86,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @return price The final execution price
-     * @return itemIds The final token IDs to be traded
-     * @return amounts The corresponding amounts for each token ID. It should always be 1 for any asset type.
+     * @return itemIds The final item ids to be traded
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired premium basis points from the floor price as the additionalParameters.
      */
@@ -134,8 +134,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @return price The final execution price
-     * @return itemIds The final token IDs to be traded
-     * @return amounts The corresponding amounts for each token ID. It should always be 1 for any asset type.
+     * @return itemIds The final item ids to be traded
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
      */
@@ -181,8 +181,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @return price The final execution price
-     * @return itemIds The final token IDs to be traded
-     * @return amounts The corresponding amounts for each token ID. It should always be 1 for any asset type.
+     * @return itemIds The final item ids to be traded
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
      */

@@ -15,25 +15,25 @@ import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol
 
 /**
  * @title StrategyUSDDynamicAsk
- * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount in ETH.
+ * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount to be in ETH.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
     // WETH
     address public immutable WETH;
 
-    /**
-     * @dev Chainlink ETH/USD Price Feed
-     */
-    AggregatorV3Interface public priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
+    // ETH/USD Chainlink price feed
+    AggregatorV3Interface public immutable priceFeed;
 
     /**
      * @notice Constructor
      * @param _weth Wrapped ether address
      * @param _owner Owner address
+     * @param _priceFeed Address of the ETH/USD price feed
      */
-    constructor(address _weth, address _owner) StrategyChainlinkPriceLatency(_owner) {
+    constructor(address _owner, address _weth, address _priceFeed) StrategyChainlinkPriceLatency(_owner) {
         WETH = _weth;
+        priceFeed = AggregatorV3Interface(_priceFeed);
     }
 
     /**

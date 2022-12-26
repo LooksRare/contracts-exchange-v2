@@ -79,7 +79,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         uint256 minPriceInETH = makerAsk.minPrice;
         uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * 1e8) / ethPriceInUSD;
 
-        if (minPriceInETH > desiredSalePriceInETH) {
+        if (minPriceInETH >= desiredSalePriceInETH) {
             price = minPriceInETH;
         } else {
             price = desiredSalePriceInETH;

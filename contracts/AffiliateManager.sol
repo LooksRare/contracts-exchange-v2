@@ -44,6 +44,7 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     /**
      * @notice Update status for affiliate program
      * @param isActive whether the affiliate program is active
+     * @dev Only callable by owner.
      */
     function updateAffiliateProgramStatus(bool isActive) external onlyOwner {
         isAffiliateProgramActive = isActive;
@@ -53,6 +54,7 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     /**
      * @notice Update affiliate controller
      * @param newAffiliateController address of new affiliate controller contract
+     * @dev Only callable by owner.
      */
     function updateAffiliateController(address newAffiliateController) external onlyOwner {
         affiliateController = newAffiliateController;

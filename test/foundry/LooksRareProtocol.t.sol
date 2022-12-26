@@ -11,22 +11,22 @@ contract LooksRareProtocolTest is ProtocolBase {
     function testAdjustETHGasLimitForTransfer() public asPrankedUser(_owner) {
         vm.expectEmit(true, false, false, true);
         emit NewGasLimitETHTransfer(10_000);
-        looksRareProtocol.adjustETHGasLimitForTransfer(10_000);
+        looksRareProtocol.updateETHGasLimitForTransfer(10_000);
         assertEq(uint256(vm.load(address(looksRareProtocol), bytes32(uint256(16)))), 10_000);
     }
 
     function testAdjustETHGasLimitForTransferRevertsIfTooLow() public asPrankedUser(_owner) {
         uint256 newGasLimitETHTransfer = 2_300;
         vm.expectRevert(NewGasLimitETHTransferTooLow.selector);
-        looksRareProtocol.adjustETHGasLimitForTransfer(newGasLimitETHTransfer - 1);
+        looksRareProtocol.updateETHGasLimitForTransfer(newGasLimitETHTransfer - 1);
 
-        looksRareProtocol.adjustETHGasLimitForTransfer(newGasLimitETHTransfer);
+        looksRareProtocol.updateETHGasLimitForTransfer(newGasLimitETHTransfer);
         assertEq(uint256(vm.load(address(looksRareProtocol), bytes32(uint256(16)))), newGasLimitETHTransfer);
     }
 
     function testAdjustETHGasLimitForTransferNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        looksRareProtocol.adjustETHGasLimitForTransfer(10_000);
+        looksRareProtocol.updateETHGasLimitForTransfer(10_000);
     }
 
     function testUpdateDomainSeparator() public {

@@ -43,6 +43,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
      * @param isMakerBid Whether the function selector is for maker bids
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
+     *      Only callable by owner.
      */
     function addStrategy(
         uint16 standardProtocolFeeBp,
@@ -83,7 +84,8 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
      * @param strategyId Strategy id
      * @param newStandardProtocolFee New standard protocol fee (e.g., 200 --> 2%)
      * @param newMinTotalFee New minimum total fee
-     * @param isActive Whether the strategy is active
+     * @param isActive Whether the strategy must remain active
+     * @dev Only callable by owner.
      */
     function updateStrategy(
         uint256 strategyId,

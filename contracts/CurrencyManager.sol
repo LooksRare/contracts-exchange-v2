@@ -26,6 +26,7 @@ contract CurrencyManager is ICurrencyManager, AffiliateManager {
      * @notice Whitelist/blacklist currency for execution
      * @param currency Currency address (address(0) for ETH)
      * @param isWhitelisted Whether the currency is whitelisted
+     * @dev Only callable by owner.
      */
     function updateCurrencyWhitelistStatus(address currency, bool isWhitelisted) external onlyOwner {
         isCurrencyWhitelisted[currency] = isWhitelisted;

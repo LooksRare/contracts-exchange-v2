@@ -32,6 +32,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
      * @param assetType Asset type
      * @param transferManagerForAssetType Transfer manager address for this asset type
      * @param selectorForAssetType Selector for the function to call to transfer this asset type
+     * @dev Only callable by owner.
      */
     function addTransferManagerForAssetType(
         uint256 assetType,

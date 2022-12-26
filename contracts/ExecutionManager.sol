@@ -37,11 +37,11 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     constructor(address _owner) StrategyManager(_owner) {}
 
     /**
-     * @notice Set collection staking registry
+     * @notice Update the creator fee manager
      * @param newCreatorFeeManager Address of the creator fee manager
      * @dev Only callable by owner.
      */
-    function setCreatorFeeManager(address newCreatorFeeManager) external onlyOwner {
+    function updateCreatorFeeManager(address newCreatorFeeManager) external onlyOwner {
         creatorFeeManager = ICreatorFeeManager(newCreatorFeeManager);
         emit NewCreatorFeeManager(newCreatorFeeManager);
     }
@@ -50,8 +50,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      * @notice Update the maximum creator fee (in bp)
      * @param newMaxCreatorFeeBp New maximum creator fee (in basis point)
      * @dev The maximum value that can be set is 25%.
+     *       Only callable by owner.
      */
-    function setMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) external onlyOwner {
+    function updateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) external onlyOwner {
         if (newMaxCreatorFeeBp > 2_500) revert CreatorFeeBpTooHigh();
         maxCreatorFeeBp = newMaxCreatorFeeBp;
 
@@ -59,10 +60,11 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     }
 
     /**
-     * @notice Set protocol fee recipient
+     * @notice Update protocol fee recipient
      * @param newProtocolFeeRecipient New protocol fee recipient address
+     * @dev Only callable by owner.
      */
-    function setProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
+    function updateProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
         protocolFeeRecipient = newProtocolFeeRecipient;
         emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
     }
@@ -88,8 +90,35 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     {
         uint256 price;
 
-        (price, itemIds, amounts, isNonceInvalidated) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
+        // Verify the order validity for timestamps
+        _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
 
+        if (makerBid.strategyId == 0) {
+            (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
+            isNonceInvalidated = true;
+        } else {
+            if (strategyInfo[makerBid.strategyId].isActive) {
+                if (!strategyInfo[makerBid.strategyId].isMakerBid) revert NoSelectorForMakerBid();
+
+                bytes4 selector = strategyInfo[makerBid.strategyId].selector;
+                if (selector == bytes4(0)) revert NoSelectorForMakerBid();
+
+                (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
+                    abi.encodeWithSelector(selector, takerAsk, makerBid)
+                );
+
+                if (!status) {
+                    // @dev It forwards the revertion message from the low-level call
+                    assembly {
+                        revert(add(data, 32), mload(data))
+                    }
+                }
+
+                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
+            } else {
+                revert StrategyNotAvailable(makerBid.strategyId);
+            }
+        }
         {
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
@@ -134,8 +163,34 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     {
         uint256 price;
 
-        (price, itemIds, amounts, isNonceInvalidated) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
+        _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
 
+        if (makerAsk.strategyId == 0) {
+            (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
+            isNonceInvalidated = true;
+        } else {
+            if (strategyInfo[makerAsk.strategyId].isActive) {
+                if (strategyInfo[makerAsk.strategyId].isMakerBid) revert NoSelectorForMakerAsk();
+
+                bytes4 selector = strategyInfo[makerAsk.strategyId].selector;
+                if (selector == bytes4(0)) revert NoSelectorForMakerAsk();
+
+                (bool status, bytes memory data) = strategyInfo[makerAsk.strategyId].implementation.call(
+                    abi.encodeWithSelector(selector, takerBid, makerAsk)
+                );
+
+                if (!status) {
+                    // @dev It forwards the revertion message from the low-level call
+                    assembly {
+                        revert(add(data, 32), mload(data))
+                    }
+                }
+
+                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
+            } else {
+                revert StrategyNotAvailable(makerAsk.strategyId);
+            }
+        }
         {
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
@@ -156,84 +211,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // 2 --> Amount for seller
             fees[2] = price - fees[1] - fees[0];
             recipients[2] = makerAsk.signer;
-        }
-    }
-
-    /**
-     * @notice Execute strategy hooks for takerBid
-     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
-     */
-    function _executeStrategyHooksForTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
-    ) internal returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
-        // Verify the order validity for timestamps
-        _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
-
-        if (makerAsk.strategyId == 0) {
-            (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
-            isNonceInvalidated = true;
-        } else {
-            if (strategyInfo[makerAsk.strategyId].isActive) {
-                if (strategyInfo[makerAsk.strategyId].isMakerBid) revert NoSelectorForMakerAsk();
-
-                bytes4 selector = strategyInfo[makerAsk.strategyId].selector;
-                if (selector == bytes4(0)) revert NoSelectorForMakerAsk();
-
-                (bool status, bytes memory data) = strategyInfo[makerAsk.strategyId].implementation.call(
-                    abi.encodeWithSelector(selector, takerBid, makerAsk)
-                );
-
-                if (!status) {
-                    assembly {
-                        revert(add(data, 32), mload(data))
-                    }
-                }
-
-                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
-            } else {
-                revert StrategyNotAvailable(makerAsk.strategyId);
-            }
-        }
-    }
-
-    /**
-     * @notice Execute strategy hooks for takerAsk
-     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
-     */
-    function _executeStrategyHooksForTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
-    ) internal returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
-        // Verify the order validity for timestamps
-        _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
-
-        if (makerBid.strategyId == 0) {
-            (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
-            isNonceInvalidated = true;
-        } else {
-            if (strategyInfo[makerBid.strategyId].isActive) {
-                if (!strategyInfo[makerBid.strategyId].isMakerBid) revert NoSelectorForMakerBid();
-
-                bytes4 selector = strategyInfo[makerBid.strategyId].selector;
-                if (selector == bytes4(0)) revert NoSelectorForMakerBid();
-
-                (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
-                    abi.encodeWithSelector(selector, takerAsk, makerBid)
-                );
-
-                if (!status) {
-                    assembly {
-                        revert(add(data, 32), mload(data))
-                    }
-                }
-
-                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
-            } else {
-                revert StrategyNotAvailable(makerBid.strategyId);
-            }
         }
     }
 

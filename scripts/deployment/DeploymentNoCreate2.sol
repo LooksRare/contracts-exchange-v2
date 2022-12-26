@@ -40,7 +40,7 @@ contract DeploymentNoCreate2 is Test {
         transferManager.whitelistOperator(address(looksRareProtocol));
         looksRareProtocol.updateCurrencyWhitelistStatus(address(0), true);
         looksRareProtocol.updateCurrencyWhitelistStatus(weth, true);
-        looksRareProtocol.setProtocolFeeRecipient(looksRareProtocol.owner());
+        looksRareProtocol.updateProtocolFeeRecipient(looksRareProtocol.owner());
         orderValidatorV2A = new OrderValidatorV2A(address(looksRareProtocol));
 
         console.log("TransferManager address: ");

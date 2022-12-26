@@ -11,7 +11,7 @@ import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol
  */
 contract StrategyChainlinkMultiplePriceFeeds is StrategyChainlinkPriceLatency {
     /**
-     * @dev NFT collection address to Chainlink price feed address mapping
+     * @notice NFT collection address to Chainlink price feed address mapping
      */
     mapping(address => address) public priceFeeds;
 
@@ -35,7 +35,7 @@ contract StrategyChainlinkMultiplePriceFeeds is StrategyChainlinkPriceLatency {
 
     /**
      * @notice Set an NFT collection's Chainlink price feed address.
-     * @dev Function only callable by contract owner
+     * @dev Only callable by owner. The owner should be a timelock.
      * @param _collection NFT collection address
      * @param _priceFeed Chainlink price feed address
      */

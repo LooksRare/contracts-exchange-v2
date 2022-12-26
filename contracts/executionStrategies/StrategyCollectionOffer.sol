@@ -63,6 +63,7 @@ contract StrategyCollectionOffer {
      * @notice Execute collection strategy with taker ask order with merkle proof
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @dev The transaction reverts if there is the maker does not include a merkle root in the additionalParameters.
      */
     function executeCollectionStrategyWithTakerAskWithProof(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -84,23 +85,22 @@ contract StrategyCollectionOffer {
                 amounts.length != 1 ||
                 price != takerAsk.minPrice ||
                 takerAsk.amounts[0] != amounts[0] ||
-                amounts[0] == 0
+                amounts[0] == 0 ||
+                makerBid.additionalParameters.length == 0
             ) revert OrderInvalid();
         }
 
-        if (makerBid.additionalParameters.length != 0) {
-            // Precomputed merkleRoot (that contains the itemIds that match a common characteristic)
-            bytes32 root = abi.decode(makerBid.additionalParameters, (bytes32));
+        // Precomputed merkleRoot (that contains the itemIds that match a common characteristic)
+        bytes32 root = abi.decode(makerBid.additionalParameters, (bytes32));
 
-            // MerkleProof + indexInTree + itemId
-            bytes32[] memory proof = abi.decode(takerAsk.additionalParameters, (bytes32[]));
+        // MerkleProof + indexInTree + itemId
+        bytes32[] memory proof = abi.decode(takerAsk.additionalParameters, (bytes32[]));
 
-            // Compute the node
-            bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
+        // Compute the node
+        bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
 
-            // Verify proof
-            if (!MerkleProofMemory.verify(proof, root, node)) revert WrongMerkleProof();
-        }
+        // Verify proof
+        if (!MerkleProofMemory.verify(proof, root, node)) revert WrongMerkleProof();
     }
 
     /**

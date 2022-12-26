@@ -72,12 +72,10 @@ contract NonceManager is INonceManager {
         uint256 _bidNonce = userBidAskNonces[msg.sender].bidNonce;
         uint256 _askNonce = userBidAskNonces[msg.sender].askNonce;
         if (bid) {
-            _bidNonce++;
-            userBidAskNonces[msg.sender].bidNonce = _bidNonce;
+            userBidAskNonces[msg.sender].bidNonce = ++_bidNonce;
         }
         if (ask) {
-            _askNonce++;
-            userBidAskNonces[msg.sender].askNonce = _askNonce;
+            userBidAskNonces[msg.sender].askNonce = ++_askNonce;
         }
 
         emit NewBidAskNonces(msg.sender, _bidNonce, _askNonce);

@@ -52,7 +52,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
         bool isMakerBid,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFeeBp < standardProtocolFeeBp || maxProtocolFeeBp < minTotalFeeBp || maxProtocolFeeBp > 5_000)
+        if (maxProtocolFeeBp < standardProtocolFeeBp || maxProtocolFeeBp < minTotalFeeBp || maxProtocolFeeBp > 500)
             revert StrategyProtocolFeeTooHigh();
 
         if (selector == bytes4(0)) revert StrategyHasNoSelector();

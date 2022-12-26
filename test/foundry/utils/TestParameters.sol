@@ -23,8 +23,7 @@ abstract contract TestParameters is Test {
     address internal constant takerUser = 0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF;
     OrderStructs.MerkleTree internal _emptyMerkleTree;
     bytes4 internal constant _emptyBytes4 = bytes4(0);
-    bytes32 public constant MAGIC_VALUE_NONCE_EXECUTED =
-        0x000000000000000000000000000000000000000000000000000000000000002a;
+    bytes32 public constant MAGIC_VALUE_ORDER_NONCE_EXECUTED = keccak256("ORDER_NONCE_EXECUTED");
 
     // Initial balances
     uint256 internal constant _initialETHBalanceUser = 100 ether;

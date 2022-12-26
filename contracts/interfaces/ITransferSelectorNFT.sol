@@ -26,8 +26,15 @@ interface ITransferSelectorNFT {
 
     /**
      * @notice It is returned if the contract is initialized.
+     * @dev It is only used for owner functions.
      */
-    error AlreadySet();
+    error ManagerSelectorAlreadySetForAssetType();
+
+    /**
+     * @notice It is returned if there is no transfer manager address or an empty selector
+     * @dev It is only used for owner functions.
+     */
+    error ManagerSelectorEmpty();
 
     /**
      * @notice It is returned if NFT transfer fails.

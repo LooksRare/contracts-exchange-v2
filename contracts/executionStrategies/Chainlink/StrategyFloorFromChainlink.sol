@@ -11,7 +11,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePriceFeeds.sol";
 
 // Shared errors
-import {AskTooHigh, BidTooLow, OrderInvalid, WrongCaller, WrongCurrency} from "../../interfaces/SharedErrors.sol";
+import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency} from "../../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyFloorFromChainlink
@@ -20,20 +20,15 @@ import {AskTooHigh, BidTooLow, OrderInvalid, WrongCaller, WrongCurrency} from ".
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
-    // Address of the protocol
-    address public immutable LOOKSRARE_PROTOCOL;
-
     // WETH
     address public immutable WETH;
 
     /**
      * @notice Constructor
      * @param _owner Owner address
-     * @param _looksRareProtocol Address of the LooksRare protocol
      * @param _weth Address of WETH
      */
-    constructor(address _owner, address _looksRareProtocol, address _weth) StrategyChainlinkMultiplePriceFeeds(_owner) {
-        LOOKSRARE_PROTOCOL = _looksRareProtocol;
+    constructor(address _owner, address _weth) StrategyChainlinkMultiplePriceFeeds(_owner) {
         WETH = _weth;
     }
 
@@ -43,8 +38,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @return price The final execution price
-     * @return itemIds The final token IDs to be traded
-     * @return amounts The corresponding amounts for each token ID. It should always be 1 for ERC721 and it can be > 1 for ERC1155
+     * @return itemIds The final item ids to be traded
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired premium amount in ETH from the floor price as the additionalParameters.
      */
@@ -56,8 +51,6 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         if (makerAsk.currency != address(0)) {
             if (makerAsk.currency != WETH) revert WrongCurrency();
         }
@@ -93,8 +86,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @return price The final execution price
-     * @return itemIds The final token IDs to be traded
-     * @return amounts The corresponding amounts for each token ID. It should always be 1 for ERC721 and it can be > 1 for ERC1155
+     * @return itemIds The final item ids to be traded
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired premium basis points from the floor price as the additionalParameters.
      */
@@ -106,8 +99,6 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         if (makerAsk.currency != address(0)) {
             if (makerAsk.currency != WETH) revert WrongCurrency();
         }
@@ -143,8 +134,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @return price The final execution price
-     * @return itemIds The final token IDs to be traded
-     * @return amounts The corresponding amounts for each token ID. It should always be 1 for ERC721 and it can be > 1 for ERC1155
+     * @return itemIds The final item ids to be traded
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
      */
@@ -156,11 +147,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
-        if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) revert WrongCurrency();
-        }
+        if (makerBid.currency != WETH) revert WrongCurrency();
 
         if (
             takerAsk.itemIds.length != 1 ||
@@ -194,8 +181,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @return price The final execution price
-     * @return itemIds The final token IDs to be traded
-     * @return amounts The corresponding amounts for each token ID. It should always be 1 for ERC721 and it can be > 1 for ERC1155
+     * @return itemIds The final item ids to be traded
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
      */
@@ -207,11 +194,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
-        if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) revert WrongCurrency();
-        }
+        if (makerBid.currency != WETH) revert WrongCurrency();
 
         if (
             takerAsk.itemIds.length != 1 ||
@@ -223,7 +206,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
 
         uint256 floorPrice = _getFloorPrice(makerBid.collection);
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-        if (discount > 10_000) revert OrderInvalid();
+        if (discount >= 10_000) revert OrderInvalid();
+
         uint256 desiredPrice = (floorPrice * (10_000 - discount)) / 10_000;
 
         if (desiredPrice >= makerBid.maxPrice) {
@@ -279,10 +263,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
     function isFixedDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
-        if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) {
-                return (orderIsValid, WrongCurrency.selector);
-            }
+        if (makerBid.currency != WETH) {
+            return (orderIsValid, WrongCurrency.selector);
         }
 
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
@@ -314,10 +296,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
     function isBasisPointsDiscountMakerBidValid(
         OrderStructs.MakerBid calldata makerBid
     ) external view returns (bool orderIsValid, bytes4 errorSelector) {
-        if (makerBid.currency != address(0)) {
-            if (makerBid.currency != WETH) {
-                return (orderIsValid, WrongCurrency.selector);
-            }
+        if (makerBid.currency != WETH) {
+            return (orderIsValid, WrongCurrency.selector);
         }
 
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
@@ -331,7 +311,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         }
 
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-        if (discount > 10_000) {
+
+        if (discount >= 10_000) {
             return (orderIsValid, OrderInvalid.selector);
         }
 

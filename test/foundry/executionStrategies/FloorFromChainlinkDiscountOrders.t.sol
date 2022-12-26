@@ -26,7 +26,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.setMaxLatency(MAXIMUM_LATENCY);
         vm.stopPrank();
 
         bytes4 errorSelector = _assertOrderInvalid(
@@ -68,7 +68,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.startPrank(_owner);
-        strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.setMaxLatency(MAXIMUM_LATENCY);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
@@ -85,25 +85,6 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
-    }
-
-    function testFloorFromChainlinkDiscountCallerNotLooksRareProtocol() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: discount
-        });
-
-        _setPriceFeed();
-
-        // Valid, but wrong caller
-        _assertOrderValid(makerBid);
-
-        vm.prank(takerUser);
-        vm.expectRevert(WrongCaller.selector);
-        // Call the function directly
-        (bool success, ) = address(strategyFloorFromChainlink).call(
-            abi.encodeWithSelector(selector, takerAsk, makerBid)
-        );
-        assertTrue(success);
     }
 
     function testFloorFromChainlinkDiscountTakerAskItemIdsLengthNotOne() public {

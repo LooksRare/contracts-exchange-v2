@@ -181,7 +181,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyFloorFromChainlink = new StrategyFloorFromChainlink(_owner, address(looksRareProtocol), address(weth));
+        strategyFloorFromChainlink = new StrategyFloorFromChainlink(_owner, address(weth));
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,
             _minTotalFeeBp,
@@ -194,7 +194,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
     function _setPriceFeed() internal {
         vm.startPrank(_owner);
-        strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.setMaxLatency(MAXIMUM_LATENCY);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
     }

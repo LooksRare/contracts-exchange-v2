@@ -24,7 +24,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     uint256 private constant decayPerSecond = 0.0025 ether;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyDutchAuction = new StrategyDutchAuction(address(looksRareProtocol));
+        strategyDutchAuction = new StrategyDutchAuction();
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,
             _minTotalFeeBp,
@@ -134,24 +134,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - startPrice + discount);
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + ((startPrice - discount) * 9_800) / 10_000);
-    }
-
-    function testCallerNotLooksRareProtocol() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
-            1,
-            1
-        );
-
-        // Valid, but wrong caller
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isValid(makerAsk);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
-
-        vm.expectRevert(WrongCaller.selector);
-        // Call the function directly
-        strategyDutchAuction.executeStrategyWithTakerBid(takerBid, makerAsk);
     }
 
     function testInactiveStrategy() public {

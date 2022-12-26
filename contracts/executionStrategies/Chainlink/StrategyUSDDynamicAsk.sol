@@ -8,7 +8,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongCaller} from "../../interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, WrongCurrency} from "../../interfaces/SharedErrors.sol";
 
 // Base strategy
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
@@ -19,8 +19,7 @@ import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
-    // Address of the protocol
-    address public immutable LOOKSRARE_PROTOCOL;
+    address public immutable WETH;
 
     /**
      * @dev Chainlink ETH/USD Price Feed
@@ -29,11 +28,11 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
 
     /**
      * @notice Constructor
+     * @param _weth Wrapped ether address
      * @param _owner Owner address
-     * @param _looksRareProtocol Address of the LooksRare protocol
      */
-    constructor(address _owner, address _looksRareProtocol) StrategyChainlinkPriceLatency(_owner) {
-        LOOKSRARE_PROTOCOL = _looksRareProtocol;
+    constructor(address _weth, address _owner) StrategyChainlinkPriceLatency(_owner) {
+        WETH = _weth;
     }
 
     /**
@@ -51,8 +50,6 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();
@@ -62,6 +59,12 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
 
             unchecked {
                 ++i;
+            }
+        }
+
+        if (makerAsk.currency != address(0)) {
+            if (makerAsk.currency != WETH) {
+                revert WrongCurrency();
             }
         }
 
@@ -76,7 +79,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         uint256 minPriceInETH = makerAsk.minPrice;
         uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * 1e8) / ethPriceInUSD;
 
-        if (minPriceInETH > desiredSalePriceInETH) {
+        if (minPriceInETH >= desiredSalePriceInETH) {
             price = minPriceInETH;
         } else {
             price = desiredSalePriceInETH;
@@ -105,10 +108,18 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
             return (orderIsValid, OrderInvalid.selector);
         }
 
+        if (makerAsk.currency != address(0)) {
+            if (makerAsk.currency != WETH) {
+                return (orderIsValid, WrongCurrency.selector);
+            }
+        }
+
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
+
         if (answer <= 0) {
             return (orderIsValid, InvalidChainlinkPrice.selector);
         }
+
         if (block.timestamp - updatedAt > maxLatency) {
             return (orderIsValid, PriceNotRecentEnough.selector);
         }

@@ -249,6 +249,7 @@ contract LooksRareProtocol is
      * @param newGasLimitETHTransfer New gas limit for ETH transfer
      */
     function adjustETHGasLimitForTransfer(uint256 newGasLimitETHTransfer) external onlyOwner {
+        if (newGasLimitETHTransfer < 2_300) revert NewGasLimitETHTransferTooLow();
         _gasLimitETHTransfer = newGasLimitETHTransfer;
 
         emit NewGasLimitETHTransfer(newGasLimitETHTransfer);
@@ -496,7 +497,7 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) private {
         // Invalidate order at this nonce for future execution or else set the order hash at this nonce
-        userOrderNonce[signer][orderNonce] = (isNonceInvalidated ? MAGIC_VALUE_NONCE_EXECUTED : orderHash);
+        userOrderNonce[signer][orderNonce] = (isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash);
     }
 
     function _transferToSellerAndCreator(

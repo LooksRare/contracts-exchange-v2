@@ -16,8 +16,8 @@ import {WrongLengths} from "./interfaces/SharedErrors.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract NonceManager is INonceManager {
-    bytes32 public immutable MAGIC_VALUE_NONCE_EXECUTED =
-        0x000000000000000000000000000000000000000000000000000000000000002a;
+    // Magic value nonce returned if executed (or cancelled)
+    bytes32 public constant MAGIC_VALUE_ORDER_NONCE_EXECUTED = keccak256("ORDER_NONCE_EXECUTED");
 
     // Track bid and ask nonces for a user
     mapping(address => UserBidAskNonces) public userBidAskNonces;
@@ -37,7 +37,7 @@ contract NonceManager is INonceManager {
         if (length == 0) revert WrongLengths();
 
         for (uint256 i; i < length; ) {
-            userOrderNonce[msg.sender][orderNonces[i]] = MAGIC_VALUE_NONCE_EXECUTED;
+            userOrderNonce[msg.sender][orderNonces[i]] = MAGIC_VALUE_ORDER_NONCE_EXECUTED;
             unchecked {
                 ++i;
             }
@@ -72,12 +72,10 @@ contract NonceManager is INonceManager {
         uint256 _bidNonce = userBidAskNonces[msg.sender].bidNonce;
         uint256 _askNonce = userBidAskNonces[msg.sender].askNonce;
         if (bid) {
-            _bidNonce++;
-            userBidAskNonces[msg.sender].bidNonce = _bidNonce;
+            userBidAskNonces[msg.sender].bidNonce = ++_bidNonce;
         }
         if (ask) {
-            _askNonce++;
-            userBidAskNonces[msg.sender].askNonce = _askNonce;
+            userBidAskNonces[msg.sender].askNonce = ++_askNonce;
         }
 
         emit NewBidAskNonces(msg.sender, _bidNonce, _askNonce);

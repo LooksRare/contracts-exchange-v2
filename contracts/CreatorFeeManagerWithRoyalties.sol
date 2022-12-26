@@ -30,7 +30,7 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
      * @inheritdoc ICreatorFeeManager
      * @dev There are two on-chain sources for the royalty fee to distribute.
      *      1. RoyaltyFeeRegistry: It is an on-chain registry where royalty fee is defined across all items of a collection.
-     *      2. ERC2981: The NFT Royalty Standard where royalty fee is defined at a tokenId level for each item of a collection.
+     *      2. ERC2981: The NFT Royalty Standard where royalty fee is defined at a itemId level for each item of a collection.
      *      The on-chain logic looks up the registry first. If it doesn't find anything, it checks if a collection is ERC2981.
      *      If so, it fetches the proper royalty information for the itemId.
      *      For a bundle that contains multiple itemIds (for a collection using ERC2981), if the royalty fee/recipient differ among the itemIds

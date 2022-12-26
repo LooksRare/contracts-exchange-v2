@@ -5,27 +5,16 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, WrongCaller} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../interfaces/SharedErrors.sol";
 
 /**
- * @title StrategyTokenIdsRange
+ * @title StrategyItemIdsRange
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyTokenIdsRange {
-    // Address of the protocol
-    address public immutable LOOKSRARE_PROTOCOL;
-
-    /**
-     * @notice Constructor
-     * @param _looksRareProtocol Address of the LooksRare protocol
-     */
-    constructor(address _looksRareProtocol) {
-        LOOKSRARE_PROTOCOL = _looksRareProtocol;
-    }
-
+contract StrategyItemIdsRange {
     /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
-     *         Bidder picks a token ID range (e.g. 1-100) and a seller can fulfill the order with any tokens within the specificed ID range
+     *         Bidder picks a item id range (e.g. 1-100) and a seller can fulfill the order with any tokens within the specificed ID range
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      */
@@ -34,36 +23,37 @@ contract StrategyTokenIdsRange {
         OrderStructs.MakerBid calldata makerBid
     )
         external
-        view
+        pure
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
-        uint256 minTokenId = makerBid.itemIds[0];
-        uint256 maxTokenId = makerBid.itemIds[1];
-        if (minTokenId >= maxTokenId) revert OrderInvalid();
+        uint256 minItemId = makerBid.itemIds[0];
+        uint256 maxItemId = makerBid.itemIds[1];
+        if (minItemId >= maxItemId) revert OrderInvalid();
 
         uint256 desiredAmount = makerBid.amounts[0];
         uint256 totalOfferedAmount;
-        uint256 lastTokenId;
+        uint256 lastItemId;
 
-        for (uint256 i; i < takerAsk.itemIds.length; ) {
-            uint256 offeredTokenId = takerAsk.itemIds[i];
-            // Force the client to sort the token IDs in ascending order,
+        uint256 length = takerAsk.itemIds.length;
+
+        for (uint256 i; i < length; ) {
+            uint256 offeredItemId = takerAsk.itemIds[i];
+            // Force the client to sort the item ids in ascending order,
             // in order to prevent taker ask from providing duplicated
-            // token IDs
-            if (offeredTokenId <= lastTokenId) revert OrderInvalid();
+            // item ids
+            if (offeredItemId <= lastItemId && i != 0) revert OrderInvalid();
 
+            // If ERC721, force amount to be 1.
             uint256 offeredAmount = makerBid.assetType == 0 ? 1 : takerAsk.amounts[i];
             if (offeredAmount == 0) revert OrderInvalid();
 
-            if (offeredTokenId >= minTokenId) {
-                if (offeredTokenId <= maxTokenId) {
+            if (offeredItemId >= minItemId) {
+                if (offeredItemId <= maxItemId) {
                     totalOfferedAmount += offeredAmount;
                 }
             }
 
-            lastTokenId = offeredTokenId;
+            lastItemId = offeredItemId;
 
             unchecked {
                 ++i;
@@ -89,9 +79,9 @@ contract StrategyTokenIdsRange {
     function isValid(
         OrderStructs.MakerBid calldata makerBid
     ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
-        uint256 minTokenId = makerBid.itemIds[0];
-        uint256 maxTokenId = makerBid.itemIds[1];
-        if (minTokenId >= maxTokenId) {
+        uint256 minItemId = makerBid.itemIds[0];
+        uint256 maxItemId = makerBid.itemIds[1];
+        if (minItemId >= maxItemId) {
             return (orderIsValid, OrderInvalid.selector);
         }
 

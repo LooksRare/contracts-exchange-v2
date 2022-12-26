@@ -31,8 +31,8 @@ contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
         emit NewAssetType(2, newTransferManager, newSelector);
         looksRareProtocol.addTransferManagerForAssetType(2, newTransferManager, newSelector);
 
-        (address transferManager, bytes4 selector) = looksRareProtocol.managerSelectorOfAssetType(2);
-        assertEq(transferManager, newTransferManager);
+        (address currentTransferManager, bytes4 selector) = looksRareProtocol.managerSelectorOfAssetType(2);
+        assertEq(currentTransferManager, newTransferManager);
         assertEq(uint32(selector), uint32(newSelector));
     }
 
@@ -41,8 +41,18 @@ contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
         looksRareProtocol.addTransferManagerForAssetType(2, newTransferManager, newSelector);
     }
 
-    function testAddTransferManagerForAssetTypeAlreadySet() public asPrankedUser(_owner) {
-        vm.expectRevert(AlreadySet.selector);
+    function testAddTransferManagerManagerSelectorAlreadySetForAssetType() public asPrankedUser(_owner) {
+        vm.expectRevert(ManagerSelectorAlreadySetForAssetType.selector);
         looksRareProtocol.addTransferManagerForAssetType(0, newTransferManager, newSelector);
+    }
+
+    function testAddTransferManagerManagerSelectorEmpty() public asPrankedUser(_owner) {
+        // Empty transfer manager address
+        vm.expectRevert(ManagerSelectorEmpty.selector);
+        looksRareProtocol.addTransferManagerForAssetType(2, address(0), newSelector);
+
+        // Empty selector
+        vm.expectRevert(ManagerSelectorEmpty.selector);
+        looksRareProtocol.addTransferManagerForAssetType(2, address(1), bytes4(0));
     }
 }

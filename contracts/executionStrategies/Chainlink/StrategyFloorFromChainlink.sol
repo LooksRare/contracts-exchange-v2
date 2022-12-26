@@ -206,7 +206,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
 
         uint256 floorPrice = _getFloorPrice(makerBid.collection);
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-        if (discount > 10_000) revert OrderInvalid();
+        if (discount >= 10_000) revert OrderInvalid();
+
         uint256 desiredPrice = (floorPrice * (10_000 - discount)) / 10_000;
 
         if (desiredPrice >= makerBid.maxPrice) {
@@ -310,7 +311,8 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         }
 
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-        if (discount > 10_000) {
+
+        if (discount >= 10_000) {
             return (orderIsValid, OrderInvalid.selector);
         }
 

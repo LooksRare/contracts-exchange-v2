@@ -13,11 +13,6 @@ import {OrderInvalid} from "../interfaces/SharedErrors.sol";
  */
 contract StrategyItemIdsRange {
     /**
-     * @notice Constructor
-     */
-    constructor() {}
-
-    /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
      *         Bidder picks a item id range (e.g. 1-100) and a seller can fulfill the order with any tokens within the specificed ID range
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)

@@ -13,11 +13,6 @@ import {BidTooLow, OrderInvalid} from "../interfaces/SharedErrors.sol";
  */
 contract StrategyDutchAuction {
     /**
-     * @notice Constructor
-     */
-    constructor() {}
-
-    /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
      *         The execution price set by the seller decreases linearly within the defined period.
      * @param takerBid Taker bid struct (contains the taker ask-specific parameters for the execution of the transaction)

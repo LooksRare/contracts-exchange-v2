@@ -21,11 +21,6 @@ import {OrderInvalid, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
  */
 contract StrategyCollectionOffer {
     /**
-     * @notice Constructor
-     */
-    constructor() {}
-
-    /**
      * @notice Execute collection strategy with taker ask order without merkle proofs
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)

@@ -18,9 +18,9 @@ contract StrategyChainlinkPriceLatency is OwnableTwoSteps {
 
     /**
      * @notice Emitted when the maximum Chainlink price latency is updated
-     * @param maxLatency Maximum Chainlink price latency
+     * @param newMaxLatency New maximum Chainlink price latency
      */
-    event MaximumLatencyUpdated(uint256 maxLatency);
+    event MaxLatencyUpdated(uint256 newMaxLatency);
 
     /**
      * @notice It is returned if the Chainlink price is invalid (e.g., negative).
@@ -48,11 +48,11 @@ contract StrategyChainlinkPriceLatency is OwnableTwoSteps {
      *         as Chainlink will at least update the price every 3,600 seconds, provided
      *         ETH's price does not deviate more than 0.5%.
      * @dev Function only callable by contract owner
-     * @param _maxLatency Maximum Chainlink price latency
+     * @param newMaxLatency Maximum Chainlink price latency
      */
-    function setMaximumLatency(uint256 _maxLatency) external onlyOwner {
-        if (_maxLatency > 3_600) revert LatencyToleranceTooHigh();
-        maxLatency = _maxLatency;
-        emit MaximumLatencyUpdated(_maxLatency);
+    function setMaximumLatency(uint256 newMaxLatency) external onlyOwner {
+        if (newMaxLatency > 3_600) revert LatencyToleranceTooHigh();
+        maxLatency = newMaxLatency;
+        emit MaxLatencyUpdated(newMaxLatency);
     }
 }

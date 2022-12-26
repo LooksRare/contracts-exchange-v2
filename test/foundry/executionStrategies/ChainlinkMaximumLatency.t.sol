@@ -11,13 +11,13 @@ import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrateg
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract ChainlinkMaximumLatencyTest is ProtocolBase {
-    event MaximumLatencyUpdated(uint256 maxLatency);
+    event MaxLatencyUpdated(uint256 newMaxLatency);
 
     function _testSetMaximumLatency(address _strategy) internal {
         StrategyChainlinkPriceLatency strategy = StrategyChainlinkPriceLatency(_strategy);
 
         vm.expectEmit(true, false, false, true);
-        emit MaximumLatencyUpdated(3_600);
+        emit MaxLatencyUpdated(3_600);
         vm.prank(_owner);
         strategy.setMaximumLatency(3_600);
 

@@ -88,8 +88,34 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     {
         uint256 price;
 
-        (price, itemIds, amounts, isNonceInvalidated) = _executeStrategyHooksForTakerAsk(takerAsk, makerBid);
+        // Verify the order validity for timestamps
+        _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
 
+        if (makerBid.strategyId == 0) {
+            (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
+            isNonceInvalidated = true;
+        } else {
+            if (strategyInfo[makerBid.strategyId].isActive) {
+                if (!strategyInfo[makerBid.strategyId].isMakerBid) revert NoSelectorForMakerBid();
+
+                bytes4 selector = strategyInfo[makerBid.strategyId].selector;
+                if (selector == bytes4(0)) revert NoSelectorForMakerBid();
+
+                (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
+                    abi.encodeWithSelector(selector, takerAsk, makerBid)
+                );
+
+                if (!status) {
+                    assembly {
+                        revert(add(data, 32), mload(data))
+                    }
+                }
+
+                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
+            } else {
+                revert StrategyNotAvailable(makerBid.strategyId);
+            }
+        }
         {
             // 0 --> Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
@@ -134,41 +160,6 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     {
         uint256 price;
 
-        (price, itemIds, amounts, isNonceInvalidated) = _executeStrategyHooksForTakerBid(takerBid, makerAsk);
-
-        {
-            // 0 --> Creator fee and adjustment of protocol fee
-            if (address(creatorFeeManager) != address(0)) {
-                (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
-                if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
-            }
-            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
-
-            // 1 --> Protocol fee
-            if (recipients[1] == address(0) || fees[1] == 0) {
-                fees[0] = minTotalFee;
-            } else {
-                fees[0] = _calculateProtocolFee(price, makerAsk.strategyId, fees[1], minTotalFee);
-            }
-
-            recipients[0] = protocolFeeRecipient;
-
-            // 2 --> Amount for seller
-            fees[2] = price - fees[1] - fees[0];
-            recipients[2] = makerAsk.signer;
-        }
-    }
-
-    /**
-     * @notice Execute strategy hooks for takerBid
-     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
-     */
-    function _executeStrategyHooksForTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
-    ) internal returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
-        // Verify the order validity for timestamps
         _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
 
         if (makerAsk.strategyId == 0) {
@@ -196,44 +187,26 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                 revert StrategyNotAvailable(makerAsk.strategyId);
             }
         }
-    }
-
-    /**
-     * @notice Execute strategy hooks for takerAsk
-     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
-     */
-    function _executeStrategyHooksForTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
-    ) internal returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
-        // Verify the order validity for timestamps
-        _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
-
-        if (makerBid.strategyId == 0) {
-            (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
-            isNonceInvalidated = true;
-        } else {
-            if (strategyInfo[makerBid.strategyId].isActive) {
-                if (!strategyInfo[makerBid.strategyId].isMakerBid) revert NoSelectorForMakerBid();
-
-                bytes4 selector = strategyInfo[makerBid.strategyId].selector;
-                if (selector == bytes4(0)) revert NoSelectorForMakerBid();
-
-                (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
-                    abi.encodeWithSelector(selector, takerAsk, makerBid)
-                );
-
-                if (!status) {
-                    assembly {
-                        revert(add(data, 32), mload(data))
-                    }
-                }
-
-                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
-            } else {
-                revert StrategyNotAvailable(makerBid.strategyId);
+        {
+            // 0 --> Creator fee and adjustment of protocol fee
+            if (address(creatorFeeManager) != address(0)) {
+                (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
+                if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
             }
+            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
+
+            // 1 --> Protocol fee
+            if (recipients[1] == address(0) || fees[1] == 0) {
+                fees[0] = minTotalFee;
+            } else {
+                fees[0] = _calculateProtocolFee(price, makerAsk.strategyId, fees[1], minTotalFee);
+            }
+
+            recipients[0] = protocolFeeRecipient;
+
+            // 2 --> Amount for seller
+            fees[2] = price - fees[1] - fees[0];
+            recipients[2] = makerAsk.signer;
         }
     }
 

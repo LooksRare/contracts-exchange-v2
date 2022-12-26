@@ -288,7 +288,7 @@ contract LooksRareProtocol is
 
         _updateUserOrderNonce(isNonceInvalidated, signer, makerBid.orderNonce, orderHash);
 
-        _transferToSellerAndCreator(recipients, fees, makerBid.currency, signer);
+        _transferToAskRecipientAndCreatorIfAny(recipients, fees, makerBid.currency, signer);
         _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, signer, itemIds, amounts);
 
         emit TakerAsk(
@@ -358,7 +358,7 @@ contract LooksRareProtocol is
                 amounts
             );
 
-            _transferToSellerAndCreator(recipients, fees, makerAsk.currency, sender);
+            _transferToAskRecipientAndCreatorIfAny(recipients, fees, makerAsk.currency, sender);
         }
 
         emit TakerBid(
@@ -440,11 +440,7 @@ contract LooksRareProtocol is
      * @param makerSignature Signature of the maker
      * @param signer Signer address
      */
-    function _computeDigestAndVerify(
-        bytes32 computedHash,
-        bytes calldata makerSignature,
-        address signer
-    ) internal view {
+    function _computeDigestAndVerify(bytes32 computedHash, bytes calldata makerSignature, address signer) private view {
         // \x19\x01 is the encoding prefix
         SignatureChecker.verify(
             keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash)),
@@ -454,29 +450,34 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Verify whether the merkle proofs provided for the order hash are correct,
-     *         or verify the order hash if it is not a merkle proof order
-     * @param merkleTree Merkle tree
-     * @param orderHash Order hash (can be maker bid hash or maker ask hash)
-     * @param signature Maker order signature
-     * @param signer Maker address
-     * @dev Verify (1) MerkleProof (if necessary) (2) Signature is from the signer
+     * @notice Transfer funds to (1) ask recipient and (2) creator recipient (if any).
+     * @param recipients Recipient addresses
+     * @param fees Fees
+     * @param currency Currency address
+     * @param bidUser Bid user
+     * @dev It does not send to the 0-th element in the array since it is the protocol fee, which is paid later in the execution flow.
      */
-    function _verifyMerkleProofOrOrderHash(
-        OrderStructs.MerkleTree calldata merkleTree,
-        bytes32 orderHash,
-        bytes calldata signature,
-        address signer
-    ) private view {
-        if (merkleTree.proof.length != 0) {
-            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash))
-                revert WrongMerkleProof();
-            _computeDigestAndVerify(merkleTree.hash(), signature, signer);
-        } else {
-            _computeDigestAndVerify(orderHash, signature, signer);
+    function _transferToAskRecipientAndCreatorIfAny(
+        address[3] memory recipients,
+        uint256[3] memory fees,
+        address currency,
+        address bidUser
+    ) private {
+        if (recipients[1] != address(0)) {
+            if (fees[1] != 0) {
+                _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
+            }
+        }
+        if (recipients[2] != address(0)) {
+            if (fees[2] != 0) {
+                _transferFungibleTokens(currency, bidUser, recipients[2], fees[2]);
+            }
         }
     }
 
+    /**
+     * @notice Update the domain separator.
+     */
     function _updateDomainSeparator() private {
         domainSeparator = keccak256(
             abi.encode(
@@ -490,31 +491,45 @@ contract LooksRareProtocol is
         chainId = block.chainid;
     }
 
+    /**
+     * @notice Update the user order nonce
+     * @param isNonceInvalidated Whether the nonce is being invalidated
+     * @param signer Signer address
+     * @param orderNonce Maker user order nonce
+     * @param orderHash Hash of the order struct
+     * @dev If isNonceInvalidated is true, this function invalidates the user order nonce for future execution.
+     *      If it is equal to false, this function maps the order hash for this user order nonce to prevent other order structs sharing the same order nonce to be executed.
+     */
     function _updateUserOrderNonce(
         bool isNonceInvalidated,
         address signer,
         uint256 orderNonce,
         bytes32 orderHash
     ) private {
-        // Invalidate order at this nonce for future execution or else set the order hash at this nonce
         userOrderNonce[signer][orderNonce] = (isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash);
     }
 
-    function _transferToSellerAndCreator(
-        address[3] memory recipients,
-        uint256[3] memory fees,
-        address currency,
-        address sender
-    ) private {
-        if (recipients[1] != address(0)) {
-            if (fees[1] != 0) {
-                _transferFungibleTokens(currency, sender, recipients[1], fees[1]);
-            }
-        }
-        if (recipients[2] != address(0)) {
-            if (fees[2] != 0) {
-                _transferFungibleTokens(currency, sender, recipients[2], fees[2]);
-            }
+    /**
+     * @notice Verify whether the merkle proofs provided for the order hash are correct,
+     *         or verify the order hash if it is not a merkle proof order
+     * @param merkleTree Merkle tree
+     * @param orderHash Order hash (can be maker bid hash or maker ask hash)
+     * @param signature Maker order signature
+     * @param signer Maker address
+     * @dev It verifies (1) merkle proof (if necessary) (2) Signature is from the expected signer
+     */
+    function _verifyMerkleProofOrOrderHash(
+        OrderStructs.MerkleTree calldata merkleTree,
+        bytes32 orderHash,
+        bytes calldata signature,
+        address signer
+    ) private view {
+        if (merkleTree.proof.length != 0) {
+            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash))
+                revert WrongMerkleProof();
+            _computeDigestAndVerify(merkleTree.hash(), signature, signer);
+        } else {
+            _computeDigestAndVerify(orderHash, signature, signer);
         }
     }
 }

@@ -194,7 +194,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
     function _setPriceFeed() internal {
         vm.startPrank(_owner);
-        strategyFloorFromChainlink.setMaximumLatency(MAXIMUM_LATENCY);
+        strategyFloorFromChainlink.setMaxLatency(MAXIMUM_LATENCY);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.stopPrank();
     }

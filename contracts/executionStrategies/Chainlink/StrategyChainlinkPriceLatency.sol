@@ -50,7 +50,7 @@ contract StrategyChainlinkPriceLatency is OwnableTwoSteps {
      * @dev Function only callable by contract owner
      * @param newMaxLatency Maximum Chainlink price latency
      */
-    function setMaximumLatency(uint256 newMaxLatency) external onlyOwner {
+    function setMaxLatency(uint256 newMaxLatency) external onlyOwner {
         if (newMaxLatency > 3_600) revert LatencyToleranceTooHigh();
         maxLatency = newMaxLatency;
         emit MaxLatencyUpdated(newMaxLatency);

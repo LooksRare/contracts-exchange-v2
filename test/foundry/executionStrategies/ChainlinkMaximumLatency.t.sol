@@ -19,7 +19,7 @@ contract ChainlinkMaximumLatencyTest is ProtocolBase {
         vm.expectEmit(true, false, false, true);
         emit MaxLatencyUpdated(3_600);
         vm.prank(_owner);
-        strategy.setMaximumLatency(3_600);
+        strategy.setMaxLatency(3_600);
 
         assertEq(strategy.maxLatency(), 3_600);
     }
@@ -29,13 +29,13 @@ contract ChainlinkMaximumLatencyTest is ProtocolBase {
 
         vm.expectRevert(StrategyChainlinkPriceLatency.LatencyToleranceTooHigh.selector);
         vm.prank(_owner);
-        strategy.setMaximumLatency(3_601);
+        strategy.setMaxLatency(3_601);
     }
 
     function _testSetMaximumLatencyNotOwner(address _strategy) internal {
         StrategyChainlinkPriceLatency strategy = StrategyChainlinkPriceLatency(_strategy);
 
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategy.setMaximumLatency(3_600);
+        strategy.setMaxLatency(3_600);
     }
 }

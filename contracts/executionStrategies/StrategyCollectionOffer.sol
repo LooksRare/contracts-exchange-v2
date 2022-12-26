@@ -8,7 +8,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, WrongCaller, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyCollectionOffer
@@ -20,16 +20,10 @@ import {OrderInvalid, WrongCaller, WrongMerkleProof} from "../interfaces/SharedE
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyCollectionOffer {
-    // Address of the protocol
-    address public immutable LOOKSRARE_PROTOCOL;
-
     /**
      * @notice Constructor
-     * @param _looksRareProtocol Address of the LooksRare protocol.
      */
-    constructor(address _looksRareProtocol) {
-        LOOKSRARE_PROTOCOL = _looksRareProtocol;
-    }
+    constructor() {}
 
     /**
      * @notice Execute collection strategy with taker ask order without merkle proofs

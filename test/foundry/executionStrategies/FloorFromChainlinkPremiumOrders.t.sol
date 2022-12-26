@@ -198,22 +198,6 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumCallerNotLooksRareProtocol() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            premium: premium
-        });
-
-        _setPriceFeed();
-
-        // Valid, but wrong caller
-        _assertOrderValid(makerAsk);
-
-        vm.prank(takerUser);
-        vm.expectRevert(WrongCaller.selector);
-        // Call the function directly
-        address(strategyFloorFromChainlink).call(abi.encodeWithSelector(selector, takerBid, makerAsk));
-    }
-
     function testFloorFromChainlinkPremiumWrongCurrency() public {
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium

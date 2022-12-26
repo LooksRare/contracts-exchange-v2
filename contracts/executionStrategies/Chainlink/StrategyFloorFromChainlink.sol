@@ -11,7 +11,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePriceFeeds.sol";
 
 // Shared errors
-import {AskTooHigh, BidTooLow, OrderInvalid, WrongCaller, WrongCurrency} from "../../interfaces/SharedErrors.sol";
+import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency} from "../../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyFloorFromChainlink
@@ -20,20 +20,15 @@ import {AskTooHigh, BidTooLow, OrderInvalid, WrongCaller, WrongCurrency} from ".
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
-    // Address of the protocol
-    address public immutable LOOKSRARE_PROTOCOL;
-
     // WETH
     address public immutable WETH;
 
     /**
      * @notice Constructor
      * @param _owner Owner address
-     * @param _looksRareProtocol Address of the LooksRare protocol
      * @param _weth Address of WETH
      */
-    constructor(address _owner, address _looksRareProtocol, address _weth) StrategyChainlinkMultiplePriceFeeds(_owner) {
-        LOOKSRARE_PROTOCOL = _looksRareProtocol;
+    constructor(address _owner, address _weth) StrategyChainlinkMultiplePriceFeeds(_owner) {
         WETH = _weth;
     }
 
@@ -56,8 +51,6 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         if (makerAsk.currency != address(0)) {
             if (makerAsk.currency != WETH) revert WrongCurrency();
         }
@@ -106,8 +99,6 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         if (makerAsk.currency != address(0)) {
             if (makerAsk.currency != WETH) revert WrongCurrency();
         }
@@ -156,8 +147,6 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         if (makerBid.currency != address(0)) {
             if (makerBid.currency != WETH) revert WrongCurrency();
         }
@@ -207,8 +196,6 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         if (makerBid.currency != address(0)) {
             if (makerBid.currency != WETH) revert WrongCurrency();
         }

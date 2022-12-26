@@ -20,7 +20,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     bytes4 public selector = StrategyTokenIdsRange.executeStrategyWithTakerAsk.selector;
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyTokenIdsRange = new StrategyTokenIdsRange(address(looksRareProtocol));
+        strategyTokenIdsRange = new StrategyTokenIdsRange();
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,
             _minTotalFeeBp,
@@ -230,21 +230,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
         // Taker ask user receives 98% of the whole price (2% protocol fee)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
-    }
-
-    function testCallerNotLooksRareProtocol() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
-
-        // Valid, but wrong caller
-        (bool isValid, bytes4 errorSelector) = strategyTokenIdsRange.isValid(makerBid);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
-
-        vm.expectRevert(WrongCaller.selector);
-        // Call the function directly
-        strategyTokenIdsRange.executeStrategyWithTakerAsk(takerAsk, makerBid);
     }
 
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {

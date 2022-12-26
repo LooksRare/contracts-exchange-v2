@@ -29,7 +29,7 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function _setUpNewStrategies() private asPrankedUser(_owner) {
-        strategyCollectionOffer = new StrategyCollectionOffer(address(looksRareProtocol));
+        strategyCollectionOffer = new StrategyCollectionOffer();
 
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,

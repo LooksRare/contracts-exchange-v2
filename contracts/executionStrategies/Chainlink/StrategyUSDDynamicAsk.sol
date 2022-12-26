@@ -8,7 +8,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongCaller} from "../../interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid} from "../../interfaces/SharedErrors.sol";
 
 // Base strategy
 import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
@@ -19,9 +19,6 @@ import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
-    // Address of the protocol
-    address public immutable LOOKSRARE_PROTOCOL;
-
     /**
      * @dev Chainlink ETH/USD Price Feed
      */
@@ -30,11 +27,8 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
     /**
      * @notice Constructor
      * @param _owner Owner address
-     * @param _looksRareProtocol Address of the LooksRare protocol
      */
-    constructor(address _owner, address _looksRareProtocol) StrategyChainlinkPriceLatency(_owner) {
-        LOOKSRARE_PROTOCOL = _looksRareProtocol;
-    }
+    constructor(address _owner) StrategyChainlinkPriceLatency(_owner) {}
 
     /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
@@ -51,8 +45,6 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();

@@ -5,23 +5,17 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongCaller} from "../interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyDutchAuction
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyDutchAuction {
-    // Address of the protocol
-    address public immutable LOOKSRARE_PROTOCOL;
-
     /**
      * @notice Constructor
-     * @param _looksRareProtocol Address of the LooksRare protocol.
      */
-    constructor(address _looksRareProtocol) {
-        LOOKSRARE_PROTOCOL = _looksRareProtocol;
-    }
+    constructor() {}
 
     /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
@@ -38,8 +32,6 @@ contract StrategyDutchAuction {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();

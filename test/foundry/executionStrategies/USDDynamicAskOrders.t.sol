@@ -39,7 +39,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(_owner, address(looksRareProtocol));
+        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(_owner);
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,
             _minTotalFeeBp,
@@ -309,26 +309,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _emptyMerkleTree, _emptyAffiliate);
-    }
-
-    function testCallerNotLooksRareProtocol() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            numberOfItems: 1,
-            numberOfAmounts: 1,
-            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
-        });
-
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.setMaxLatency(3_600);
-
-        // Valid, but wrong caller
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
-        assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
-
-        vm.expectRevert(WrongCaller.selector);
-        // Call the function directly
-        strategyUSDDynamicAsk.executeStrategyWithTakerBid(takerBid, makerAsk);
     }
 
     function testZeroItemIdsLength() public {

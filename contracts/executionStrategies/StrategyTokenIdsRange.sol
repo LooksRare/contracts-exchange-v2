@@ -5,23 +5,17 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, WrongCaller} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyTokenIdsRange
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyTokenIdsRange {
-    // Address of the protocol
-    address public immutable LOOKSRARE_PROTOCOL;
-
     /**
      * @notice Constructor
-     * @param _looksRareProtocol Address of the LooksRare protocol
      */
-    constructor(address _looksRareProtocol) {
-        LOOKSRARE_PROTOCOL = _looksRareProtocol;
-    }
+    constructor() {}
 
     /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
@@ -34,11 +28,9 @@ contract StrategyTokenIdsRange {
         OrderStructs.MakerBid calldata makerBid
     )
         external
-        view
+        pure
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (msg.sender != LOOKSRARE_PROTOCOL) revert WrongCaller();
-
         uint256 minTokenId = makerBid.itemIds[0];
         uint256 maxTokenId = makerBid.itemIds[1];
         if (minTokenId >= maxTokenId) revert OrderInvalid();

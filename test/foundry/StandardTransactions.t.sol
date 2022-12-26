@@ -44,9 +44,6 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify validity of maker ask order
         _isMakerAskOrderValid(makerAsk, signature);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
@@ -60,6 +57,7 @@ contract StandardTransactionsTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
+            vm.prank(takerUser);
             looksRareProtocol.executeTakerBid{value: price}(
                 takerBid,
                 makerAsk,
@@ -69,8 +67,6 @@ contract StandardTransactionsTest is ProtocolBase {
             );
             emit log_named_uint("TakerBid // ERC721 // Protocol Fee // Registry Royalties", gasLeft - gasleft());
         }
-
-        vm.stopPrank();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), takerUser);
@@ -118,9 +114,6 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify maker bid order
         _isMakerBidOrderValid(makerBid, signature);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
@@ -137,11 +130,10 @@ contract StandardTransactionsTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker ask transaction
+            vm.prank(takerUser);
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
             emit log_named_uint("TakerAsk // ERC721 // Protocol Fee // Registry Royalties", gasLeft - gasleft());
         }
-
-        vm.stopPrank();
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
@@ -200,9 +192,6 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         {
             // Other execution parameters
             OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
@@ -210,6 +199,7 @@ contract StandardTransactionsTest is ProtocolBase {
             uint256 gasLeft = gasleft();
 
             // Execute taker bid transaction
+            vm.prank(takerUser);
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
                 takerBids,
                 makerAsks,
@@ -223,8 +213,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 gasLeft - gasleft()
             );
         }
-
-        vm.stopPrank();
 
         for (uint256 i; i < numberPurchases; i++) {
             // Taker user has received the asset
@@ -283,13 +271,10 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        // Transfer tokenId=2 to random user
+        // Transfer tokenId = 2 to random user
         address randomUser = address(55);
         vm.prank(makerUser);
         mockERC721.transferFrom(makerUser, randomUser, faultyTokenId);
-
-        // Taker user actions
-        vm.startPrank(takerUser);
 
         /**
          * 1. The whole purchase fails if execution is atomic
@@ -306,6 +291,7 @@ contract StandardTransactionsTest is ProtocolBase {
                     0
                 )
             );
+            vm.prank(takerUser);
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
                 takerBids,
                 makerAsks,
@@ -323,6 +309,7 @@ contract StandardTransactionsTest is ProtocolBase {
             // Other execution parameters
             OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
+            vm.prank(takerUser);
             // Execute taker bid transaction
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
                 takerBids,
@@ -333,8 +320,6 @@ contract StandardTransactionsTest is ProtocolBase {
                 false
             );
         }
-
-        vm.stopPrank();
 
         for (uint256 i; i < faultyTokenId; i++) {
             // Taker user has received the first two assets
@@ -370,9 +355,8 @@ contract StandardTransactionsTest is ProtocolBase {
         // 1. Wrong maker asks length
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases - 1);
 
-        vm.startPrank(takerUser);
-
         vm.expectRevert(WrongLengths.selector);
+        vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
             takerBids,
             makerAsks,

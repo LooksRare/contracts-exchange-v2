@@ -238,14 +238,12 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     }
 
     /**
-     * @notice Verify order timestamp validity
-     * @param startTime Start timestamp
-     * @param endTime End timestamp
+     * @notice Calculate protocol fee for a given protocol fee
+     * @param price Price
+     * @param strategyId Strategy id
+     * @param creatorFee Creator fee amount
+     * @param minTotalFeeBp Minimum total fee (in basis point)
      */
-    function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) internal view {
-        if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
-    }
-
     function _calculateProtocolFee(
         uint256 price,
         uint256 strategyId,
@@ -254,10 +252,19 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
     ) private view returns (uint256 protocolFee) {
         uint256 standardProtocolFeeBp = (price * strategyInfo[strategyId].standardProtocolFeeBp) / 10_000;
 
-        if (creatorFee + standardProtocolFeeBp > minTotalFeeBp) {
+        if (creatorFee + standardProtocolFeeBp >= minTotalFeeBp) {
             protocolFee = standardProtocolFeeBp;
         } else {
             protocolFee = minTotalFeeBp - creatorFee;
         }
+    }
+
+    /**
+     * @notice Verify order timestamp validity
+     * @param startTime Start timestamp
+     * @param endTime End timestamp
+     */
+    function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) private view {
+        if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
     }
 }

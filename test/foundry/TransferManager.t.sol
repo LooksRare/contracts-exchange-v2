@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// LooksRare unopinionated libraries
+import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
+
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
@@ -605,5 +608,15 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         vm.prank(_transferrer);
         vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
         transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
+    }
+
+    function testWhitelistOperatorNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        transferManager.whitelistOperator(address(0));
+    }
+
+    function testRemoveOperatorNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        transferManager.removeOperator(address(0));
     }
 }

@@ -22,23 +22,12 @@ contract BundleTransactionsTest is ProtocolBase {
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-        {
-            // Mint the items
-            mockERC721.batchMint(takerUser, makerBid.itemIds);
+        // Mint the items
+        mockERC721.batchMint(takerUser, makerBid.itemIds);
 
-            uint256 gasLeft = gasleft();
-
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Bundle (5 items) // Protocol Fee // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
-        vm.stopPrank();
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         for (uint256 i; i < makerBid.itemIds.length; i++) {
             // Maker user has received all the assets in the bundle
@@ -71,28 +60,18 @@ contract BundleTransactionsTest is ProtocolBase {
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-        {
-            // Mint the items
-            mockERC721.batchMint(takerUser, makerBid.itemIds);
+        // Mint the items
+        mockERC721.batchMint(takerUser, makerBid.itemIds);
 
-            uint256 gasLeft = gasleft();
-
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Bundle (5 items) // Protocol Fee // Registry Royalties",
-                gasLeft - gasleft()
-            );
-        }
-        vm.stopPrank();
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         for (uint256 i; i < makerBid.itemIds.length; i++) {
             // Maker user has received all the assets in the bundle
             assertEq(mockERC721.ownerOf(makerBid.itemIds[i]), makerUser);
         }
+
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Royalty recipient receives royalties
@@ -123,25 +102,15 @@ contract BundleTransactionsTest is ProtocolBase {
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                _emptyMerkleTree,
-                _emptyAffiliate
-            );
-            emit log_named_uint(
-                "TakerBid // ERC721 // Bundle (5 items) // Protocol Fee // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
-        vm.stopPrank();
+        // Execute taker bid transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
 
         for (uint256 i; i < makerAsk.itemIds.length; i++) {
             // Taker user has received all the assets in the bundle
@@ -177,30 +146,22 @@ contract BundleTransactionsTest is ProtocolBase {
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-        {
-            uint256 gasLeft = gasleft();
+        // Execute taker bid transaction
+        vm.prank(takerUser);
 
-            // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                _emptyMerkleTree,
-                _emptyAffiliate
-            );
-            emit log_named_uint(
-                "TakerBid // ERC721 // Bundle (5 items) // Protocol Fee // Registry Royalties",
-                gasLeft - gasleft()
-            );
-        }
-        vm.stopPrank();
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
 
         for (uint256 i; i < makerAsk.itemIds.length; i++) {
             // Taker user has received all the assets in the bundle
             assertEq(mockERC721.ownerOf(makerAsk.itemIds[i]), takerUser);
         }
+
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Royalty recipient receives the royalties

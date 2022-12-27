@@ -40,7 +40,7 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
         assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
         assertEq(strategyMinTotalFee, _minTotalFeeBp);
         assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, _emptyBytes4);
+        assertEq(strategySelector, _EMPTY_BYTES4);
         assertFalse(strategyIsMakerBid);
         assertEq(strategyImplementation, address(0));
     }

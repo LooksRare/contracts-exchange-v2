@@ -32,7 +32,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -73,7 +73,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         _executeTakerBid(takerBid, makerAsk, signature);
 
@@ -104,7 +104,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         _executeTakerBid(takerBid, makerAsk, signature);
 

@@ -25,6 +25,8 @@ import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 // Utils
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
 
+import "hardhat/console.sol";
+
 contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;
 
@@ -45,7 +47,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             signature,
-            _emptyMerkleTree
+            _EMPTY_MERKLE_TREE
         );
 
         for (uint256 i; i < 9; i++) {
@@ -53,16 +55,46 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         }
     }
 
+    function _doesMakerAskOrderReturnValidationCode(
+        OrderStructs.MakerAsk memory makerAsk,
+        bytes memory signature,
+        uint256 expectedValidationCode
+    ) internal {
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE
+        );
+
+        uint256 index = expectedValidationCode / 100;
+        assertEq(validationCodes[index - 1], expectedValidationCode);
+    }
+
     function _isMakerBidOrderValid(OrderStructs.MakerBid memory makerBid, bytes memory signature) internal {
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             signature,
-            _emptyMerkleTree
+            _EMPTY_MERKLE_TREE
         );
 
         for (uint256 i; i < 9; i++) {
             assertEq(validationCodes[i], 0);
         }
+    }
+
+    function _doesMakerBidOrderReturnValidationCode(
+        OrderStructs.MakerBid memory makerBid,
+        bytes memory signature,
+        uint256 expectedValidationCode
+    ) internal {
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE
+        );
+
+        uint256 index = expectedValidationCode / 100;
+        assertEq(validationCodes[index - 1], expectedValidationCode);
     }
 
     function _setUpUser(address user) internal asPrankedUser(user) {

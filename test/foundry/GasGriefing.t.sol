@@ -74,8 +74,8 @@ contract GasGriefingTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
 
         // Taker user has received the asset
@@ -147,7 +147,7 @@ contract GasGriefingTest is ProtocolBase {
             makerAsks,
             signatures,
             merkleTrees,
-            _emptyAffiliate,
+            _EMPTY_AFFILIATE,
             false
         );
 

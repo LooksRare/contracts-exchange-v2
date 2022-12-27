@@ -112,11 +112,11 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(5), makerUser);
@@ -181,11 +181,11 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
         assertEq(mockERC1155.balanceOf(makerUser, 5), 2);
@@ -215,11 +215,11 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(5), makerUser);
@@ -254,7 +254,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // lower band == upper band
         invalidItemIds[1] = 5;
@@ -267,7 +267,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskDuplicatedItemIds() public {
@@ -288,12 +288,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskUnsortedItemIds() public {
@@ -313,12 +313,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
@@ -343,12 +343,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskPriceTooHigh() public {
@@ -364,12 +364,12 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testInactiveStrategy() public {
@@ -386,11 +386,11 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 }

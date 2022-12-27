@@ -74,7 +74,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Verify ownership is transferred
         assertEq(IERC721(erc721).ownerOf(itemId), makerUser);
@@ -134,7 +134,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         vm.prank(takerUser);
 
         // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Verify ownership is transferred
         for (uint256 i; i < makerBid.itemIds.length; i++) {
@@ -213,6 +213,6 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
                 address(mockERC721WithRoyalties)
             )
         );
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 }

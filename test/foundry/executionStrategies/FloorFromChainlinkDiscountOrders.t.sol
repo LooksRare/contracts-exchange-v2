@@ -25,9 +25,8 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
+        vm.prank(_owner);
         strategyFloorFromChainlink.updateMaxLatency(MAXIMUM_LATENCY);
-        vm.stopPrank();
 
         bytes4 errorSelector = _assertOrderInvalid(
             makerBid,
@@ -45,9 +44,8 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.startPrank(_owner);
+        vm.prank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
 
         bytes4 errorSelector = _assertOrderInvalid(
             makerBid,
@@ -231,7 +229,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         );
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
     function _assertOrderInvalid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {
@@ -259,6 +257,6 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     ) internal {
         vm.prank(takerUser);
         // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 }

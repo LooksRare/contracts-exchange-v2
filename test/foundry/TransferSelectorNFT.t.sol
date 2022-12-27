@@ -53,6 +53,6 @@ contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
 
         // Empty selector
         vm.expectRevert(ManagerSelectorEmpty.selector);
-        looksRareProtocol.addTransferManagerForAssetType(2, address(1), bytes4(0));
+        looksRareProtocol.addTransferManagerForAssetType(2, address(1), _EMPTY_BYTES4);
     }
 }

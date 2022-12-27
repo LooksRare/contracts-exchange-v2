@@ -85,37 +85,25 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        // First taker user actions
-        vm.startPrank(takerUser);
-        {
-            itemIds = new uint256[](1);
-            amounts = new uint256[](1);
-            itemIds[0] = 0;
-            amounts[0] = 1;
+        itemIds = new uint256[](1);
+        amounts = new uint256[](1);
+        itemIds[0] = 0;
+        amounts[0] = 1;
 
-            mockERC721.mint(takerUser, itemIds[0]);
+        mockERC721.mint(takerUser, itemIds[0]);
 
-            // Prepare the taker ask
-            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                itemIds,
-                amounts,
-                abi.encode()
-            );
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            itemIds,
+            amounts,
+            abi.encode()
+        );
 
-            uint256 gasLeft = gasleft();
-
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-
-            emit log_named_uint(
-                "TakerAsk // 1 ERC721 Sold // Protocol Fee // Collection Order (Multi-fills) // Registry Royalties",
-                gasLeft - gasleft()
-            );
-        }
-
-        vm.stopPrank();
+        // Execute the first taker ask transaction by the first taker user
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(0), makerUser);
@@ -129,40 +117,25 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         // Second taker user actions
         address secondTakerUser = address(420);
         _setUpUser(secondTakerUser);
-        vm.startPrank(secondTakerUser);
 
-        {
-            itemIds = new uint256[](3);
-            amounts = new uint256[](3);
+        itemIds = new uint256[](3);
+        amounts = new uint256[](3);
 
-            itemIds[0] = 1; // tokenId = 1
-            itemIds[1] = 2; // tokenId = 2
-            itemIds[2] = 3; // tokenId = 3
-            amounts[0] = 1;
-            amounts[1] = 1;
-            amounts[2] = 1;
+        itemIds[0] = 1; // tokenId = 1
+        itemIds[1] = 2; // tokenId = 2
+        itemIds[2] = 3; // tokenId = 3
+        amounts[0] = 1;
+        amounts[1] = 1;
+        amounts[2] = 1;
 
-            mockERC721.batchMint(secondTakerUser, itemIds);
+        mockERC721.batchMint(secondTakerUser, itemIds);
 
-            // Prepare the taker ask
-            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-                secondTakerUser,
-                makerBid.maxPrice,
-                itemIds,
-                amounts,
-                abi.encode()
-            );
+        // Prepare the taker ask
+        takerAsk = OrderStructs.TakerAsk(secondTakerUser, makerBid.maxPrice, itemIds, amounts, abi.encode());
 
-            uint256 gasLeft = gasleft();
-
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-
-            emit log_named_uint(
-                "TakerAsk // 3 ERC721 Sold // Protocol Fee // Collection Order (Multi-fills) // Registry Royalties",
-                gasLeft - gasleft()
-            );
-        }
+        // Execute a second taker ask transaction from the second taker user
+        vm.prank(secondTakerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the 3 assets
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -225,10 +198,10 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
                 abi.encode()
             );
 
+            // It should revert if strategy is not available
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
         }
     }
 }

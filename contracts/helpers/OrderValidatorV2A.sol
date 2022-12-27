@@ -415,9 +415,11 @@ contract OrderValidatorV2A {
         address user,
         uint256 price
     ) internal view returns (uint256 validationCode) {
-        if (IERC20(currency).balanceOf(user) < price) return ERC20_BALANCE_INFERIOR_TO_PRICE;
-        if (IERC20(currency).allowance(user, address(looksRareProtocol)) < price)
-            return ERC20_APPROVAL_INFERIOR_TO_PRICE;
+        if (currency != address(0)) {
+            if (IERC20(currency).balanceOf(user) < price) return ERC20_BALANCE_INFERIOR_TO_PRICE;
+            if (IERC20(currency).allowance(user, address(looksRareProtocol)) < price)
+                return ERC20_APPROVAL_INFERIOR_TO_PRICE;
+        }
     }
 
     /**

@@ -47,7 +47,7 @@ contract StrategyChainlinkPriceLatency is OwnableTwoSteps {
      * @notice Update maximum Chainlink price latency. It cannot be higher than 3,600
      *         as Chainlink will at least update the price every 3,600 seconds, provided
      *         ETH's price does not deviate more than 0.5%.
-     * @param newMaxLatency Maximum Chainlink price latency (in second)
+     * @param newMaxLatency Maximum Chainlink price latency (in seconds)
      * @dev Only callable by owner.
      */
     function updateMaxLatency(uint256 newMaxLatency) external onlyOwner {

@@ -16,6 +16,12 @@ contract StrategyChainlinkMultiplePriceFeeds is StrategyChainlinkPriceLatency {
     mapping(address => address) public priceFeeds;
 
     /**
+     * @notice It is returned if the price feed for a collection is already set.
+     * @dev This error can only be retrieved by owner operation.
+     */
+    error PriceFeedAlreadySet();
+
+    /**
      * @notice It is returned when the price feed is not available.
      */
     error PriceFeedNotAvailable();
@@ -35,11 +41,13 @@ contract StrategyChainlinkMultiplePriceFeeds is StrategyChainlinkPriceLatency {
 
     /**
      * @notice Set an NFT collection's Chainlink price feed address.
-     * @dev Only callable by owner. The owner should be a timelock.
+     * @dev Only callable by owner.
+     *      Once the price feed is set for a collection, it is not possible to adjust it after.
      * @param _collection NFT collection address
      * @param _priceFeed Chainlink price feed address
      */
     function setPriceFeed(address _collection, address _priceFeed) external onlyOwner {
+        if (priceFeeds[_collection] != address(0)) revert PriceFeedAlreadySet();
         priceFeeds[_collection] = _priceFeed;
         emit PriceFeedUpdated(_collection, _priceFeed);
     }

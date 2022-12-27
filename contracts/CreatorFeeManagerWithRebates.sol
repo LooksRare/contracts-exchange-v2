@@ -11,6 +11,7 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 /**
  * @title CreatorFeeManagerWithRebates
  * @notice It distributes a royalty rebate.
+ * @author LooksRare protocol team (👀,💎)
  */
 contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
     // Standard royalty fee (in basis point)

@@ -10,7 +10,7 @@ import {OrderInvalid} from "./interfaces/SharedErrors.sol";
 /**
  * @title InheritedStrategies
  * @notice This contract handles the execution of inherited strategies.
- *         - StrategyId = 0 --> Standard Order
+ * @dev StrategyId = 0 --> Standard Order
  * @author LooksRare protocol team (👀,💎)
  */
 contract InheritedStrategies {

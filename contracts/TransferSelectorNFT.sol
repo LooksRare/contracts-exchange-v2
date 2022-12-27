@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-// Dependencies
+// Direct dependencies
 import {ExecutionManager} from "./ExecutionManager.sol";
 
 // Interfaces

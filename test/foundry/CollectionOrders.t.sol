@@ -255,9 +255,6 @@ contract CollectionOrdersTest is ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Mint asset
         mockERC721.mint(takerUser, tokenId);
 

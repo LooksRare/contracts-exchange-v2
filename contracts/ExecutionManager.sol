@@ -16,7 +16,7 @@ import {StrategyManager} from "./StrategyManager.sol";
 /**
  * @title ExecutionManager
  * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain
- *         when off-chain maker orders is matched by on-chain taker orders of a different kind.
+ *         when an off-chain maker order is matched by on-chain taker order of a different kind.
  *         For instance, a taker ask is executed against a maker bid (or a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
@@ -73,6 +73,11 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      * @notice Execute strategy for taker ask
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
+     * @return itemIds Array of item ids to be traded
+     * @return amounts Array of amounts for each item id
+     * @return recipients Array of recipient addresses
+     * @return fees Array of fee amounts for recipients
+     * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      */
     function _executeStrategyForTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -120,7 +125,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             }
         }
         {
-            // 0 --> Creator fee and adjustment of protocol fee
+            // Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerBid.collection, price, itemIds);
                 if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
@@ -128,7 +133,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
             uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
 
-            // 1 --> Protocol fee
+            // Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
                 fees[0] = minTotalFee;
             } else {
@@ -137,7 +142,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
             recipients[0] = protocolFeeRecipient;
 
-            // 2 --> Amount for seller
+            // Net fee for seller
             fees[2] = price - fees[1] - fees[0];
             recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
         }
@@ -147,6 +152,11 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      * @notice Execute strategy for taker bid
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
+     * @return itemIds Array of item ids to be traded
+     * @return amounts Array of amounts for each item id
+     * @return recipients Array of recipient addresses
+     * @return fees Array of fee amounts for recipients
+     * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      */
     function _executeStrategyForTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -192,14 +202,14 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             }
         }
         {
-            // 0 --> Creator fee and adjustment of protocol fee
+            // Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
                 if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
             }
             uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
 
-            // 1 --> Protocol fee
+            // Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
                 fees[0] = minTotalFee;
             } else {
@@ -208,7 +218,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
 
             recipients[0] = protocolFeeRecipient;
 
-            // 2 --> Amount for seller
+            // Net fee for seller
             fees[2] = price - fees[1] - fees[0];
             recipients[2] = makerAsk.signer;
         }
@@ -220,6 +230,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      * @param strategyId Strategy id
      * @param creatorFee Creator fee amount
      * @param minTotalFeeBp Minimum total fee (in basis point)
+     * @return protocolFee Protocol fee amount
      */
     function _calculateProtocolFee(
         uint256 price,

@@ -11,7 +11,7 @@ import "../../../contracts/interfaces/SharedErrors.sol";
 
 // Strategies
 import {StrategyUSDDynamicAsk} from "../../../contracts/executionStrategies/Chainlink/StrategyUSDDynamicAsk.sol";
-import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkPriceLatency.sol";
+import {BaseStrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
@@ -149,7 +149,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(-1);
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -159,7 +159,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
         (isValid, errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -309,7 +309,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isValid(makerAsk);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);

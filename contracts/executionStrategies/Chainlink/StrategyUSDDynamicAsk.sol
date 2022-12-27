@@ -11,14 +11,14 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {BidTooLow, OrderInvalid, WrongCurrency} from "../../interfaces/SharedErrors.sol";
 
 // Base strategy
-import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
+import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
 /**
  * @title StrategyUSDDynamicAsk
  * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount to be in ETH.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
+contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
     // WETH
     address public immutable WETH;
 
@@ -31,7 +31,7 @@ contract StrategyUSDDynamicAsk is StrategyChainlinkPriceLatency {
      * @param _owner Owner address
      * @param _priceFeed Address of the ETH/USD price feed
      */
-    constructor(address _owner, address _weth, address _priceFeed) StrategyChainlinkPriceLatency(_owner) {
+    constructor(address _owner, address _weth, address _priceFeed) BaseStrategyChainlinkPriceLatency(_owner) {
         WETH = _weth;
         priceFeed = AggregatorV3Interface(_priceFeed);
     }

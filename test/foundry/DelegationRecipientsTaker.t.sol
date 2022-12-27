@@ -58,7 +58,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         // Execute taker ask transaction
         vm.prank(takerUser);
 
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
@@ -127,8 +127,8 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
 
         // Random recipient user has received the asset

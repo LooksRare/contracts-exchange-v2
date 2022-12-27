@@ -59,8 +59,8 @@ contract StandardTransactionsTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
 
         // Taker user has received the asset
@@ -123,7 +123,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
@@ -192,7 +192,7 @@ contract StandardTransactionsTest is ProtocolBase {
             makerAsks,
             signatures,
             merkleTrees,
-            _emptyAffiliate,
+            _EMPTY_AFFILIATE,
             false
         );
 
@@ -280,7 +280,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 makerAsks,
                 signatures,
                 merkleTrees,
-                _emptyAffiliate,
+                _EMPTY_AFFILIATE,
                 true
             );
         }
@@ -299,7 +299,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 makerAsks,
                 signatures,
                 merkleTrees,
-                _emptyAffiliate,
+                _EMPTY_AFFILIATE,
                 false
             );
         }
@@ -345,7 +345,7 @@ contract StandardTransactionsTest is ProtocolBase {
             makerAsks,
             signatures,
             merkleTrees,
-            _emptyAffiliate,
+            _EMPTY_AFFILIATE,
             false
         );
 
@@ -360,7 +360,7 @@ contract StandardTransactionsTest is ProtocolBase {
             makerAsks,
             signatures,
             merkleTrees,
-            _emptyAffiliate,
+            _EMPTY_AFFILIATE,
             false
         );
 
@@ -375,7 +375,7 @@ contract StandardTransactionsTest is ProtocolBase {
             makerAsks,
             signatures,
             merkleTrees,
-            _emptyAffiliate,
+            _EMPTY_AFFILIATE,
             false
         );
     }

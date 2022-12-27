@@ -49,7 +49,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(numberOrders - 1), takerUser);
@@ -91,7 +91,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(numberOrders - 1), makerUser);
@@ -128,7 +128,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         vm.prank(takerUser);
         vm.expectRevert(WrongMerkleProof.selector);
         // Execute taker bid transaction
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskMultipleOrdersSignedERC721WrongMerkleProof() public {
@@ -156,7 +156,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         vm.prank(takerUser);
         vm.expectRevert(WrongMerkleProof.selector);
         // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _EMPTY_AFFILIATE);
     }
 
     function _getMerkleTree(

@@ -43,7 +43,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
@@ -68,7 +68,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         _executeTakerAsk(takerAsk, makerBid, signature);
 
@@ -96,7 +96,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         _executeTakerAsk(takerAsk, makerBid, signature);
 

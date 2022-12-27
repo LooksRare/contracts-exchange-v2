@@ -106,7 +106,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // With proof
         makerBid.strategyId = 2;
@@ -115,7 +115,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testAmountsMismatch() public {
@@ -138,7 +138,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // With proof
         makerBid.strategyId = 2;
@@ -147,7 +147,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testAmountsLengthNotOne() public {
@@ -168,7 +168,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // With proof
         makerBid.strategyId = 2;
@@ -177,7 +177,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testZeroAmount() public {
@@ -194,7 +194,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsInvalid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testBidAskAmountMismatch() public {
@@ -212,7 +212,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testPriceMismatch() public {
@@ -228,7 +228,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsValid(makerBid);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     /**
@@ -274,7 +274,7 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(tokenId), makerUser);
@@ -344,7 +344,7 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemIdSold), makerUser);
@@ -359,7 +359,7 @@ contract CollectionOrdersTest is ProtocolBase {
     function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
         assertTrue(orderIsValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
     function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid) private {

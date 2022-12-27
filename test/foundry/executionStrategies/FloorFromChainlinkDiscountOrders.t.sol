@@ -229,7 +229,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         );
         (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
         assertTrue(isValid);
-        assertEq(errorSelector, bytes4(0));
+        assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
     function _assertOrderInvalid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {
@@ -257,6 +257,6 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     ) internal {
         vm.prank(takerUser);
         // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 }

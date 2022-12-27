@@ -85,7 +85,7 @@ contract AffiliateOrdersTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, _emptyMerkleTree, _affiliate);
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _affiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), takerUser);
@@ -238,7 +238,7 @@ contract AffiliateOrdersTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _affiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _affiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);

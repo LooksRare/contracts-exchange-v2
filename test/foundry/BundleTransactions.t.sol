@@ -27,7 +27,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         for (uint256 i; i < makerBid.itemIds.length; i++) {
             // Maker user has received all the assets in the bundle
@@ -65,7 +65,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         for (uint256 i; i < makerBid.itemIds.length; i++) {
             // Maker user has received all the assets in the bundle
@@ -108,8 +108,8 @@ contract BundleTransactionsTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
 
         for (uint256 i; i < makerAsk.itemIds.length; i++) {
@@ -153,8 +153,8 @@ contract BundleTransactionsTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
 
         for (uint256 i; i < makerAsk.itemIds.length; i++) {

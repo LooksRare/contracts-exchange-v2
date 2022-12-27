@@ -47,7 +47,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             signature,
-            _emptyMerkleTree
+            _EMPTY_MERKLE_TREE
         );
 
         for (uint256 i; i < 9; i++) {
@@ -63,7 +63,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             signature,
-            _emptyMerkleTree
+            _EMPTY_MERKLE_TREE
         );
 
         uint256 index = expectedValidationCode / 100;
@@ -74,7 +74,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             signature,
-            _emptyMerkleTree
+            _EMPTY_MERKLE_TREE
         );
 
         for (uint256 i; i < 9; i++) {
@@ -90,7 +90,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             signature,
-            _emptyMerkleTree
+            _EMPTY_MERKLE_TREE
         );
 
         uint256 index = expectedValidationCode / 100;

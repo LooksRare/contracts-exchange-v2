@@ -103,7 +103,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Execute the first taker ask transaction by the first taker user
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(0), makerUser);
@@ -135,7 +135,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Execute a second taker ask transaction from the second taker user
         vm.prank(secondTakerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the 3 assets
         assertEq(mockERC721.ownerOf(1), makerUser);
@@ -201,7 +201,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             // It should revert if strategy is not available
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
         }
     }
 }

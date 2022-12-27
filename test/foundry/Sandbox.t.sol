@@ -80,7 +80,7 @@ contract SandboxTest is ProtocolBase {
         // It should fail with assetType = 0
         vm.expectRevert(abi.encodeWithSelector(ITransferSelectorNFT.NFTTransferFail.selector, SANDBOX, 0));
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Adjust asset type and sign order again
         makerBid.assetType = 1;
@@ -88,7 +88,7 @@ contract SandboxTest is ProtocolBase {
 
         // It shouldn't fail with assetType = 0
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Maker user has received the Sandbox asset
         assertEq(IERC1155(SANDBOX).balanceOf(makerUser, itemId), makerBid.amounts[0]);
@@ -137,8 +137,8 @@ contract SandboxTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
 
         // Adjust asset type and sign order again
@@ -151,8 +151,8 @@ contract SandboxTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
 
         // Taker user has received the Sandbox asset

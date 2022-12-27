@@ -72,8 +72,8 @@ contract LooksRareProtocolTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
     }
 
@@ -115,7 +115,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         // Execute taker ask transaction
         vm.prank(takerUser);
         vm.expectRevert(WrongCurrency.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testUpdateETHGasLimitForTransfer() public asPrankedUser(_owner) {

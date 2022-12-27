@@ -65,8 +65,8 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             takerBid,
             makerAsk,
             signature,
-            _emptyMerkleTree,
-            _emptyAffiliate
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
         );
     }
 
@@ -110,7 +110,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
         // Execute taker ask transaction
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         vm.stopPrank();
     }
@@ -165,7 +165,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             makerAsks,
             signatures,
             merkleTrees,
-            _emptyAffiliate,
+            _EMPTY_AFFILIATE,
             false
         );
     }

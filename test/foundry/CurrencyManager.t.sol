@@ -35,7 +35,7 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
         assertFalse(currencyManager.isCurrencyWhitelisted(address(mockERC20)));
     }
 
-    function testupdateCurrencyWhitelistStatusNotOwner() public {
+    function testUpdateCurrencyWhitelistStatusNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         currencyManager.updateCurrencyWhitelistStatus(address(mockERC20), true);
     }

@@ -15,19 +15,19 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     error OrderInvalid();
 
-    function testupdateCreatorFeeManager() public asPrankedUser(_owner) {
+    function testUpdateCreatorFeeManager() public asPrankedUser(_owner) {
         vm.expectEmit(true, false, false, true);
         emit NewCreatorFeeManager(address(1));
         looksRareProtocol.updateCreatorFeeManager(address(1));
         assertEq(address(looksRareProtocol.creatorFeeManager()), address(1));
     }
 
-    function testupdateCreatorFeeManagerNotOwner() public {
+    function testUpdateCreatorFeeManagerNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateCreatorFeeManager(address(1));
     }
 
-    function testSetMaxCreatorFeeBp() public asPrankedUser(_owner) {
+    function testUpdateMaxCreatorFeeBp() public asPrankedUser(_owner) {
         uint16 newMaxCreatorFeeBp = uint16(2_500);
         vm.expectEmit(true, false, false, true);
         emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
@@ -35,24 +35,24 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         assertEq(looksRareProtocol.maxCreatorFeeBp(), newMaxCreatorFeeBp);
     }
 
-    function testSetMaxCreatorFeeBpNotOwner() public {
+    function testUpdateMaxCreatorFeeBpNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_500));
     }
 
-    function testSetMaxCreatorFeeBpTooHigh() public asPrankedUser(_owner) {
+    function testUpdateMaxCreatorFeeBpTooHigh() public asPrankedUser(_owner) {
         vm.expectRevert(CreatorFeeBpTooHigh.selector);
         looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_501));
     }
 
-    function testSetProtocolFeeRecipient() public asPrankedUser(_owner) {
+    function testUpdateProtocolFeeRecipient() public asPrankedUser(_owner) {
         vm.expectEmit(true, false, false, true);
         emit NewProtocolFeeRecipient(address(1));
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
         assertEq(looksRareProtocol.protocolFeeRecipient(), address(1));
     }
 
-    function testSetProtocolFeeRecipientNotOwner() public {
+    function testUpdateProtocolFeeRecipientNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
     }

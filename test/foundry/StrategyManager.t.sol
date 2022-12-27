@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// LooksRare unopinionated libraries
+import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
+
 // Interfaces
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 
@@ -160,5 +163,22 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             true,
             address(0)
         );
+    }
+
+    function testAddStrategyNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        looksRareProtocol.addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            _emptyBytes4,
+            true,
+            address(0)
+        );
+    }
+
+    function testUpdateStrategyNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        looksRareProtocol.updateStrategy(0, 299, 100, false);
     }
 }

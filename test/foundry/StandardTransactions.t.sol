@@ -354,6 +354,7 @@ contract StandardTransactionsTest is ProtocolBase {
         signatures = new bytes[](numberPurchases - 1);
 
         vm.expectRevert(WrongLengths.selector);
+        vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
             takerBids,
             makerAsks,
@@ -368,6 +369,7 @@ contract StandardTransactionsTest is ProtocolBase {
         merkleTrees = new OrderStructs.MerkleTree[](numberPurchases - 1);
 
         vm.expectRevert(WrongLengths.selector);
+        vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
             takerBids,
             makerAsks,
@@ -376,7 +378,5 @@ contract StandardTransactionsTest is ProtocolBase {
             _emptyAffiliate,
             false
         );
-
-        vm.stopPrank();
     }
 }

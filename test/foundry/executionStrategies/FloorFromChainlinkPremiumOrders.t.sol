@@ -46,9 +46,8 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
+        vm.prank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.stopPrank();
 
         bytes4 errorSelector = _assertOrderInvalid(
             makerAsk,

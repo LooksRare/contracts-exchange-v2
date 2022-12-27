@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// LooksRare unopinionated libraries
+import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
+
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
@@ -27,10 +30,19 @@ contract AffiliateOrdersTest is ProtocolBase {
         looksRareProtocol.updateAffiliateRate(_affiliate, _affiliateRate);
         vm.stopPrank();
 
-        vm.startPrank(_affiliate);
         vm.deal(_affiliate, _initialETHBalanceAffiliate + _initialWETHBalanceAffiliate);
+        vm.prank(_affiliate);
         weth.deposit{value: _initialWETHBalanceAffiliate}();
-        vm.stopPrank();
+    }
+
+    function testUpdateAffiliateControllerNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        looksRareProtocol.updateAffiliateController(address(0));
+    }
+
+    function testUpdateAffiliateProgramStatusNotOwner() public {
+        vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
+        looksRareProtocol.updateAffiliateProgramStatus(false);
     }
 
     /**
@@ -142,25 +154,19 @@ contract AffiliateOrdersTest is ProtocolBase {
         vm.prank(makerUser);
         mockERC721.transferFrom(makerUser, randomUser, faultyTokenId);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
+        // Other execution parameters
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-        {
-            // Other execution parameters
-            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
-
-            // Execute taker bid transaction
-            looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-                takerBids,
-                makerAsks,
-                signatures,
-                merkleTrees,
-                _affiliate,
-                false
-            );
-        }
-
-        vm.stopPrank();
+        // Execute taker bid transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            takerBids,
+            makerAsks,
+            signatures,
+            merkleTrees,
+            _affiliate,
+            false
+        );
 
         for (uint256 i; i < faultyTokenId; i++) {
             // Taker user has received the first two assets

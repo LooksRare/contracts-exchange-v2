@@ -118,14 +118,14 @@ contract LooksRareProtocolTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
     }
 
-    function testAdjustETHGasLimitForTransfer() public asPrankedUser(_owner) {
+    function testUpdateETHGasLimitForTransfer() public asPrankedUser(_owner) {
         vm.expectEmit(true, false, false, true);
         emit NewGasLimitETHTransfer(10_000);
         looksRareProtocol.updateETHGasLimitForTransfer(10_000);
         assertEq(uint256(vm.load(address(looksRareProtocol), bytes32(uint256(16)))), 10_000);
     }
 
-    function testAdjustETHGasLimitForTransferRevertsIfTooLow() public asPrankedUser(_owner) {
+    function testUpdateETHGasLimitForTransferRevertsIfTooLow() public asPrankedUser(_owner) {
         uint256 newGasLimitETHTransfer = 2_300;
         vm.expectRevert(NewGasLimitETHTransferTooLow.selector);
         looksRareProtocol.updateETHGasLimitForTransfer(newGasLimitETHTransfer - 1);
@@ -134,7 +134,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         assertEq(uint256(vm.load(address(looksRareProtocol), bytes32(uint256(16)))), newGasLimitETHTransfer);
     }
 
-    function testAdjustETHGasLimitForTransferNotOwner() public {
+    function testUpdateETHGasLimitForTransferNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateETHGasLimitForTransfer(10_000);
     }

@@ -451,11 +451,11 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Transfer funds to (1) ask recipient and (2) creator recipient (if any).
+     * @notice Transfer funds to (1) creator recipient (if any), (2) ask recipient
      * @param recipients Recipient addresses
      * @param fees Fees
      * @param currency Currency address
-     * @param bidUser Bid user
+     * @param bidUser Bid user address
      * @dev It does not send to the 0-th element in the array since it is the protocol fee, which is paid later in the execution flow.
      */
     function _transferToAskRecipientAndCreatorIfAny(
@@ -469,10 +469,13 @@ contract LooksRareProtocol is
                 _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
             }
         }
-        if (recipients[2] != address(0)) {
-            if (fees[2] != 0) {
-                _transferFungibleTokens(currency, bidUser, recipients[2], fees[2]);
-            }
+
+        // @dev There is no check for address(0) since the ask recipient can never be address(0).
+        // If ask recipient is the maker --> the signer cannot be the null address
+        // If ask is the taker --> either it is the sender address or if the recipient (in TakerAsk) is set to address(0), it is adjusted to
+        // the original taker address
+        if (fees[2] != 0) {
+            _transferFungibleTokens(currency, bidUser, recipients[2], fees[2]);
         }
     }
 

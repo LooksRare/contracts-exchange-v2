@@ -2,14 +2,14 @@
 pragma solidity ^0.8.17;
 
 // Dependencies
-import {StrategyChainlinkPriceLatency} from "./StrategyChainlinkPriceLatency.sol";
+import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
 /**
- * @title StrategyChainlinkMultiplePriceFeeds
+ * @title BaseStrategyChainlinkMultiplePriceFeeds
  * @notice This contract allows a strategy to store Chainlink price feeds for price retrieval.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyChainlinkMultiplePriceFeeds is StrategyChainlinkPriceLatency {
+contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLatency {
     /**
      * @notice NFT collection address to Chainlink price feed address mapping
      */
@@ -37,7 +37,7 @@ contract StrategyChainlinkMultiplePriceFeeds is StrategyChainlinkPriceLatency {
      * @notice Constructor
      * @param _owner Owner address
      */
-    constructor(address _owner) StrategyChainlinkPriceLatency(_owner) {}
+    constructor(address _owner) BaseStrategyChainlinkPriceLatency(_owner) {}
 
     /**
      * @notice Set an NFT collection's Chainlink price feed address.

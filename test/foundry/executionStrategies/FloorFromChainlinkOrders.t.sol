@@ -9,7 +9,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Strategies
-import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkMultiplePriceFeeds.sol";
+import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Other tests
@@ -84,7 +84,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
     function testPriceFeedCannotBeSetTwice() public asPrankedUser(_owner) {
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.expectRevert(StrategyChainlinkMultiplePriceFeeds.PriceFeedAlreadySet.selector);
+        vm.expectRevert(BaseStrategyChainlinkMultiplePriceFeeds.PriceFeedAlreadySet.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 

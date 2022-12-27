@@ -3,8 +3,8 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {StrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkPriceLatency.sol";
-import {StrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/StrategyChainlinkMultiplePriceFeeds.sol";
+import {BaseStrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
+import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Shared errors
@@ -30,7 +30,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         bytes4 errorSelector = _assertOrderInvalid(
             makerBid,
-            StrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector
+            BaseStrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector
         );
 
         vm.expectRevert(errorSelector);
@@ -49,7 +49,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         bytes4 errorSelector = _assertOrderInvalid(
             makerBid,
-            StrategyChainlinkPriceLatency.PriceNotRecentEnough.selector
+            BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector
         );
 
         vm.expectRevert(errorSelector);
@@ -72,14 +72,14 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         bytes4 errorSelector = _assertOrderInvalid(
             makerBid,
-            StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector
+            BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector
         );
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
 
         aggregator.setAnswer(-1);
-        errorSelector = _assertOrderInvalid(makerBid, StrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
+        errorSelector = _assertOrderInvalid(makerBid, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);

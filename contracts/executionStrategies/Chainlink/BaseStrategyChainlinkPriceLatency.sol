@@ -5,11 +5,11 @@ pragma solidity ^0.8.17;
 import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSteps.sol";
 
 /**
- * @title StrategyChainlinkPriceLatency
+ * @title BaseStrategyChainlinkPriceLatency
  * @notice This contract allows the owner to define the maximum acceptable Chainlink price latency.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyChainlinkPriceLatency is OwnableTwoSteps {
+contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
     /**
      * @notice Maximum latency accepted after which
      *         the execution strategy rejects the retrieved price

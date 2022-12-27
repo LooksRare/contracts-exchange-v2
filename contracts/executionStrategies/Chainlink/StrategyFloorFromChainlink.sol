@@ -8,7 +8,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {OrderStructs} from "../../libraries/OrderStructs.sol";
 
 // Other dependencies
-import {StrategyChainlinkMultiplePriceFeeds} from "./StrategyChainlinkMultiplePriceFeeds.sol";
+import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMultiplePriceFeeds.sol";
 
 // Shared errors
 import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency} from "../../interfaces/SharedErrors.sol";
@@ -19,7 +19,7 @@ import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency} from "../../interfac
  *         and a buyer to make a floor price - discount collection bid
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
+contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
     // WETH
     address public immutable WETH;
 
@@ -28,7 +28,7 @@ contract StrategyFloorFromChainlink is StrategyChainlinkMultiplePriceFeeds {
      * @param _owner Owner address
      * @param _weth Address of WETH
      */
-    constructor(address _owner, address _weth) StrategyChainlinkMultiplePriceFeeds(_owner) {
+    constructor(address _owner, address _weth) BaseStrategyChainlinkMultiplePriceFeeds(_owner) {
         WETH = _weth;
     }
 

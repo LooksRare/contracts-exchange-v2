@@ -62,9 +62,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
@@ -74,24 +71,9 @@ contract AffiliateOrdersTest is ProtocolBase {
             abi.encode()
         );
 
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker bid transaction
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                _emptyMerkleTree,
-                _affiliate
-            );
-            emit log_named_uint(
-                "TakerBid // ERC721 // Protocol Fee with Affiliate // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
-
-        vm.stopPrank();
+        // Execute taker bid transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, _emptyMerkleTree, _affiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), takerUser);
@@ -236,9 +218,6 @@ contract AffiliateOrdersTest is ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
@@ -251,18 +230,10 @@ contract AffiliateOrdersTest is ProtocolBase {
             abi.encode()
         );
 
-        {
-            uint256 gasLeft = gasleft();
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _affiliate);
 
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _affiliate);
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Protocol Fee with Affiliate // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
-
-        vm.stopPrank();
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
         // Maker bid user pays the whole price

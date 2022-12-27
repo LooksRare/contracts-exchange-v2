@@ -53,20 +53,15 @@ contract StandardTransactionsTest is ProtocolBase {
             abi.encode()
         );
 
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker bid transaction
-            vm.prank(takerUser);
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                _emptyMerkleTree,
-                _emptyAffiliate
-            );
-            emit log_named_uint("TakerBid // ERC721 // Protocol Fee // Registry Royalties", gasLeft - gasleft());
-        }
+        // Execute taker bid transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _emptyMerkleTree,
+            _emptyAffiliate
+        );
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), takerUser);
@@ -126,14 +121,9 @@ contract StandardTransactionsTest is ProtocolBase {
             abi.encode()
         );
 
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker ask transaction
-            vm.prank(takerUser);
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-            emit log_named_uint("TakerAsk // ERC721 // Protocol Fee // Registry Royalties", gasLeft - gasleft());
-        }
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
@@ -192,27 +182,19 @@ contract StandardTransactionsTest is ProtocolBase {
             );
         }
 
-        {
-            // Other execution parameters
-            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+        // Other execution parameters
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-            uint256 gasLeft = gasleft();
-
-            // Execute taker bid transaction
-            vm.prank(takerUser);
-            looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-                takerBids,
-                makerAsks,
-                signatures,
-                merkleTrees,
-                _emptyAffiliate,
-                false
-            );
-            emit log_named_uint(
-                "TakerBid (3 items) // Non-atomic // ERC721 // Protocol Fee // No Royalties",
-                gasLeft - gasleft()
-            );
-        }
+        // Execute taker bid transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            takerBids,
+            makerAsks,
+            signatures,
+            merkleTrees,
+            _emptyAffiliate,
+            false
+        );
 
         for (uint256 i; i < numberPurchases; i++) {
             // Taker user has received the asset
@@ -220,6 +202,7 @@ contract StandardTransactionsTest is ProtocolBase {
             // Verify the nonce is marked as executed
             assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
+
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
         // Maker ask user receives 98% of the whole price (2% protocol)

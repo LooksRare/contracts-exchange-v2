@@ -275,19 +275,9 @@ contract CollectionOrdersTest is ProtocolBase {
 
         _assertOrderIsValid(makerBid);
 
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Protocol Fee // CollectionOrder // Registry Royalties",
-                gasLeft - gasleft()
-            );
-        }
-
-        vm.stopPrank();
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(tokenId), makerUser);
@@ -336,9 +326,6 @@ contract CollectionOrdersTest is ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         uint256 itemIdSold = 2;
         bytes32[] memory proof = m.getProof(merkleTreeIds, 2);
 
@@ -358,19 +345,9 @@ contract CollectionOrdersTest is ProtocolBase {
 
         _assertOrderIsValid(makerBid);
 
-        {
-            uint256 gasLeft = gasleft();
-
-            // Execute taker ask transaction
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
-
-            emit log_named_uint(
-                "TakerAsk // ERC721 // Protocol Fee // Collection Order with Merkle Tree // Registry Royalties",
-                gasLeft - gasleft()
-            );
-        }
-
-        vm.stopPrank();
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _emptyMerkleTree, _emptyAffiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemIdSold), makerUser);

@@ -50,9 +50,6 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
 
         bytes memory signature = new bytes(0);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
@@ -63,7 +60,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         );
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
-        // Execute taker bid transaction
+        vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -71,8 +68,6 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             _emptyMerkleTree,
             _emptyAffiliate
         );
-
-        vm.stopPrank();
     }
 
     function testTakerAskReentrancy() public {
@@ -160,25 +155,18 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             );
         }
 
-        // Taker user actions
-        vm.startPrank(takerUser);
+        // Other execution parameters
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-        {
-            // Other execution parameters
-            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
-
-            vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
-            // Execute taker bid transaction
-            looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-                takerBids,
-                makerAsks,
-                signatures,
-                merkleTrees,
-                _emptyAffiliate,
-                false
-            );
-        }
-
-        vm.stopPrank();
+        vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            takerBids,
+            makerAsks,
+            signatures,
+            merkleTrees,
+            _emptyAffiliate,
+            false
+        );
     }
 }

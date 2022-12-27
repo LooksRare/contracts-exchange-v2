@@ -27,9 +27,8 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
+        vm.prank(_owner);
         strategyFloorFromChainlink.updateMaxLatency(MAXIMUM_LATENCY);
-        vm.stopPrank();
 
         bytes4 errorSelector = _assertOrderInvalid(
             makerAsk,

@@ -202,11 +202,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Mint asset
         mockERC721.mint(takerUser, itemId);
+
+        // Taker user actions
+        vm.startPrank(takerUser);
 
         // Prepare the taker ask
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
@@ -393,11 +393,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        // Taker user actions
-        vm.startPrank(takerUser);
-
         // Mint asset
         mockERC721.mint(takerUser, itemId);
+
+        // Taker user actions
+        vm.startPrank(takerUser);
 
         // Prepare the taker ask
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(

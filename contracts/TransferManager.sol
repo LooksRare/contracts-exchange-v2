@@ -9,7 +9,7 @@ import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IE
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
 import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1155.sol";
 
-// Interfaces
+// Interfaces and errors
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {WrongLengths} from "./interfaces/SharedErrors.sol";
 

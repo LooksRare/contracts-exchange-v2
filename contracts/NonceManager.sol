@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-// Interfaces
+// Interfaces and errors
 import {INonceManager} from "./interfaces/INonceManager.sol";
 import {WrongLengths} from "./interfaces/SharedErrors.sol";
 

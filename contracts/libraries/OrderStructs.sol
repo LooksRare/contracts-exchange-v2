@@ -7,23 +7,30 @@ pragma solidity ^0.8.17;
  * @author LooksRare protocol team (👀,💎)
  */
 library OrderStructs {
-    // Maker ask hash used to compute maker ask order hash
-    // keccak256("MakerAsk(uint256 askNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    /**
+     * @notice Maker ask hash used to compute maker ask order hash
+     * @dev keccak256("MakerAsk(uint256 askNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+     */
     bytes32 internal constant _MAKER_ASK_HASH = 0x88210d05352c99907588dddb658b9abce78f141d1415d7be787f6120b718fe02;
 
-    // Maker bid hash used to compute maker bid order hash
-    // keccak256("MakerBid(uint256 bidNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+    /**
+     * @notice Maker bid hash used to compute maker bid order hash
+     * @dev keccak256("MakerBid(uint256 bidNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
+     */
     bytes32 internal constant _MAKER_BID_HASH = 0xc69763700afbfcdc70a0b138ea120a08fc78dfc5532f1e7232fa8d8cfb26f96a;
 
-    // Merkle root hash used to compute merkle root order (proof is not included in the hash)
-    // keccak256("MerkleTree(bytes32 root)")
+    /**
+     * @notice Merkle root hash used to compute merkle root order (proof is not included in the hashing function)
+     * @dev keccak256("MerkleTree(bytes32 root)")
+     */
     bytes32 internal constant _MERKLE_TREE_HASH = 0x4339702fd09d392db18a2a980b04a717d48085f206207a9fe4472d7ba0ccbf0b;
 
     /**
-     * 1. MAKER ORDERS
+     * 1. Maker structs
      */
 
     /**
+     * @notice MakerAsk is the struct for a maker ask order. It contains one or multiple NFTs listed in a single order.
      * @param askNonce Global user order nonce for maker ask orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param strategyId Strategy id
@@ -57,6 +64,7 @@ library OrderStructs {
     }
 
     /**
+     * @notice MakerBid is the struct for maker bid order. It represents offers made with fungible tokens.
      * @param bidNonce Global user order nonce for maker bid orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param strategyId Strategy id
@@ -90,25 +98,12 @@ library OrderStructs {
     }
 
     /**
-     * 2. TAKER ORDERS
+     * 2. Taker structs
      */
 
     /**
-     * @param recipient Recipient address (to receive non fungible tokens)
-     * @param maxPrice Maximum price for execution
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
-     * @param additionalParameters Extra data specific for the order
-     */
-    struct TakerBid {
-        address recipient;
-        uint256 maxPrice;
-        uint256[] itemIds;
-        uint256[] amounts;
-        bytes additionalParameters;
-    }
-
-    /**
+     * @notice TakerAsk is the struct for a taker bid order. It contains the parameters required for a direct purchase.
+     * @dev TakerAsk structs are matched against MakerBid structs at the protocol level.
      * @param recipient Recipient address (to receive non fungible tokens)
      * @param minPrice Minimum price for execution
      * @param itemIds Array of itemIds
@@ -124,17 +119,40 @@ library OrderStructs {
     }
 
     /**
-     * 3. MERKLE TREE
+     * @notice TakerBid is the struct for a taker bid order. It contains the parameters required for a direct purchase.
+     * @dev TakerBid structs are matched against MakerAsk structs at the protocol level.
+     * @param recipient Recipient address (to receive non fungible tokens)
+     * @param maxPrice Maximum price for execution
+     * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
+     * @param additionalParameters Extra data specific for the order
+     */
+    struct TakerBid {
+        address recipient;
+        uint256 maxPrice;
+        uint256[] itemIds;
+        uint256[] amounts;
+        bytes additionalParameters;
+    }
+
+    /**
+     * 3. Merkle tree
      */
 
     /**
+     * @notice MerkleTree struct
+     * @dev A Merkle tree can be computed with order hashes. It can contain order hashes from both maker bid and maker ask structs.
      * @param root Merkle root
-     * @param proof Merkle proof
+     * @param proof Array containing the merkle proof
      */
     struct MerkleTree {
         bytes32 root;
         bytes32[] proof;
     }
+
+    /**
+     * 4. Hash functions
+     */
 
     /**
      * @notice Hash the maker ask struct

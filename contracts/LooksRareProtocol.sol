@@ -20,7 +20,7 @@ import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 // Shared errors
 import {WrongCaller, WrongCurrency, WrongLengths, WrongMerkleProof} from "./interfaces/SharedErrors.sol";
 
-// Other dependencies
+// Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 /**

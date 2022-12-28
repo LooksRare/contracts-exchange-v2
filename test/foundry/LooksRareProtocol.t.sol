@@ -11,7 +11,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Shared errors
-import {WrongCurrency} from "../../contracts/interfaces/SharedErrors.sol";
+import {WrongCaller, WrongCurrency} from "../../contracts/interfaces/SharedErrors.sol";
 import {CURRENCY_NOT_WHITELISTED} from "../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Other mocks and utils
@@ -137,6 +137,32 @@ contract LooksRareProtocolTest is ProtocolBase {
     function testUpdateETHGasLimitForTransferNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateETHGasLimitForTransfer(10_000);
+    }
+
+    function testCannotCallRestrictedExecuteTakerBid() public {
+        _setUpUsers();
+        uint256 itemId = 0;
+
+        // Mint asset
+        mockERC721.mint(makerUser, itemId);
+
+        // Prepare the orders and signature
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(0), // ETH
+            signer: makerUser,
+            minPrice: price,
+            itemId: itemId
+        });
+
+        vm.prank(takerUser);
+        vm.expectRevert(WrongCaller.selector);
+        looksRareProtocol.restrictedExecuteTakerBid(takerBid, makerAsk, takerUser, _computeOrderHashMakerAsk(makerAsk));
     }
 
     function testUpdateDomainSeparator() public {

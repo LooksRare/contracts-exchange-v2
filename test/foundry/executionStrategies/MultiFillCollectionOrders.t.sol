@@ -112,7 +112,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
         // Verify the nonce is not marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), computeOrderHashMakerBid(makerBid));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), _computeOrderHashMakerBid(makerBid));
 
         // Second taker user actions
         address secondTakerUser = address(420);

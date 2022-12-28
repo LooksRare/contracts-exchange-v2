@@ -58,7 +58,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerBid(
             SignatureParameters({
-                orderHash: computeOrderHashMakerAsk(makerAsk),
+                orderHash: _computeOrderHashMakerAsk(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -143,7 +143,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerAsk(
             SignatureParameters({
-                orderHash: computeOrderHashMakerBid(makerBid),
+                orderHash: _computeOrderHashMakerBid(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
             }),

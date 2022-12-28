@@ -205,7 +205,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 itemId: i
             });
 
-            orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
+            orderHashes[i] = _computeOrderHashMakerAsk(makerAsk);
         }
     }
 
@@ -229,7 +229,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 itemId: i
             });
 
-            orderHashes[i] = computeOrderHashMakerBid(makerBid);
+            orderHashes[i] = _computeOrderHashMakerBid(makerBid);
         }
     }
 }

@@ -52,7 +52,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
         if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) revert WrongCurrency();
+            if (makerAsk.currency != WETH) {
+                revert WrongCurrency();
+            }
         }
 
         if (
@@ -61,7 +63,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             makerAsk.amounts[0] != 1 ||
             makerAsk.itemIds[0] != takerBid.itemIds[0] ||
             takerBid.amounts[0] != 1
-        ) revert OrderInvalid();
+        ) {
+            revert OrderInvalid();
+        }
 
         uint256 floorPrice = _getFloorPrice(makerAsk.collection);
         uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
@@ -73,7 +77,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             price = makerAsk.minPrice;
         }
 
-        if (takerBid.maxPrice < price) revert BidTooLow();
+        if (takerBid.maxPrice < price) {
+            revert BidTooLow();
+        }
 
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
@@ -100,7 +106,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
         if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) revert WrongCurrency();
+            if (makerAsk.currency != WETH) {
+                revert WrongCurrency();
+            }
         }
 
         if (
@@ -109,7 +117,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             makerAsk.amounts[0] != 1 ||
             makerAsk.itemIds[0] != takerBid.itemIds[0] ||
             takerBid.amounts[0] != 1
-        ) revert OrderInvalid();
+        ) {
+            revert OrderInvalid();
+        }
 
         uint256 floorPrice = _getFloorPrice(makerAsk.collection);
         uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
@@ -121,7 +131,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             price = makerAsk.minPrice;
         }
 
-        if (takerBid.maxPrice < price) revert BidTooLow();
+        if (takerBid.maxPrice < price) {
+            revert BidTooLow();
+        }
 
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;
@@ -147,7 +159,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerBid.currency != WETH) revert WrongCurrency();
+        if (makerBid.currency != WETH) {
+            revert WrongCurrency();
+        }
 
         if (
             takerAsk.itemIds.length != 1 ||
@@ -155,11 +169,17 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             takerAsk.amounts[0] != 1 ||
             makerBid.amounts.length != 1 ||
             makerBid.amounts[0] != 1
-        ) revert OrderInvalid();
+        ) {
+            revert OrderInvalid();
+        }
 
         uint256 floorPrice = _getFloorPrice(makerBid.collection);
         uint256 discountAmount = abi.decode(makerBid.additionalParameters, (uint256));
-        if (floorPrice <= discountAmount) revert OrderInvalid();
+
+        if (floorPrice <= discountAmount) {
+            revert OrderInvalid();
+        }
+
         uint256 desiredPrice = floorPrice - discountAmount;
 
         if (desiredPrice >= makerBid.maxPrice) {
@@ -168,7 +188,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             price = desiredPrice;
         }
 
-        if (takerAsk.minPrice > price) revert AskTooHigh();
+        if (takerAsk.minPrice > price) {
+            revert AskTooHigh();
+        }
 
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;
@@ -194,7 +216,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerBid.currency != WETH) revert WrongCurrency();
+        if (makerBid.currency != WETH) {
+            revert WrongCurrency();
+        }
 
         if (
             takerAsk.itemIds.length != 1 ||
@@ -202,11 +226,17 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             takerAsk.amounts[0] != 1 ||
             makerBid.amounts.length != 1 ||
             makerBid.amounts[0] != 1
-        ) revert OrderInvalid();
+        ) {
+            revert OrderInvalid();
+        }
 
         uint256 floorPrice = _getFloorPrice(makerBid.collection);
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-        if (discount >= 10_000) revert OrderInvalid();
+
+        // @dev Discount cannot be 100%
+        if (discount >= 10_000) {
+            revert OrderInvalid();
+        }
 
         uint256 desiredPrice = (floorPrice * (10_000 - discount)) / 10_000;
 
@@ -216,7 +246,9 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             price = desiredPrice;
         }
 
-        if (takerAsk.minPrice > price) revert AskTooHigh();
+        if (takerAsk.minPrice > price) {
+            revert AskTooHigh();
+        }
 
         itemIds = takerAsk.itemIds;
         amounts = takerAsk.amounts;
@@ -321,11 +353,22 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
 
     function _getFloorPrice(address collection) private view returns (uint256 price) {
         address priceFeed = priceFeeds[collection];
-        if (priceFeed == address(0)) revert PriceFeedNotAvailable();
+
+        if (priceFeed == address(0)) {
+            revert PriceFeedNotAvailable();
+        }
 
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp > maxLatency + updatedAt) revert PriceNotRecentEnough();
+
+        // Verify the answer is not null or negative
+        if (answer <= 0) {
+            revert InvalidChainlinkPrice();
+        }
+
+        // Verify the latency
+        if (block.timestamp > maxLatency + updatedAt) {
+            revert PriceNotRecentEnough();
+        }
 
         price = uint256(answer);
     }

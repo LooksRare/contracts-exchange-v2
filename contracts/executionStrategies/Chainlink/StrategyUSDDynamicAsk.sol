@@ -53,10 +53,14 @@ contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
     {
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
-        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();
+        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
+            revert OrderInvalid();
+        }
+
         for (uint256 i; i < itemIdsLength; ) {
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || makerAsk.amounts[i] != takerBid.amounts[i])
+            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || makerAsk.amounts[i] != takerBid.amounts[i]) {
                 revert OrderInvalid();
+            }
 
             unchecked {
                 ++i;
@@ -70,8 +74,14 @@ contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
         }
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
-        if (answer <= 0) revert InvalidChainlinkPrice();
-        if (block.timestamp - updatedAt > maxLatency) revert PriceNotRecentEnough();
+
+        if (answer <= 0) {
+            revert InvalidChainlinkPrice();
+        }
+
+        if (block.timestamp - updatedAt > maxLatency) {
+            revert PriceNotRecentEnough();
+        }
 
         // The client has to provide a USD value that is augmented by 1e18.
         uint256 desiredSalePriceInUSD = abi.decode(makerAsk.additionalParameters, (uint256));
@@ -86,7 +96,9 @@ contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
             price = desiredSalePriceInETH;
         }
 
-        if (takerBid.maxPrice < price) revert BidTooLow();
+        if (takerBid.maxPrice < price) {
+            revert BidTooLow();
+        }
 
         itemIds = makerAsk.itemIds;
         amounts = makerAsk.amounts;

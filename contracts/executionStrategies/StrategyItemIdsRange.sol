@@ -28,12 +28,14 @@ contract StrategyItemIdsRange {
     {
         uint256 minItemId = makerBid.itemIds[0];
         uint256 maxItemId = makerBid.itemIds[1];
-        if (minItemId >= maxItemId) revert OrderInvalid();
+
+        if (minItemId >= maxItemId) {
+            revert OrderInvalid();
+        }
 
         uint256 desiredAmount = makerBid.amounts[0];
         uint256 totalOfferedAmount;
         uint256 lastItemId;
-
         uint256 length = takerAsk.itemIds.length;
 
         for (uint256 i; i < length; ) {
@@ -41,11 +43,15 @@ contract StrategyItemIdsRange {
             // Force the client to sort the item ids in ascending order,
             // in order to prevent taker ask from providing duplicated
             // item ids
-            if (offeredItemId <= lastItemId && i != 0) revert OrderInvalid();
+            if (offeredItemId <= lastItemId && i != 0) {
+                revert OrderInvalid();
+            }
 
             // If ERC721, force amount to be 1.
             uint256 offeredAmount = makerBid.assetType == 0 ? 1 : takerAsk.amounts[i];
-            if (offeredAmount == 0) revert OrderInvalid();
+            if (offeredAmount == 0) {
+                revert OrderInvalid();
+            }
 
             if (offeredItemId >= minItemId) {
                 if (offeredItemId <= maxItemId) {
@@ -60,8 +66,13 @@ contract StrategyItemIdsRange {
             }
         }
 
-        if (totalOfferedAmount != desiredAmount) revert OrderInvalid();
-        if (makerBid.maxPrice != takerAsk.minPrice) revert OrderInvalid();
+        if (totalOfferedAmount != desiredAmount) {
+            revert OrderInvalid();
+        }
+
+        if (makerBid.maxPrice != takerAsk.minPrice) {
+            revert OrderInvalid();
+        }
 
         price = makerBid.maxPrice;
         itemIds = takerAsk.itemIds;

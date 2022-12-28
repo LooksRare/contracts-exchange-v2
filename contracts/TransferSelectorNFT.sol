@@ -9,7 +9,7 @@ import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
 
 /**
  * @title TransferSelectorNFT
- * @notice This contract handles the logic for transferring items.
+ * @notice This contract handles the logic for transferring non-fungible items.
  * @author LooksRare protocol team (👀,💎)
  */
 contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
@@ -39,11 +39,13 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
         address transferManagerForAssetType,
         bytes4 selectorForAssetType
     ) external onlyOwner {
-        if (transferManagerForAssetType == address(0) || selectorForAssetType == bytes4(0))
+        if (transferManagerForAssetType == address(0) || selectorForAssetType == bytes4(0)) {
             revert ManagerSelectorEmpty();
+        }
 
-        if (managerSelectorOfAssetType[assetType].transferManager != address(0))
+        if (managerSelectorOfAssetType[assetType].transferManager != address(0)) {
             revert ManagerSelectorAlreadySetForAssetType();
+        }
 
         managerSelectorOfAssetType[assetType] = ManagerSelector({
             transferManager: transferManagerForAssetType,
@@ -73,12 +75,16 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
         address transferManager = managerSelectorOfAssetType[assetType].transferManager;
         bytes4 selector = managerSelectorOfAssetType[assetType].selector;
 
-        if (transferManager == address(0) || selector == bytes4(0)) revert NoTransferManagerForAssetType(assetType);
+        if (transferManager == address(0) || selector == bytes4(0)) {
+            revert NoTransferManagerForAssetType(assetType);
+        }
 
         (bool status, ) = transferManager.call(
             abi.encodeWithSelector(selector, collection, sender, recipient, itemIds, amounts)
         );
 
-        if (!status) revert NFTTransferFail(collection, assetType);
+        if (!status) {
+            revert NFTTransferFail(collection, assetType);
+        }
     }
 }

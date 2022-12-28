@@ -45,7 +45,9 @@ contract StrategyCollectionOffer {
             price != takerAsk.minPrice ||
             takerAsk.amounts[0] != amounts[0] ||
             amounts[0] == 0
-        ) revert OrderInvalid();
+        ) {
+            revert OrderInvalid();
+        }
     }
 
     /**
@@ -76,7 +78,9 @@ contract StrategyCollectionOffer {
                 takerAsk.amounts[0] != amounts[0] ||
                 amounts[0] == 0 ||
                 makerBid.additionalParameters.length == 0
-            ) revert OrderInvalid();
+            ) {
+                revert OrderInvalid();
+            }
         }
 
         // Precomputed merkleRoot (that contains the itemIds that match a common characteristic)
@@ -88,8 +92,10 @@ contract StrategyCollectionOffer {
         // Compute the node
         bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
 
-        // Verify proof
-        if (!MerkleProofMemory.verify(proof, root, node)) revert WrongMerkleProof();
+        // Verify the merkle proof
+        if (!MerkleProofMemory.verify(proof, root, node)) {
+            revert WrongMerkleProof();
+        }
     }
 
     /**

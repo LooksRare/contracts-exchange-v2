@@ -49,7 +49,10 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         uint256[] calldata
     ) external {
         uint256 length = itemIds.length;
-        if (length == 0) revert WrongLengths();
+        if (length == 0) {
+            revert WrongLengths();
+        }
+
         if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
 
         for (uint256 i; i < length; ) {
@@ -77,8 +80,14 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         uint256[] calldata amounts
     ) external {
         uint256 length = itemIds.length;
-        if (length == 0 || amounts.length != length) revert WrongLengths();
-        if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+
+        if (length == 0 || amounts.length != length) {
+            revert WrongLengths();
+        }
+
+        if (!isOperatorValidForTransfer(from, msg.sender)) {
+            revert TransferCallerInvalid();
+        }
 
         if (length == 1) {
             _executeERC1155SafeTransferFrom(collection, from, to, itemIds[0], amounts[0]);
@@ -107,17 +116,23 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     ) external {
         uint256 collectionsLength = collections.length;
 
-        if (collectionsLength == 0 || (itemIds.length ^ collectionsLength) | (amounts.length ^ collectionsLength) != 0)
+        if (
+            collectionsLength == 0 || (itemIds.length ^ collectionsLength) | (amounts.length ^ collectionsLength) != 0
+        ) {
             revert WrongLengths();
+        }
 
         if (from != msg.sender) {
-            if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+            if (!isOperatorValidForTransfer(from, msg.sender)) {
+                revert TransferCallerInvalid();
+            }
         }
 
         for (uint256 i; i < collectionsLength; ) {
             uint256 itemIdsLengthForSingleCollection = itemIds[i].length;
-            if (itemIdsLengthForSingleCollection == 0 || amounts[i].length != itemIdsLengthForSingleCollection)
+            if (itemIdsLengthForSingleCollection == 0 || amounts[i].length != itemIdsLengthForSingleCollection) {
                 revert WrongLengths();
+            }
 
             uint256 assetType = assetTypes[i];
             if (assetType == 0) {
@@ -145,11 +160,20 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @dev Each operator address must be globally whitelisted to be approved.
      */
     function grantApprovals(address[] calldata operators) external {
-        if (operators.length == 0) revert WrongLengths();
+        uint256 length = operators.length;
 
-        for (uint256 i; i < operators.length; ) {
-            if (!isOperatorWhitelisted[operators[i]]) revert NotWhitelisted();
-            if (hasUserApprovedOperator[msg.sender][operators[i]]) revert AlreadyApproved();
+        if (length == 0) {
+            revert WrongLengths();
+        }
+
+        for (uint256 i; i < length; ) {
+            if (!isOperatorWhitelisted[operators[i]]) {
+                revert NotWhitelisted();
+            }
+
+            if (hasUserApprovedOperator[msg.sender][operators[i]]) {
+                revert AlreadyApproved();
+            }
 
             hasUserApprovedOperator[msg.sender][operators[i]] = true;
 
@@ -167,10 +191,15 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @dev Each operator address must be approved at the user level to be revoked.
      */
     function revokeApprovals(address[] calldata operators) external {
-        if (operators.length == 0) revert WrongLengths();
+        uint256 length = operators.length;
+        if (length == 0) {
+            revert WrongLengths();
+        }
 
-        for (uint256 i; i < operators.length; ) {
-            if (!hasUserApprovedOperator[msg.sender][operators[i]]) revert NotApproved();
+        for (uint256 i; i < length; ) {
+            if (!hasUserApprovedOperator[msg.sender][operators[i]]) {
+                revert NotApproved();
+            }
 
             delete hasUserApprovedOperator[msg.sender][operators[i]];
             unchecked {
@@ -187,7 +216,9 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @dev Only callable by owner.
      */
     function whitelistOperator(address operator) external onlyOwner {
-        if (isOperatorWhitelisted[operator]) revert AlreadyWhitelisted();
+        if (isOperatorWhitelisted[operator]) {
+            revert AlreadyWhitelisted();
+        }
 
         isOperatorWhitelisted[operator] = true;
 
@@ -200,7 +231,9 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @dev Only callable by owner.
      */
     function removeOperator(address operator) external onlyOwner {
-        if (!isOperatorWhitelisted[operator]) revert NotWhitelisted();
+        if (!isOperatorWhitelisted[operator]) {
+            revert NotWhitelisted();
+        }
 
         delete isOperatorWhitelisted[operator];
 

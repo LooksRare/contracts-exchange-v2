@@ -53,10 +53,13 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
         bool isMakerBid,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFeeBp < standardProtocolFeeBp || maxProtocolFeeBp < minTotalFeeBp || maxProtocolFeeBp > 500)
+        if (maxProtocolFeeBp < standardProtocolFeeBp || maxProtocolFeeBp < minTotalFeeBp || maxProtocolFeeBp > 500) {
             revert StrategyProtocolFeeTooHigh();
+        }
 
-        if (selector == bytes4(0)) revert StrategyHasNoSelector();
+        if (selector == bytes4(0)) {
+            revert StrategyHasNoSelector();
+        }
 
         strategyInfo[countStrategies] = Strategy({
             isActive: true,
@@ -93,11 +96,14 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
         uint16 newMinTotalFee,
         bool isActive
     ) external onlyOwner {
-        if (strategyId >= countStrategies) revert StrategyNotUsed();
+        if (strategyId >= countStrategies) {
+            revert StrategyNotUsed();
+        }
 
         uint256 maxProtocolFeeBp = strategyInfo[strategyId].maxProtocolFeeBp;
-        if (newStandardProtocolFee > maxProtocolFeeBp || newMinTotalFee > maxProtocolFeeBp)
+        if (newStandardProtocolFee > maxProtocolFeeBp || newMinTotalFee > maxProtocolFeeBp) {
             revert StrategyProtocolFeeTooHigh();
+        }
 
         strategyInfo[strategyId].isActive = isActive;
         strategyInfo[strategyId].standardProtocolFeeBp = newStandardProtocolFee;

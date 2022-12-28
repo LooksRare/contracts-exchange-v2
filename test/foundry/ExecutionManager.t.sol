@@ -52,6 +52,11 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         assertEq(looksRareProtocol.protocolFeeRecipient(), address(1));
     }
 
+    function testUpdateProtocolFeeRecipientCannotBeNullAddress() public asPrankedUser(_owner) {
+        vm.expectRevert(IExecutionManager.NewProtocolFeeRecipientCannotBeNullAddress.selector);
+        looksRareProtocol.updateProtocolFeeRecipient(address(0));
+    }
+
     function testUpdateProtocolFeeRecipientNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateProtocolFeeRecipient(address(1));

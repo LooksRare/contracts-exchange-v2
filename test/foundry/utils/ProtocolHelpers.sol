@@ -30,6 +30,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 itemId
     )
         internal
+        view
         returns (
             OrderStructs.MakerAsk memory newMakerAsk,
             OrderStructs.TakerBid memory newTakerBid,
@@ -139,6 +140,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 itemId
     )
         internal
+        view
         returns (
             OrderStructs.MakerBid memory newMakerBid,
             OrderStructs.TakerAsk memory newTakerAsk,
@@ -234,7 +236,10 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         });
     }
 
-    function _signMakerAsk(OrderStructs.MakerAsk memory _makerAsk, uint256 _signerKey) internal returns (bytes memory) {
+    function _signMakerAsk(
+        OrderStructs.MakerAsk memory _makerAsk,
+        uint256 _signerKey
+    ) internal view returns (bytes memory) {
         bytes32 orderHash = _makerAsk.hash();
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -245,7 +250,10 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         return abi.encodePacked(r, s, v);
     }
 
-    function _signMakerBid(OrderStructs.MakerBid memory _makerBid, uint256 _signerKey) internal returns (bytes memory) {
+    function _signMakerBid(
+        OrderStructs.MakerBid memory _makerBid,
+        uint256 _signerKey
+    ) internal view returns (bytes memory) {
         bytes32 orderHash = computeOrderHashMakerBid(_makerBid);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -259,7 +267,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     function _signMerkleProof(
         OrderStructs.MerkleTree memory _merkleTree,
         uint256 _signerKey
-    ) internal returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, _merkleTree.hash()))

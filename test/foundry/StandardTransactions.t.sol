@@ -41,8 +41,38 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify validity of maker ask order
         _isMakerAskOrderValid(makerAsk, signature);
 
+        // Arrays for events
+        address[3] memory expectedRecipients;
+        expectedRecipients[0] = _owner;
+        expectedRecipients[1] = _royaltyRecipient;
+        expectedRecipients[2] = makerUser;
+
+        uint256[3] memory expectedFees;
+        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
+        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+
         // Execute taker bid transaction
         vm.prank(takerUser);
+        vm.expectEmit(true, false, false, true);
+
+        emit TakerBid(
+            SignatureParameters({
+                orderHash: computeOrderHashMakerAsk(makerAsk),
+                orderNonce: makerAsk.orderNonce,
+                isNonceInvalidated: true
+            }),
+            takerUser,
+            takerUser,
+            makerAsk.strategyId,
+            makerAsk.currency,
+            makerAsk.collection,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            expectedRecipients,
+            expectedFees
+        );
+
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -96,8 +126,38 @@ contract StandardTransactionsTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
+        // Arrays for events
+        address[3] memory expectedRecipients;
+        expectedRecipients[0] = _owner;
+        expectedRecipients[1] = _royaltyRecipient;
+        expectedRecipients[2] = takerUser;
+
+        uint256[3] memory expectedFees;
+        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
+        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+
         // Execute taker ask transaction
         vm.prank(takerUser);
+        vm.expectEmit(true, false, false, true);
+
+        emit TakerAsk(
+            SignatureParameters({
+                orderHash: computeOrderHashMakerBid(makerBid),
+                orderNonce: makerBid.orderNonce,
+                isNonceInvalidated: true
+            }),
+            takerUser,
+            makerUser,
+            makerBid.strategyId,
+            makerBid.currency,
+            makerBid.collection,
+            makerBid.itemIds,
+            makerBid.amounts,
+            expectedRecipients,
+            expectedFees
+        );
+
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset

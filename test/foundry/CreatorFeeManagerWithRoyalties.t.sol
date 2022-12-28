@@ -48,7 +48,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _setUpRoyaltiesRegistry(_newCreatorRoyaltyFee);
 
         uint256 price = 1 ether; // Fixed price of sale
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
@@ -101,7 +101,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     }
 
     function testCreatorRoyaltiesGetPaidForERC2981() public {
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
         uint256 price = 1 ether; // Fixed price of sale
 
         _setUpUsers();
@@ -335,7 +335,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _setUpRoyaltiesRegistry(_creatorRoyaltyFeeTooHigh);
 
         uint256 price = 1 ether; // Fixed price of sale
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);

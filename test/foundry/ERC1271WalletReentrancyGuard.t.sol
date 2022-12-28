@@ -29,7 +29,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -75,7 +75,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({

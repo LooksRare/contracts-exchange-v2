@@ -183,7 +183,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
@@ -367,7 +367,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         uint256 orderNonce = 69;
 

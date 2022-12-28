@@ -15,16 +15,16 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
     /**
      * One ERC721 is sold through a taker ask using WETH and the proceeds of the sale goes to a random recipient.
      */
-    function testTakerAskERC721WithRoyaltiesFromRegistry() public {
-        address randomRecipientSaleProceeds = address(420);
-
+    function testTakerAskERC721WithRoyaltiesFromRegistryWithDelegation() public {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
+        address randomRecipientSaleProceeds = address(420);
+        uint256 itemId = 0;
 
-        uint256 itemId = 0; // TokenId
+        // Mint asset
+        mockERC721.mint(takerUser, itemId);
 
-        // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
@@ -37,27 +37,42 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
             itemId: itemId
         });
 
-        // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        // Adjust recipient
+        takerAsk.recipient = randomRecipientSaleProceeds;
 
         // Verify maker bid order
         _isMakerBidOrderValid(makerBid, signature);
 
-        // Mint asset
-        mockERC721.mint(takerUser, itemId);
+        // Arrays for events
+        address[3] memory expectedRecipients;
+        expectedRecipients[0] = _owner;
+        expectedRecipients[1] = _royaltyRecipient;
+        expectedRecipients[2] = randomRecipientSaleProceeds;
 
-        // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            randomRecipientSaleProceeds,
-            makerBid.maxPrice,
+        uint256[3] memory expectedFees;
+        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
+        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+
+        vm.prank(takerUser);
+        vm.expectEmit(true, false, false, true);
+
+        emit TakerAsk(
+            SignatureParameters({
+                orderHash: _computeOrderHashMakerBid(makerBid),
+                orderNonce: makerBid.orderNonce,
+                isNonceInvalidated: true
+            }),
+            takerUser,
+            makerUser,
+            makerBid.strategyId,
+            makerBid.currency,
+            makerBid.collection,
             makerBid.itemIds,
             makerBid.amounts,
-            abi.encode()
+            expectedRecipients,
+            expectedFees
         );
-
-        // Execute taker ask transaction
-        vm.prank(takerUser);
-
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
@@ -67,7 +82,6 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         // Random recipient user receives 98% of the whole price and taker user receives nothing.
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser);
         assertEq(weth.balanceOf(randomRecipientSaleProceeds), (price * 9_800) / 10_000);
-
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             weth.balanceOf(_royaltyRecipient),
@@ -80,19 +94,17 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
     /**
      * One ERC721 is sold through a taker bid and the NFT transfer goes to a random recipient.
      */
-    function testTakerBidERC721WithRoyaltiesFromRegistry() public {
+    function testTakerBidERC721WithRoyaltiesFromRegistryWithDelegation() public {
         address randomRecipientNFT = address(420);
+        uint256 itemId = 0;
 
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
-
         // Mint asset
         mockERC721.mint(makerUser, itemId);
 
-        // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
@@ -105,23 +117,41 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
             itemId: itemId
         });
 
-        // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        // Adjust recipient to random recipient
+        takerBid.recipient = randomRecipientNFT;
 
         // Verify validity of maker ask order
         _isMakerAskOrderValid(makerAsk, signature);
 
-        // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
+        // Arrays for events
+        address[3] memory expectedRecipients;
+        expectedRecipients[0] = _owner;
+        expectedRecipients[1] = _royaltyRecipient;
+        expectedRecipients[2] = makerUser;
+
+        uint256[3] memory expectedFees;
+        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
+        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+
+        vm.prank(takerUser);
+
+        emit TakerBid(
+            SignatureParameters({
+                orderHash: _computeOrderHashMakerAsk(makerAsk),
+                orderNonce: makerAsk.orderNonce,
+                isNonceInvalidated: true
+            }),
+            takerUser,
             randomRecipientNFT,
-            makerAsk.minPrice,
+            makerAsk.strategyId,
+            makerAsk.currency,
+            makerAsk.collection,
             makerAsk.itemIds,
             makerAsk.amounts,
-            abi.encode()
+            expectedRecipients,
+            expectedFees
         );
-
-        // Execute taker bid transaction
-        vm.prank(takerUser);
 
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,

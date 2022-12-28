@@ -73,7 +73,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -226,7 +226,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({

@@ -30,7 +30,7 @@ contract GasGriefingTest is ProtocolBase {
     function testTakerBidGasGriefing() public {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(gasGriefer, itemId);

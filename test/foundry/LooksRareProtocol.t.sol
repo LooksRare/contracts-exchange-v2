@@ -32,7 +32,7 @@ contract LooksRareProtocolTest is ProtocolBase {
 
     function testCannotTradeIfWrongCurrency() public {
         _setUpUsers();
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -78,7 +78,7 @@ contract LooksRareProtocolTest is ProtocolBase {
     }
 
     function testCannotTradeIfETHIsUsedForMakerBid() public {
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({

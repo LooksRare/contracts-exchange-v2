@@ -572,7 +572,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
         // Owner removes the operators
         vm.prank(_owner);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit OperatorRemoved(_transferrer);
         transferManager.removeOperator(_transferrer);
 
@@ -594,7 +594,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
         // Owner removes the operators
         vm.prank(_sender);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit ApprovalsRemoved(_sender, operators);
         transferManager.revokeApprovals(operators);
 

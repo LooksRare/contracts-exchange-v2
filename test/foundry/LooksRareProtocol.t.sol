@@ -168,7 +168,7 @@ contract LooksRareProtocolTest is ProtocolBase {
     function testUpdateDomainSeparator() public {
         uint256 newChainId = 69_420;
         vm.chainId(newChainId);
-        vm.expectEmit(true, false, false, false);
+        vm.expectEmit(true, false, false, true);
         emit NewDomainSeparator();
         looksRareProtocol.updateDomainSeparator();
         assertEq(looksRareProtocol.chainId(), newChainId);

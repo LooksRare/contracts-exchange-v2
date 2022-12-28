@@ -44,7 +44,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         subsetNonces[0] = subsetNonce;
 
         vm.prank(makerUser);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit SubsetNoncesCancelled(makerUser, subsetNonces);
         looksRareProtocol.cancelSubsetNonces(subsetNonces);
 
@@ -123,7 +123,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         );
 
         vm.prank(makerUser);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit NewBidAskNonces(makerUser, 0, 1);
         looksRareProtocol.incrementBidAskNonces(false, true);
     }
@@ -171,7 +171,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         vm.prank(makerUser);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit NewBidAskNonces(makerUser, 1, 0);
         looksRareProtocol.incrementBidAskNonces(true, false);
     }

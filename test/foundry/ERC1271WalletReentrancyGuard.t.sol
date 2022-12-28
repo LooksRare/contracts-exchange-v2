@@ -42,7 +42,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             assetType: 0, // ERC721,
             orderNonce: 0, // orderNonce
             collection: address(mockERC721),
-            currency: address(0), // ETH,
+            currency: address(0), // ETH
             signer: address(maliciousERC1271Wallet),
             minPrice: price,
             itemId: itemId
@@ -138,7 +138,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
                 assetType: 0, // ERC721
                 orderNonce: i,
                 collection: address(mockERC721),
-                currency: address(0), // ETH,
+                currency: address(0), // ETH
                 signer: address(maliciousERC1271Wallet),
                 minPrice: price,
                 itemId: i // 0, 1, etc.

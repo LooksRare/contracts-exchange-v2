@@ -24,7 +24,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(makerUser, itemId);
 
-        // Prepare the order hash
+        // Prepare the orders and signature
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,
             subsetNonce: 0,
@@ -32,7 +32,7 @@ contract StandardTransactionsTest is ProtocolBase {
             assetType: 0, // ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH,
+            currency: address(0), // ETH
             signer: makerUser,
             minPrice: price,
             itemId: itemId
@@ -199,7 +199,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 assetType: 0, // ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
-                currency: address(0), // ETH,
+                currency: address(0), // ETH
                 signer: makerUser,
                 minPrice: price, // Fixed
                 itemId: i // (0, 1, etc.)
@@ -271,7 +271,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 assetType: 0, // ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
-                currency: address(0), // ETH,
+                currency: address(0), // ETH
                 signer: makerUser,
                 minPrice: price, // Fixed
                 itemId: i // (0, 1, etc.)

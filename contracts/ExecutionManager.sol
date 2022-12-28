@@ -65,6 +65,7 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      * @dev Only callable by owner.
      */
     function updateProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
+        if (newProtocolFeeRecipient == address(0)) revert NewProtocolFeeRecipientCannotBeNullAddress();
         protocolFeeRecipient = newProtocolFeeRecipient;
         emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
     }

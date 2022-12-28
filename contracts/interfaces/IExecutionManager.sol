@@ -30,6 +30,11 @@ interface IExecutionManager {
     error CreatorFeeBpTooHigh();
 
     /**
+     * @notice It is returned if the new protocol fee recipient is set to address(0)
+     */
+    error NewProtocolFeeRecipientCannotBeNullAddress();
+
+    /**
      * @notice It is returned if there is no selector for maker bid for a given strategyId
      */
     error NoSelectorForMakerBid();

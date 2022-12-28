@@ -566,40 +566,17 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         );
     }
 
-    function testCannotTransferIfOperatorRemoved() public {
+    function testCannotTransferERC721IfOperatorApprovalsRevokedByUserOrOperatorRemovedByOwner() public {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
-        // Owner removes the operators
-        vm.prank(_owner);
-        vm.expectEmit(false, false, false, true);
-        emit OperatorRemoved(_transferrer);
-        transferManager.removeOperator(_transferrer);
-
-        uint256 itemId = 500;
-
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = itemId;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1;
-
-        vm.prank(_transferrer);
-        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
-        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
-    }
-
-    function testCannotTransferERC721IfOperatorApprovalsRevokedByUser() public {
-        _whitelistOperator(_transferrer);
-        _grantApprovals(_sender);
-
-        // User revokes the operators
+        // 1. User revokes the operator
         vm.prank(_sender);
         vm.expectEmit(false, false, false, true);
         emit ApprovalsRemoved(_sender, operators);
         transferManager.revokeApprovals(operators);
 
         uint256 itemId = 500;
-
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
@@ -608,13 +585,24 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         vm.prank(_transferrer);
         vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
         transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
+
+        // 2. Sender grants again approvals but owner removes the operators
+        _grantApprovals(_sender);
+        vm.prank(_owner);
+        vm.expectEmit(false, false, false, true);
+        emit OperatorRemoved(_transferrer);
+        transferManager.removeOperator(_transferrer);
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
     }
 
-    function testCannotTransferERC1155IfOperatorApprovalsRevokedByUser() public {
+    function testCannotTransferERC1155IfOperatorApprovalsRevokedByUserOrOperatorRemovedByOwner() public {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
-        // User revokes the operators
+        // 1. User revokes the operator
         vm.prank(_sender);
         vm.expectEmit(false, false, false, true);
         emit ApprovalsRemoved(_sender, operators);
@@ -629,13 +617,24 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         vm.prank(_transferrer);
         vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
         transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
+
+        // 2. Sender grants again approvals but owner removes the operators
+        _grantApprovals(_sender);
+        vm.prank(_owner);
+        vm.expectEmit(false, false, false, true);
+        emit OperatorRemoved(_transferrer);
+        transferManager.removeOperator(_transferrer);
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
     }
 
     function testCannotBatchTransferIfOperatorApprovalsRevoked() public {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
-        // User revokes the operators
+        // 1. User revokes the operator
         vm.prank(_sender);
         vm.expectEmit(false, false, false, true);
         emit ApprovalsRemoved(_sender, operators);
@@ -663,6 +662,24 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         amounts[1] = new uint256[](1);
         amounts[0][0] = 1;
         amounts[1][0] = 2;
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferBatchItemsAcrossCollections(
+            collections,
+            assetTypes,
+            _sender,
+            _recipient,
+            itemIds,
+            amounts
+        );
+
+        // 2. Sender grants again approvals but owner removes the operators
+        _grantApprovals(_sender);
+        vm.prank(_owner);
+        vm.expectEmit(false, false, false, true);
+        emit OperatorRemoved(_transferrer);
+        transferManager.removeOperator(_transferrer);
 
         vm.prank(_transferrer);
         vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);

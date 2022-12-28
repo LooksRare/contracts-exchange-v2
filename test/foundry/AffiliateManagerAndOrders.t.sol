@@ -83,7 +83,7 @@ contract AffiliateOrdersTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(0), // ETH
@@ -148,7 +148,7 @@ contract AffiliateOrdersTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
+                assetType: 0, // ERC721
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: address(0), // ETH
@@ -233,7 +233,7 @@ contract AffiliateOrdersTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

@@ -676,6 +676,13 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         );
     }
 
+    function testUserCannotGrantApprovalIfOperatorNotWhitelisted() public asPrankedUser(_owner) {
+        address randomOperator = address(420);
+        transferManager.whitelistOperator(randomOperator);
+        vm.expectRevert(ITransferManager.AlreadyWhitelisted.selector);
+        transferManager.whitelistOperator(randomOperator);
+    }
+
     function testWhitelistOperatorNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         transferManager.whitelistOperator(address(0));
@@ -692,6 +699,36 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         address notOperator = address(420);
         vm.expectRevert(ITransferManager.NotWhitelisted.selector);
         transferManager.removeOperator(notOperator);
+    }
+
+    function testUserCannotGrantApprovalsIfNotWhitelisted() public {
+        address[] memory approvedOperators = new address[](1);
+        approvedOperators[0] = _transferrer;
+
+        vm.expectRevert(ITransferManager.NotWhitelisted.selector);
+        vm.prank(_sender);
+        transferManager.grantApprovals(approvedOperators);
+    }
+
+    function testUserCannotGrantApprovalsIfAlreadyApproved() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        address[] memory approvedOperators = new address[](1);
+        approvedOperators[0] = _transferrer;
+
+        vm.expectRevert(ITransferManager.AlreadyApproved.selector);
+        vm.prank(_sender);
+        transferManager.grantApprovals(approvedOperators);
+    }
+
+    function testUserCannotRevokeApprovalsIfNotApproved() public {
+        address[] memory approvedOperators = new address[](1);
+        approvedOperators[0] = _transferrer;
+
+        vm.expectRevert(ITransferManager.NotApproved.selector);
+        vm.prank(_sender);
+        transferManager.revokeApprovals(approvedOperators);
     }
 
     function testRemoveOperatorNotOwner() public {

@@ -7,6 +7,9 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
+// Interfaces
+import {IAffiliateManager} from "../../contracts/interfaces/IAffiliateManager.sol";
+
 // Mocks and other tests
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
@@ -33,6 +36,24 @@ contract AffiliateOrdersTest is ProtocolBase {
         vm.deal(_affiliate, _initialETHBalanceAffiliate + _initialWETHBalanceAffiliate);
         vm.prank(_affiliate);
         weth.deposit{value: _initialWETHBalanceAffiliate}();
+    }
+
+    function testCannotUpdateAffiliateRateIfNotAffiliateController() public {
+        vm.expectRevert(IAffiliateManager.NotAffiliateController.selector);
+        looksRareProtocol.updateAffiliateRate(address(42), 100);
+    }
+
+    function testCannotUpdateAffiliateRateIfRateHigherthan10000() public asPrankedUser(_owner) {
+        looksRareProtocol.updateAffiliateController(_owner);
+
+        address randomAffiliate = address(42);
+        uint256 affiliateRateLimitBp = 10000;
+        vm.expectRevert(IAffiliateManager.PercentageTooHigh.selector);
+        looksRareProtocol.updateAffiliateRate(randomAffiliate, affiliateRateLimitBp + 1);
+
+        // It does not revert
+        looksRareProtocol.updateAffiliateRate(randomAffiliate, affiliateRateLimitBp);
+        assertEq(looksRareProtocol.affiliateRates(randomAffiliate), affiliateRateLimitBp);
     }
 
     function testUpdateAffiliateControllerNotOwner() public {

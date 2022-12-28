@@ -7,6 +7,9 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
+// Interfaces
+import {IAffiliateManager} from "../../contracts/interfaces/IAffiliateManager.sol";
+
 // Mocks and other tests
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
@@ -35,6 +38,24 @@ contract AffiliateOrdersTest is ProtocolBase {
         weth.deposit{value: _initialWETHBalanceAffiliate}();
     }
 
+    function testCannotUpdateAffiliateRateIfNotAffiliateController() public {
+        vm.expectRevert(IAffiliateManager.NotAffiliateController.selector);
+        looksRareProtocol.updateAffiliateRate(address(42), 100);
+    }
+
+    function testCannotUpdateAffiliateRateIfRateHigherthan10000() public asPrankedUser(_owner) {
+        looksRareProtocol.updateAffiliateController(_owner);
+
+        address randomAffiliate = address(42);
+        uint256 affiliateRateLimitBp = 10000;
+        vm.expectRevert(IAffiliateManager.PercentageTooHigh.selector);
+        looksRareProtocol.updateAffiliateRate(randomAffiliate, affiliateRateLimitBp + 1);
+
+        // It does not revert
+        looksRareProtocol.updateAffiliateRate(randomAffiliate, affiliateRateLimitBp);
+        assertEq(looksRareProtocol.affiliateRates(randomAffiliate), affiliateRateLimitBp);
+    }
+
     function testUpdateAffiliateControllerNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateAffiliateController(address(0));
@@ -52,7 +73,7 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -62,10 +83,10 @@ contract AffiliateOrdersTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH,
+            currency: address(0), // ETH
             signer: makerUser,
             minPrice: price,
             itemId: itemId
@@ -127,10 +148,10 @@ contract AffiliateOrdersTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
+                assetType: 0, // ERC721
                 orderNonce: i,
                 collection: address(mockERC721),
-                currency: address(0), // ETH,
+                currency: address(0), // ETH
                 signer: makerUser,
                 minPrice: price,
                 itemId: i // (0, 1, etc.)
@@ -205,14 +226,14 @@ contract AffiliateOrdersTest is ProtocolBase {
         _setUpUsers();
         _setUpAffiliate();
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

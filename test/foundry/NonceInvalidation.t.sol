@@ -28,10 +28,10 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             askNonce: 0,
             subsetNonce: subsetNonce,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH,
+            currency: address(0), // ETH
             signer: makerUser,
             minPrice: price,
             itemId: itemId
@@ -44,7 +44,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         subsetNonces[0] = subsetNonce;
 
         vm.prank(makerUser);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit SubsetNoncesCancelled(makerUser, subsetNonces);
         looksRareProtocol.cancelSubsetNonces(subsetNonces);
 
@@ -87,10 +87,10 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             askNonce: userGlobalAskNonce,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH,
+            currency: address(0), // ETH
             signer: makerUser,
             minPrice: price,
             itemId: itemId
@@ -123,7 +123,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         );
 
         vm.prank(makerUser);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit NewBidAskNonces(makerUser, 0, 1);
         looksRareProtocol.incrementBidAskNonces(false, true);
     }
@@ -140,7 +140,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             bidNonce: userGlobalBidNonce,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -171,7 +171,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         vm.prank(makerUser);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit NewBidAskNonces(makerUser, 1, 0);
         looksRareProtocol.incrementBidAskNonces(true, false);
     }
@@ -183,14 +183,14 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -367,7 +367,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         uint256 orderNonce = 69;
 
@@ -381,7 +381,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: orderNonce,
             collection: address(mockERC721),
             currency: address(weth),

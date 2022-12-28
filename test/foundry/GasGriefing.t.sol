@@ -30,7 +30,7 @@ contract GasGriefingTest is ProtocolBase {
     function testTakerBidGasGriefing() public {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(gasGriefer, itemId);
@@ -40,10 +40,10 @@ contract GasGriefingTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH,
+            currency: address(0), // ETH
             signer: gasGriefer,
             minPrice: price,
             itemId: itemId
@@ -111,10 +111,10 @@ contract GasGriefingTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721,
+                assetType: 0, // ERC721
                 orderNonce: i,
                 collection: address(mockERC721),
-                currency: address(0), // ETH,
+                currency: address(0), // ETH
                 signer: gasGriefer,
                 minPrice: price, // Fixed
                 itemId: i // (0, 1, etc.)

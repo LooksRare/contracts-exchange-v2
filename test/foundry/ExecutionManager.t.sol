@@ -5,16 +5,17 @@ pragma solidity ^0.8.17;
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 
 // Libraries and interfaces
+import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+
+// Shared errors
+import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
-    error OrderInvalid();
-
     function testUpdateCreatorFeeManager() public asPrankedUser(_owner) {
         vm.expectEmit(true, false, false, true);
         emit NewCreatorFeeManager(address(1));
@@ -293,5 +294,76 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
         );
+    }
+
+    function testCannotExecuteTransactionIfMakerBidWithStrategyForMakerAsk() public {
+        _setUpUsers();
+
+        bool isMakerBid = true;
+        vm.prank(_owner);
+        // All parameters are random, including the selector and the implementation
+        looksRareProtocol.addStrategy(250, 250, 300, 0xa9059cbb, isMakerBid, address(1));
+
+        uint256 itemId = 0;
+        uint256 price = 1 ether;
+
+        // Mint asset
+        mockERC721.mint(makerUser, itemId);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1, // Fake strategy
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(0),
+            signer: makerUser,
+            minPrice: price,
+            itemId: itemId
+        });
+
+        vm.prank(takerUser);
+        vm.expectRevert(IExecutionManager.NoSelectorForMakerAsk.selector);
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
+    }
+
+    function testCannotExecuteTransactionIfMakerAskWithStrategyForMakerBid() public {
+        _setUpUsers();
+
+        bool isMakerBid = false;
+        vm.prank(_owner);
+        // All parameters are random, including the selector and the implementation
+        looksRareProtocol.addStrategy(250, 250, 300, 0xa9059cbb, isMakerBid, address(1));
+
+        uint256 itemId = 0;
+        uint256 price = 1 ether;
+
+        // Mint asset to ask user
+        mockERC721.mint(takerUser, itemId);
+
+        // Prepare the order hash
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1, // Fake strategy
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
+
+        vm.prank(takerUser);
+        vm.expectRevert(IExecutionManager.NoSelectorForMakerBid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 }

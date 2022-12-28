@@ -14,8 +14,6 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
-    error CreatorFeeTooHigh(address collection);
-
     // Royalty fee registry
     IRoyaltyFeeRegistry public immutable royaltyFeeRegistry;
 

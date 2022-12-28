@@ -29,7 +29,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -39,10 +39,10 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0, // subsetNonce
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0, // orderNonce
             collection: address(mockERC721),
-            currency: address(0), // ETH,
+            currency: address(0), // ETH
             signer: address(maliciousERC1271Wallet),
             minPrice: price,
             itemId: itemId
@@ -75,14 +75,14 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -138,7 +138,7 @@ contract ERC1271WalletReentrancyGuardTest is ProtocolBase {
                 assetType: 0, // ERC721
                 orderNonce: i,
                 collection: address(mockERC721),
-                currency: address(0), // ETH,
+                currency: address(0), // ETH
                 signer: address(maliciousERC1271Wallet),
                 minPrice: price,
                 itemId: i // 0, 1, etc.

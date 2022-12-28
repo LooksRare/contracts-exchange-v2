@@ -20,7 +20,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         uint16 minTotalFeeBp = 250;
         bool isActive = false;
 
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit StrategyUpdated(strategyId, isActive, standardProtocolFeeBp, minTotalFeeBp);
         looksRareProtocol.updateStrategy(strategyId, standardProtocolFeeBp, minTotalFeeBp, isActive);
 
@@ -52,7 +52,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         uint16 minTotalFeeBp = 250;
         bool isActive = true;
 
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit StrategyUpdated(strategyId, isActive, standardProtocolFeeBp, minTotalFeeBp);
         looksRareProtocol.updateStrategy(strategyId, standardProtocolFeeBp, minTotalFeeBp, isActive);
 

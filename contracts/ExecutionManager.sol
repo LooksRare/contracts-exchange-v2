@@ -114,13 +114,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                     revert NoSelectorForMakerBid();
                 }
 
-                bytes4 selector = strategyInfo[makerBid.strategyId].selector;
-                if (selector == bytes4(0)) {
-                    revert NoSelectorForMakerBid();
-                }
-
                 (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
-                    abi.encodeWithSelector(selector, takerAsk, makerBid)
+                    abi.encodeWithSelector(strategyInfo[makerBid.strategyId].selector, takerAsk, makerBid)
                 );
 
                 if (!status) {
@@ -197,13 +192,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
                     revert NoSelectorForMakerAsk();
                 }
 
-                bytes4 selector = strategyInfo[makerAsk.strategyId].selector;
-                if (selector == bytes4(0)) {
-                    revert NoSelectorForMakerAsk();
-                }
-
                 (bool status, bytes memory data) = strategyInfo[makerAsk.strategyId].implementation.call(
-                    abi.encodeWithSelector(selector, takerBid, makerAsk)
+                    abi.encodeWithSelector(strategyInfo[makerAsk.strategyId].selector, takerBid, makerAsk)
                 );
 
                 if (!status) {

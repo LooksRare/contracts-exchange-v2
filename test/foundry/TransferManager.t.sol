@@ -566,53 +566,186 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         );
     }
 
-    function testCannotTransferIfOperatorRemoved() public {
+    function testCannotTransferERC721IfOperatorApprovalsRevokedByUserOrOperatorRemovedByOwner() public {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
-        // Owner removes the operators
-        vm.prank(_owner);
-        vm.expectEmit(false, false, false, false);
-        emit OperatorRemoved(_transferrer);
-        transferManager.removeOperator(_transferrer);
+        // 1. User revokes the operator
+        vm.prank(_sender);
+        vm.expectEmit(false, false, false, true);
+        emit ApprovalsRemoved(_sender, operators);
+        transferManager.revokeApprovals(operators);
 
         uint256 itemId = 500;
-
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
+
+        // 2. Sender grants again approvals but owner removes the operators
+        _grantApprovals(_sender);
+        vm.prank(_owner);
+        vm.expectEmit(false, false, false, true);
+        emit OperatorRemoved(_transferrer);
+        transferManager.removeOperator(_transferrer);
 
         vm.prank(_transferrer);
         vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
         transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
     }
 
-    function testCannotTransferIfApprovalsRemoved() public {
+    function testCannotTransferERC1155IfOperatorApprovalsRevokedByUserOrOperatorRemovedByOwner() public {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
-        // Owner removes the operators
+        // 1. User revokes the operator
         vm.prank(_sender);
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(false, false, false, true);
         emit ApprovalsRemoved(_sender, operators);
         transferManager.revokeApprovals(operators);
 
         uint256 itemId = 500;
-
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1;
+        amounts[0] = 5;
 
         vm.prank(_transferrer);
         vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
-        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
+
+        // 2. Sender grants again approvals but owner removes the operators
+        _grantApprovals(_sender);
+        vm.prank(_owner);
+        vm.expectEmit(false, false, false, true);
+        emit OperatorRemoved(_transferrer);
+        transferManager.removeOperator(_transferrer);
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
+    }
+
+    function testCannotBatchTransferIfOperatorApprovalsRevoked() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        // 1. User revokes the operator
+        vm.prank(_sender);
+        vm.expectEmit(false, false, false, true);
+        emit ApprovalsRemoved(_sender, operators);
+        transferManager.revokeApprovals(operators);
+
+        address[] memory collections = new address[](2);
+        uint256[] memory assetTypes = new uint256[](2);
+        uint256[][] memory amounts = new uint256[][](2);
+        uint256[][] memory itemIds = new uint256[][](2);
+
+        collections[0] = address(mockERC721);
+        collections[1] = address(mockERC1155);
+        assetTypes[0] = 0;
+        assetTypes[1] = 1;
+
+        uint256 itemId0 = 500;
+        uint256 itemId1 = 500;
+
+        itemIds[0] = new uint256[](1);
+        itemIds[1] = new uint256[](1);
+        itemIds[0][0] = itemId0;
+        itemIds[1][0] = itemId1;
+
+        amounts[0] = new uint256[](1);
+        amounts[1] = new uint256[](1);
+        amounts[0][0] = 1;
+        amounts[1][0] = 2;
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferBatchItemsAcrossCollections(
+            collections,
+            assetTypes,
+            _sender,
+            _recipient,
+            itemIds,
+            amounts
+        );
+
+        // 2. Sender grants again approvals but owner removes the operators
+        _grantApprovals(_sender);
+        vm.prank(_owner);
+        vm.expectEmit(false, false, false, true);
+        emit OperatorRemoved(_transferrer);
+        transferManager.removeOperator(_transferrer);
+
+        vm.prank(_transferrer);
+        vm.expectRevert(ITransferManager.TransferCallerInvalid.selector);
+        transferManager.transferBatchItemsAcrossCollections(
+            collections,
+            assetTypes,
+            _sender,
+            _recipient,
+            itemIds,
+            amounts
+        );
+    }
+
+    function testUserCannotGrantApprovalIfOperatorNotWhitelisted() public asPrankedUser(_owner) {
+        address randomOperator = address(420);
+        transferManager.whitelistOperator(randomOperator);
+        vm.expectRevert(ITransferManager.AlreadyWhitelisted.selector);
+        transferManager.whitelistOperator(randomOperator);
     }
 
     function testWhitelistOperatorNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         transferManager.whitelistOperator(address(0));
+    }
+
+    function testOwnerCannotWhitelistOperatorIfAlreadyWhitelisted() public asPrankedUser(_owner) {
+        address randomOperator = address(420);
+        transferManager.whitelistOperator(randomOperator);
+        vm.expectRevert(ITransferManager.AlreadyWhitelisted.selector);
+        transferManager.whitelistOperator(randomOperator);
+    }
+
+    function testOwnerCannotRemoveOperatorIfNotWhitelisted() public asPrankedUser(_owner) {
+        address notOperator = address(420);
+        vm.expectRevert(ITransferManager.NotWhitelisted.selector);
+        transferManager.removeOperator(notOperator);
+    }
+
+    function testUserCannotGrantApprovalsIfNotWhitelisted() public {
+        address[] memory approvedOperators = new address[](1);
+        approvedOperators[0] = _transferrer;
+
+        vm.expectRevert(ITransferManager.NotWhitelisted.selector);
+        vm.prank(_sender);
+        transferManager.grantApprovals(approvedOperators);
+    }
+
+    function testUserCannotGrantApprovalsIfAlreadyApproved() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        address[] memory approvedOperators = new address[](1);
+        approvedOperators[0] = _transferrer;
+
+        vm.expectRevert(ITransferManager.AlreadyApproved.selector);
+        vm.prank(_sender);
+        transferManager.grantApprovals(approvedOperators);
+    }
+
+    function testUserCannotRevokeApprovalsIfNotApproved() public {
+        address[] memory approvedOperators = new address[](1);
+        approvedOperators[0] = _transferrer;
+
+        vm.expectRevert(ITransferManager.NotApproved.selector);
+        vm.prank(_sender);
+        transferManager.revokeApprovals(approvedOperators);
     }
 
     function testRemoveOperatorNotOwner() public {

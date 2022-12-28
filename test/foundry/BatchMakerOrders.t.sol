@@ -199,13 +199,13 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 assetType: 0, // ERC721
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
-                currency: address(0), // ETH,
+                currency: address(0), // ETH
                 signer: makerUser,
                 minPrice: price,
                 itemId: i
             });
 
-            orderHashes[i] = computeOrderHashMakerAsk(makerAsk);
+            orderHashes[i] = _computeOrderHashMakerAsk(makerAsk);
         }
     }
 
@@ -229,7 +229,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 itemId: i
             });
 
-            orderHashes[i] = computeOrderHashMakerBid(makerBid);
+            orderHashes[i] = _computeOrderHashMakerBid(makerBid);
         }
     }
 }

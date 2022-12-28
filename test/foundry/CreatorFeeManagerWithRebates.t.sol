@@ -51,7 +51,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0,
-            assetType: 0, // ERC721,
+            assetType: 0, // ERC721
             orderNonce: 0,
             collection: erc721,
             currency: address(weth),

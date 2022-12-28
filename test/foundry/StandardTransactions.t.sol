@@ -19,13 +19,13 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
@@ -38,20 +38,8 @@ contract StandardTransactionsTest is ProtocolBase {
             itemId: itemId
         });
 
-        // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
         // Verify validity of maker ask order
         _isMakerAskOrderValid(makerAsk, signature);
-
-        // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            abi.encode()
-        );
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -87,10 +75,9 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0; // TokenId
+        uint256 itemId = 0;
 
-        // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
@@ -103,23 +90,11 @@ contract StandardTransactionsTest is ProtocolBase {
             itemId: itemId
         });
 
-        // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
         // Verify maker bid order
         _isMakerBidOrderValid(makerBid, signature);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
-
-        // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
-            abi.encode()
-        );
 
         // Execute taker ask transaction
         vm.prank(takerUser);

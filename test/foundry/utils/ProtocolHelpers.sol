@@ -17,6 +17,49 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
     bytes32 internal _domainSeparator;
 
+    function _createSingleItemMakerAskAndTakerBidOrderAndSignature(
+        uint256 askNonce,
+        uint256 subsetNonce,
+        uint256 strategyId,
+        uint256 assetType,
+        uint256 orderNonce,
+        address collection,
+        address currency,
+        address signer,
+        uint256 minPrice,
+        uint256 itemId
+    )
+        internal
+        returns (
+            OrderStructs.MakerAsk memory newMakerAsk,
+            OrderStructs.TakerBid memory newTakerBid,
+            bytes memory signature
+        )
+    {
+        newMakerAsk = _createSingleItemMakerAskOrder(
+            askNonce,
+            subsetNonce,
+            strategyId,
+            assetType,
+            orderNonce,
+            collection,
+            currency,
+            signer,
+            minPrice,
+            itemId
+        );
+
+        signature = _signMakerAsk(newMakerAsk, makerUserPK);
+
+        newTakerBid = OrderStructs.TakerBid(
+            takerUser,
+            newMakerAsk.minPrice,
+            newMakerAsk.itemIds,
+            newMakerAsk.amounts,
+            abi.encode()
+        );
+    }
+
     function _createSingleItemMakerAskOrder(
         uint256 askNonce,
         uint256 subsetNonce,
@@ -81,6 +124,49 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             amounts: amounts,
             additionalParameters: abi.encode()
         });
+    }
+
+    function _createSingleItemMakerBidAndTakerAskOrderAndSignature(
+        uint256 bidNonce,
+        uint256 subsetNonce,
+        uint256 strategyId,
+        uint256 assetType,
+        uint256 orderNonce,
+        address collection,
+        address currency,
+        address signer,
+        uint256 maxPrice,
+        uint256 itemId
+    )
+        internal
+        returns (
+            OrderStructs.MakerBid memory newMakerBid,
+            OrderStructs.TakerAsk memory newTakerAsk,
+            bytes memory signature
+        )
+    {
+        newMakerBid = _createSingleItemMakerBidOrder(
+            bidNonce,
+            subsetNonce,
+            strategyId,
+            assetType,
+            orderNonce,
+            collection,
+            currency,
+            signer,
+            maxPrice,
+            itemId
+        );
+
+        signature = _signMakerBid(newMakerBid, makerUserPK);
+
+        newTakerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            newMakerBid.maxPrice,
+            newMakerBid.itemIds,
+            newMakerBid.amounts,
+            abi.encode()
+        );
     }
 
     function _createSingleItemMakerBidOrder(

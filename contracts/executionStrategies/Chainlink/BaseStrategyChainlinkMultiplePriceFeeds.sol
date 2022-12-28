@@ -47,8 +47,12 @@ contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLa
      * @param _priceFeed Chainlink price feed address
      */
     function setPriceFeed(address _collection, address _priceFeed) external onlyOwner {
-        if (priceFeeds[_collection] != address(0)) revert PriceFeedAlreadySet();
+        if (priceFeeds[_collection] != address(0)) {
+            revert PriceFeedAlreadySet();
+        }
+
         priceFeeds[_collection] = _priceFeed;
+
         emit PriceFeedUpdated(_collection, _priceFeed);
     }
 }

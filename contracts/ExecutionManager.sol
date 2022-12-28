@@ -53,7 +53,10 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      *       Only callable by owner.
      */
     function updateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) external onlyOwner {
-        if (newMaxCreatorFeeBp > 2_500) revert CreatorFeeBpTooHigh();
+        if (newMaxCreatorFeeBp > 2_500) {
+            revert CreatorFeeBpTooHigh();
+        }
+
         maxCreatorFeeBp = newMaxCreatorFeeBp;
 
         emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
@@ -65,7 +68,10 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      * @dev Only callable by owner.
      */
     function updateProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
-        if (newProtocolFeeRecipient == address(0)) revert NewProtocolFeeRecipientCannotBeNullAddress();
+        if (newProtocolFeeRecipient == address(0)) {
+            revert NewProtocolFeeRecipientCannotBeNullAddress();
+        }
+
         protocolFeeRecipient = newProtocolFeeRecipient;
         emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
     }
@@ -104,10 +110,14 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
-                if (!strategyInfo[makerBid.strategyId].isMakerBid) revert NoSelectorForMakerBid();
+                if (!strategyInfo[makerBid.strategyId].isMakerBid) {
+                    revert NoSelectorForMakerBid();
+                }
 
                 bytes4 selector = strategyInfo[makerBid.strategyId].selector;
-                if (selector == bytes4(0)) revert NoSelectorForMakerBid();
+                if (selector == bytes4(0)) {
+                    revert NoSelectorForMakerBid();
+                }
 
                 (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerAsk, makerBid)
@@ -129,7 +139,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerBid.collection, price, itemIds);
-                if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
+                if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+                    revert CreatorFeeBpTooHigh();
+                }
             }
 
             uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
@@ -181,10 +193,14 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerAsk.strategyId].isActive) {
-                if (strategyInfo[makerAsk.strategyId].isMakerBid) revert NoSelectorForMakerAsk();
+                if (strategyInfo[makerAsk.strategyId].isMakerBid) {
+                    revert NoSelectorForMakerAsk();
+                }
 
                 bytes4 selector = strategyInfo[makerAsk.strategyId].selector;
-                if (selector == bytes4(0)) revert NoSelectorForMakerAsk();
+                if (selector == bytes4(0)) {
+                    revert NoSelectorForMakerAsk();
+                }
 
                 (bool status, bytes memory data) = strategyInfo[makerAsk.strategyId].implementation.call(
                     abi.encodeWithSelector(selector, takerBid, makerAsk)
@@ -206,7 +222,9 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
             // Creator fee and adjustment of protocol fee
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
-                if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) revert CreatorFeeBpTooHigh();
+                if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+                    revert CreatorFeeBpTooHigh();
+                }
             }
             uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
 
@@ -254,6 +272,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
      * @param endTime End timestamp
      */
     function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) private view {
-        if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
+        if (startTime > block.timestamp || endTime < block.timestamp) {
+            revert OutsideOfTimeRange();
+        }
     }
 }

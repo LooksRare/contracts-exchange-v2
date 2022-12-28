@@ -107,7 +107,9 @@ contract LooksRareProtocol is
         address affiliate
     ) external nonReentrant {
         // Verify whether the currency is whitelisted but is not ETH (address(0))
-        if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) revert WrongCurrency();
+        if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) {
+            revert WrongCurrency();
+        }
 
         address signer = makerBid.signer;
         bytes32 orderHash = makerBid.hash();
@@ -131,7 +133,9 @@ contract LooksRareProtocol is
         address affiliate
     ) external payable nonReentrant {
         // Verify whether the currency is whitelisted
-        if (!isCurrencyWhitelisted[makerAsk.currency]) revert WrongCurrency();
+        if (!isCurrencyWhitelisted[makerAsk.currency]) {
+            revert WrongCurrency();
+        }
 
         bytes32 orderHash = makerAsk.hash();
         _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, makerAsk.signer);
@@ -161,11 +165,15 @@ contract LooksRareProtocol is
         if (
             length == 0 ||
             (makerAsks.length ^ length) | (makerSignatures.length ^ length) | (merkleTrees.length ^ length) != 0
-        ) revert WrongLengths();
+        ) {
+            revert WrongLengths();
+        }
 
         // Verify whether the currency at array = 0 is whitelisted
         address currency = makerAsks[0].currency;
-        if (!isCurrencyWhitelisted[currency]) revert WrongCurrency();
+        if (!isCurrencyWhitelisted[currency]) {
+            revert WrongCurrency();
+        }
 
         {
             // Initialize protocol fee
@@ -176,7 +184,9 @@ contract LooksRareProtocol is
 
                 // Verify currency is the same
                 if (i != 0) {
-                    if (makerAsk.currency != currency) revert WrongCurrency();
+                    if (makerAsk.currency != currency) {
+                        revert WrongCurrency();
+                    }
                 }
 
                 OrderStructs.TakerBid calldata takerBid = takerBids[i];
@@ -226,7 +236,10 @@ contract LooksRareProtocol is
         address sender,
         bytes32 orderHash
     ) external returns (uint256 protocolFeeAmount) {
-        if (msg.sender != address(this)) revert WrongCaller();
+        if (msg.sender != address(this)) {
+            revert WrongCaller();
+        }
+
         protocolFeeAmount = _executeTakerBid(takerBid, makerAsk, sender, orderHash);
     }
 
@@ -250,7 +263,10 @@ contract LooksRareProtocol is
      * @dev Only callable by owner.
      */
     function updateETHGasLimitForTransfer(uint256 newGasLimitETHTransfer) external onlyOwner {
-        if (newGasLimitETHTransfer < 2_300) revert NewGasLimitETHTransferTooLow();
+        if (newGasLimitETHTransfer < 2_300) {
+            revert NewGasLimitETHTransferTooLow();
+        }
+
         _gasLimitETHTransfer = newGasLimitETHTransfer;
 
         emit NewGasLimitETHTransfer(newGasLimitETHTransfer);
@@ -276,7 +292,9 @@ contract LooksRareProtocol is
                 userBidAskNonces[signer].bidNonce != makerBid.bidNonce ||
                 userSubsetNonce[signer][makerBid.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
-            ) revert WrongNonces();
+            ) {
+                revert WrongNonces();
+            }
         }
 
         (
@@ -336,7 +354,9 @@ contract LooksRareProtocol is
                 userBidAskNonces[signer].askNonce != makerAsk.askNonce ||
                 userSubsetNonce[signer][makerAsk.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
-            ) revert WrongNonces();
+            ) {
+                revert WrongNonces();
+            }
         }
 
         (
@@ -529,8 +549,9 @@ contract LooksRareProtocol is
         address signer
     ) private view {
         if (merkleTree.proof.length != 0) {
-            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash))
+            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 revert WrongMerkleProof();
+            }
             _computeDigestAndVerify(merkleTree.hash(), signature, signer);
         } else {
             _computeDigestAndVerify(orderHash, signature, signer);

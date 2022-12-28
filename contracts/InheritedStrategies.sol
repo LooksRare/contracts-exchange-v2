@@ -84,7 +84,9 @@ contract InheritedStrategies {
                 (amountsLength ^ counterpartyItemIdsLength)) !=
             0 ||
             price != counterpartyPrice
-        ) revert OrderInvalid();
+        ) {
+            revert OrderInvalid();
+        }
     }
 
     function _verifyMatchingItemIdsAndAmounts(
@@ -95,8 +97,9 @@ contract InheritedStrategies {
         uint256[] calldata counterpartyItemIds
     ) private pure {
         for (uint256 i; i < length; ) {
-            if ((amounts[i] != counterpartyAmounts[i]) || amounts[i] == 0 || (itemIds[i] != counterpartyItemIds[i]))
+            if ((amounts[i] != counterpartyAmounts[i]) || amounts[i] == 0 || (itemIds[i] != counterpartyItemIds[i])) {
                 revert OrderInvalid();
+            }
 
             unchecked {
                 ++i;

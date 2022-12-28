@@ -34,7 +34,9 @@ contract NonceManager is INonceManager {
      */
     function cancelOrderNonces(uint256[] calldata orderNonces) external {
         uint256 length = orderNonces.length;
-        if (length == 0) revert WrongLengths();
+        if (length == 0) {
+            revert WrongLengths();
+        }
 
         for (uint256 i; i < length; ) {
             userOrderNonce[msg.sender][orderNonces[i]] = MAGIC_VALUE_ORDER_NONCE_EXECUTED;
@@ -51,7 +53,9 @@ contract NonceManager is INonceManager {
      * @param subsetNonces Array of subset nonces
      */
     function cancelSubsetNonces(uint256[] calldata subsetNonces) external {
-        if (subsetNonces.length == 0) revert WrongLengths();
+        if (subsetNonces.length == 0) {
+            revert WrongLengths();
+        }
 
         for (uint256 i; i < subsetNonces.length; ) {
             userSubsetNonce[msg.sender][subsetNonces[i]] = true;

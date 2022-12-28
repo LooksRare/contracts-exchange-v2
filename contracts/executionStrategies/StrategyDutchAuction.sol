@@ -29,11 +29,19 @@ contract StrategyDutchAuction {
     {
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
-        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) revert OrderInvalid();
+        if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
+            revert OrderInvalid();
+        }
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
-            if (amount == 0) revert OrderInvalid();
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) revert OrderInvalid();
+
+            if (amount == 0) {
+                revert OrderInvalid();
+            }
+
+            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) {
+                revert OrderInvalid();
+            }
 
             unchecked {
                 ++i;
@@ -42,7 +50,9 @@ contract StrategyDutchAuction {
 
         uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
 
-        if (startPrice < makerAsk.minPrice) revert OrderInvalid();
+        if (startPrice < makerAsk.minPrice) {
+            revert OrderInvalid();
+        }
 
         uint256 duration = makerAsk.endTime - makerAsk.startTime;
         uint256 decayPerSecond = (startPrice - makerAsk.minPrice) / duration;
@@ -50,7 +60,9 @@ contract StrategyDutchAuction {
         uint256 elapsedTime = block.timestamp - makerAsk.startTime;
         price = startPrice - elapsedTime * decayPerSecond;
 
-        if (takerBid.maxPrice < price) revert BidTooLow();
+        if (takerBid.maxPrice < price) {
+            revert BidTooLow();
+        }
 
         isNonceInvalidated = true;
 

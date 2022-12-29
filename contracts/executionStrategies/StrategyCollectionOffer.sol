@@ -49,8 +49,8 @@ contract StrategyCollectionOffer {
             revert OrderInvalid();
         }
 
-        if (amounts[0] != 1) {
-            if (amounts[0] == 0) {
+        if (makerAmount != 1) {
+            if (makerAmount == 0) {
                 revert OrderInvalid();
             }
             if (makerBid.assetType == 0) {

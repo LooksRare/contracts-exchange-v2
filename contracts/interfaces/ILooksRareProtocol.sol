@@ -109,6 +109,11 @@ interface ILooksRareProtocol {
     error SameDomainSeparator();
 
     /**
+     * @notice It is returned if the domain separator should change.
+     */
+    error WrongChainId();
+
+    /**
      * @notice It is returned if the nonces are not valid.
      */
     error WrongNonces();

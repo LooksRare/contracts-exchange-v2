@@ -39,14 +39,23 @@ contract StrategyCollectionOffer {
         isNonceInvalidated = true;
 
         // A collection order can only be executable for 1 itemId but quantity to fill can vary
-        if (
-            itemIds.length != 1 ||
-            amounts.length != 1 ||
-            price != takerAsk.minPrice ||
-            takerAsk.amounts[0] != amounts[0] ||
-            amounts[0] == 0
-        ) {
+        if (itemIds.length != 1 || amounts.length != 1 || price != takerAsk.minPrice) {
             revert OrderInvalid();
+        }
+
+        uint256 makerAmount = amounts[0];
+
+        if (makerAmount != takerAsk.amounts[0]) {
+            revert OrderInvalid();
+        }
+
+        if (amounts[0] != 1) {
+            if (amounts[0] == 0) {
+                revert OrderInvalid();
+            }
+            if (makerBid.assetType == 0) {
+                revert OrderInvalid();
+            }
         }
     }
 
@@ -69,16 +78,22 @@ contract StrategyCollectionOffer {
         amounts = makerBid.amounts;
         isNonceInvalidated = true;
 
-        // A collection order can only be executable for 1 itemId but quantity to fill can vary
-        {
-            if (
-                itemIds.length != 1 ||
-                amounts.length != 1 ||
-                price != takerAsk.minPrice ||
-                takerAsk.amounts[0] != amounts[0] ||
-                amounts[0] == 0 ||
-                makerBid.additionalParameters.length == 0
-            ) {
+        // A collection order can only be executable for 1 itemId but the actual quantity to fill can vary
+        if (itemIds.length != 1 || amounts.length != 1 || price != takerAsk.minPrice) {
+            revert OrderInvalid();
+        }
+
+        uint256 makerAmount = amounts[0];
+
+        if (makerAmount != takerAsk.amounts[0]) {
+            revert OrderInvalid();
+        }
+
+        if (makerAmount != 1) {
+            if (makerAmount == 0) {
+                revert OrderInvalid();
+            }
+            if (makerBid.assetType == 0) {
                 revert OrderInvalid();
             }
         }
@@ -108,10 +123,18 @@ contract StrategyCollectionOffer {
     function isValid(
         OrderStructs.MakerBid calldata makerBid
     ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
-        if (makerBid.amounts.length != 1 || makerBid.amounts[0] == 0) {
-            errorSelector = OrderInvalid.selector;
-        } else {
-            orderIsValid = true;
+        if (makerBid.amounts.length != 1) {
+            return (orderIsValid, OrderInvalid.selector);
         }
+
+        if (makerBid.amounts[0] != 1) {
+            if (makerBid.amounts[0] == 0) {
+                return (orderIsValid, OrderInvalid.selector);
+            }
+            if (makerBid.assetType == 0) {
+                return (orderIsValid, OrderInvalid.selector);
+            }
+        }
+        orderIsValid = true;
     }
 }

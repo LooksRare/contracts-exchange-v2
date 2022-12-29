@@ -62,6 +62,17 @@ contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
                 revert OrderInvalid();
             }
 
+            uint256 amount = makerAsk.amounts[i];
+
+            if (amount != 1) {
+                if (amount == 0) {
+                    revert OrderInvalid();
+                }
+                if (makerAsk.assetType == 0) {
+                    revert OrderInvalid();
+                }
+            }
+
             unchecked {
                 ++i;
             }
@@ -119,6 +130,20 @@ contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
             return (orderIsValid, OrderInvalid.selector);
+        }
+
+        for (uint256 i; i < itemIdsLength; ) {
+            uint256 amount = makerAsk.amounts[i];
+
+            if (makerAsk.assetType == 0 && amount != 1) {
+                return (orderIsValid, OrderInvalid.selector);
+            } else if (amount == 0) {
+                return (orderIsValid, OrderInvalid.selector);
+            }
+
+            unchecked {
+                ++i;
+            }
         }
 
         if (makerAsk.currency != address(0)) {

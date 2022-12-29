@@ -8,14 +8,14 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {OrderInvalid} from "./interfaces/SharedErrors.sol";
 
 /**
- * @title InheritedStrategies
- * @notice This contract handles the execution of inherited strategies.
- * @dev StrategyId = 0 --> Standard Order
+ * @title InheritedStrategy
+ * @notice This contract handles the verification of parameters for standard transactions.
+ * @dev StrategyId = 0 --> Standard sale
  * @author LooksRare protocol team (👀,💎)
  */
-contract InheritedStrategies {
+contract InheritedStrategy {
     /**
-     * @notice Execute standard sale strategy with taker bid order
+     * @notice Verify the parameters for a standard sale strategy where it is initiated by the taker bid order
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      */
@@ -45,7 +45,7 @@ contract InheritedStrategies {
     }
 
     /**
-     * @notice Execute standard sale strategy with taker ask order
+     * @notice Verify the parameters for a standard sale strategy where it is initiated by the taker ask order
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      */

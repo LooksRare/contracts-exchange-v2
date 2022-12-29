@@ -120,7 +120,7 @@ contract CollectionOrdersTest is ProtocolBase {
 
     function testAmountsMismatch() public {
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
-            address(mockERC721),
+            address(mockERC1155),
             address(weth)
         );
 

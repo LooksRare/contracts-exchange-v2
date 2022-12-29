@@ -5,10 +5,11 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid} from "../interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, WrongFunctionSelector} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyDutchAuction
+ * @notice This contract offers a single execution strategies for users to create Dutch auctions.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyDutchAuction {
@@ -80,25 +81,31 @@ contract StrategyDutchAuction {
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param functionSelector Function selector for the strategy
      * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
-     * @return orderIsValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
-    function isValid(
-        OrderStructs.MakerAsk calldata makerAsk
-    ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
+    function isMakerAskValid(
+        OrderStructs.MakerAsk calldata makerAsk,
+        bytes4 functionSelector
+    ) external pure returns (bool isValid, bytes4 errorSelector) {
+        if (functionSelector != StrategyDutchAuction.executeStrategyWithTakerBid.selector) {
+            return (isValid, WrongFunctionSelector.selector);
+        }
+
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
         }
 
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
             if (makerAsk.assetType == 0 && amount != 1) {
-                return (orderIsValid, OrderInvalid.selector);
+                return (isValid, OrderInvalid.selector);
             } else if (amount == 0) {
-                return (orderIsValid, OrderInvalid.selector);
+                return (isValid, OrderInvalid.selector);
             }
 
             unchecked {
@@ -109,9 +116,9 @@ contract StrategyDutchAuction {
         uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
 
         if (startPrice < makerAsk.minPrice) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
         }
 
-        orderIsValid = true;
+        isValid = true;
     }
 }

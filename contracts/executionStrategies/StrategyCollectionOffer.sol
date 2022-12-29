@@ -12,7 +12,7 @@ import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfac
 
 /**
  * @title StrategyCollectionOffer
- * @notice This contract allows users to create maker bid offers for items in a collection.
+ * @notice This contract offers execution strategies for users to create maker bid offers for items in a collection.
  *         There are two available functions:
  *         1. executeCollectionStrategyWithTakerAsk --> it applies to all item ids in a collection
  *         2. executeCollectionStrategyWithTakerAskWithProof --> it is same except that it allows adding merkle proof criteria.
@@ -124,19 +124,19 @@ contract StrategyCollectionOffer {
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
         ) {
-            return (orderIsValid, WrongFunctionSelector.selector);
+            return (isValid, WrongFunctionSelector.selector);
         }
 
         if (makerBid.amounts.length != 1) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
         }
 
         if (makerBid.amounts[0] != 1) {
             if (makerBid.amounts[0] == 0) {
-                return (orderIsValid, OrderInvalid.selector);
+                return (isValid, OrderInvalid.selector);
             }
             if (makerBid.assetType == 0) {
-                return (orderIsValid, OrderInvalid.selector);
+                return (isValid, OrderInvalid.selector);
             }
         }
 
@@ -146,9 +146,9 @@ contract StrategyCollectionOffer {
             functionSelector == StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             makerBid.additionalParameters.length != 32
         ) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
         }
 
-        orderIsValid = true;
+        isValid = true;
     }
 }

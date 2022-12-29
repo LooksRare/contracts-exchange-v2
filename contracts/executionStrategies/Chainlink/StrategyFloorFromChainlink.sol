@@ -20,6 +20,11 @@ import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelecto
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
+    /**
+     * @notice It is returned if the fixed discount for a maker bid is greater than floor price.
+     */
+    error DiscountGreaterThanFloorPrice();
+
     // WETH
     address public immutable WETH;
 
@@ -177,7 +182,7 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
         uint256 discountAmount = abi.decode(makerBid.additionalParameters, (uint256));
 
         if (floorPrice <= discountAmount) {
-            revert OrderInvalid();
+            revert DiscountGreaterThanFloorPrice();
         }
 
         uint256 desiredPrice = floorPrice - discountAmount;
@@ -336,7 +341,8 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
 
         if (functionSelector == StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector) {
             if (floorPrice <= discount) {
-                return (isValid, OrderInvalid.selector);
+                // A special selector is returned to differentiate with OrderInvalid since the maker can potentially become valid again
+                return (isValid, DiscountGreaterThanFloorPrice.selector);
             }
         }
 

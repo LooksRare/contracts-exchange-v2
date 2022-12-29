@@ -24,7 +24,6 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
     function setUp() public override {
         _setIsFixedAmount(0);
         _setDiscount(100);
-        _setValidityFunctionSelector(StrategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid.selector);
         _setSelector(StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector, true);
         super.setUp();
     }
@@ -41,7 +40,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
@@ -66,7 +65,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
@@ -94,7 +93,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
@@ -120,7 +119,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isBasisPointsDiscountMakerBidValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 

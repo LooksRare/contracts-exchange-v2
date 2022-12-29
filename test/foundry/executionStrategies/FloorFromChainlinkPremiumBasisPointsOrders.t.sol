@@ -34,7 +34,9 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
 
-        _assertOrderValid(makerAsk);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -68,7 +70,12 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         bytes memory signature = _signMakerAsk(newMakerAsk, makerUserPK);
 
         _setPriceFeed();
-        _assertOrderValid(newMakerAsk);
+
+        // Verify it is valid
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(newMakerAsk, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
+
         _executeTakerBid(newTakerBid, newMakerAsk, signature);
 
         // Taker user has received the asset
@@ -95,7 +102,12 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _setPriceFeed();
-        _assertOrderValid(makerAsk);
+
+        // Verify it is valid
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
+
         _executeTakerBid(takerBid, makerAsk, signature);
 
         // Taker user has received the asset

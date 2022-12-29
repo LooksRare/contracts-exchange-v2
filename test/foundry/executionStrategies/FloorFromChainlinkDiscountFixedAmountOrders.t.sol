@@ -18,7 +18,6 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function setUp() public override {
         _setIsFixedAmount(1);
         _setDiscount(0.1 ether);
-        _setValidityFunctionSelector(StrategyFloorFromChainlink.isFixedDiscountMakerBidValid.selector);
         _setSelector(StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector, true);
         super.setUp();
     }
@@ -35,7 +34,9 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        _assertOrderValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
@@ -58,7 +59,9 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        _assertOrderValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         _executeTakerAsk(takerAsk, makerBid, signature);
 
@@ -84,7 +87,9 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        _assertOrderValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         _executeTakerAsk(takerAsk, makerBid, signature);
 
@@ -108,7 +113,9 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderInvalid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, StrategyFloorFromChainlink.DiscountGreaterThanFloorPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -118,7 +125,11 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         makerBid.additionalParameters = abi.encode(9.8 ether);
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        vm.expectRevert(OrderInvalid.selector);
+        (isValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, StrategyFloorFromChainlink.DiscountGreaterThanFloorPrice.selector);
+
+        vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 }

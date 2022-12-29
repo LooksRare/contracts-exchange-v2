@@ -14,9 +14,10 @@ import "../../../contracts/interfaces/SharedErrors.sol";
 import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
 import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
 
+import "hardhat/console.sol";
+
 abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrdersTest {
     uint256 internal discount;
-    bytes4 private validityFunctionSelector;
 
     function testFloorFromChainlinkDiscountPriceFeedNotAvailable() public {
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
@@ -28,10 +29,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         vm.prank(_owner);
         strategyFloorFromChainlink.updateMaxLatency(MAXIMUM_LATENCY);
 
-        bytes4 errorSelector = _assertOrderInvalid(
-            makerBid,
-            BaseStrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector
-        );
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, BaseStrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -47,10 +47,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         vm.prank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
 
-        bytes4 errorSelector = _assertOrderInvalid(
-            makerBid,
-            BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector
-        );
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -70,16 +69,18 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
         vm.stopPrank();
 
-        bytes4 errorSelector = _assertOrderInvalid(
-            makerBid,
-            BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector
-        );
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
 
         aggregator.setAnswer(-1);
-        errorSelector = _assertOrderInvalid(makerBid, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
+
+        (isValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -97,7 +98,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        _assertOrderValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -115,7 +118,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        _assertOrderValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -132,7 +137,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderInvalid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -153,7 +160,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        _assertOrderValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -173,7 +182,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderInvalid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -190,7 +201,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        _assertOrderValid(makerBid);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.expectRevert(AskTooHigh.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -209,7 +222,9 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         _setPriceFeed();
 
-        bytes4 errorSelector = _assertOrderInvalid(makerBid, WrongCurrency.selector);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, WrongCurrency.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -217,37 +232,6 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
     function _setDiscount(uint256 _discount) internal {
         discount = _discount;
-    }
-
-    function _setValidityFunctionSelector(bytes4 _validityFunctionSelector) internal {
-        validityFunctionSelector = _validityFunctionSelector;
-    }
-
-    function _assertOrderValid(OrderStructs.MakerBid memory makerBid) internal {
-        (, bytes memory data) = address(strategyFloorFromChainlink).call(
-            abi.encodeWithSelector(validityFunctionSelector, makerBid)
-        );
-        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-    }
-
-    function _assertOrderInvalid(OrderStructs.MakerBid memory makerBid) internal returns (bytes4) {
-        return _assertOrderInvalid(makerBid, OrderInvalid.selector);
-    }
-
-    function _assertOrderInvalid(
-        OrderStructs.MakerBid memory makerBid,
-        bytes4 expectedError
-    ) internal returns (bytes4) {
-        (, bytes memory data) = address(strategyFloorFromChainlink).call(
-            abi.encodeWithSelector(validityFunctionSelector, makerBid)
-        );
-        (bool isValid, bytes4 errorSelector) = abi.decode(data, (bool, bytes4));
-        assertFalse(isValid);
-        assertEq(errorSelector, expectedError);
-
-        return errorSelector;
     }
 
     function _executeTakerAsk(

@@ -114,8 +114,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
+        // Execute taker ask transaction
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
@@ -183,8 +183,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
+        // Execute taker ask transaction
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
@@ -198,38 +198,40 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
     }
 
-    function testTakerAskForceAmountOneIfERC721() public {
+    function testTakerAskRevertIfAmountIsZeroOrGreaterThanOneERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
 
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
         uint256[] memory invalidAmounts = new uint256[](3);
         invalidAmounts[0] = 1;
-        invalidAmounts[1] = 0;
+        invalidAmounts[1] = 2;
         invalidAmounts[2] = 2;
 
         takerAsk.amounts = invalidAmounts;
 
-        // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
+        // The maker bid order is still valid since the error comes from the taker ask amounts.
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isValid(makerBid);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
+        // It fails at 2nd item in the array (greater than 1)
+        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        // Maker user has received the asset
-        assertEq(mockERC721.ownerOf(5), makerUser);
-        assertEq(mockERC721.ownerOf(7), makerUser);
-        assertEq(mockERC721.ownerOf(10), makerUser);
+        // Re-adjust the amounts
+        takerAsk.amounts[0] = 0;
+        takerAsk.amounts[1] = 1;
+        takerAsk.amounts[2] = 1;
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
-        // Taker ask user receives 98% of the whole price (2% protocol fee)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
+        // It now fails at 1st item in the array (equal to 0)
+        vm.expectRevert(OrderInvalid.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
@@ -252,8 +254,8 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, OrderInvalid.selector);
 
         vm.expectRevert(errorSelector);
+        // Execute taker ask transaction
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // lower band == upper band
@@ -266,7 +268,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -292,7 +293,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -317,7 +317,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -347,7 +346,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -368,7 +366,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -390,7 +387,6 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         vm.prank(takerUser);
-        // Execute taker bid transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 }

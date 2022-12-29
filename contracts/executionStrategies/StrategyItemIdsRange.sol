@@ -47,15 +47,20 @@ contract StrategyItemIdsRange {
                 revert OrderInvalid();
             }
 
-            // If ERC721, force amount to be 1.
-            uint256 offeredAmount = makerBid.assetType == 0 ? 1 : takerAsk.amounts[i];
-            if (offeredAmount == 0) {
-                revert OrderInvalid();
+            uint256 amount = takerAsk.amounts[i];
+
+            if (amount != 1) {
+                if (amount == 0) {
+                    revert OrderInvalid();
+                }
+                if (makerBid.assetType == 0) {
+                    revert OrderInvalid();
+                }
             }
 
             if (offeredItemId >= minItemId) {
                 if (offeredItemId <= maxItemId) {
-                    totalOfferedAmount += offeredAmount;
+                    totalOfferedAmount += amount;
                 }
             }
 

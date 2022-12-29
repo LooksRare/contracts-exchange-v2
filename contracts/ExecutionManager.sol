@@ -9,7 +9,7 @@ import {IExecutionManager} from "./interfaces/IExecutionManager.sol";
 import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
 
 // Direct dependencies
-import {InheritedStrategies} from "./InheritedStrategies.sol";
+import {InheritedStrategy} from "./InheritedStrategy.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
@@ -20,7 +20,7 @@ import {StrategyManager} from "./StrategyManager.sol";
  *         For instance, a taker ask is executed against a maker bid (or a taker bid against a maker ask).
  * @author LooksRare protocol team (👀,💎)
  */
-contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager, IExecutionManager {
+contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, IExecutionManager {
     // Protocol fee recipient
     address public protocolFeeRecipient;
 
@@ -106,7 +106,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
 
         if (makerBid.strategyId == 0) {
-            (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
+            _verifyStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
+            (price, itemIds, amounts) = (makerBid.maxPrice, makerBid.itemIds, makerBid.amounts);
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
@@ -184,7 +185,8 @@ contract ExecutionManager is InheritedStrategies, NonceManager, StrategyManager,
         _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
 
         if (makerAsk.strategyId == 0) {
-            (price, itemIds, amounts) = _executeStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
+            _verifyStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
+            (price, itemIds, amounts) = (makerAsk.minPrice, makerAsk.itemIds, makerAsk.amounts);
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerAsk.strategyId].isActive) {

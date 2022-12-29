@@ -11,7 +11,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMultiplePriceFeeds.sol";
 
 // Shared errors
-import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency} from "../../interfaces/SharedErrors.sol";
+import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyFloorFromChainlink
@@ -259,26 +259,34 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
      * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
-     * @return orderIsValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
     function isMakerAskValid(
-        OrderStructs.MakerAsk calldata makerAsk
-    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
+        OrderStructs.MakerAsk calldata makerAsk,
+        bytes4 functionSelector
+    ) external view returns (bool isValid, bytes4 errorSelector) {
+        if (
+            functionSelector != StrategyFloorFromChainlink.executeBasisPointsPremiumStrategyWithTakerBid.selector &&
+            functionSelector != StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector
+        ) {
+            return (isValid, WrongFunctionSelector.selector);
+        }
+
         if (makerAsk.currency != address(0)) {
             if (makerAsk.currency != WETH) {
-                return (orderIsValid, WrongCurrency.selector);
+                return (isValid, WrongCurrency.selector);
             }
         }
 
         if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
         }
 
         (, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerAsk.collection);
 
         if (priceFeedErrorSelector == bytes4(0)) {
-            orderIsValid = true;
+            isValid = true;
         } else {
             errorSelector = priceFeedErrorSelector;
         }
@@ -288,67 +296,51 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
-     * @return orderIsValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @param functionSelector Function selector for the strategy
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
      */
-    function isFixedDiscountMakerBidValid(
-        OrderStructs.MakerBid calldata makerBid
-    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
+    function isMakerBidValid(
+        OrderStructs.MakerBid calldata makerBid,
+        bytes4 functionSelector
+    ) external view returns (bool isValid, bytes4 errorSelector) {
+        if (
+            functionSelector != StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector &&
+            functionSelector != StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector
+        ) {
+            return (isValid, WrongCurrency.selector);
+        }
+
         if (makerBid.currency != WETH) {
-            return (orderIsValid, WrongCurrency.selector);
+            return (isValid, WrongCurrency.selector);
         }
 
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
+        }
+
+        uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
+
+        if (functionSelector == StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector) {
+            if (discount >= 10_000) {
+                return (isValid, OrderInvalid.selector);
+            }
         }
 
         (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerBid.collection);
 
-        if (priceFeedErrorSelector != bytes4(0)) {
-            return (orderIsValid, priceFeedErrorSelector);
+        if (functionSelector == StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector) {
+            if (floorPrice <= discount) {
+                return (isValid, OrderInvalid.selector);
+            }
         }
-
-        uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-        if (floorPrice <= discount) {
-            return (orderIsValid, OrderInvalid.selector);
-        }
-
-        orderIsValid = true;
-    }
-
-    /**
-     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
-     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
-     * @return orderIsValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, return the error's 4 bytes selector
-     * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
-     */
-    function isBasisPointsDiscountMakerBidValid(
-        OrderStructs.MakerBid calldata makerBid
-    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
-        if (makerBid.currency != WETH) {
-            return (orderIsValid, WrongCurrency.selector);
-        }
-
-        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
-            return (orderIsValid, OrderInvalid.selector);
-        }
-
-        (, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerBid.collection);
 
         if (priceFeedErrorSelector != bytes4(0)) {
-            return (orderIsValid, priceFeedErrorSelector);
+            return (isValid, priceFeedErrorSelector);
         }
 
-        uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-
-        if (discount >= 10_000) {
-            return (orderIsValid, OrderInvalid.selector);
-        }
-
-        orderIsValid = true;
+        isValid = true;
     }
 
     function _getFloorPrice(address collection) private view returns (uint256 price) {

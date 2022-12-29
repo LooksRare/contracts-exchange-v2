@@ -32,11 +32,17 @@ contract StrategyDutchAuction {
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
             revert OrderInvalid();
         }
+
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
 
-            if (amount == 0) {
-                revert OrderInvalid();
+            if (amount != 1) {
+                if (amount == 0) {
+                    revert OrderInvalid();
+                }
+                if (makerAsk.assetType == 0) {
+                    revert OrderInvalid();
+                }
             }
 
             if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) {
@@ -86,9 +92,12 @@ contract StrategyDutchAuction {
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
             return (orderIsValid, OrderInvalid.selector);
         }
+
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
-            if (amount == 0) {
+            if (makerAsk.assetType == 0 && amount != 1) {
+                return (orderIsValid, OrderInvalid.selector);
+            } else if (amount == 0) {
                 return (orderIsValid, OrderInvalid.selector);
             }
 

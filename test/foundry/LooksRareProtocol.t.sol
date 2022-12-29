@@ -164,30 +164,4 @@ contract LooksRareProtocolTest is ProtocolBase {
         vm.expectRevert(WrongCaller.selector);
         looksRareProtocol.restrictedExecuteTakerBid(takerBid, makerAsk, takerUser, _computeOrderHashMakerAsk(makerAsk));
     }
-
-    function testUpdateDomainSeparator() public {
-        uint256 newChainId = 69_420;
-        vm.chainId(newChainId);
-        vm.expectEmit(true, false, false, true);
-        emit NewDomainSeparator();
-        looksRareProtocol.updateDomainSeparator();
-        assertEq(looksRareProtocol.chainId(), newChainId);
-        assertEq(
-            looksRareProtocol.domainSeparator(),
-            keccak256(
-                abi.encode(
-                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                    keccak256("LooksRareProtocol"),
-                    keccak256(bytes("2")),
-                    newChainId,
-                    address(looksRareProtocol)
-                )
-            )
-        );
-    }
-
-    function testUpdateDomainSeparatorSameDomainSeparator() public {
-        vm.expectRevert(SameDomainSeparator.selector);
-        looksRareProtocol.updateDomainSeparator();
-    }
 }

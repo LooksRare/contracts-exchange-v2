@@ -245,10 +245,10 @@ contract LooksRareProtocol is
 
     /**
      * @notice Update the domain separator
-     * @dev If there is a fork of the network with a new chainId, it allows the owner to reset the domain separator for
-     *      the chain with the new id. Anyone can call this function.
+     * @dev  Only callable by owner. If there is a fork of the network with a new chainId,
+     *      it allows the owner to reset the domain separator for the new chain id.
      */
-    function updateDomainSeparator() external {
+    function updateDomainSeparator() external onlyOwner {
         if (block.chainid != chainId) {
             _updateDomainSeparator();
             emit NewDomainSeparator();
@@ -457,17 +457,22 @@ contract LooksRareProtocol is
 
     /**
      * @notice Compute digest and verify
+     * @dev If chainId is not equal to the cached chain id, it would revert.
      * @param computedHash Hash of order (maker bid or maker ask) or merkle root
      * @param makerSignature Signature of the maker
      * @param signer Signer address
      */
     function _computeDigestAndVerify(bytes32 computedHash, bytes calldata makerSignature, address signer) private view {
-        // \x19\x01 is the encoding prefix
-        SignatureChecker.verify(
-            keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash)),
-            signer,
-            makerSignature
-        );
+        if (chainId == block.chainid) {
+            // \x19\x01 is the standard encoding prefix
+            SignatureChecker.verify(
+                keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash)),
+                signer,
+                makerSignature
+            );
+        } else {
+            revert WrongChainId();
+        }
     }
 
     /**

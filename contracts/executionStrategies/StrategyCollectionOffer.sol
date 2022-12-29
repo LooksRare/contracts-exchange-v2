@@ -14,9 +14,9 @@ import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfac
  * @title StrategyCollectionOffer
  * @notice This contract allows users to create maker bid offers for items in a collection.
  *         There are two available functions:
- *         1. executeCollectionStrategyWithTakerAsk --> it applies to all item ids in a collection, the second
+ *         1. executeCollectionStrategyWithTakerAsk --> it applies to all item ids in a collection
  *         2. executeCollectionStrategyWithTakerAskWithProof --> it is same except that it allows adding merkle proof criteria.
- *            Use cases include trait-based offers or rarity score offers.
+ * @dev Use cases can include trait-based offers or rarity score offers.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyCollectionOffer {
@@ -102,7 +102,7 @@ contract StrategyCollectionOffer {
         bytes32[] memory proof = abi.decode(takerAsk.additionalParameters, (bytes32[]));
         bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
 
-        // Verify the merkle proof
+        // Verify the merkle root for the given merkle proof
         if (!MerkleProofMemory.verify(proof, root, node)) {
             revert WrongMerkleProof();
         }
@@ -112,14 +112,14 @@ contract StrategyCollectionOffer {
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
-     * @param functionSelector Function selector for the makerBid to be used
-     * @return orderIsValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @param functionSelector Function selector for the strategy
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
     function isMakerBidValid(
         OrderStructs.MakerBid calldata makerBid,
         bytes4 functionSelector
-    ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
+    ) external pure returns (bool isValid, bytes4 errorSelector) {
         if (
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector

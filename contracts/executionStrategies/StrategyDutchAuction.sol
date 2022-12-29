@@ -9,7 +9,7 @@ import {BidTooLow, OrderInvalid, WrongFunctionSelector} from "../interfaces/Shar
 
 /**
  * @title StrategyDutchAuction
- * @notice This contract offers a single execution strategies for users to create Dutch auctions.
+ * @notice This contract offers a single execution strategy for users to create Dutch auctions.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyDutchAuction {

@@ -259,6 +259,7 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
      * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
@@ -320,6 +321,7 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             return (isValid, OrderInvalid.selector);
         }
 
+        (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerBid.collection);
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
 
         if (functionSelector == StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector) {
@@ -328,16 +330,14 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             }
         }
 
-        (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerBid.collection);
+        if (priceFeedErrorSelector != bytes4(0)) {
+            return (isValid, priceFeedErrorSelector);
+        }
 
         if (functionSelector == StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector) {
             if (floorPrice <= discount) {
                 return (isValid, OrderInvalid.selector);
             }
-        }
-
-        if (priceFeedErrorSelector != bytes4(0)) {
-            return (isValid, priceFeedErrorSelector);
         }
 
         isValid = true;

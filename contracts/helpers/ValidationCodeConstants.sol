@@ -4,42 +4,43 @@ pragma solidity ^0.8.17;
 // 0. No error
 uint256 constant ORDER_EXPECTED_TO_BE_VALID = 0;
 
-// 1. Nonce-related errors
-uint256 constant USER_SUBSET_NONCE_CANCELLED = 101;
-uint256 constant USER_ORDER_NONCE_EXECUTED_OR_CANCELLED = 111;
-uint256 constant USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH = 112;
-uint256 constant USER_GLOBAL_BID_NONCE_HIGHER = 121;
-uint256 constant USER_GLOBAL_BID_NONCE_LOWER = 122;
-uint256 constant USER_GLOBAL_ASK_NONCE_HIGHER = 123;
-uint256 constant USER_GLOBAL_ASK_NONCE_LOWER = 124;
+// 1. Maker order struct-related errors
+uint256 constant MAKER_ORDER_INVALID_STANDARD_SALE = 101;
+uint256 constant MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE = 111;
+uint256 constant MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE = 112;
 
-// 2. Errors related to signatures (EOA, EIP-1271) and Merkle Tree computations
-uint256 constant ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE = 201;
-uint256 constant WRONG_SIGNATURE_LENGTH = 211;
-uint256 constant INVALID_S_PARAMETER_EOA = 212;
-uint256 constant INVALID_V_PARAMETER_EOA = 213;
-uint256 constant NULL_SIGNER_EOA = 214;
-uint256 constant WRONG_SIGNER_EOA = 215;
-uint256 constant MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271 = 221;
-uint256 constant SIGNATURE_INVALID_EIP1271 = 222;
+// 2. Nonce-related errors
+uint256 constant USER_SUBSET_NONCE_CANCELLED = 201;
+uint256 constant USER_ORDER_NONCE_EXECUTED_OR_CANCELLED = 211;
+uint256 constant USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH = 212;
+uint256 constant USER_GLOBAL_BID_NONCE_HIGHER = 221;
+uint256 constant USER_GLOBAL_BID_NONCE_LOWER = 222;
+uint256 constant USER_GLOBAL_ASK_NONCE_HIGHER = 223;
+uint256 constant USER_GLOBAL_ASK_NONCE_LOWER = 224;
 
-// 3. Strategy & currency-related errors
-uint256 constant CURRENCY_NOT_WHITELISTED = 301;
-uint256 constant STRATEGY_NOT_IMPLEMENTED = 311;
-uint256 constant STRATEGY_TAKER_BID_SELECTOR_INVALID = 312;
-uint256 constant STRATEGY_TAKER_ASK_SELECTOR_INVALID = 313;
-uint256 constant STRATEGY_NOT_ACTIVE = 314;
+// 3. Errors related to signatures (EOA, EIP-1271) and Merkle Tree computations
+uint256 constant ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE = 301;
+uint256 constant WRONG_SIGNATURE_LENGTH = 311;
+uint256 constant INVALID_S_PARAMETER_EOA = 312;
+uint256 constant INVALID_V_PARAMETER_EOA = 313;
+uint256 constant NULL_SIGNER_EOA = 314;
+uint256 constant WRONG_SIGNER_EOA = 315;
+uint256 constant MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271 = 321;
+uint256 constant SIGNATURE_INVALID_EIP1271 = 322;
 
-// 4. Timestamp-related validation errors
-uint256 constant TOO_LATE_TO_EXECUTE_ORDER = 401;
-uint256 constant TOO_EARLY_TO_EXECUTE_ORDER = 402;
+// 4. Strategy & currency-related errors
+uint256 constant CURRENCY_NOT_WHITELISTED = 401;
+uint256 constant STRATEGY_NOT_IMPLEMENTED = 411;
+uint256 constant STRATEGY_TAKER_BID_SELECTOR_INVALID = 412;
+uint256 constant STRATEGY_TAKER_ASK_SELECTOR_INVALID = 413;
+uint256 constant STRATEGY_NOT_ACTIVE = 414;
 
-// 5. Maker order struct-related errors
-uint256 constant MAKER_ORDER_INVALID_STANDARD_SALE = 501;
-uint256 constant MAKER_ORDER_INVALID_NON_STANDARD_SALE = 502;
+// 5. Timestamp-related validation errors
+uint256 constant TOO_LATE_TO_EXECUTE_ORDER = 501;
+uint256 constant TOO_EARLY_TO_EXECUTE_ORDER = 502;
 
 // 6. Transfer-related (ERC20, ERC721, ERC1155 tokens), including transfers and approvals, errors
-uint256 constant SAME_ITEM_ID_IN_BUNDLE = 602;
+uint256 constant SAME_ITEM_ID_IN_BUNDLE = 601;
 uint256 constant ERC20_BALANCE_INFERIOR_TO_PRICE = 611;
 uint256 constant ERC20_APPROVAL_INFERIOR_TO_PRICE = 612;
 uint256 constant ERC721_ITEM_ID_DOES_NOT_EXIST = 621;

@@ -20,6 +20,9 @@ import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../interfaces/IStrategyManager.sol";
 import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 
+// Shared errors
+import {OrderInvalid} from "../interfaces/SharedErrors.sol";
+
 // Other dependencies
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";
 import {TransferManager} from "../TransferManager.sol";
@@ -27,20 +30,50 @@ import {TransferManager} from "../TransferManager.sol";
 // Validation codes
 import "./ValidationCodeConstants.sol";
 
+import "hardhat/console.sol";
+
+interface IExtendedExecutionStrategy {
+    /**
+     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
+     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @param functionSelector Function selector for the strategy
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it return the error's 4 bytes selector
+     */
+    function isMakerAskValid(
+        OrderStructs.MakerAsk calldata makerAsk,
+        bytes4 functionSelector
+    ) external view returns (bool isValid, bytes4 errorSelector);
+
+    /**
+     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
+     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param functionSelector Function selector for the strategy
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
+     */
+    function isMakerBidValid(
+        OrderStructs.MakerBid calldata makerBid,
+        bytes4 functionSelector
+    ) external pure returns (bool isValid, bytes4 errorSelector);
+}
+
 /**
  * @title OrderValidatorV2A
  * @notice This contract is used to check the validity of maker ask/bid orders in the LooksRareProtocol (v2).
  *         It performs checks for:
- *         1. Nonce related issues (e.g., nonce executed or cancelled)
- *         2. Signature related issues and merkle tree parameters
- *         3. Internal whitelist related issues (i.e., currency or strategy not whitelisted)
- *         4. Timestamp related issues (e.g., order expired)
- *         5. Maker order struct related issues
+ *         1. Maker order-specific issues (e.g., order invalid due to format or other-strategy specific issues)
+ *         2. Nonce related issues (e.g., nonce executed or cancelled)
+ *         3. Signature related issues and merkle tree parameters
+ *         4. Internal whitelist related issues (i.e., currency or strategy not whitelisted)
+ *         5. Timestamp related issues (e.g., order expired)
  *         6. Asset related issues for ERC20/ERC721/ERC1155 (approvals and balances)
  *         7. Asset type suggestions
  *         8. Transfer manager related issues
  *         9. Creator fee related issues (e.g., creator fee too high, ERC2981 bundles)
- * @dev This version does not handle strategies, which support partial fills.
+ * @dev This version does not handle strategies with partial fills.
  * @author LooksRare protocol team (👀,💎)
  */
 contract OrderValidatorV2A {
@@ -116,7 +149,7 @@ contract OrderValidatorV2A {
     ) external view returns (uint256[9][] memory validationCodes) {
         uint256 length = makerAsks.length;
 
-        validationCodes = new uint256[9][](length);
+        validationCodes = new uint256[CRITERIA_GROUPS][](length);
 
         for (uint256 i; i < length; ) {
             validationCodes[i] = checkMakerAskOrderValidity(makerAsks[i], signatures[i], merkleTrees[i]);
@@ -140,7 +173,7 @@ contract OrderValidatorV2A {
     ) external view returns (uint256[9][] memory validationCodes) {
         uint256 length = makerBids.length;
 
-        validationCodes = new uint256[9][](length);
+        validationCodes = new uint256[CRITERIA_GROUPS][](length);
 
         for (uint256 i; i < length; ) {
             validationCodes[i] = checkMakerBidOrderValidity(makerBids[i], signatures[i], merkleTrees[i]);
@@ -164,23 +197,26 @@ contract OrderValidatorV2A {
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerAsk.hash();
 
-        validationCodes[0] = _checkValidityMakerAskNonces(
+        (
+            uint256 validationCode0,
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
+            uint256 price
+        ) = _checkValidityMakerAskItemIdsAndAmountsAndPrice(makerAsk);
+
+        validationCodes[0] = validationCode0;
+
+        validationCodes[1] = _checkValidityMakerAskNonces(
             makerAsk.signer,
             makerAsk.askNonce,
             makerAsk.orderNonce,
             makerAsk.subsetNonce,
             orderHash
         );
-        validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
-        validationCodes[2] = _checkValidityMakerAskWhitelists(makerAsk.currency, makerAsk.strategyId);
-        validationCodes[3] = _checkValidityTimestamps(makerAsk.startTime, makerAsk.endTime);
-        (
-            uint256 validationCode4,
-            uint256[] memory itemIds,
-            uint256[] memory amounts,
-            uint256 price
-        ) = _checkValidityMakerAskItemIdsAndAmountsAndPrice(makerAsk);
-        validationCodes[4] = validationCode4;
+        validationCodes[2] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
+        validationCodes[3] = _checkValidityMakerAskWhitelists(makerAsk.currency, makerAsk.strategyId);
+        validationCodes[4] = _checkValidityTimestamps(makerAsk.startTime, makerAsk.endTime);
+
         validationCodes[5] = _checkValidityMakerAskNFTAssets(
             makerAsk.collection,
             makerAsk.assetType,
@@ -207,26 +243,27 @@ contract OrderValidatorV2A {
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerBid.hash();
 
-        validationCodes[0] = _checkValidityMakerBidNonces(
+        (
+            uint256 validationCode0,
+            uint256[] memory itemIds,
+            ,
+            uint256 price
+        ) = _checkValidityMakerBidItemIdsAndAmountsAndPrice(makerBid);
+
+        validationCodes[0] = validationCode0;
+        validationCodes[1] = _checkValidityMakerBidNonces(
             makerBid.signer,
             makerBid.bidNonce,
             makerBid.orderNonce,
             makerBid.subsetNonce,
             orderHash
         );
-        validationCodes[1] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
-        validationCodes[2] = _checkValidityMakerBidWhitelists(makerBid.currency, makerBid.strategyId);
-        validationCodes[3] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
-        (
-            uint256 validationCode4,
-            uint256[] memory itemIds,
-            ,
-            uint256 price
-        ) = _checkValidityMakerBidItemIdsAndAmountsAndPrice(makerBid);
-        validationCodes[4] = validationCode4;
+        validationCodes[2] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
+        validationCodes[3] = _checkValidityMakerBidWhitelists(makerBid.currency, makerBid.strategyId);
+        validationCodes[4] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
         validationCodes[5] = _checkValidityMakerBidERC20Assets(makerBid.currency, makerBid.signer, price);
         validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
-        validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID;
+        validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID; // TransferManager NFT-related
         validationCodes[8] = _checkValidityCreatorFee(makerBid.collection, price, itemIds);
     }
 
@@ -766,12 +803,39 @@ contract OrderValidatorV2A {
                 if (amounts[i] == 0) {
                     validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                 }
+
+                if (makerAsk.assetType == 0 && amounts[i] != 1) {
+                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                }
+
                 unchecked {
                     ++i;
                 }
             }
         } else {
-            // TODO
+            itemIds = makerAsk.itemIds;
+            amounts = makerAsk.amounts;
+            // @dev It should ideally be adjusted by real price
+            price = makerAsk.minPrice;
+
+            (, , , , bytes4 strategySelector, , address strategyImplementation) = looksRareProtocol.strategyInfo(
+                makerAsk.strategyId
+            );
+
+            (bool isValid, bytes4 errorSelector) = IExtendedExecutionStrategy(strategyImplementation).isMakerAskValid(
+                makerAsk,
+                strategySelector
+            );
+
+            if (isValid) {
+                validationCode = ORDER_EXPECTED_TO_BE_VALID;
+            } else {
+                if (errorSelector == OrderInvalid.selector) {
+                    validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
+                } else {
+                    validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
+                }
+            }
         }
     }
 
@@ -783,6 +847,7 @@ contract OrderValidatorV2A {
         returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price)
     {
         if (makerBid.strategyId == 0) {
+            console.log("CIAO");
             itemIds = makerBid.itemIds;
             amounts = makerBid.amounts;
             price = makerBid.maxPrice;
@@ -790,18 +855,44 @@ contract OrderValidatorV2A {
             uint256 length = itemIds.length;
             if (length == 0 || (amounts.length != length)) {
                 validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-            }
+            } else {
+                for (uint256 i; i < length; ) {
+                    if (amounts[i] == 0) {
+                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                    }
 
-            for (uint256 i; i < length; ) {
-                if (amounts[i] == 0) {
-                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                }
-                unchecked {
-                    ++i;
+                    if (makerBid.assetType == 0 && amounts[i] != 1) {
+                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                    }
+
+                    unchecked {
+                        ++i;
+                    }
                 }
             }
         } else {
-            //
+            // @dev It should ideally be adjusted by real price
+            //      amounts and itemIds are not used since most non-native maker bids won't target a single item
+            price = makerBid.maxPrice;
+
+            (, , , , bytes4 strategySelector, , address strategyImplementation) = looksRareProtocol.strategyInfo(
+                makerBid.strategyId
+            );
+
+            (bool isValid, bytes4 errorSelector) = IExtendedExecutionStrategy(strategyImplementation).isMakerBidValid(
+                makerBid,
+                strategySelector
+            );
+
+            if (isValid) {
+                validationCode = ORDER_EXPECTED_TO_BE_VALID;
+            } else {
+                if (errorSelector == OrderInvalid.selector) {
+                    validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
+                } else {
+                    validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
+                }
+            }
         }
     }
 

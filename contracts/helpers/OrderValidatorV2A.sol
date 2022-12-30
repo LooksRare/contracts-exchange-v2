@@ -30,8 +30,6 @@ import {TransferManager} from "../TransferManager.sol";
 // Validation codes
 import "./ValidationCodeConstants.sol";
 
-import "hardhat/console.sol";
-
 interface IExtendedExecutionStrategy {
     /**
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
@@ -64,10 +62,10 @@ interface IExtendedExecutionStrategy {
  * @title OrderValidatorV2A
  * @notice This contract is used to check the validity of maker ask/bid orders in the LooksRareProtocol (v2).
  *         It performs checks for:
- *         1. Maker order-specific issues (e.g., order invalid due to format or other-strategy specific issues)
- *         2. Nonce related issues (e.g., nonce executed or cancelled)
- *         3. Signature related issues and merkle tree parameters
- *         4. Internal whitelist related issues (i.e., currency or strategy not whitelisted)
+ *         1. Internal whitelist related issues (i.e., currency or strategy not whitelisted)
+ *         2. Maker order-specific issues (e.g., order invalid due to format or other-strategy specific issues)
+ *         3. Nonce related issues (e.g., nonce executed or cancelled)
+ *         4. Signature related issues and merkle tree parameters
  *         5. Timestamp related issues (e.g., order expired)
  *         6. Asset related issues for ERC20/ERC721/ERC1155 (approvals and balances)
  *         7. Asset type suggestions
@@ -197,24 +195,32 @@ contract OrderValidatorV2A {
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerAsk.hash();
 
+        validationCodes[0] = _checkValidityMakerAskWhitelists(makerAsk.currency, makerAsk.strategyId);
+
+        // It can exit here if the strategy doesn't exist. However, if the strategy isn't valid, it can continue the execution.
+        if (
+            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_TAKER_BID_SELECTOR_INVALID
+        ) {
+            return validationCodes;
+        }
+
         (
-            uint256 validationCode0,
+            uint256 validationCode1,
             uint256[] memory itemIds,
             uint256[] memory amounts,
             uint256 price
         ) = _checkValidityMakerAskItemIdsAndAmountsAndPrice(makerAsk);
 
-        validationCodes[0] = validationCode0;
+        validationCodes[1] = validationCode1;
 
-        validationCodes[1] = _checkValidityMakerAskNonces(
+        validationCodes[2] = _checkValidityMakerAskNonces(
             makerAsk.signer,
             makerAsk.askNonce,
             makerAsk.orderNonce,
             makerAsk.subsetNonce,
             orderHash
         );
-        validationCodes[2] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
-        validationCodes[3] = _checkValidityMakerAskWhitelists(makerAsk.currency, makerAsk.strategyId);
+        validationCodes[3] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
         validationCodes[4] = _checkValidityTimestamps(makerAsk.startTime, makerAsk.endTime);
 
         validationCodes[5] = _checkValidityMakerAskNFTAssets(
@@ -243,23 +249,31 @@ contract OrderValidatorV2A {
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerBid.hash();
 
+        validationCodes[0] = _checkValidityMakerBidWhitelists(makerBid.currency, makerBid.strategyId);
+
+        // It can exit here if the strategy doesn't exist. However, if the strategy isn't valid, it can continue the execution.
+        if (
+            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_TAKER_ASK_SELECTOR_INVALID
+        ) {
+            return validationCodes;
+        }
+
         (
-            uint256 validationCode0,
+            uint256 validationCode1,
             uint256[] memory itemIds,
             ,
             uint256 price
         ) = _checkValidityMakerBidItemIdsAndAmountsAndPrice(makerBid);
 
-        validationCodes[0] = validationCode0;
-        validationCodes[1] = _checkValidityMakerBidNonces(
+        validationCodes[1] = validationCode1;
+        validationCodes[2] = _checkValidityMakerBidNonces(
             makerBid.signer,
             makerBid.bidNonce,
             makerBid.orderNonce,
             makerBid.subsetNonce,
             orderHash
         );
-        validationCodes[2] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
-        validationCodes[3] = _checkValidityMakerBidWhitelists(makerBid.currency, makerBid.strategyId);
+        validationCodes[3] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
         validationCodes[4] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
         validationCodes[5] = _checkValidityMakerBidERC20Assets(makerBid.currency, makerBid.signer, price);
         validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
@@ -847,7 +861,6 @@ contract OrderValidatorV2A {
         returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price)
     {
         if (makerBid.strategyId == 0) {
-            console.log("CIAO");
             itemIds = makerBid.itemIds;
             amounts = makerBid.amounts;
             price = makerBid.maxPrice;

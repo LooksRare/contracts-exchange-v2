@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 // WETH
 import {WETH} from "solmate/src/tokens/WETH.sol";
@@ -24,8 +24,6 @@ import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 
 // Utils
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
-
-import "hardhat/console.sol";
 
 contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;

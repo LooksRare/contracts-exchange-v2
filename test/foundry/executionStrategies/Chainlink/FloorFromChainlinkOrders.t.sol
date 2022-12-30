@@ -5,16 +5,16 @@ pragma solidity ^0.8.17;
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 
 // Libraries and interfaces
-import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
+import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
+import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
 // Strategies
-import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
+import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Other tests
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
-import {ProtocolBase} from "../ProtocolBase.t.sol";
+import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
 abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
     StrategyFloorFromChainlink internal strategyFloorFromChainlink;

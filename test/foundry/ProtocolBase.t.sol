@@ -25,8 +25,6 @@ import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 // Utils
 import {MockOrderGenerator} from "./utils/MockOrderGenerator.sol";
 
-import "hardhat/console.sol";
-
 contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     address[] public operators;
 

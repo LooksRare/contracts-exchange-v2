@@ -33,6 +33,11 @@ error WrongCaller();
 error WrongCurrency();
 
 /**
+ * @notice The function selector is not implemented.
+ */
+error WrongFunctionSelector();
+
+/**
  * @notice There is either a mismatch or an error in the length of the array(s).
  */
 error WrongLengths();

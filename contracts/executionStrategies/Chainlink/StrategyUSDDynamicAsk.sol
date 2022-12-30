@@ -8,7 +8,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongCurrency} from "../../interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../interfaces/SharedErrors.sol";
 
 // Base strategy
 import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
@@ -120,25 +120,31 @@ contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
-     * @return orderIsValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @param functionSelector Function selector for the strategy
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it return the error's 4 bytes selector
      */
-    function isValid(
-        OrderStructs.MakerAsk calldata makerAsk
-    ) external view returns (bool orderIsValid, bytes4 errorSelector) {
+    function isMakerAskValid(
+        OrderStructs.MakerAsk calldata makerAsk,
+        bytes4 functionSelector
+    ) external view returns (bool isValid, bytes4 errorSelector) {
+        if (functionSelector != StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector) {
+            return (isValid, WrongFunctionSelector.selector);
+        }
+
         uint256 itemIdsLength = makerAsk.itemIds.length;
 
         if (itemIdsLength == 0 || itemIdsLength != makerAsk.amounts.length) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
         }
 
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
 
             if (makerAsk.assetType == 0 && amount != 1) {
-                return (orderIsValid, OrderInvalid.selector);
+                return (isValid, OrderInvalid.selector);
             } else if (amount == 0) {
-                return (orderIsValid, OrderInvalid.selector);
+                return (isValid, OrderInvalid.selector);
             }
 
             unchecked {
@@ -148,20 +154,20 @@ contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
 
         if (makerAsk.currency != address(0)) {
             if (makerAsk.currency != WETH) {
-                return (orderIsValid, WrongCurrency.selector);
+                return (isValid, WrongCurrency.selector);
             }
         }
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
 
         if (answer <= 0) {
-            return (orderIsValid, InvalidChainlinkPrice.selector);
+            return (isValid, InvalidChainlinkPrice.selector);
         }
 
         if (block.timestamp - updatedAt > maxLatency) {
-            return (orderIsValid, PriceNotRecentEnough.selector);
+            return (isValid, PriceNotRecentEnough.selector);
         }
 
-        orderIsValid = true;
+        isValid = true;
     }
 }

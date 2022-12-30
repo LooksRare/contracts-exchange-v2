@@ -8,15 +8,15 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyCollectionOffer
- * @notice This contract allows users to create maker bid offers for items in a collection.
+ * @notice This contract offers execution strategies for users to create maker bid offers for items in a collection.
  *         There are two available functions:
- *         1. executeCollectionStrategyWithTakerAsk --> it applies too all itemId in a collection, the second
+ *         1. executeCollectionStrategyWithTakerAsk --> it applies to all item ids in a collection
  *         2. executeCollectionStrategyWithTakerAskWithProof --> it is same except that it allows adding merkle proof criteria.
- *            Use cases include trait-based offers or rarity score offers.
+ * @dev Use cases can include trait-based offers or rarity score offers.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyCollectionOffer {
@@ -98,16 +98,11 @@ contract StrategyCollectionOffer {
             }
         }
 
-        // Precomputed merkleRoot (that contains the itemIds that match a common characteristic)
         bytes32 root = abi.decode(makerBid.additionalParameters, (bytes32));
-
-        // MerkleProof + indexInTree + itemId
         bytes32[] memory proof = abi.decode(takerAsk.additionalParameters, (bytes32[]));
-
-        // Compute the node
         bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
 
-        // Verify the merkle proof
+        // Verify the merkle root for the given merkle proof
         if (!MerkleProofMemory.verify(proof, root, node)) {
             revert WrongMerkleProof();
         }
@@ -117,24 +112,43 @@ contract StrategyCollectionOffer {
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
-     * @return orderIsValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @param functionSelector Function selector for the strategy
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
-    function isValid(
-        OrderStructs.MakerBid calldata makerBid
-    ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
+    function isMakerBidValid(
+        OrderStructs.MakerBid calldata makerBid,
+        bytes4 functionSelector
+    ) external pure returns (bool isValid, bytes4 errorSelector) {
+        if (
+            functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
+            functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
+        ) {
+            return (isValid, WrongFunctionSelector.selector);
+        }
+
         if (makerBid.amounts.length != 1) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
         }
 
         if (makerBid.amounts[0] != 1) {
             if (makerBid.amounts[0] == 0) {
-                return (orderIsValid, OrderInvalid.selector);
+                return (isValid, OrderInvalid.selector);
             }
             if (makerBid.assetType == 0) {
-                return (orderIsValid, OrderInvalid.selector);
+                return (isValid, OrderInvalid.selector);
             }
         }
-        orderIsValid = true;
+
+        // If no root is not provided, it will be invalid.
+        // @dev It doesn't mean the merkle root is valid against a specific itemId that exists in the collection.
+        if (
+            functionSelector == StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
+            makerBid.additionalParameters.length != 32
+        ) {
+            return (isValid, OrderInvalid.selector);
+        }
+
+        isValid = true;
     }
 }

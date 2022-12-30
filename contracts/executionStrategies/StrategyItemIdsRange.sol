@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongFunctionSelector} from "../interfaces/SharedErrors.sol";
 
 /**
  * @title StrategyItemIdsRange
@@ -89,18 +89,24 @@ contract StrategyItemIdsRange {
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
-     * @return orderIsValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, return the error's 4 bytes selector
+     * @param functionSelector Function selector for the strategy
+     * @return isValid Whether the maker struct is valid
+     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
-    function isValid(
-        OrderStructs.MakerBid calldata makerBid
-    ) external pure returns (bool orderIsValid, bytes4 errorSelector) {
+    function isMakerBidValid(
+        OrderStructs.MakerBid calldata makerBid,
+        bytes4 functionSelector
+    ) external pure returns (bool isValid, bytes4 errorSelector) {
+        if (functionSelector != StrategyItemIdsRange.executeStrategyWithTakerAsk.selector) {
+            return (isValid, WrongFunctionSelector.selector);
+        }
+
         uint256 minItemId = makerBid.itemIds[0];
         uint256 maxItemId = makerBid.itemIds[1];
         if (minItemId >= maxItemId) {
-            return (orderIsValid, OrderInvalid.selector);
+            return (isValid, OrderInvalid.selector);
         }
 
-        orderIsValid = true;
+        isValid = true;
     }
 }

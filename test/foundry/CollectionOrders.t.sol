@@ -22,6 +22,7 @@ contract CollectionOrdersTest is ProtocolBase {
     bytes4 public selectorWithProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
 
     uint256 private constant price = 1 ether; // Fixed price of sale
+    bytes32 private constant mockMerkleRoot = bytes32(keccak256("Mock")); // Mock merkle root
 
     function setUp() public override {
         super.setUp();
@@ -103,16 +104,17 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid is still valid
-        _assertOrderIsValid(makerBid);
+        _assertOrderIsValid(makerBid, false);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // With proof
         makerBid.strategyId = 2;
+        makerBid.additionalParameters = abi.encode(mockMerkleRoot);
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        _assertOrderIsValid(makerBid);
+        _assertOrderIsValid(makerBid, true);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -135,16 +137,17 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.strategyId = 1;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        _assertOrderIsValid(makerBid);
+        _assertOrderIsValid(makerBid, false);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // With proof
         makerBid.strategyId = 2;
+        makerBid.additionalParameters = abi.encode(mockMerkleRoot);
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        _assertOrderIsValid(makerBid);
+        _assertOrderIsValid(makerBid, true);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -165,16 +168,17 @@ contract CollectionOrdersTest is ProtocolBase {
         takerAsk.amounts = amounts;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        _assertOrderIsInvalid(makerBid);
+        _assertOrderIsInvalid(makerBid, false);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // With proof
         makerBid.strategyId = 2;
+        makerBid.additionalParameters = abi.encode(mockMerkleRoot);
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        _assertOrderIsInvalid(makerBid);
+        _assertOrderIsInvalid(makerBid, true);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -189,9 +193,10 @@ contract CollectionOrdersTest is ProtocolBase {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
         makerBid.amounts = amounts;
+        makerBid.additionalParameters = abi.encode(mockMerkleRoot);
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        _assertOrderIsInvalid(makerBid);
+        _assertOrderIsInvalid(makerBid, false);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -209,7 +214,7 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid still valid
-        _assertOrderIsValid(makerBid);
+        _assertOrderIsValid(makerBid, false);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -225,7 +230,7 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Maker bid still valid
-        _assertOrderIsValid(makerBid);
+        _assertOrderIsValid(makerBid, false);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -270,7 +275,7 @@ contract CollectionOrdersTest is ProtocolBase {
             abi.encode()
         );
 
-        _assertOrderIsValid(makerBid);
+        _assertOrderIsValid(makerBid, false);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -340,7 +345,7 @@ contract CollectionOrdersTest is ProtocolBase {
             abi.encode(proof)
         );
 
-        _assertOrderIsValid(makerBid);
+        _assertOrderIsValid(makerBid, true);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -356,14 +361,24 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) private {
-        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid, bool withProof) private {
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
+            makerBid,
+            withProof
+                ? StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector
+                : StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
+        );
         assertTrue(orderIsValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
-    function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid) private {
-        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isValid(makerBid);
+    function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid, bool withProof) private {
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
+            makerBid,
+            withProof
+                ? StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector
+                : StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
+        );
 
         assertFalse(orderIsValid);
         assertEq(errorSelector, OrderInvalid.selector);

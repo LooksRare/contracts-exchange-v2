@@ -2,14 +2,14 @@
 pragma solidity ^0.8.17;
 
 // Libraries and interfaces
-import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
+import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
+import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionManager.sol";
 
 // Shared errors
-import "../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../../../../contracts/interfaces/SharedErrors.sol";
 
 // Strategies
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Other tests
 import {FloorFromChainlinkDiscountOrdersTest} from "./FloorFromChainlinkDiscountOrders.t.sol";

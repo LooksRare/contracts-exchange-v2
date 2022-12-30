@@ -2,20 +2,20 @@
 pragma solidity ^0.8.17;
 
 // Murky (third-party) library is used to compute Merkle trees in Solidity
-import {Merkle} from "../../lib/murky/src/Merkle.sol";
+import {Merkle} from "../../../lib/murky/src/Merkle.sol";
 
 // Libraries
-import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
-import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../contracts/helpers/ValidationCodeConstants.sol";
+import {OrderInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
+import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Strategies
-import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
+import {StrategyCollectionOffer} from "../../../contracts/executionStrategies/StrategyCollectionOffer.sol";
 
 // Base test
-import {ProtocolBase} from "./ProtocolBase.t.sol";
+import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
     StrategyCollectionOffer public strategyCollectionOffer;

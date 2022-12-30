@@ -2,19 +2,17 @@
 pragma solidity ^0.8.17;
 
 // Libraries and interfaces
-import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {BaseStrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
-import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
+import {BaseStrategyChainlinkPriceLatency} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
+import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
+import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Shared errors
-import "../../../contracts/interfaces/SharedErrors.sol";
+import {AskTooHigh, OrderInvalid, WrongCurrency} from "../../../../contracts/interfaces/SharedErrors.sol";
 
 // Mocks and other tests
-import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
+import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
-
-import "hardhat/console.sol";
 
 abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrdersTest {
     uint256 internal discount;

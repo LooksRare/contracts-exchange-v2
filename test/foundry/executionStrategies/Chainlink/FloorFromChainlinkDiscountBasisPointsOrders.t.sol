@@ -5,19 +5,19 @@ pragma solidity ^0.8.17;
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 
 // Libraries and interfaces
-import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager.sol";
+import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
+import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionManager.sol";
 
 // Shared errors
-import "../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../../../../contracts/interfaces/SharedErrors.sol";
 
 // Strategies
-import {BaseStrategyChainlinkPriceLatency} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
-import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {BaseStrategyChainlinkPriceLatency} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
+import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
+import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Mocks and other tests
-import {MockChainlinkAggregator} from "../../mock/MockChainlinkAggregator.sol";
+import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {FloorFromChainlinkDiscountOrdersTest} from "./FloorFromChainlinkDiscountOrders.t.sol";
 
 contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDiscountOrdersTest {

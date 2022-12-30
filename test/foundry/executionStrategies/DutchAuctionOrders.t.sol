@@ -7,7 +7,8 @@ import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import "../../../contracts/interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
+import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Strategies
 import {StrategyDutchAuction} from "../../../contracts/executionStrategies/StrategyDutchAuction.sol";
@@ -120,6 +121,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
+        _isMakerAskOrderValid(makerAsk, signature);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -153,6 +155,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
 
         vm.prank(takerUser);
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
@@ -173,6 +176,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -193,6 +197,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -220,6 +225,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
+        _isMakerAskOrderValid(makerAsk, signature);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
@@ -244,6 +250,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -267,6 +274,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -293,6 +301,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
+        _isMakerAskOrderValid(makerAsk, signature);
 
         vm.expectRevert(BidTooLow.selector);
         vm.prank(takerUser);

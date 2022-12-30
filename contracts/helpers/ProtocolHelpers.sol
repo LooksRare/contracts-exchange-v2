@@ -35,7 +35,7 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Compute digest for maker ask
+     * @notice Compute digest for maker ask struct
      * @param makerAsk Maker ask struct
      * @return digest Digest
      */
@@ -45,7 +45,7 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Compute digest for maker bid
+     * @notice Compute digest for maker bid struct
      * @param makerBid Maker bid struct
      * @return digest Digest
      */
@@ -55,8 +55,9 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Compute digest for merkle tree
+     * @notice Compute digest for merkle tree struct
      * @param merkleTree Merkle tree struct
+     * @return digest Digest
      */
     function computeDigestMerkleTree(OrderStructs.MerkleTree memory merkleTree) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
@@ -64,10 +65,11 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Verify maker ask order
+     * @notice Verify maker ask order signature
      * @param makerAsk Maker ask struct
      * @param makerSignature Maker signature
      * @param signer Signer address
+     * @dev It returns true only if the SignatureChecker does not revert before.
      */
     function verifyMakerAskOrder(
         OrderStructs.MakerAsk memory makerAsk,
@@ -80,10 +82,11 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Verify maker bid order
+     * @notice Verify maker bid order signature
      * @param makerBid Maker bid struct
      * @param makerSignature Maker signature
      * @param signer Signer address
+     * @dev It returns true only if the SignatureChecker does not revert before.
      */
     function verifyMakerBidOrder(
         OrderStructs.MakerBid memory makerBid,
@@ -96,10 +99,11 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Verify merkle tree
+     * @notice Verify merkle tree signature
      * @param merkleTree Merkle tree struct
      * @param makerSignature Maker signature
      * @param signer Signer address
+     * @dev It returns true only if the SignatureChecker does not revert before.
      */
     function verifyMerkleTree(
         OrderStructs.MerkleTree memory merkleTree,

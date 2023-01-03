@@ -43,8 +43,10 @@ contract StrategyItemIdsRange {
             // Force the client to sort the item ids in ascending order,
             // in order to prevent taker ask from providing duplicated
             // item ids
-            if (offeredItemId <= lastItemId && i != 0) {
-                revert OrderInvalid();
+            if (offeredItemId <= lastItemId) {
+                if (i != 0) {
+                    revert OrderInvalid();
+                }
             }
 
             uint256 amount = takerAsk.amounts[i];

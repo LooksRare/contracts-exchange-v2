@@ -8,7 +8,7 @@ import {Merkle} from "../../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector} from "../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../../../contracts/interfaces/SharedErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Strategies
@@ -16,6 +16,8 @@ import {StrategyCollectionOffer} from "../../../contracts/executionStrategies/St
 
 // Base test
 import {ProtocolBase} from "../ProtocolBase.t.sol";
+
+import "hardhat/console.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
     StrategyCollectionOffer public strategyCollectionOffer;
@@ -388,11 +390,179 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function testWrongSelector() public {
+    function testTakerAskCannotExecuteWithWrongProof(uint256 itemIdSold) public {
+        vm.assume(itemIdSold > 5);
+        _setUpUsers();
+
+        // Initialize Merkle Tree
+        Merkle m = new Merkle();
+
+        bytes32[] memory merkleTreeIds = new bytes32[](5);
+        for (uint256 i; i < merkleTreeIds.length; i++) {
+            mockERC721.mint(takerUser, i);
+            merkleTreeIds[i] = keccak256(abi.encodePacked(i));
+        }
+
+        // Compute merkle root
+        bytes32 merkleRoot = m.getRoot(merkleTreeIds);
+
+        // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
+            assetType: 0, // ERC721
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Not used
+        });
+
+        makerBid.additionalParameters = abi.encode(merkleRoot);
+
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        bytes32[] memory proof = m.getProof(merkleTreeIds, 2);
+
+        assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[2]));
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemIdSold;
+
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            itemIds,
+            makerBid.amounts,
+            abi.encode(proof)
+        );
+
+        // Verify validity of maker bid order
+        _assertOrderIsValid(makerBid, true);
+        _isMakerBidOrderValid(makerBid, signature);
+
+        vm.prank(takerUser);
+        vm.expectRevert(WrongMerkleProof.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testWrongAmounts() public {
+        _setUpUsers();
+
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1,
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0
+        });
+
+        // Random itemIds
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = 5;
+
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
+
+        // 1. Amount is 0 (without merkle proof)
+        makerBid.amounts[0] = 0;
+        takerAsk.amounts = makerBid.amounts;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        _assertOrderIsInvalid(makerBid, false);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 2. Amount is too high for ERC721 (without merkle proof)
+        makerBid.amounts[0] = 2;
+        signature = _signMakerBid(makerBid, makerUserPK);
+        _assertOrderIsInvalid(makerBid, false);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 3. Amount is 0 (with merkle proof)
+        makerBid.strategyId = 2;
+        makerBid.additionalParameters = abi.encode(mockMerkleRoot);
+        makerBid.amounts[0] = 0;
+        takerAsk.amounts = makerBid.amounts;
+        signature = _signMakerBid(makerBid, makerUserPK);
+        _assertOrderIsInvalid(makerBid, true);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 4. Amount is too high for ERC721 (without merkle proof)
+        makerBid.amounts[0] = 2;
+        takerAsk.amounts = makerBid.amounts;
+        signature = _signMakerBid(makerBid, makerUserPK);
+        _assertOrderIsInvalid(makerBid, true);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testMerkleRootLengthIsNot32() public {
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0
+        });
+
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
+
+        _assertOrderIsInvalid(makerBid, true);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(); // It should revert without data (since the root cannot be extracted since the additionalParameters length is 0)
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testWrongSelector() public {
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 3,
             assetType: 0,
             orderNonce: 0,
             collection: address(mockERC721),

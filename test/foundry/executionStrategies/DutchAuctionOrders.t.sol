@@ -232,17 +232,17 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testZeroAmount() public {
+    function testWrongAmounts() public {
         _setUpUsers();
         _setUpNewStrategy();
+
+        // 1. Amount = 0
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid(
             1,
             1
         );
 
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 0;
-        makerAsk.amounts = amounts;
+        makerAsk.amounts[0] = 0;
 
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -254,6 +254,19 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 2. ERC721 amount > 1
+        makerAsk.amounts[0] = 2;
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        (isValid, errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 

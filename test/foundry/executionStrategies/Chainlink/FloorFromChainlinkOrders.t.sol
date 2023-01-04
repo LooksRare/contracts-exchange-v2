@@ -8,6 +8,9 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
+// Shared errors
+import {WrongFunctionSelector} from "../../../../contracts/interfaces/SharedErrors.sol";
+
 // Strategies
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
@@ -91,6 +94,42 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     function testSetPriceFeedNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+    }
+
+    function testWrongSelector() public {
+        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            minPrice: 1 ether,
+            itemId: 0
+        });
+
+        (bool orderIsValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, bytes4(0));
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, WrongFunctionSelector.selector);
+
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: 1 ether,
+            itemId: 0
+        });
+
+        (orderIsValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, bytes4(0));
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, WrongFunctionSelector.selector);
     }
 
     function _setSelector(bytes4 _selector, bool _isMakerBid) internal {

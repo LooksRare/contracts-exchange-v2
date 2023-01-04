@@ -1034,10 +1034,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@looksrare/contracts-libs@2.5.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.5.0.tgz#88719ba4a84fd8c5a2474ece7471bc30f5b3e8cd"
-  integrity sha512-RGErb/NZoCf5fDZzaOpOMP8MnTmwwZ9x3URNu0tDp5BHBRo4MCPb///dKNYFqPsy1PjBmYPRLRvkYn0JYUHhTw==
+"@looksrare/contracts-libs@2.5.1":
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.5.1.tgz#cc6c049e31bd16db7a309c02213eb6b18d717e52"
+  integrity sha512-Mddt94e25GzMFik9hkC77Wkwma4AjVLNCFXsKB0lMRMKf0wDq8/ko8CZEVfh+rqccBlhGwzGitPaCU1YJTIPeg==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
@@ -7604,8 +7604,6 @@ level-post@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/level-post/-/level-post-1.0.7.tgz#19ccca9441a7cc527879a0635000f06d5e8f27d0"
   integrity sha512-PWYqG4Q00asOrLhX7BejSajByB4EmG2GaKHfj3h5UmmZ2duciXLPGYWIjBzLECFWUGOZWlm5B20h/n3Gs3HKew==
-  dependencies:
-    ltgt "^2.1.2"
 
 level-sublevel@6.6.4:
   version "6.6.4"

@@ -3,7 +3,6 @@ pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
-import {ReentrancyGuard} from "@looksrare/contracts-libs/contracts/ReentrancyGuard.sol";
 import {LowLevelETHReturnETHIfAnyExceptOneWei} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelETHReturnETHIfAnyExceptOneWei.sol";
 import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelWETH.sol";
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
@@ -66,7 +65,6 @@ LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKS
 contract LooksRareProtocol is
     ILooksRareProtocol,
     TransferSelectorNFT,
-    ReentrancyGuard,
     LowLevelETHReturnETHIfAnyExceptOneWei,
     LowLevelWETH,
     LowLevelERC20Transfer

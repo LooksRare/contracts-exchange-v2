@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 // Direct dependencies
 import {ExecutionManager} from "./ExecutionManager.sol";
+import {PackableReentrancyGuard} from "@looksrare/contracts-libs/contracts/PackableReentrancyGuard.sol";
 
 // Interfaces
 import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
@@ -12,7 +13,7 @@ import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
  * @notice This contract handles the logic for transferring non-fungible items.
  * @author LooksRare protocol team (👀,💎)
  */
-contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
+contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, PackableReentrancyGuard {
     /**
      * @notice It returns the transfer manager address and the associated bytes4
      * selector used to transfer assets for this asset type.

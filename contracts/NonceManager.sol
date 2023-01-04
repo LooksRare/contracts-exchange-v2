@@ -53,11 +53,13 @@ contract NonceManager is INonceManager {
      * @param subsetNonces Array of subset nonces
      */
     function cancelSubsetNonces(uint256[] calldata subsetNonces) external {
-        if (subsetNonces.length == 0) {
+        uint256 length = subsetNonces.length;
+
+        if (length == 0) {
             revert WrongLengths();
         }
 
-        for (uint256 i; i < subsetNonces.length; ) {
+        for (uint256 i; i < length; ) {
             userSubsetNonce[msg.sender][subsetNonces[i]] = true;
             unchecked {
                 ++i;

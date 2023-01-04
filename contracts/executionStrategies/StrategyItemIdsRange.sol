@@ -101,7 +101,8 @@ contract StrategyItemIdsRange {
             return (isValid, WrongFunctionSelector.selector);
         }
 
-        if (makerBid.itemIds.length < 2) {
+        // These are done for order invalidation to prevent underflows or array errors
+        if (makerBid.itemIds.length < 2 || makerBid.itemIds.length == 0 || makerBid.itemIds[0] == 0) {
             return (isValid, OrderInvalid.selector);
         }
 

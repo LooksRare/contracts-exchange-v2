@@ -315,7 +315,7 @@ contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
             functionSelector != StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector &&
             functionSelector != StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector
         ) {
-            return (isValid, WrongCurrency.selector);
+            return (isValid, WrongFunctionSelector.selector);
         }
 
         if (makerBid.currency != WETH) {

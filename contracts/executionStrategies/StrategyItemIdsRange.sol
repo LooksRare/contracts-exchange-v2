@@ -101,8 +101,13 @@ contract StrategyItemIdsRange {
             return (isValid, WrongFunctionSelector.selector);
         }
 
+        if (makerBid.itemIds.length < 2) {
+            return (isValid, OrderInvalid.selector);
+        }
+
         uint256 minItemId = makerBid.itemIds[0];
         uint256 maxItemId = makerBid.itemIds[1];
+
         if (minItemId >= maxItemId) {
             return (isValid, OrderInvalid.selector);
         }

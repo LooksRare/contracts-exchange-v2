@@ -102,10 +102,13 @@ contract StrategyDutchAuction {
 
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
-            if (makerAsk.assetType == 0 && amount != 1) {
-                return (isValid, OrderInvalid.selector);
-            } else if (amount == 0) {
-                return (isValid, OrderInvalid.selector);
+            if (amount != 1) {
+                if (amount == 0) {
+                    return (isValid, OrderInvalid.selector);
+                }
+                if (makerAsk.assetType == 0) {
+                    return (isValid, OrderInvalid.selector);
+                }
             }
 
             unchecked {

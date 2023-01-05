@@ -115,11 +115,11 @@ contract LooksRareProtocol is
         bytes32 orderHash = makerBid.hash();
         _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, signer);
 
-        // Execute the transaction and fetch protocol fee
-        uint256 totalProtocolFee = _executeTakerAsk(takerAsk, makerBid, orderHash);
+        // Execute the transaction and fetch protocol fee amount
+        uint256 totalProtocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, orderHash);
 
         // Pay protocol fee (and affiliate fee if any)
-        _payProtocolFeeAndAffiliateFee(makerBid.currency, signer, affiliate, totalProtocolFee);
+        _payProtocolFeeAndAffiliateFee(makerBid.currency, signer, affiliate, totalProtocolFeeAmount);
     }
 
     /**
@@ -140,11 +140,11 @@ contract LooksRareProtocol is
         bytes32 orderHash = makerAsk.hash();
         _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, makerAsk.signer);
 
-        // Execute the transaction and fetch protocol fee
-        uint256 totalProtocolFee = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
+        // Execute the transaction and fetch protocol fee amount
+        uint256 totalProtocolFeeAmount = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
 
-        // Pay protocol fee (and affiliate fee if any)
-        _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFee);
+        // Pay protocol fee amount (and affiliate fee if any)
+        _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFeeAmount);
 
         // Return ETH if any
         _returnETHIfAnyWithOneWeiLeft();
@@ -177,7 +177,7 @@ contract LooksRareProtocol is
 
         {
             // Initialize protocol fee
-            uint256 totalProtocolFee;
+            uint256 totalProtocolFeeAmount;
 
             for (uint256 i; i < length; ) {
                 OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
@@ -198,12 +198,12 @@ contract LooksRareProtocol is
                     // If atomic, it uses the executeTakerBid function, if not atomic, it uses a catch/revert pattern with external function
                     if (isAtomic) {
                         // Execute the transaction and add protocol fee
-                        totalProtocolFee += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
+                        totalProtocolFeeAmount += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
                     } else {
                         try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
-                            uint256 protocolFee
+                            uint256 protocolFeeAmount
                         ) {
-                            totalProtocolFee += protocolFee;
+                            totalProtocolFeeAmount += protocolFeeAmount;
                         } catch {}
                     }
 
@@ -214,7 +214,7 @@ contract LooksRareProtocol is
             }
 
             // Pay protocol fee (and affiliate fee if any)
-            _payProtocolFeeAndAffiliateFee(currency, msg.sender, affiliate, totalProtocolFee);
+            _payProtocolFeeAndAffiliateFee(currency, msg.sender, affiliate, totalProtocolFeeAmount);
         }
 
         // Return ETH if any
@@ -407,36 +407,36 @@ contract LooksRareProtocol is
      * @param currency Currency address to transfer (address(0) is ETH)
      * @param bidUser Bid user address
      * @param affiliate Affiliate address (address(0) if none)
-     * @param totalProtocolFee Total protocol fee (denominated in the currency)
+     * @param totalProtocolFeeAmount Total protocol fee amount (denominated in the currency)
      */
     function _payProtocolFeeAndAffiliateFee(
         address currency,
         address bidUser,
         address affiliate,
-        uint256 totalProtocolFee
+        uint256 totalProtocolFeeAmount
     ) internal {
-        uint256 totalAffiliateFee;
+        uint256 totalAffiliateFeeAmount;
 
         // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
         if (affiliate != address(0)) {
             if (isAffiliateProgramActive) {
-                totalAffiliateFee = (totalProtocolFee * affiliateRates[affiliate]) / 10_000;
-                totalProtocolFee -= totalAffiliateFee;
+                totalAffiliateFeeAmount = (totalProtocolFeeAmount * affiliateRates[affiliate]) / 10_000;
+                totalProtocolFeeAmount -= totalAffiliateFeeAmount;
 
                 // If bid user isn't the affiliate, pay the affiliate.
                 // If currency is ETH, funds are returned to sender at the end of the execution.
                 // If currency is ERC20, funds are not transferred from bidder to bidder (since it uses transferFrom).
                 if (bidUser != affiliate) {
-                    _transferFungibleTokens(currency, bidUser, affiliate, totalAffiliateFee);
+                    _transferFungibleTokens(currency, bidUser, affiliate, totalAffiliateFeeAmount);
                 }
             }
         }
 
         // Transfer remaining protocol fee to the protocol fee recipient
-        _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFee);
+        _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFeeAmount);
 
-        if (totalAffiliateFee != 0) {
-            emit AffiliatePayment(affiliate, currency, totalAffiliateFee);
+        if (totalAffiliateFeeAmount != 0) {
+            emit AffiliatePayment(affiliate, currency, totalAffiliateFeeAmount);
         }
     }
 
@@ -489,13 +489,12 @@ contract LooksRareProtocol is
         address currency,
         address bidUser
     ) private {
-        if (recipients[1] != address(0)) {
-            if (fees[1] != 0) {
-                _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
-            }
+        // @dev There is no check for address(0), if the creator recipient is address(0), the fee is set to 0
+        if (fees[1] != 0) {
+            _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
         }
 
-        // @dev There is no check for address(0) since the ask recipient can never be address(0).
+        // @dev There is no check for address(0) since the ask recipient can never be address(0)
         // If ask recipient is the maker --> the signer cannot be the null address
         // If ask is the taker --> either it is the sender address or if the recipient (in TakerAsk) is set to address(0), it is adjusted to
         // the original taker address
@@ -505,7 +504,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Update the domain separator.
+     * @notice Update the domain separator and cache the chain id
      */
     function _updateDomainSeparator() private {
         domainSeparator = keccak256(

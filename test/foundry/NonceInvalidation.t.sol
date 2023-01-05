@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-// Libraries and interfaces
+// Libraries, interfaces, errors
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {INonceManager} from "../../contracts/interfaces/INonceManager.sol";
+import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 
 // Other utils and tests
 import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFillCollectionOrder.sol";
@@ -414,5 +415,15 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         }
 
         vm.stopPrank();
+    }
+
+    function testCancelNoncesRevertIfEmptyArrays() public {
+        uint256[] memory nonces = new uint256[](0);
+
+        vm.expectRevert(WrongLengths.selector);
+        looksRareProtocol.cancelSubsetNonces(nonces);
+
+        vm.expectRevert(WrongLengths.selector);
+        looksRareProtocol.cancelOrderNonces(nonces);
     }
 }

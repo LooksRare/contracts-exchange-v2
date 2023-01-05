@@ -16,7 +16,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
      */
     function testOwnerCanDiscontinueStrategy() public asPrankedUser(_owner) {
         uint256 strategyId = 0;
-        uint16 standardProtocolFeeBp = 299;
+        uint16 standardProtocolFeeBp = 249;
         uint16 minTotalFeeBp = 250;
         bool isActive = false;
 

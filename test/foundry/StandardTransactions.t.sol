@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-// Libraries and interfaces
+// Libraries, interfaces, errors
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
@@ -10,16 +10,15 @@ import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract StandardTransactionsTest is ProtocolBase {
-    uint256 private constant price = 1 ether; // Fixed price of sale
-
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
-    function testTakerBidERC721WithRoyaltiesFromRegistry() public {
+    function testTakerBidERC721WithRoyaltiesFromRegistry(uint256 price) public {
+        vm.assume(price <= 2 ether);
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0;
+        uint256 itemId = 42;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -42,15 +41,19 @@ contract StandardTransactionsTest is ProtocolBase {
         _isMakerAskOrderValid(makerAsk, signature);
 
         // Arrays for events
+        uint256[3] memory expectedFees;
         address[3] memory expectedRecipients;
+
+        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
+        if (expectedFees[0] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
+            expectedFees[0] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        }
+        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+
         expectedRecipients[0] = _owner;
         expectedRecipients[1] = _royaltyRecipient;
         expectedRecipients[2] = makerUser;
-
-        uint256[3] memory expectedFees;
-        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
-        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -86,12 +89,9 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + expectedFees[2]);
         // Royalty recipient receives 0.5% of the whole price
-        assertEq(
-            address(_royaltyRecipient).balance,
-            _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
-        );
+        assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -101,9 +101,10 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 is sold through taker bid. Address zero is specified as the recipient in the taker struct.
      */
-    function testTakerBidERC721WithAddressZeroSpecifiedAsRecipient() public {
+    function testTakerBidERC721WithAddressZeroSpecifiedAsRecipient(uint256 price) public {
+        vm.assume(price <= 2 ether);
         _setUpUsers();
-        uint256 itemId = 0;
+        uint256 itemId = 42;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -129,15 +130,19 @@ contract StandardTransactionsTest is ProtocolBase {
         _isMakerAskOrderValid(makerAsk, signature);
 
         // Arrays for events
+        uint256[3] memory expectedFees;
         address[3] memory expectedRecipients;
+
+        expectedFees[0] = (price * _minTotalFeeBp) / 10_000; // 2% is paid instead of 1.5%
+        expectedFees[1] = 0; // No royalties
+        if (expectedFees[0] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
+            expectedFees[0] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        }
+        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+
         expectedRecipients[0] = _owner;
         expectedRecipients[1] = address(0); // No royalties
         expectedRecipients[2] = makerUser;
-
-        uint256[3] memory expectedFees;
-        expectedFees[0] = (price * _minTotalFeeBp) / 10_000; // 2% is paid instead of 1.5%
-        expectedFees[1] = 0; // No royalties
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -173,17 +178,19 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + expectedFees[2]);
     }
 
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker ask using WETH
      */
-    function testTakerAskERC721WithRoyaltiesFromRegistry() public {
+    function testTakerAskERC721WithRoyaltiesFromRegistry(uint256 price) public {
+        vm.assume(price <= 2 ether);
+
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0;
+        uint256 itemId = 42;
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
@@ -205,18 +212,23 @@ contract StandardTransactionsTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Arrays for events
+        uint256[3] memory expectedFees;
         address[3] memory expectedRecipients;
+
+        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
+        if (expectedFees[0] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
+            expectedFees[0] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        }
+        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+
         expectedRecipients[0] = _owner;
         expectedRecipients[1] = _royaltyRecipient;
         expectedRecipients[2] = takerUser;
 
-        uint256[3] memory expectedFees;
-        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
-        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
-
         // Execute taker ask transaction
         vm.prank(takerUser);
+
         vm.expectEmit(true, false, false, true);
 
         emit TakerAsk(
@@ -243,12 +255,11 @@ contract StandardTransactionsTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + expectedFees[2]);
+        // Owner receives 1.5% of the whole price
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + expectedFees[0]);
         // Royalty recipient receives 0.5% of the whole price
-        assertEq(
-            weth.balanceOf(_royaltyRecipient),
-            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
-        );
+        assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient + expectedFees[1]);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
@@ -256,10 +267,11 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 is sold through a taker ask using WETH. Address zero is specified as the recipient in the taker struct.
      */
-    function testTakerAskERC721WithAddressZeroSpecifiedAsRecipient() public {
+    function testTakerAskERC721WithAddressZeroSpecifiedAsRecipient(uint256 price) public {
+        vm.assume(price <= 2 ether);
         _setUpUsers();
 
-        uint256 itemId = 0;
+        uint256 itemId = 42;
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
@@ -284,15 +296,19 @@ contract StandardTransactionsTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Arrays for events
-        address[3] memory expectedRecipients;
-        expectedRecipients[0] = _owner;
-        expectedRecipients[1] = address(0);
-        expectedRecipients[2] = takerUser;
-
         uint256[3] memory expectedFees;
-        expectedFees[0] = (price * _minTotalFeeBp) / 10_000;
-        expectedFees[1] = 0;
+        address[3] memory expectedRecipients;
+
+        expectedFees[0] = (price * _minTotalFeeBp) / 10_000; // 2% is paid instead of 1.5%
+        expectedFees[1] = 0; // No royalties
+        if (expectedFees[0] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
+            expectedFees[0] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        }
         expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+
+        expectedRecipients[0] = _owner;
+        expectedRecipients[1] = address(0); // No royalties
+        expectedRecipients[2] = takerUser;
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -322,13 +338,14 @@ contract StandardTransactionsTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + expectedFees[2]);
     }
 
     /**
      * Three ERC721 are sold through 3 taker bids in one transaction with non-atomicity.
      */
     function testThreeTakerBidsERC721() public {
+        uint256 price = 0.015 ether;
         _setUpUsers();
 
         uint256 numberPurchases = 3;
@@ -400,6 +417,8 @@ contract StandardTransactionsTest is ProtocolBase {
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */
     function testThreeTakerBidsERC721OneFails() public {
+        uint256 price = 1.4 ether;
+
         _setUpUsers();
 
         uint256 numberPurchases = 3;
@@ -514,6 +533,7 @@ contract StandardTransactionsTest is ProtocolBase {
     function testThreeTakerBidsERC721WrongLengths() public {
         _setUpUsers();
 
+        uint256 price = 1.12121111111 ether;
         uint256 numberPurchases = 3;
 
         OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);

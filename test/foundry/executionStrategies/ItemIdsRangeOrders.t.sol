@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {OrderInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongFunctionSelector} from "../../../contracts/interfaces/SharedErrors.sol";
 import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Strategies
@@ -199,6 +199,60 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
         // Taker ask user receives 98% of the whole price (2% protocol fee)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
+    }
+
+    function testMakerBidItemIdsLengthIsNotTwo() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+
+        // 1. ItemIds length is 1 (lower than 2)
+        makerBid.itemIds = new uint256[](1);
+        makerBid.itemIds[0] = 4;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(errorSelector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 2. ItemIds length is 3 (greater than 2)
+        makerBid.itemIds = new uint256[](3);
+        makerBid.itemIds[0] = 4;
+        makerBid.itemIds[1] = 40;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        (isValid, errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(errorSelector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testMakerBidAmountLengthIsNotOne() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        makerBid.amounts = new uint256[](2);
+
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(errorSelector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskRevertIfAmountIsZeroOrGreaterThanOneERC721() public {
@@ -399,5 +453,26 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testWrongSelector() public {
+        _setUpNewStrategy();
+
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: 0,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: 1 ether,
+            itemId: 0
+        });
+
+        (bool orderIsValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, bytes4(0));
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, WrongFunctionSelector.selector);
     }
 }

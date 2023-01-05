@@ -73,14 +73,20 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
         uint256[] memory amounts
     ) internal {
         address transferManager = managerSelectorOfAssetType[assetType].transferManager;
-        bytes4 selector = managerSelectorOfAssetType[assetType].selector;
 
-        if (transferManager == address(0) || selector == bytes4(0)) {
+        if (transferManager == address(0)) {
             revert NoTransferManagerForAssetType(assetType);
         }
 
         (bool status, ) = transferManager.call(
-            abi.encodeWithSelector(selector, collection, sender, recipient, itemIds, amounts)
+            abi.encodeWithSelector(
+                managerSelectorOfAssetType[assetType].selector,
+                collection,
+                sender,
+                recipient,
+                itemIds,
+                amounts
+            )
         );
 
         if (!status) {

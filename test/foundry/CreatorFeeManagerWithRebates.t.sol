@@ -46,11 +46,10 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             mockERC721WithRoyalties.mint(takerUser, itemId);
         }
 
-        // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0,
+            strategyId: 0, // Standard sale for fixed price
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: erc721,
@@ -59,18 +58,6 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             maxPrice: price,
             itemId: itemId
         });
-
-        // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
-            abi.encode()
-        );
 
         // Execute taker ask transaction
         vm.prank(takerUser);

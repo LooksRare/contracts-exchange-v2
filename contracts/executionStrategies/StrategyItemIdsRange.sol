@@ -9,6 +9,7 @@ import {OrderInvalid, WrongFunctionSelector} from "../interfaces/SharedErrors.so
 
 /**
  * @title StrategyItemIdsRange
+ * @notice This contract offers a single execution strategy for users to bid on a specific amounts of items in a range specified by 2 itemIds.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyItemIdsRange {
@@ -26,6 +27,10 @@ contract StrategyItemIdsRange {
         pure
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
+        if (makerBid.itemIds.length != 2 || makerBid.amounts.length != 1) {
+            revert OrderInvalid();
+        }
+
         uint256 minItemId = makerBid.itemIds[0];
         uint256 maxItemId = makerBid.itemIds[1];
 
@@ -102,7 +107,7 @@ contract StrategyItemIdsRange {
         }
 
         // These are done for order invalidation to prevent underflows or array errors
-        if (makerBid.itemIds.length < 2 || makerBid.itemIds.length == 0 || makerBid.itemIds[0] == 0) {
+        if (makerBid.itemIds.length != 2 || makerBid.amounts.length != 1 || makerBid.itemIds[0] == 0) {
             return (isValid, OrderInvalid.selector);
         }
 

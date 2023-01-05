@@ -137,7 +137,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerBid.collection, price, itemIds);
 
             if (recipients[1] == address(0)) {
-                // If fee is null, creator fee is set at 0
+                // If recipient is null address, creator fee is set at 0
                 fees[1] = 0;
             } else if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
                 // If creator fee is higher than tolerated, it reverts

@@ -489,13 +489,12 @@ contract LooksRareProtocol is
         address currency,
         address bidUser
     ) private {
-        // @dev There is no check for address(0) since the creator can never be address(0).
-        // If the creator recipient is address(0), the fee is set to 0
+        // @dev There is no check for address(0), if the creator recipient is address(0), the fee is set to 0
         if (fees[1] != 0) {
             _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
         }
 
-        // @dev There is no check for address(0) since the ask recipient can never be address(0).
+        // @dev There is no check for address(0) since the ask recipient can never be address(0)
         // If ask recipient is the maker --> the signer cannot be the null address
         // If ask is the taker --> either it is the sender address or if the recipient (in TakerAsk) is set to address(0), it is adjusted to
         // the original taker address
@@ -505,7 +504,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Update the domain separator and cache the chain id.
+     * @notice Update the domain separator and cache the chain id
      */
     function _updateDomainSeparator() private {
         domainSeparator = keccak256(

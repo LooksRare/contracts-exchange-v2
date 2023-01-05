@@ -53,7 +53,12 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
         bool isMakerBid,
         address implementation
     ) external onlyOwner {
-        if (maxProtocolFeeBp < standardProtocolFeeBp || maxProtocolFeeBp < minTotalFeeBp || maxProtocolFeeBp > 500) {
+        if (
+            maxProtocolFeeBp < standardProtocolFeeBp ||
+            maxProtocolFeeBp < minTotalFeeBp ||
+            standardProtocolFeeBp > minTotalFeeBp ||
+            maxProtocolFeeBp > 500
+        ) {
             revert StrategyProtocolFeeTooHigh();
         }
 
@@ -101,7 +106,12 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
         }
 
         uint256 maxProtocolFeeBp = strategyInfo[strategyId].maxProtocolFeeBp;
-        if (newStandardProtocolFee > maxProtocolFeeBp || newMinTotalFee > maxProtocolFeeBp) {
+
+        if (
+            newStandardProtocolFee > maxProtocolFeeBp ||
+            newMinTotalFee > maxProtocolFeeBp ||
+            newStandardProtocolFee > newMinTotalFee
+        ) {
             revert StrategyProtocolFeeTooHigh();
         }
 

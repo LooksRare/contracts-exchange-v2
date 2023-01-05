@@ -85,13 +85,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            abi.encode()
-        );
+        takerBid.amounts = makerAsk.amounts;
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 

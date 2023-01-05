@@ -693,6 +693,49 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         );
     }
 
+    function testCannotTransferERC721OrERC1155IfArrayLengthIs0() public {
+        uint256[] memory emptyArrayUint256 = new uint256[](0);
+
+        // 1. ERC721
+        vm.expectRevert(WrongLengths.selector);
+        transferManager.transferItemsERC721(
+            address(mockERC721),
+            _sender,
+            _recipient,
+            emptyArrayUint256,
+            emptyArrayUint256
+        );
+
+        // 2. ERC1155 length is 0
+        vm.expectRevert(WrongLengths.selector);
+        transferManager.transferItemsERC1155(
+            address(mockERC1155),
+            _sender,
+            _recipient,
+            emptyArrayUint256,
+            emptyArrayUint256
+        );
+
+        // 3. ERC1155 length differs
+        uint256[] memory itemIds = new uint256[](2);
+        uint256[] memory amounts = new uint256[](3);
+
+        vm.expectRevert(WrongLengths.selector);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
+    }
+
+    function testUserCannotGrantOrRevokeApprovalsIfArrayLengthIs0() public {
+        address[] memory emptyArrayAddresses = new address[](0);
+
+        // 1. Grant approvals
+        vm.expectRevert(WrongLengths.selector);
+        transferManager.grantApprovals(emptyArrayAddresses);
+
+        // 2. Revoke approvals
+        vm.expectRevert(WrongLengths.selector);
+        transferManager.revokeApprovals(emptyArrayAddresses);
+    }
+
     function testUserCannotGrantApprovalIfOperatorNotWhitelisted() public asPrankedUser(_owner) {
         address randomOperator = address(420);
         transferManager.whitelistOperator(randomOperator);

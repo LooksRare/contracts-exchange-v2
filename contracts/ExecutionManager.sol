@@ -149,7 +149,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         uint256 minTotalFeeAmount = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
 
         if (fees[1] == 0) {
-            // If no creator fee recipient, protocol fee is set as the minimum total fee amount
+            // If creator fee is null, protocol fee is set as the minimum total fee amount
             fees[0] = minTotalFeeAmount;
             // Net fee for seller
             fees[2] = price - fees[0];
@@ -235,7 +235,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         uint256 minTotalFeeAmount = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
 
         if (fees[1] == 0) {
-            // If no creator fee recipient, protocol fee is set as the minimum total fee amount
+            // If creator fee is null, protocol fee is set as the minimum total fee amount
             fees[0] = minTotalFeeAmount;
             // Net fee amount for seller
             fees[2] = price - fees[0];

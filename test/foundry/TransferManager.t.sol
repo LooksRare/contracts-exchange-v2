@@ -715,8 +715,9 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             emptyArrayUint256,
             emptyArrayUint256
         );
+    }
 
-        // 3. ERC1155 length differs
+    function testCannotTransferERC1155IfArrayLengthDiffers() public {
         uint256[] memory itemIds = new uint256[](2);
         uint256[] memory amounts = new uint256[](3);
 

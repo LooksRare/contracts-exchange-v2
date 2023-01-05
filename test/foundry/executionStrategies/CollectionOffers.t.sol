@@ -17,8 +17,6 @@ import {StrategyCollectionOffer} from "../../../contracts/executionStrategies/St
 // Base test
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
-import "hardhat/console.sol";
-
 contract CollectionOrdersTest is ProtocolBase {
     StrategyCollectionOffer public strategyCollectionOffer;
     bytes4 public selectorNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
@@ -513,7 +511,7 @@ contract CollectionOrdersTest is ProtocolBase {
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        // 4. Amount is too high for ERC721 (without merkle proof)
+        // 4. Amount is too high for ERC721 (with merkle proof)
         makerBid.amounts[0] = 2;
         takerAsk.amounts = makerBid.amounts;
         signature = _signMakerBid(makerBid, makerUserPK);

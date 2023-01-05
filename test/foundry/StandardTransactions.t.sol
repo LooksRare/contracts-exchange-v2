@@ -13,9 +13,8 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
-    function testTakerBidERC721WithRoyaltiesFromRegistry(uint96 price) public {
-        price = (price > 2 ether) ? 2 ether : price;
-
+    function testTakerBidERC721WithRoyaltiesFromRegistry(uint72 price) public {
+        vm.assume(price <= 2 ether);
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
@@ -102,9 +101,8 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 is sold through taker bid. Address zero is specified as the recipient in the taker struct.
      */
-    function testTakerBidERC721WithAddressZeroSpecifiedAsRecipient(uint96 price) public {
-        price = (price > 2 ether) ? 2 ether : price;
-
+    function testTakerBidERC721WithAddressZeroSpecifiedAsRecipient(uint72 price) public {
+        vm.assume(price <= 2 ether);
         _setUpUsers();
         uint256 itemId = 42;
 
@@ -186,8 +184,8 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker ask using WETH
      */
-    function testTakerAskERC721WithRoyaltiesFromRegistry(uint96 price) public {
-        price = (price > 2 ether) ? 2 ether : price;
+    function testTakerAskERC721WithRoyaltiesFromRegistry(uint72 price) public {
+        vm.assume(price <= 2 ether);
 
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
@@ -269,8 +267,8 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 is sold through a taker ask using WETH. Address zero is specified as the recipient in the taker struct.
      */
-    function testTakerAskERC721WithAddressZeroSpecifiedAsRecipient(uint96 price) public {
-        price = (price > 2 ether) ? 2 ether : price;
+    function testTakerAskERC721WithAddressZeroSpecifiedAsRecipient(uint72 price) public {
+        vm.assume(price <= 2 ether);
         _setUpUsers();
 
         uint256 itemId = 42;
@@ -347,9 +345,9 @@ contract StandardTransactionsTest is ProtocolBase {
      * Three ERC721 are sold through 3 taker bids in one transaction with non-atomicity.
      */
     function testThreeTakerBidsERC721() public {
+        uint256 price = 0.015 ether;
         _setUpUsers();
 
-        uint256 price = 1.5 ether;
         uint256 numberPurchases = 3;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
@@ -419,9 +417,10 @@ contract StandardTransactionsTest is ProtocolBase {
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */
     function testThreeTakerBidsERC721OneFails() public {
+        uint256 price = 1.4 ether;
+
         _setUpUsers();
 
-        uint256 price = 1.5 ether;
         uint256 numberPurchases = 3;
         uint256 faultyTokenId = numberPurchases - 1;
 

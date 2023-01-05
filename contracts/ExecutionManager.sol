@@ -139,9 +139,6 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             if (recipients[1] == address(0)) {
                 // If recipient is null address, creator fee is set at 0
                 fees[1] = 0;
-            } else if (fees[1] == 0) {
-                // If creator fee is null, creator recipient address is set to null
-                recipients[1] = address(0);
             } else if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
                 // If creator fee is higher than tolerated, it reverts
                 revert CreatorFeeBpTooHigh();
@@ -154,15 +151,16 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         if (recipients[1] == address(0)) {
             // If no creator fee recipient, protocol fee is set as the minimum total fee amount
             fees[0] = minTotalFeeAmount;
+            // Net fee for seller
+            fees[2] = price - fees[0];
         } else {
             // If there is a creator fee information, the protocol fee amount can be calculated
             fees[0] = _calculateProtocolFeeAmount(price, makerBid.strategyId, fees[1], minTotalFeeAmount);
+            // Net fee for seller
+            fees[2] = price - fees[1] - fees[0];
         }
 
         recipients[0] = protocolFeeRecipient;
-
-        // Net fee for seller
-        fees[2] = price - fees[1] - fees[0];
         recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
     }
 
@@ -227,9 +225,6 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             if (recipients[1] == address(0)) {
                 // If recipient is null address, creator fee is set at 0
                 fees[1] = 0;
-            } else if (fees[1] == 0) {
-                // If creator fee is null, creator recipient address is set to null
-                recipients[1] = address(0);
             } else if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
                 // If creator fee is higher than tolerated, it reverts
                 revert CreatorFeeBpTooHigh();
@@ -242,15 +237,16 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         if (recipients[1] == address(0)) {
             // If no creator fee recipient, protocol fee is set as the minimum total fee amount
             fees[0] = minTotalFeeAmount;
+            // Net fee amount for seller
+            fees[2] = price - fees[0];
         } else {
             // If there is a creator fee information, the protocol fee amount can be calculated
             fees[0] = _calculateProtocolFeeAmount(price, makerAsk.strategyId, fees[1], minTotalFeeAmount);
+            // Net fee amount for seller
+            fees[2] = price - fees[1] - fees[0];
         }
 
         recipients[0] = protocolFeeRecipient;
-
-        // Net fee amount for seller
-        fees[2] = price - fees[1] - fees[0];
         recipients[2] = makerAsk.signer;
     }
 

@@ -435,8 +435,8 @@ contract LooksRareProtocol is
         // Transfer remaining protocol fee to the protocol fee recipient
         _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFeeAmount);
 
-        if (totalProtocolFeeAmount != 0) {
-            emit AffiliatePayment(affiliate, currency, totalProtocolFeeAmount);
+        if (totalAffiliateFeeAmount != 0) {
+            emit AffiliatePayment(affiliate, currency, totalAffiliateFeeAmount);
         }
     }
 
@@ -489,10 +489,10 @@ contract LooksRareProtocol is
         address currency,
         address bidUser
     ) private {
-        if (recipients[1] != address(0)) {
-            if (fees[1] != 0) {
-                _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
-            }
+        // @dev There is no check for address(0) since the creator can never be address(0).
+        // If the creator recipient is address(0), the fee is set to 0
+        if (fees[1] != 0) {
+            _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
         }
 
         // @dev There is no check for address(0) since the ask recipient can never be address(0).
@@ -505,7 +505,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Update the domain separator.
+     * @notice Update the domain separator and cache the chain id.
      */
     function _updateDomainSeparator() private {
         domainSeparator = keccak256(

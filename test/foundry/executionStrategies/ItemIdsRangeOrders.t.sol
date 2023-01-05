@@ -205,12 +205,28 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
-        makerBid.itemIds = new uint256[](1);
 
-        // Sign order
+        // 1. ItemIds length is 1 (lower than 2)
+        makerBid.itemIds = new uint256[](1);
+        makerBid.itemIds[0] = 4;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.prank(takerUser);
+        vm.expectRevert(errorSelector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 2. ItemIds length is 3 (greater than 2)
+        makerBid.itemIds = new uint256[](3);
+        makerBid.itemIds[0] = 4;
+        makerBid.itemIds[1] = 40;
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        (isValid, errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);

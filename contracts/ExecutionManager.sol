@@ -140,13 +140,13 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
                 }
             }
 
-            uint256 minTotalFee = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
+            uint256 minTotalFeeAmount = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
 
             // Protocol fee
             if (recipients[1] == address(0) || fees[1] == 0) {
-                fees[0] = minTotalFee;
+                fees[0] = minTotalFeeAmount;
             } else {
-                fees[0] = _calculateProtocolFee(price, makerBid.strategyId, fees[1], minTotalFee);
+                fees[0] = _calculateProtocolFeeAmount(price, makerBid.strategyId, fees[1], minTotalFeeAmount);
             }
 
             recipients[0] = protocolFeeRecipient;
@@ -211,20 +211,20 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             }
         }
         {
-            // Creator fee and adjustment of protocol fee
+            // Creator fee amount and adjustment of protocol fee amount
             if (address(creatorFeeManager) != address(0)) {
                 (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
                 if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
                     revert CreatorFeeBpTooHigh();
                 }
             }
-            uint256 minTotalFee = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
+            uint256 minTotalFeeAmount = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
 
-            // Protocol fee
+            // Protocol fee amount
             if (recipients[1] == address(0) || fees[1] == 0) {
-                fees[0] = minTotalFee;
+                fees[0] = minTotalFeeAmount;
             } else {
-                fees[0] = _calculateProtocolFee(price, makerAsk.strategyId, fees[1], minTotalFee);
+                fees[0] = _calculateProtocolFeeAmount(price, makerAsk.strategyId, fees[1], minTotalFeeAmount);
             }
 
             recipients[0] = protocolFeeRecipient;
@@ -236,25 +236,23 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice Calculate protocol fee for a given protocol fee
+     * @notice Calculate protocol fee amount for a given protocol fee
      * @param price Price
      * @param strategyId Strategy id
-     * @param creatorFee Creator fee amount
-     * @param minTotalFeeBp Minimum total fee (in basis point)
-     * @return protocolFee Protocol fee amount
+     * @param creatorFeeAmount Creator fee amount
+     * @param minTotalFeeAmount Min total fee amount
+     * @return protocolFeeAmount Protocol fee amount
      */
-    function _calculateProtocolFee(
+    function _calculateProtocolFeeAmount(
         uint256 price,
         uint256 strategyId,
-        uint256 creatorFee,
-        uint256 minTotalFeeBp
-    ) private view returns (uint256 protocolFee) {
-        uint256 standardProtocolFeeBp = (price * strategyInfo[strategyId].standardProtocolFeeBp) / 10_000;
+        uint256 creatorFeeAmount,
+        uint256 minTotalFeeAmount
+    ) private view returns (uint256 protocolFeeAmount) {
+        protocolFeeAmount = (price * strategyInfo[strategyId].standardProtocolFeeBp) / 10_000;
 
-        if (creatorFee + standardProtocolFeeBp >= minTotalFeeBp) {
-            protocolFee = standardProtocolFeeBp;
-        } else {
-            protocolFee = minTotalFeeBp - creatorFee;
+        if (protocolFeeAmount + creatorFeeAmount < minTotalFeeAmount) {
+            protocolFeeAmount = minTotalFeeAmount - creatorFeeAmount;
         }
     }
 

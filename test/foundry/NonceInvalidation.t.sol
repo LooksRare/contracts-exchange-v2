@@ -417,7 +417,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.stopPrank();
     }
 
-    function testCancelNonesRevertlIfEmptyArrays() public {
+    function testCancelNonesRevertIfEmptyArrays() public {
         uint256[] memory nonces = new uint256[](0);
 
         vm.expectRevert(WrongLengths.selector);

@@ -9,16 +9,12 @@ import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-import "hardhat/console.sol";
-
 contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
     function testTakerBidERC721WithRoyaltiesFromRegistry(uint96 price) public {
         price = (price > 2 ether) ? 2 ether : price;
-
-        console.log(price);
 
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
@@ -57,7 +53,7 @@ contract StandardTransactionsTest is ProtocolBase {
         expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
 
         expectedRecipients[0] = _owner;
-        expectedRecipients[1] = expectedFees[1] == 0 ? address(0) : _royaltyRecipient;
+        expectedRecipients[1] = _royaltyRecipient;
         expectedRecipients[2] = makerUser;
 
         // Execute taker bid transaction
@@ -192,7 +188,6 @@ contract StandardTransactionsTest is ProtocolBase {
      */
     function testTakerAskERC721WithRoyaltiesFromRegistry(uint96 price) public {
         price = (price > 2 ether) ? 2 ether : price;
-        console.log(price);
 
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
@@ -230,7 +225,7 @@ contract StandardTransactionsTest is ProtocolBase {
         expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
 
         expectedRecipients[0] = _owner;
-        expectedRecipients[1] = expectedFees[1] == 0 ? address(0) : _royaltyRecipient;
+        expectedRecipients[1] = _royaltyRecipient;
         expectedRecipients[2] = takerUser;
 
         // Execute taker ask transaction

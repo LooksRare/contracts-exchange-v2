@@ -39,7 +39,11 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
         address transferManagerForAssetType,
         bytes4 selectorForAssetType
     ) external onlyOwner {
-        if (transferManagerForAssetType == address(0) || selectorForAssetType == bytes4(0)) {
+        if (
+            transferManagerForAssetType == address(0) ||
+            transferManagerForAssetType == address(this) ||
+            selectorForAssetType == bytes4(0)
+        ) {
             revert ManagerSelectorEmpty();
         }
 

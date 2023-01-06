@@ -8,7 +8,7 @@ import {LowLevelETHReturnETHIfAnyExceptOneWei} from "@looksrare/contracts-libs/c
 import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelWETH.sol";
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
-// OpenZeppelin's library for verifying Merkle proofs
+// OpenZeppelin's library (adjusted) for verifying Merkle proofs
 import {MerkleProofCalldata} from "./libraries/OpenZeppelin/MerkleProofCalldata.sol";
 
 // Libraries
@@ -25,7 +25,9 @@ import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 /**
  * @title LooksRareProtocol
- * @notice This contract is the core contract of the LooksRare protocol (v2).
+ * @notice This contract is the core smart contract of the LooksRare protocol ("v2").
+ *         It is the main entry point for users to initiate transactions with taker orders
+ *         and manage the cancellation of maker orders, which exist offchain.
 LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRAR'''''''''''''''''''''''''''''''''''OOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKS:.                                        .;OOKSRARELOOKSRARELOOKSR
@@ -52,7 +54,7 @@ LOOKSRARELOOKSRARELOOo,.                                          .,OKSRARELOOKS
 LOOKSRARELOOKSRARELOOKSx;.                                      .;xOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLO:.                                  .:SRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLOOKl.                              .lOKSRLOOKSRARELOOKSRARELOOKSR
-LOOKSRARELOOKSRARELOOKSRLOOKSRo'.                        .'oLOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRo'.                        .'oWENV2?LOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLOOKSRARd;.                    .;xRELOOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLOOKSRARELO:.                .:kRARELOOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKl.            .cOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR

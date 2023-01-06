@@ -14,10 +14,15 @@ import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyManager is IStrategyManager, CurrencyManager {
-    // Count how many strategies exist (it includes strategies that have been removed)
+    /**
+     * @notice This variable keeps the count of how many strategies exist.
+     *         It includes strategies that have been removed.
+     */
     uint256 public countStrategies = 1;
 
-    // Track strategy information for a strategy id
+    /**
+     * @notice This returns the strategy information for a strategy id.
+     */
     mapping(uint256 => Strategy) public strategyInfo;
 
     /**
@@ -37,7 +42,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
     }
 
     /**
-     * @notice Add a new strategy
+     * @notice This function allows the owner to add a new execution strategy to the protocol.
      * @param standardProtocolFeeBp Protocol fee
      * @param maxProtocolFeeBp Maximum protocol fee
      * @param selector Selector
@@ -88,7 +93,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
     }
 
     /**
-     * @notice Update strategy
+     * @notice This function allows the owner to update parameters for an existing execution strategy.
      * @param strategyId Strategy id
      * @param newStandardProtocolFee New standard protocol fee (e.g., 200 --> 2%)
      * @param newMinTotalFee New minimum total fee

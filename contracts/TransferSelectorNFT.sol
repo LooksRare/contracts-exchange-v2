@@ -13,7 +13,10 @@ import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
-    // Tracks manager address and associated selector to transfer asset type
+    /**
+     * @notice It returns the transfer manager address and the associated bytes4
+     * selector used to transfer assets for this asset type.
+     */
     mapping(uint256 => ManagerSelector) public managerSelectorOfAssetType;
 
     /**
@@ -28,7 +31,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
     }
 
     /**
-     * @notice Add transfer manager for new asset types
+     * @notice This function allows the owner to add new transfer manager implementations for new asset types.
      * @param assetType Asset type
      * @param transferManagerForAssetType Transfer manager address for this asset type
      * @param selectorForAssetType Selector for the function to call to transfer this asset type
@@ -60,7 +63,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager {
     }
 
     /**
-     * @notice Transfer non-fungible tokens
+     * @notice This function is internal and used to transfer non-fungible tokens.
      * @param collection Collection address
      * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
      * @param sender Sender address

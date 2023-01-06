@@ -283,8 +283,12 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      * @param endTime End timestamp
      */
     function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) private view {
-        if (startTime > block.timestamp || endTime < block.timestamp) {
-            revert OutsideOfTimeRange();
+        // if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
+        assembly {
+            if or(gt(startTime, timestamp()), lt(endTime, timestamp())) {
+                mstore(0x00, 0x7476320f)
+                revert(0x1c, 0x04)
+            }
         }
     }
 }

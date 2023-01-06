@@ -16,14 +16,14 @@ interface ICreatorFeeManager {
 
     /**
      * @notice It returns the royalty fee registry address/interface.
-     * @return IRoyaltyFeeRegistry Interface of the royalty fee registry
+     * @return royaltyFeeRegistry Interface of the royalty fee registry
      */
-    function royaltyFeeRegistry() external view returns (IRoyaltyFeeRegistry);
+    function royaltyFeeRegistry() external view returns (IRoyaltyFeeRegistry royaltyFeeRegistry);
 
     /**
-     * @notice View creator address and calculate creator fee.
+     * @notice This function returns the creator address and calculates the creator fee.
      * @param collection Collection address
-     * @param price Trade price
+     * @param price Transaction price
      * @param itemIds Array of item ids
      * @return creator Creator address
      * @return creatorFee Creator fee

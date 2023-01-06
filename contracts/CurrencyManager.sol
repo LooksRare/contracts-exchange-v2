@@ -13,7 +13,9 @@ import {AffiliateManager} from "./AffiliateManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract CurrencyManager is ICurrencyManager, AffiliateManager {
-    // Check whether the currency is whitelisted
+    /**
+     * @notice It checks whether the currency is whitelisted for transacting.
+     */
     mapping(address => bool) public isCurrencyWhitelisted;
 
     /**
@@ -23,7 +25,7 @@ contract CurrencyManager is ICurrencyManager, AffiliateManager {
     constructor(address _owner) AffiliateManager(_owner) {}
 
     /**
-     * @notice Whitelist/blacklist currency for execution
+     * @notice This function allows the owner to update the Whitelist/blacklist status of a currency for transacting.
      * @param currency Currency address (address(0) for ETH)
      * @param isWhitelisted Whether the currency is whitelisted
      * @dev Only callable by owner.

@@ -30,7 +30,7 @@ interface ILooksRareProtocol {
     event AffiliatePayment(address affiliate, address currency, uint256 affiliateFee);
 
     /**
-     * @notice It is emitted if there is a new domain separator.
+     * @notice It is emitted if there is a change in the domain separator.
      */
     event NewDomainSeparator();
 
@@ -41,7 +41,7 @@ interface ILooksRareProtocol {
     event NewGasLimitETHTransfer(uint256 gasLimitETHTransfer);
 
     /**
-     * @notice It is emitted when there a taker ask transaction is completed
+     * @notice It is emitted when a taker ask transaction is completed.
      * @param signatureParameters Struct about signature parameters
      * @param askUser Address of the ask user
      * @param bidUser Address of the bid user
@@ -70,7 +70,7 @@ interface ILooksRareProtocol {
     );
 
     /**
-     * @notice It is emitted when there a taker bid transaction is completed
+     * @notice It is emitted when a taker bid transaction is completed.
      * @param signatureParameters Struct about signature parameters
      * @param bidUser Address of the bid user
      * @param bidRecipient Address of the recipient of the bid
@@ -119,7 +119,7 @@ interface ILooksRareProtocol {
     error WrongNonces();
 
     /**
-     * @notice Sell with taker ask (against maker bid)
+     * @notice This function allows a user to execute a taker ask (against a maker bid).
      * @param takerAsk Taker ask struct
      * @param makerBid Maker bid struct
      * @param makerSignature Maker signature
@@ -135,7 +135,7 @@ interface ILooksRareProtocol {
     ) external;
 
     /**
-     * @notice Buy with taker bid (against maker ask)
+     * @notice This function allows a user to execute a taker bid (against a maker ask).
      * @param takerBid Taker bid struct
      * @param makerAsk Maker ask struct
      * @param makerSignature Maker signature
@@ -151,7 +151,7 @@ interface ILooksRareProtocol {
     ) external payable;
 
     /**
-     * @notice Batch buy with taker bids (against maker asks)
+     * @notice This function allows a user to batch buy with an array of taker bids (against an array of maker asks).
      * @param takerBids Array of taker bid structs
      * @param makerAsks Array of maker ask structs
      * @param makerSignatures Array of maker signatures

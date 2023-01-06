@@ -84,11 +84,15 @@ contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
     }
 
     function testAddTransferManagerManagerSelectorEmpty() public asPrankedUser(_owner) {
-        // Empty transfer manager address
+        // 1. Empty transfer manager address
         vm.expectRevert(ManagerSelectorEmpty.selector);
         looksRareProtocol.addTransferManagerForAssetType(2, address(0), newSelector);
 
-        // Empty selector
+        // 2. Address transfer manager is protocol address
+        vm.expectRevert(ManagerSelectorEmpty.selector);
+        looksRareProtocol.addTransferManagerForAssetType(2, address(looksRareProtocol), newSelector);
+
+        // 3. Empty selector
         vm.expectRevert(ManagerSelectorEmpty.selector);
         looksRareProtocol.addTransferManagerForAssetType(2, address(1), _EMPTY_BYTES4);
     }

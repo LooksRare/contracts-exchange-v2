@@ -84,16 +84,34 @@ contract InheritedStrategy {
         uint256 price,
         uint256 counterpartyPrice
     ) private pure {
-        if (
-            amountsLength == 0 ||
-            // If A == B, then A XOR B == 0. So if all 4 are equal, it should be 0 | 0 | 0 == 0
-            ((amountsLength ^ itemIdsLength) |
-                (counterpartyItemIdsLength ^ counterpartyAmountsLength) |
-                (amountsLength ^ counterpartyItemIdsLength)) !=
-            0 ||
-            price != counterpartyPrice
-        ) {
-            revert OrderInvalid();
+        // if (
+        //     amountsLength == 0 ||
+        //     // If A == B, then A XOR B == 0. So if all 4 are equal, it should be 0 | 0 | 0 == 0
+        //     ((amountsLength ^ itemIdsLength) |
+        //         (counterpartyItemIdsLength ^ counterpartyAmountsLength) |
+        //         (amountsLength ^ counterpartyItemIdsLength)) !=
+        //     0 ||
+        //     price != counterpartyPrice
+        // ) {
+        //     revert OrderInvalid();
+        // }
+        assembly {
+            if or(
+                or(iszero(amountsLength), iszero(eq(price, counterpartyPrice))),
+                gt(
+                    or(
+                        or(
+                            xor(amountsLength, itemIdsLength),
+                            xor(counterpartyItemIdsLength, counterpartyAmountsLength)
+                        ),
+                        xor(amountsLength, counterpartyItemIdsLength)
+                    ),
+                    0
+                )
+            ) {
+                mstore(0x00, 0x2e0c0f71)
+                revert(0x1c, 0x04)
+            }
         }
     }
 

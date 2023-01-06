@@ -18,7 +18,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
      * @notice This variable keeps the count of how many strategies exist.
      *         It includes strategies that have been removed.
      */
-    uint256 public countStrategies = 1;
+    uint256 private _countStrategies = 1;
 
     /**
      * @notice This returns the strategy information for a strategy id.
@@ -71,7 +71,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
             revert NotV2Strategy();
         }
 
-        strategyInfo[countStrategies] = Strategy({
+        strategyInfo[_countStrategies] = Strategy({
             isActive: true,
             standardProtocolFeeBp: standardProtocolFeeBp,
             minTotalFeeBp: minTotalFeeBp,
@@ -82,7 +82,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
         });
 
         emit NewStrategy(
-            countStrategies++,
+            _countStrategies++,
             standardProtocolFeeBp,
             minTotalFeeBp,
             maxProtocolFeeBp,
@@ -106,7 +106,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
         uint16 newMinTotalFee,
         bool isActive
     ) external onlyOwner {
-        if (strategyId >= countStrategies) {
+        if (strategyId >= _countStrategies) {
             revert StrategyNotUsed();
         }
 

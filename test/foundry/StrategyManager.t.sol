@@ -147,9 +147,8 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.updateStrategy(0, newStandardProtocolFee, newMinTotalFee, true);
 
         // 3. It reverts if strategy doesn't exist
-        uint256 countStrategies = looksRareProtocol.countStrategies();
         vm.expectRevert(StrategyNotUsed.selector);
-        looksRareProtocol.updateStrategy(countStrategies, currentStandardProtocolFee, currentMinTotalFee, true);
+        looksRareProtocol.updateStrategy(1, currentStandardProtocolFee, currentMinTotalFee, true);
     }
 
     /**

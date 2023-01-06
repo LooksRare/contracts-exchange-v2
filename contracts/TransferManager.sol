@@ -120,7 +120,11 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         uint256 collectionsLength = collections.length;
 
         if (
-            collectionsLength == 0 || (itemIds.length ^ collectionsLength) | (amounts.length ^ collectionsLength) != 0
+            collectionsLength == 0 ||
+            (assetTypes.length ^ collectionsLength) |
+                (itemIds.length ^ collectionsLength) |
+                (amounts.length ^ collectionsLength) !=
+            0
         ) {
             revert WrongLengths();
         }

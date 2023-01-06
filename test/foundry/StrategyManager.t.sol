@@ -6,12 +6,22 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 
 // Interfaces
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
+import {IBaseStrategy} from "../../contracts/interfaces/IBaseStrategy.sol";
 
 // Random strategy
 import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
+
+contract FalseBaseStrategy is IBaseStrategy {
+    /**
+     * @inheritdoc IBaseStrategy
+     */
+    function isLooksRareV2Strategy() external pure override returns (bool) {
+        return false;
+    }
+}
 
 contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
@@ -197,6 +207,45 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             _EMPTY_BYTES4,
             true,
             address(0)
+        );
+    }
+
+    function testAddStrategyNotV2Strategy() public asPrankedUser(_owner) {
+        bytes4 randomSelector = StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
+
+        // 1. EOA
+        vm.expectRevert();
+        looksRareProtocol.addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            randomSelector,
+            true,
+            address(0)
+        );
+
+        // 2. Wrong contract (e.g., LooksRareProtocol)
+        vm.expectRevert();
+        looksRareProtocol.addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            randomSelector,
+            true,
+            address(looksRareProtocol)
+        );
+
+        // 3. Contract that implements the function but returns false
+        FalseBaseStrategy falseStrategy = new FalseBaseStrategy();
+
+        vm.expectRevert(NotV2Strategy.selector);
+        looksRareProtocol.addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            randomSelector,
+            true,
+            address(falseStrategy)
         );
     }
 

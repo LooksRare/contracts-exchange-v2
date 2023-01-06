@@ -7,7 +7,10 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 // Custom errors
 import {OrderInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
 
-contract StrategyTestMultiFillCollectionOrder {
+// BaseStrategy
+import {BaseStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";
+
+contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
     using OrderStructs for OrderStructs.MakerBid;
 
     // Address of the protocol

@@ -15,6 +15,9 @@ import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Strategies
+import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     function testUpdateCreatorFeeManager() public asPrankedUser(_owner) {
         vm.expectEmit(true, false, false, true);
@@ -299,10 +302,19 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
     function testCannotExecuteTransactionIfMakerBidWithStrategyForMakerAsk() public {
         _setUpUsers();
 
+        vm.prank(_owner);
+        StrategyFloorFromChainlink strategy = new StrategyFloorFromChainlink(_owner, address(weth));
+
         bool isMakerBid = true;
         vm.prank(_owner);
-        // All parameters are random, including the selector and the implementation
-        looksRareProtocol.addStrategy(250, 250, 300, 0xa9059cbb, isMakerBid, address(1));
+        looksRareProtocol.addStrategy(
+            250,
+            250,
+            300,
+            StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector,
+            isMakerBid,
+            address(strategy)
+        );
 
         uint256 itemId = 0;
         uint256 price = 1 ether;
@@ -337,10 +349,20 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
     function testCannotExecuteTransactionIfMakerAskWithStrategyForMakerBid() public {
         _setUpUsers();
 
+        vm.prank(_owner);
+        StrategyFloorFromChainlink strategy = new StrategyFloorFromChainlink(_owner, address(weth));
+
         bool isMakerBid = false;
         vm.prank(_owner);
         // All parameters are random, including the selector and the implementation
-        looksRareProtocol.addStrategy(250, 250, 300, 0xa9059cbb, isMakerBid, address(1));
+        looksRareProtocol.addStrategy(
+            250,
+            250,
+            300,
+            StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector,
+            isMakerBid,
+            address(strategy)
+        );
 
         uint256 itemId = 0;
         uint256 price = 1 ether;

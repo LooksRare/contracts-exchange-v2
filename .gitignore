@@ -10,6 +10,7 @@ typechain
 cache
 artifacts
 abis/
+docs/
 
 # Forge coverage and gas
 .gas-snapshot

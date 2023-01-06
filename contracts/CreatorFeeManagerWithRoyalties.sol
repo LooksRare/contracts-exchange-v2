@@ -10,16 +10,18 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
  * @title CreatorFeeManagerWithRoyalties
- * @notice It distributes royalties.
+ * @notice This contract retrieves the creator fee addresses and calculates the royalties.
  * @author LooksRare protocol team (👀,💎)
  */
 contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
-    // Royalty fee registry
+    /**
+     * @notice Royalty fee registry interface.
+     */
     IRoyaltyFeeRegistry public immutable royaltyFeeRegistry;
 
     /**
      * @notice Constructor
-     * @param _royaltyFeeRegistry Address of the Royalty Fee Registry
+     * @param _royaltyFeeRegistry Royalty fee registry address.
      */
     constructor(address _royaltyFeeRegistry) {
         royaltyFeeRegistry = IRoyaltyFeeRegistry(_royaltyFeeRegistry);

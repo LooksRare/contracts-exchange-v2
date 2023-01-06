@@ -10,19 +10,23 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
  * @title CreatorFeeManagerWithRebates
- * @notice It distributes a royalty rebate.
+ * @notice This contract retrieves the creator fee addresses and returns the creator rebate.
  * @author LooksRare protocol team (👀,💎)
  */
 contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
-    // Standard royalty fee (in basis point)
+    /**
+     * @notice Standard royalty fee (in basis point).
+     */
     uint256 public constant STANDARD_ROYALTY_FEE_BP = 50;
 
-    // Royalty fee registry
+    /**
+     * @notice Royalty fee registry interface.
+     */
     IRoyaltyFeeRegistry public immutable royaltyFeeRegistry;
 
     /**
      * @notice Constructor
-     * @param _royaltyFeeRegistry Address of the Royalty Fee Registry
+     * @param _royaltyFeeRegistry Royalty fee registry address.
      */
     constructor(address _royaltyFeeRegistry) {
         royaltyFeeRegistry = IRoyaltyFeeRegistry(_royaltyFeeRegistry);

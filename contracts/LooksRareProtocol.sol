@@ -8,7 +8,7 @@ import {LowLevelETHReturnETHIfAnyExceptOneWei} from "@looksrare/contracts-libs/c
 import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelWETH.sol";
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
-// OpenZeppelin's library for verifying Merkle proofs
+// OpenZeppelin's library (adjusted) for verifying Merkle proofs
 import {MerkleProofCalldata} from "./libraries/OpenZeppelin/MerkleProofCalldata.sol";
 
 // Libraries
@@ -25,7 +25,9 @@ import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 /**
  * @title LooksRareProtocol
- * @notice This contract is the core contract of the LooksRare protocol (v2).
+ * @notice This contract is the core smart contract of the LooksRare protocol ("v2").
+ *         It is the main entry point for users to initiate transactions with taker orders
+ *         and manage the cancellation of maker orders, which exist offchain.
 LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRAR'''''''''''''''''''''''''''''''''''OOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKS:.                                        .;OOKSRARELOOKSRARELOOKSR
@@ -52,7 +54,7 @@ LOOKSRARELOOKSRARELOOo,.                                          .,OKSRARELOOKS
 LOOKSRARELOOKSRARELOOKSx;.                                      .;xOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLO:.                                  .:SRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLOOKl.                              .lOKSRLOOKSRARELOOKSRARELOOKSR
-LOOKSRARELOOKSRARELOOKSRLOOKSRo'.                        .'oLOOKSRLOOKSRARELOOKSRARELOOKSR
+LOOKSRARELOOKSRARELOOKSRLOOKSRo'.                        .'oWENV2?LOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLOOKSRARd;.                    .;xRELOOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLOOKSRARELO:.                .:kRARELOOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKl.            .cOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
@@ -73,16 +75,26 @@ contract LooksRareProtocol is
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleTree;
 
-    // Wrapped ETH
+    /**
+     * @notice Wrapped ETH.
+     */
     address public immutable WETH;
 
-    // Current chainId
+    /**
+     * @notice Current chainId.
+     */
     uint256 public chainId;
 
-    // Current domain separator
+    /**
+     * @notice Current domain separator.
+     */
     bytes32 public domainSeparator;
 
-    // Gas limit
+    /**
+     * @notice This variable is used as the gas limit for a ETH transfer.
+     *         If a standard ETH transfer fails within this gas limit, ETH will get wrapped to WETH and transfer
+     *         to the original recipient.
+     */
     uint256 private _gasLimitETHTransfer = 2_300;
 
     /**
@@ -222,7 +234,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Function used to do non-atomic matching in the context of a batch taker bid
+     * @notice This function is used to do a non-atomic matching in the context of a batch taker bid.
      * @param takerBid Taker bid struct
      * @param makerAsk Maker ask struct
      * @param sender Sender address (i.e., the initial msg sender)
@@ -244,8 +256,8 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Update the domain separator
-     * @dev  Only callable by owner. If there is a fork of the network with a new chainId,
+     * @notice This function allows the owner to update the domain separator (if possible).
+     * @dev Only callable by owner. If there is a fork of the network with a new chainId,
      *      it allows the owner to reset the domain separator for the new chain id.
      */
     function updateDomainSeparator() external onlyOwner {
@@ -258,7 +270,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Update ETH gas limit for transfer
+     * @notice This function allows the owner to update the maximum ETH gas limit for a standard transfer.
      * @param newGasLimitETHTransfer New gas limit for ETH transfer
      * @dev Only callable by owner.
      */
@@ -273,7 +285,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Sell with taker ask (against maker bid)
+     * @notice This function is internal and is used to execute a taker ask (against a maker bid).
      * @param takerAsk Taker ask order struct
      * @param makerBid Maker bid order struct
      * @param orderHash Hash of the maker bid order
@@ -332,7 +344,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Execute taker bid (against maker ask)
+     * @notice This function is internal and is used to execute a taker bid (against a maker ask).
      * @param takerBid Taker bid order struct
      * @param makerAsk Maker ask order struct
      * @param sender Sender of the transaction (i.e., msg.sender)
@@ -403,7 +415,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Pay protocol fee and affiliate fee (if any)
+     * @notice This function is internal and is used to pay the protocol fee and affiliate fee (if any).
      * @param currency Currency address to transfer (address(0) is ETH)
      * @param bidUser Bid user address
      * @param affiliate Affiliate address (address(0) if none)
@@ -441,7 +453,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Transfer fungible tokens
+     * @notice This function is internal and is used to transfer fungible tokens.
      * @param currency Currency address
      * @param sender Sender address
      * @param recipient Recipient address
@@ -456,7 +468,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Compute digest and verify
+     * @notice This function is private and used to verify the chain id, compute the digest, and verify the signature.
      * @dev If chainId is not equal to the cached chain id, it would revert.
      * @param computedHash Hash of order (maker bid or maker ask) or merkle root
      * @param makerSignature Signature of the maker
@@ -476,7 +488,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Transfer funds to (1) creator recipient (if any), (2) ask recipient
+     * @notice This function is private and used to transfer funds to (1) creator recipient (if any) and (2) ask recipient.
      * @param recipients Recipient addresses
      * @param fees Fees
      * @param currency Currency address
@@ -504,7 +516,7 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Update the domain separator and cache the chain id
+     * @notice This function is private and used to compute the domain separator and store the current chain id.
      */
     function _updateDomainSeparator() private {
         domainSeparator = keccak256(
@@ -520,13 +532,15 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Update the user order nonce
+     * @notice This function is internal and is called during the execution of a transaction to decide
+     *         how to map the user's order nonce.
      * @param isNonceInvalidated Whether the nonce is being invalidated
      * @param signer Signer address
      * @param orderNonce Maker user order nonce
      * @param orderHash Hash of the order struct
      * @dev If isNonceInvalidated is true, this function invalidates the user order nonce for future execution.
-     *      If it is equal to false, this function maps the order hash for this user order nonce to prevent other order structs sharing the same order nonce to be executed.
+     *      If it is equal to false, this function maps the order hash for this user order nonce
+     *      to prevent other order structs sharing the same order nonce to be executed.
      */
     function _updateUserOrderNonce(
         bool isNonceInvalidated,
@@ -538,8 +552,8 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice Verify whether the merkle proofs provided for the order hash are correct,
-     *         or verify the order hash if it is not a merkle proof order
+     * @notice This function is private and called to verify whether the merkle proofs provided for the order hash
+     *         are correct or verify the order hash if the order is not part of a merkle tree.
      * @param merkleTree Merkle tree
      * @param orderHash Order hash (can be maker bid hash or maker ask hash)
      * @param signature Maker order signature

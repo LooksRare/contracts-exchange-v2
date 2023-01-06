@@ -9,17 +9,24 @@ import {IAffiliateManager} from "./interfaces/IAffiliateManager.sol";
 
 /**
  * @title AffiliateManager
- * @notice This contract handles the list of affiliates for the LooksRare protocol.
+ * @notice This contract handles the management of affiliates for the LooksRare protocol.
  * @author LooksRare protocol team (👀,💎)
  */
 contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
-    // Whether the affiliate program is active
+    /**
+     * @notice Whether the affiliate program is active.
+     */
     bool public isAffiliateProgramActive;
 
-    // Address of the affiliate controller
+    /**
+     * @notice Address of the affiliate controller.
+     */
     address public affiliateController;
 
-    // Tracks affiliate rates
+    /**
+     * @notice It tracks the affiliate rate (in basis point) for a given affiliate address.
+     *         The basis point represents how much of the protocol fee will be shared to the affiliate.
+     */
     mapping(address => uint256) public affiliateRates;
 
     /**
@@ -29,9 +36,9 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     constructor(address _owner) OwnableTwoSteps(_owner) {}
 
     /**
-     * @notice Update affiliate rate
+     * @notice This function allows the affiliate controller to update the affiliate rate (in basis point).
      * @param affiliate Affiliate address
-     * @param bp Rate basis point to collect (e.g., 100 = 1%) per referred trade
+     * @param bp Rate (in basis point) to collect (e.g., 100 = 1%) per referred transaction
      */
     function updateAffiliateRate(address affiliate, uint256 bp) external {
         if (msg.sender != affiliateController) {
@@ -47,8 +54,8 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Update status for affiliate program
-     * @param isActive whether the affiliate program is active
+     * @notice This function allows the owner to update the affiliate program status.
+     * @param isActive Whether the affiliate program is active
      * @dev Only callable by owner.
      */
     function updateAffiliateProgramStatus(bool isActive) external onlyOwner {
@@ -57,8 +64,8 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     }
 
     /**
-     * @notice Update affiliate controller
-     * @param newAffiliateController address of new affiliate controller contract
+     * @notice This function allows the owner to update the affiliate controller address.
+     * @param newAffiliateController New affiliate controller address
      * @dev Only callable by owner.
      */
     function updateAffiliateController(address newAffiliateController) external onlyOwner {

@@ -25,26 +25,26 @@ interface ITransferSelectorNFT {
     event NewAssetType(uint256 assetType, address transferManager, bytes4 selector);
 
     /**
-     * @notice It is returned if the contract is initialized.
+     * @notice It is returned if the transfer manager is already initialized for the asset type id.
      * @dev It is only used for owner functions.
      */
     error ManagerSelectorAlreadySetForAssetType();
 
     /**
-     * @notice It is returned if there is no transfer manager address or an empty selector
+     * @notice It is returned if there is no transfer manager address or an empty selector.
      * @dev It is only used for owner functions.
      */
     error ManagerSelectorEmpty();
 
     /**
-     * @notice It is returned if NFT transfer fails.
+     * @notice It is returned if the NFT transfer fails.
      * @param collection Collection address
      * @param assetType Asset type id
      */
     error NFTTransferFail(address collection, uint256 assetType);
 
     /**
-     * @notice It is returned if there is no transfer manager for the asset type
+     * @notice It is returned if there is no transfer manager for the asset type.
      * @param assetType Asset type id
      */
     error NoTransferManagerForAssetType(uint256 assetType);

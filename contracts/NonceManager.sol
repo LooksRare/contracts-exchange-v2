@@ -16,20 +16,28 @@ import {WrongLengths} from "./interfaces/SharedErrors.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract NonceManager is INonceManager {
-    // Magic value nonce returned if executed (or cancelled)
+    /**
+     * @notice Magic value nonce returned if executed (or cancelled).
+     */
     bytes32 public constant MAGIC_VALUE_ORDER_NONCE_EXECUTED = keccak256("ORDER_NONCE_EXECUTED");
 
-    // Track bid and ask nonces for a user
+    /**
+     * @notice This tracks the bid and ask nonces for a user address.
+     */
     mapping(address => UserBidAskNonces) public userBidAskNonces;
 
-    // Check whether the order nonce for a user was executed or cancelled
+    /**
+     * @notice This checks whether the order nonce for a user was executed or cancelled.
+     */
     mapping(address => mapping(uint256 => bytes32)) public userOrderNonce;
 
-    // Check whether the subset nonce for a user was cancelled
+    /**
+     * @notice This checks whether the subset nonce for a user was cancelled.
+     */
     mapping(address => mapping(uint256 => bool)) public userSubsetNonce;
 
     /**
-     * @notice Cancel order nonces
+     * @notice This function allows a user to cancel an array of order nonces.
      * @param orderNonces Array of order nonces
      */
     function cancelOrderNonces(uint256[] calldata orderNonces) external {
@@ -49,7 +57,7 @@ contract NonceManager is INonceManager {
     }
 
     /**
-     * @notice Cancel subset nonces
+     * @notice This function allows a user to cancel an array of subset nonces.
      * @param subsetNonces Array of subset nonces
      */
     function cancelSubsetNonces(uint256[] calldata subsetNonces) external {
@@ -70,7 +78,7 @@ contract NonceManager is INonceManager {
     }
 
     /**
-     * @notice Increment bid/ask nonces for a user
+     * @notice This function allows a user to increment her bid/ask nonces.
      * @param bid Whether to increment the user bid nonce
      * @param ask Whether to increment the user ask nonce
      */

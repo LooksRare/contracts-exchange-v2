@@ -23,6 +23,7 @@
   "scripts": {
     "compile:forge": "FOUNDRY_PROFILE=local forge build",
     "compile:hardhat": "hardhat compile --force",
+    "generate:docs": "rm -f -R docs && hardhat docgen",
     "format:check": "prettier --check '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "format:write": "prettier --write '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "lint": "eslint '**/*.{js,jsx,ts,tsx}'",
@@ -69,6 +70,7 @@
     "release-it": "^15.0.0",
     "solhint": "^3.3.7",
     "solidity-coverage": "^0.7.21",
+    "solidity-docgen": "^0.6.0-beta.34",
     "solmate": "^6.6.1",
     "ts-node": "^10.1.0",
     "typechain": "^5.1.2",

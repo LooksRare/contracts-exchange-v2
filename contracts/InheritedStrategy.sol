@@ -10,12 +10,13 @@ import {OrderInvalid} from "./interfaces/SharedErrors.sol";
 /**
  * @title InheritedStrategy
  * @notice This contract handles the verification of parameters for standard transactions.
- * @dev StrategyId = 0 --> Standard sale
+ * @dev A standard transaction (bid or ask) is mapped to strategyId = 0.
  * @author LooksRare protocol team (👀,💎)
  */
 contract InheritedStrategy {
     /**
-     * @notice Verify the parameters for a standard sale strategy where it is initiated by the taker bid order
+     * @notice This function is internal and is used to validate the parameters for a standard sale strategy
+     *         when the standard transaction is initiated by a taker bid.
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      */
@@ -45,7 +46,8 @@ contract InheritedStrategy {
     }
 
     /**
-     * @notice Verify the parameters for a standard sale strategy where it is initiated by the taker ask order
+     * @notice This function is internal and is used to validate the parameters for a standard sale strategy
+     *         when the standard transaction is initiated by a taker ask.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      */

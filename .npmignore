@@ -8,10 +8,10 @@ typechain
 # Hardhat files
 cache
 artifacts
-
 hardhat.config.ts
 contracts/test
 test/
+docs/
 
 # Others 
 lib

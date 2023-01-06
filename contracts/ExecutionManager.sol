@@ -21,13 +21,19 @@ import {StrategyManager} from "./StrategyManager.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, IExecutionManager {
-    // Protocol fee recipient
+    /**
+     * @notice Protocol fee recipient.
+     */
     address public protocolFeeRecipient;
 
-    // Maximum creator fee (in basis point)
+    /**
+     * @notice Maximum creator fee (in basis point).
+     */
     uint16 public maxCreatorFeeBp = 1_000;
 
-    // Creator fee manager
+    /**
+     * @notice Creator fee manager.
+     */
     ICreatorFeeManager public creatorFeeManager;
 
     /**
@@ -37,7 +43,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     constructor(address _owner) StrategyManager(_owner) {}
 
     /**
-     * @notice Update the creator fee manager
+     * @notice This function allows the owner to update the creator fee manager address.
      * @param newCreatorFeeManager Address of the creator fee manager
      * @dev Only callable by owner.
      */
@@ -47,7 +53,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice Update the maximum creator fee (in bp)
+     * @notice This function allows the owner to update the maximum creator fee (in basis point).
      * @param newMaxCreatorFeeBp New maximum creator fee (in basis point)
      * @dev The maximum value that can be set is 25%.
      *       Only callable by owner.
@@ -63,7 +69,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice Update protocol fee recipient
+     * @notice This function allows the owner to update the protocol fee recipient.
      * @param newProtocolFeeRecipient New protocol fee recipient address
      * @dev Only callable by owner.
      */
@@ -77,7 +83,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice Execute strategy for taker ask
+     * @notice This function is internal and used to execute a transaction initiated by a taker ask.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
      * @return itemIds Array of item ids to be traded
@@ -165,7 +171,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice Execute strategy for taker bid
+     * @notice This function is internal and used to execute a transaction initiated by a taker bid.
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
      * @return itemIds Array of item ids to be traded
@@ -251,8 +257,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice Calculate protocol fee amount for a given protocol fee
-     * @param price Price
+     * @notice This function is internal and used to calculate the protocol fee amount for a given set of fees.
+     * @param price Transaction price
      * @param strategyId Strategy id
      * @param creatorFeeAmount Creator fee amount
      * @param minTotalFeeAmount Min total fee amount
@@ -272,7 +278,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice Verify order timestamp validity
+     * @notice This function is internal and used to verify the validity of an order in the context of the current block timestamps.
      * @param startTime Start timestamp
      * @param endTime End timestamp
      */

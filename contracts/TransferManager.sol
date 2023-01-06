@@ -12,17 +12,23 @@ import {WrongLengths} from "./interfaces/SharedErrors.sol";
 
 /**
  * @title TransferManager
- * @notice Core functions of TransferManager contracts for ERC721/ERC1155.
+ * @notice This contract provides the transfer functions for ERC721/ERC1155 for contracts that require them.
  *         Asset type "0" refers to ERC721 transfer functions.
  *         Asset type "1" refers to ERC1155 transfer functions.
- *         "Safe" transfer functions for ERC721 are not implemented; these functions introduce added gas costs to verify if the recipient is a contract as it requires verifying the receiver interface is valid.
+ * @dev "Safe" transfer functions for ERC721 are not implemented since they come with added gas costs
+ *       to verify if the recipient is a contract as it requires verifying the receiver interface is valid.
  * @author LooksRare protocol team (👀,💎)
  */
 contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelERC1155Transfer, OwnableTwoSteps {
-    // Whether the user has approved the operator address (first address is user, second address is operator)
+    /**
+     * @notice This returns whether the user has approved the operator address.
+     * The first address is the user and the second address is the operator (e.g. LooksRareProtocol).
+     */
     mapping(address => mapping(address => bool)) public hasUserApprovedOperator;
 
-    // Whether the operator address is whitelisted
+    /**
+     * @notice This returns whether the operator address is whitelisted by this contract's owner.
+     */
     mapping(address => bool) public isOperatorWhitelisted;
 
     /**
@@ -32,7 +38,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     constructor(address _owner) OwnableTwoSteps(_owner) {}
 
     /**
-     * @notice Transfer items for ERC721 collection
+     * @notice This function transfers items for a single ERC721 collection.
      * @param collection Collection address
      * @param from Sender address
      * @param to Recipient address
@@ -61,7 +67,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice Transfer items for ERC1155 collection
+     * @notice This function transfers items for a single ERC1155 collection.
      * @param collection Collection address
      * @param from Sender address
      * @param to Recipient address
@@ -94,7 +100,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice Transfer batch items across collections
+     * @notice This function transfers items across an array of collections that can be both ERC721 and ERC1155.
      * @param collections Array of collection addresses
      * @param assetTypes Array of asset types
      * @param from Sender address
@@ -152,7 +158,8 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice Grant approvals for list of operators on behalf of the sender
+     * @notice This function allows a user to grant approvals for an array of operators.
+     *         Users cannot grant approvals if the operator is not whitelisted by this contract's owner.
      * @param operators Array of operator addresses
      * @dev Each operator address must be globally whitelisted to be approved.
      */
@@ -183,7 +190,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice Revoke all approvals for the sender
+     * @notice This function allows a user to revoke existing approvals for an array of operators.
      * @param operators Array of operator addresses
      * @dev Each operator address must be approved at the user level to be revoked.
      */
@@ -208,7 +215,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice Whitelist an operator in the system
+     * @notice This function allows the user to whitelist an operator in this transfer system.
      * @param operator Operator address to add
      * @dev Only callable by owner.
      */
@@ -223,7 +230,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice Remove an operator from the system
+     * @notice This function allows the user to remove an operator in this transfer system.
      * @param operator Operator address to remove
      * @dev Only callable by owner.
      */
@@ -238,7 +245,8 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice Check (internally) whether transfer (by an operator) is valid
+     * @notice This function is internal and is used to verify whether the transfer
+     *         (by an operator on behalf of a user) is valid.
      * @param user User address
      * @param operator Operator address
      * @return isOperatorValid Whether the operator is valid for transfer on behalf of the user

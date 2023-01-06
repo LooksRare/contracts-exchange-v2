@@ -58,7 +58,7 @@ interface ITransferManager {
     error TransferCallerInvalid();
 
     /**
-     * @notice It is returned if the asset type isn't 0 or 1.
+     * @notice It is returned if the asset type is not 0, nor 1.
      * @param assetType Asset type id
      */
     error WrongAssetType(uint256 assetType);

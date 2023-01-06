@@ -7,19 +7,19 @@ pragma solidity ^0.8.17;
  */
 interface IAffiliateManager {
     /**
-     * @notice It is emitted when there is an update of affliate controller
+     * @notice It is emitted when there is an update of affliate controller.
      * @param affiliateController Address of the new affiliate controller
      */
     event NewAffiliateController(address affiliateController);
 
     /**
      * @notice It is emitted if the affiliate program is activated or deactivated.
-     * @param isActive Whether it is active following the change.
+     * @param isActive Whether the affiliate program is active after the update.
      */
     event NewAffiliateProgramStatus(bool isActive);
 
     /**
-     * @notice It is emitted if there is a new affiliate and its associated rate (in basis point)
+     * @notice It is emitted if there is a new affiliate and its associated rate (in basis point).
      * @param affiliate Address of the affiliate
      * @param rate Affiliate rate (in basis point)
      */
@@ -31,7 +31,7 @@ interface IAffiliateManager {
     error NotAffiliateController();
 
     /**
-     * @notice It is returned if the affiliate controller is trying to set an affiliate rate higher than 10,000
+     * @notice It is returned if the affiliate controller is trying to set an affiliate rate higher than 10,000.
      */
     error PercentageTooHigh();
 }

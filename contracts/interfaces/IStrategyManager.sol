@@ -56,6 +56,18 @@ interface IStrategyManager {
     event StrategyUpdated(uint256 strategyId, bool isActive, uint16 standardProtocolFeeBp, uint16 minTotalFeeBp);
 
     /**
+     * @notice If the strategy has not set properly its implementation contract.
+     * @dev It can only be returned for owner operations.
+     */
+    error NotV2Strategy();
+
+    /**
+     * @notice If the strategy has no selector.
+     * @dev It can only be returned for owner operations.
+     */
+    error StrategyHasNoSelector();
+
+    /**
      * @notice It is returned if the strategyId is not valid.
      */
     error StrategyNotUsed();
@@ -65,10 +77,4 @@ interface IStrategyManager {
      * @dev It can only be returned for owner operations.
      */
     error StrategyProtocolFeeTooHigh();
-
-    /**
-     * @notice If the strategy has no selector.
-     * @dev The only exception is strategyId = 0
-     */
-    error StrategyHasNoSelector();
 }

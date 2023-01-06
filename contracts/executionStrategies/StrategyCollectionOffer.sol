@@ -10,6 +10,9 @@ import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol
 // Shared errors
 import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
 
+// Dependencies
+import {BaseStrategy} from "./BaseStrategy.sol";
+
 /**
  * @title StrategyCollectionOffer
  * @notice This contract offers execution strategies for users to create maker bid offers for items in a collection.
@@ -19,7 +22,7 @@ import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfac
  * @dev Use cases can include trait-based offers or rarity score offers.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyCollectionOffer {
+contract StrategyCollectionOffer is BaseStrategy {
     /**
      * @notice Execute collection strategy with taker ask order without merkle proofs
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)

@@ -7,12 +7,15 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 // Shared errors
 import {BidTooLow, OrderInvalid, WrongFunctionSelector} from "../interfaces/SharedErrors.sol";
 
+// Dependencies
+import {BaseStrategy} from "./BaseStrategy.sol";
+
 /**
  * @title StrategyDutchAuction
  * @notice This contract offers a single execution strategy for users to create Dutch auctions.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyDutchAuction {
+contract StrategyDutchAuction is BaseStrategy {
     /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
      *         The execution price set by the seller decreases linearly within the defined period.

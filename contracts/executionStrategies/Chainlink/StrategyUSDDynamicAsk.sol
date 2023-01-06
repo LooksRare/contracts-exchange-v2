@@ -10,7 +10,8 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 // Shared errors
 import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../interfaces/SharedErrors.sol";
 
-// Base strategy
+// Base strategy contracts
+import {BaseStrategy} from "../BaseStrategy.sol";
 import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
 /**
@@ -18,7 +19,7 @@ import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLat
  * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount to be in ETH.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyUSDDynamicAsk is BaseStrategyChainlinkPriceLatency {
+contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatency {
     // WETH
     address public immutable WETH;
 

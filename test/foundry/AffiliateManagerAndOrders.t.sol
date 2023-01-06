@@ -14,7 +14,7 @@ import {IAffiliateManager} from "../../contracts/interfaces/IAffiliateManager.so
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 
-contract AffiliateOrdersTest is ProtocolBase {
+contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
     // Affiliate rate
     uint256 internal _affiliateRate = 2_000;
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -36,6 +36,27 @@ contract AffiliateOrdersTest is ProtocolBase {
         vm.deal(_affiliate, _initialETHBalanceAffiliate + _initialWETHBalanceAffiliate);
         vm.prank(_affiliate);
         weth.deposit{value: _initialWETHBalanceAffiliate}();
+    }
+
+    function testEventsAreEmittedAsExpected() public asPrankedUser(_owner) {
+        // 1. NewAffiliateController
+        vm.expectEmit(true, false, false, true);
+        emit NewAffiliateController(_owner);
+        looksRareProtocol.updateAffiliateController(_owner);
+
+        // 2. NewAffiliateProgramStatus
+        vm.expectEmit(true, false, false, true);
+        emit NewAffiliateProgramStatus(true);
+        looksRareProtocol.updateAffiliateProgramStatus(true);
+
+        vm.expectEmit(true, false, false, true);
+        emit NewAffiliateProgramStatus(false);
+        looksRareProtocol.updateAffiliateProgramStatus(false);
+
+        // 3. NewAffiliateRate
+        vm.expectEmit(true, false, false, true);
+        emit NewAffiliateRate(takerUser, 30);
+        looksRareProtocol.updateAffiliateRate(takerUser, 30);
     }
 
     function testCannotUpdateAffiliateRateIfNotAffiliateController() public {

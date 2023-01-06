@@ -33,11 +33,16 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         mockERC1155.setApprovalForAll(address(transferManager), true);
         address[] memory approvedOperators = new address[](1);
         approvedOperators[0] = _transferrer;
+
+        vm.expectEmit(true, false, false, true);
+        emit ApprovalsGranted(user, approvedOperators);
         transferManager.grantApprovals(approvedOperators);
     }
 
     function _whitelistOperator(address transferrer) private {
         vm.prank(_owner);
+        vm.expectEmit(true, false, false, true);
+        emit OperatorWhitelisted(transferrer);
         transferManager.whitelistOperator(transferrer);
     }
 

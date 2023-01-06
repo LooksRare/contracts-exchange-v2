@@ -21,7 +21,7 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
         mockERC20 = new MockERC20();
     }
 
-    function testupdateCurrencyWhitelistStatus() public asPrankedUser(_owner) {
+    function testUpdateCurrencyWhitelistStatus() public asPrankedUser(_owner) {
         // Set to true
         vm.expectEmit(true, false, false, true);
         emit CurrencyWhitelistStatusUpdated(address(mockERC20), true);

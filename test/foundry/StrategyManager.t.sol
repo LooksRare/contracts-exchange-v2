@@ -7,6 +7,9 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 // Interfaces
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 
+// Random strategy
+import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
+
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
@@ -43,18 +46,50 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         assertEq(strategyImplementation, address(0));
     }
 
+    function testNewStrategyEventIsEmitted() public asPrankedUser(_owner) {
+        StrategyCollectionOffer strategy = new StrategyCollectionOffer();
+
+        uint256 strategyId = 1;
+        uint16 standardProtocolFeeBp = 0;
+        uint16 minTotalFeeBp = 200;
+        uint16 maxProtocolFeeBp = 200;
+        bytes4 selector = StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
+        bool isMakerBid = true;
+        address implementation = address(strategy);
+
+        vm.expectEmit(true, false, false, true);
+        emit NewStrategy(
+            strategyId,
+            standardProtocolFeeBp,
+            minTotalFeeBp,
+            maxProtocolFeeBp,
+            selector,
+            isMakerBid,
+            implementation
+        );
+
+        looksRareProtocol.addStrategy(
+            standardProtocolFeeBp,
+            minTotalFeeBp,
+            maxProtocolFeeBp,
+            selector,
+            isMakerBid,
+            implementation
+        );
+    }
+
     /**
-     * Owner can change protocol fee and deactivate royalty
+     * Owner can change protocol fee information
      */
-    function testOwnerCanChangeStrategyProtocolFeeAndDeactivateRoyalty() public asPrankedUser(_owner) {
+    function testOwnerCanChangeStrategyProtocolFees() public asPrankedUser(_owner) {
         uint256 strategyId = 0;
-        uint16 standardProtocolFeeBp = 250;
-        uint16 minTotalFeeBp = 250;
+        uint16 newStandardProtocolFeeBp = 100;
+        uint16 newMinTotalFeeBp = 265;
         bool isActive = true;
 
         vm.expectEmit(false, false, false, true);
-        emit StrategyUpdated(strategyId, isActive, standardProtocolFeeBp, minTotalFeeBp);
-        looksRareProtocol.updateStrategy(strategyId, standardProtocolFeeBp, minTotalFeeBp, isActive);
+        emit StrategyUpdated(strategyId, isActive, newStandardProtocolFeeBp, newMinTotalFeeBp);
+        looksRareProtocol.updateStrategy(strategyId, newStandardProtocolFeeBp, newMinTotalFeeBp, isActive);
 
         (
             bool strategyIsActive,
@@ -67,8 +102,8 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         ) = looksRareProtocol.strategyInfo(strategyId);
 
         assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, minTotalFeeBp);
+        assertEq(strategyStandardProtocolFee, newStandardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, newMinTotalFeeBp);
         assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
         assertEq(strategySelector, _EMPTY_BYTES4);
         assertFalse(strategyIsMakerBid);

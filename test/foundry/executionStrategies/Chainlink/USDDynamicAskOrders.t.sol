@@ -419,6 +419,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
         makerAsk.amounts = amounts;
+        takerBid.amounts = amounts;
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -430,8 +431,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
-        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
+        vm.expectRevert(errorSelector);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -445,6 +446,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 2;
         makerAsk.amounts = amounts;
+        takerBid.amounts = amounts;
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -456,8 +458,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
-        vm.expectRevert(errorSelector);
         vm.prank(takerUser);
+        vm.expectRevert(errorSelector);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 

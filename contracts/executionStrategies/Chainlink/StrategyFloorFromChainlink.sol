@@ -7,11 +7,12 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 // Libraries
 import {OrderStructs} from "../../libraries/OrderStructs.sol";
 
-// Other dependencies
-import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMultiplePriceFeeds.sol";
-
 // Shared errors
 import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../interfaces/SharedErrors.sol";
+
+// Base strategy contracts
+import {BaseStrategy} from "../BaseStrategy.sol";
+import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMultiplePriceFeeds.sol";
 
 /**
  * @title StrategyFloorFromChainlink
@@ -19,7 +20,7 @@ import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelecto
  *         and a buyer to make a floor price - discount collection bid
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloorFromChainlink is BaseStrategyChainlinkMultiplePriceFeeds {
+contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultiplePriceFeeds {
     /**
      * @notice It is returned if the fixed discount for a maker bid is greater than floor price.
      */

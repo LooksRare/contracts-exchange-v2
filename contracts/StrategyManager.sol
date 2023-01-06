@@ -5,6 +5,7 @@ pragma solidity ^0.8.17;
 import {CurrencyManager} from "./CurrencyManager.sol";
 
 // Interfaces
+import {IBaseStrategy} from "./interfaces/IBaseStrategy.sol";
 import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
 
 /**
@@ -59,6 +60,10 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
 
         if (selector == bytes4(0)) {
             revert StrategyHasNoSelector();
+        }
+
+        if (!IBaseStrategy(implementation).isLooksRareV2Strategy()) {
+            revert NotV2Strategy();
         }
 
         strategyInfo[countStrategies] = Strategy({

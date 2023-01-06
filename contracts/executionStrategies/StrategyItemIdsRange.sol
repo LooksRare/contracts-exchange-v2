@@ -7,12 +7,15 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 // Shared errors
 import {OrderInvalid, WrongFunctionSelector} from "../interfaces/SharedErrors.sol";
 
+// Dependencies
+import {BaseStrategy} from "./BaseStrategy.sol";
+
 /**
  * @title StrategyItemIdsRange
  * @notice This contract offers a single execution strategy for users to bid on a specific amounts of items in a range specified by 2 itemIds.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyItemIdsRange {
+contract StrategyItemIdsRange is BaseStrategy {
     /**
      * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
      *         Bidder picks a item id range (e.g. 1-100) and a seller can fulfill the order with any tokens within the specificed ID range

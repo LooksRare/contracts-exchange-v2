@@ -8,6 +8,7 @@ import "hardhat-abi-exporter";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "dotenv/config";
+import "solidity-docgen";
 
 task("accounts", "Prints the list of accounts", async (_args, hre) => {
   const accounts = await hre.ethers.getSigners();
@@ -42,6 +43,7 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  docgen: { pages: "files", exclude: ["contracts/helpers/*"] },
   paths: {
     sources: "./contracts/",
     tests: "./test",

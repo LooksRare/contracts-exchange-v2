@@ -23,7 +23,7 @@
   "scripts": {
     "compile:forge": "FOUNDRY_PROFILE=local forge build",
     "compile:hardhat": "hardhat compile --force",
-    "generate:docs": "hardhat docgen",
+    "generate:docs": "rm -f -R docs && hardhat docgen",
     "format:check": "prettier --check '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "format:write": "prettier --write '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "lint": "eslint '**/*.{js,jsx,ts,tsx}'",

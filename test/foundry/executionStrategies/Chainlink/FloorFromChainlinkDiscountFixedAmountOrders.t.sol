@@ -18,7 +18,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function setUp() public override {
         _setIsFixedAmount(1);
         _setDiscount(0.1 ether);
-        _setSelector(StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector, true);
+        _setSelector(StrategyFloorFromChainlink.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector, true);
         super.setUp();
     }
 

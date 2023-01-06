@@ -157,7 +157,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount amount in ETH from the floor price as the additionalParameters.
      */
-    function executeFixedDiscountStrategyWithTakerAsk(
+    function executeFixedDiscountCollectionOfferStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
@@ -214,7 +214,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount basis points from the floor price as the additionalParameters.
      */
-    function executeBasisPointsDiscountStrategyWithTakerAsk(
+    function executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
@@ -313,8 +313,10 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector) {
         if (
-            functionSelector != StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector &&
-            functionSelector != StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector
+            functionSelector !=
+            StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector &&
+            functionSelector !=
+            StrategyFloorFromChainlink.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
             return (isValid, WrongFunctionSelector.selector);
         }
@@ -330,7 +332,10 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerBid.collection);
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
 
-        if (functionSelector == StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector) {
+        if (
+            functionSelector ==
+            StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
+        ) {
             if (discount >= 10_000) {
                 return (isValid, OrderInvalid.selector);
             }
@@ -340,7 +345,10 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             return (isValid, priceFeedErrorSelector);
         }
 
-        if (functionSelector == StrategyFloorFromChainlink.executeFixedDiscountStrategyWithTakerAsk.selector) {
+        if (
+            functionSelector ==
+            StrategyFloorFromChainlink.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
+        ) {
             if (floorPrice <= discount) {
                 // A special selector is returned to differentiate with OrderInvalid since the maker can potentially become valid again
                 return (isValid, DiscountGreaterThanFloorPrice.selector);

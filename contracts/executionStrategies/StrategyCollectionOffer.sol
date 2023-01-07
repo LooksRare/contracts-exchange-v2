@@ -24,7 +24,8 @@ import {BaseStrategy} from "./BaseStrategy.sol";
  */
 contract StrategyCollectionOffer is BaseStrategy {
     /**
-     * @notice Execute collection strategy with taker ask order without merkle proofs
+     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
+     *         This strategy executes a collection offer against a taker ask order without the need of merkle proofs.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      */
@@ -63,7 +64,8 @@ contract StrategyCollectionOffer is BaseStrategy {
     }
 
     /**
-     * @notice Execute collection strategy with taker ask order with merkle proof
+     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
+     *         This strategy executes a collection offer against a taker ask order with the need of merkle proofs.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @dev The transaction reverts if there is the maker does not include a merkle root in the additionalParameters.
@@ -112,8 +114,8 @@ contract StrategyCollectionOffer is BaseStrategy {
     }
 
     /**
-     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
-     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @notice This function validates *only the maker* order under the context of the chosen strategy.
+     *         It does not revert if the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid

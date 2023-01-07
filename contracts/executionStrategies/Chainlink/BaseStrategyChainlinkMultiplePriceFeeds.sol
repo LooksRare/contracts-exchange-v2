@@ -11,7 +11,7 @@ import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLat
  */
 contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLatency {
     /**
-     * @notice NFT collection address to Chainlink price feed address mapping
+     * @notice This maps the collection address to a Chainlink price feed address.
      */
     mapping(address => address) public priceFeeds;
 
@@ -40,7 +40,7 @@ contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLa
     constructor(address _owner) BaseStrategyChainlinkPriceLatency(_owner) {}
 
     /**
-     * @notice Set an NFT collection's Chainlink price feed address.
+     * @notice This function allows the owner to set an NFT collection's Chainlink price feed address.
      * @dev Only callable by owner.
      *      Once the price feed is set for a collection, it is not possible to adjust it after.
      * @param _collection NFT collection address

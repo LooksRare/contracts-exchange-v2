@@ -30,6 +30,9 @@ import {TransferManager} from "../TransferManager.sol";
 // Validation codes
 import "./ValidationCodeConstants.sol";
 
+/**
+ * @title IExtendedExecutionStrategy
+ */
 interface IExtendedExecutionStrategy {
     /**
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
@@ -62,7 +65,7 @@ interface IExtendedExecutionStrategy {
  * @title OrderValidatorV2A
  * @notice This contract is used to check the validity of maker ask/bid orders in the LooksRareProtocol (v2).
  *         It performs checks for:
- *         1. Internal whitelist related issues (i.e., currency or strategy not whitelisted)
+ *         1. Internal whitelist related issues (i.e. currency or strategy not whitelisted)
  *         2. Maker order-specific issues (e.g., order invalid due to format or other-strategy specific issues)
  *         3. Nonce related issues (e.g., nonce executed or cancelled)
  *         4. Signature related issues and merkle tree parameters
@@ -79,37 +82,59 @@ contract OrderValidatorV2A {
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleTree;
 
-    // ERC721 potential interfaceId
+    /**
+     * @notice ERC721 potential interfaceId.
+     */
     bytes4 public constant ERC721_INTERFACE_ID_1 = 0x5b5e139f;
 
-    // ERC721 potential interfaceId
+    /**
+     * @notice ERC721 potential interfaceId.
+     */
     bytes4 public constant ERC721_INTERFACE_ID_2 = 0x80ac58cd;
 
-    // ERC1155 interfaceId
+    /**
+     * @notice ERC1155 interfaceId.
+     */
     bytes4 public constant ERC1155_INTERFACE_ID = 0xd9b67a26;
 
-    // Magic value nonce returned if executed (or cancelled)
+    /**
+     * @notice Magic value nonce returned if executed (or cancelled).
+     */
     bytes32 public constant MAGIC_VALUE_ORDER_NONCE_EXECUTED = keccak256("ORDER_NONCE_EXECUTED");
 
-    // Number of distinct criteria groups checked to evaluate the validity of an order
+    /**
+     * @notice Number of distinct criteria groups checked to evaluate the validity of an order.
+     */
     uint256 public constant CRITERIA_GROUPS = 9;
 
-    // LooksRareProtocol domain separator
+    /**
+     * @notice LooksRareProtocol domain separator.
+     */
     bytes32 public domainSeparator;
 
-    // Maximum creator fee (in bp)
+    /**
+     * @notice Maximum creator fee (in basis point).
+     */
     uint256 public maxCreatorFeeBp;
 
-    // CreatorFeeManager
+    /**
+     * @notice CreatorFeeManager.
+     */
     ICreatorFeeManager public creatorFeeManager;
 
-    // LooksRareProtocol
+    /**
+     * @notice LooksRareProtocol.
+     */
     LooksRareProtocol public looksRareProtocol;
 
-    // Royalty fee registry
+    /**
+     * @notice Royalty fee registry.
+     */
     IRoyaltyFeeRegistry public royaltyFeeRegistry;
 
-    // TransferManager
+    /**
+     * @notice TransferManager
+     */
     TransferManager public transferManager;
 
     /**
@@ -301,8 +326,14 @@ contract OrderValidatorV2A {
 
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
             (, uint256 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
-            if (askNonce < globalAskNonce) return USER_GLOBAL_ASK_NONCE_HIGHER;
-            if (askNonce > globalAskNonce) return USER_GLOBAL_ASK_NONCE_LOWER;
+
+            if (askNonce < globalAskNonce) {
+                return USER_GLOBAL_ASK_NONCE_HIGHER;
+            }
+
+            if (askNonce > globalAskNonce) {
+                return USER_GLOBAL_ASK_NONCE_LOWER;
+            }
         }
     }
 
@@ -326,8 +357,14 @@ contract OrderValidatorV2A {
 
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
             (uint256 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerSigner);
-            if (bidNonce < globalBidNonce) return USER_GLOBAL_BID_NONCE_HIGHER;
-            if (bidNonce > globalBidNonce) return USER_GLOBAL_BID_NONCE_LOWER;
+
+            if (bidNonce < globalBidNonce) {
+                return USER_GLOBAL_BID_NONCE_HIGHER;
+            }
+
+            if (bidNonce > globalBidNonce) {
+                return USER_GLOBAL_BID_NONCE_LOWER;
+            }
         }
     }
 
@@ -346,13 +383,20 @@ contract OrderValidatorV2A {
         bytes32 orderHash
     ) internal view returns (uint256 validationCode) {
         // 1. Check subset nonce
-        if (looksRareProtocol.userSubsetNonce(makerSigner, subsetNonce)) return USER_SUBSET_NONCE_CANCELLED;
+        if (looksRareProtocol.userSubsetNonce(makerSigner, subsetNonce)) {
+            return USER_SUBSET_NONCE_CANCELLED;
+        }
 
         // 2. Check order nonce
         bytes32 orderNonceStatus = looksRareProtocol.userOrderNonce(makerSigner, orderNonce);
-        if (orderNonceStatus == MAGIC_VALUE_ORDER_NONCE_EXECUTED) return USER_ORDER_NONCE_EXECUTED_OR_CANCELLED;
-        if (orderNonceStatus != bytes32(0) && orderNonceStatus != orderHash)
+
+        if (orderNonceStatus == MAGIC_VALUE_ORDER_NONCE_EXECUTED) {
+            return USER_ORDER_NONCE_EXECUTED_OR_CANCELLED;
+        }
+
+        if (orderNonceStatus != bytes32(0) && orderNonceStatus != orderHash) {
             return USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH;
+        }
     }
 
     /**
@@ -366,7 +410,9 @@ contract OrderValidatorV2A {
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
         // 1. Verify whether the currency is whitelisted
-        if (!looksRareProtocol.isCurrencyWhitelisted(currency)) return CURRENCY_NOT_WHITELISTED;
+        if (!looksRareProtocol.isCurrencyWhitelisted(currency)) {
+            return CURRENCY_NOT_WHITELISTED;
+        }
 
         // 2. Verify whether the strategy is valid
         (
@@ -379,10 +425,17 @@ contract OrderValidatorV2A {
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(strategyId);
 
-        if (strategyId != 0 && strategyImplementation == address(0)) return STRATEGY_NOT_IMPLEMENTED;
-        if (strategyId != 0 && (strategySelector == bytes4(0) || strategyIsMakerBid))
+        if (strategyId != 0 && strategyImplementation == address(0)) {
+            return STRATEGY_NOT_IMPLEMENTED;
+        }
+
+        if (strategyId != 0 && (strategySelector == bytes4(0) || strategyIsMakerBid)) {
             return STRATEGY_TAKER_BID_SELECTOR_INVALID;
-        if (!strategyIsActive) return STRATEGY_NOT_ACTIVE;
+        }
+
+        if (!strategyIsActive) {
+            return STRATEGY_NOT_ACTIVE;
+        }
     }
 
     /**
@@ -396,8 +449,9 @@ contract OrderValidatorV2A {
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
         // 1. Verify whether the currency is whitelisted
-        if (currency == address(0) || !looksRareProtocol.isCurrencyWhitelisted(currency))
+        if (currency == address(0) || !looksRareProtocol.isCurrencyWhitelisted(currency)) {
             return CURRENCY_NOT_WHITELISTED;
+        }
 
         // 2. Verify whether the strategy is valid
         (
@@ -410,10 +464,17 @@ contract OrderValidatorV2A {
             address strategyImplementation
         ) = looksRareProtocol.strategyInfo(strategyId);
 
-        if (strategyId != 0 && strategyImplementation == address(0)) return STRATEGY_NOT_IMPLEMENTED;
-        if (strategyId != 0 && (strategySelector == bytes4(0) || !strategyIsMakerBid))
+        if (strategyId != 0 && strategyImplementation == address(0)) {
+            return STRATEGY_NOT_IMPLEMENTED;
+        }
+
+        if (strategyId != 0 && (strategySelector == bytes4(0) || !strategyIsMakerBid)) {
             return STRATEGY_TAKER_ASK_SELECTOR_INVALID;
-        if (!strategyIsActive) return STRATEGY_NOT_ACTIVE;
+        }
+
+        if (!strategyIsActive) {
+            return STRATEGY_NOT_ACTIVE;
+        }
     }
 
     /**
@@ -426,8 +487,12 @@ contract OrderValidatorV2A {
         uint256 startTime,
         uint256 endTime
     ) internal view returns (uint256 validationCode) {
-        if (endTime < block.timestamp) return TOO_LATE_TO_EXECUTE_ORDER;
-        if (startTime > block.timestamp + 5 minutes) return TOO_EARLY_TO_EXECUTE_ORDER;
+        if (endTime < block.timestamp) {
+            return TOO_LATE_TO_EXECUTE_ORDER;
+        }
+        if (startTime > block.timestamp + 5 minutes) {
+            return TOO_EARLY_TO_EXECUTE_ORDER;
+        }
     }
 
     /**
@@ -435,7 +500,7 @@ contract OrderValidatorV2A {
      * @param collection Address of the collection
      * @param assetType Asset type in the maker order
      * @return validationCode Validation code
-     * @dev This function may return false positives (i.e., assets that are tradable but don't implement the proper interfaceId). Use with care.
+     * @dev This function may return false positives (i.e. assets that are tradable but don't implement the proper interfaceId). Use with care.
      *      If ERC165 is not implemented, it will revert.
      */
     function _checkIfPotentialWrongAssetTypes(
@@ -445,10 +510,14 @@ contract OrderValidatorV2A {
         if (assetType == 0) {
             bool isERC721 = IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_1) ||
                 IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
-            if (!isERC721) return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721;
+
+            if (!isERC721) {
+                return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721;
+            }
         } else if (assetType == 1) {
-            if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID))
+            if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID)) {
                 return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155;
+            }
         } else {
             return ASSET_TYPE_NOT_SUPPORTED;
         }
@@ -467,9 +536,13 @@ contract OrderValidatorV2A {
         uint256 price
     ) internal view returns (uint256 validationCode) {
         if (currency != address(0)) {
-            if (IERC20(currency).balanceOf(user) < price) return ERC20_BALANCE_INFERIOR_TO_PRICE;
-            if (IERC20(currency).allowance(user, address(looksRareProtocol)) < price)
+            if (IERC20(currency).balanceOf(user) < price) {
+                return ERC20_BALANCE_INFERIOR_TO_PRICE;
+            }
+
+            if (IERC20(currency).allowance(user, address(looksRareProtocol)) < price) {
                 return ERC20_APPROVAL_INFERIOR_TO_PRICE;
+            }
         }
     }
 
@@ -490,7 +563,10 @@ contract OrderValidatorV2A {
         uint256[] memory amounts
     ) internal view returns (uint256 validationCode) {
         validationCode = _checkIfItemIdsDiffer(itemIds);
-        if (validationCode != ORDER_EXPECTED_TO_BE_VALID) return validationCode;
+
+        if (validationCode != ORDER_EXPECTED_TO_BE_VALID) {
+            return validationCode;
+        }
 
         if (assetType == 0) {
             validationCode = _checkValidityERC721AndEquivalents(collection, user, itemIds);
@@ -520,8 +596,13 @@ contract OrderValidatorV2A {
         for (uint256 i; i < length; ) {
             (success, data) = collection.staticcall(abi.encodeWithSelector(IERC721.ownerOf.selector, itemIds[i]));
 
-            if (!success) return ERC721_ITEM_ID_DOES_NOT_EXIST;
-            if (abi.decode(data, (address)) != user) return ERC721_ITEM_ID_NOT_IN_BALANCE;
+            if (!success) {
+                return ERC721_ITEM_ID_DOES_NOT_EXIST;
+            }
+
+            if (abi.decode(data, (address)) != user) {
+                return ERC721_ITEM_ID_NOT_IN_BALANCE;
+            }
 
             unchecked {
                 ++i;
@@ -546,11 +627,14 @@ contract OrderValidatorV2A {
                 );
 
                 address approvedAddress;
+
                 if (success) {
                     approvedAddress = abi.decode(data, (address));
                 }
 
-                if (approvedAddress != address(transferManager)) return ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID;
+                if (approvedAddress != address(transferManager)) {
+                    return ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID;
+                }
 
                 unchecked {
                     ++i;
@@ -587,7 +671,9 @@ contract OrderValidatorV2A {
         if (success) {
             uint256[] memory balances = abi.decode(data, (uint256[]));
             for (uint256 i; i < length; ) {
-                if (balances[i] < amounts[i]) return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
+                if (balances[i] < amounts[i]) {
+                    return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
+                }
             }
         } else {
             // 1.2 If the balanceOfBatch doesn't work, use loop with balanceOf function
@@ -595,8 +681,14 @@ contract OrderValidatorV2A {
                 (success, data) = collection.staticcall(
                     abi.encodeWithSelector(IERC1155.balanceOf.selector, user, itemIds[i])
                 );
-                if (!success) return ERC1155_BALANCE_OF_DOES_NOT_EXIST;
-                if (abi.decode(data, (uint256)) < amounts[i]) return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
+
+                if (!success) {
+                    return ERC1155_BALANCE_OF_DOES_NOT_EXIST;
+                }
+
+                if (abi.decode(data, (uint256)) < amounts[i]) {
+                    return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
+                }
 
                 unchecked {
                     ++i;
@@ -609,8 +701,13 @@ contract OrderValidatorV2A {
             abi.encodeWithSelector(IERC1155.isApprovedForAll.selector, user, address(transferManager))
         );
 
-        if (!success) return ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST;
-        if (!abi.decode(data, (bool))) return ERC1155_NO_APPROVAL_FOR_ALL;
+        if (!success) {
+            return ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST;
+        }
+
+        if (!abi.decode(data, (bool))) {
+            return ERC1155_NO_APPROVAL_FOR_ALL;
+        }
     }
 
     /**
@@ -629,10 +726,12 @@ contract OrderValidatorV2A {
                     if (itemIds[i] == itemIds[j]) {
                         return SAME_ITEM_ID_IN_BUNDLE;
                     }
+
                     unchecked {
                         ++j;
                     }
                 }
+
                 unchecked {
                     ++i;
                 }
@@ -655,8 +754,10 @@ contract OrderValidatorV2A {
         address signer
     ) internal view returns (uint256 validationCode) {
         if (merkleTree.proof.length != 0) {
-            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash))
+            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 return ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE;
+            }
+
             return _computeDigestAndVerify(merkleTree.hash(), signature, signer);
         } else {
             return _computeDigestAndVerify(orderHash, signature, signer);
@@ -694,8 +795,9 @@ contract OrderValidatorV2A {
                             receiver = newReceiver;
                             creatorFee = newCreatorFee;
                         } else {
-                            if (newReceiver != receiver || newCreatorFee != creatorFee)
+                            if (newReceiver != receiver || newCreatorFee != creatorFee) {
                                 return BUNDLE_ERC2981_NOT_SUPPORTED;
+                            }
                         }
                     }
                     unchecked {
@@ -703,7 +805,9 @@ contract OrderValidatorV2A {
                     }
                 }
 
-                if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) return CREATOR_FEE_TOO_HIGH;
+                if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+                    return CREATOR_FEE_TOO_HIGH;
+                }
             }
         }
     }
@@ -764,22 +868,35 @@ contract OrderValidatorV2A {
                 return WRONG_SIGNATURE_LENGTH;
             }
 
-            if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0)
+            if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
                 return INVALID_S_PARAMETER_EOA;
+            }
 
-            if (v != 27 && v != 28) return INVALID_V_PARAMETER_EOA;
+            if (v != 27 && v != 28) {
+                return INVALID_V_PARAMETER_EOA;
+            }
 
             address recoveredSigner = ecrecover(hash, v, r, s);
-            if (signer == address(0)) return NULL_SIGNER_EOA;
-            if (signer != recoveredSigner) return WRONG_SIGNER_EOA;
+            if (signer == address(0)) {
+                return NULL_SIGNER_EOA;
+            }
+
+            if (signer != recoveredSigner) {
+                return WRONG_SIGNER_EOA;
+            }
         } else {
             // Logic if ERC1271
             (bool success, bytes memory data) = signer.staticcall(
                 abi.encodeWithSelector(IERC1271.isValidSignature.selector, signer)
             );
 
-            if (!success) return MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271;
-            if (abi.decode(data, (bytes4)) != IERC1271.isValidSignature.selector) return SIGNATURE_INVALID_EIP1271;
+            if (!success) {
+                return MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271;
+            }
+
+            if (abi.decode(data, (bytes4)) != IERC1271.isValidSignature.selector) {
+                return SIGNATURE_INVALID_EIP1271;
+            }
         }
     }
 
@@ -789,11 +906,13 @@ contract OrderValidatorV2A {
      * @return validationCode Validation code
      */
     function _checkValidityTransferManagerApprovals(address user) internal view returns (uint256 validationCode) {
-        if (!transferManager.hasUserApprovedOperator(user, address(looksRareProtocol)))
+        if (!transferManager.hasUserApprovedOperator(user, address(looksRareProtocol))) {
             return NO_TRANSFER_MANAGER_APPROVAL_BY_USER_FOR_EXCHANGE;
+        }
 
-        if (!transferManager.isOperatorWhitelisted(address(looksRareProtocol)))
+        if (!transferManager.isOperatorWhitelisted(address(looksRareProtocol))) {
             return TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE;
+        }
     }
 
     function _checkValidityMakerAskItemIdsAndAmountsAndPrice(

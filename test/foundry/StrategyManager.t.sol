@@ -223,7 +223,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             address(0)
         );
 
-        // 2. Wrong contract (e.g., LooksRareProtocol)
+        // 2. Wrong contract (e.g. LooksRareProtocol)
         vm.expectRevert();
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,

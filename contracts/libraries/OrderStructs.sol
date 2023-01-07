@@ -34,7 +34,7 @@ library OrderStructs {
      * @param askNonce Global user order nonce for maker ask orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param strategyId Strategy id
-     * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
+     * @param assetType Asset type (e.g. 0 = ERC721, 1 = ERC1155)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
      * @param collection Collection address
      * @param currency Currency address (@dev address(0) = ETH)
@@ -44,7 +44,7 @@ library OrderStructs {
      * @param minPrice Minimum price for execution
      * @param itemIds Array of itemIds
      * @param amounts Array of amounts
-     * @param additionalParameters Extra data specific for the order (e.g., it can contain start price for Dutch Auction)
+     * @param additionalParameters Extra data specific for the order (e.g. it can contain start price for Dutch Auction)
      */
     struct MakerAsk {
         uint256 askNonce;
@@ -68,7 +68,7 @@ library OrderStructs {
      * @param bidNonce Global user order nonce for maker bid orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param strategyId Strategy id
-     * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
+     * @param assetType Asset type (e.g. 0 = ERC721, 1 = ERC1155)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
      * @param collection Collection address
      * @param currency Currency address (@dev ETH is not valid as a maker bid currency)
@@ -78,7 +78,7 @@ library OrderStructs {
      * @param maxPrice Maximum price for execution
      * @param itemIds Array of itemIds
      * @param amounts Array of amounts
-     * @param additionalParameters Extra data specific for the order (e.g., it can contain a merkle root for specific strategies)
+     * @param additionalParameters Extra data specific for the order (e.g. it can contain a merkle root for specific strategies)
      */
     struct MakerBid {
         uint256 bidNonce;

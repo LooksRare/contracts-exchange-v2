@@ -43,9 +43,10 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
 
     /**
      * @notice This function allows the owner to add a new execution strategy to the protocol.
-     * @param standardProtocolFeeBp Protocol fee
-     * @param maxProtocolFeeBp Maximum protocol fee
-     * @param selector Selector
+     * @param standardProtocolFeeBp Standard protocol fee (in basis point)
+     * @param minTotalFeeBp Minimum total fee (in basis point)
+     * @param maxProtocolFeeBp Maximum protocol fee (in basis point)
+     * @param selector Function selector for the strategy
      * @param isMakerBid Whether the function selector is for maker bids
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
@@ -95,9 +96,9 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
     /**
      * @notice This function allows the owner to update parameters for an existing execution strategy.
      * @param strategyId Strategy id
-     * @param newStandardProtocolFee New standard protocol fee (e.g., 200 --> 2%)
-     * @param newMinTotalFee New minimum total fee
-     * @param isActive Whether the strategy must remain active
+     * @param newStandardProtocolFee New standard protocol fee (in basis point)
+     * @param newMinTotalFee New minimum total fee (in basis point)
+     * @param isActive Whether the strategy must be active
      * @dev Only callable by owner.
      */
     function updateStrategy(

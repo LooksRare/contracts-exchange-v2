@@ -66,7 +66,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
     /**
      * @notice This function is internal and used to transfer non-fungible tokens.
      * @param collection Collection address
-     * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
+     * @param assetType Asset type (e.g. 0 = ERC721, 1 = ERC1155)
      * @param sender Sender address
      * @param recipient Recipient address
      * @param itemIds Array of itemIds

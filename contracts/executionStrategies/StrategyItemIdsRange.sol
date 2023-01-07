@@ -18,7 +18,7 @@ import {BaseStrategy} from "./BaseStrategy.sol";
 contract StrategyItemIdsRange is BaseStrategy {
     /**
      * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
-     *         With this strategy, the bidder picks a item id range (e.g., 1-100) and a seller can fulfill the order with any tokens within the specificed ID range.
+     *         With this strategy, the bidder picks a item id range (e.g. 1-100) and a seller can fulfill the order with any tokens within the specificed ID range.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      */

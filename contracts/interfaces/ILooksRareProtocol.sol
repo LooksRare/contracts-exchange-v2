@@ -104,7 +104,7 @@ interface ILooksRareProtocol {
     error NewGasLimitETHTransferTooLow();
 
     /**
-     * @notice It is returned if the domain separator cannot be updated (i.e., the chainId is the same).
+     * @notice It is returned if the domain separator cannot be updated (i.e. the chainId is the same).
      */
     error SameDomainSeparator();
 
@@ -157,7 +157,7 @@ interface ILooksRareProtocol {
      * @param makerSignatures Array of maker signatures
      * @param merkleTrees Array of merkle tree structs if the signature contains multiple maker orders
      * @param affiliate Affiliate address
-     * @param isAtomic Whether the execution should be atomic i.e., whether it should revert if 1 or more transactions fail
+     * @param isAtomic Whether the execution should be atomic i.e. whether it should revert if 1 or more transactions fail
      */
     function executeMultipleTakerBids(
         OrderStructs.TakerBid[] calldata takerBids,

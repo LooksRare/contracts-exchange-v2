@@ -235,7 +235,7 @@ contract LooksRareProtocol is
      * @notice This function is used to do a non-atomic matching in the context of a batch taker bid.
      * @param takerBid Taker bid struct
      * @param makerAsk Maker ask struct
-     * @param sender Sender address (i.e., the initial msg sender)
+     * @param sender Sender address (i.e. the initial msg sender)
      * @param orderHash Hash of the maker ask order
      * @return protocolFeeAmount Protocol fee amount
      * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
@@ -349,7 +349,7 @@ contract LooksRareProtocol is
      * @notice This function is internal and is used to execute a taker bid (against a maker ask).
      * @param takerBid Taker bid order struct
      * @param makerAsk Maker ask order struct
-     * @param sender Sender of the transaction (i.e., msg.sender)
+     * @param sender Sender of the transaction (i.e. msg.sender)
      * @param orderHash Hash of the maker ask order
      * @return protocolFeeAmount Protocol fee amount
      */

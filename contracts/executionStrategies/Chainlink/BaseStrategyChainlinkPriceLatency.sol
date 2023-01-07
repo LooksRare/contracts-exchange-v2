@@ -23,12 +23,12 @@ contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
     event MaxLatencyUpdated(uint256 newMaxLatency);
 
     /**
-     * @notice It is returned if the Chainlink price is invalid (e.g., negative).
+     * @notice It is returned if the Chainlink price is invalid (e.g. negative).
      */
     error InvalidChainlinkPrice();
 
     /**
-     * @notice It is returned if the latency tolerance is set too high (i.e., greater than 3,600 sec).
+     * @notice It is returned if the latency tolerance is set too high (i.e. greater than 3,600 sec).
      */
     error LatencyToleranceTooHigh();
 

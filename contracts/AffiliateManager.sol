@@ -38,7 +38,7 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
     /**
      * @notice This function allows the affiliate controller to update the affiliate rate (in basis point).
      * @param affiliate Affiliate address
-     * @param bp Rate (in basis point) to collect (e.g., 100 = 1%) per referred transaction
+     * @param bp Rate (in basis point) to collect (e.g. 100 = 1%) per referred transaction
      */
     function updateAffiliateRate(address affiliate, uint256 bp) external {
         if (msg.sender != affiliateController) {

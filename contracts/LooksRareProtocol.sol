@@ -315,10 +315,14 @@ contract LooksRareProtocol is
             bool isNonceInvalidated
         ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
 
+        // Order nonce status is updated
         _updateUserOrderNonce(isNonceInvalidated, signer, makerBid.orderNonce, orderHash);
 
-        _transferToAskRecipientAndCreatorIfAny(recipients, fees, makerBid.currency, signer);
+        // Taker action goes first
         _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, signer, itemIds, amounts);
+
+        // Maker action goes second
+        _transferToAskRecipientAndCreatorIfAny(recipients, fees, makerBid.currency, signer);
 
         emit TakerAsk(
             SignatureParameters({
@@ -337,7 +341,7 @@ contract LooksRareProtocol is
             fees
         );
 
-        // Return protocol fee
+        // It returns the protocol fee amount
         return fees[0];
     }
 
@@ -377,20 +381,21 @@ contract LooksRareProtocol is
             bool isNonceInvalidated
         ) = _executeStrategyForTakerBid(takerBid, makerAsk);
 
+        // Order nonce status is updated
         _updateUserOrderNonce(isNonceInvalidated, signer, makerAsk.orderNonce, orderHash);
 
-        {
-            _transferNFT(
-                makerAsk.collection,
-                makerAsk.assetType,
-                signer,
-                takerBid.recipient == address(0) ? sender : takerBid.recipient,
-                itemIds,
-                amounts
-            );
+        // Taker action goes first
+        _transferToAskRecipientAndCreatorIfAny(recipients, fees, makerAsk.currency, sender);
 
-            _transferToAskRecipientAndCreatorIfAny(recipients, fees, makerAsk.currency, sender);
-        }
+        // Maker action goes second
+        _transferNFT(
+            makerAsk.collection,
+            makerAsk.assetType,
+            signer,
+            takerBid.recipient == address(0) ? sender : takerBid.recipient,
+            itemIds,
+            amounts
+        );
 
         emit TakerBid(
             SignatureParameters({
@@ -409,6 +414,7 @@ contract LooksRareProtocol is
             fees
         );
 
+        // It returns the protocol fee amount
         return fees[0];
     }
 

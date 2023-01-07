@@ -24,24 +24,14 @@ contract InheritedStrategy {
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     ) internal pure {
-        uint256 targetLength = makerAsk.amounts.length;
-
-        _verifyEqualLengthsAndMatchingPrice(
-            targetLength,
-            takerBid.amounts.length,
-            makerAsk.itemIds.length,
-            takerBid.itemIds.length,
-            makerAsk.minPrice,
-            takerBid.maxPrice
-        );
-
-        _verifyMatchingItemIdsAndAmounts(
+        _verifyMatchingItemIdsAndAmountsAndPrice(
             makerAsk.assetType,
-            targetLength,
             makerAsk.amounts,
             takerBid.amounts,
             makerAsk.itemIds,
-            takerBid.itemIds
+            takerBid.itemIds,
+            makerAsk.minPrice,
+            takerBid.maxPrice
         );
     }
 
@@ -55,62 +45,70 @@ contract InheritedStrategy {
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     ) internal pure {
-        uint256 targetLength = makerBid.amounts.length;
-
-        _verifyEqualLengthsAndMatchingPrice(
-            targetLength,
-            takerAsk.amounts.length,
-            makerBid.itemIds.length,
-            takerAsk.itemIds.length,
-            makerBid.maxPrice,
-            takerAsk.minPrice
-        );
-
-        _verifyMatchingItemIdsAndAmounts(
+        _verifyMatchingItemIdsAndAmountsAndPrice(
             makerBid.assetType,
-            targetLength,
             makerBid.amounts,
             takerAsk.amounts,
             makerBid.itemIds,
-            takerAsk.itemIds
+            takerAsk.itemIds,
+            makerBid.maxPrice,
+            takerAsk.minPrice
         );
     }
 
-    function _verifyEqualLengthsAndMatchingPrice(
-        uint256 amountsLength,
-        uint256 counterpartyAmountsLength,
-        uint256 itemIdsLength,
-        uint256 counterpartyItemIdsLength,
-        uint256 price,
-        uint256 counterpartyPrice
-    ) private pure {
-        if (
-            amountsLength == 0 ||
-            // If A == B, then A XOR B == 0. So if all 4 are equal, it should be 0 | 0 | 0 == 0
-            ((amountsLength ^ itemIdsLength) |
-                (counterpartyItemIdsLength ^ counterpartyAmountsLength) |
-                (amountsLength ^ counterpartyItemIdsLength)) !=
-            0 ||
-            price != counterpartyPrice
-        ) {
-            revert OrderInvalid();
-        }
-    }
-
-    function _verifyMatchingItemIdsAndAmounts(
+    function _verifyMatchingItemIdsAndAmountsAndPrice(
         uint256 assetType,
-        uint256 length,
         uint256[] calldata amounts,
         uint256[] calldata counterpartyAmounts,
         uint256[] calldata itemIds,
-        uint256[] calldata counterpartyItemIds
+        uint256[] calldata counterpartyItemIds,
+        uint256 price,
+        uint256 counterpartyPrice
     ) private pure {
-        for (uint256 i; i < length; ) {
-            if ((amounts[i] != counterpartyAmounts[i]) || (itemIds[i] != counterpartyItemIds[i])) {
+        uint256 amountsLength = amounts.length;
+
+        {
+            uint256 counterpartyAmountsLength = counterpartyAmounts.length;
+            uint256 itemIdsLength = itemIds.length;
+            uint256 counterpartyItemIdsLength = counterpartyItemIds.length;
+
+            // if (
+            //     amountsLength == 0 ||
+            //     // If A == B, then A XOR B == 0. So if all 4 are equal, it should be 0 | 0 | 0 == 0
+            //     ((amountsLength ^ itemIdsLength) |
+            //         (counterpartyItemIdsLength ^ counterpartyAmountsLength) |
+            //         (amountsLength ^ counterpartyItemIdsLength)) !=
+            //     0 ||
+            //     price != counterpartyPrice
+            // ) {
+            //     revert OrderInvalid();
+            // }
+            assembly {
+                if or(
+                    or(iszero(amountsLength), iszero(eq(price, counterpartyPrice))),
+                    gt(
+                        or(
+                            or(
+                                xor(amountsLength, itemIdsLength),
+                                xor(counterpartyItemIdsLength, counterpartyAmountsLength)
+                            ),
+                            xor(amountsLength, counterpartyItemIdsLength)
+                        ),
+                        0
+                    )
+                ) {
+                    mstore(0x00, 0x2e0c0f71)
+                    revert(0x1c, 0x04)
+                }
+            }
+        }
+
+        for (uint256 i; i < amountsLength; ) {
+            uint256 amount = amounts[i];
+
+            if ((amount != counterpartyAmounts[i]) || (itemIds[i] != counterpartyItemIds[i])) {
                 revert OrderInvalid();
             }
-
-            uint256 amount = amounts[i];
 
             if (amount != 1) {
                 if (amount == 0) {

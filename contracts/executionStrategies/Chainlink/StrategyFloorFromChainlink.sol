@@ -327,7 +327,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             return (isValid, WrongCurrency.selector);
         }
 
-        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
+        if (makerBid.itemIds.length != 1 || makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
             return (isValid, OrderInvalid.selector);
         }
 

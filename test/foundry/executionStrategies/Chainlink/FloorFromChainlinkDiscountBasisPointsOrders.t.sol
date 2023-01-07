@@ -24,7 +24,10 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
     function setUp() public override {
         _setIsFixedAmount(0);
         _setDiscount(100);
-        _setSelector(StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector, true);
+        _setSelector(
+            StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector,
+            true
+        );
         super.setUp();
     }
 

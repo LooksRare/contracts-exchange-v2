@@ -311,7 +311,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             250,
             250,
             300,
-            StrategyFloorFromChainlink.executeBasisPointsDiscountStrategyWithTakerAsk.selector,
+            StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector,
             isMakerBid,
             address(strategy)
         );

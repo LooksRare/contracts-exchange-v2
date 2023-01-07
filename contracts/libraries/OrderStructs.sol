@@ -8,19 +8,19 @@ pragma solidity ^0.8.17;
  */
 library OrderStructs {
     /**
-     * @notice Maker ask hash used to compute maker ask order hash
+     * @notice This is the constant used to compute the maker ask order hash.
      * @dev keccak256("MakerAsk(uint256 askNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
      */
     bytes32 internal constant _MAKER_ASK_HASH = 0x88210d05352c99907588dddb658b9abce78f141d1415d7be787f6120b718fe02;
 
     /**
-     * @notice Maker bid hash used to compute maker bid order hash
+     * @notice This is the constant used to compute the maker bid order hash.
      * @dev keccak256("MakerBid(uint256 bidNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
      */
     bytes32 internal constant _MAKER_BID_HASH = 0xc69763700afbfcdc70a0b138ea120a08fc78dfc5532f1e7232fa8d8cfb26f96a;
 
     /**
-     * @notice Merkle root hash used to compute merkle root order (proof is not included in the hashing function)
+     * @notice This is the constant used to compute the merkle root order hash (proof is not included in the hashing function).
      * @dev keccak256("MerkleTree(bytes32 root)")
      */
     bytes32 internal constant _MERKLE_TREE_HASH = 0x4339702fd09d392db18a2a980b04a717d48085f206207a9fe4472d7ba0ccbf0b;
@@ -35,7 +35,7 @@ library OrderStructs {
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param strategyId Strategy id
      * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
-     * @param orderNonce Order nonce (can be shared across bid/ask maker orders)
+     * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
      * @param collection Collection address
      * @param currency Currency address (@dev address(0) = ETH)
      * @param signer Signer address
@@ -69,9 +69,9 @@ library OrderStructs {
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param strategyId Strategy id
      * @param assetType Asset type (e.g., 0 = ERC721, 1 = ERC1155)
-     * @param orderNonce Order nonce (can be shared across bid/ask maker orders)
+     * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
      * @param collection Collection address
-     * @param currency Currency address (@dev ETH is not valid for bidding)
+     * @param currency Currency address (@dev ETH is not valid as a maker bid currency)
      * @param signer Signer address
      * @param startTime Start timestamp
      * @param endTime End timestamp
@@ -140,7 +140,7 @@ library OrderStructs {
      */
 
     /**
-     * @notice MerkleTree struct
+     * @notice MerkleTree is the struct for a merkle tree of order hashes.
      * @dev A Merkle tree can be computed with order hashes. It can contain order hashes from both maker bid and maker ask structs.
      * @param root Merkle root
      * @param proof Array containing the merkle proof
@@ -155,7 +155,7 @@ library OrderStructs {
      */
 
     /**
-     * @notice Hash the maker ask struct
+     * @notice This function is used to compute the order hash for a maker ask struct.
      * @param makerAsk Maker ask order struct
      * @return makerAskHash Hash of the maker ask struct
      */
@@ -171,10 +171,10 @@ library OrderStructs {
                         makerAsk.strategyId,
                         makerAsk.assetType,
                         makerAsk.orderNonce,
-                        makerAsk.collection
+                        makerAsk.collection,
+                        makerAsk.currency
                     ),
                     abi.encode(
-                        makerAsk.currency,
                         makerAsk.signer,
                         makerAsk.startTime,
                         makerAsk.endTime,
@@ -188,7 +188,7 @@ library OrderStructs {
     }
 
     /**
-     * @notice Hash the maker bid struct
+     * @notice This function is used to compute the order hash for a maker bid struct.
      * @param makerBid Maker bid order struct
      * @return makerBidHash Hash of the maker bid struct
      */
@@ -221,7 +221,7 @@ library OrderStructs {
     }
 
     /**
-     * @notice Hash a merkle root
+     * @notice This function is used to compute the hash for a merkle tree struct.
      * @param merkleTree Merkle tree struct
      * @return merkleTreeHash Hash of the merkle tree struct
      */

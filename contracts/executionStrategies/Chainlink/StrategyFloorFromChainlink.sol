@@ -17,7 +17,7 @@ import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMu
 /**
  * @title StrategyFloorFromChainlink
  * @notice This contract allows a seller to make a floor price + premium ask
- *         and a buyer to make a floor price - discount collection bid
+ *         and a buyer to make a floor price - discount collection bid.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultiplePriceFeeds {
@@ -26,7 +26,9 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      */
     error DiscountGreaterThanFloorPrice();
 
-    // WETH
+    /**
+     * @notice Wrapped ether (WETH) address.
+     */
     address public immutable WETH;
 
     /**
@@ -39,8 +41,8 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     }
 
     /**
-     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
-     *         This strategy looks at the seller's desired execution price in ETH (floor + premium) and minimum execution price and chooses the higher price
+     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     *         This strategy looks at the seller's desired execution price in ETH (floor + premium) and minimum execution price and chooses the higher price.
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @return price The final execution price
@@ -93,8 +95,8 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     }
 
     /**
-     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
-     *         This strategy looks at the seller's desired execution price in ETH (floor * (1 + premium)) and minimum execution price and chooses the higher price
+     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
+     *         This strategy looks at the seller's desired execution price in ETH (floor * (1 + premium)) and minimum execution price and chooses the higher price.
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @return price The final execution price
@@ -147,7 +149,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     }
 
     /**
-     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
      *         This strategy looks at the bidder's desired execution price in ETH (floor - discount) and maximum execution price and chooses the lower price.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
@@ -204,7 +206,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     }
 
     /**
-     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
      *         This strategy looks at the bidder's desired execution price in ETH (floor * (1 - discount)) and maximum execution price and chooses the lower price.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
@@ -262,7 +264,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     }
 
     /**
-     * @notice Validate the *only the maker* order under the context of the chosen strategy. It does not revert if
+     * @notice This function validates *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @param functionSelector Function selector for the strategy
@@ -300,7 +302,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     }
 
     /**
-     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
+     * @notice This function validates *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
      * @param functionSelector Function selector for the strategy

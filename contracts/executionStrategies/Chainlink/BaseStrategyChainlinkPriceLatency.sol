@@ -12,12 +12,12 @@ import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSte
 contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
     /**
      * @notice Maximum latency accepted after which
-     *         the execution strategy rejects the retrieved price
+     *         the execution strategy rejects the retrieved price.
      */
     uint256 public maxLatency;
 
     /**
-     * @notice Emitted when the maximum Chainlink price latency is updated
+     * @notice It is emitted when the maximum Chainlink price latency is updated.
      * @param newMaxLatency New maximum Chainlink price latency
      */
     event MaxLatencyUpdated(uint256 newMaxLatency);
@@ -28,7 +28,7 @@ contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
     error InvalidChainlinkPrice();
 
     /**
-     * @notice It is returned if the latency tolerance is set too high (i.e., greater than 3,600 sec)
+     * @notice It is returned if the latency tolerance is set too high (i.e., greater than 3,600 sec).
      */
     error LatencyToleranceTooHigh();
 
@@ -44,9 +44,9 @@ contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
     constructor(address _owner) OwnableTwoSteps(_owner) {}
 
     /**
-     * @notice Update maximum Chainlink price latency. It cannot be higher than 3,600
-     *         as Chainlink will at least update the price every 3,600 seconds, provided
-     *         ETH's price does not deviate more than 0.5%.
+     * @notice This function allows the owner to update the maximum Chainlink price latency.
+     *         It cannot be higher than 3,600 as Chainlink will at least update the price every 3,600 seconds,
+     *         provided ETH's price does not deviate more than 0.5%.
      * @param newMaxLatency Maximum Chainlink price latency (in seconds)
      * @dev Only callable by owner.
      */

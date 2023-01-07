@@ -20,10 +20,14 @@ import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLat
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatency {
-    // WETH
+    /**
+     * @notice Wrapped ether (WETH) address.
+     */
     address public immutable WETH;
 
-    // ETH/USD Chainlink price feed
+    /**
+     * @notice ETH/USD Chainlink price feed
+     */
     AggregatorV3Interface public immutable priceFeed;
 
     /**
@@ -38,7 +42,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
     }
 
     /**
-     * @notice Validate the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status
+     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
      *         This strategy looks at the seller's desired sale price in USD and minimum sale price in ETH, converts the USD value into ETH using Chainlink's price feed and chooses the higher price.
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
@@ -118,8 +122,8 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
     }
 
     /**
-     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
-     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     * @notice This function validates *only the maker* order under the context of the chosen strategy.
+     *         It does not revert if the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid

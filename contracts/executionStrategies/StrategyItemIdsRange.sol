@@ -68,11 +68,11 @@ contract StrategyItemIdsRange is BaseStrategy {
                 }
             }
 
-            if (offeredItemId >= minItemId) {
-                if (offeredItemId <= maxItemId) {
-                    totalOfferedAmount += amount;
-                }
+            if (offeredItemId < minItemId || offeredItemId > maxItemId) {
+                revert OrderInvalid();
             }
+
+            totalOfferedAmount += amount;
 
             lastItemId = offeredItemId;
 

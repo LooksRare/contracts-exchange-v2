@@ -487,6 +487,10 @@ contract OrderValidatorV2A {
         uint256 startTime,
         uint256 endTime
     ) internal view returns (uint256 validationCode) {
+        if (startTime >= endTime) {
+            return START_TIME_GREATER_THAN_END_TIME;
+        }
+
         if (endTime < block.timestamp) {
             return TOO_LATE_TO_EXECUTE_ORDER;
         }

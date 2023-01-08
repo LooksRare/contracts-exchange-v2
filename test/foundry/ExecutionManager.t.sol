@@ -11,6 +11,7 @@ import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol"
 
 // Shared errors
 import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
+import {START_TIME_GREATER_THAN_END_TIME, TOO_LATE_TO_EXECUTE_ORDER, TOO_EARLY_TO_EXECUTE_ORDER} from "../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -78,9 +79,14 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(weth)
         );
 
-        vm.warp(block.timestamp - 1);
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        makerBid.startTime = block.timestamp + 20 minutes;
+        makerBid.endTime = block.timestamp + 21 minutes;
 
+        vm.warp(makerBid.startTime - 5 minutes);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
+
+        vm.warp(makerBid.startTime - 1);
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
@@ -93,6 +99,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.endTime = block.timestamp - 1;
         signature = _signMakerBid(makerBid, makerUserPK);
 
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
+
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
@@ -102,6 +110,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.startTime = block.timestamp;
         makerBid.endTime = block.timestamp - 1;
         signature = _signMakerBid(makerBid, makerUserPK);
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);

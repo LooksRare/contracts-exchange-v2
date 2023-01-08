@@ -37,8 +37,9 @@ uint256 constant MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271 = 421;
 uint256 constant SIGNATURE_INVALID_EIP1271 = 422;
 
 // 5. Timestamp-related validation errors
-uint256 constant TOO_LATE_TO_EXECUTE_ORDER = 501;
-uint256 constant TOO_EARLY_TO_EXECUTE_ORDER = 502;
+uint256 constant START_TIME_GREATER_THAN_END_TIME = 501;
+uint256 constant TOO_LATE_TO_EXECUTE_ORDER = 502;
+uint256 constant TOO_EARLY_TO_EXECUTE_ORDER = 503;
 
 // 6. Transfer-related (ERC20, ERC721, ERC1155 tokens), including transfers and approvals, errors
 uint256 constant SAME_ITEM_ID_IN_BUNDLE = 601;

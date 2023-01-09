@@ -10,7 +10,7 @@ import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol
 // Shared errors
 import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
 
-// Dependencies
+// Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
 
 /**

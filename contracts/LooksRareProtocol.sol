@@ -26,7 +26,7 @@ import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
  * @title LooksRareProtocol
  * @notice This contract is the core smart contract of the LooksRare protocol ("v2").
  *         It is the main entry point for users to initiate transactions with taker orders
- *         and manage the cancellation of maker orders, which exist offchain.
+ *         and manage the cancellation of maker orders, which exist off-chain.
 LOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSRARELOOKSRARELOOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKSRAR'''''''''''''''''''''''''''''''''''OOKSRLOOKSRARELOOKSRARELOOKSR
 LOOKSRARELOOKSRARELOOKS:.                                        .;OOKSRARELOOKSRARELOOKSR

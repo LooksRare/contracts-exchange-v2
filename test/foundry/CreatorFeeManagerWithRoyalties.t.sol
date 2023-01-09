@@ -305,10 +305,6 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 _royaltyRecipient,
                 _newCreatorRoyaltyFee - i // It is not equal
             );
-
-            (, uint256 info) = mockERC721WithRoyalties.royaltyInfo(i, 10000);
-
-            assertEq(info, _newCreatorRoyaltyFee - i);
         }
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);

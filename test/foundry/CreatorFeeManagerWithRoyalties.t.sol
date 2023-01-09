@@ -250,7 +250,6 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        //
         _isMakerBidOrderValid(makerBid, signature);
 
         // Taker user actions
@@ -307,8 +306,6 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 _newCreatorRoyaltyFee - i // It is not equal
             );
 
-            console.log(_newCreatorRoyaltyFee - i);
-
             (, uint256 info) = mockERC721WithRoyalties.royaltyInfo(i, 10000);
 
             assertEq(info, _newCreatorRoyaltyFee - i);
@@ -329,8 +326,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         /**
          * 2. Same fee structure but different recipient
-        
-
+         */
         // Adjust ERC721 with royalties
         for (uint256 i; i < makerBid.itemIds.length; i++) {
             mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(
@@ -351,7 +347,6 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         );
 
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-         */
     }
 
     function testCreatorRoyaltiesRevertIfFeeHigherThanLimit() public {
@@ -367,24 +362,24 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
-        {
-            (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: itemId
-            });
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: itemId
+        });
 
-            vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
-            vm.prank(takerUser);
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-        }
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
+
+        vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // 2. Maker ask
         itemId = 1; // The itemId changes as it is already minted before
@@ -393,7 +388,10 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the orders and signature
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
+        OrderStructs.MakerAsk memory makerAsk;
+        OrderStructs.TakerBid memory takerBid;
+
+        (makerAsk, takerBid, signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 0, // Standard sale for fixed price
@@ -410,6 +408,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
         vm.prank(takerUser);
+
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,

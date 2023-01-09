@@ -8,6 +8,10 @@
 
 This project contains core smart contracts used for the LooksRare exchange protocol ("v2").
 
+## Architecture
+
+![inheritance](./inheritance-contracts.svg)
+
 ## Setup
 
 - Run `yarn`

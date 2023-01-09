@@ -9,6 +9,9 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ICreatorFeeManager} from "../../contracts/interfaces/ICreatorFeeManager.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 
+// Shared errors
+import {BUNDLE_ERC2981_NOT_SUPPORTED} from "../../contracts/helpers/ValidationCodeConstants.sol";
+
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
@@ -58,6 +61,8 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             maxPrice: price,
             itemId: itemId
         });
+
+        _isMakerBidOrderValid(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -116,6 +121,8 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        _isMakerBidOrderValid(makerBid, signature);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -180,6 +187,8 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
 
+        _isMakerBidOrderValid(makerBid, signature);
+
         /**
          * Different recipient
          */
@@ -192,6 +201,8 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
                 50
             );
         }
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         vm.prank(takerUser);
         vm.expectRevert(

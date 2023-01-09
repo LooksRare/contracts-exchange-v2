@@ -56,18 +56,20 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
                     (bool status, bytes memory data) = collection.staticcall(
                         abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
                     );
+
                     if (status) {
-                        (address newCreator, uint256 newcreatorFee) = abi.decode(data, (address, uint256));
+                        (address newCreator, uint256 newCreatorFee) = abi.decode(data, (address, uint256));
 
                         if (i == 0) {
                             creator = newCreator;
-                            creatorFee = newcreatorFee;
+                            creatorFee = newCreatorFee;
                         } else {
-                            if (newCreator != creator || newcreatorFee != creatorFee) {
+                            if (newCreator != creator || newCreatorFee != creatorFee) {
                                 revert BundleEIP2981NotAllowed(collection);
                             }
                         }
                     }
+
                     unchecked {
                         ++i;
                     }

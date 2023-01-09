@@ -487,10 +487,18 @@ contract OrderValidatorV2A {
         uint256 startTime,
         uint256 endTime
     ) internal view returns (uint256 validationCode) {
-        if (endTime < block.timestamp) {
+        // @dev It is possible for startTime to be equal to endTime.
+        // If so, the execution only succeeds when the startTime = endTime = block.timestamp.
+        // For order invalidation, if the call succeeds, it is already too late for later execution since the
+        // next block will have a greater timestamp than the current one.
+        if (startTime >= endTime) {
+            return START_TIME_GREATER_THAN_END_TIME;
+        }
+
+        if (endTime <= block.timestamp) {
             return TOO_LATE_TO_EXECUTE_ORDER;
         }
-        if (startTime > block.timestamp + 5 minutes) {
+        if (startTime >= block.timestamp + 5 minutes) {
             return TOO_EARLY_TO_EXECUTE_ORDER;
         }
     }
@@ -775,39 +783,19 @@ contract OrderValidatorV2A {
         uint256 price,
         uint256[] memory itemIds
     ) internal view returns (uint256 validationCode) {
-        // Check if there is a royalty info in the system
-        (address receiver, uint256 creatorFee) = royaltyFeeRegistry.royaltyInfo(collection, price);
+        (bool status, bytes memory data) = address(creatorFeeManager).staticcall(
+            abi.encodeWithSelector(ICreatorFeeManager.viewCreatorFeeInfo.selector, collection, price, itemIds)
+        );
 
-        // If it is a collection offer, itemIds would be empty
-        uint256 length = itemIds.length;
+        if (!status) {
+            return BUNDLE_ERC2981_NOT_SUPPORTED;
+        }
 
-        if (receiver == address(0) && length > 0) {
-            if (IERC165(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
-                for (uint256 i; i < length; ) {
-                    (bool status, bytes memory data) = collection.staticcall(
-                        abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
-                    );
+        (address creator, uint256 creatorFee) = abi.decode(data, (address, uint256));
 
-                    if (status) {
-                        (address newReceiver, uint256 newCreatorFee) = abi.decode(data, (address, uint256));
-
-                        if (i == 0) {
-                            receiver = newReceiver;
-                            creatorFee = newCreatorFee;
-                        } else {
-                            if (newReceiver != receiver || newCreatorFee != creatorFee) {
-                                return BUNDLE_ERC2981_NOT_SUPPORTED;
-                            }
-                        }
-                    }
-                    unchecked {
-                        ++i;
-                    }
-                }
-
-                if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) {
-                    return CREATOR_FEE_TOO_HIGH;
-                }
+        if (creator != address(0)) {
+            if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+                return CREATOR_FEE_TOO_HIGH;
             }
         }
     }

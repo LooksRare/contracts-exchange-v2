@@ -70,7 +70,7 @@ To run the coverage report, the below command can be executed.
 
 ```
 forge coverage --report lcov
-LCOV_EXCLUDE=("test/*" "contracts/libraries/OpenZeppelin/*")
+LCOV_EXCLUDE=("test/*" "contracts/libraries/*" "contracts/helpers/ProtocolHelpers.sol")
 echo $LCOV_EXCLUDE | xargs lcov --output-file lcov-filtered.info --remove lcov.info
 genhtml lcov-filtered.info --output-directory out
 open out/index.html

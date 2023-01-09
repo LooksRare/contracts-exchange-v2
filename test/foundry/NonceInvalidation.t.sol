@@ -6,6 +6,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {INonceManager} from "../../contracts/interfaces/INonceManager.sol";
 import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
+import {USER_GLOBAL_ASK_NONCE_HIGHER, USER_GLOBAL_ASK_NONCE_LOWER, USER_GLOBAL_BID_NONCE_HIGHER, USER_GLOBAL_BID_NONCE_LOWER, USER_SUBSET_NONCE_CANCELLED, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED} from "../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Other utils and tests
 import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFillCollectionOrder.sol";
@@ -48,6 +49,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.expectEmit(false, false, false, true);
         emit SubsetNoncesCancelled(makerUser, subsetNonces);
         looksRareProtocol.cancelSubsetNonces(subsetNonces);
+
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, USER_SUBSET_NONCE_CANCELLED);
 
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
@@ -99,6 +102,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, USER_GLOBAL_ASK_NONCE_LOWER);
 
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
@@ -152,6 +157,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_GLOBAL_BID_NONCE_LOWER);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -220,6 +227,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         {
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+            _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
 
             // Second one fails
             vm.expectRevert(WrongNonces.selector);
@@ -329,6 +338,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             // Sign order
             signature = _signMakerBid(makerBid, makerUserPK);
 
+            _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH);
+
             // Prepare the taker ask
             OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
                 takerUser,
@@ -394,11 +405,10 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
+
         // Mint asset
         mockERC721.mint(takerUser, itemId);
-
-        // Taker user actions
-        vm.startPrank(takerUser);
 
         // Prepare the taker ask
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
@@ -409,12 +419,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             abi.encode()
         );
 
-        {
-            vm.expectRevert(WrongNonces.selector);
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-        }
-
-        vm.stopPrank();
+        vm.prank(takerUser);
+        vm.expectRevert(WrongNonces.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testCancelNoncesRevertIfEmptyArrays() public {

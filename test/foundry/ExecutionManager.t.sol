@@ -93,22 +93,23 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         /**
          * 2. Too late to execute
          */
-        vm.warp(block.timestamp);
 
         makerBid.startTime = 0;
-        makerBid.endTime = block.timestamp - 1;
+        makerBid.endTime = block.timestamp;
         signature = _signMakerBid(makerBid, makerUserPK);
 
+        vm.warp(block.timestamp);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
 
+        vm.warp(block.timestamp + 1);
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         /**
          * 3. start time > end time
          */
-        makerBid.startTime = block.timestamp;
-        makerBid.endTime = block.timestamp - 1;
+        makerBid.startTime = block.timestamp + 1;
+        makerBid.endTime = block.timestamp;
         signature = _signMakerBid(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);

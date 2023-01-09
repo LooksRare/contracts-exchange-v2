@@ -487,14 +487,18 @@ contract OrderValidatorV2A {
         uint256 startTime,
         uint256 endTime
     ) internal view returns (uint256 validationCode) {
+        // @dev It is possible for startTime to be equal to endTime.
+        // If so, the execution only succeeds when the startTime = endTime = block.timestamp.
+        // For order invalidation, if the call succeeds, it is already too late for later execution since the
+        // next block will have a greater timestamp than the current one.
         if (startTime >= endTime) {
             return START_TIME_GREATER_THAN_END_TIME;
         }
 
-        if (endTime < block.timestamp) {
+        if (endTime <= block.timestamp) {
             return TOO_LATE_TO_EXECUTE_ORDER;
         }
-        if (startTime > block.timestamp + 5 minutes) {
+        if (startTime >= block.timestamp + 5 minutes) {
             return TOO_EARLY_TO_EXECUTE_ORDER;
         }
     }

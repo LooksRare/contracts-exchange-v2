@@ -7,7 +7,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 // Custom errors
 import {OrderInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
 
-// BaseStrategy
+// Base strategy contracts
 import {BaseStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";
 
 contract StrategyTestMultiFillCollectionOrder is BaseStrategy {

@@ -7,7 +7,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 // Shared errors
 import {OrderInvalid, WrongFunctionSelector} from "../interfaces/SharedErrors.sol";
 
-// Dependencies
+// Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
 
 /**

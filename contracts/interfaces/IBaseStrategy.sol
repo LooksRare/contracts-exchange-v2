@@ -8,7 +8,7 @@ pragma solidity ^0.8.17;
 interface IBaseStrategy {
     /**
      * @notice This function acts as a safety check for the protocol's owner when adding new execution strategies.
-     * @return isStrategy Whether it is a strategy
+     * @return isStrategy Whether it is a LooksRare V2 protocol strategy
      */
     function isLooksRareV2Strategy() external pure returns (bool isStrategy);
 }

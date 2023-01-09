@@ -10,7 +10,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  */
 interface ILooksRareProtocol {
     /**
-     * @notice Custom struct that contains signature parameters
+     * @notice This struct contains signature parameters and the nonce invalidation status.
      * @param orderHash Maker order hash
      * @param orderNonce Order nonce
      * @param isNonceInvalidated Whether this transaction invalidated the maker user's order nonce at the protocol level

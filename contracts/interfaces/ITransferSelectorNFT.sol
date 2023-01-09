@@ -7,7 +7,7 @@ pragma solidity ^0.8.17;
  */
 interface ITransferSelectorNFT {
     /**
-     * @notice Custom struct that contains information about the transfer manager and function selector.
+     * @notice This struct contains information about the transfer manager and the associated function selector.
      * @param transferManager Address of the transfer manager
      * @param selector Function selector
      */

@@ -7,7 +7,7 @@ import {WrongLengths} from "./interfaces/SharedErrors.sol";
 
 /**
  * @title NonceManager
- * @notice This contract handles the nonce logic that is used for invalidating maker orders that exist offchain.
+ * @notice This contract handles the nonce logic that is used for invalidating maker orders that exist off-chain.
  *         The nonce logic revolves around three parts at the user level:
  *         - order nonce (orders sharing an order nonce are conditional, OCO-like)
  *         - subset (orders can be grouped under a same subset)

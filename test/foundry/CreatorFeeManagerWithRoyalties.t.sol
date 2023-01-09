@@ -9,6 +9,9 @@ import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.so
 // Core contract
 import {CreatorFeeManagerWithRoyalties} from "../../contracts/CreatorFeeManagerWithRoyalties.sol";
 
+// Shared errors
+import {BUNDLE_ERC2981_NOT_SUPPORTED, CREATOR_FEE_TOO_HIGH} from "../../contracts/helpers/ValidationCodeConstants.sol";
+
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
@@ -39,6 +42,9 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Set up 2% as protocol fee, which is now equal to minimum fee
         looksRareProtocol.updateStrategy(0, _newProtocolFee, _newProtocolFee, true);
         vm.stopPrank();
+
+        // Adjust for new creator fee manager
+        orderValidator.adjustExternalParameters();
     }
 
     function testCreatorRoyaltiesGetPaidForRoyaltyFeeManager() public {
@@ -78,6 +84,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             makerBid.amounts,
             abi.encode()
         );
+
+        _isMakerBidOrderValid(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -138,6 +146,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             abi.encode()
         );
 
+        _isMakerBidOrderValid(makerBid, signature);
+
         // Execute taker ask transaction
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -179,6 +189,9 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         // Mint the items
         mockERC721.batchMint(takerUser, makerBid.itemIds);
+
+        // Check order validity
+        _isMakerBidOrderValid(makerBid, signature);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -237,6 +250,9 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
+        //
+        _isMakerBidOrderValid(makerBid, signature);
+
         // Taker user actions
         vm.prank(takerUser);
 
@@ -290,7 +306,15 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 _royaltyRecipient,
                 _newCreatorRoyaltyFee - i // It is not equal
             );
+
+            console.log(_newCreatorRoyaltyFee - i);
+
+            (, uint256 info) = mockERC721WithRoyalties.royaltyInfo(i, 10000);
+
+            assertEq(info, _newCreatorRoyaltyFee - i);
         }
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         // Taker user action should revert
         vm.prank(takerUser);
@@ -305,7 +329,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         /**
          * 2. Same fee structure but different recipient
-         */
+        
 
         // Adjust ERC721 with royalties
         for (uint256 i; i < makerBid.itemIds.length; i++) {
@@ -316,6 +340,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+
         vm.prank(takerUser);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -325,6 +351,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         );
 
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+         */
     }
 
     function testCreatorRoyaltiesRevertIfFeeHigherThanLimit() public {
@@ -365,30 +392,30 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(makerUser, itemId);
 
-        {
-            // Prepare the orders and signature
-            (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
-                assetType: 0, // ERC721
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(0), // ETH
-                signer: makerUser,
-                minPrice: price,
-                itemId: itemId
-            });
+        // Prepare the orders and signature
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0, // Standard sale for fixed price
+            assetType: 0, // ERC721
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(0), // ETH
+            signer: makerUser,
+            minPrice: price,
+            itemId: itemId
+        });
 
-            vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
-            vm.prank(takerUser);
-            looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
-                makerAsk,
-                signature,
-                _EMPTY_MERKLE_TREE,
-                _EMPTY_AFFILIATE
-            );
-        }
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
+
+        vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 }

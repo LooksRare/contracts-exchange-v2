@@ -783,39 +783,19 @@ contract OrderValidatorV2A {
         uint256 price,
         uint256[] memory itemIds
     ) internal view returns (uint256 validationCode) {
-        // Check if there is a royalty info in the system
-        (address receiver, uint256 creatorFee) = royaltyFeeRegistry.royaltyInfo(collection, price);
+        (bool status, bytes memory data) = address(creatorFeeManager).staticcall(
+            abi.encodeWithSelector(ICreatorFeeManager.viewCreatorFeeInfo.selector, collection, price, itemIds)
+        );
 
-        // If it is a collection offer, itemIds would be empty
-        uint256 length = itemIds.length;
+        if (!status) {
+            return BUNDLE_ERC2981_NOT_SUPPORTED;
+        }
 
-        if (receiver == address(0) && length > 0) {
-            if (IERC165(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
-                for (uint256 i; i < length; ) {
-                    (bool status, bytes memory data) = collection.staticcall(
-                        abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
-                    );
+        (address creator, uint256 creatorFee) = abi.decode(data, (address, uint256));
 
-                    if (status) {
-                        (address newReceiver, uint256 newCreatorFee) = abi.decode(data, (address, uint256));
-
-                        if (i == 0) {
-                            receiver = newReceiver;
-                            creatorFee = newCreatorFee;
-                        } else {
-                            if (newReceiver != receiver || newCreatorFee != creatorFee) {
-                                return BUNDLE_ERC2981_NOT_SUPPORTED;
-                            }
-                        }
-                    }
-                    unchecked {
-                        ++i;
-                    }
-                }
-
-                if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) {
-                    return CREATOR_FEE_TOO_HIGH;
-                }
+        if (creator != address(0)) {
+            if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+                return CREATOR_FEE_TOO_HIGH;
             }
         }
     }

@@ -1,0 +1,319 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="2216pt" height="548pt" viewBox="0.00 0.00 2215.98 548.00">
+<g id="graph0" class="graph" transform="translate(4,544) scale(1)" data-name="G">
+
+<polygon fill="white" stroke="none" points="-4,4 -4,-544 2211.98,-544 2211.98,4 -4,4" style=""/>
+<!-- LooksRareProtocol -->
+<g id="node1" class="node" pointer-events="visible" data-name="LooksRareProtocol">
+
+<ellipse fill="none" stroke="black" cx="722.77" cy="-522" rx="86.27" ry="18" style=""/>
+<text text-anchor="middle" x="722.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">LooksRareProtocol</text>
+</g>
+<!-- ILooksRareProtocol -->
+<g id="node2" class="node" pointer-events="visible" data-name="ILooksRareProtocol">
+
+<ellipse fill="none" stroke="black" cx="213.77" cy="-450" rx="89.2" ry="18" style=""/>
+<text text-anchor="middle" x="213.77" y="-445.8" font-family="Times,serif" font-size="14.00" style="">ILooksRareProtocol</text>
+</g>
+<!-- LooksRareProtocol&#45;&gt;ILooksRareProtocol -->
+<g id="edge1" class="edge" data-name="LooksRareProtocol-&gt;ILooksRareProtocol">
+
+<path fill="none" stroke="black" d="M648.76,-512.44C566.37,-502.68 429.33,-485.77 311.77,-468 304.69,-466.93 297.32,-465.76 289.96,-464.55" style=""/>
+<polygon fill="black" stroke="black" points="290.74,-461.13 280.3,-462.94 289.59,-468.04 290.74,-461.13" style=""/>
+</g>
+<!-- TransferSelectorNFT -->
+<g id="node3" class="node" pointer-events="visible" data-name="TransferSelectorNFT">
+
+<ellipse fill="none" stroke="black" cx="414.77" cy="-450" rx="93.75" ry="18" style=""/>
+<text text-anchor="middle" x="414.77" y="-445.8" font-family="Times,serif" font-size="14.00" style="">TransferSelectorNFT</text>
+</g>
+<!-- LooksRareProtocol&#45;&gt;TransferSelectorNFT -->
+<g id="edge2" class="edge" data-name="LooksRareProtocol-&gt;TransferSelectorNFT">
+
+<path fill="none" stroke="black" d="M665.92,-508.08C614.78,-496.46 539.48,-479.34 484.67,-466.89" style=""/>
+<polygon fill="black" stroke="black" points="485.65,-463.52 475.13,-464.72 484.1,-470.35 485.65,-463.52" style=""/>
+</g>
+<!-- LowLevelETHReturnETHIfAnyExceptOneWei -->
+<g id="node4" class="node" pointer-events="visible" data-name="LowLevelETHReturnETHIfAnyExceptOneWei">
+
+<ellipse fill="none" stroke="black" cx="722.77" cy="-450" rx="196.69" ry="18" style=""/>
+<text text-anchor="middle" x="722.77" y="-445.8" font-family="Times,serif" font-size="14.00" style="">LowLevelETHReturnETHIfAnyExceptOneWei</text>
+</g>
+<!-- LooksRareProtocol&#45;&gt;LowLevelETHReturnETHIfAnyExceptOneWei -->
+<g id="edge3" class="edge" data-name="LooksRareProtocol-&gt;LowLevelETHReturnETHIfAnyExceptOneWei">
+
+<path fill="none" stroke="black" d="M722.77,-503.7C722.77,-496.41 722.77,-487.73 722.77,-479.54" style=""/>
+<polygon fill="black" stroke="black" points="726.27,-479.62 722.77,-469.62 719.27,-479.62 726.27,-479.62" style=""/>
+</g>
+<!-- LowLevelWETH -->
+<g id="node5" class="node" pointer-events="visible" data-name="LowLevelWETH">
+
+<ellipse fill="none" stroke="black" cx="1015.77" cy="-450" rx="78.71" ry="18" style=""/>
+<text text-anchor="middle" x="1015.77" y="-445.8" font-family="Times,serif" font-size="14.00" style="">LowLevelWETH</text>
+</g>
+<!-- LooksRareProtocol&#45;&gt;LowLevelWETH -->
+<g id="edge4" class="edge" data-name="LooksRareProtocol-&gt;LowLevelWETH">
+
+<path fill="none" stroke="black" d="M777.88,-507.83C827.31,-496.03 899.83,-478.7 951.79,-466.29" style=""/>
+<polygon fill="black" stroke="black" points="952.5,-469.72 961.41,-463.99 950.87,-462.91 952.5,-469.72" style=""/>
+</g>
+<!-- LowLevelERC20Transfer -->
+<g id="node6" class="node" pointer-events="visible" data-name="LowLevelERC20Transfer">
+
+<ellipse fill="none" stroke="black" cx="1223.77" cy="-450" rx="111.73" ry="18" style=""/>
+<text text-anchor="middle" x="1223.77" y="-445.8" font-family="Times,serif" font-size="14.00" style="">LowLevelERC20Transfer</text>
+</g>
+<!-- LooksRareProtocol&#45;&gt;LowLevelERC20Transfer -->
+<g id="edge5" class="edge" data-name="LooksRareProtocol-&gt;LowLevelERC20Transfer">
+
+<path fill="none" stroke="black" d="M785.55,-509.29C796.29,-507.43 807.34,-505.59 817.77,-504 944.43,-484.71 976.79,-484.99 1103.77,-468 1112.67,-466.81 1121.93,-465.54 1131.19,-464.26" style=""/>
+<polygon fill="black" stroke="black" points="1131.54,-467.75 1140.97,-462.9 1130.58,-460.81 1131.54,-467.75" style=""/>
+</g>
+<!-- ITransferSelectorNFT -->
+<g id="node21" class="node" pointer-events="visible" data-name="ITransferSelectorNFT">
+
+<ellipse fill="none" stroke="black" cx="215.77" cy="-378" rx="96.68" ry="18" style=""/>
+<text text-anchor="middle" x="215.77" y="-373.8" font-family="Times,serif" font-size="14.00" style="">ITransferSelectorNFT</text>
+</g>
+<!-- TransferSelectorNFT&#45;&gt;ITransferSelectorNFT -->
+<g id="edge12" class="edge" data-name="TransferSelectorNFT-&gt;ITransferSelectorNFT">
+
+<path fill="none" stroke="black" d="M371.1,-433.64C341.52,-423.23 302.22,-409.41 270.54,-398.27" style=""/>
+<polygon fill="black" stroke="black" points="271.71,-394.97 261.11,-394.95 269.39,-401.57 271.71,-394.97" style=""/>
+</g>
+<!-- ExecutionManager -->
+<g id="node22" class="node" pointer-events="visible" data-name="ExecutionManager">
+
+<ellipse fill="none" stroke="black" cx="414.77" cy="-378" rx="84.51" ry="18" style=""/>
+<text text-anchor="middle" x="414.77" y="-373.8" font-family="Times,serif" font-size="14.00" style="">ExecutionManager</text>
+</g>
+<!-- TransferSelectorNFT&#45;&gt;ExecutionManager -->
+<g id="edge13" class="edge" data-name="TransferSelectorNFT-&gt;ExecutionManager">
+
+<path fill="none" stroke="black" d="M414.77,-431.7C414.77,-424.41 414.77,-415.73 414.77,-407.54" style=""/>
+<polygon fill="black" stroke="black" points="418.27,-407.62 414.77,-397.62 411.27,-407.62 418.27,-407.62" style=""/>
+</g>
+<!-- PackableReentrancyGuard -->
+<g id="node23" class="node" pointer-events="visible" data-name="PackableReentrancyGuard">
+
+<ellipse fill="none" stroke="black" cx="708.77" cy="-378" rx="113.99" ry="18" style=""/>
+<text text-anchor="middle" x="708.77" y="-373.8" font-family="Times,serif" font-size="14.00" style="">PackableReentrancyGuard</text>
+</g>
+<!-- TransferSelectorNFT&#45;&gt;PackableReentrancyGuard -->
+<g id="edge14" class="edge" data-name="TransferSelectorNFT-&gt;PackableReentrancyGuard">
+
+<path fill="none" stroke="black" d="M472.16,-435.34C519.08,-424.17 585.69,-408.31 636.29,-396.26" style=""/>
+<polygon fill="black" stroke="black" points="637.09,-399.67 646.01,-393.94 635.47,-392.86 637.09,-399.67" style=""/>
+</g>
+<!-- CurrencyManager -->
+<g id="node7" class="node" pointer-events="visible" data-name="CurrencyManager">
+
+<ellipse fill="none" stroke="black" cx="330.77" cy="-234" rx="81.07" ry="18" style=""/>
+<text text-anchor="middle" x="330.77" y="-229.8" font-family="Times,serif" font-size="14.00" style="">CurrencyManager</text>
+</g>
+<!-- ICurrencyManager -->
+<g id="node8" class="node" pointer-events="visible" data-name="ICurrencyManager">
+
+<ellipse fill="none" stroke="black" cx="240.77" cy="-162" rx="84.5" ry="18" style=""/>
+<text text-anchor="middle" x="240.77" y="-157.8" font-family="Times,serif" font-size="14.00" style="">ICurrencyManager</text>
+</g>
+<!-- CurrencyManager&#45;&gt;ICurrencyManager -->
+<g id="edge6" class="edge" data-name="CurrencyManager-&gt;ICurrencyManager">
+
+<path fill="none" stroke="black" d="M309.44,-216.41C297.98,-207.5 283.66,-196.36 271.06,-186.56" style=""/>
+<polygon fill="black" stroke="black" points="273.5,-184.02 263.46,-180.64 269.2,-189.54 273.5,-184.02" style=""/>
+</g>
+<!-- AffiliateManager -->
+<g id="node9" class="node" pointer-events="visible" data-name="AffiliateManager">
+
+<ellipse fill="none" stroke="black" cx="421.77" cy="-162" rx="78.13" ry="18" style=""/>
+<text text-anchor="middle" x="421.77" y="-157.8" font-family="Times,serif" font-size="14.00" style="">AffiliateManager</text>
+</g>
+<!-- CurrencyManager&#45;&gt;AffiliateManager -->
+<g id="edge7" class="edge" data-name="CurrencyManager-&gt;AffiliateManager">
+
+<path fill="none" stroke="black" d="M352.34,-216.41C363.93,-207.5 378.41,-196.36 391.15,-186.56" style=""/>
+<polygon fill="black" stroke="black" points="393.06,-189.51 398.85,-180.64 388.79,-183.96 393.06,-189.51" style=""/>
+</g>
+<!-- IAffiliateManager -->
+<g id="node10" class="node" pointer-events="visible" data-name="IAffiliateManager">
+
+<ellipse fill="none" stroke="black" cx="329.77" cy="-90" rx="81.06" ry="18" style=""/>
+<text text-anchor="middle" x="329.77" y="-85.8" font-family="Times,serif" font-size="14.00" style="">IAffiliateManager</text>
+</g>
+<!-- AffiliateManager&#45;&gt;IAffiliateManager -->
+<g id="edge8" class="edge" data-name="AffiliateManager-&gt;IAffiliateManager">
+
+<path fill="none" stroke="black" d="M399.97,-144.41C388.26,-135.5 373.61,-124.36 360.74,-114.56" style=""/>
+<polygon fill="black" stroke="black" points="363.02,-111.9 352.94,-108.63 358.78,-117.47 363.02,-111.9" style=""/>
+</g>
+<!-- OwnableTwoSteps -->
+<g id="node11" class="node" pointer-events="visible" data-name="OwnableTwoSteps">
+
+<ellipse fill="none" stroke="black" cx="513.77" cy="-90" rx="84.55" ry="18" style=""/>
+<text text-anchor="middle" x="513.77" y="-85.8" font-family="Times,serif" font-size="14.00" style="">OwnableTwoSteps</text>
+</g>
+<!-- AffiliateManager&#45;&gt;OwnableTwoSteps -->
+<g id="edge9" class="edge" data-name="AffiliateManager-&gt;OwnableTwoSteps">
+
+<path fill="none" stroke="black" d="M443.58,-144.41C455.29,-135.5 469.94,-124.36 482.81,-114.56" style=""/>
+<polygon fill="black" stroke="black" points="484.77,-117.47 490.6,-108.63 480.53,-111.9 484.77,-117.47" style=""/>
+</g>
+<!-- IOwnableTwoSteps -->
+<g id="node12" class="node" pointer-events="visible" data-name="IOwnableTwoSteps">
+
+<ellipse fill="none" stroke="black" cx="513.77" cy="-18" rx="87.98" ry="18" style=""/>
+<text text-anchor="middle" x="513.77" y="-13.8" font-family="Times,serif" font-size="14.00" style="">IOwnableTwoSteps</text>
+</g>
+<!-- OwnableTwoSteps&#45;&gt;IOwnableTwoSteps -->
+<g id="edge10" class="edge" data-name="OwnableTwoSteps-&gt;IOwnableTwoSteps">
+
+<path fill="none" stroke="black" d="M513.77,-71.7C513.77,-64.41 513.77,-55.73 513.77,-47.54" style=""/>
+<polygon fill="black" stroke="black" points="517.27,-47.62 513.77,-37.62 510.27,-47.62 517.27,-47.62" style=""/>
+</g>
+<!-- NonceManager -->
+<g id="node13" class="node" pointer-events="visible" data-name="NonceManager">
+
+<ellipse fill="none" stroke="black" cx="73.77" cy="-306" rx="70.62" ry="18" style=""/>
+<text text-anchor="middle" x="73.77" y="-301.8" font-family="Times,serif" font-size="14.00" style="">NonceManager</text>
+</g>
+<!-- INonceManager -->
+<g id="node14" class="node" pointer-events="visible" data-name="INonceManager">
+
+<ellipse fill="none" stroke="black" cx="73.77" cy="-234" rx="73.55" ry="18" style=""/>
+<text text-anchor="middle" x="73.77" y="-229.8" font-family="Times,serif" font-size="14.00" style="">INonceManager</text>
+</g>
+<!-- NonceManager&#45;&gt;INonceManager -->
+<g id="edge11" class="edge" data-name="NonceManager-&gt;INonceManager">
+
+<path fill="none" stroke="black" d="M73.77,-287.7C73.77,-280.41 73.77,-271.73 73.77,-263.54" style=""/>
+<polygon fill="black" stroke="black" points="77.27,-263.62 73.77,-253.62 70.27,-263.62 77.27,-263.62" style=""/>
+</g>
+<!-- SignatureChecker -->
+<g id="node15" class="node" pointer-events="visible" data-name="SignatureChecker">
+
+<ellipse fill="none" stroke="black" cx="906.77" cy="-522" rx="80.44" ry="18" style=""/>
+<text text-anchor="middle" x="906.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">SignatureChecker</text>
+</g>
+<!-- IERC1271 -->
+<g id="node16" class="node" pointer-events="visible" data-name="IERC1271">
+
+<ellipse fill="none" stroke="black" cx="1057.77" cy="-522" rx="52.2" ry="18" style=""/>
+<text text-anchor="middle" x="1057.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">IERC1271</text>
+</g>
+<!-- IWETH -->
+<g id="node17" class="node" pointer-events="visible" data-name="IWETH">
+
+<ellipse fill="none" stroke="black" cx="1169.77" cy="-522" rx="42.28" ry="18" style=""/>
+<text text-anchor="middle" x="1169.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">IWETH</text>
+</g>
+<!-- IERC20 -->
+<g id="node18" class="node" pointer-events="visible" data-name="IERC20">
+
+<ellipse fill="none" stroke="black" cx="1272.77" cy="-522" rx="42.88" ry="18" style=""/>
+<text text-anchor="middle" x="1272.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">IERC20</text>
+</g>
+<!-- MerkleProofCalldata -->
+<g id="node19" class="node" pointer-events="visible" data-name="MerkleProofCalldata">
+
+<ellipse fill="none" stroke="black" cx="1425.77" cy="-522" rx="92.62" ry="18" style=""/>
+<text text-anchor="middle" x="1425.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">MerkleProofCalldata</text>
+</g>
+<!-- OrderStructs -->
+<g id="node20" class="node" pointer-events="visible" data-name="OrderStructs">
+
+<ellipse fill="none" stroke="black" cx="1596.77" cy="-522" rx="60.26" ry="18" style=""/>
+<text text-anchor="middle" x="1596.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">OrderStructs</text>
+</g>
+<!-- ExecutionManager&#45;&gt;NonceManager -->
+<g id="edge16" class="edge" data-name="ExecutionManager-&gt;NonceManager">
+
+<path fill="none" stroke="black" d="M354.62,-364.94C301.7,-354.3 222.58,-338.3 153.77,-324 148.57,-322.92 143.18,-321.79 137.77,-320.65" style=""/>
+<polygon fill="black" stroke="black" points="138.68,-317.27 128.17,-318.63 137.23,-324.12 138.68,-317.27" style=""/>
+</g>
+<!-- InheritedStrategy -->
+<g id="node24" class="node" pointer-events="visible" data-name="InheritedStrategy">
+
+<ellipse fill="none" stroke="black" cx="240.77" cy="-306" rx="78.15" ry="18" style=""/>
+<text text-anchor="middle" x="240.77" y="-301.8" font-family="Times,serif" font-size="14.00" style="">InheritedStrategy</text>
+</g>
+<!-- ExecutionManager&#45;&gt;InheritedStrategy -->
+<g id="edge15" class="edge" data-name="ExecutionManager-&gt;InheritedStrategy">
+
+<path fill="none" stroke="black" d="M376.59,-361.64C350.89,-351.3 316.79,-337.58 289.18,-326.48" style=""/>
+<polygon fill="black" stroke="black" points="290.56,-323.26 279.97,-322.77 287.95,-329.75 290.56,-323.26" style=""/>
+</g>
+<!-- StrategyManager -->
+<g id="node25" class="node" pointer-events="visible" data-name="StrategyManager">
+
+<ellipse fill="none" stroke="black" cx="414.77" cy="-306" rx="77.57" ry="18" style=""/>
+<text text-anchor="middle" x="414.77" y="-301.8" font-family="Times,serif" font-size="14.00" style="">StrategyManager</text>
+</g>
+<!-- ExecutionManager&#45;&gt;StrategyManager -->
+<g id="edge17" class="edge" data-name="ExecutionManager-&gt;StrategyManager">
+
+<path fill="none" stroke="black" d="M414.77,-359.7C414.77,-352.41 414.77,-343.73 414.77,-335.54" style=""/>
+<polygon fill="black" stroke="black" points="418.27,-335.62 414.77,-325.62 411.27,-335.62 418.27,-335.62" style=""/>
+</g>
+<!-- IExecutionManager -->
+<g id="node26" class="node" pointer-events="visible" data-name="IExecutionManager">
+
+<ellipse fill="none" stroke="black" cx="597.77" cy="-306" rx="87.94" ry="18" style=""/>
+<text text-anchor="middle" x="597.77" y="-301.8" font-family="Times,serif" font-size="14.00" style="">IExecutionManager</text>
+</g>
+<!-- ExecutionManager&#45;&gt;IExecutionManager -->
+<g id="edge18" class="edge" data-name="ExecutionManager-&gt;IExecutionManager">
+
+<path fill="none" stroke="black" d="M454.48,-361.81C481.63,-351.43 517.85,-337.57 547.09,-326.39" style=""/>
+<polygon fill="black" stroke="black" points="548.01,-329.78 556.1,-322.94 545.51,-323.25 548.01,-329.78" style=""/>
+</g>
+<!-- IReentrancyGuard -->
+<g id="node31" class="node" pointer-events="visible" data-name="IReentrancyGuard">
+
+<ellipse fill="none" stroke="black" cx="785.77" cy="-306" rx="82.21" ry="18" style=""/>
+<text text-anchor="middle" x="785.77" y="-301.8" font-family="Times,serif" font-size="14.00" style="">IReentrancyGuard</text>
+</g>
+<!-- PackableReentrancyGuard&#45;&gt;IReentrancyGuard -->
+<g id="edge21" class="edge" data-name="PackableReentrancyGuard-&gt;IReentrancyGuard">
+
+<path fill="none" stroke="black" d="M727.41,-360.05C736.87,-351.46 748.53,-340.86 758.94,-331.4" style=""/>
+<polygon fill="black" stroke="black" points="761.14,-334.12 766.19,-324.81 756.43,-328.94 761.14,-334.12" style=""/>
+</g>
+<!-- StrategyManager&#45;&gt;CurrencyManager -->
+<g id="edge20" class="edge" data-name="StrategyManager-&gt;CurrencyManager">
+
+<path fill="none" stroke="black" d="M394.87,-288.41C384.27,-279.58 371.06,-268.57 359.39,-258.84" style=""/>
+<polygon fill="black" stroke="black" points="361.91,-256.39 351.99,-252.68 357.43,-261.77 361.91,-256.39" style=""/>
+</g>
+<!-- IStrategyManager -->
+<g id="node29" class="node" pointer-events="visible" data-name="IStrategyManager">
+
+<ellipse fill="none" stroke="black" cx="510.77" cy="-234" rx="80.51" ry="18" style=""/>
+<text text-anchor="middle" x="510.77" y="-229.8" font-family="Times,serif" font-size="14.00" style="">IStrategyManager</text>
+</g>
+<!-- StrategyManager&#45;&gt;IStrategyManager -->
+<g id="edge19" class="edge" data-name="StrategyManager-&gt;IStrategyManager">
+
+<path fill="none" stroke="black" d="M437.52,-288.41C449.87,-279.41 465.33,-268.14 478.86,-258.27" style=""/>
+<polygon fill="black" stroke="black" points="480.61,-261.32 486.63,-252.6 476.49,-255.67 480.61,-261.32" style=""/>
+</g>
+<!-- ICreatorFeeManager -->
+<g id="node27" class="node" pointer-events="visible" data-name="ICreatorFeeManager">
+
+<ellipse fill="none" stroke="black" cx="1766.77" cy="-522" rx="91.44" ry="18" style=""/>
+<text text-anchor="middle" x="1766.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">ICreatorFeeManager</text>
+</g>
+<!-- IRoyaltyFeeRegistry -->
+<g id="node28" class="node" pointer-events="visible" data-name="IRoyaltyFeeRegistry">
+
+<ellipse fill="none" stroke="black" cx="1967.77" cy="-522" rx="91.5" ry="18" style=""/>
+<text text-anchor="middle" x="1967.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">IRoyaltyFeeRegistry</text>
+</g>
+<!-- IBaseStrategy -->
+<g id="node30" class="node" pointer-events="visible" data-name="IBaseStrategy">
+
+<ellipse fill="none" stroke="black" cx="2142.77" cy="-522" rx="65.41" ry="18" style=""/>
+<text text-anchor="middle" x="2142.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">IBaseStrategy</text>
+</g>
+</g>
+</svg>

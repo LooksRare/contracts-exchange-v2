@@ -618,7 +618,9 @@ contract OrderValidatorV2A {
         }
 
         // 2. Verify if collection is approved by transfer manager
-        (success, data) = collection.staticcall(abi.encodeCall(IERC721.isApprovedForAll, (user, transferManager)));
+        (success, data) = collection.staticcall(
+            abi.encodeCall(IERC721.isApprovedForAll, (user, address(transferManager)))
+        );
 
         bool isApprovedAll;
         if (success) {

@@ -602,7 +602,7 @@ contract OrderValidatorV2A {
         bytes memory data;
 
         for (uint256 i; i < length; ) {
-            (success, data) = collection.staticcall(abi.encodeWithSelector(IERC721.ownerOf.selector, itemIds[i]));
+            (success, data) = collection.staticcall(abi.encodeCall(IERC721.ownerOf, (itemIds[i])));
 
             if (!success) {
                 return ERC721_ITEM_ID_DOES_NOT_EXIST;
@@ -618,9 +618,7 @@ contract OrderValidatorV2A {
         }
 
         // 2. Verify if collection is approved by transfer manager
-        (success, data) = collection.staticcall(
-            abi.encodeWithSelector(IERC721.isApprovedForAll.selector, user, transferManager)
-        );
+        (success, data) = collection.staticcall(abi.encodeCall(IERC721.isApprovedForAll, (user, transferManager)));
 
         bool isApprovedAll;
         if (success) {
@@ -630,9 +628,7 @@ contract OrderValidatorV2A {
         if (!isApprovedAll) {
             for (uint256 i; i < length; ) {
                 // 3. If collection is not approved by transfer manager, try to see if it is approved individually
-                (success, data) = collection.staticcall(
-                    abi.encodeWithSelector(IERC721.getApproved.selector, itemIds[i])
-                );
+                (success, data) = collection.staticcall(abi.encodeCall(IERC721.getApproved, (itemIds[i])));
 
                 address approvedAddress;
 
@@ -673,7 +669,7 @@ contract OrderValidatorV2A {
 
         // 1.1 Use balanceOfBatch
         (bool success, bytes memory data) = collection.staticcall(
-            abi.encodeWithSelector(IERC1155.balanceOfBatch.selector, users, itemIds)
+            abi.encodeCall(IERC1155.balanceOfBatch, (users, itemIds))
         );
 
         if (success) {
@@ -686,9 +682,7 @@ contract OrderValidatorV2A {
         } else {
             // 1.2 If the balanceOfBatch doesn't work, use loop with balanceOf function
             for (uint256 i; i < length; ) {
-                (success, data) = collection.staticcall(
-                    abi.encodeWithSelector(IERC1155.balanceOf.selector, user, itemIds[i])
-                );
+                (success, data) = collection.staticcall(abi.encodeCall(IERC1155.balanceOf, (user, itemIds[i])));
 
                 if (!success) {
                     return ERC1155_BALANCE_OF_DOES_NOT_EXIST;
@@ -706,7 +700,7 @@ contract OrderValidatorV2A {
 
         // 2. Verify if collection is approved by transfer manager
         (success, data) = collection.staticcall(
-            abi.encodeWithSelector(IERC1155.isApprovedForAll.selector, user, address(transferManager))
+            abi.encodeCall(IERC1155.isApprovedForAll, (user, address(transferManager)))
         );
 
         if (!success) {
@@ -784,7 +778,7 @@ contract OrderValidatorV2A {
         uint256[] memory itemIds
     ) internal view returns (uint256 validationCode) {
         (bool status, bytes memory data) = address(creatorFeeManager).staticcall(
-            abi.encodeWithSelector(ICreatorFeeManager.viewCreatorFeeInfo.selector, collection, price, itemIds)
+            abi.encodeCall(ICreatorFeeManager.viewCreatorFeeInfo, (collection, price, itemIds))
         );
 
         if (!status) {
@@ -875,7 +869,7 @@ contract OrderValidatorV2A {
         } else {
             // Logic if ERC1271
             (bool success, bytes memory data) = signer.staticcall(
-                abi.encodeWithSelector(IERC1271.isValidSignature.selector, signer)
+                abi.encodeCall(IERC1271.isValidSignature, (hash, signature))
             );
 
             if (!success) {

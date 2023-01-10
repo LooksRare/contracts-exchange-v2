@@ -13,6 +13,9 @@ import {InheritedStrategy} from "./InheritedStrategy.sol";
 import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
+// Assembly
+import {OutsideOfTimeRange_error_selector, OutsideOfTimeRange_error_length, Error_selector_offset} from "./ExecutionManagerConstants.sol";
+
 /**
  * @title ExecutionManager
  * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain
@@ -286,8 +289,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         // if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
         assembly {
             if or(gt(startTime, timestamp()), lt(endTime, timestamp())) {
-                mstore(0x00, 0x7476320f)
-                revert(0x1c, 0x04)
+                mstore(0x00, OutsideOfTimeRange_error_selector)
+                revert(Error_selector_offset, OutsideOfTimeRange_error_length)
             }
         }
     }

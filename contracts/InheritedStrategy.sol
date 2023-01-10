@@ -7,6 +7,9 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 // Shared errors
 import {OrderInvalid} from "./interfaces/SharedErrors.sol";
 
+// Assembly
+import {OrderInvalid_error_selector, OrderInvalid_error_length, Error_selector_offset, OneWord} from "./executionStrategies/StrategyConstants.sol";
+
 /**
  * @title InheritedStrategy
  * @notice This contract handles the verification of parameters for standard transactions.
@@ -65,62 +68,92 @@ contract InheritedStrategy {
         uint256 price,
         uint256 counterpartyPrice
     ) private pure {
-        uint256 amountsLength = amounts.length;
+        assembly {
+            let end
+            {
+                /*
+                 * @dev If A == B, then A XOR B == 0. So if all 4 lengths are equal, it should be 0 | 0 | 0 == 0
+                 *
+                 * if (
+                 *     amountsLength == 0 ||
+                 *     price != counterpartyPrice ||
+                 *     ((amountsLength ^ itemIdsLength) |
+                 *         (amountsLength ^ counterpartyAmountsLength) |
+                 *         (amountsLength ^ counterpartyItemIdsLength)) !=
+                 *     0
+                 * ) {
+                 *     revert OrderInvalid();
+                 * }
+                 */
+                let amountsLength := amounts.length
+                let itemIdsLength := itemIds.length
+                let counterpartyAmountsLength := counterpartyAmounts.length
+                let counterpartyItemIdsLength := counterpartyItemIds.length
 
-        {
-            uint256 counterpartyAmountsLength = counterpartyAmounts.length;
-            uint256 itemIdsLength = itemIds.length;
-            uint256 counterpartyItemIdsLength = counterpartyItemIds.length;
-
-            // if (
-            //     amountsLength == 0 ||
-            //     // If A == B, then A XOR B == 0. So if all 4 are equal, it should be 0 | 0 | 0 == 0
-            //     ((amountsLength ^ itemIdsLength) |
-            //         (counterpartyItemIdsLength ^ counterpartyAmountsLength) |
-            //         (amountsLength ^ counterpartyItemIdsLength)) !=
-            //     0 ||
-            //     price != counterpartyPrice
-            // ) {
-            //     revert OrderInvalid();
-            // }
-            assembly {
                 if or(
-                    or(iszero(amountsLength), iszero(eq(price, counterpartyPrice))),
-                    gt(
-                        or(
-                            or(
-                                xor(amountsLength, itemIdsLength),
-                                xor(counterpartyItemIdsLength, counterpartyAmountsLength)
-                            ),
-                            xor(amountsLength, counterpartyItemIdsLength)
-                        ),
-                        0
+                    or(iszero(amountsLength), xor(price, counterpartyPrice)),
+                    or(
+                        or(xor(amountsLength, itemIdsLength), xor(amountsLength, counterpartyAmountsLength)),
+                        xor(amountsLength, counterpartyItemIdsLength)
                     )
                 ) {
-                    mstore(0x00, 0x2e0c0f71)
-                    revert(0x1c, 0x04)
+                    mstore(0x00, OrderInvalid_error_selector)
+                    revert(Error_selector_offset, OrderInvalid_error_length)
                 }
-            }
-        }
 
-        for (uint256 i; i < amountsLength; ) {
-            uint256 amount = amounts[i];
-
-            if ((amount != counterpartyAmounts[i]) || (itemIds[i] != counterpartyItemIds[i])) {
-                revert OrderInvalid();
+                /**
+                 * @dev Shifting left 5 times is equivalent to amountsLength * 32 bytes
+                 */
+                end := shl(5, amountsLength)
             }
 
-            if (amount != 1) {
-                if (amount == 0) {
-                    revert OrderInvalid();
-                }
-                if (assetType == 0) {
-                    revert OrderInvalid();
-                }
-            }
+            let _assetType := assetType
+            let amountsOffset := amounts.offset
+            let itemIdsOffset := itemIds.offset
+            let counterpartyAmountsOffset := counterpartyAmounts.offset
+            let counterpartyItemIdsOffset := counterpartyItemIds.offset
 
-            unchecked {
-                ++i;
+            for {
+
+            } end {
+
+            } {
+                /**
+                 * @dev Starting from the end of the array minus 32 bytes to load the last item,
+                 *      ending with `end` equal to 0 to load the first item
+                 */
+                end := sub(end, OneWord)
+
+                let amount := calldataload(add(amountsOffset, end))
+                let invalidOrder
+
+                {
+                    let itemId := calldataload(add(itemIdsOffset, end))
+                    let counterpartyAmount := calldataload(add(counterpartyAmountsOffset, end))
+                    let counterpartyItemId := calldataload(add(counterpartyItemIdsOffset, end))
+
+                    invalidOrder := or(xor(amount, counterpartyAmount), xor(itemId, counterpartyItemId))
+                }
+
+                /**
+                 * @dev If amount or _assetType is 0, the multiplication result will be 0
+                 *
+                 * if (amount != 1) {
+                 *   if (amount == 0) {
+                 *      revert OrderInvalid();
+                 *   }
+                 *
+                 *   if (_assetType == 0) {
+                 *      revert OrderInvalid();
+                 *   }
+                 * }
+                 */
+                invalidOrder := or(invalidOrder, and(xor(amount, 1), iszero(mul(amount, _assetType))))
+
+                if invalidOrder {
+                    mstore(0x00, OrderInvalid_error_selector)
+                    revert(Error_selector_offset, OrderInvalid_error_length)
+                }
             }
         }
     }

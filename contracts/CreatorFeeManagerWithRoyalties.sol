@@ -54,7 +54,7 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
 
                 for (uint256 i; i < length; ) {
                     (bool status, bytes memory data) = collection.staticcall(
-                        abi.encodeWithSelector(IERC2981.royaltyInfo.selector, itemIds[i], price)
+                        abi.encodeCall(IERC2981.royaltyInfo, (itemIds[i], price))
                     );
 
                     if (status) {

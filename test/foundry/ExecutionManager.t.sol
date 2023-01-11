@@ -95,6 +95,29 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testCannotValidateOrderIfTooLateToExecute(uint256 delta) public asPrankedUser(takerUser) {
+        // This logic is at least valid for the next 1,000 years
+        vm.assume(delta > 0 && delta < ONE_THOUSAND_YEARS);
+        // Change timestamp to avoid underflow issues
+        vm.warp(BEGINNING_OF_2023);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        makerBid.startTime = block.timestamp - 1;
+        makerBid.endTime = block.timestamp;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.warp(block.timestamp);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
+
+        vm.warp(block.timestamp + delta);
+        vm.expectRevert(OutsideOfTimeRange.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {
         // Change timestamp to avoid underflow issues
         vm.warp(12_000_000);

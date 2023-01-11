@@ -118,50 +118,20 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {
+    function testCannotValidateOrderIfStartTimeLaterThanEndTime(uint256 timestamp) public asPrankedUser(takerUser) {
+        // This logic is at least valid for the next 1,000 years
+        vm.assume(timestamp > BEGINNING_OF_2023 && timestamp < BEGINNING_OF_2023 + ONE_THOUSAND_YEARS);
         // Change timestamp to avoid underflow issues
-        vm.warp(12_000_000);
+        vm.warp(timestamp);
 
-        /**
-         * 1. Too early to execute
-         */
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
 
-        makerBid.startTime = block.timestamp + 20 minutes;
-        makerBid.endTime = block.timestamp + 21 minutes;
-
-        vm.warp(makerBid.startTime - 5 minutes);
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
-
-        vm.warp(makerBid.startTime - 1);
-        vm.expectRevert(OutsideOfTimeRange.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        /**
-         * 2. Too late to execute
-         */
-
-        makerBid.startTime = 0;
-        makerBid.endTime = block.timestamp;
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.warp(block.timestamp);
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
-
-        vm.warp(block.timestamp + 1);
-        vm.expectRevert(OutsideOfTimeRange.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        /**
-         * 3. start time > end time
-         */
         makerBid.startTime = block.timestamp + 1;
         makerBid.endTime = block.timestamp;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);
 

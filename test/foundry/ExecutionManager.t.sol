@@ -134,6 +134,20 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testCannotValidateOrderIfMakerBidItemIdsIsEmpty() public {
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        uint256[] memory itemIds = new uint256[](0);
+        makerBid.itemIds = itemIds;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
         // (For takerBid tests)
         vm.deal(takerUser, 100 ether);

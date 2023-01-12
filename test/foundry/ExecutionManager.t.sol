@@ -32,8 +32,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateCreatorFeeManager(address(1));
     }
 
-    function testUpdateMaxCreatorFeeBp() public asPrankedUser(_owner) {
-        uint16 newMaxCreatorFeeBp = uint16(2_500);
+    function testUpdateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+        vm.assume(newMaxCreatorFeeBp <= 2_500);
         vm.expectEmit(true, false, false, true);
         emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
         looksRareProtocol.updateMaxCreatorFeeBp(newMaxCreatorFeeBp);
@@ -45,9 +45,10 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_500));
     }
 
-    function testUpdateMaxCreatorFeeBpTooHigh() public asPrankedUser(_owner) {
+    function testUpdateMaxCreatorFeeBpTooHigh(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+        vm.assume(newMaxCreatorFeeBp > 2_500);
         vm.expectRevert(CreatorFeeBpTooHigh.selector);
-        looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_501));
+        looksRareProtocol.updateMaxCreatorFeeBp(newMaxCreatorFeeBp);
     }
 
     function testUpdateProtocolFeeRecipient() public asPrankedUser(_owner) {

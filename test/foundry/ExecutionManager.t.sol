@@ -67,50 +67,66 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
     }
 
-    function testCannotValidateOrderIfWrongTimestamps() public asPrankedUser(takerUser) {
+    function testCannotValidateOrderIfTooEarlyToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
+        // 300 because because it is deducted by 5 minutes + 1 second
+        vm.assume(timestamp > 300 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
-        vm.warp(12_000_000);
+        vm.warp(timestamp);
 
-        /**
-         * 1. Too early to execute
-         */
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
 
-        makerBid.startTime = block.timestamp + 20 minutes;
-        makerBid.endTime = block.timestamp + 21 minutes;
+        makerBid.startTime = block.timestamp;
+        makerBid.endTime = block.timestamp + 1 seconds;
 
+        // Maker bid is valid if its start time is within 5 minutes into the future
         vm.warp(makerBid.startTime - 5 minutes);
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
 
-        vm.warp(makerBid.startTime - 1);
+        // Maker bid is invalid if its start time is not within 5 minutes into the future
+        vm.warp(makerBid.startTime - 5 minutes - 1 seconds);
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
 
-        /**
-         * 2. Too late to execute
-         */
+    function testCannotValidateOrderIfTooLateToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
+        vm.assume(timestamp > 0 && timestamp < type(uint256).max);
+        // Change timestamp to avoid underflow issues
+        vm.warp(timestamp);
 
-        makerBid.startTime = 0;
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        makerBid.startTime = block.timestamp - 1 seconds;
         makerBid.endTime = block.timestamp;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.warp(block.timestamp);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
 
-        vm.warp(block.timestamp + 1);
+        vm.warp(block.timestamp + 1 seconds);
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
 
-        /**
-         * 3. start time > end time
-         */
-        makerBid.startTime = block.timestamp + 1;
+    function testCannotValidateOrderIfStartTimeLaterThanEndTime(uint256 timestamp) public asPrankedUser(takerUser) {
+        vm.assume(timestamp < type(uint256).max);
+        // Change timestamp to avoid underflow issues
+        vm.warp(timestamp);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        makerBid.startTime = block.timestamp + 1 seconds;
         makerBid.endTime = block.timestamp;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);
 

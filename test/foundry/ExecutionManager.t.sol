@@ -258,23 +258,22 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
-        // (For takerBid tests)
+    function testCannotValidateOrderIfMakerAskItemIdsLengthMismatch(
+        uint256 makerAskItemIdsLength
+    ) public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
+
+        vm.assume(makerAskItemIdsLength > 1 && makerAskItemIdsLength < 100_000);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
 
-        /**
-         * 7. STANDARD STRATEGY/MAKER ASK: maker itemIds' length is not equal to maker amounts' length
-         */
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
 
-        // Change itemIds array to make it equal to 2
-        itemIds = new uint256[](2);
+        uint256[] memory itemIds = new uint256[](makerAskItemIdsLength);
         makerAsk.itemIds = itemIds;
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
@@ -284,6 +283,15 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
         );
+    }
+
+    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
+        // (For takerBid tests)
+        vm.deal(takerUser, 100 ether);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
         /**
          * 8. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is not equal to length of taker
@@ -291,9 +299,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
 
         // Change itemIds array to make it equal to 2
-        itemIds = new uint256[](2);
+        uint256[] memory itemIds = new uint256[](2);
         takerBid.itemIds = itemIds;
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(

@@ -236,18 +236,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
-        // (For takerBid tests)
+    function testCannotValidateOrderIfMakerAskItemIdsIsEmpty() public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
-            address(mockERC721),
-            address(weth)
-        );
-
-        /**
-         * 6. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is equal to 0
-         */
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -264,6 +255,15 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
+        );
+    }
+
+    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
+        // (For takerBid tests)
+        vm.deal(takerUser, 100 ether);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
         );
 
         /**

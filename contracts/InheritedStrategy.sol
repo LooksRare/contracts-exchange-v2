@@ -121,6 +121,20 @@ contract InheritedStrategy {
                 /**
                  * @dev Starting from the end of the array minus 32 bytes to load the last item,
                  *      ending with `end` equal to 0 to load the first item
+                 *
+                 * uint256 end = amountsLength;
+                 *
+                 * for (uint256 i = end - 1; i >= 0; i--) {
+                 *   uint256 amount = amounts[i];
+                 *   uint256 itemId = itemIds[i];
+                 *
+                 *   uint256 counterpartyAmount = counterpartyAmounts[i];
+                 *   uint256 counterpartyItemId = counterpartyItemIds[i];
+                 *
+                 *   if (amount != counterpartyAmount || itemId != counterpartyItemId) {
+                 *      revert OrderInvalid();
+                 *   };
+                 * }
                  */
                 end := sub(end, OneWord)
 

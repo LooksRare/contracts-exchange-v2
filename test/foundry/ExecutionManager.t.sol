@@ -67,12 +67,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
     }
 
-    uint256 private constant ONE_THOUSAND_YEARS = 31_536_000_000 seconds;
-    uint256 private constant BEGINNING_OF_2023 = 1_672_531_200;
-
     function testCannotValidateOrderIfTooEarlyToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
-        // This logic is at least valid for the next 1,000 years
-        vm.assume(timestamp > BEGINNING_OF_2023 && timestamp < BEGINNING_OF_2023 + ONE_THOUSAND_YEARS);
+        // 300 because because it is deducted by 5 minutes + 1 second
+        vm.assume(timestamp > 300 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
 
@@ -82,7 +79,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         makerBid.startTime = block.timestamp;
-        makerBid.endTime = block.timestamp + 1;
+        makerBid.endTime = block.timestamp + 1 seconds;
 
         // Maker bid is valid if its start time is within 5 minutes into the future
         vm.warp(makerBid.startTime - 5 minutes);
@@ -90,14 +87,13 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
 
         // Maker bid is invalid if its start time is not within 5 minutes into the future
-        vm.warp(makerBid.startTime - 5 minutes - 1);
+        vm.warp(makerBid.startTime - 5 minutes - 1 seconds);
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testCannotValidateOrderIfTooLateToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
-        // This logic is at least valid for the next 1,000 years
-        vm.assume(timestamp > BEGINNING_OF_2023 && timestamp < BEGINNING_OF_2023 + ONE_THOUSAND_YEARS);
+        vm.assume(timestamp > 0 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
 
@@ -106,21 +102,20 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(weth)
         );
 
-        makerBid.startTime = block.timestamp - 1;
+        makerBid.startTime = block.timestamp - 1 seconds;
         makerBid.endTime = block.timestamp;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.warp(block.timestamp);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
 
-        vm.warp(block.timestamp + 1);
+        vm.warp(block.timestamp + 1 seconds);
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testCannotValidateOrderIfStartTimeLaterThanEndTime(uint256 timestamp) public asPrankedUser(takerUser) {
-        // This logic is at least valid for the next 1,000 years
-        vm.assume(timestamp > BEGINNING_OF_2023 && timestamp < BEGINNING_OF_2023 + ONE_THOUSAND_YEARS);
+        vm.assume(timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
 
@@ -129,7 +124,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(weth)
         );
 
-        makerBid.startTime = block.timestamp + 1;
+        makerBid.startTime = block.timestamp + 1 seconds;
         makerBid.endTime = block.timestamp;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 

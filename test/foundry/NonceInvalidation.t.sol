@@ -18,8 +18,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order if subset nonce is used
      */
-    function testCannotExecuteOrderIfSubsetNonceIsUsed() public {
-        uint256 subsetNonce = 3;
+    function testCannotExecuteOrderIfSubsetNonceIsUsed(uint256 subsetNonce) public {
         uint256 itemId = 420;
 
         // Mint asset
@@ -79,8 +78,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order if maker is at a different global ask nonce than signed
      */
-    function testCannotExecuteOrderIfWrongUserGlobalAskNonce() public {
-        uint256 userGlobalAskNonce = 1;
+    function testCannotExecuteOrderIfWrongUserGlobalAskNonce(uint256 userGlobalAskNonce) public {
+        vm.assume(userGlobalAskNonce > 0);
         uint256 itemId = 420;
 
         // Mint asset
@@ -137,8 +136,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order if maker is at a different global bid nonce than signed
      */
-    function testCannotExecuteOrderIfWrongUserGlobalBidNonce() public {
-        uint256 userGlobalBidNonce = 1;
+    function testCannotExecuteOrderIfWrongUserGlobalBidNonce(uint256 userGlobalBidNonce) public {
+        vm.assume(userGlobalBidNonce > 0);
         uint256 itemId = 420;
 
         // Prepare the order hash
@@ -241,7 +240,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order sharing the same order nonce as another that is being partially filled
      */
-    function testCannotExecuteAnotherOrderAtNonceIfExecutionIsInProgress() public {
+    function testCannotExecuteAnotherOrderAtNonceIfExecutionIsInProgress(uint256 orderNonce) public {
         _setUpUsers();
 
         // 0. Add the new strategy
@@ -263,7 +262,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         // 1. Maker signs a message and execute a partial fill on it
         uint256 amountsToFill = 4;
-        uint256 orderNonce = 420;
 
         uint256[] memory itemIds = new uint256[](0);
         uint256[] memory amounts = new uint256[](1);
@@ -357,31 +355,29 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         }
     }
 
-    function testCancelOrderNonces() public asPrankedUser(makerUser) {
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), bytes32(0));
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), bytes32(0));
+    function testCancelOrderNonces(uint256 nonceOne, uint256 nonceTwo) public asPrankedUser(makerUser) {
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, nonceOne), bytes32(0));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, nonceTwo), bytes32(0));
 
         uint256[] memory orderNonces = new uint256[](2);
-        orderNonces[0] = 69;
-        orderNonces[1] = 420;
+        orderNonces[0] = nonceOne;
+        orderNonces[1] = nonceTwo;
         vm.expectEmit(true, false, false, true);
         emit OrderNoncesCancelled(makerUser, orderNonces);
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 69), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, 420), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, nonceOne), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, nonceTwo), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
     /**
      * Cannot execute an order if its nonce has been cancelled
      */
-    function testCannotExecuteAnOrderWhoseNonceIsCancelled() public {
+    function testCannotExecuteAnOrderWhoseNonceIsCancelled(uint256 orderNonce) public {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
         uint256 itemId = 0;
-
-        uint256 orderNonce = 69;
 
         uint256[] memory orderNonces = new uint256[](1);
         orderNonces[0] = orderNonce;

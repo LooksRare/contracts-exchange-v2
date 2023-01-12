@@ -285,21 +285,20 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
-        // (For takerBid tests)
+    function testCannotValidateOrderIfTakerBidItemIdsLengthMismatch(
+        uint256 takerBidItemIdsLength
+    ) public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
+
+        vm.assume(takerBidItemIdsLength > 1 && takerBidItemIdsLength < 100_000);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
 
-        /**
-         * 8. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is not equal to length of taker
-         */
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
 
-        // Change itemIds array to make it equal to 2
-        uint256[] memory itemIds = new uint256[](2);
+        uint256[] memory itemIds = new uint256[](takerBidItemIdsLength);
         takerBid.itemIds = itemIds;
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -310,6 +309,15 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             signature,
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
+        );
+    }
+
+    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
+        // (For takerBid tests)
+        vm.deal(takerUser, 100 ether);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
         );
 
         /**
@@ -322,7 +330,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         amounts[0] = 1;
         amounts[1] = 1;
         takerBid.amounts = amounts;
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(

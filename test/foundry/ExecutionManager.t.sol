@@ -148,6 +148,46 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testCannotValidateOrderIfMakerBidItemIdsLengthMismatch(
+        uint256 makerBidItemIdsLength
+    ) public asPrankedUser(takerUser) {
+        vm.assume(makerBidItemIdsLength > 1 && makerBidItemIdsLength < 100_000);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        uint256[] memory itemIds = new uint256[](makerBidItemIdsLength);
+        makerBid.itemIds = itemIds;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testCannotValidateOrderIfTakerAskItemIdsLengthMismatch(
+        uint256 takerAskItemIdsLength
+    ) public asPrankedUser(takerUser) {
+        vm.assume(takerAskItemIdsLength > 1 && takerAskItemIdsLength < 100_000);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        uint256[] memory itemIds = new uint256[](takerAskItemIdsLength);
+        takerAsk.itemIds = itemIds;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
         // (For takerBid tests)
         vm.deal(takerUser, 100 ether);
@@ -156,32 +196,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(mockERC721),
             address(weth)
         );
-
-        /**
-         * 2. STANDARD STRATEGY/MAKER BID: maker itemIds' length is not equal to maker amounts' length
-         */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
-
-        // Change itemIds array for maker to make its length equal to 2
-        uint256[] memory itemIds = new uint256[](2);
-        makerBid.itemIds = itemIds;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        /**
-         * 3. STANDARD STRATEGY/MAKER BID: itemIds' length of maker is not equal to length of taker
-         */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
-
-        // Change itemIds array for taker to make its length equal to 2
-        itemIds = new uint256[](2);
-        takerAsk.itemIds = itemIds;
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         /**
          * 4. STANDARD STRATEGY/MAKER BID: amounts' length of maker is not equal to length of taker
@@ -193,7 +207,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         amounts[0] = 1;
         amounts[1] = 1;
         takerAsk.amounts = amounts;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -224,7 +238,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         // Change maker itemIds array to make its length equal to 0
-        itemIds = new uint256[](0);
+        uint256[] memory itemIds = new uint256[](0);
         makerAsk.itemIds = itemIds;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 

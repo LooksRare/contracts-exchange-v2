@@ -188,6 +188,29 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testCannotValidateOrderIfTakerAskAmountsLengthMismatch(
+        uint256 takerAskAmountsLength
+    ) public asPrankedUser(takerUser) {
+        vm.assume(takerAskAmountsLength > 1 && takerAskAmountsLength < 100_000);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+
+        uint256[] memory amounts = new uint256[](takerAskAmountsLength);
+        for (uint i; i < takerAskAmountsLength; i++) {
+            amounts[i] = 1;
+        }
+        takerAsk.amounts = amounts;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
         // (For takerBid tests)
         vm.deal(takerUser, 100 ether);
@@ -198,25 +221,10 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
 
         /**
-         * 4. STANDARD STRATEGY/MAKER BID: amounts' length of maker is not equal to length of taker
-         */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
-
-        // Change amounts array for taker to make its length equal to 2
-        uint256[] memory amounts = new uint256[](2);
-        amounts[0] = 1;
-        amounts[1] = 1;
-        takerAsk.amounts = amounts;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        /**
          * 5. STANDARD STRATEGY/MAKER BID: maxPrice of maker is not equal to minPrice of taker
          */
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Change price of takerAsk to be higher than makerAsk price
         takerAsk.minPrice = makerBid.maxPrice + 1;
@@ -295,7 +303,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
         // Change amounts array' length to make it equal to 2
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
-        amounts = new uint256[](2);
+        uint256[] memory amounts = new uint256[](2);
         amounts[0] = 1;
         amounts[1] = 1;
         takerBid.amounts = amounts;

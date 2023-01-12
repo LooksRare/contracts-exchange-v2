@@ -312,23 +312,23 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
-        // (For takerBid tests)
+    function testCannotValidateOrderIfTakerBidAmountsLengthMismatch(
+        uint256 takerBidAmountsLength
+    ) public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
+
+        vm.assume(takerBidAmountsLength > 1 && takerBidAmountsLength < 100_000);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
 
-        /**
-         * 9. STANDARD STRATEGY/MAKER ASK: amounts' length of maker is not equal to length of taker
-         */
-
-        // Change amounts array' length to make it equal to 2
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
-        uint256[] memory amounts = new uint256[](2);
-        amounts[0] = 1;
-        amounts[1] = 1;
+
+        uint256[] memory amounts = new uint256[](takerBidAmountsLength);
+        for (uint i; i < takerBidAmountsLength; i++) {
+            amounts[i] = 1;
+        }
         takerBid.amounts = amounts;
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -340,12 +340,21 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
         );
+    }
+
+    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
+        // (For takerBid tests)
+        vm.deal(takerUser, 100 ether);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
         /**
          * 10. STANDARD STRATEGY/MAKER ASK: minPrice of maker is not equal to maxPrice of taker
          */
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Change price of takerBid to be lower than makerAsk price
         takerBid.maxPrice = makerAsk.minPrice - 1;

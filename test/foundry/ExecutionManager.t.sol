@@ -158,8 +158,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(weth)
         );
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
-
         uint256[] memory itemIds = new uint256[](makerBidItemIdsLength);
         makerBid.itemIds = itemIds;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -178,8 +176,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(weth)
         );
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
-
         uint256[] memory itemIds = new uint256[](takerAskItemIdsLength);
         takerAsk.itemIds = itemIds;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -197,8 +193,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(mockERC721),
             address(weth)
         );
-
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         uint256[] memory amounts = new uint256[](takerAskAmountsLength);
         for (uint i; i < takerAskAmountsLength; i++) {
@@ -219,7 +213,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(weth)
         );
 
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
         makerBid.maxPrice = lowerPrice;
         takerAsk.minPrice = higherPrice;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -269,8 +262,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(mockERC721)
         );
 
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
-
         uint256[] memory itemIds = new uint256[](makerAskItemIdsLength);
         makerAsk.itemIds = itemIds;
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -295,8 +286,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
-
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
 
         uint256[] memory itemIds = new uint256[](takerBidItemIdsLength);
         takerBid.itemIds = itemIds;
@@ -323,8 +312,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(mockERC721)
         );
 
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
-
         uint256[] memory amounts = new uint256[](takerBidAmountsLength);
         for (uint i; i < takerBidAmountsLength; i++) {
             amounts[i] = 1;
@@ -342,22 +329,22 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
-        // (For takerBid tests)
-        vm.deal(takerUser, 100 ether);
+    function testCannotValidateOrderIfTakerMakerPricesMismatch(
+        uint256 lowerPrice,
+        uint256 higherPrice
+    ) public asPrankedUser(takerUser) {
+        vm.assume(lowerPrice > 0 && lowerPrice < higherPrice);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
 
-        /**
-         * 10. STANDARD STRATEGY/MAKER ASK: minPrice of maker is not equal to maxPrice of taker
-         */
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
+        takerBid.maxPrice = lowerPrice;
+        makerAsk.minPrice = higherPrice;
+
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        // Change price of takerBid to be lower than makerAsk price
-        takerBid.maxPrice = makerAsk.minPrice - 1;
+        vm.deal(takerUser, takerBid.maxPrice);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
@@ -368,8 +355,13 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _EMPTY_AFFILIATE
         );
 
-        // Change price of takerBid to be higher than makerAsk price
-        takerBid.maxPrice = makerAsk.minPrice + 1;
+        // Reverse
+        takerBid.maxPrice = higherPrice;
+        makerAsk.minPrice = lowerPrice;
+
+        signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.deal(takerUser, takerBid.maxPrice);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(

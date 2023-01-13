@@ -59,14 +59,7 @@ contract StrategyItemIdsRange is BaseStrategy {
 
             uint256 amount = takerAsk.amounts[i];
 
-            if (amount != 1) {
-                if (amount == 0) {
-                    revert OrderInvalid();
-                }
-                if (makerBid.assetType == 0) {
-                    revert OrderInvalid();
-                }
-            }
+            _validateAmount(amount, makerBid.assetType);
 
             if (offeredItemId < minItemId || offeredItemId > maxItemId) {
                 revert OrderInvalid();

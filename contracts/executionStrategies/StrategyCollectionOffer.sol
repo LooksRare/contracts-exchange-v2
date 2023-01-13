@@ -53,14 +53,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             revert OrderInvalid();
         }
 
-        if (makerAmount != 1) {
-            if (makerAmount == 0) {
-                revert OrderInvalid();
-            }
-            if (makerBid.assetType == 0) {
-                revert OrderInvalid();
-            }
-        }
+        _validateAmount(makerAmount, makerBid.assetType);
     }
 
     /**
@@ -94,14 +87,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             revert OrderInvalid();
         }
 
-        if (makerAmount != 1) {
-            if (makerAmount == 0) {
-                revert OrderInvalid();
-            }
-            if (makerBid.assetType == 0) {
-                revert OrderInvalid();
-            }
-        }
+        _validateAmount(makerAmount, makerBid.assetType);
 
         bytes32 root = abi.decode(makerBid.additionalParameters, (bytes32));
         bytes32[] memory proof = abi.decode(takerAsk.additionalParameters, (bytes32[]));

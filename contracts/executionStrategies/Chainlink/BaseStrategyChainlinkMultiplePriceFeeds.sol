@@ -12,6 +12,7 @@ import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLat
 contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLatency {
     /**
      * @notice This maps the collection address to a Chainlink price feed address.
+     *         All prices returned from the price feeds must have 18 decimals.
      */
     mapping(address => address) public priceFeeds;
 

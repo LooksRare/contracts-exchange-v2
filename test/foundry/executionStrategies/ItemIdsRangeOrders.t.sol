@@ -32,13 +32,14 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function _createMakerBidAndTakerAsk()
-        private
-        returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk)
-    {
+    function _createMakerBidAndTakerAsk(
+        uint256 lowerBound,
+        uint256 upperBound
+    ) private returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
+        uint256 mid = (lowerBound + upperBound) / 2;
         uint256[] memory makerBidItemIds = new uint256[](2);
-        makerBidItemIds[0] = 5;
-        makerBidItemIds[1] = 10;
+        makerBidItemIds[0] = lowerBound;
+        makerBidItemIds[1] = upperBound;
 
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 3;
@@ -57,16 +58,22 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             amounts: makerBidAmounts
         });
 
-        mockERC721.mint(takerUser, 4);
-        mockERC721.mint(takerUser, 5);
-        mockERC721.mint(takerUser, 7);
-        mockERC721.mint(takerUser, 10);
-        mockERC721.mint(takerUser, 11);
+        // This way, we can test
+        // 1. lower bound is 0
+        // 2. lower bound is > 0, and 0 is excluded
+        if (lowerBound > 0) {
+            mockERC721.mint(takerUser, lowerBound - 1);
+        }
+
+        mockERC721.mint(takerUser, lowerBound);
+        mockERC721.mint(takerUser, mid);
+        mockERC721.mint(takerUser, upperBound);
+        mockERC721.mint(takerUser, upperBound + 1);
 
         uint256[] memory takerAskItemIds = new uint256[](3);
-        takerAskItemIds[0] = 5;
-        takerAskItemIds[1] = 7;
-        takerAskItemIds[2] = 10;
+        takerAskItemIds[0] = lowerBound;
+        takerAskItemIds[1] = mid;
+        takerAskItemIds[2] = upperBound;
 
         uint256[] memory takerAskAmounts = new uint256[](3);
         takerAskAmounts[0] = 1;
@@ -103,10 +110,17 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyImplementation, address(strategyItemIdsRange));
     }
 
-    function testTokenIdsRangeERC721() public {
+    function testTokenIdsRangeERC721(uint256 lowerBound, uint256 upperBound) public {
+        vm.assume(lowerBound < type(uint128).max && upperBound < type(uint128).max && lowerBound + 1 < upperBound);
+
+        uint256 mid = (lowerBound + upperBound) / 2;
+
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            lowerBound,
+            upperBound
+        );
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -121,41 +135,9 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
-        assertEq(mockERC721.ownerOf(5), makerUser);
-        assertEq(mockERC721.ownerOf(7), makerUser);
-        assertEq(mockERC721.ownerOf(10), makerUser);
-
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
-        // Taker ask user receives 98% of the whole price (2% protocol fee)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
-    }
-
-    function testTokenIdsRangeERC721ZeroIsAValidTokenID() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
-
-        mockERC721.mint(takerUser, 0);
-        makerBid.itemIds[0] = 0;
-        takerAsk.itemIds[0] = 0;
-
-        // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
-
-        // Execute taker ask transaction
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        // Maker user has received the asset
-        assertEq(mockERC721.ownerOf(0), makerUser);
-        assertEq(mockERC721.ownerOf(7), makerUser);
-        assertEq(mockERC721.ownerOf(10), makerUser);
+        assertEq(mockERC721.ownerOf(lowerBound), makerUser);
+        assertEq(mockERC721.ownerOf(mid), makerUser);
+        assertEq(mockERC721.ownerOf(upperBound), makerUser);
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
@@ -240,7 +222,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testMakerBidItemIdsLengthIsNotTwo() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
 
         // 1. ItemIds length is 1 (lower than 2)
         makerBid.itemIds = new uint256[](1);
@@ -275,7 +260,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testMakerBidAmountLengthIsNotOne() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
         makerBid.amounts = new uint256[](2);
 
         // Sign order
@@ -294,7 +282,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskRevertIfAmountIsZeroOrGreaterThanOneERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -331,7 +322,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
 
         uint256[] memory invalidItemIds = new uint256[](2);
         invalidItemIds[0] = 5;
@@ -367,7 +361,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskDuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
 
         uint256[] memory invalidItemIds = new uint256[](3);
         invalidItemIds[0] = 5;
@@ -393,7 +390,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskUnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
 
         uint256[] memory invalidItemIds = new uint256[](3);
         invalidItemIds[0] = 5;
@@ -419,7 +419,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
 
         uint256[] memory itemIds = new uint256[](2);
         itemIds[0] = 5;
@@ -450,7 +453,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskPriceTooHigh() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
 
         takerAsk.minPrice = makerBid.maxPrice + 1 wei;
 
@@ -471,7 +477,10 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+            5,
+            10
+        );
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);

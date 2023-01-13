@@ -59,11 +59,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) {
-                revert WrongCurrency();
-            }
-        }
+        _allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
         if (
             makerAsk.itemIds.length != 1 ||
@@ -113,11 +109,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) {
-                revert WrongCurrency();
-            }
-        }
+        _allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
         if (
             makerAsk.itemIds.length != 1 ||

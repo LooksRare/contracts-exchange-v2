@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {IBaseStrategy} from "../interfaces/IBaseStrategy.sol";
 
 // Assembly
-import {OrderInvalid_error_selector, OrderInvalid_error_length, Error_selector_offset} from "./StrategyConstants.sol";
+import {OrderInvalid_error_selector, OrderInvalid_error_length, WrongCurrency_error_selector, WrongCurrency_error_length, Error_selector_offset} from "./StrategyConstants.sol";
 
 /**
  * @title BaseStrategy
@@ -40,6 +40,27 @@ abstract contract BaseStrategy is IBaseStrategy {
             if or(iszero(amount), and(xor(amount, 1), iszero(assetType))) {
                 mstore(0x00, OrderInvalid_error_selector)
                 revert(Error_selector_offset, OrderInvalid_error_length)
+            }
+        }
+    }
+
+    /**
+     * @dev This is equivalent to
+     *      if (makerAsk.currency != address(0)) {
+     *          if (makerAsk.currency != WETH) {
+     *              revert WrongCurrency();
+     *          }
+     *      }
+     *
+     *      1. If orderCurrency == WETH, allowedCurrency == WETH -> WETH * (WETH - WETH) == 0
+     *      2. If orderCurrency == ETH,  allowedCurrency == WETH -> 0 * (0 - WETH) == 0
+     *      3. If orderCurrency == USDC, allowedCurrency == WETH -> USDC * (USDC - WETH) != 0
+     */
+    function _allowNativeOrAllowedCurrency(address orderCurrency, address allowedCurrency) internal pure {
+        assembly {
+            if mul(orderCurrency, sub(orderCurrency, allowedCurrency)) {
+                mstore(0x00, WrongCurrency_error_selector)
+                revert(Error_selector_offset, WrongCurrency_error_length)
             }
         }
     }

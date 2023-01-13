@@ -163,13 +163,17 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
     }
 
-    function testTokenIdsRangeERC1155() public {
+    function testTokenIdsRangeERC1155(uint256 lowerBound, uint256 upperBound) public {
+        vm.assume(lowerBound < type(uint128).max && upperBound < type(uint128).max && lowerBound + 1 < upperBound);
+
+        uint256 mid = (lowerBound + upperBound) / 2;
+
         _setUpUsers();
         _setUpNewStrategy();
 
         uint256[] memory makerBidItemIds = new uint256[](2);
-        makerBidItemIds[0] = 5;
-        makerBidItemIds[1] = 10;
+        makerBidItemIds[0] = lowerBound;
+        makerBidItemIds[1] = upperBound;
 
         uint256[] memory makerBidAmounts = new uint256[](1);
         makerBidAmounts[0] = 6;
@@ -188,14 +192,14 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             amounts: makerBidAmounts
         });
 
-        mockERC1155.mint(takerUser, 5, 2);
-        mockERC1155.mint(takerUser, 7, 2);
-        mockERC1155.mint(takerUser, 10, 2);
+        mockERC1155.mint(takerUser, lowerBound, 2);
+        mockERC1155.mint(takerUser, mid, 2);
+        mockERC1155.mint(takerUser, upperBound, 2);
 
         uint256[] memory takerAskItemIds = new uint256[](3);
-        takerAskItemIds[0] = 5;
-        takerAskItemIds[1] = 7;
-        takerAskItemIds[2] = 10;
+        takerAskItemIds[0] = lowerBound;
+        takerAskItemIds[1] = mid;
+        takerAskItemIds[2] = upperBound;
 
         uint256[] memory takerAskAmounts = new uint256[](3);
         takerAskAmounts[0] = 2;
@@ -223,9 +227,9 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
-        assertEq(mockERC1155.balanceOf(makerUser, 5), 2);
-        assertEq(mockERC1155.balanceOf(makerUser, 7), 2);
-        assertEq(mockERC1155.balanceOf(makerUser, 10), 2);
+        assertEq(mockERC1155.balanceOf(makerUser, lowerBound), 2);
+        assertEq(mockERC1155.balanceOf(makerUser, mid), 2);
+        assertEq(mockERC1155.balanceOf(makerUser, upperBound), 2);
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);

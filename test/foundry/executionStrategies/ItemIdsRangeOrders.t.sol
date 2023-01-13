@@ -131,6 +131,38 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
     }
 
+    function testTokenIdsRangeERC721ZeroIsAValidTokenID() public {
+        _setUpUsers();
+        _setUpNewStrategy();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk();
+
+        mockERC721.mint(takerUser, 0);
+        makerBid.itemIds[0] = 0;
+        takerAsk.itemIds[0] = 0;
+
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
+        _isMakerBidOrderValid(makerBid, signature);
+
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // Maker user has received the asset
+        assertEq(mockERC721.ownerOf(0), makerUser);
+        assertEq(mockERC721.ownerOf(7), makerUser);
+        assertEq(mockERC721.ownerOf(10), makerUser);
+
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
+        // Taker ask user receives 98% of the whole price (2% protocol fee)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
+    }
+
     function testTokenIdsRangeERC1155() public {
         _setUpUsers();
         _setUpNewStrategy();

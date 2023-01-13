@@ -112,7 +112,7 @@ contract StrategyItemIdsRange is BaseStrategy {
         }
 
         // These are done for order invalidation to prevent underflows or array errors
-        if (makerBid.itemIds.length != 2 || makerBid.amounts.length != 1 || makerBid.itemIds[0] == 0) {
+        if (makerBid.itemIds.length != 2 || makerBid.amounts.length != 1) {
             return (isValid, OrderInvalid.selector);
         }
 

@@ -375,7 +375,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         }
 
         // Verify the latency
-        if (block.timestamp > maxLatency + updatedAt) {
+        if (block.timestamp - updatedAt > maxLatency) {
             revert PriceNotRecentEnough();
         }
 
@@ -394,7 +394,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         if (answer <= 0) {
             return (floorPrice, InvalidChainlinkPrice.selector);
         }
-        if (block.timestamp > maxLatency + updatedAt) {
+        if (block.timestamp - updatedAt > maxLatency) {
             return (floorPrice, PriceNotRecentEnough.selector);
         }
 

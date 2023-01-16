@@ -101,25 +101,48 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyImplementation, address(strategyDutchAuction));
     }
 
-    function testDutchAuction(
+    function _fuzzAssumptions(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,
         uint256 elapsedTime
-    ) public {
+    ) private pure {
         // These limits should be realistically way more than enough
         vm.assume(duration > 0 && duration <= 31_536_000);
         // Assume the NFT is worth at least 0.01 USD at today's ETH price (2023-01-13 18:00:00 UTC)
         vm.assume(startPrice > 1e12 && startPrice <= 100_000 ether);
         vm.assume(decayPerSecond > 0 && decayPerSecond < startPrice);
         vm.assume(elapsedTime <= duration && startPrice > decayPerSecond * duration);
+    }
 
+    function _calculatePrices(
+        uint256 startPrice,
+        uint256 duration,
+        uint256 decayPerSecond,
+        uint256 elapsedTime
+    ) private pure returns (uint256 endPrice, uint256 executionPrice) {
+        endPrice = startPrice - decayPerSecond * duration;
+        uint256 discount = decayPerSecond * elapsedTime;
+        executionPrice = startPrice - discount;
+    }
+
+    function testDutchAuction(
+        uint256 startPrice,
+        uint256 duration,
+        uint256 decayPerSecond,
+        uint256 elapsedTime
+    ) public {
+        _fuzzAssumptions(startPrice, duration, decayPerSecond, elapsedTime);
         _setUpUsers();
         _setUpNewStrategy();
 
-        uint256 endPrice = startPrice - decayPerSecond * duration;
-        uint256 discount = decayPerSecond * elapsedTime;
-        uint256 executionPrice = startPrice - discount;
+        (uint256 endPrice, uint256 executionPrice) = _calculatePrices(
+            startPrice,
+            duration,
+            decayPerSecond,
+            elapsedTime
+        );
+
         deal(address(weth), takerUser, executionPrice);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
@@ -156,6 +179,89 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             _initialWETHBalanceUser + (executionPrice - protocolFee),
             "maker balance incorrect"
         );
+    }
+
+    function testStartPriceTooLow(
+        uint256 startPrice,
+        uint256 duration,
+        uint256 decayPerSecond,
+        uint256 elapsedTime
+    ) public {
+        _fuzzAssumptions(startPrice, duration, decayPerSecond, elapsedTime);
+        _setUpUsers();
+        _setUpNewStrategy();
+
+        (uint256 endPrice, uint256 executionPrice) = _calculatePrices(
+            startPrice,
+            duration,
+            decayPerSecond,
+            elapsedTime
+        );
+        deal(address(weth), takerUser, executionPrice);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            startPrice: startPrice,
+            endPrice: endPrice,
+            endTime: block.timestamp + duration
+        });
+
+        makerAsk.minPrice = startPrice + 1 wei;
+
+        // Sign order
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.expectRevert(errorSelector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testTakerBidTooLow(
+        uint256 startPrice,
+        uint256 duration,
+        uint256 decayPerSecond,
+        uint256 elapsedTime
+    ) public {
+        _fuzzAssumptions(startPrice, duration, decayPerSecond, elapsedTime);
+        _setUpUsers();
+        _setUpNewStrategy();
+
+        (uint256 endPrice, uint256 executionPrice) = _calculatePrices(
+            startPrice,
+            duration,
+            decayPerSecond,
+            elapsedTime
+        );
+        deal(address(weth), takerUser, executionPrice);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            numberOfItems: 1,
+            numberOfAmounts: 1,
+            startPrice: startPrice,
+            endPrice: endPrice,
+            endTime: block.timestamp + duration
+        });
+
+        takerBid.maxPrice = executionPrice - 1 wei;
+
+        // Sign order
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        // Valid, taker struct validation only happens during execution
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
+        _isMakerAskOrderValid(makerAsk, signature);
+
+        vm.expectRevert(BidTooLow.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testInactiveStrategy() public {
@@ -302,95 +408,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.prank(takerUser);
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
-    function testStartPriceTooLow(
-        uint256 startPrice,
-        uint256 duration,
-        uint256 decayPerSecond,
-        uint256 elapsedTime
-    ) public {
-        // These limits should be realistically way more than enough
-        vm.assume(duration > 0 && duration <= 31_536_000);
-        // Assume the NFT is worth at least 0.01 USD at today's ETH price (2023-01-13 18:00:00 UTC)
-        vm.assume(startPrice > 1e12 && startPrice <= 100_000 ether);
-        vm.assume(decayPerSecond > 0 && decayPerSecond < startPrice);
-        vm.assume(elapsedTime <= duration && startPrice > decayPerSecond * duration);
-
-        _setUpUsers();
-        _setUpNewStrategy();
-
-        uint256 endPrice = startPrice - decayPerSecond * duration;
-        uint256 discount = decayPerSecond * elapsedTime;
-        uint256 executionPrice = startPrice - discount;
-        deal(address(weth), takerUser, executionPrice);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            numberOfItems: 1,
-            numberOfAmounts: 1,
-            startPrice: startPrice,
-            endPrice: endPrice,
-            endTime: block.timestamp + duration
-        });
-
-        makerAsk.minPrice = startPrice + 1 wei;
-
-        // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
-
-        vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
-    function testTakerBidTooLow(
-        uint256 startPrice,
-        uint256 duration,
-        uint256 decayPerSecond,
-        uint256 elapsedTime
-    ) public {
-        // These limits should be realistically way more than enough
-        vm.assume(duration > 0 && duration <= 31_536_000);
-        // Assume the NFT is worth at least 0.01 USD at today's ETH price (2023-01-13 18:00:00 UTC)
-        vm.assume(startPrice > 1e12 && startPrice <= 100_000 ether);
-        vm.assume(decayPerSecond > 0 && decayPerSecond < startPrice);
-        vm.assume(elapsedTime <= duration && startPrice > decayPerSecond * duration);
-
-        _setUpUsers();
-        _setUpNewStrategy();
-
-        uint256 endPrice = startPrice - decayPerSecond * duration;
-        uint256 discount = decayPerSecond * elapsedTime;
-        uint256 executionPrice = startPrice - discount;
-        deal(address(weth), takerUser, executionPrice);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            numberOfItems: 1,
-            numberOfAmounts: 1,
-            startPrice: startPrice,
-            endPrice: endPrice,
-            endTime: block.timestamp + duration
-        });
-
-        takerBid.maxPrice = executionPrice - 1 wei;
-
-        // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerAskOrderValid(makerAsk, signature);
-
-        vm.expectRevert(BidTooLow.selector);
-        vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 

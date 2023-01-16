@@ -9,21 +9,59 @@ pragma solidity ^0.8.17;
 library OrderStructs {
     /**
      * @notice This is the constant used to compute the maker ask order hash.
-     * @dev keccak256("MakerAsk(uint256 askNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 minPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
      */
-    bytes32 internal constant _MAKER_ASK_HASH = 0x88210d05352c99907588dddb658b9abce78f141d1415d7be787f6120b718fe02;
+    bytes32 internal constant _MAKER_ASK_HASH =
+        keccak256(
+            "MakerAsk("
+            "uint256 askNonce,"
+            "uint256 subsetNonce,"
+            "uint256 strategyId,"
+            "uint256 assetType,"
+            "uint256 orderNonce,"
+            "address collection,"
+            "address currency,"
+            "address signer,"
+            "uint256 startTime,"
+            "uint256 endTime,"
+            "uint256 minPrice,"
+            "uint256[] itemIds,"
+            "uint256[] amounts,"
+            "bytes additionalParameters"
+            ")"
+        );
 
     /**
      * @notice This is the constant used to compute the maker bid order hash.
-     * @dev keccak256("MakerBid(uint256 bidNonce,uint256 subsetNonce,uint256 strategyId,uint256 assetType,uint256 orderNonce,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 maxPrice,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)")
      */
-    bytes32 internal constant _MAKER_BID_HASH = 0xc69763700afbfcdc70a0b138ea120a08fc78dfc5532f1e7232fa8d8cfb26f96a;
+    bytes32 internal constant _MAKER_BID_HASH =
+        keccak256(
+            "MakerBid("
+            "uint256 bidNonce,"
+            "uint256 subsetNonce,"
+            "uint256 strategyId,"
+            "uint256 assetType,"
+            "uint256 orderNonce,"
+            "address collection,"
+            "address currency,"
+            "address signer,"
+            "uint256 startTime,"
+            "uint256 endTime,"
+            "uint256 maxPrice,"
+            "uint256[] itemIds,"
+            "uint256[] amounts,"
+            "bytes additionalParameters"
+            ")"
+        );
 
     /**
      * @notice This is the constant used to compute the merkle root order hash (proof is not included in the hashing function).
-     * @dev keccak256("MerkleTree(bytes32 root)")
      */
-    bytes32 internal constant _MERKLE_TREE_HASH = 0x4339702fd09d392db18a2a980b04a717d48085f206207a9fe4472d7ba0ccbf0b;
+    bytes32 internal constant _MERKLE_TREE_HASH =
+        keccak256(
+            "MerkleTree("
+            "bytes32 root"
+            ")"
+        );
 
     /**
      * 1. Maker structs

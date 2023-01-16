@@ -21,6 +21,12 @@ import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLat
  */
 contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatency {
     /**
+     * @dev It is possible to call priceFeed.decimals() to get the decimals,
+     *      but we want to save gas so it's hard coded instead.
+     */
+    uint256 public constant ETH_USD_PRICE_FEED_DECIMALS = 1e8;
+
+    /**
      * @notice Wrapped ether (WETH) address.
      */
     address public immutable WETH;
@@ -104,7 +110,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
 
         uint256 ethPriceInUSD = uint256(answer);
         uint256 minPriceInETH = makerAsk.minPrice;
-        uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * 1e8) / ethPriceInUSD;
+        uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * ETH_USD_PRICE_FEED_DECIMALS) / ethPriceInUSD;
 
         if (minPriceInETH >= desiredSalePriceInETH) {
             price = minPriceInETH;

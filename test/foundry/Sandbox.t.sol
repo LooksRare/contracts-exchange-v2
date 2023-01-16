@@ -6,13 +6,14 @@ import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IE
 import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1155.sol";
 
 // Libraries and interfaces
-import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract SandboxTest is ProtocolBase {
+    error ERC721TransferFromFail();
+
     // Fixed price of sale
     uint256 private constant price = 1 ether;
 
@@ -78,7 +79,7 @@ contract SandboxTest is ProtocolBase {
         );
 
         // It should fail with assetType = 0
-        vm.expectRevert(abi.encodeWithSelector(ITransferSelectorNFT.NFTTransferFail.selector, SANDBOX, 0));
+        vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
@@ -131,7 +132,7 @@ contract SandboxTest is ProtocolBase {
         );
 
         // It should fail with assetType = 0
-        vm.expectRevert(abi.encodeWithSelector(ITransferSelectorNFT.NFTTransferFail.selector, SANDBOX, 0));
+        vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,

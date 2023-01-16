@@ -32,8 +32,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateCreatorFeeManager(address(1));
     }
 
-    function testUpdateMaxCreatorFeeBp() public asPrankedUser(_owner) {
-        uint16 newMaxCreatorFeeBp = uint16(2_500);
+    function testUpdateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+        vm.assume(newMaxCreatorFeeBp <= 2_500);
         vm.expectEmit(true, false, false, true);
         emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
         looksRareProtocol.updateMaxCreatorFeeBp(newMaxCreatorFeeBp);
@@ -45,9 +45,10 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_500));
     }
 
-    function testUpdateMaxCreatorFeeBpTooHigh() public asPrankedUser(_owner) {
+    function testUpdateMaxCreatorFeeBpTooHigh(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+        vm.assume(newMaxCreatorFeeBp > 2_500);
         vm.expectRevert(CreatorFeeBpTooHigh.selector);
-        looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_501));
+        looksRareProtocol.updateMaxCreatorFeeBp(newMaxCreatorFeeBp);
     }
 
     function testUpdateProtocolFeeRecipient() public asPrankedUser(_owner) {
@@ -134,98 +135,112 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfWrongFormat() public asPrankedUser(takerUser) {
-        // (For takerBid tests)
-        vm.deal(takerUser, 100 ether);
-
-        uint256[] memory itemIds = new uint256[](2);
-
-        /**
-         * 1. STANDARD STRATEGY/MAKER BID: itemIds' length is equal to 0
-         */
+    function testCannotValidateOrderIfMakerBidItemIdsIsEmpty() public {
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
 
-        // Change makerBid itemIds array's length to make it equal to 0
-        itemIds = new uint256[](0);
+        uint256[] memory itemIds = new uint256[](0);
         makerBid.itemIds = itemIds;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
 
-        /**
-         * 2. STANDARD STRATEGY/MAKER BID: maker itemIds' length is not equal to maker amounts' length
-         */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+    function testCannotValidateOrderIfMakerBidItemIdsLengthMismatch(
+        uint256 makerBidItemIdsLength
+    ) public asPrankedUser(takerUser) {
+        vm.assume(makerBidItemIdsLength > 1 && makerBidItemIdsLength < 100_000);
 
-        // Change itemIds array for maker to make its length equal to 2
-        itemIds = new uint256[](2);
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        uint256[] memory itemIds = new uint256[](makerBidItemIdsLength);
         makerBid.itemIds = itemIds;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
 
-        /**
-         * 3. STANDARD STRATEGY/MAKER BID: itemIds' length of maker is not equal to length of taker
-         */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+    function testCannotValidateOrderIfTakerAskItemIdsLengthMismatch(
+        uint256 takerAskItemIdsLength
+    ) public asPrankedUser(takerUser) {
+        vm.assume(takerAskItemIdsLength > 1 && takerAskItemIdsLength < 100_000);
 
-        // Change itemIds array for taker to make its length equal to 2
-        itemIds = new uint256[](2);
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        uint256[] memory itemIds = new uint256[](takerAskItemIdsLength);
         takerAsk.itemIds = itemIds;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
 
-        /**
-         * 4. STANDARD STRATEGY/MAKER BID: amounts' length of maker is not equal to length of taker
-         */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+    function testCannotValidateOrderIfTakerAskAmountsLengthMismatch(
+        uint256 takerAskAmountsLength
+    ) public asPrankedUser(takerUser) {
+        vm.assume(takerAskAmountsLength > 1 && takerAskAmountsLength < 100_000);
 
-        // Change amounts array for taker to make its length equal to 2
-        uint256[] memory amounts = new uint256[](2);
-        amounts[0] = 1;
-        amounts[1] = 1;
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        uint256[] memory amounts = new uint256[](takerAskAmountsLength);
+        for (uint i; i < takerAskAmountsLength; i++) {
+            amounts[i] = 1;
+        }
         takerAsk.amounts = amounts;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testCannotValidateOrderIfMakerTakerPricesMismatch(uint256 lowerPrice, uint256 higherPrice) public {
+        vm.assume(lowerPrice > 0 && lowerPrice < higherPrice);
+
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        makerBid.maxPrice = lowerPrice;
+        takerAsk.minPrice = higherPrice;
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // Reverse
+        makerBid.maxPrice = higherPrice;
+        takerAsk.minPrice = lowerPrice;
         signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
 
-        /**
-         * 5. STANDARD STRATEGY/MAKER BID: maxPrice of maker is not equal to minPrice of taker
-         */
-        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
-        signature = _signMakerBid(makerBid, makerUserPK);
+    function testCannotValidateOrderIfMakerAskItemIdsIsEmpty() public asPrankedUser(takerUser) {
+        vm.deal(takerUser, 100 ether);
 
-        // Change price of takerAsk to be higher than makerAsk price
-        takerAsk.minPrice = makerBid.maxPrice + 1;
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        // Change price of takerAsk to be higher than makerAsk price
-        takerAsk.minPrice = makerBid.maxPrice - 1;
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        /**
-         * 6. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is equal to 0
-         */
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
 
         // Change maker itemIds array to make its length equal to 0
-        itemIds = new uint256[](0);
+        uint256[] memory itemIds = new uint256[](0);
         makerAsk.itemIds = itemIds;
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
@@ -235,16 +250,22 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
         );
+    }
 
-        /**
-         * 7. STANDARD STRATEGY/MAKER ASK: maker itemIds' length is not equal to maker amounts' length
-         */
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
+    function testCannotValidateOrderIfMakerAskItemIdsLengthMismatch(
+        uint256 makerAskItemIdsLength
+    ) public asPrankedUser(takerUser) {
+        vm.deal(takerUser, 100 ether);
 
-        // Change itemIds array to make it equal to 2
-        itemIds = new uint256[](2);
+        vm.assume(makerAskItemIdsLength > 1 && makerAskItemIdsLength < 100_000);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+
+        uint256[] memory itemIds = new uint256[](makerAskItemIdsLength);
         makerAsk.itemIds = itemIds;
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
@@ -254,16 +275,22 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
         );
+    }
 
-        /**
-         * 8. STANDARD STRATEGY/MAKER ASK: itemIds' length of maker is not equal to length of taker
-         */
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
+    function testCannotValidateOrderIfTakerBidItemIdsLengthMismatch(
+        uint256 takerBidItemIdsLength
+    ) public asPrankedUser(takerUser) {
+        vm.deal(takerUser, 100 ether);
 
-        // Change itemIds array to make it equal to 2
-        itemIds = new uint256[](2);
+        vm.assume(takerBidItemIdsLength > 1 && takerBidItemIdsLength < 100_000);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+
+        uint256[] memory itemIds = new uint256[](takerBidItemIdsLength);
         takerBid.itemIds = itemIds;
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
@@ -273,18 +300,52 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
         );
+    }
 
-        /**
-         * 9. STANDARD STRATEGY/MAKER ASK: amounts' length of maker is not equal to length of taker
-         */
+    function testCannotValidateOrderIfTakerBidAmountsLengthMismatch(
+        uint256 takerBidAmountsLength
+    ) public asPrankedUser(takerUser) {
+        vm.deal(takerUser, 100 ether);
 
-        // Change amounts array' length to make it equal to 2
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
-        amounts = new uint256[](2);
-        amounts[0] = 1;
-        amounts[1] = 1;
+        vm.assume(takerBidAmountsLength > 1 && takerBidAmountsLength < 100_000);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+
+        uint256[] memory amounts = new uint256[](takerBidAmountsLength);
+        for (uint i; i < takerBidAmountsLength; i++) {
+            amounts[i] = 1;
+        }
         takerBid.amounts = amounts;
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.expectRevert(OrderInvalid.selector);
+        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
+            takerBid,
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
+    }
+
+    function testCannotValidateOrderIfTakerMakerPricesMismatch(
+        uint256 lowerPrice,
+        uint256 higherPrice
+    ) public asPrankedUser(takerUser) {
+        vm.assume(lowerPrice > 0 && lowerPrice < higherPrice);
+
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+
+        takerBid.maxPrice = lowerPrice;
+        makerAsk.minPrice = higherPrice;
+
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.deal(takerUser, takerBid.maxPrice);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
@@ -295,26 +356,13 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             _EMPTY_AFFILIATE
         );
 
-        /**
-         * 10. STANDARD STRATEGY/MAKER ASK: minPrice of maker is not equal to maxPrice of taker
-         */
-        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
+        // Reverse
+        takerBid.maxPrice = higherPrice;
+        makerAsk.minPrice = lowerPrice;
+
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        // Change price of takerBid to be lower than makerAsk price
-        takerBid.maxPrice = makerAsk.minPrice - 1;
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE,
-            _EMPTY_AFFILIATE
-        );
-
-        // Change price of takerBid to be higher than makerAsk price
-        takerBid.maxPrice = makerAsk.minPrice + 1;
+        vm.deal(takerUser, takerBid.maxPrice);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(

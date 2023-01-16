@@ -162,7 +162,7 @@ contract InheritedStrategy {
                  *   }
                  * }
                  */
-                invalidOrder := or(invalidOrder, and(xor(amount, 1), iszero(mul(amount, _assetType))))
+                invalidOrder := or(invalidOrder, or(iszero(amount), and(xor(amount, 1), iszero(_assetType))))
 
                 if invalidOrder {
                     mstore(0x00, OrderInvalid_error_selector)

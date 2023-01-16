@@ -79,7 +79,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
         uint256 desiredPrice = floorPrice + premium;
 
-        if (desiredPrice >= makerAsk.minPrice) {
+        if (desiredPrice > makerAsk.minPrice) {
             price = desiredPrice;
         } else {
             price = makerAsk.minPrice;
@@ -133,7 +133,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
         uint256 desiredPrice = (floorPrice * (10_000 + premium)) / 10_000;
 
-        if (desiredPrice >= makerAsk.minPrice) {
+        if (desiredPrice > makerAsk.minPrice) {
             price = desiredPrice;
         } else {
             price = makerAsk.minPrice;
@@ -190,7 +190,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
 
         uint256 desiredPrice = floorPrice - discountAmount;
 
-        if (desiredPrice >= makerBid.maxPrice) {
+        if (desiredPrice > makerBid.maxPrice) {
             price = makerBid.maxPrice;
         } else {
             price = desiredPrice;
@@ -248,7 +248,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
 
         uint256 desiredPrice = (floorPrice * (10_000 - discount)) / 10_000;
 
-        if (desiredPrice >= makerBid.maxPrice) {
+        if (desiredPrice > makerBid.maxPrice) {
             price = makerBid.maxPrice;
         } else {
             price = desiredPrice;

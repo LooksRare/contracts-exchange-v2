@@ -242,7 +242,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
 
         // @dev Discount cannot be 100%
-        if (discount >= 10_000) {
+        if (discount > 9_999) {
             revert OrderInvalid();
         }
 
@@ -338,7 +338,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             functionSelector ==
             StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
-            if (discount >= 10_000) {
+            if (discount > 9_999) {
                 return (isValid, OrderInvalid.selector);
             }
         }
@@ -370,7 +370,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
 
         // Verify the answer is not null or negative
-        if (answer <= 0) {
+        if (answer < 1) {
             revert InvalidChainlinkPrice();
         }
 
@@ -391,7 +391,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         }
 
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
-        if (answer <= 0) {
+        if (answer < 1) {
             return (floorPrice, InvalidChainlinkPrice.selector);
         }
         if (block.timestamp > maxLatency + updatedAt) {

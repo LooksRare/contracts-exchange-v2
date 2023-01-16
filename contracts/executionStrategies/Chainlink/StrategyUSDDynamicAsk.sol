@@ -97,7 +97,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
 
-        if (answer <= 0) {
+        if (answer < 1) {
             revert InvalidChainlinkPrice();
         }
 
@@ -174,7 +174,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
 
-        if (answer <= 0) {
+        if (answer < 1) {
             return (isValid, InvalidChainlinkPrice.selector);
         }
 

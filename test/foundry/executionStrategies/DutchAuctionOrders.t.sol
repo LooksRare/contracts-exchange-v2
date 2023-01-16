@@ -305,19 +305,36 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testStartPriceTooLow() public {
+    function testStartPriceTooLow(
+        uint256 startPrice,
+        uint256 duration,
+        uint256 decayPerSecond,
+        uint256 elapsedTime
+    ) public {
+        // These limits should be realistically way more than enough
+        vm.assume(duration > 0 && duration <= 31_536_000);
+        // Assume the NFT is worth at least 0.01 USD at today's ETH price (2023-01-13 18:00:00 UTC)
+        vm.assume(startPrice > 1e12 && startPrice <= 100_000 ether);
+        vm.assume(decayPerSecond > 0 && decayPerSecond < startPrice);
+        vm.assume(elapsedTime <= duration && startPrice > decayPerSecond * duration);
+
         _setUpUsers();
         _setUpNewStrategy();
+
+        uint256 endPrice = startPrice - decayPerSecond * duration;
+        uint256 discount = decayPerSecond * elapsedTime;
+        uint256 executionPrice = startPrice - discount;
+        deal(address(weth), takerUser, executionPrice);
+
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
-            startPrice: 10 ether,
-            endPrice: 1 ether,
-            endTime: block.timestamp + 1 hours
+            startPrice: startPrice,
+            endPrice: endPrice,
+            endTime: block.timestamp + duration
         });
 
-        // startPrice is 10 ether
-        makerAsk.minPrice = 10 ether + 1 wei;
+        makerAsk.minPrice = startPrice + 1 wei;
 
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);

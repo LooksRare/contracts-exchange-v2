@@ -150,7 +150,7 @@ contract InheritedStrategy {
                 }
 
                 /**
-                 * @dev If amount or _assetType is 0, the multiplication result will be 0
+                 * @dev This is equivalent to
                  *
                  * if (amount != 1) {
                  *   if (amount == 0) {

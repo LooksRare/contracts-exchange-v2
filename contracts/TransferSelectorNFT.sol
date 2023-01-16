@@ -2,8 +2,9 @@
 pragma solidity ^0.8.17;
 
 // Direct dependencies
-import {ExecutionManager} from "./ExecutionManager.sol";
 import {PackableReentrancyGuard} from "@looksrare/contracts-libs/contracts/PackableReentrancyGuard.sol";
+import {ExecutionManager} from "./ExecutionManager.sol";
+import {TransferManager} from "./TransferManager.sol";
 
 // Interfaces
 import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
@@ -20,7 +21,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
     /**
      * @notice Transfer manager for ERC721 and ERC1155.
      */
-    address public transferManager;
+    TransferManager public transferManager;
 
     /**
      * @notice Constructor
@@ -28,7 +29,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
      * @param _transferManager Address of the transfer manager for ERC721/ERC1155
      */
     constructor(address _owner, address _transferManager) ExecutionManager(_owner) {
-        transferManager = _transferManager;
+        transferManager = TransferManager(_transferManager);
     }
 
     /**
@@ -48,22 +49,12 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
-        bool status;
-
         if (assetType == 0) {
-            (status, ) = transferManager.call(
-                abi.encodeWithSelector(0xa7bc96d3, collection, sender, recipient, itemIds, amounts)
-            );
+            transferManager.transferItemsERC721(collection, sender, recipient, itemIds, amounts);
         } else if (assetType == 1) {
-            (status, ) = transferManager.call(
-                abi.encodeWithSelector(0xa0a406c6, collection, sender, recipient, itemIds, amounts)
-            );
+            transferManager.transferItemsERC1155(collection, sender, recipient, itemIds, amounts);
         } else {
             revert WrongAssetType(assetType);
-        }
-
-        if (!status) {
-            revert NFTTransferFail(collection, assetType);
         }
     }
 }

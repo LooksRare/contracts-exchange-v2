@@ -8,6 +8,9 @@ import {PackableReentrancyGuard} from "@looksrare/contracts-libs/contracts/Packa
 // Interfaces
 import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
 
+// Shared errors
+import {WrongAssetType} from "./interfaces/SharedErrors.sol";
+
 /**
  * @title TransferSelectorNFT
  * @notice This contract handles the logic for transferring non-fungible items.
@@ -15,52 +18,17 @@ import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
  */
 contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, PackableReentrancyGuard {
     /**
-     * @notice It returns the transfer manager address and the associated bytes4
-     * selector used to transfer assets for this asset type.
+     * @notice Transfer manager for ERC721 and ERC1155.
      */
-    mapping(uint256 => ManagerSelector) public managerSelectorOfAssetType;
+    address public transferManager;
 
     /**
      * @notice Constructor
      * @param _owner Owner address
-     * @param transferManager Address of the transfer manager for ERC721/ERC1155
+     * @param _transferManager Address of the transfer manager for ERC721/ERC1155
      */
-    constructor(address _owner, address transferManager) ExecutionManager(_owner) {
-        // Transfer manager with selectors for ERC721/ERC1155
-        managerSelectorOfAssetType[0] = ManagerSelector({transferManager: transferManager, selector: 0xa7bc96d3});
-        managerSelectorOfAssetType[1] = ManagerSelector({transferManager: transferManager, selector: 0xa0a406c6});
-    }
-
-    /**
-     * @notice This function allows the owner to add new transfer manager implementations for new asset types.
-     * @param assetType Asset type
-     * @param transferManagerForAssetType Transfer manager address for this asset type
-     * @param selectorForAssetType Selector for the function to call to transfer this asset type
-     * @dev Only callable by owner.
-     */
-    function addTransferManagerForAssetType(
-        uint256 assetType,
-        address transferManagerForAssetType,
-        bytes4 selectorForAssetType
-    ) external onlyOwner {
-        if (
-            transferManagerForAssetType == address(0) ||
-            transferManagerForAssetType == address(this) ||
-            selectorForAssetType == bytes4(0)
-        ) {
-            revert ManagerSelectorEmpty();
-        }
-
-        if (managerSelectorOfAssetType[assetType].transferManager != address(0)) {
-            revert ManagerSelectorAlreadySetForAssetType();
-        }
-
-        managerSelectorOfAssetType[assetType] = ManagerSelector({
-            transferManager: transferManagerForAssetType,
-            selector: selectorForAssetType
-        });
-
-        emit NewAssetType(assetType, transferManagerForAssetType, selectorForAssetType);
+    constructor(address _owner, address _transferManager) ExecutionManager(_owner) {
+        transferManager = _transferManager;
     }
 
     /**
@@ -80,22 +48,19 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
-        address transferManager = managerSelectorOfAssetType[assetType].transferManager;
+        bool status;
 
-        if (transferManager == address(0)) {
-            revert NoTransferManagerForAssetType(assetType);
+        if (assetType == 0) {
+            (status, ) = transferManager.call(
+                abi.encodeWithSelector(0xa7bc96d3, collection, sender, recipient, itemIds, amounts)
+            );
+        } else if (assetType == 1) {
+            (status, ) = transferManager.call(
+                abi.encodeWithSelector(0xa0a406c6, collection, sender, recipient, itemIds, amounts)
+            );
+        } else {
+            revert WrongAssetType(assetType);
         }
-
-        (bool status, ) = transferManager.call(
-            abi.encodeWithSelector(
-                managerSelectorOfAssetType[assetType].selector,
-                collection,
-                sender,
-                recipient,
-                itemIds,
-                amounts
-            )
-        );
 
         if (!status) {
             revert NFTTransferFail(collection, assetType);

@@ -23,6 +23,12 @@ error FunctionSelectorInvalid();
 error OrderInvalid();
 
 /**
+ * @notice It is returned if the asset type is not 0, nor 1.
+ * @param assetType Asset type
+ */
+error WrongAssetType(uint256 assetType);
+
+/**
  * @notice This function cannot be called by the sender.
  */
 error WrongCaller();

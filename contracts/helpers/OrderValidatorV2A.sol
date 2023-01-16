@@ -144,7 +144,7 @@ contract OrderValidatorV2A {
      */
     constructor(address _looksRareProtocol) {
         looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
-        (address transferManagerAddress, ) = looksRareProtocol.managerSelectorOfAssetType(0);
+        address transferManagerAddress = looksRareProtocol.transferManager();
         transferManager = TransferManager(transferManagerAddress);
 
         _adjustExternalParameters();

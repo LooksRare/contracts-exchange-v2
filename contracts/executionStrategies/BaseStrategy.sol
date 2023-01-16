@@ -37,7 +37,7 @@ abstract contract BaseStrategy is IBaseStrategy {
      */
     function _validateAmount(uint256 amount, uint256 assetType) internal pure {
         assembly {
-            if and(xor(amount, 1), iszero(mul(amount, assetType))) {
+            if or(iszero(amount), and(xor(amount, 1), iszero(assetType))) {
                 mstore(0x00, OrderInvalid_error_selector)
                 revert(Error_selector_offset, OrderInvalid_error_length)
             }

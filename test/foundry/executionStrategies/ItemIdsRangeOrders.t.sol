@@ -486,7 +486,7 @@ contract TokenIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
+        looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);

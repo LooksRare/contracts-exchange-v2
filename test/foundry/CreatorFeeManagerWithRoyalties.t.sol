@@ -40,7 +40,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         vm.startPrank(_owner);
         looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManagerWithRoyalties));
         // Set up 2% as protocol fee, which is now equal to minimum fee
-        looksRareProtocol.updateStrategy(0, _newProtocolFee, _newProtocolFee, true);
+        looksRareProtocol.updateStrategy(0, true, _newProtocolFee, _newProtocolFee);
         vm.stopPrank();
 
         // Adjust for new creator fee manager

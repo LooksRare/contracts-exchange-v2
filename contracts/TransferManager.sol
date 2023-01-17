@@ -56,7 +56,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             revert WrongLengths();
         }
 
-        if (!isOperatorValidForTransfer(from, msg.sender)) revert TransferCallerInvalid();
+        _isOperatorValidForTransfer(from, msg.sender);
 
         for (uint256 i; i < length; ) {
             _executeERC721TransferFrom(collection, from, to, itemIds[i]);
@@ -88,9 +88,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             revert WrongLengths();
         }
 
-        if (!isOperatorValidForTransfer(from, msg.sender)) {
-            revert TransferCallerInvalid();
-        }
+        _isOperatorValidForTransfer(from, msg.sender);
 
         if (length == 1) {
             _executeERC1155SafeTransferFrom(collection, from, to, itemIds[0], amounts[0]);
@@ -130,9 +128,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         }
 
         if (from != msg.sender) {
-            if (!isOperatorValidForTransfer(from, msg.sender)) {
-                revert TransferCallerInvalid();
-            }
+            _isOperatorValidForTransfer(from, msg.sender);
         }
 
         for (uint256 i; i < collectionsLength; ) {
@@ -175,15 +171,17 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         }
 
         for (uint256 i; i < length; ) {
-            if (!isOperatorWhitelisted[operators[i]]) {
+            address operator = operators[i];
+
+            if (!isOperatorWhitelisted[operator]) {
                 revert NotWhitelisted();
             }
 
-            if (hasUserApprovedOperator[msg.sender][operators[i]]) {
+            if (hasUserApprovedOperator[msg.sender][operator]) {
                 revert AlreadyApproved();
             }
 
-            hasUserApprovedOperator[msg.sender][operators[i]] = true;
+            hasUserApprovedOperator[msg.sender][operator] = true;
 
             unchecked {
                 ++i;
@@ -205,11 +203,13 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         }
 
         for (uint256 i; i < length; ) {
-            if (!hasUserApprovedOperator[msg.sender][operators[i]]) {
+            address operator = operators[i];
+
+            if (!hasUserApprovedOperator[msg.sender][operator]) {
                 revert NotApproved();
             }
 
-            delete hasUserApprovedOperator[msg.sender][operators[i]];
+            delete hasUserApprovedOperator[msg.sender][operator];
             unchecked {
                 ++i;
             }
@@ -249,13 +249,16 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice This function is internal and is used to verify whether the transfer
-     *         (by an operator on behalf of a user) is valid.
+     * @notice This function is internal and verifies whether the transfer
+     *         (by an operator on behalf of a user) is valid. If not, it reverts.
      * @param user User address
      * @param operator Operator address
-     * @return isOperatorValid Whether the operator is valid for transfer on behalf of the user
      */
-    function isOperatorValidForTransfer(address user, address operator) internal view returns (bool isOperatorValid) {
-        return isOperatorWhitelisted[operator] && hasUserApprovedOperator[user][operator];
+    function _isOperatorValidForTransfer(address user, address operator) private view {
+        if (isOperatorWhitelisted[operator] && hasUserApprovedOperator[user][operator]) {
+            return;
+        }
+
+        revert TransferCallerInvalid();
     }
 }

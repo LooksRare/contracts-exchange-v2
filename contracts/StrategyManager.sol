@@ -39,6 +39,8 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
             isMakerBid: false,
             implementation: address(0)
         });
+
+        emit NewStrategy(0, 150, 200, 300, bytes4(0), false, address(0));
     }
 
     /**

@@ -51,9 +51,9 @@ interface ILooksRareProtocol {
      * @param itemIds Array of item ids
      * @param amounts Array of amounts (for item ids)
      * @param feeRecipients Array of fee recipients
-     *        feeRecipients[0] Protocol fee recipient (prior to potential affiliate payment)
+     *        feeRecipients[0] User who receives the proceeds of the sale (it can be the taker ask user or different)
      *        feeRecipients[1] Creator fee recipient (if none, address(0))
-     *        feeRecipients[2] User who receives the proceeds of the sale (it can be the taker ask user or different)
+     *        feeRecipients[2] Protocol fee recipient (prior to potential affiliate payment)
      * @param feeAmounts Array of fee amounts
      */
     event TakerAsk(
@@ -65,7 +65,7 @@ interface ILooksRareProtocol {
         address collection,
         uint256[] itemIds,
         uint256[] amounts,
-        address[3] feeRecipients,
+        address[2] feeRecipients,
         uint256[3] feeAmounts
     );
 
@@ -80,9 +80,9 @@ interface ILooksRareProtocol {
      * @param itemIds Array of item ids
      * @param amounts Array of amounts (for item ids)
      * @param feeRecipients Array of fee recipients
-     *        feeRecipients[0] Protocol fee recipient (prior to potential affiliate payment)
+     *        feeRecipients[0] User who receives the proceeds of the sale (it is the maker ask user)
      *        feeRecipients[1] Creator fee recipient (if none, address(0))
-     *        feeRecipients[2] User who receives the proceeds of the sale (it is always the maker ask user)
+     *        feeRecipients[2] Protocol fee recipient (prior to potential affiliate payment)
      * @param feeAmounts Array of fee amounts
      */
     event TakerBid(
@@ -94,7 +94,7 @@ interface ILooksRareProtocol {
         address collection,
         uint256[] itemIds,
         uint256[] amounts,
-        address[3] feeRecipients,
+        address[2] feeRecipients,
         uint256[3] feeAmounts
     );
 

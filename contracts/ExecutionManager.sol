@@ -104,7 +104,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         returns (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address[3] memory recipients,
+            address[2] memory recipients,
             uint256[3] memory fees,
             bool isNonceInvalidated
         )
@@ -159,18 +159,17 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
 
         if (fees[1] == 0) {
             // If creator fee is null, protocol fee is set as the minimum total fee amount
-            fees[0] = minTotalFeeAmount;
+            fees[2] = minTotalFeeAmount;
             // Net fee for seller
-            fees[2] = price - fees[0];
+            fees[0] = price - fees[2];
         } else {
-            // If there is a creator fee information, the protocol fee amount can be calculated
-            fees[0] = _calculateProtocolFeeAmount(price, makerBid.strategyId, fees[1], minTotalFeeAmount);
+            // If there is a creator fee, the protocol fee amount can be calculated
+            fees[2] = _calculateProtocolFeeAmount(price, makerBid.strategyId, fees[1], minTotalFeeAmount);
             // Net fee for seller
-            fees[2] = price - fees[1] - fees[0];
+            fees[0] = price - fees[1] - fees[2];
         }
 
-        recipients[0] = protocolFeeRecipient;
-        recipients[2] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
+        recipients[0] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
     }
 
     /**
@@ -191,7 +190,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         returns (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address[3] memory recipients,
+            address[2] memory recipients,
             uint256[3] memory fees,
             bool isNonceInvalidated
         )
@@ -245,18 +244,17 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
 
         if (fees[1] == 0) {
             // If creator fee is null, protocol fee is set as the minimum total fee amount
-            fees[0] = minTotalFeeAmount;
+            fees[2] = minTotalFeeAmount;
             // Net fee amount for seller
-            fees[2] = price - fees[0];
+            fees[0] = price - fees[2];
         } else {
-            // If there is a creator fee information, the protocol fee amount can be calculated
-            fees[0] = _calculateProtocolFeeAmount(price, makerAsk.strategyId, fees[1], minTotalFeeAmount);
+            // If there is a creator fee, the protocol fee amount can be calculated
+            fees[2] = _calculateProtocolFeeAmount(price, makerAsk.strategyId, fees[1], minTotalFeeAmount);
             // Net fee amount for seller
-            fees[2] = price - fees[1] - fees[0];
+            fees[0] = price - fees[1] - fees[2];
         }
 
-        recipients[0] = protocolFeeRecipient;
-        recipients[2] = makerAsk.signer;
+        recipients[0] = makerAsk.signer;
     }
 
     /**

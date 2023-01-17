@@ -310,7 +310,7 @@ contract LooksRareProtocol is
         (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address[3] memory recipients,
+            address[2] memory recipients,
             uint256[3] memory fees,
             bool isNonceInvalidated
         ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
@@ -342,7 +342,7 @@ contract LooksRareProtocol is
         );
 
         // It returns the protocol fee amount
-        return fees[0];
+        return fees[2];
     }
 
     /**
@@ -376,7 +376,7 @@ contract LooksRareProtocol is
         (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address[3] memory recipients,
+            address[2] memory recipients,
             uint256[3] memory fees,
             bool isNonceInvalidated
         ) = _executeStrategyForTakerBid(takerBid, makerAsk);
@@ -415,7 +415,7 @@ contract LooksRareProtocol is
         );
 
         // It returns the protocol fee amount
-        return fees[0];
+        return fees[2];
     }
 
     /**
@@ -500,22 +500,22 @@ contract LooksRareProtocol is
      * @dev It does not send to the 0-th element in the array since it is the protocol fee, which is paid later in the execution flow.
      */
     function _transferToAskRecipientAndCreatorIfAny(
-        address[3] memory recipients,
+        address[2] memory recipients,
         uint256[3] memory fees,
         address currency,
         address bidUser
     ) private {
         // @dev There is no check for address(0), if the creator recipient is address(0), the fee is set to 0
-        if (fees[1] != 0) {
-            _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
+        if (fees[0] != 0) {
+            _transferFungibleTokens(currency, bidUser, recipients[0], fees[0]);
         }
 
         // @dev There is no check for address(0) since the ask recipient can never be address(0)
         // If ask recipient is the maker --> the signer cannot be the null address
         // If ask is the taker --> either it is the sender address or if the recipient (in TakerAsk) is set to address(0), it is adjusted to
         // the original taker address
-        if (fees[2] != 0) {
-            _transferFungibleTokens(currency, bidUser, recipients[2], fees[2]);
+        if (fees[1] != 0) {
+            _transferFungibleTokens(currency, bidUser, recipients[1], fees[1]);
         }
     }
 

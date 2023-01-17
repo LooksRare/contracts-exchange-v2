@@ -562,7 +562,7 @@ contract LooksRareProtocol is
      * @param orderHash Order hash (can be maker bid hash or maker ask hash)
      * @param signature Maker order signature
      * @param signer Maker address
-     * @dev It verifies (1) merkle proof (if necessary) (2) Signature is from the expected signer
+     * @dev It verifies (1) merkle proof (if necessary) (2) signature is from the expected signer
      */
     function _verifyMerkleProofOrOrderHash(
         OrderStructs.MerkleTree calldata merkleTree,
@@ -574,9 +574,9 @@ contract LooksRareProtocol is
             if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 revert WrongMerkleProof();
             }
-            _computeDigestAndVerify(merkleTree.hash(), signature, signer);
-        } else {
-            _computeDigestAndVerify(orderHash, signature, signer);
+            orderHash = merkleTree.hash();
         }
+
+        _computeDigestAndVerify(orderHash, signature, signer);
     }
 }

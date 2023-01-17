@@ -64,11 +64,12 @@ contract StrategyDutchAuction is BaseStrategy {
             revert OrderInvalid();
         }
 
-        uint256 duration = makerAsk.endTime - makerAsk.startTime;
-        uint256 decayPerSecond = (startPrice - makerAsk.minPrice) / duration;
+        uint256 startTime = makerAsk.startTime;
+        uint256 endTime = makerAsk.endTime;
 
-        uint256 elapsedTime = block.timestamp - makerAsk.startTime;
-        price = startPrice - elapsedTime * decayPerSecond;
+        price =
+            ((endTime - block.timestamp) * startPrice + (block.timestamp - startTime) * makerAsk.minPrice) /
+            (endTime - startTime);
 
         if (takerBid.maxPrice < price) {
             revert BidTooLow();

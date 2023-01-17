@@ -35,7 +35,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
 
         vm.expectEmit(false, false, false, true);
         emit StrategyUpdated(strategyId, isActive, standardProtocolFeeBp, minTotalFeeBp);
-        looksRareProtocol.updateStrategy(strategyId, standardProtocolFeeBp, minTotalFeeBp, isActive);
+        looksRareProtocol.updateStrategy(strategyId, isActive, standardProtocolFeeBp, minTotalFeeBp);
 
         (
             bool strategyIsActive,
@@ -99,7 +99,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
 
         vm.expectEmit(false, false, false, true);
         emit StrategyUpdated(strategyId, isActive, newStandardProtocolFeeBp, newMinTotalFeeBp);
-        looksRareProtocol.updateStrategy(strategyId, newStandardProtocolFeeBp, newMinTotalFeeBp, isActive);
+        looksRareProtocol.updateStrategy(strategyId, isActive, newStandardProtocolFeeBp, newMinTotalFeeBp);
 
         (
             bool strategyIsActive,
@@ -138,17 +138,17 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         uint16 newStandardProtocolFee = maxProtocolFeeBp + 1;
         uint16 newMinTotalFee = currentMinTotalFee;
         vm.expectRevert(StrategyProtocolFeeTooHigh.selector);
-        looksRareProtocol.updateStrategy(0, newStandardProtocolFee, newMinTotalFee, true);
+        looksRareProtocol.updateStrategy(0, true, newStandardProtocolFee, newMinTotalFee);
 
         // 2. newMinTotalFee is higher than maxProtocolFeeBp
         newStandardProtocolFee = currentStandardProtocolFee;
         newMinTotalFee = maxProtocolFeeBp + 1;
         vm.expectRevert(StrategyProtocolFeeTooHigh.selector);
-        looksRareProtocol.updateStrategy(0, newStandardProtocolFee, newMinTotalFee, true);
+        looksRareProtocol.updateStrategy(0, true, newStandardProtocolFee, newMinTotalFee);
 
         // 3. It reverts if strategy doesn't exist
         vm.expectRevert(StrategyNotUsed.selector);
-        looksRareProtocol.updateStrategy(1, currentStandardProtocolFee, currentMinTotalFee, true);
+        looksRareProtocol.updateStrategy(1, true, currentStandardProtocolFee, currentMinTotalFee);
     }
 
     /**
@@ -262,6 +262,6 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
 
     function testUpdateStrategyNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        looksRareProtocol.updateStrategy(0, 299, 100, false);
+        looksRareProtocol.updateStrategy(0, false, 299, 100);
     }
 }

@@ -499,7 +499,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         vm.startPrank(_owner);
         strategyUSDDynamicAsk.updateMaxLatency(3_600);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
+        looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
         vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);

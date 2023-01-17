@@ -39,7 +39,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         assertEq(errorSelector, _EMPTY_BYTES4);
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
+        looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         _executeTakerAsk(takerAsk, makerBid, signature);

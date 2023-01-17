@@ -179,7 +179,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
+        looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         {
             itemIds = new uint256[](1);

@@ -28,7 +28,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         _setPriceFeed();
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
+        looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);

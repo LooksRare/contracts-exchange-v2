@@ -147,7 +147,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
 
         vm.prank(_owner);
-        looksRareProtocol.updateStrategy(1, _standardProtocolFeeBp, _minTotalFeeBp, false);
+        looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);

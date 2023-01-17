@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 // Libraries
 import {OrderStructs} from "../../libraries/OrderStructs.sol";
+import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 
 // Interfaces
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
@@ -80,7 +81,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
             }
         }
 
-        _allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
+        CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
 

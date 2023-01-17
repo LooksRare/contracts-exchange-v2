@@ -43,25 +43,4 @@ abstract contract BaseStrategy is IBaseStrategy {
             }
         }
     }
-
-    /**
-     * @dev This is equivalent to
-     *      if (makerAsk.currency != address(0)) {
-     *          if (makerAsk.currency != WETH) {
-     *              revert WrongCurrency();
-     *          }
-     *      }
-     *
-     *      1. If orderCurrency == WETH, allowedCurrency == WETH -> WETH * 0 == 0
-     *      2. If orderCurrency == ETH,  allowedCurrency == WETH -> 0 * 1 == 0
-     *      3. If orderCurrency == USDC, allowedCurrency == WETH -> USDC * 1 != 0
-     */
-    function _allowNativeOrAllowedCurrency(address orderCurrency, address allowedCurrency) internal pure {
-        assembly {
-            if mul(orderCurrency, iszero(eq(orderCurrency, allowedCurrency))) {
-                mstore(0x00, WrongCurrency_error_selector)
-                revert(Error_selector_offset, WrongCurrency_error_length)
-            }
-        }
-    }
 }

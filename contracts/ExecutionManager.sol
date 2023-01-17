@@ -92,7 +92,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      * @return itemIds Array of item ids to be traded
      * @return amounts Array of amounts for each item id
      * @return recipients Array of recipient addresses
-     * @return fees Array of fee amounts for recipients
+     * @return feeAmounts Array of fee amounts
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      */
     function _executeStrategyForTakerAsk(
@@ -105,7 +105,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             uint256[] memory itemIds,
             uint256[] memory amounts,
             address[2] memory recipients,
-            uint256[3] memory fees,
+            uint256[3] memory feeAmounts,
             bool isNonceInvalidated
         )
     {
@@ -143,12 +143,12 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
 
         // Creator fee and adjustment of protocol fee
         if (address(creatorFeeManager) != address(0)) {
-            (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerBid.collection, price, itemIds);
+            (recipients[1], feeAmounts[1]) = creatorFeeManager.viewCreatorFeeInfo(makerBid.collection, price, itemIds);
 
             if (recipients[1] == address(0)) {
                 // If recipient is null address, creator fee is set at 0
-                fees[1] = 0;
-            } else if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+                feeAmounts[1] = 0;
+            } else if (feeAmounts[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
                 // If creator fee is higher than tolerated, it reverts
                 revert CreatorFeeBpTooHigh();
             }
@@ -157,16 +157,16 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         // Compute minimum total fee amount
         uint256 minTotalFeeAmount = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
 
-        if (fees[1] == 0) {
+        if (feeAmounts[1] == 0) {
             // If creator fee is null, protocol fee is set as the minimum total fee amount
-            fees[2] = minTotalFeeAmount;
+            feeAmounts[2] = minTotalFeeAmount;
             // Net fee for seller
-            fees[0] = price - fees[2];
+            feeAmounts[0] = price - feeAmounts[2];
         } else {
             // If there is a creator fee, the protocol fee amount can be calculated
-            fees[2] = _calculateProtocolFeeAmount(price, makerBid.strategyId, fees[1], minTotalFeeAmount);
+            feeAmounts[2] = _calculateProtocolFeeAmount(price, makerBid.strategyId, feeAmounts[1], minTotalFeeAmount);
             // Net fee for seller
-            fees[0] = price - fees[1] - fees[2];
+            feeAmounts[0] = price - feeAmounts[1] - feeAmounts[2];
         }
 
         recipients[0] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
@@ -179,7 +179,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      * @return itemIds Array of item ids to be traded
      * @return amounts Array of amounts for each item id
      * @return recipients Array of recipient addresses
-     * @return fees Array of fee amounts for recipients
+     * @return feeAmounts Array of fee amounts
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      */
     function _executeStrategyForTakerBid(
@@ -191,7 +191,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             uint256[] memory itemIds,
             uint256[] memory amounts,
             address[2] memory recipients,
-            uint256[3] memory fees,
+            uint256[3] memory feeAmounts,
             bool isNonceInvalidated
         )
     {
@@ -228,12 +228,12 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
 
         // Creator fee amount and adjustment of protocol fee amount
         if (address(creatorFeeManager) != address(0)) {
-            (recipients[1], fees[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
+            (recipients[1], feeAmounts[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
 
             if (recipients[1] == address(0)) {
                 // If recipient is null address, creator fee is set at 0
-                fees[1] = 0;
-            } else if (fees[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+                feeAmounts[1] = 0;
+            } else if (feeAmounts[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
                 // If creator fee is higher than tolerated, it reverts
                 revert CreatorFeeBpTooHigh();
             }
@@ -242,23 +242,23 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         // Compute minimum total fee amount
         uint256 minTotalFeeAmount = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
 
-        if (fees[1] == 0) {
+        if (feeAmounts[1] == 0) {
             // If creator fee is null, protocol fee is set as the minimum total fee amount
-            fees[2] = minTotalFeeAmount;
+            feeAmounts[2] = minTotalFeeAmount;
             // Net fee amount for seller
-            fees[0] = price - fees[2];
+            feeAmounts[0] = price - feeAmounts[2];
         } else {
             // If there is a creator fee, the protocol fee amount can be calculated
-            fees[2] = _calculateProtocolFeeAmount(price, makerAsk.strategyId, fees[1], minTotalFeeAmount);
+            feeAmounts[2] = _calculateProtocolFeeAmount(price, makerAsk.strategyId, feeAmounts[1], minTotalFeeAmount);
             // Net fee amount for seller
-            fees[0] = price - fees[1] - fees[2];
+            feeAmounts[0] = price - feeAmounts[1] - feeAmounts[2];
         }
 
         recipients[0] = makerAsk.signer;
     }
 
     /**
-     * @notice This function is internal and used to calculate the protocol fee amount for a given set of fees.
+     * @notice This function is internal and used to calculate the protocol fee amount for a given set of feeAmounts.
      * @param price Transaction price
      * @param strategyId Strategy id
      * @param creatorFeeAmount Creator fee amount

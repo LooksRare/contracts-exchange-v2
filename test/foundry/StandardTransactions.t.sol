@@ -43,18 +43,17 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Arrays for events
         uint256[3] memory expectedFees;
-        address[3] memory expectedRecipients;
+        address[2] memory expectedRecipients;
 
-        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        if (expectedFees[0] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
-            expectedFees[0] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
         }
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+        expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
-        expectedRecipients[0] = _owner;
+        expectedRecipients[0] = makerUser;
         expectedRecipients[1] = _royaltyRecipient;
-        expectedRecipients[2] = makerUser;
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -90,7 +89,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + expectedFees[2]);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + expectedFees[0]);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);
         // No leftover in the balance of the contract
@@ -132,18 +131,19 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Arrays for events
         uint256[3] memory expectedFees;
-        address[3] memory expectedRecipients;
+        address[2] memory expectedRecipients;
 
-        expectedFees[0] = (price * _minTotalFeeBp) / 10_000; // 2% is paid instead of 1.5%
+        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = 0; // No royalties
-        if (expectedFees[0] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
-            expectedFees[0] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
-        }
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
 
-        expectedRecipients[0] = _owner;
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
+        }
+
+        expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
+
+        expectedRecipients[0] = makerUser;
         expectedRecipients[1] = address(0); // No royalties
-        expectedRecipients[2] = makerUser;
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -179,7 +179,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + expectedFees[2]);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + expectedFees[0]);
     }
 
     /**
@@ -214,18 +214,17 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Arrays for events
         uint256[3] memory expectedFees;
-        address[3] memory expectedRecipients;
+        address[2] memory expectedRecipients;
 
-        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        if (expectedFees[0] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
-            expectedFees[0] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
         }
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+        expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
-        expectedRecipients[0] = _owner;
+        expectedRecipients[0] = takerUser;
         expectedRecipients[1] = _royaltyRecipient;
-        expectedRecipients[2] = takerUser;
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -256,9 +255,9 @@ contract StandardTransactionsTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + expectedFees[2]);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + expectedFees[0]);
         // Owner receives 1.5% of the whole price
-        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + expectedFees[0]);
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + expectedFees[2]);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient + expectedFees[1]);
         // Verify the nonce is marked as executed
@@ -298,18 +297,18 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Arrays for events
         uint256[3] memory expectedFees;
-        address[3] memory expectedRecipients;
+        address[2] memory expectedRecipients;
 
-        expectedFees[0] = (price * _minTotalFeeBp) / 10_000; // 2% is paid instead of 1.5%
+        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = 0; // No royalties
-        if (expectedFees[0] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
-            expectedFees[0] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
-        }
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
 
-        expectedRecipients[0] = _owner;
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
+        }
+        expectedFees[0] = price - expectedFees[1] - expectedFees[2];
+
+        expectedRecipients[0] = takerUser;
         expectedRecipients[1] = address(0); // No royalties
-        expectedRecipients[2] = takerUser;
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -339,7 +338,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + expectedFees[2]);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + expectedFees[0]);
     }
 
     /**

@@ -44,15 +44,14 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         _isMakerBidOrderValid(makerBid, signature);
 
         // Arrays for events
-        address[3] memory expectedRecipients;
-        expectedRecipients[0] = _owner;
+        address[2] memory expectedRecipients;
+        expectedRecipients[0] = randomRecipientSaleProceeds;
         expectedRecipients[1] = _royaltyRecipient;
-        expectedRecipients[2] = randomRecipientSaleProceeds;
 
         uint256[3] memory expectedFees;
-        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+        expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
         vm.prank(takerUser);
         vm.expectEmit(true, false, false, true);
@@ -124,15 +123,14 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         _isMakerAskOrderValid(makerAsk, signature);
 
         // Arrays for events
-        address[3] memory expectedRecipients;
-        expectedRecipients[0] = _owner;
+        address[2] memory expectedRecipients;
+        expectedRecipients[0] = makerUser;
         expectedRecipients[1] = _royaltyRecipient;
-        expectedRecipients[2] = makerUser;
 
         uint256[3] memory expectedFees;
-        expectedFees[0] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[0] = price - (expectedFees[1] + expectedFees[0]);
         expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        expectedFees[2] = price - (expectedFees[1] + expectedFees[0]);
+        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
 
         vm.prank(takerUser);
 

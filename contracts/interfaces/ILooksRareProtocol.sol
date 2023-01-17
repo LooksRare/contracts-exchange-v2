@@ -51,10 +51,12 @@ interface ILooksRareProtocol {
      * @param itemIds Array of item ids
      * @param amounts Array of amounts (for item ids)
      * @param feeRecipients Array of fee recipients
-     *        feeRecipients[0] Protocol fee recipient (prior to potential affiliate payment)
+     *        feeRecipients[0] User who receives the proceeds of the sale (it can be the taker ask user or different)
      *        feeRecipients[1] Creator fee recipient (if none, address(0))
-     *        feeRecipients[2] User who receives the proceeds of the sale (it can be the taker ask user or different)
      * @param feeAmounts Array of fee amounts
+     *        feeAmounts[0] Fee amount for the user receiving sale proceeds
+     *        feeAmounts[1] Creator fee amount
+     *        feeAmounts[2] Protocol fee amount prior to adjustment for a potential affiliate payment
      */
     event TakerAsk(
         SignatureParameters signatureParameters,
@@ -65,7 +67,7 @@ interface ILooksRareProtocol {
         address collection,
         uint256[] itemIds,
         uint256[] amounts,
-        address[3] feeRecipients,
+        address[2] feeRecipients,
         uint256[3] feeAmounts
     );
 
@@ -80,10 +82,12 @@ interface ILooksRareProtocol {
      * @param itemIds Array of item ids
      * @param amounts Array of amounts (for item ids)
      * @param feeRecipients Array of fee recipients
-     *        feeRecipients[0] Protocol fee recipient (prior to potential affiliate payment)
+     *        feeRecipients[0] User who receives the proceeds of the sale (it is the maker ask user)
      *        feeRecipients[1] Creator fee recipient (if none, address(0))
-     *        feeRecipients[2] User who receives the proceeds of the sale (it is always the maker ask user)
      * @param feeAmounts Array of fee amounts
+     *        feeAmounts[0] Fee amount for the user receiving sale proceeds
+     *        feeAmounts[1] Creator fee amount
+     *        feeAmounts[2] Protocol fee amount prior to adjustment for a potential affiliate payment
      */
     event TakerBid(
         SignatureParameters signatureParameters,
@@ -94,7 +98,7 @@ interface ILooksRareProtocol {
         address collection,
         uint256[] itemIds,
         uint256[] amounts,
-        address[3] feeRecipients,
+        address[2] feeRecipients,
         uint256[3] feeAmounts
     );
 

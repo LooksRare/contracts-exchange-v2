@@ -68,7 +68,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         looksRareProtocol.updateAffiliateController(_owner);
 
         address randomAffiliate = address(42);
-        uint256 affiliateRateLimitBp = 10000;
+        uint256 affiliateRateLimitBp = 10_000;
         vm.expectRevert(IAffiliateManager.PercentageTooHigh.selector);
         looksRareProtocol.updateAffiliateRate(randomAffiliate, affiliateRateLimitBp + 1);
 

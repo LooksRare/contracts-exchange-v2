@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 // Libraries, interfaces, errors
-import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 
@@ -10,6 +9,8 @@ import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract StandardTransactionsTest is ProtocolBase {
+    error ERC721TransferFromFail();
+
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
@@ -470,14 +471,7 @@ contract StandardTransactionsTest is ProtocolBase {
             // Other execution parameters
             OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-            // NFTTransferFail(address collection, uint256 assetType);
-            vm.expectRevert(
-                abi.encodeWithSelector(
-                    ITransferSelectorNFT.NFTTransferFail.selector,
-                    makerAsks[faultyTokenId].collection,
-                    0
-                )
-            );
+            vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
             vm.prank(takerUser);
             looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
                 takerBids,

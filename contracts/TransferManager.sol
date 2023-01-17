@@ -8,7 +8,7 @@ import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLe
 
 // Interfaces and errors
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {WrongLengths} from "./interfaces/SharedErrors.sol";
+import {WrongAssetType, WrongLengths} from "./interfaces/SharedErrors.sol";
 
 /**
  * @title TransferManager

@@ -8,8 +8,6 @@ import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-import "hardhat/console.sol";
-
 contract StandardTransactionsTest is ProtocolBase {
     error ERC721TransferFromFail();
 

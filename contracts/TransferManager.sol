@@ -175,15 +175,17 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         }
 
         for (uint256 i; i < length; ) {
-            if (!isOperatorWhitelisted[operators[i]]) {
+            address operator = operators[i];
+
+            if (!isOperatorWhitelisted[operator]) {
                 revert NotWhitelisted();
             }
 
-            if (hasUserApprovedOperator[msg.sender][operators[i]]) {
+            if (hasUserApprovedOperator[msg.sender][operator]) {
                 revert AlreadyApproved();
             }
 
-            hasUserApprovedOperator[msg.sender][operators[i]] = true;
+            hasUserApprovedOperator[msg.sender][operator] = true;
 
             unchecked {
                 ++i;
@@ -205,11 +207,13 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         }
 
         for (uint256 i; i < length; ) {
-            if (!hasUserApprovedOperator[msg.sender][operators[i]]) {
+            address operator = operators[i];
+
+            if (!hasUserApprovedOperator[msg.sender][operator]) {
                 revert NotApproved();
             }
 
-            delete hasUserApprovedOperator[msg.sender][operators[i]];
+            delete hasUserApprovedOperator[msg.sender][operator];
             unchecked {
                 ++i;
             }

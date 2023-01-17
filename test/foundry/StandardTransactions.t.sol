@@ -47,8 +47,8 @@ contract StandardTransactionsTest is ProtocolBase {
 
         expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
         }
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
@@ -136,8 +136,8 @@ contract StandardTransactionsTest is ProtocolBase {
         expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = 0; // No royalties
 
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
         }
 
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
@@ -218,8 +218,8 @@ contract StandardTransactionsTest is ProtocolBase {
 
         expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
         }
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
@@ -302,8 +302,8 @@ contract StandardTransactionsTest is ProtocolBase {
         expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
         expectedFees[1] = 0; // No royalties
 
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10000) - expectedFees[1];
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
         }
         expectedFees[0] = price - expectedFees[1] - expectedFees[2];
 

@@ -15,8 +15,9 @@ import {WrongFunctionSelector} from "../../../../contracts/interfaces/SharedErro
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
 import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
-// Other tests
+// Mocks and other tests
 import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
+import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
 abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
@@ -83,6 +84,15 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         assertEq(strategyFloorFromChainlink.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
+    }
+
+    function testSetPriceFeedInvalidDecimals(uint8 decimals) public asPrankedUser(_owner) {
+        vm.assume(decimals != 18);
+
+        MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
+        priceFeed.setDecimals(decimals);
+        vm.expectRevert(BaseStrategyChainlinkMultiplePriceFeeds.InvalidDecimals.selector);
+        strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(priceFeed));
     }
 
     function testPriceFeedCannotBeSetTwice() public asPrankedUser(_owner) {

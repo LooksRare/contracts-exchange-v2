@@ -190,39 +190,62 @@ contract LooksRareProtocol is
         }
 
         {
-            // Initialize protocol fee
+            // Initialize protocol fee amount
             uint256 totalProtocolFeeAmount;
 
-            for (uint256 i; i < length; ) {
-                OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
+            // If atomic, it uses the executeTakerBid function.
+            // If not atomic, it uses a catch/revert pattern with external function.
+            if (isAtomic) {
+                for (uint256 i; i < length; ) {
+                    OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
 
-                // Verify currency is the same
-                if (i != 0) {
-                    if (makerAsk.currency != currency) {
-                        revert WrongCurrency();
+                    // Verify currency is the same
+                    if (i != 0) {
+                        if (makerAsk.currency != currency) {
+                            revert WrongCurrency();
+                        }
                     }
-                }
 
-                OrderStructs.TakerBid calldata takerBid = takerBids[i];
-                bytes32 orderHash = makerAsk.hash();
+                    OrderStructs.TakerBid calldata takerBid = takerBids[i];
+                    bytes32 orderHash = makerAsk.hash();
 
-                {
-                    _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
+                    {
+                        _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
 
-                    // If atomic, it uses the executeTakerBid function, if not atomic, it uses a catch/revert pattern with external function
-                    if (isAtomic) {
                         // Execute the transaction and add protocol fee
                         totalProtocolFeeAmount += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
-                    } else {
+
+                        unchecked {
+                            ++i;
+                        }
+                    }
+                }
+            } else {
+                for (uint256 i; i < length; ) {
+                    OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
+
+                    // Verify currency is the same
+                    if (i != 0) {
+                        if (makerAsk.currency != currency) {
+                            revert WrongCurrency();
+                        }
+                    }
+
+                    OrderStructs.TakerBid calldata takerBid = takerBids[i];
+                    bytes32 orderHash = makerAsk.hash();
+
+                    {
+                        _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
+
                         try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
                             uint256 protocolFeeAmount
                         ) {
                             totalProtocolFeeAmount += protocolFeeAmount;
                         } catch {}
-                    }
 
-                    unchecked {
-                        ++i;
+                        unchecked {
+                            ++i;
+                        }
                     }
                 }
             }

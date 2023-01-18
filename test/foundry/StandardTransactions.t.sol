@@ -42,15 +42,8 @@ contract StandardTransactionsTest is ProtocolBase {
         _isMakerAskOrderValid(makerAsk, signature);
 
         // Arrays for events
-        uint256[3] memory expectedFees;
+        uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: _standardRoyaltyFee});
         address[2] memory expectedRecipients;
-
-        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
-        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
-        }
-        expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
         expectedRecipients[0] = makerUser;
         expectedRecipients[1] = _royaltyRecipient;
@@ -130,17 +123,8 @@ contract StandardTransactionsTest is ProtocolBase {
         _isMakerAskOrderValid(makerAsk, signature);
 
         // Arrays for events
-        uint256[3] memory expectedFees;
+        uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: 0});
         address[2] memory expectedRecipients;
-
-        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
-        expectedFees[1] = 0; // No royalties
-
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
-        }
-
-        expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
         expectedRecipients[0] = makerUser;
         expectedRecipients[1] = address(0); // No royalties
@@ -213,15 +197,8 @@ contract StandardTransactionsTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Arrays for events
-        uint256[3] memory expectedFees;
+        uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: _standardRoyaltyFee});
         address[2] memory expectedRecipients;
-
-        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
-        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
-        }
-        expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
         expectedRecipients[0] = takerUser;
         expectedRecipients[1] = _royaltyRecipient;
@@ -296,16 +273,8 @@ contract StandardTransactionsTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Arrays for events
-        uint256[3] memory expectedFees;
+        uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: 0});
         address[2] memory expectedRecipients;
-
-        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
-        expectedFees[1] = 0; // No royalties
-
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
-        }
-        expectedFees[0] = price - expectedFees[1] - expectedFees[2];
 
         expectedRecipients[0] = takerUser;
         expectedRecipients[1] = address(0); // No royalties
@@ -576,5 +545,17 @@ contract StandardTransactionsTest is ProtocolBase {
             _EMPTY_AFFILIATE,
             false
         );
+    }
+
+    function _calculateExpectedFees(
+        uint256 price,
+        uint256 royaltyFeeBp
+    ) private pure returns (uint256[3] memory expectedFees) {
+        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[1] = (price * royaltyFeeBp) / 10_000;
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
+        }
+        expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
     }
 }

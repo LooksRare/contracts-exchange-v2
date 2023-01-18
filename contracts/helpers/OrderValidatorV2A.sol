@@ -223,7 +223,7 @@ contract OrderValidatorV2A {
 
         // It can exit here if the strategy doesn't exist. However, if the strategy isn't valid, it can continue the execution.
         if (
-            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_TAKER_BID_SELECTOR_INVALID
+            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_MAKER_ASK_SELECTOR_INVALID
         ) {
             return validationCodes;
         }
@@ -277,7 +277,7 @@ contract OrderValidatorV2A {
 
         // It can exit here if the strategy doesn't exist. However, if the strategy isn't valid, it can continue the execution.
         if (
-            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_TAKER_ASK_SELECTOR_INVALID
+            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_MAKER_BID_SELECTOR_INVALID
         ) {
             return validationCodes;
         }
@@ -429,7 +429,7 @@ contract OrderValidatorV2A {
         }
 
         if (strategyId != 0 && (strategySelector == bytes4(0) || strategyIsMakerBid)) {
-            return STRATEGY_TAKER_BID_SELECTOR_INVALID;
+            return STRATEGY_MAKER_ASK_SELECTOR_INVALID;
         }
 
         if (!strategyIsActive) {
@@ -468,7 +468,7 @@ contract OrderValidatorV2A {
         }
 
         if (strategyId != 0 && (strategySelector == bytes4(0) || !strategyIsMakerBid)) {
-            return STRATEGY_TAKER_ASK_SELECTOR_INVALID;
+            return STRATEGY_MAKER_BID_SELECTOR_INVALID;
         }
 
         if (!strategyIsActive) {
@@ -911,21 +911,22 @@ contract OrderValidatorV2A {
             price = makerAsk.minPrice;
 
             uint256 length = itemIds.length;
+
             if (length == 0 || (amounts.length != length)) {
                 validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-            }
+            } else {
+                for (uint256 i; i < length; ) {
+                    if (amounts[i] == 0) {
+                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                    }
 
-            for (uint256 i; i < length; ) {
-                if (amounts[i] == 0) {
-                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                }
+                    if (makerAsk.assetType == 0 && amounts[i] != 1) {
+                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                    }
 
-                if (makerAsk.assetType == 0 && amounts[i] != 1) {
-                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                }
-
-                unchecked {
-                    ++i;
+                    unchecked {
+                        ++i;
+                    }
                 }
             }
         } else {
@@ -968,6 +969,7 @@ contract OrderValidatorV2A {
             price = makerBid.maxPrice;
 
             uint256 length = itemIds.length;
+
             if (length == 0 || (amounts.length != length)) {
                 validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
             } else {

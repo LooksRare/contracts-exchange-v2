@@ -116,8 +116,10 @@ contract LooksRareProtocol is
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
     ) external nonReentrant {
+        address currency = makerBid.currency;
+
         // Verify whether the currency is whitelisted but is not ETH (address(0))
-        if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) {
+        if (!isCurrencyWhitelisted[currency] || currency == address(0)) {
             revert WrongCurrency();
         }
 
@@ -129,7 +131,7 @@ contract LooksRareProtocol is
         uint256 totalProtocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, orderHash);
 
         // Pay protocol fee (and affiliate fee if any)
-        _payProtocolFeeAndAffiliateFee(makerBid.currency, signer, affiliate, totalProtocolFeeAmount);
+        _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, totalProtocolFeeAmount);
     }
 
     /**
@@ -142,8 +144,10 @@ contract LooksRareProtocol is
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
     ) external payable nonReentrant {
+        address currency = makerAsk.currency;
+
         // Verify whether the currency is whitelisted
-        if (!isCurrencyWhitelisted[makerAsk.currency]) {
+        if (!isCurrencyWhitelisted[currency]) {
             revert WrongCurrency();
         }
 
@@ -154,7 +158,7 @@ contract LooksRareProtocol is
         uint256 totalProtocolFeeAmount = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
 
         // Pay protocol fee amount (and affiliate fee if any)
-        _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFeeAmount);
+        _payProtocolFeeAndAffiliateFee(currency, msg.sender, affiliate, totalProtocolFeeAmount);
 
         // Return ETH if any
         _returnETHIfAnyWithOneWeiLeft();

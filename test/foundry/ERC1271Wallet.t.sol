@@ -27,9 +27,6 @@ contract ERC1271WalletTest is ProtocolBase {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
     }
 
-    /**
-     * One ERC721 (where royalties come from the registry) is sold through a taker bid
-     */
     function testTakerBid() public {
         ERC1271WalletMock wallet = new ERC1271WalletMock(address(makerUser));
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup(

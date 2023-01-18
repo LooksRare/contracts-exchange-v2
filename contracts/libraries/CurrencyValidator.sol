@@ -13,8 +13,8 @@ import {WrongCurrency_error_selector, WrongCurrency_error_length, Error_selector
 library CurrencyValidator {
     /**
      * @dev This is equivalent to
-     *      if (makerAsk.currency != address(0)) {
-     *          if (makerAsk.currency != WETH) {
+     *      if (orderCurrency != address(0)) {
+     *          if (orderCurrency != allowedCurrency) {
      *              revert WrongCurrency();
      *          }
      *      }

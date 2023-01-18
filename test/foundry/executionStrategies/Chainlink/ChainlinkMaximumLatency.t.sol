@@ -13,29 +13,32 @@ import {ProtocolBase} from "../../ProtocolBase.t.sol";
 contract ChainlinkMaximumLatencyTest is ProtocolBase {
     event MaxLatencyUpdated(uint256 newMaxLatency);
 
-    function _testSetMaximumLatency(address _strategy) internal {
+    function _testSetMaximumLatency(address _strategy, uint256 _maxLatency) internal {
         BaseStrategyChainlinkPriceLatency strategy = BaseStrategyChainlinkPriceLatency(_strategy);
+        vm.assume(_maxLatency <= strategy.absoluteMaxLatency());
 
         vm.expectEmit(true, false, false, true);
-        emit MaxLatencyUpdated(86_400);
+        emit MaxLatencyUpdated(_maxLatency);
         vm.prank(_owner);
-        strategy.updateMaxLatency(86_400);
+        strategy.updateMaxLatency(_maxLatency);
 
-        assertEq(strategy.maxLatency(), 86_400);
+        assertEq(strategy.maxLatency(), _maxLatency);
     }
 
-    function _testSetMaximumLatencyLatencyToleranceTooHigh(address _strategy) internal {
+    function _testSetMaximumLatencyLatencyToleranceTooHigh(address _strategy, uint256 _maxLatency) internal {
         BaseStrategyChainlinkPriceLatency strategy = BaseStrategyChainlinkPriceLatency(_strategy);
+        vm.assume(_maxLatency > strategy.absoluteMaxLatency());
 
         vm.expectRevert(BaseStrategyChainlinkPriceLatency.LatencyToleranceTooHigh.selector);
         vm.prank(_owner);
-        strategy.updateMaxLatency(86_401);
+        strategy.updateMaxLatency(_maxLatency);
     }
 
     function _testSetMaximumLatencyNotOwner(address _strategy) internal {
         BaseStrategyChainlinkPriceLatency strategy = BaseStrategyChainlinkPriceLatency(_strategy);
+        uint256 absoluteMaxLatency = strategy.absoluteMaxLatency();
 
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        strategy.updateMaxLatency(86_400);
+        strategy.updateMaxLatency(absoluteMaxLatency);
     }
 }

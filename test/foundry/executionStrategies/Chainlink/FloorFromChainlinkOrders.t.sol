@@ -65,12 +65,16 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(strategyImplementation, address(strategyFloorFromChainlink));
     }
 
-    function testSetMaximumLatency() public {
-        _testSetMaximumLatency(address(strategyFloorFromChainlink));
+    function testAbsoluteMaxLatency() public {
+        assertEq(strategyFloorFromChainlink.absoluteMaxLatency(), MAXIMUM_LATENCY);
     }
 
-    function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloorFromChainlink));
+    function testSetMaximumLatency(uint256 maxLatency) public {
+        _testSetMaximumLatency(address(strategyFloorFromChainlink), maxLatency);
+    }
+
+    function testSetMaximumLatencyLatencyToleranceTooHigh(uint256 maxLatency) public {
+        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloorFromChainlink), maxLatency);
     }
 
     function testSetMaximumLatencyNotOwner() public {

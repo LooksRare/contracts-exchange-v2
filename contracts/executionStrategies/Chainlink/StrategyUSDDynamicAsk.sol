@@ -43,7 +43,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
      * @param _owner Owner address
      * @param _priceFeed Address of the ETH/USD price feed
      */
-    constructor(address _owner, address _weth, address _priceFeed) BaseStrategyChainlinkPriceLatency(_owner) {
+    constructor(address _owner, address _weth, address _priceFeed) BaseStrategyChainlinkPriceLatency(_owner, 3_600) {
         WETH = _weth;
         priceFeed = AggregatorV3Interface(_priceFeed);
     }

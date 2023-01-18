@@ -119,12 +119,16 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertEq(strategyImplementation, address(strategyUSDDynamicAsk));
     }
 
-    function testSetMaximumLatency() public {
-        _testSetMaximumLatency(address(strategyUSDDynamicAsk));
+    function testAbsoluteMaxLatency() public {
+        assertEq(strategyUSDDynamicAsk.absoluteMaxLatency(), 3_600);
     }
 
-    function testSetMaximumLatencyLatencyToleranceTooHigh() public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyUSDDynamicAsk));
+    function testSetMaximumLatency(uint256 maxLatency) public {
+        _testSetMaximumLatency(address(strategyUSDDynamicAsk), maxLatency);
+    }
+
+    function testSetMaximumLatencyLatencyToleranceTooHigh(uint256 maxLatency) public {
+        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyUSDDynamicAsk), maxLatency);
     }
 
     function testSetMaximumLatencyNotOwner() public {

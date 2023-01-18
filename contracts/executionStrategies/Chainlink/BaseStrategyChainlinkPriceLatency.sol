@@ -11,6 +11,11 @@ import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSte
  */
 contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
     /**
+     * @notice The absolute max price latency. It cannot be modified.
+     */
+    uint256 public immutable absoluteMaxLatency;
+
+    /**
      * @notice Maximum latency accepted after which
      *         the execution strategy rejects the retrieved price.
      */
@@ -41,7 +46,9 @@ contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
      * @notice Constructor
      * @param _owner Owner address
      */
-    constructor(address _owner) OwnableTwoSteps(_owner) {}
+    constructor(address _owner, uint256 _absoluteMaxLatency) OwnableTwoSteps(_owner) {
+        absoluteMaxLatency = _absoluteMaxLatency;
+    }
 
     /**
      * @notice This function allows the owner to update the maximum Chainlink price latency.
@@ -54,7 +61,7 @@ contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
      * @dev Only callable by owner.
      */
     function updateMaxLatency(uint256 newMaxLatency) external onlyOwner {
-        if (newMaxLatency > 86_400) revert LatencyToleranceTooHigh();
+        if (newMaxLatency > absoluteMaxLatency) revert LatencyToleranceTooHigh();
         maxLatency = newMaxLatency;
         emit MaxLatencyUpdated(newMaxLatency);
     }

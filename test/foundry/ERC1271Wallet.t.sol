@@ -18,21 +18,18 @@ contract ERC1271WalletTest is ProtocolBase {
     uint256 private constant itemId = 0;
     bytes private constant _EMPTY_SIGNATURE = new bytes(0);
 
-    MaliciousERC1271Wallet private maliciousERC1271Wallet;
-
     function setUp() public override {
         super.setUp();
         _setUpUser(takerUser);
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
-
-        maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
-        _setUpUser(address(maliciousERC1271Wallet));
     }
 
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
     function testTakerBidReentrancy() public {
+        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup(
@@ -76,6 +73,8 @@ contract ERC1271WalletTest is ProtocolBase {
     }
 
     function testTakerAskReentrancy() public {
+        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
         (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
@@ -109,6 +108,8 @@ contract ERC1271WalletTest is ProtocolBase {
     uint256 private constant numberPurchases = 3;
 
     function testExecuteMultipleTakerBidsReentrancy() public {
+        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 
         (

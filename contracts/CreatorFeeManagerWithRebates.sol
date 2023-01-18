@@ -55,7 +55,6 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
                         (address newCreator, ) = abi.decode(data, (address, uint256));
 
                         if (i == 0) {
-                            if (newCreator == address(0)) break;
                             creator = newCreator;
                         } else {
                             if (newCreator != creator) {

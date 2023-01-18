@@ -11,6 +11,8 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 contract StandardTransactionsTest is ProtocolBase {
     error ERC721TransferFromFail();
 
+    uint256 private constant itemId = 42;
+
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
@@ -18,8 +20,6 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.assume(price <= 2 ether);
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
-
-        uint256 itemId = 42;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -77,14 +77,8 @@ contract StandardTransactionsTest is ProtocolBase {
             _EMPTY_AFFILIATE
         );
 
-        // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + expectedFees[0]);
-        // Royalty recipient receives 0.5% of the whole price
-        assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);
+        _assertSuccessfulExecutionThroughETH(takerUser, makerUser, price, expectedFees);
+
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -97,7 +91,6 @@ contract StandardTransactionsTest is ProtocolBase {
     function testTakerBidERC721WithAddressZeroSpecifiedAsRecipient(uint256 price) public {
         vm.assume(price <= 2 ether);
         _setUpUsers();
-        uint256 itemId = 42;
 
         // Mint asset
         mockERC721.mint(makerUser, itemId);
@@ -158,12 +151,7 @@ contract StandardTransactionsTest is ProtocolBase {
             _EMPTY_AFFILIATE
         );
 
-        // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + expectedFees[0]);
+        _assertSuccessfulExecutionThroughETH(takerUser, makerUser, price, expectedFees);
     }
 
     /**
@@ -174,8 +162,6 @@ contract StandardTransactionsTest is ProtocolBase {
 
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
-
-        uint256 itemId = 42;
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
@@ -227,16 +213,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + expectedFees[0]);
-        // Owner receives 1.5% of the whole price
-        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + expectedFees[2]);
-        // Royalty recipient receives 0.5% of the whole price
-        assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient + expectedFees[1]);
+        _assertSuccessfulExecutionThroughWETH(makerUser, takerUser, price, expectedFees);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
@@ -247,8 +224,6 @@ contract StandardTransactionsTest is ProtocolBase {
     function testTakerAskERC721WithAddressZeroSpecifiedAsRecipient(uint256 price) public {
         vm.assume(price <= 2 ether);
         _setUpUsers();
-
-        uint256 itemId = 42;
 
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
@@ -302,12 +277,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + expectedFees[0]);
+        _assertSuccessfulExecutionThroughWETH(makerUser, takerUser, price, expectedFees);
     }
 
     /**
@@ -557,5 +527,38 @@ contract StandardTransactionsTest is ProtocolBase {
             expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
         }
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
+    }
+
+    function _assertSuccessfulExecutionThroughWETH(
+        address buyer,
+        address seller,
+        uint256 price,
+        uint256[3] memory expectedFees
+    ) private {
+        // Buyer has received the asset
+        assertEq(mockERC721.ownerOf(itemId), buyer);
+        // Buyer pays the whole price
+        assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - price);
+        // Seller receives 98% of the whole price
+        assertEq(weth.balanceOf(seller), _initialWETHBalanceUser + expectedFees[0]);
+        // Owner receives 1.5% of the whole price
+        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + expectedFees[2]);
+        // Royalty recipient receives 0.5% of the whole price
+        assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient + expectedFees[1]);
+    }
+
+    function _assertSuccessfulExecutionThroughETH(
+        address buyer,
+        address seller,
+        uint256 price,
+        uint256[3] memory expectedFees
+    ) private {
+        assertEq(mockERC721.ownerOf(itemId), buyer);
+        // Buyer pays the whole price
+        assertEq(address(buyer).balance, _initialETHBalanceUser - price);
+        // Seller receives 98% of the whole price (2%)
+        assertEq(address(seller).balance, _initialETHBalanceUser + expectedFees[0]);
+        // Royalty recipient receives 0.5% of the whole price
+        assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);
     }
 }

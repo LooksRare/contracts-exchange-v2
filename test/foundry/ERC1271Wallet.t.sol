@@ -13,6 +13,9 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MaliciousERC1271Wallet} from "./utils/MaliciousERC1271Wallet.sol";
 import {ERC1271WalletMock} from "openzeppelin-contracts/contracts/mocks/ERC1271WalletMock.sol";
 
+// Errors
+import {InvalidSignatureERC1271} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
+
 contract ERC1271WalletTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
     uint256 private constant itemId = 0;
@@ -52,6 +55,31 @@ contract ERC1271WalletTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemId), takerUser);
     }
 
+    function testTakerBidInvalidSignature() public {
+        ERC1271WalletMock wallet = new ERC1271WalletMock(address(makerUser));
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup(
+            address(wallet)
+        );
+
+        // Signed by a different private key
+        bytes memory signature = _signMakerAsk(makerAsk, takerUserPK);
+
+        vm.startPrank(address(wallet));
+        mockERC721.setApprovalForAll(address(transferManager), true);
+        transferManager.grantApprovals(operators);
+        vm.stopPrank();
+
+        vm.expectRevert(InvalidSignatureERC1271.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
+    }
+
     function testTakerBidReentrancy() public {
         MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
         _setUpUser(address(maliciousERC1271Wallet));
@@ -89,6 +117,25 @@ contract ERC1271WalletTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         assertEq(mockERC721.ownerOf(itemId), address(wallet));
+    }
+
+    function testTakerAskInvalidSignature() public {
+        ERC1271WalletMock wallet = new ERC1271WalletMock(address(makerUser));
+        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
+            address(wallet)
+        );
+
+        // Signed by a different private key
+        bytes memory signature = _signMakerBid(makerBid, takerUserPK);
+
+        // Wallet needs to hold WETH and have given WETH approval
+        deal(address(weth), address(wallet), price);
+        vm.prank(address(wallet));
+        weth.approve(address(looksRareProtocol), price);
+
+        vm.expectRevert(InvalidSignatureERC1271.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskReentrancy() public {
@@ -135,6 +182,38 @@ contract ERC1271WalletTest is ProtocolBase {
         for (uint256 i; i < numberPurchases; i++) {
             assertEq(mockERC721.ownerOf(i), takerUser);
         }
+    }
+
+    function testExecuteMultipleTakerBidsInvalidSignatures() public {
+        ERC1271WalletMock wallet = new ERC1271WalletMock(address(makerUser));
+
+        (
+            OrderStructs.MakerAsk[] memory makerAsks,
+            OrderStructs.TakerBid[] memory takerBids,
+            OrderStructs.MerkleTree[] memory merkleTrees,
+            bytes[] memory signatures
+        ) = _multipleTakerBidsSetup(address(wallet));
+
+        // Signed by a different private key
+        for (uint256 i; i < signatures.length; i++) {
+            signatures[i] = _signMakerAsk(makerAsks[i], takerUserPK);
+        }
+
+        vm.startPrank(address(wallet));
+        mockERC721.setApprovalForAll(address(transferManager), true);
+        transferManager.grantApprovals(operators);
+        vm.stopPrank();
+
+        vm.expectRevert(InvalidSignatureERC1271.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            takerBids,
+            makerAsks,
+            signatures,
+            merkleTrees,
+            _EMPTY_AFFILIATE,
+            false
+        );
     }
 
     function testExecuteMultipleTakerBidsReentrancy() public {

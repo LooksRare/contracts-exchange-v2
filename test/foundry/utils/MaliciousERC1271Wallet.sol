@@ -4,9 +4,8 @@ pragma solidity ^0.8.17;
 import {ILooksRareProtocol} from "../../../contracts/interfaces/ILooksRareProtocol.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
-contract PotentiallyMaliciousERC1271Wallet {
+contract MaliciousERC1271Wallet {
     enum FunctionToReenter {
-        None,
         ExecuteTakerAsk,
         ExecuteTakerBid,
         ExecuteMultipleTakerBids

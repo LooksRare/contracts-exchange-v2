@@ -10,33 +10,34 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Mocks and other utils
-import {PotentiallyMaliciousERC1271Wallet} from "./utils/PotentiallyMaliciousERC1271Wallet.sol";
+import {MaliciousERC1271Wallet} from "./utils/MaliciousERC1271Wallet.sol";
+import {ERC1271WalletMock} from "openzeppelin-contracts/contracts/mocks/ERC1271WalletMock.sol";
 
 contract ERC1271WalletTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
     uint256 private constant itemId = 0;
     bytes private constant _EMPTY_SIGNATURE = new bytes(0);
 
-    PotentiallyMaliciousERC1271Wallet private potentiallyMaliciousERC1271Wallet;
+    MaliciousERC1271Wallet private maliciousERC1271Wallet;
 
     function setUp() public override {
         super.setUp();
         _setUpUser(takerUser);
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        potentiallyMaliciousERC1271Wallet = new PotentiallyMaliciousERC1271Wallet(address(looksRareProtocol));
-        _setUpUser(address(potentiallyMaliciousERC1271Wallet));
+        maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        _setUpUser(address(maliciousERC1271Wallet));
     }
 
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
     function testTakerBidReentrancy() public {
-        potentiallyMaliciousERC1271Wallet.setFunctionToReenter(
-            PotentiallyMaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid
-        );
+        maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup();
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup(
+            address(maliciousERC1271Wallet)
+        );
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
         vm.prank(takerUser);
@@ -50,17 +51,23 @@ contract ERC1271WalletTest is ProtocolBase {
     }
 
     function testTakerBidNoReentrancy() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup();
-
-        potentiallyMaliciousERC1271Wallet.setFunctionToReenter(
-            PotentiallyMaliciousERC1271Wallet.FunctionToReenter.None
+        ERC1271WalletMock wallet = new ERC1271WalletMock(address(makerUser));
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup(
+            address(wallet)
         );
+
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.startPrank(address(wallet));
+        mockERC721.setApprovalForAll(address(transferManager), true);
+        transferManager.grantApprovals(operators);
+        vm.stopPrank();
 
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
-            _EMPTY_SIGNATURE,
+            signature,
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
         );
@@ -69,11 +76,11 @@ contract ERC1271WalletTest is ProtocolBase {
     }
 
     function testTakerAskReentrancy() public {
-        potentiallyMaliciousERC1271Wallet.setFunctionToReenter(
-            PotentiallyMaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk
-        );
+        maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
-        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup();
+        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
+            address(maliciousERC1271Wallet)
+        );
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
         vm.prank(takerUser);
@@ -81,31 +88,35 @@ contract ERC1271WalletTest is ProtocolBase {
     }
 
     function testTakerAskNoReentrancy() public {
-        potentiallyMaliciousERC1271Wallet.setFunctionToReenter(
-            PotentiallyMaliciousERC1271Wallet.FunctionToReenter.None
+        ERC1271WalletMock wallet = new ERC1271WalletMock(address(makerUser));
+        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
+            address(wallet)
         );
 
-        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup();
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Wallet needs to hold WETH and have given WETH approval
+        deal(address(weth), address(wallet), price);
+        vm.prank(address(wallet));
+        weth.approve(address(looksRareProtocol), price);
 
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, _EMPTY_SIGNATURE, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        assertEq(mockERC721.ownerOf(itemId), address(potentiallyMaliciousERC1271Wallet));
+        assertEq(mockERC721.ownerOf(itemId), address(wallet));
     }
 
     uint256 private constant numberPurchases = 3;
 
     function testExecuteMultipleTakerBidsReentrancy() public {
-        potentiallyMaliciousERC1271Wallet.setFunctionToReenter(
-            PotentiallyMaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids
-        );
+        maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 
         (
             OrderStructs.MakerAsk[] memory makerAsks,
             OrderStructs.TakerBid[] memory takerBids,
             OrderStructs.MerkleTree[] memory merkleTrees,
             bytes[] memory signatures
-        ) = _multipleTakerBidsSetup();
+        ) = _multipleTakerBidsSetup(address(maliciousERC1271Wallet));
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
         vm.prank(takerUser);
@@ -120,16 +131,19 @@ contract ERC1271WalletTest is ProtocolBase {
     }
 
     function testExecuteMultipleTakerBidsNoReentrancy() public {
-        potentiallyMaliciousERC1271Wallet.setFunctionToReenter(
-            PotentiallyMaliciousERC1271Wallet.FunctionToReenter.None
-        );
+        ERC1271WalletMock wallet = new ERC1271WalletMock(address(makerUser));
 
         (
             OrderStructs.MakerAsk[] memory makerAsks,
             OrderStructs.TakerBid[] memory takerBids,
             OrderStructs.MerkleTree[] memory merkleTrees,
             bytes[] memory signatures
-        ) = _multipleTakerBidsSetup();
+        ) = _multipleTakerBidsSetup(address(wallet));
+
+        vm.startPrank(address(wallet));
+        mockERC721.setApprovalForAll(address(transferManager), true);
+        transferManager.grantApprovals(operators);
+        vm.stopPrank();
 
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
@@ -146,12 +160,11 @@ contract ERC1271WalletTest is ProtocolBase {
         }
     }
 
-    function _takerBidSetup()
-        private
-        returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid)
-    {
+    function _takerBidSetup(
+        address signer
+    ) private returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) {
         // Mint asset
-        mockERC721.mint(address(potentiallyMaliciousERC1271Wallet), itemId);
+        mockERC721.mint(signer, itemId);
 
         // Prepare the order hash
         makerAsk = _createSingleItemMakerAskOrder({
@@ -162,7 +175,7 @@ contract ERC1271WalletTest is ProtocolBase {
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(0), // ETH
-            signer: address(potentiallyMaliciousERC1271Wallet),
+            signer: signer,
             minPrice: price,
             itemId: itemId
         });
@@ -177,10 +190,9 @@ contract ERC1271WalletTest is ProtocolBase {
         );
     }
 
-    function _takerAskSetup()
-        private
-        returns (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid)
-    {
+    function _takerAskSetup(
+        address signer
+    ) private returns (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) {
         // Prepare the order hash
         makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
@@ -190,7 +202,7 @@ contract ERC1271WalletTest is ProtocolBase {
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
-            signer: address(potentiallyMaliciousERC1271Wallet),
+            signer: signer,
             maxPrice: price,
             itemId: itemId
         });
@@ -208,7 +220,9 @@ contract ERC1271WalletTest is ProtocolBase {
         );
     }
 
-    function _multipleTakerBidsSetup()
+    function _multipleTakerBidsSetup(
+        address signer
+    )
         private
         returns (
             OrderStructs.MakerAsk[] memory makerAsks,
@@ -223,7 +237,7 @@ contract ERC1271WalletTest is ProtocolBase {
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
-            mockERC721.mint(address(potentiallyMaliciousERC1271Wallet), i);
+            mockERC721.mint(signer, i);
 
             // Prepare the order hash
             makerAsks[i] = _createSingleItemMakerAskOrder({
@@ -234,12 +248,12 @@ contract ERC1271WalletTest is ProtocolBase {
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: address(0), // ETH
-                signer: address(potentiallyMaliciousERC1271Wallet),
+                signer: signer,
                 minPrice: price,
                 itemId: i // 0, 1, etc.
             });
 
-            signatures[i] = _EMPTY_SIGNATURE;
+            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.TakerBid(
                 takerUser,

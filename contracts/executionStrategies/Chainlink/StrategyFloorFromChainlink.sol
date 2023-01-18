@@ -6,6 +6,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 
 // Libraries
 import {OrderStructs} from "../../libraries/OrderStructs.sol";
+import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 
 // Shared errors
 import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../interfaces/SharedErrors.sol";
@@ -59,11 +60,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) {
-                revert WrongCurrency();
-            }
-        }
+        CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
         if (
             makerAsk.itemIds.length != 1 ||
@@ -113,11 +110,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) {
-                revert WrongCurrency();
-            }
-        }
+        CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
         if (
             makerAsk.itemIds.length != 1 ||

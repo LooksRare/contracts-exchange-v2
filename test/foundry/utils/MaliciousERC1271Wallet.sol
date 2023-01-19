@@ -6,6 +6,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 abstract contract MaliciousERC1271Wallet {
     enum FunctionToReenter {
+        None,
         ExecuteTakerAsk,
         ExecuteTakerBid,
         ExecuteMultipleTakerBids
@@ -26,7 +27,11 @@ abstract contract MaliciousERC1271Wallet {
         magicValue = this.isValidSignature.selector;
     }
 
-    function _executeTakerAsk(bytes calldata signature) internal {
+    function onERC1155Received(address, address, uint256, uint256, bytes memory) external virtual returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    function _executeTakerAsk(bytes memory signature) internal {
         OrderStructs.TakerAsk memory takerAsk;
         OrderStructs.MakerBid memory makerBid;
         OrderStructs.MerkleTree memory merkleTree;
@@ -34,7 +39,7 @@ abstract contract MaliciousERC1271Wallet {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, address(this));
     }
 
-    function _executeTakerBid(bytes calldata signature) internal {
+    function _executeTakerBid(bytes memory signature) internal {
         OrderStructs.TakerBid memory takerBid;
         OrderStructs.MakerAsk memory makerAsk;
         OrderStructs.MerkleTree memory merkleTree;

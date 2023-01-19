@@ -116,8 +116,10 @@ contract LooksRareProtocol is
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
     ) external nonReentrant {
+        address currency = makerBid.currency;
+
         // Verify whether the currency is whitelisted but is not ETH (address(0))
-        if (!isCurrencyWhitelisted[makerBid.currency] || makerBid.currency == address(0)) {
+        if (!isCurrencyWhitelisted[currency] || currency == address(0)) {
             revert WrongCurrency();
         }
 
@@ -129,7 +131,7 @@ contract LooksRareProtocol is
         uint256 totalProtocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, orderHash);
 
         // Pay protocol fee (and affiliate fee if any)
-        _payProtocolFeeAndAffiliateFee(makerBid.currency, signer, affiliate, totalProtocolFeeAmount);
+        _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, totalProtocolFeeAmount);
     }
 
     /**
@@ -142,8 +144,10 @@ contract LooksRareProtocol is
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
     ) external payable nonReentrant {
+        address currency = makerAsk.currency;
+
         // Verify whether the currency is whitelisted
-        if (!isCurrencyWhitelisted[makerAsk.currency]) {
+        if (!isCurrencyWhitelisted[currency]) {
             revert WrongCurrency();
         }
 
@@ -154,7 +158,7 @@ contract LooksRareProtocol is
         uint256 totalProtocolFeeAmount = _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
 
         // Pay protocol fee amount (and affiliate fee if any)
-        _payProtocolFeeAndAffiliateFee(makerAsk.currency, msg.sender, affiliate, totalProtocolFeeAmount);
+        _payProtocolFeeAndAffiliateFee(currency, msg.sender, affiliate, totalProtocolFeeAmount);
 
         // Return ETH if any
         _returnETHIfAnyWithOneWeiLeft();
@@ -186,39 +190,62 @@ contract LooksRareProtocol is
         }
 
         {
-            // Initialize protocol fee
+            // Initialize protocol fee amount
             uint256 totalProtocolFeeAmount;
 
-            for (uint256 i; i < length; ) {
-                OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
+            // If atomic, it uses the executeTakerBid function.
+            // If not atomic, it uses a catch/revert pattern with external function.
+            if (isAtomic) {
+                for (uint256 i; i < length; ) {
+                    OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
 
-                // Verify currency is the same
-                if (i != 0) {
-                    if (makerAsk.currency != currency) {
-                        revert WrongCurrency();
+                    // Verify currency is the same
+                    if (i != 0) {
+                        if (makerAsk.currency != currency) {
+                            revert WrongCurrency();
+                        }
                     }
-                }
 
-                OrderStructs.TakerBid calldata takerBid = takerBids[i];
-                bytes32 orderHash = makerAsk.hash();
+                    OrderStructs.TakerBid calldata takerBid = takerBids[i];
+                    bytes32 orderHash = makerAsk.hash();
 
-                {
-                    _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
+                    {
+                        _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
 
-                    // If atomic, it uses the executeTakerBid function, if not atomic, it uses a catch/revert pattern with external function
-                    if (isAtomic) {
                         // Execute the transaction and add protocol fee
                         totalProtocolFeeAmount += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
-                    } else {
+
+                        unchecked {
+                            ++i;
+                        }
+                    }
+                }
+            } else {
+                for (uint256 i; i < length; ) {
+                    OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
+
+                    // Verify currency is the same
+                    if (i != 0) {
+                        if (makerAsk.currency != currency) {
+                            revert WrongCurrency();
+                        }
+                    }
+
+                    OrderStructs.TakerBid calldata takerBid = takerBids[i];
+                    bytes32 orderHash = makerAsk.hash();
+
+                    {
+                        _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
+
                         try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
                             uint256 protocolFeeAmount
                         ) {
                             totalProtocolFeeAmount += protocolFeeAmount;
                         } catch {}
-                    }
 
-                    unchecked {
-                        ++i;
+                        unchecked {
+                            ++i;
+                        }
                     }
                 }
             }

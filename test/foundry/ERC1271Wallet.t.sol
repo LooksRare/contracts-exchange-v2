@@ -11,6 +11,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Mocks and other utils
 import {MaliciousERC1271Wallet} from "./utils/MaliciousERC1271Wallet.sol";
+import {MaliciousIsValidSignatureERC1271Wallet} from "./utils/MaliciousIsValidSignatureERC1271Wallet.sol";
 import {ERC1271WalletMock} from "openzeppelin-contracts/contracts/mocks/ERC1271WalletMock.sol";
 
 // Errors
@@ -82,7 +83,9 @@ contract ERC1271WalletTest is ProtocolBase {
     }
 
     function testTakerBidReentrancy() public {
-        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        MaliciousIsValidSignatureERC1271Wallet maliciousERC1271Wallet = new MaliciousIsValidSignatureERC1271Wallet(
+            address(looksRareProtocol)
+        );
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
@@ -140,7 +143,9 @@ contract ERC1271WalletTest is ProtocolBase {
     }
 
     function testTakerAskReentrancy() public {
-        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        MaliciousIsValidSignatureERC1271Wallet maliciousERC1271Wallet = new MaliciousIsValidSignatureERC1271Wallet(
+            address(looksRareProtocol)
+        );
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
@@ -218,7 +223,9 @@ contract ERC1271WalletTest is ProtocolBase {
     }
 
     function testExecuteMultipleTakerBidsReentrancy() public {
-        MaliciousERC1271Wallet maliciousERC1271Wallet = new MaliciousERC1271Wallet(address(looksRareProtocol));
+        MaliciousIsValidSignatureERC1271Wallet maliciousERC1271Wallet = new MaliciousIsValidSignatureERC1271Wallet(
+            address(looksRareProtocol)
+        );
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 

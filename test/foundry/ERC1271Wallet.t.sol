@@ -16,6 +16,10 @@ import {ERC1271WalletMock} from "openzeppelin-contracts/contracts/mocks/ERC1271W
 // Errors
 import {InvalidSignatureERC1271} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
 
+/**
+ * @dev ERC1271WalletMock recovers a signature's signer using ECDSA. If it matches the mock wallet's
+ *      owner, it returns the magic value. Otherwise it returns an empty bytes4 value.
+ */
 contract ERC1271WalletTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
     uint256 private constant itemId = 0;

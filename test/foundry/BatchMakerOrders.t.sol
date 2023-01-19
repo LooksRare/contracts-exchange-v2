@@ -9,6 +9,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
 import {WrongMerkleProof} from "../../contracts/interfaces/SharedErrors.sol";
+import {ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -30,13 +31,16 @@ contract BatchMakerOrdersTest is ProtocolBase {
         for (uint256 i; i < numberOrders; i++) {
             mockERC721.mint(makerUser, i);
         }
-        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
 
+        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
 
         // Maker signs the root
         bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
+
+        // Verify validity
+        _isMakerAskOrderValidWithMerkleTree(makerAsk, signature, merkleTree);
 
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
@@ -77,6 +81,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Maker signs the root
         bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
+        // Verify validity
+        _isMakerBidOrderValidWithMerkleTree(makerBid, signature, merkleTree);
+
         // Mint asset
         mockERC721.mint(takerUser, numberOrders - 1);
 
@@ -116,6 +123,14 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Maker signs the root
         bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
+        // Verify invalidity of maker ask order
+        _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
+            makerAsk,
+            signature,
+            merkleTree,
+            ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE
+        );
+
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
@@ -143,6 +158,14 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         // Maker signs the root
         bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
+
+        // Verify invalidity of maker bid order
+        _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
+            makerBid,
+            signature,
+            merkleTree,
+            ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE
+        );
 
         // Prepare the taker ask
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(

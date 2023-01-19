@@ -7,8 +7,8 @@ uint256 constant ORDER_EXPECTED_TO_BE_VALID = 0;
 // 1. Strategy & currency-related errors
 uint256 constant CURRENCY_NOT_WHITELISTED = 101;
 uint256 constant STRATEGY_NOT_IMPLEMENTED = 111;
-uint256 constant STRATEGY_TAKER_BID_SELECTOR_INVALID = 112;
-uint256 constant STRATEGY_TAKER_ASK_SELECTOR_INVALID = 113;
+uint256 constant STRATEGY_MAKER_ASK_SELECTOR_INVALID = 112;
+uint256 constant STRATEGY_MAKER_BID_SELECTOR_INVALID = 113;
 uint256 constant STRATEGY_NOT_ACTIVE = 114;
 
 // 2. Maker order struct-related errors

@@ -22,6 +22,9 @@ contract BundleTransactionsTest is ProtocolBase {
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
+        // Verify validity
+        _isMakerBidOrderValid(makerBid, signature);
+
         // Mint the items
         mockERC721.batchMint(takerUser, makerBid.itemIds);
 
@@ -59,6 +62,9 @@ contract BundleTransactionsTest is ProtocolBase {
 
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Verify validity
+        _isMakerBidOrderValid(makerBid, signature);
 
         // Mint the items
         mockERC721.batchMint(takerUser, makerBid.itemIds);
@@ -101,6 +107,9 @@ contract BundleTransactionsTest is ProtocolBase {
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        // Verify validity
+        _isMakerAskOrderValid(makerAsk, signature);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -145,6 +154,9 @@ contract BundleTransactionsTest is ProtocolBase {
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        // Verify validity
+        _isMakerAskOrderValid(makerAsk, signature);
 
         // Execute taker bid transaction
         vm.prank(takerUser);

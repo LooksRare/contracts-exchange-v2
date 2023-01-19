@@ -11,7 +11,7 @@ import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol"
 
 // Shared errors
 import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
-import {START_TIME_GREATER_THAN_END_TIME, TOO_LATE_TO_EXECUTE_ORDER, TOO_EARLY_TO_EXECUTE_ORDER} from "../../contracts/helpers/ValidationCodeConstants.sol";
+import {MAKER_ORDER_INVALID_STANDARD_SALE, STRATEGY_MAKER_BID_SELECTOR_INVALID, STRATEGY_MAKER_ASK_SELECTOR_INVALID, STRATEGY_NOT_ACTIVE, START_TIME_GREATER_THAN_END_TIME, TOO_LATE_TO_EXECUTE_ORDER, TOO_EARLY_TO_EXECUTE_ORDER} from "../../contracts/helpers/ValidationCodeConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -145,6 +145,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -162,6 +164,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         uint256[] memory itemIds = new uint256[](makerBidItemIdsLength);
         makerBid.itemIds = itemIds;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -242,6 +246,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
             takerBid,
@@ -266,6 +272,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         uint256[] memory itemIds = new uint256[](makerAskItemIdsLength);
         makerAsk.itemIds = itemIds;
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
@@ -410,6 +418,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             itemId: itemId
         });
 
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_MAKER_ASK_SELECTOR_INVALID);
+
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForMakerAsk.selector);
         looksRareProtocol.executeTakerBid{value: price}(
@@ -458,6 +468,8 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             maxPrice: price,
             itemId: itemId
         });
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, STRATEGY_MAKER_BID_SELECTOR_INVALID);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForMakerBid.selector);

@@ -53,6 +53,18 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         }
     }
 
+    function _isMakerAskOrderValidWithMerkleTree(
+        OrderStructs.MakerAsk memory makerAsk,
+        bytes memory signature,
+        OrderStructs.MerkleTree memory merkleTree
+    ) internal {
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(makerAsk, signature, merkleTree);
+
+        for (uint256 i; i < 9; i++) {
+            assertEq(validationCodes[i], 0);
+        }
+    }
+
     function _doesMakerAskOrderReturnValidationCode(
         OrderStructs.MakerAsk memory makerAsk,
         bytes memory signature,
@@ -63,6 +75,18 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
             signature,
             _EMPTY_MERKLE_TREE
         );
+
+        uint256 index = expectedValidationCode / 100;
+        assertEq(validationCodes[index - 1], expectedValidationCode);
+    }
+
+    function _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
+        OrderStructs.MakerAsk memory makerAsk,
+        bytes memory signature,
+        OrderStructs.MerkleTree memory merkleTree,
+        uint256 expectedValidationCode
+    ) internal {
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(makerAsk, signature, merkleTree);
 
         uint256 index = expectedValidationCode / 100;
         assertEq(validationCodes[index - 1], expectedValidationCode);
@@ -80,6 +104,18 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         }
     }
 
+    function _isMakerBidOrderValidWithMerkleTree(
+        OrderStructs.MakerBid memory makerBid,
+        bytes memory signature,
+        OrderStructs.MerkleTree memory merkleTree
+    ) internal {
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(makerBid, signature, merkleTree);
+
+        for (uint256 i; i < 9; i++) {
+            assertEq(validationCodes[i], 0);
+        }
+    }
+
     function _doesMakerBidOrderReturnValidationCode(
         OrderStructs.MakerBid memory makerBid,
         bytes memory signature,
@@ -90,6 +126,18 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
             signature,
             _EMPTY_MERKLE_TREE
         );
+
+        uint256 index = expectedValidationCode / 100;
+        assertEq(validationCodes[index - 1], expectedValidationCode);
+    }
+
+    function _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
+        OrderStructs.MakerBid memory makerBid,
+        bytes memory signature,
+        OrderStructs.MerkleTree memory merkleTree,
+        uint256 expectedValidationCode
+    ) internal {
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(makerBid, signature, merkleTree);
 
         uint256 index = expectedValidationCode / 100;
         assertEq(validationCodes[index - 1], expectedValidationCode);

@@ -459,12 +459,10 @@ contract LooksRareProtocol is
         uint256 totalProtocolFeeAmount
     ) internal {
         if (totalProtocolFeeAmount != 0) {
-            uint256 totalAffiliateFeeAmount;
-
-            // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
             if (affiliate != address(0)) {
+                // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
                 if (isAffiliateProgramActive) {
-                    totalAffiliateFeeAmount = (totalProtocolFeeAmount * affiliateRates[affiliate]) / 10_000;
+                    uint256 totalAffiliateFeeAmount = (totalProtocolFeeAmount * affiliateRates[affiliate]) / 10_000;
 
                     if (totalAffiliateFeeAmount != 0) {
                         totalProtocolFeeAmount -= totalAffiliateFeeAmount;

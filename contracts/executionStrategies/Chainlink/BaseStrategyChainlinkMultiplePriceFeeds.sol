@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// Chainlink aggregator interface
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+
 // Dependencies
 import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
@@ -15,6 +18,11 @@ contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLa
      *         All prices returned from the price feeds must have 18 decimals.
      */
     mapping(address => address) public priceFeeds;
+
+    /**
+     * @notice All NFT floor price feeds are expected to have 18 decimals.
+     */
+    error InvalidDecimals();
 
     /**
      * @notice It is returned if the price feed for a collection is already set.
@@ -50,6 +58,10 @@ contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLa
     function setPriceFeed(address _collection, address _priceFeed) external onlyOwner {
         if (priceFeeds[_collection] != address(0)) {
             revert PriceFeedAlreadySet();
+        }
+
+        if (AggregatorV3Interface(_priceFeed).decimals() != 18) {
+            revert InvalidDecimals();
         }
 
         priceFeeds[_collection] = _priceFeed;

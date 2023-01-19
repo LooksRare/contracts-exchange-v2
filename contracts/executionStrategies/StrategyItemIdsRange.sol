@@ -33,6 +33,10 @@ contract StrategyItemIdsRange is BaseStrategy {
         if (makerBid.itemIds.length != 2 || makerBid.amounts.length != 1) {
             revert OrderInvalid();
         }
+        uint256 length = takerAsk.itemIds.length;
+        if (length != takerAsk.amounts.length) {
+            revert OrderInvalid();
+        }
 
         uint256 minItemId = makerBid.itemIds[0];
         uint256 maxItemId = makerBid.itemIds[1];
@@ -44,7 +48,6 @@ contract StrategyItemIdsRange is BaseStrategy {
         uint256 desiredAmount = makerBid.amounts[0];
         uint256 totalOfferedAmount;
         uint256 lastItemId;
-        uint256 length = takerAsk.itemIds.length;
 
         for (uint256 i; i < length; ) {
             uint256 offeredItemId = takerAsk.itemIds[i];

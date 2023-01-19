@@ -458,28 +458,31 @@ contract LooksRareProtocol is
         address affiliate,
         uint256 totalProtocolFeeAmount
     ) internal {
-        uint256 totalAffiliateFeeAmount;
+        if (totalProtocolFeeAmount != 0) {
+            uint256 totalAffiliateFeeAmount;
 
-        // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
-        if (affiliate != address(0)) {
-            if (isAffiliateProgramActive) {
-                totalAffiliateFeeAmount = (totalProtocolFeeAmount * affiliateRates[affiliate]) / 10_000;
-                totalProtocolFeeAmount -= totalAffiliateFeeAmount;
+            // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
+            if (affiliate != address(0)) {
+                if (isAffiliateProgramActive) {
+                    totalAffiliateFeeAmount = (totalProtocolFeeAmount * affiliateRates[affiliate]) / 10_000;
 
-                // If bid user isn't the affiliate, pay the affiliate.
-                // If currency is ETH, funds are returned to sender at the end of the execution.
-                // If currency is ERC20, funds are not transferred from bidder to bidder (since it uses transferFrom).
-                if (bidUser != affiliate) {
-                    _transferFungibleTokens(currency, bidUser, affiliate, totalAffiliateFeeAmount);
+                    if (totalAffiliateFeeAmount != 0) {
+                        totalProtocolFeeAmount -= totalAffiliateFeeAmount;
+
+                        // If bid user isn't the affiliate, pay the affiliate.
+                        // If currency is ETH, funds are returned to sender at the end of the execution.
+                        // If currency is ERC20, funds are not transferred from bidder to bidder (since it uses transferFrom).
+                        if (bidUser != affiliate) {
+                            _transferFungibleTokens(currency, bidUser, affiliate, totalAffiliateFeeAmount);
+                        }
+
+                        emit AffiliatePayment(affiliate, currency, totalAffiliateFeeAmount);
+                    }
                 }
             }
-        }
 
-        // Transfer remaining protocol fee to the protocol fee recipient
-        _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFeeAmount);
-
-        if (totalAffiliateFeeAmount != 0) {
-            emit AffiliatePayment(affiliate, currency, totalAffiliateFeeAmount);
+            // Transfer remaining protocol fee to the protocol fee recipient
+            _transferFungibleTokens(currency, bidUser, protocolFeeRecipient, totalProtocolFeeAmount);
         }
     }
 

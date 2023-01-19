@@ -13,8 +13,8 @@ import {ILooksRareProtocol} from "../../contracts/interfaces/ILooksRareProtocol.
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract DomainSeparatorUpdatesTest is ProtocolBase {
-    function testUpdateDomainSeparator(uint256 newChainId) public asPrankedUser(_owner) {
-        _assumeValidNewChainId(newChainId);
+    function testUpdateDomainSeparator(uint64 newChainId) public asPrankedUser(_owner) {
+        vm.assume(newChainId != block.chainid);
 
         vm.chainId(newChainId);
         vm.expectEmit(true, false, false, true);
@@ -35,8 +35,8 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testCannotTradeIfDomainSeparatorHasBeenUpdated(uint256 newChainId) public {
-        _assumeValidNewChainId(newChainId);
+    function testCannotTradeIfDomainSeparatorHasBeenUpdated(uint64 newChainId) public {
+        vm.assume(newChainId != block.chainid);
 
         _setUpUsers();
         uint256 itemId = 42;
@@ -77,8 +77,8 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testCannotTradeIfChainIdHasChanged(uint256 newChainId) public {
-        _assumeValidNewChainId(newChainId);
+    function testCannotTradeIfChainIdHasChanged(uint64 newChainId) public {
+        vm.assume(newChainId != block.chainid);
 
         _setUpUsers();
 
@@ -124,9 +124,5 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
     function testUpdateDomainSeparatorNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateDomainSeparator();
-    }
-
-    function _assumeValidNewChainId(uint256 newChainId) private view {
-        vm.assume(newChainId != block.chainid && newChainId < 2 ** 64);
     }
 }

@@ -27,8 +27,18 @@ abstract contract MaliciousERC1271Wallet {
         magicValue = this.isValidSignature.selector;
     }
 
-    function onERC1155Received(address, address, uint256, uint256, bytes memory) external virtual returns (bytes4) {
+    function onERC1155Received(address, address, uint256, uint256, bytes calldata) external virtual returns (bytes4) {
         return this.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] calldata,
+        uint256[] calldata,
+        bytes calldata
+    ) external virtual returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
     }
 
     function _executeTakerAsk(bytes memory signature) internal {

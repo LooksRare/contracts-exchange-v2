@@ -177,6 +177,51 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, _EMPTY_SIGNATURE, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testBatchTakerAsk() public {
+        ERC1271Wallet wallet = new ERC1271Wallet(makerUser);
+        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _batchTakerAskSetup(
+            address(wallet)
+        );
+
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Wallet needs to hold WETH and have given WETH approval
+        deal(address(weth), address(wallet), price);
+        vm.prank(address(wallet));
+        weth.approve(address(looksRareProtocol), price);
+
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        for (uint256 i; i < 10; i++) {
+            assertEq(mockERC1155.balanceOf(address(wallet), i), 1);
+        }
+    }
+
+    function testBatchTakerAskOnERC1155BatchReceivedReentrancy() public {
+        MaliciousOnERC1155ReceivedERC1271Wallet maliciousERC1271Wallet = new MaliciousOnERC1155ReceivedERC1271Wallet(
+            address(looksRareProtocol)
+        );
+        _setUpUser(address(maliciousERC1271Wallet));
+
+        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _batchTakerAskSetup(
+            address(maliciousERC1271Wallet)
+        );
+
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Wallet needs to hold WETH and have given WETH approval
+        deal(address(weth), address(maliciousERC1271Wallet), price);
+        vm.prank(address(maliciousERC1271Wallet));
+        weth.approve(address(looksRareProtocol), price);
+
+        maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
+
+        vm.expectRevert(LowLevelERC1155Transfer.ERC1155SafeBatchTransferFrom.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     uint256 private constant numberPurchases = 3;
 
     function testExecuteMultipleTakerBids() public {
@@ -316,6 +361,45 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
 
         // Mint asset
         mockERC1155.mint(takerUser, itemId, 1);
+
+        // Prepare the taker ask
+        takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
+    }
+
+    function _batchTakerAskSetup(
+        address signer
+    ) private returns (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) {
+        uint256[] memory itemIds = new uint256[](10);
+        uint256[] memory amounts = new uint256[](10);
+
+        for (uint256 i; i < 10; i++) {
+            itemIds[i] = i;
+            amounts[i] = 1;
+
+            // Mint asset
+            mockERC1155.mint(takerUser, i, 1);
+        }
+
+        // Prepare the first order
+        makerBid = _createMultiItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 0,
+            assetType: 1,
+            orderNonce: 0,
+            collection: address(mockERC1155),
+            currency: address(weth),
+            signer: signer,
+            maxPrice: price,
+            itemIds: itemIds,
+            amounts: amounts
+        });
 
         // Prepare the taker ask
         takerAsk = OrderStructs.TakerAsk(

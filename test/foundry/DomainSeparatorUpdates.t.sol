@@ -13,8 +13,9 @@ import {ILooksRareProtocol} from "../../contracts/interfaces/ILooksRareProtocol.
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract DomainSeparatorUpdatesTest is ProtocolBase {
-    function testUpdateDomainSeparator() public asPrankedUser(_owner) {
-        uint256 newChainId = 69_420;
+    function testUpdateDomainSeparator(uint64 newChainId) public asPrankedUser(_owner) {
+        vm.assume(newChainId != block.chainid);
+
         vm.chainId(newChainId);
         vm.expectEmit(true, false, false, true);
         emit NewDomainSeparator();
@@ -34,9 +35,10 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testCannotTradeIfDomainSeparatorHasBeenUpdated() public {
+    function testCannotTradeIfDomainSeparatorHasBeenUpdated(uint64 newChainId) public {
+        vm.assume(newChainId != block.chainid);
+
         _setUpUsers();
-        uint256 newChainId = 69_420;
         uint256 itemId = 42;
         uint256 price = 2 ether;
 
@@ -75,10 +77,11 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testCannotTradeIfChainIdHasChanged() public {
+    function testCannotTradeIfChainIdHasChanged(uint64 newChainId) public {
+        vm.assume(newChainId != block.chainid);
+
         _setUpUsers();
 
-        uint256 newChainId = 69_420;
         uint256 itemId = 42;
         uint256 price = 2 ether;
 

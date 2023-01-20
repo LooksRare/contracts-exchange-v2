@@ -289,7 +289,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
 
     function testExecuteMultipleTakerBidsIsValidSignatureReentrancy() public {
         MaliciousIsValidSignatureERC1271Wallet maliciousERC1271Wallet = new MaliciousIsValidSignatureERC1271Wallet(
-            address(makerUser)
+            address(looksRareProtocol)
         );
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
@@ -311,6 +311,10 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             _EMPTY_AFFILIATE,
             false
         );
+
+        for (uint256 i; i < numberOfPurchases - 1; i++) {
+            assertEq(mockERC1155.balanceOf(takerUser, i), 0);
+        }
     }
 
     function testExecuteMultipleTakerBidsOnERC1155ReceivedReentrancyOnlyInTheLastCall() public {

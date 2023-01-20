@@ -30,22 +30,20 @@ contract StrategyItemIdsRange is BaseStrategy {
         pure
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerBid.itemIds.length != 2 || makerBid.amounts.length != 1) {
-            revert OrderInvalid();
-        }
         uint256 length = takerAsk.itemIds.length;
         if (length != takerAsk.amounts.length) {
             revert OrderInvalid();
         }
 
-        uint256 minItemId = makerBid.itemIds[0];
-        uint256 maxItemId = makerBid.itemIds[1];
+        (uint256 minItemId, uint256 maxItemId, uint256 desiredAmount) = abi.decode(
+            makerBid.additionalParameters,
+            (uint256, uint256, uint256)
+        );
 
         if (minItemId >= maxItemId) {
             revert OrderInvalid();
         }
 
-        uint256 desiredAmount = makerBid.amounts[0];
         uint256 totalOfferedAmount;
         uint256 lastItemId;
 
@@ -107,13 +105,14 @@ contract StrategyItemIdsRange is BaseStrategy {
             return (isValid, WrongFunctionSelector.selector);
         }
 
-        // These are done for order invalidation to prevent underflows or array errors
-        if (makerBid.itemIds.length != 2 || makerBid.amounts.length != 1) {
+        (uint256 minItemId, uint256 maxItemId, uint256 desiredAmount) = abi.decode(
+            makerBid.additionalParameters,
+            (uint256, uint256, uint256)
+        );
+
+        if (desiredAmount == 0) {
             return (isValid, OrderInvalid.selector);
         }
-
-        uint256 minItemId = makerBid.itemIds[0];
-        uint256 maxItemId = makerBid.itemIds[1];
 
         if (minItemId >= maxItemId) {
             return (isValid, OrderInvalid.selector);

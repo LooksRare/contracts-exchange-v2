@@ -24,8 +24,7 @@ library OrderStructs {
             "uint256 startTime,"
             "uint256 endTime,"
             "uint256 minPrice,"
-            "uint256[] itemIds,"
-            "uint256[] amounts,"
+            "Item[] items,"
             "bytes additionalParameters"
             ")"
         );
@@ -47,8 +46,7 @@ library OrderStructs {
             "uint256 startTime,"
             "uint256 endTime,"
             "uint256 maxPrice,"
-            "uint256[] itemIds,"
-            "uint256[] amounts,"
+            "Item[] items,"
             "bytes additionalParameters"
             ")"
         );
@@ -68,6 +66,14 @@ library OrderStructs {
      */
 
     /**
+     * @notice Item is the struct for a combination of itemId and amount.
+     */
+    struct Item {
+        uint256 itemId;
+        uint256 amount;
+    }
+
+    /**
      * @notice MakerAsk is the struct for a maker ask order. It contains one or multiple NFTs listed in a single order.
      * @param askNonce Global user order nonce for maker ask orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
@@ -80,8 +86,7 @@ library OrderStructs {
      * @param startTime Start timestamp
      * @param endTime End timestamp
      * @param minPrice Minimum price for execution
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
+     * @param items Array of item structs
      * @param additionalParameters Extra data specific for the order (e.g. it can contain start price for Dutch Auction)
      */
     struct MakerAsk {
@@ -96,8 +101,7 @@ library OrderStructs {
         uint256 startTime;
         uint256 endTime;
         uint256 minPrice;
-        uint256[] itemIds;
-        uint256[] amounts;
+        Item[] items;
         bytes additionalParameters;
     }
 
@@ -114,8 +118,7 @@ library OrderStructs {
      * @param startTime Start timestamp
      * @param endTime End timestamp
      * @param maxPrice Maximum price for execution
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
+     * @param items Array of item structs
      * @param additionalParameters Extra data specific for the order (e.g. it can contain a merkle root for specific strategies)
      */
     struct MakerBid {
@@ -130,8 +133,7 @@ library OrderStructs {
         uint256 startTime;
         uint256 endTime;
         uint256 maxPrice;
-        uint256[] itemIds;
-        uint256[] amounts;
+        Item[] items;
         bytes additionalParameters;
     }
 
@@ -144,15 +146,13 @@ library OrderStructs {
      * @dev TakerAsk structs are matched against MakerBid structs at the protocol level.
      * @param recipient Recipient address (to receive non fungible tokens)
      * @param minPrice Minimum price for execution
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
+     * @param items Array of item structs
      * @param additionalParameters Extra data specific for the order
      */
     struct TakerAsk {
         address recipient;
         uint256 minPrice;
-        uint256[] itemIds;
-        uint256[] amounts;
+        Item[] items;
         bytes additionalParameters;
     }
 
@@ -161,15 +161,13 @@ library OrderStructs {
      * @dev TakerBid structs are matched against MakerAsk structs at the protocol level.
      * @param recipient Recipient address (to receive non fungible tokens)
      * @param maxPrice Maximum price for execution
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
+     * @param items Array of item structs
      * @param additionalParameters Extra data specific for the order
      */
     struct TakerBid {
         address recipient;
         uint256 maxPrice;
-        uint256[] itemIds;
-        uint256[] amounts;
+        Item[] items;
         bytes additionalParameters;
     }
 
@@ -217,8 +215,7 @@ library OrderStructs {
                         makerAsk.startTime,
                         makerAsk.endTime,
                         makerAsk.minPrice,
-                        keccak256(abi.encodePacked(makerAsk.itemIds)),
-                        keccak256(abi.encodePacked(makerAsk.amounts)),
+                        keccak256(abi.encode(makerAsk.items)),
                         keccak256(makerAsk.additionalParameters)
                     )
                 )
@@ -249,8 +246,7 @@ library OrderStructs {
                         makerBid.startTime,
                         makerBid.endTime,
                         makerBid.maxPrice,
-                        keccak256(abi.encodePacked(makerBid.itemIds)),
-                        keccak256(abi.encodePacked(makerBid.amounts)),
+                        keccak256(abi.encode(makerBid.items)),
                         keccak256(makerBid.additionalParameters)
                     )
                 )

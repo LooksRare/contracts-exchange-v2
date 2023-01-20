@@ -460,7 +460,8 @@ contract LooksRareProtocol is
     ) internal {
         if (totalProtocolFeeAmount != 0) {
             if (affiliate != address(0)) {
-                // Check whether affiliate program is active and whether to execute a affiliate logic (and adjust downward the protocol fee if so)
+                // Check whether affiliate program is active and whether to execute a affiliate logic
+                // If so, it adjusts downward the protocol fee.
                 if (isAffiliateProgramActive) {
                     uint256 totalAffiliateFeeAmount = (totalProtocolFeeAmount * affiliateRates[affiliate]) / 10_000;
 
@@ -469,7 +470,8 @@ contract LooksRareProtocol is
 
                         // If bid user isn't the affiliate, pay the affiliate.
                         // If currency is ETH, funds are returned to sender at the end of the execution.
-                        // If currency is ERC20, funds are not transferred from bidder to bidder (since it uses transferFrom).
+                        // If currency is ERC20, funds are not transferred from bidder to bidder
+                        // (since it uses transferFrom).
                         if (bidUser != affiliate) {
                             _transferFungibleTokens(currency, bidUser, affiliate, totalAffiliateFeeAmount);
                         }
@@ -500,32 +502,15 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice This function is private and used to verify the chain id, compute the digest, and verify the signature.
-     * @dev If chainId is not equal to the cached chain id, it would revert.
-     * @param computedHash Hash of order (maker bid or maker ask) or merkle root
-     * @param makerSignature Signature of the maker
-     * @param signer Signer address
-     */
-    function _computeDigestAndVerify(bytes32 computedHash, bytes calldata makerSignature, address signer) private view {
-        if (chainId == block.chainid) {
-            // \x19\x01 is the standard encoding prefix
-            SignatureChecker.verify(
-                keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash)),
-                signer,
-                makerSignature
-            );
-        } else {
-            revert WrongChainId();
-        }
-    }
-
-    /**
-     * @notice This function is private and used to transfer funds to (1) creator recipient (if any) and (2) ask recipient.
+     * @notice This function is private and used to transfer funds to
+     *         (1) creator recipient (if any)
+     *         (2) ask recipient.
      * @param recipients Recipient addresses
      * @param feeAmounts Fees
      * @param currency Currency address
      * @param bidUser Bid user address
-     * @dev It does not send to the 0-th element in the array since it is the protocol fee, which is paid later in the execution flow.
+     * @dev It does not send to the 0-th element in the array since it is the protocol fee,
+     *      which is paid later in the execution flow.
      */
     function _transferToAskRecipientAndCreatorIfAny(
         address[2] memory recipients,
@@ -540,8 +525,8 @@ contract LooksRareProtocol is
 
         // @dev There is no check for address(0) since the ask recipient can never be address(0)
         // If ask recipient is the maker --> the signer cannot be the null address
-        // If ask is the taker --> either it is the sender address or if the recipient (in TakerAsk) is set to address(0), it is adjusted to
-        // the original taker address
+        // If ask is the taker --> either it is the sender address or
+        // if the recipient (in TakerAsk) is set to address(0), it is adjusted to the original taker address
         if (feeAmounts[1] != 0) {
             _transferFungibleTokens(currency, bidUser, recipients[1], feeAmounts[1]);
         }
@@ -581,6 +566,26 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) private {
         userOrderNonce[signer][orderNonce] = (isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash);
+    }
+
+    /**
+     * @notice This function is private and used to verify the chain id, compute the digest, and verify the signature.
+     * @dev If chainId is not equal to the cached chain id, it would revert.
+     * @param computedHash Hash of order (maker bid or maker ask) or merkle root
+     * @param makerSignature Signature of the maker
+     * @param signer Signer address
+     */
+    function _computeDigestAndVerify(bytes32 computedHash, bytes calldata makerSignature, address signer) private view {
+        if (chainId == block.chainid) {
+            // \x19\x01 is the standard encoding prefix
+            SignatureChecker.verify(
+                keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash)),
+                signer,
+                makerSignature
+            );
+        } else {
+            revert WrongChainId();
+        }
     }
 
     /**

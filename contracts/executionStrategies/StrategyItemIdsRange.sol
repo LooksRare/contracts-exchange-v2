@@ -12,13 +12,16 @@ import {BaseStrategy} from "./BaseStrategy.sol";
 
 /**
  * @title StrategyItemIdsRange
- * @notice This contract offers a single execution strategy for users to bid on a specific amounts of items in a range specified by 2 itemIds.
+ * @notice This contract offers a single execution strategy for users to bid on
+ *         a specific amount of items in a range bounded by 2 item ids.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyItemIdsRange is BaseStrategy {
     /**
-     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
-     *         With this strategy, the bidder picks a item id range (e.g. 1-100) and a seller can fulfill the order with any tokens within the specificed ID range.
+     * @notice This function validates the order under the context of the chosen strategy
+     *         and returns the fulfillable items/amounts/price/nonce invalidation status.
+     *         With this strategy, the bidder picks a item id range (e.g. 1-100)
+     *         and a seller can fulfill the order with any tokens within the specified id range.
      * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
@@ -93,7 +96,8 @@ contract StrategyItemIdsRange is BaseStrategy {
 
     /**
      * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     *         It does not revert if the maker order is invalid.
+     *         Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid

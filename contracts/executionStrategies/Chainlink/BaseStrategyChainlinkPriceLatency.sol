@@ -33,7 +33,8 @@ contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
     error LatencyToleranceTooHigh();
 
     /**
-     * @notice It is returned if the current block time relative to the latest price's update time is greater than the latency tolerance.
+     * @notice It is returned if the current block time relative to the latest price's update time
+     *         is greater than the latency tolerance.
      */
     error PriceNotRecentEnough();
 

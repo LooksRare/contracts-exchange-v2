@@ -161,7 +161,8 @@ interface ILooksRareProtocol {
      * @param makerSignatures Array of maker signatures
      * @param merkleTrees Array of merkle tree structs if the signature contains multiple maker orders
      * @param affiliate Affiliate address
-     * @param isAtomic Whether the execution should be atomic i.e. whether it should revert if 1 or more transactions fail
+     * @param isAtomic Whether the execution should be atomic
+     *        i.e. whether it should revert if 1 or more transactions fail
      */
     function executeMultipleTakerBids(
         OrderStructs.TakerBid[] calldata takerBids,

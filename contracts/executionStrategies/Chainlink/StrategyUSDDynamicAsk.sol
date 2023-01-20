@@ -49,8 +49,10 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
     }
 
     /**
-     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
-     *         This strategy looks at the seller's desired sale price in USD and minimum sale price in ETH, converts the USD value into ETH using Chainlink's price feed and chooses the higher price.
+     * @notice This function validates the order under the context of the chosen strategy
+     *         and returns the fulfillable items/amounts/price/nonce invalidation status.
+     *         This strategy looks at the seller's desired sale price in USD and minimum sale price in ETH,
+     *         converts the USD value into ETH using Chainlink's price feed and chooses the higher price.
      * @param takerBid Taker bid struct (taker bid-specific parameters for the execution)
      * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      * @dev The client has to provide the seller's desired sale price in USD as the additionalParameters
@@ -117,7 +119,8 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
 
     /**
      * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     *         It does not revert if the maker order is invalid.
+     *         Instead it returns false and the error's 4 bytes selector.
      * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid

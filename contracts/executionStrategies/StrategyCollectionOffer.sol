@@ -17,7 +17,7 @@ import {BaseStrategy} from "./BaseStrategy.sol";
  * @title StrategyCollectionOffer
  * @notice This contract offers execution strategies for users to create maker bid offers for items in a collection.
  *         There are two available functions:
- *         1. executeCollectionStrategyWithTakerAsk --> it applies to all item ids in a collection
+ *         1. executeCollectionStrategyWithTakerAsk --> it applies to all itemIds in a collection
  *         2. executeCollectionStrategyWithTakerAskWithProof --> it allows adding merkle proof criteria.
  * @dev Use cases can include trait-based offers or rarity score offers.
  * @author LooksRare protocol team (👀,💎)
@@ -58,7 +58,8 @@ contract StrategyCollectionOffer is BaseStrategy {
     }
 
     /**
-     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
+     * @notice This function validates the order under the context of the chosen strategy
+     *         and returns the fulfillable items/amounts/price/nonce invalidation status.
      *         This strategy executes a collection offer against a taker ask order with the need of merkle proofs.
      * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
@@ -102,7 +103,8 @@ contract StrategyCollectionOffer is BaseStrategy {
 
     /**
      * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
+     *         It does not revert if the maker order is invalid.
+     *         Instead it returns false and the error's 4 bytes selector.
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid
@@ -133,7 +135,7 @@ contract StrategyCollectionOffer is BaseStrategy {
         }
 
         // If no root is provided or wrong length, it should be invalid.
-        // @dev It doesn't mean the merkle root is valid against a specific itemId that exists in the collection.
+        // @dev It does not mean the merkle root is valid against a specific itemId that exists in the collection.
         if (
             functionSelector == StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             makerBid.additionalParameters.length != 32

@@ -104,7 +104,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -178,7 +178,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: 0, // ERC721
+                assetType: ASSET_TYPE_ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -273,7 +273,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

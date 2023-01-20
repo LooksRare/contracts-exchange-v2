@@ -219,7 +219,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 askNonce: 0, // askNonce
                 subsetNonce: 0, // subsetNonce
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: 0, // ERC721
+                assetType: ASSET_TYPE_ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: ETH,
@@ -243,7 +243,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: 0, // ERC721
+                assetType: ASSET_TYPE_ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: address(weth),

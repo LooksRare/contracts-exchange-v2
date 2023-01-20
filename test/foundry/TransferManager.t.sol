@@ -174,8 +174,8 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 
-            assetTypes[0] = 1; // ERC1155
-            assetTypes[1] = 0; // ERC721
+            assetTypes[0] = ASSET_TYPE_ERC1155;
+            assetTypes[1] = ASSET_TYPE_ERC721;
 
             uint256[] memory tokenIdsERC1155 = new uint256[](2);
             tokenIdsERC1155[0] = tokenId1ERC1155;
@@ -235,8 +235,8 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 
-            assetTypes[0] = 1; // ERC1155
-            assetTypes[1] = 0; // ERC721
+            assetTypes[0] = ASSET_TYPE_ERC1155;
+            assetTypes[1] = ASSET_TYPE_ERC721;
 
             uint256[] memory tokenIdsERC1155 = new uint256[](2);
             tokenIdsERC1155[0] = tokenId1ERC1155;
@@ -292,8 +292,8 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256[][] memory itemIds = new uint256[][](2);
 
         {
-            assetTypes[0] = 1; // ERC1155
-            assetTypes[1] = 0; // ERC721
+            assetTypes[0] = ASSET_TYPE_ERC1155;
+            assetTypes[1] = ASSET_TYPE_ERC721;
 
             uint256[] memory tokenIdsERC1155 = new uint256[](2);
             tokenIdsERC1155[0] = tokenId1ERC1155;
@@ -346,7 +346,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 
-            assetTypes[0] = 1; // ERC1155
+            assetTypes[0] = ASSET_TYPE_ERC1155;
 
             uint256[] memory tokenIdsERC1155 = new uint256[](2);
             tokenIdsERC1155[0] = tokenId1ERC1155;
@@ -398,8 +398,8 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 
-            assetTypes[0] = 1; // ERC1155
-            assetTypes[1] = 0; // ERC721
+            assetTypes[0] = ASSET_TYPE_ERC1155;
+            assetTypes[1] = ASSET_TYPE_ERC721;
 
             uint256[] memory tokenIdsERC1155 = new uint256[](2);
             tokenIdsERC1155[0] = tokenId1ERC1155;
@@ -448,8 +448,8 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 
-            assetTypes[0] = 1; // ERC1155
-            assetTypes[1] = 0; // ERC721
+            assetTypes[0] = ASSET_TYPE_ERC1155;
+            assetTypes[1] = ASSET_TYPE_ERC721;
 
             uint256[] memory tokenIdsERC1155 = new uint256[](2);
             tokenIdsERC1155[0] = tokenId1ERC1155;
@@ -536,8 +536,8 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 
-            assetTypes[0] = 1; // ERC1155
-            assetTypes[1] = 0; // ERC721
+            assetTypes[0] = ASSET_TYPE_ERC1155;
+            assetTypes[1] = ASSET_TYPE_ERC721;
 
             uint256[] memory tokenIdsERC1155 = new uint256[](0);
 
@@ -590,8 +590,8 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
             collections[0] = address(mockERC1155);
             collections[1] = address(mockERC721);
 
-            assetTypes[0] = 1; // ERC1155
-            assetTypes[1] = 0; // ERC721
+            assetTypes[0] = ASSET_TYPE_ERC1155;
+            assetTypes[1] = ASSET_TYPE_ERC721;
 
             uint256[] memory tokenIdsERC1155 = new uint256[](2);
             tokenIdsERC1155[0] = tokenId1ERC1155;

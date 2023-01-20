@@ -61,7 +61,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -122,7 +122,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721WithRoyalties),
             currency: address(weth),
@@ -358,18 +358,22 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: price,
-            itemId: itemId
-        });
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk,
+            bytes memory signature
+        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                assetType: ASSET_TYPE_ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: itemId
+            });
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
 
@@ -391,7 +395,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,

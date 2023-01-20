@@ -15,6 +15,9 @@ import {BUNDLE_ERC2981_NOT_SUPPORTED} from "../../contracts/constants/Validation
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
 contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
     function _setUpRoyaltiesRegistry(uint256 fee) private {
         vm.prank(_owner);
@@ -77,13 +80,16 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Owner receives 1.5% of the whole price
-        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / 10_000);
+        assertEq(
+            weth.balanceOf(_owner),
+            _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10_000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             weth.balanceOf(_royaltyRecipient),
-            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
+            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
@@ -145,12 +151,15 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Royalty recipient receives royalties
         assertEq(
             weth.balanceOf(_royaltyRecipient),
-            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
+            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Owner receives protocol fee (1.5%)
-        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / 10_000);
+        assertEq(
+            weth.balanceOf(_owner),
+            _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / 10_000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }

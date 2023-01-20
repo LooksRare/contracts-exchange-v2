@@ -16,6 +16,9 @@ import {StrategyDutchAuction} from "../../../contracts/executionStrategies/Strat
 // Other tests
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericConstants.sol";
+
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
     bytes4 public selector = StrategyDutchAuction.executeStrategyWithTakerBid.selector;
@@ -173,7 +176,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), 0, "taker balance incorrect");
         // Maker ask user receives 98% of the whole price (2% protocol)
-        uint256 protocolFee = (executionPrice * 200) / 10_000;
+        uint256 protocolFee = (executionPrice * 200) / ONE_HUNDRED_PERCENT_IN_BP;
         assertEq(
             weth.balanceOf(makerUser),
             _initialWETHBalanceUser + (executionPrice - protocolFee),

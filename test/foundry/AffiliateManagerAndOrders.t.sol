@@ -14,6 +14,9 @@ import {IAffiliateManager} from "../../contracts/interfaces/IAffiliateManager.so
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
 contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
     // Affiliate rate
     uint256 internal _affiliateRate = 2_000;
@@ -23,7 +26,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 originalAmount,
         uint256 tierRate
     ) private pure returns (uint256 affiliateFee) {
-        affiliateFee = (originalAmount * tierRate) / (10_000 * 10_000);
+        affiliateFee = (originalAmount * tierRate) / (ONE_HUNDRED_PERCENT_IN_BP * ONE_HUNDRED_PERCENT_IN_BP);
     }
 
     function _setUpAffiliate() private {
@@ -68,7 +71,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         looksRareProtocol.updateAffiliateController(_owner);
 
         address randomAffiliate = address(42);
-        uint256 affiliateRateLimitBp = 10_000;
+        uint256 affiliateRateLimitBp = ONE_HUNDRED_PERCENT_IN_BP;
         vm.expectRevert(IAffiliateManager.PercentageTooHigh.selector);
         looksRareProtocol.updateAffiliateRate(randomAffiliate, affiliateRateLimitBp + 1);
 
@@ -141,13 +144,17 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * (10_000 - _minTotalFeeBp)) / 10_000);
+        assertEq(
+            address(makerUser).balance,
+            _initialETHBalanceUser + (price * (ONE_HUNDRED_PERCENT_IN_BP - _minTotalFeeBp)) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // Affiliate user receives 20% of protocol fee
         assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
         // Owner receives 80% of protocol fee
         assertEq(
             address(_owner).balance,
-            _initialETHBalanceOwner + ((price * _minTotalFeeBp) / 10_000 - expectedAffiliateFeeAmount)
+            _initialETHBalanceOwner +
+                ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount)
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
@@ -245,7 +252,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(
             address(makerUser).balance,
-            _initialETHBalanceUser + ((price * 9_800) * (numberPurchases - 1)) / 10_000
+            _initialETHBalanceUser + ((price * 9_800) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Affiliate user receives 20% of protocol fee
         assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
@@ -253,7 +260,9 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(
             address(_owner).balance,
             _initialETHBalanceOwner +
-                (((numberPurchases - 1) * (price * _minTotalFeeBp)) / 10_000 - expectedAffiliateFeeAmount)
+                (((numberPurchases - 1) * (price * _minTotalFeeBp)) /
+                    ONE_HUNDRED_PERCENT_IN_BP -
+                    expectedAffiliateFeeAmount)
         );
         // Only 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
@@ -313,13 +322,14 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of whole price (protocol fee)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Affiliate user receives 20% of protocol fee
         assertEq(weth.balanceOf(_affiliate), _initialWETHBalanceAffiliate + expectedAffiliateFeeAmount);
         // Owner receives 80% of protocol fee
         assertEq(
             weth.balanceOf(_owner),
-            _initialWETHBalanceOwner + ((price * _minTotalFeeBp) / 10_000 - expectedAffiliateFeeAmount)
+            _initialWETHBalanceOwner +
+                ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount)
         );
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);

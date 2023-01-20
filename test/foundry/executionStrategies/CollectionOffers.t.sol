@@ -17,6 +17,9 @@ import {StrategyCollectionOffer} from "../../../contracts/executionStrategies/St
 // Base test
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericConstants.sol";
+
 contract CollectionOrdersTest is ProtocolBase {
     StrategyCollectionOffer public strategyCollectionOffer;
     bytes4 public selectorNoProof = strategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
@@ -311,7 +314,7 @@ contract CollectionOrdersTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
@@ -383,7 +386,7 @@ contract CollectionOrdersTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }

@@ -8,6 +8,9 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
 contract DelegationRecipientsTakerTest is ProtocolBase {
     // Fixed price of sale
     uint256 private constant price = 1 ether;
@@ -53,8 +56,8 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         expectedRecipients[1] = _royaltyRecipient;
 
         uint256[3] memory expectedFees;
-        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
-        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
+        expectedFees[2] = (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
+        expectedFees[1] = (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP;
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
         vm.prank(takerUser);
@@ -84,11 +87,11 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Random recipient user receives 98% of the whole price and taker user receives nothing.
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser);
-        assertEq(weth.balanceOf(randomRecipientSaleProceeds), (price * 9_800) / 10_000);
+        assertEq(weth.balanceOf(randomRecipientSaleProceeds), (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             weth.balanceOf(_royaltyRecipient),
-            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
+            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
@@ -137,8 +140,8 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         uint256[3] memory expectedFees;
         expectedFees[0] = price - (expectedFees[1] + expectedFees[0]);
-        expectedFees[1] = (price * _standardRoyaltyFee) / 10_000;
-        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
+        expectedFees[1] = (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP;
+        expectedFees[2] = (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
 
         vm.prank(takerUser);
 
@@ -172,11 +175,11 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / 10_000);
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             address(_royaltyRecipient).balance,
-            _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
+            _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);

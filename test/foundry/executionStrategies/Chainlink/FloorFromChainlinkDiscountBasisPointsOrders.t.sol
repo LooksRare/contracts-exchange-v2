@@ -20,6 +20,9 @@ import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrateg
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {FloorFromChainlinkDiscountOrdersTest} from "./FloorFromChainlinkDiscountOrders.t.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
+
 contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDiscountOrdersTest {
     function setUp() public override {
         _setIsFixedAmount(0);
@@ -115,7 +118,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         // Floor price = 9.7 ETH, discount = 100%, desired price = 0
         // Max price = 0
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: 10_000
+            discount: ONE_HUNDRED_PERCENT_IN_BP
         });
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);

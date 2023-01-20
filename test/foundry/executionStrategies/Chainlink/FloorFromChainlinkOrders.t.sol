@@ -19,6 +19,9 @@ import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrateg
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
+
 abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager {
     StrategyFloorFromChainlink internal strategyFloorFromChainlink;
 
@@ -170,7 +173,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             takerUser,
             isFixedAmount != 0
                 ? LATEST_CHAINLINK_ANSWER_IN_WAD + premium
-                : (LATEST_CHAINLINK_ANSWER_IN_WAD * (10_000 + premium)) / 10_000,
+                : (LATEST_CHAINLINK_ANSWER_IN_WAD * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP,
             itemIds,
             amounts,
             abi.encode()
@@ -186,10 +189,12 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         if (isFixedAmount != 0) {
             price = LATEST_CHAINLINK_ANSWER_IN_WAD - discount;
         } else {
-            if (discount > 10_000) {
+            if (discount > ONE_HUNDRED_PERCENT_IN_BP) {
                 price = 0;
             } else {
-                price = (LATEST_CHAINLINK_ANSWER_IN_WAD * (10_000 - discount)) / 10_000;
+                price =
+                    (LATEST_CHAINLINK_ANSWER_IN_WAD * (ONE_HUNDRED_PERCENT_IN_BP - discount)) /
+                    ONE_HUNDRED_PERCENT_IN_BP;
             }
         }
 

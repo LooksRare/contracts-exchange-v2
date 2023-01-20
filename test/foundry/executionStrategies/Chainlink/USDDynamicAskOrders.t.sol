@@ -17,9 +17,8 @@ import {BaseStrategyChainlinkPriceLatency} from "../../../../contracts/execution
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {MockERC20} from "../../../mock/MockERC20.sol";
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
-import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 
-contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
+contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
     bytes4 public selector = StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector;
 
@@ -29,8 +28,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
     // startedAt       uint256 :  1665680123
     // updatedAt       uint256 :  1665680123
     // answeredInRound uint80  :  92233720368547793259
+    uint256 private constant CHAINLINK_PRICE_UPDATED_AT = 1665680123;
     uint256 private constant FORKED_BLOCK_NUMBER = 15740567;
     uint256 private constant LATEST_CHAINLINK_ANSWER_IN_WAD = 126533075631 * 1e10;
+    uint256 private constant MAXIMUM_LATENCY = 3_600 seconds;
 
     function setUp() public override {
         vm.createSelectFork(vm.rpcUrl("mainnet"), FORKED_BLOCK_NUMBER);
@@ -119,20 +120,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         assertEq(strategyImplementation, address(strategyUSDDynamicAsk));
     }
 
-    function testAbsoluteMaxLatency() public {
-        assertEq(strategyUSDDynamicAsk.absoluteMaxLatency(), 3_600);
-    }
-
-    function testSetMaximumLatency(uint256 maxLatency) public {
-        _testSetMaximumLatency(address(strategyUSDDynamicAsk), maxLatency);
-    }
-
-    function testSetMaximumLatencyLatencyToleranceTooHigh(uint256 maxLatency) public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyUSDDynamicAsk), maxLatency);
-    }
-
-    function testSetMaximumLatencyNotOwner() public {
-        _testSetMaximumLatencyNotOwner(address(strategyUSDDynamicAsk));
+    function testMaxLatency() public {
+        assertEq(strategyUSDDynamicAsk.maxLatency(), 3_600);
     }
 
     function testUSDDynamicAskInvalidChainlinkPrice() public {
@@ -143,9 +132,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         });
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
 
         MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
         vm.etch(CHAINLINK_ETH_USD_PRICE_FEED, address(priceFeed).code);
@@ -178,9 +164,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
-
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
@@ -205,9 +188,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         });
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -238,9 +218,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
-
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
@@ -270,9 +247,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         takerBid.maxPrice = 1.1 ether;
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
 
         uint256 initialETHBalanceTakerUser = address(takerUser).balance;
         uint256 initialETHBalanceMakerUser = address(makerUser).balance;
@@ -306,7 +280,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
+        makerAsk.startTime = CHAINLINK_PRICE_UPDATED_AT;
+        uint256 latencyViolationTimestamp = CHAINLINK_PRICE_UPDATED_AT + MAXIMUM_LATENCY + 1 seconds;
+        makerAsk.endTime = latencyViolationTimestamp;
+
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.warp(latencyViolationTimestamp);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -351,9 +331,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
-
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
@@ -371,9 +348,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         });
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -399,9 +373,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
-
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -425,9 +396,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
         takerBid.amounts = amounts;
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
@@ -453,9 +421,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
-
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -477,9 +442,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.prank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
-
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -500,10 +462,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyUSDDynamicAsk.updateMaxLatency(3_600);
+        vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
-        vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);

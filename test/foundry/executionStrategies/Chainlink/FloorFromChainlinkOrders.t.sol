@@ -16,11 +16,10 @@ import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/exe
 import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Mocks and other tests
-import {ChainlinkMaximumLatencyTest} from "./ChainlinkMaximumLatency.t.sol";
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
-abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMaximumLatencyTest {
+abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager {
     StrategyFloorFromChainlink internal strategyFloorFromChainlink;
 
     // At block 15740567
@@ -29,6 +28,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     // startedAt       uint256 : 1666100016
     // updatedAt       uint256 : 1666100016
     // answeredInRound uint80  : 18446744073709552305
+    uint256 internal constant CHAINLINK_PRICE_UPDATED_AT = 1666100016;
     uint256 private constant FORKED_BLOCK_NUMBER = 7_791_270;
     uint256 internal constant LATEST_CHAINLINK_ANSWER_IN_WAD = 9.7 ether;
     uint256 internal constant MAXIMUM_LATENCY = 86_400 seconds;
@@ -65,20 +65,8 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(strategyImplementation, address(strategyFloorFromChainlink));
     }
 
-    function testAbsoluteMaxLatency() public {
-        assertEq(strategyFloorFromChainlink.absoluteMaxLatency(), MAXIMUM_LATENCY);
-    }
-
-    function testSetMaximumLatency(uint256 maxLatency) public {
-        _testSetMaximumLatency(address(strategyFloorFromChainlink), maxLatency);
-    }
-
-    function testSetMaximumLatencyLatencyToleranceTooHigh(uint256 maxLatency) public {
-        _testSetMaximumLatencyLatencyToleranceTooHigh(address(strategyFloorFromChainlink), maxLatency);
-    }
-
-    function testSetMaximumLatencyNotOwner() public {
-        _testSetMaximumLatencyNotOwner(address(strategyFloorFromChainlink));
+    function testmaxLatency() public {
+        assertEq(strategyFloorFromChainlink.maxLatency(), MAXIMUM_LATENCY);
     }
 
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
@@ -253,7 +241,6 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     }
 
     function _setPriceFeed() internal asPrankedUser(_owner) {
-        strategyFloorFromChainlink.updateMaxLatency(MAXIMUM_LATENCY);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 }

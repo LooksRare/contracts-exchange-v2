@@ -27,9 +27,6 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.prank(_owner);
-        strategyFloorFromChainlink.updateMaxLatency(MAXIMUM_LATENCY);
-
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, BaseStrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
@@ -43,10 +40,16 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
             premium: premium
         });
 
+        makerAsk.startTime = CHAINLINK_PRICE_UPDATED_AT;
+        uint256 latencyViolationTimestamp = CHAINLINK_PRICE_UPDATED_AT + MAXIMUM_LATENCY + 1 seconds;
+        makerAsk.endTime = latencyViolationTimestamp;
+
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.prank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+
+        vm.warp(latencyViolationTimestamp);
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -65,10 +68,8 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        vm.startPrank(_owner);
-        strategyFloorFromChainlink.updateMaxLatency(MAXIMUM_LATENCY);
+        vm.prank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
-        vm.stopPrank();
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);

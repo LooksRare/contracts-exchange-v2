@@ -14,11 +14,11 @@ contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerAskAndTakerBid(
         address collection
     ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
-        uint256 assetType;
+        uint256 assetType = ASSET_TYPE_ERC721;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = 1;
+            assetType = ASSET_TYPE_ERC1155;
         }
 
         newMakerAsk = _createSingleItemMakerAskOrder({
@@ -47,10 +47,10 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         address currency
     ) internal view returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
-        uint256 assetType;
+        uint256 assetType = ASSET_TYPE_ERC721;
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = 1;
+            assetType = ASSET_TYPE_ERC1155;
         }
 
         newMakerBid = _createSingleItemMakerBidOrder({
@@ -79,11 +79,11 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         uint256 numberTokens
     ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
-        uint256 assetType;
+        uint256 assetType = ASSET_TYPE_ERC721;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = 1;
+            assetType = ASSET_TYPE_ERC1155;
         }
 
         uint256[] memory itemIds = new uint256[](numberTokens);
@@ -126,11 +126,11 @@ contract MockOrderGenerator is ProtocolHelpers {
         address currency,
         uint256 numberTokens
     ) internal view returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
-        uint256 assetType;
+        uint256 assetType = ASSET_TYPE_ERC721;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = 1;
+            assetType = ASSET_TYPE_ERC1155;
         }
 
         uint256[] memory itemIds = new uint256[](numberTokens);

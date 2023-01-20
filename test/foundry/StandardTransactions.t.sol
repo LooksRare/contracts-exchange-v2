@@ -25,18 +25,22 @@ contract StandardTransactionsTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the orders and signature
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            minPrice: price,
-            itemId: itemId
-        });
+        (
+            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.TakerBid memory takerBid,
+            bytes memory signature
+        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
+                askNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                assetType: ASSET_TYPE_ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: ETH,
+                signer: makerUser,
+                minPrice: price,
+                itemId: itemId
+            });
 
         // Verify validity of maker ask order
         _isMakerAskOrderValid(makerAsk, signature);
@@ -96,18 +100,22 @@ contract StandardTransactionsTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the orders and signature
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            minPrice: price,
-            itemId: itemId
-        });
+        (
+            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.TakerBid memory takerBid,
+            bytes memory signature
+        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
+                askNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                assetType: ASSET_TYPE_ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: ETH,
+                signer: makerUser,
+                minPrice: price,
+                itemId: itemId
+            });
 
         // Adjustment
         takerBid.recipient = address(0);
@@ -163,18 +171,22 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: price,
-            itemId: itemId
-        });
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk,
+            bytes memory signature
+        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                assetType: ASSET_TYPE_ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: itemId
+            });
 
         // Verify maker bid order
         _isMakerBidOrderValid(makerBid, signature);
@@ -225,18 +237,22 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.assume(price <= 2 ether);
         _setUpUsers();
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: price,
-            itemId: itemId
-        });
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk,
+            bytes memory signature
+        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                assetType: ASSET_TYPE_ERC721,
+                orderNonce: 0,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: itemId
+            });
 
         // Verify maker bid order
         _isMakerBidOrderValid(makerBid, signature);
@@ -302,7 +318,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: 0, // ERC721
+                assetType: ASSET_TYPE_ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -376,7 +392,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: 0, // ERC721
+                assetType: ASSET_TYPE_ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,

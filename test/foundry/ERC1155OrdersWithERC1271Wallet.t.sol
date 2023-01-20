@@ -323,7 +323,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 1, // ERC1155
+            assetType: ASSET_TYPE_ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: ETH,
@@ -350,7 +350,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 1, // ERC1155
+            assetType: ASSET_TYPE_ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: address(weth),
@@ -391,7 +391,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 1,
+            assetType: ASSET_TYPE_ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: address(weth),
@@ -435,7 +435,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: 1, // ERC1155
+                assetType: ASSET_TYPE_ERC1155,
                 orderNonce: i,
                 collection: address(mockERC1155),
                 currency: ETH,

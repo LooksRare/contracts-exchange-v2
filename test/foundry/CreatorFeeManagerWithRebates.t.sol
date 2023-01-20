@@ -49,18 +49,22 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             mockERC721WithRoyalties.mint(takerUser, itemId);
         }
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721
-            orderNonce: 0,
-            collection: erc721,
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: price,
-            itemId: itemId
-        });
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk,
+            bytes memory signature
+        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
+                bidNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                assetType: ASSET_TYPE_ERC721,
+                orderNonce: 0,
+                collection: erc721,
+                currency: address(weth),
+                signer: makerUser,
+                maxPrice: price,
+                itemId: itemId
+            });
 
         _isMakerBidOrderValid(makerBid, signature);
 

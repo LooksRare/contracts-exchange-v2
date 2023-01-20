@@ -57,7 +57,7 @@ contract SandboxTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721 but it should be ERC1155
+            assetType: ASSET_TYPE_ERC721, // it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,
             currency: address(weth),
@@ -84,7 +84,7 @@ contract SandboxTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Adjust asset type and sign order again
-        makerBid.assetType = 1;
+        makerBid.assetType = ASSET_TYPE_ERC1155;
         signature = _signMakerBid(makerBid, makerUserPK);
 
         // It shouldn't fail with assetType = 0
@@ -110,7 +110,7 @@ contract SandboxTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: 0, // ERC721 but it should be ERC1155
+            assetType: ASSET_TYPE_ERC721, // it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,
             currency: ETH,
@@ -143,7 +143,7 @@ contract SandboxTest is ProtocolBase {
         );
 
         // Adjust asset type and sign order again
-        makerAsk.assetType = 1;
+        makerAsk.assetType = ASSET_TYPE_ERC1155;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // It shouldn't fail with assetType = 0

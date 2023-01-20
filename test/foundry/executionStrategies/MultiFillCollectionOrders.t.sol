@@ -72,7 +72,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
-            assetType: 0,
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -165,7 +165,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
-            assetType: 0,
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

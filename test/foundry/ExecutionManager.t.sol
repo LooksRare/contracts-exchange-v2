@@ -409,7 +409,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Fake strategy
-            assetType: 0,
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -460,7 +460,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Fake strategy
-            assetType: 0,
+            assetType: ASSET_TYPE_ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

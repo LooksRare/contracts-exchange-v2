@@ -16,7 +16,7 @@ import {BUNDLE_ERC2981_NOT_SUPPORTED, CREATOR_FEE_TOO_HIGH} from "../../contract
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     CreatorFeeManagerWithRoyalties public creatorFeeManagerWithRoyalties;

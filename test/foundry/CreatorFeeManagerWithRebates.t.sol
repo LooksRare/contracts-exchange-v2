@@ -16,7 +16,7 @@ import {BUNDLE_ERC2981_NOT_SUPPORTED} from "../../contracts/constants/Validation
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
     function _setUpRoyaltiesRegistry(uint256 fee) private {

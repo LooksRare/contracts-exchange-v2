@@ -18,7 +18,7 @@ import {StrategyCollectionOffer} from "../../../contracts/executionStrategies/St
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../contracts/constants/NumericConstants.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
     StrategyCollectionOffer public strategyCollectionOffer;

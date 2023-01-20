@@ -17,6 +17,9 @@ import {CURRENCY_NOT_WHITELISTED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../..
 // Other mocks and utils
 import {MockERC20} from "../mock/MockERC20.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+
 contract LooksRareProtocolTest is ProtocolBase {
     // Fixed price of sale
     uint256 private constant price = 1 ether;

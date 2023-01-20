@@ -10,6 +10,9 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 // Other helpers
 import {ProtocolHelpers} from "../utils/ProtocolHelpers.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../../contracts/constants/NumericConstants.sol";
+
 contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerAskAndTakerBid(
         address collection

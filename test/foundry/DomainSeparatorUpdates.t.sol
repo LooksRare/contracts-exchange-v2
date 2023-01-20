@@ -12,6 +12,9 @@ import {ILooksRareProtocol} from "../../contracts/interfaces/ILooksRareProtocol.
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+
 contract DomainSeparatorUpdatesTest is ProtocolBase {
     function testUpdateDomainSeparator(uint64 newChainId) public asPrankedUser(_owner) {
         vm.assume(newChainId != block.chainid);

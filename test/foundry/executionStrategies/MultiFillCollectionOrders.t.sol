@@ -13,7 +13,7 @@ import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFi
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../contracts/constants/NumericConstants.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
     uint256 private constant price = 1 ether; // Fixed price of sale

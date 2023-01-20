@@ -52,8 +52,4 @@ abstract contract TestParameters is Test {
 
     // Strategy ID
     uint256 internal constant STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY = 0;
-
-    // Asset types
-    uint256 internal constant ASSET_TYPE_ERC721 = 0;
-    uint256 internal constant ASSET_TYPE_ERC1155 = 1;
 }

@@ -16,6 +16,9 @@ import {StrategyItemIdsRange} from "../../../contracts/executionStrategies/Strat
 // Base test
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../../contracts/constants/NumericConstants.sol";
+
 contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     StrategyItemIdsRange public strategyItemIdsRange;
     bytes4 public selector = StrategyItemIdsRange.executeStrategyWithTakerAsk.selector;

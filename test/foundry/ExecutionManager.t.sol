@@ -19,6 +19,9 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 // Strategies
 import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     function testUpdateCreatorFeeManager() public asPrankedUser(_owner) {
         vm.expectEmit(true, false, false, true);

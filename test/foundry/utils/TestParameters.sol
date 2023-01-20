@@ -19,6 +19,9 @@ abstract contract TestParameters is Test {
     address internal constant _royaltyRecipient = address(22);
     address internal constant _affiliate = address(2);
 
+    // Currencies
+    address internal constant ETH = address(0);
+
     // Generic fee parameters
     uint16 internal constant _standardProtocolFeeBp = uint16(150);
     uint16 internal constant _minTotalFeeBp = uint16(200);

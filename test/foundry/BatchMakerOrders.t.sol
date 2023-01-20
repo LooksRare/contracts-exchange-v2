@@ -222,7 +222,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 assetType: 0, // ERC721
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
-                currency: address(0), // ETH
+                currency: ETH,
                 signer: makerUser,
                 minPrice: price,
                 itemId: i

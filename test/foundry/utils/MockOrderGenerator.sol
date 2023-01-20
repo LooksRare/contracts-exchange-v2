@@ -91,7 +91,11 @@ contract MockOrderGenerator is ProtocolHelpers {
 
         for (uint256 i; i < itemIds.length; i++) {
             itemIds[i] = i;
-            amounts[i] = 1;
+            if (assetType != 1) {
+                amounts[i] = 1;
+            } else {
+                amounts[i] = 1 + i;
+            }
         }
 
         newMakerAsk = _createMultiItemMakerAskOrder({
@@ -123,8 +127,9 @@ contract MockOrderGenerator is ProtocolHelpers {
         uint256 numberTokens
     ) internal view returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
         uint256 assetType;
+
         // If ERC1155, adjust asset type
-        if (IERC165(collection).supportsInterface(0x4e2312e0)) {
+        if (IERC165(collection).supportsInterface(0xd9b67a26)) {
             assetType = 1;
         }
 
@@ -133,7 +138,11 @@ contract MockOrderGenerator is ProtocolHelpers {
 
         for (uint256 i; i < itemIds.length; i++) {
             itemIds[i] = i;
-            amounts[i] = 1;
+            if (assetType != 1) {
+                amounts[i] = 1;
+            } else {
+                amounts[i] = 1 + i;
+            }
         }
 
         newMakerBid = _createMultiItemMakerBidOrder({

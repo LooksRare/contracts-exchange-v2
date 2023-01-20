@@ -26,7 +26,7 @@ contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 2, // It does not exist
             orderNonce: 0,
             collection: address(mockERC721),

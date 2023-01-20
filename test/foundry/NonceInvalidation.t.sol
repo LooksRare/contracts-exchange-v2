@@ -28,7 +28,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: subsetNonce,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
@@ -89,7 +89,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: userGlobalAskNonce,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
@@ -144,7 +144,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: userGlobalBidNonce,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
@@ -196,7 +196,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
@@ -322,7 +322,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             makerBid = _createMultiItemMakerBidOrder({
                 bidNonce: 0,
                 subsetNonce: 0,
-                strategyId: 0, // normal offer
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: 0,
                 orderNonce: orderNonce,
                 collection: address(mockERC721),
@@ -388,7 +388,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721
             orderNonce: orderNonce,
             collection: address(mockERC721),

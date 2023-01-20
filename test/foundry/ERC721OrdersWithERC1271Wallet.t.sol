@@ -258,7 +258,7 @@ contract ERC721OrdersWithERC1271WalletTest is ProtocolBase {
         makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
@@ -285,7 +285,7 @@ contract ERC721OrdersWithERC1271WalletTest is ProtocolBase {
         makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
@@ -331,7 +331,7 @@ contract ERC721OrdersWithERC1271WalletTest is ProtocolBase {
             makerAsks[i] = _createSingleItemMakerAskOrder({
                 askNonce: 0,
                 subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: 0, // ERC721
                 orderNonce: i,
                 collection: address(mockERC721),

@@ -49,4 +49,7 @@ abstract contract TestParameters is Test {
 
     // Chainlink ETH/USD price feed (Ethereum mainnet)
     address internal constant CHAINLINK_ETH_USD_PRICE_FEED = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
+
+    // Strategy ID
+    uint256 internal constant STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY = 0;
 }

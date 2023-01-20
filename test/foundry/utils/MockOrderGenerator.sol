@@ -24,7 +24,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         newMakerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
-            strategyId: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
             orderNonce: 0,
             collection: collection,
@@ -56,7 +56,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         newMakerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
             orderNonce: 0,
             collection: collection,
@@ -101,7 +101,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         newMakerAsk = _createMultiItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
-            strategyId: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
             orderNonce: 0,
             collection: collection,
@@ -148,7 +148,7 @@ contract MockOrderGenerator is ProtocolHelpers {
         newMakerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
             orderNonce: 0,
             collection: collection,

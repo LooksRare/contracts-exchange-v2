@@ -322,7 +322,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 1, // ERC1155
             orderNonce: 0,
             collection: address(mockERC1155),
@@ -349,7 +349,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 1, // ERC1155
             orderNonce: 0,
             collection: address(mockERC1155),
@@ -390,7 +390,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 1,
             orderNonce: 0,
             collection: address(mockERC1155),
@@ -434,7 +434,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             makerAsks[i] = _createSingleItemMakerAskOrder({
                 askNonce: 0,
                 subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: 1, // ERC1155
                 orderNonce: i,
                 collection: address(mockERC1155),

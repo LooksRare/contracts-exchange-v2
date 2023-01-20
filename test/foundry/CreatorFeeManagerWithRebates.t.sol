@@ -52,7 +52,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: erc721,

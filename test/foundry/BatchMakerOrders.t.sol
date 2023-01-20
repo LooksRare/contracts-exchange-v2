@@ -218,7 +218,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             makerAsk = _createSingleItemMakerAskOrder({
                 askNonce: 0, // askNonce
                 subsetNonce: 0, // subsetNonce
-                strategyId: 0, // Standard sale for fixed price
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: 0, // ERC721
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
@@ -242,7 +242,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             makerBid = _createSingleItemMakerBidOrder({
                 bidNonce: 0,
                 subsetNonce: 0,
-                strategyId: 0, // Standard sale for fixed price
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: 0, // ERC721
                 orderNonce: i, // incremental
                 collection: address(mockERC721),

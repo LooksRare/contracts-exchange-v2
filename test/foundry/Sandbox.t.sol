@@ -56,7 +56,7 @@ contract SandboxTest is ProtocolBase {
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721 but it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,
@@ -109,7 +109,7 @@ contract SandboxTest is ProtocolBase {
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
-            strategyId: 0, // Standard sale for fixed price
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: 0, // ERC721 but it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,

@@ -142,17 +142,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         }
 
         // Creator fee and adjustment of protocol fee
-        if (address(creatorFeeManager) != address(0)) {
-            (recipients[1], feeAmounts[1]) = creatorFeeManager.viewCreatorFeeInfo(makerBid.collection, price, itemIds);
-
-            if (recipients[1] == address(0)) {
-                // If recipient is null address, creator fee is set at 0
-                feeAmounts[1] = 0;
-            } else if (feeAmounts[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
-                // If creator fee is higher than tolerated, it reverts
-                revert CreatorFeeBpTooHigh();
-            }
-        }
+        (recipients[1], feeAmounts[1]) = _calculateCreatorFeeAmountAndRecipient(makerBid.collection, price, itemIds);
 
         // Compute minimum total fee amount
         uint256 minTotalFeeAmount = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
@@ -227,17 +217,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         }
 
         // Creator fee amount and adjustment of protocol fee amount
-        if (address(creatorFeeManager) != address(0)) {
-            (recipients[1], feeAmounts[1]) = creatorFeeManager.viewCreatorFeeInfo(makerAsk.collection, price, itemIds);
-
-            if (recipients[1] == address(0)) {
-                // If recipient is null address, creator fee is set at 0
-                feeAmounts[1] = 0;
-            } else if (feeAmounts[1] * 10_000 > (price * uint256(maxCreatorFeeBp))) {
-                // If creator fee is higher than tolerated, it reverts
-                revert CreatorFeeBpTooHigh();
-            }
-        }
+        (recipients[1], feeAmounts[1]) = _calculateCreatorFeeAmountAndRecipient(makerAsk.collection, price, itemIds);
 
         // Compute minimum total fee amount
         uint256 minTotalFeeAmount = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
@@ -275,6 +255,32 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
 
         if (protocolFeeAmount + creatorFeeAmount < minTotalFeeAmount) {
             protocolFeeAmount = minTotalFeeAmount - creatorFeeAmount;
+        }
+    }
+
+    /**
+     * @notice This function is internal and used to calculate the creator fee amount and retrieve the recipient address.
+     * @param collection Collection address
+     * @param price Transaction price
+     * @param itemIds Array of item ids
+     * @return creator Creator recipient
+     * @return creatorFeeAmount Creator fee amount
+     */
+    function _calculateCreatorFeeAmountAndRecipient(
+        address collection,
+        uint256 price,
+        uint256[] memory itemIds
+    ) private view returns (address creator, uint256 creatorFeeAmount) {
+        if (address(creatorFeeManager) != address(0)) {
+            (creator, creatorFeeAmount) = creatorFeeManager.viewCreatorFeeInfo(collection, price, itemIds);
+
+            if (creator == address(0)) {
+                // If recipient is null address, creator fee is set to 0
+                creatorFeeAmount = 0;
+            } else if (creatorFeeAmount * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+                // If creator fee is higher than tolerated, it reverts
+                revert CreatorFeeBpTooHigh();
+            }
         }
     }
 

@@ -8,62 +8,6 @@ pragma solidity ^0.8.17;
  */
 library OrderStructs {
     /**
-     * @notice This is the constant used to compute the maker ask order hash.
-     */
-    bytes32 internal constant _MAKER_ASK_HASH =
-        keccak256(
-            "MakerAsk("
-            "uint256 askNonce,"
-            "uint256 subsetNonce,"
-            "uint256 strategyId,"
-            "uint256 assetType,"
-            "uint256 orderNonce,"
-            "address collection,"
-            "address currency,"
-            "address signer,"
-            "uint256 startTime,"
-            "uint256 endTime,"
-            "uint256 minPrice,"
-            "uint256[] itemIds,"
-            "uint256[] amounts,"
-            "bytes additionalParameters"
-            ")"
-        );
-
-    /**
-     * @notice This is the constant used to compute the maker bid order hash.
-     */
-    bytes32 internal constant _MAKER_BID_HASH =
-        keccak256(
-            "MakerBid("
-            "uint256 bidNonce,"
-            "uint256 subsetNonce,"
-            "uint256 strategyId,"
-            "uint256 assetType,"
-            "uint256 orderNonce,"
-            "address collection,"
-            "address currency,"
-            "address signer,"
-            "uint256 startTime,"
-            "uint256 endTime,"
-            "uint256 maxPrice,"
-            "uint256[] itemIds,"
-            "uint256[] amounts,"
-            "bytes additionalParameters"
-            ")"
-        );
-
-    /**
-     * @notice This is the constant used to compute the merkle root order hash (proof is not included in the hashing function).
-     */
-    bytes32 internal constant _MERKLE_TREE_HASH =
-        keccak256(
-            "MerkleTree("
-            "bytes32 root"
-            ")"
-        );
-
-    /**
      * 1. Maker structs
      */
 
@@ -116,7 +60,8 @@ library OrderStructs {
      * @param maxPrice Maximum price for execution
      * @param itemIds Array of itemIds
      * @param amounts Array of amounts
-     * @param additionalParameters Extra data specific for the order (e.g. it can contain a merkle root for specific strategies)
+     * @param additionalParameters Extra data specific for the order
+     *                             (e.g. it can contain a merkle root for specific strategies)
      */
     struct MakerBid {
         uint256 bidNonce;
@@ -174,12 +119,13 @@ library OrderStructs {
     }
 
     /**
-     * 3. Merkle tree
+     * 3. Merkle tree struct
      */
 
     /**
      * @notice MerkleTree is the struct for a merkle tree of order hashes.
-     * @dev A Merkle tree can be computed with order hashes. It can contain order hashes from both maker bid and maker ask structs.
+     * @dev A Merkle tree can be computed with order hashes.
+     *      It can contain order hashes from both maker bid and maker ask structs.
      * @param root Merkle root
      * @param proof Array containing the merkle proof
      */
@@ -189,7 +135,68 @@ library OrderStructs {
     }
 
     /**
-     * 4. Hash functions
+     * 4. Constants
+     */
+
+    /**
+     * @notice This is the constant used to compute the maker ask order hash.
+     */
+    bytes32 internal constant _MAKER_ASK_HASH =
+        keccak256(
+            "MakerAsk("
+            "uint256 askNonce,"
+            "uint256 subsetNonce,"
+            "uint256 strategyId,"
+            "uint256 assetType,"
+            "uint256 orderNonce,"
+            "address collection,"
+            "address currency,"
+            "address signer,"
+            "uint256 startTime,"
+            "uint256 endTime,"
+            "uint256 minPrice,"
+            "uint256[] itemIds,"
+            "uint256[] amounts,"
+            "bytes additionalParameters"
+            ")"
+        );
+
+    /**
+     * @notice This is the constant used to compute the maker bid order hash.
+     */
+    bytes32 internal constant _MAKER_BID_HASH =
+        keccak256(
+            "MakerBid("
+            "uint256 bidNonce,"
+            "uint256 subsetNonce,"
+            "uint256 strategyId,"
+            "uint256 assetType,"
+            "uint256 orderNonce,"
+            "address collection,"
+            "address currency,"
+            "address signer,"
+            "uint256 startTime,"
+            "uint256 endTime,"
+            "uint256 maxPrice,"
+            "uint256[] itemIds,"
+            "uint256[] amounts,"
+            "bytes additionalParameters"
+            ")"
+        );
+
+    /**
+     * @notice This is the constant used to compute the merkle root order hash.
+     * @dev The proof is not included in the hashing function.
+     */
+    bytes32 internal constant _MERKLE_TREE_HASH =
+        keccak256(
+            "MerkleTree("
+            "bytes32 root"
+            ")"
+        );
+
+    /**
+     * 5. Hash functions
      */
 
     /**

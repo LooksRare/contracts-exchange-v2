@@ -115,8 +115,12 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
 
         if (makerBid.strategyId == 0) {
-            _verifyStandardSaleStrategyWithTakerAsk(takerAsk, makerBid);
-            (price, itemIds, amounts) = (makerBid.maxPrice, makerBid.itemIds, makerBid.amounts);
+            (price, itemIds, amounts) = _verifyStandardSaleStrategyWithTakerAsk(
+                makerBid.assetType,
+                makerBid.items,
+                takerAsk.minPrice,
+                makerBid.maxPrice
+            );
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
@@ -200,8 +204,12 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
 
         if (makerAsk.strategyId == 0) {
-            _verifyStandardSaleStrategyWithTakerBid(takerBid, makerAsk);
-            (price, itemIds, amounts) = (makerAsk.minPrice, makerAsk.itemIds, makerAsk.amounts);
+            (price, itemIds, amounts) = _verifyStandardSaleStrategyWithTakerBid(
+                makerAsk.assetType,
+                makerAsk.items,
+                makerAsk.minPrice,
+                takerBid.maxPrice
+            );
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerAsk.strategyId].isActive) {

@@ -261,8 +261,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager, ChainlinkMax
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        // Make the order currency native ETH
-        makerAsk.currency = address(0);
+        makerAsk.currency = ETH;
         // Bidder overpays by 0.1 ETH
         takerBid.maxPrice = 1.1 ether;
 

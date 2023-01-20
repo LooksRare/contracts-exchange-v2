@@ -326,7 +326,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             assetType: 1, // ERC1155
             orderNonce: 0,
             collection: address(mockERC1155),
-            currency: address(0), // ETH
+            currency: ETH,
             signer: signer,
             minPrice: price,
             itemId: itemId
@@ -438,7 +438,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
                 assetType: 1, // ERC1155
                 orderNonce: i,
                 collection: address(mockERC1155),
-                currency: address(0), // ETH
+                currency: ETH,
                 signer: signer,
                 minPrice: price,
                 itemId: i // 0, 1, etc.

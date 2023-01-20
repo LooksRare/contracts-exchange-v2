@@ -28,7 +28,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType: assetType,
             orderNonce: 0,
             collection: collection,
-            currency: address(0), // ETH
+            currency: ETH,
             signer: makerUser,
             minPrice: 1 ether,
             itemId: 0
@@ -105,7 +105,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType: assetType,
             orderNonce: 0,
             collection: collection,
-            currency: address(0),
+            currency: ETH,
             signer: makerUser,
             minPrice: 1 ether,
             itemIds: itemIds,

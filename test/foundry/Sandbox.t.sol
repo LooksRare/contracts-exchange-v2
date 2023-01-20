@@ -113,7 +113,7 @@ contract SandboxTest is ProtocolBase {
             assetType: 0, // ERC721 but it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,
-            currency: address(0), // ETH
+            currency: ETH,
             signer: makerUser,
             minPrice: price,
             itemId: itemId

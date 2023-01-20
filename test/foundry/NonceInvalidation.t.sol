@@ -32,7 +32,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH
+            currency: ETH,
             signer: makerUser,
             minPrice: price,
             itemId: itemId
@@ -93,7 +93,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH
+            currency: ETH,
             signer: makerUser,
             minPrice: price,
             itemId: itemId

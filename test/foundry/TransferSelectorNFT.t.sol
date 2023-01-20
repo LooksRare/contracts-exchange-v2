@@ -30,7 +30,7 @@ contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
             assetType: 2, // It does not exist
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH
+            currency: ETH,
             signer: makerUser,
             minPrice: price,
             itemId: 10

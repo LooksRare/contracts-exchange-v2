@@ -412,7 +412,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             assetType: 0,
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0),
+            currency: ETH,
             signer: makerUser,
             minPrice: price,
             itemId: itemId

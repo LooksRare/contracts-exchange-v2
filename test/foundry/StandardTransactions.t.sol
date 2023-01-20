@@ -32,7 +32,7 @@ contract StandardTransactionsTest is ProtocolBase {
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH
+            currency: ETH,
             signer: makerUser,
             minPrice: price,
             itemId: itemId
@@ -103,7 +103,7 @@ contract StandardTransactionsTest is ProtocolBase {
             assetType: 0, // ERC721
             orderNonce: 0,
             collection: address(mockERC721),
-            currency: address(0), // ETH
+            currency: ETH,
             signer: makerUser,
             minPrice: price,
             itemId: itemId
@@ -305,7 +305,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 assetType: 0, // ERC721
                 orderNonce: i,
                 collection: address(mockERC721),
-                currency: address(0), // ETH
+                currency: ETH,
                 signer: makerUser,
                 minPrice: price, // Fixed
                 itemId: i // (0, 1, etc.)
@@ -379,7 +379,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 assetType: 0, // ERC721
                 orderNonce: i,
                 collection: address(mockERC721),
-                currency: address(0), // ETH
+                currency: ETH,
                 signer: makerUser,
                 minPrice: price, // Fixed
                 itemId: i // (0, 1, etc.)

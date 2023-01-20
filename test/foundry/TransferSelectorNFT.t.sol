@@ -11,7 +11,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 
 // Errors
-import {ASSET_TYPE_NOT_SUPPORTED} from "../../contracts/helpers/ValidationCodeConstants.sol";
+import {ASSET_TYPE_NOT_SUPPORTED} from "../../contracts/constants/ValidationCodeConstants.sol";
 import {WrongAssetType} from "../../contracts/interfaces/SharedErrors.sol";
 
 // Base test

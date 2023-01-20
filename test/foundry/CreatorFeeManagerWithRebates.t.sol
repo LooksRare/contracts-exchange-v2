@@ -10,7 +10,7 @@ import {ICreatorFeeManager} from "../../contracts/interfaces/ICreatorFeeManager.
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 
 // Shared errors
-import {BUNDLE_ERC2981_NOT_SUPPORTED} from "../../contracts/helpers/ValidationCodeConstants.sol";
+import {BUNDLE_ERC2981_NOT_SUPPORTED} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";

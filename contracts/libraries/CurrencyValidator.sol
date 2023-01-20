@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 // Assembly
-import {WrongCurrency_error_selector, WrongCurrency_error_length, Error_selector_offset} from "../executionStrategies/StrategyConstants.sol";
+import {WrongCurrency_error_selector, WrongCurrency_error_length, Error_selector_offset} from "../constants/StrategyConstants.sol";
 
 /**
  * @title CurrencyValidator

@@ -9,7 +9,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
 import {WrongMerkleProof} from "../../contracts/interfaces/SharedErrors.sol";
-import {ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/helpers/ValidationCodeConstants.sol";
+import {ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";

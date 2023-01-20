@@ -28,7 +28,7 @@ import {LooksRareProtocol} from "../LooksRareProtocol.sol";
 import {TransferManager} from "../TransferManager.sol";
 
 // Validation codes
-import "./ValidationCodeConstants.sol";
+import "../constants/ValidationCodeConstants.sol";
 
 /**
  * @title IExtendedExecutionStrategy

@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {IBaseStrategy} from "../interfaces/IBaseStrategy.sol";
 
 // Assembly
-import {OrderInvalid_error_selector, OrderInvalid_error_length, WrongCurrency_error_selector, WrongCurrency_error_length, Error_selector_offset} from "./StrategyConstants.sol";
+import {OrderInvalid_error_selector, OrderInvalid_error_length, WrongCurrency_error_selector, WrongCurrency_error_length, Error_selector_offset} from "../constants/StrategyConstants.sol";
 
 /**
  * @title BaseStrategy

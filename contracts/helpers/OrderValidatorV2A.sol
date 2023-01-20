@@ -30,6 +30,9 @@ import {TransferManager} from "../TransferManager.sol";
 // Validation codes
 import "../constants/ValidationCodeConstants.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
+
 /**
  * @title IExtendedExecutionStrategy
  */
@@ -792,7 +795,7 @@ contract OrderValidatorV2A {
         (address creator, uint256 creatorFee) = abi.decode(data, (address, uint256));
 
         if (creator != address(0)) {
-            if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+            if (creatorFee * ONE_HUNDRED_PERCENT_IN_BP > (price * uint256(maxCreatorFeeBp))) {
                 return CREATOR_FEE_TOO_HIGH;
             }
         }

@@ -12,6 +12,9 @@ import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
 // Shared errors
 import {WrongAssetType} from "./interfaces/SharedErrors.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";
+
 /**
  * @title TransferSelectorNFT
  * @notice This contract handles the logic for transferring non-fungible items.
@@ -49,9 +52,9 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
-        if (assetType == 0) {
+        if (assetType == ASSET_TYPE_ERC721) {
             transferManager.transferItemsERC721(collection, sender, recipient, itemIds, amounts);
-        } else if (assetType == 1) {
+        } else if (assetType == ASSET_TYPE_ERC1155) {
             transferManager.transferItemsERC1155(collection, sender, recipient, itemIds, amounts);
         } else {
             revert WrongAssetType(assetType);

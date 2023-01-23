@@ -67,7 +67,14 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
                         if (newCreator != creator) {
                             revert BundleEIP2981NotAllowed(collection);
                         }
-                    } catch {}
+                    } catch {
+                        // If creator address is not 0, that means there was at least 1
+                        // successful call. If all royaltyInfo calls fail, we should assume
+                        // 0 royalty.
+                        if (creator != address(0)) {
+                            revert BundleEIP2981NotAllowed(collection);
+                        }
+                    }
 
                     unchecked {
                         ++i;

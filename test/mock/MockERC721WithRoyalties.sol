@@ -4,6 +4,9 @@ pragma solidity ^0.8.17;
 import {IERC165, IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 import {MockERC721} from "./MockERC721.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
 contract MockERC721WithRoyalties is MockERC721, IERC2981 {
     address public immutable DEFAULT_ROYALTY_RECIPIENT;
     uint256 public immutable DEFAULT_ROYALTY_FEE;
@@ -21,7 +24,7 @@ contract MockERC721WithRoyalties is MockERC721, IERC2981 {
         address royaltyRecipient,
         uint256 royaltyFee
     ) external {
-        require(royaltyFee <= 10_000, "Royalty too high");
+        require(royaltyFee <= ONE_HUNDRED_PERCENT_IN_BP, "Royalty too high");
         _royaltyRecipientForTokenId[tokenId] = royaltyRecipient;
         _royaltyFeeForTokenId[tokenId] = royaltyFee;
     }
@@ -35,7 +38,7 @@ contract MockERC721WithRoyalties is MockERC721, IERC2981 {
             : _royaltyRecipientForTokenId[tokenId];
         uint256 _royaltyFee = _royaltyFeeForTokenId[tokenId];
         uint256 royaltyFee = _royaltyFee == 0 ? DEFAULT_ROYALTY_FEE : _royaltyFee;
-        royaltyAmount = (royaltyFee * salePrice) / 10_000;
+        royaltyAmount = (royaltyFee * salePrice) / ONE_HUNDRED_PERCENT_IN_BP;
     }
 
     function supportsInterface(bytes4 interfaceId) public view override(MockERC721, IERC165) returns (bool) {

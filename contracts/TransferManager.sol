@@ -10,6 +10,9 @@ import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLe
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {WrongAssetType, WrongLengths} from "./interfaces/SharedErrors.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";
+
 /**
  * @title TransferManager
  * @notice This contract provides the transfer functions for ERC721/ERC1155 for contracts that require them.
@@ -138,14 +141,14 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             }
 
             uint256 assetType = assetTypes[i];
-            if (assetType == 0) {
+            if (assetType == ASSET_TYPE_ERC721) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     _executeERC721TransferFrom(collections[i], from, to, itemIds[i][j]);
                     unchecked {
                         ++j;
                     }
                 }
-            } else if (assetType == 1) {
+            } else if (assetType == ASSET_TYPE_ERC1155) {
                 _executeERC1155SafeBatchTransferFrom(collections[i], from, to, itemIds[i], amounts[i]);
             } else {
                 revert WrongAssetType(assetType);

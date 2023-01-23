@@ -18,6 +18,9 @@ import {MockERC1155} from "../mock/MockERC1155.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
 import {TestParameters} from "./utils/TestParameters.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/NumericConstants.sol";
+
 contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     address[] public operators;
     MockERC721 public mockERC721;

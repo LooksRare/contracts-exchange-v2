@@ -18,6 +18,9 @@ import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol
 import {MockERC20} from "../../../mock/MockERC20.sol";
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
+
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
     bytes4 public selector = StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector;

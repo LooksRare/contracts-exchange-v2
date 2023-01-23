@@ -8,6 +8,9 @@ import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+
 contract StandardTransactionsTest is ProtocolBase {
     error ERC721TransferFromFail();
 
@@ -363,7 +366,10 @@ contract StandardTransactionsTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
         // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + ((price * 9_800) * numberPurchases) / 10_000);
+        assertEq(
+            address(makerUser).balance,
+            _initialETHBalanceUser + ((price * 9_800) * numberPurchases) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }
@@ -472,7 +478,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(
             address(makerUser).balance,
-            _initialETHBalanceUser + ((price * 9_800) * (numberPurchases - 1)) / 10_000
+            _initialETHBalanceUser + ((price * 9_800) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
@@ -537,10 +543,10 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 price,
         uint256 royaltyFeeBp
     ) private pure returns (uint256[3] memory expectedFees) {
-        expectedFees[2] = (price * _standardProtocolFeeBp) / 10_000;
-        expectedFees[1] = (price * royaltyFeeBp) / 10_000;
-        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / 10_000)) {
-            expectedFees[2] = ((price * _minTotalFeeBp) / 10_000) - expectedFees[1];
+        expectedFees[2] = (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
+        expectedFees[1] = (price * royaltyFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
+        if (expectedFees[2] + expectedFees[1] < ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP)) {
+            expectedFees[2] = ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP) - expectedFees[1];
         }
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
     }

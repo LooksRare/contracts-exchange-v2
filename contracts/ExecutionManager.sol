@@ -14,7 +14,10 @@ import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
 // Assembly
-import {OutsideOfTimeRange_error_selector, OutsideOfTimeRange_error_length, Error_selector_offset} from "./ExecutionManagerConstants.sol";
+import {OutsideOfTimeRange_error_selector, OutsideOfTimeRange_error_length, Error_selector_offset} from "./constants/ExecutionManagerConstants.sol";
+
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
 /**
  * @title ExecutionManager
@@ -86,13 +89,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-<<<<<<< HEAD
      * @notice This function is internal and is used to execute a transaction initiated by a taker ask.
-     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-=======
-     * @notice This function is internal and used to execute a transaction initiated by a taker ask.
      * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
->>>>>>> 032da6b (docs: Adjustments for length)
      * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
      * @return itemIds Array of item ids to be traded
      * @return amounts Array of amounts for each item id
@@ -150,7 +148,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(makerBid.collection, price, itemIds);
 
         // Compute minimum total fee amount
-        uint256 minTotalFeeAmount = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
+        uint256 minTotalFeeAmount = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) /
+            ONE_HUNDRED_PERCENT_IN_BP;
 
         if (feeAmounts[1] == 0) {
             // If creator fee is null, protocol fee is set as the minimum total fee amount
@@ -225,7 +224,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(makerAsk.collection, price, itemIds);
 
         // Compute minimum total fee amount
-        uint256 minTotalFeeAmount = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
+        uint256 minTotalFeeAmount = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) /
+            ONE_HUNDRED_PERCENT_IN_BP;
 
         if (feeAmounts[1] == 0) {
             // If creator fee is null, protocol fee is set as the minimum total fee amount
@@ -257,7 +257,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         uint256 creatorFeeAmount,
         uint256 minTotalFeeAmount
     ) private view returns (uint256 protocolFeeAmount) {
-        protocolFeeAmount = (price * strategyInfo[strategyId].standardProtocolFeeBp) / 10_000;
+        protocolFeeAmount = (price * strategyInfo[strategyId].standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
 
         if (protocolFeeAmount + creatorFeeAmount < minTotalFeeAmount) {
             protocolFeeAmount = minTotalFeeAmount - creatorFeeAmount;
@@ -284,7 +284,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             if (creator == address(0)) {
                 // If recipient is null address, creator fee is set to 0
                 creatorFeeAmount = 0;
-            } else if (creatorFeeAmount * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+            } else if (creatorFeeAmount * ONE_HUNDRED_PERCENT_IN_BP > (price * uint256(maxCreatorFeeBp))) {
                 // If creator fee is higher than tolerated, it reverts
                 revert CreatorFeeBpTooHigh();
             }

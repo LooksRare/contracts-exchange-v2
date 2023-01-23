@@ -22,6 +22,9 @@ import {WrongCaller, WrongCurrency, WrongLengths, WrongMerkleProof} from "./inte
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
+
 /**
  * @title LooksRareProtocol
  * @notice This contract is the core smart contract of the LooksRare protocol ("v2").
@@ -463,7 +466,8 @@ contract LooksRareProtocol is
                 // Check whether affiliate program is active and whether to execute a affiliate logic
                 // If so, it adjusts the protocol fee downward.
                 if (isAffiliateProgramActive) {
-                    uint256 totalAffiliateFeeAmount = (totalProtocolFeeAmount * affiliateRates[affiliate]) / 10_000;
+                    uint256 totalAffiliateFeeAmount = (totalProtocolFeeAmount * affiliateRates[affiliate]) /
+                        ONE_HUNDRED_PERCENT_IN_BP;
 
                     if (totalAffiliateFeeAmount != 0) {
                         totalProtocolFeeAmount -= totalAffiliateFeeAmount;

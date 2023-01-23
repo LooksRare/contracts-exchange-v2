@@ -10,6 +10,9 @@ import {BidTooLow, OrderInvalid, WrongFunctionSelector} from "../interfaces/Shar
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721} from "../constants/NumericConstants.sol";
+
 /**
  * @title StrategyDutchAuction
  * @notice This contract offers a single execution strategy for users to create Dutch auctions.
@@ -105,7 +108,7 @@ contract StrategyDutchAuction is BaseStrategy {
                 if (amount == 0) {
                     return (isValid, OrderInvalid.selector);
                 }
-                if (makerAsk.assetType == 0) {
+                if (makerAsk.assetType == ASSET_TYPE_ERC721) {
                     return (isValid, OrderInvalid.selector);
                 }
             }

@@ -28,7 +28,10 @@ import {LooksRareProtocol} from "../LooksRareProtocol.sol";
 import {TransferManager} from "../TransferManager.sol";
 
 // Validation codes
-import "./ValidationCodeConstants.sol";
+import "../constants/ValidationCodeConstants.sol";
+
+// Constants
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
 
 /**
  * @title IExtendedExecutionStrategy
@@ -517,14 +520,14 @@ contract OrderValidatorV2A {
         address collection,
         uint256 assetType
     ) internal view returns (uint256 validationCode) {
-        if (assetType == 0) {
+        if (assetType == ASSET_TYPE_ERC721) {
             bool isERC721 = IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_1) ||
                 IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
 
             if (!isERC721) {
                 return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721;
             }
-        } else if (assetType == 1) {
+        } else if (assetType == ASSET_TYPE_ERC1155) {
             if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID)) {
                 return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155;
             }
@@ -578,9 +581,9 @@ contract OrderValidatorV2A {
             return validationCode;
         }
 
-        if (assetType == 0) {
+        if (assetType == ASSET_TYPE_ERC721) {
             validationCode = _checkValidityERC721AndEquivalents(collection, user, itemIds);
-        } else if (assetType == 1) {
+        } else if (assetType == ASSET_TYPE_ERC1155) {
             validationCode = _checkValidityERC1155(collection, user, itemIds, amounts);
         }
     }
@@ -792,7 +795,7 @@ contract OrderValidatorV2A {
         (address creator, uint256 creatorFee) = abi.decode(data, (address, uint256));
 
         if (creator != address(0)) {
-            if (creatorFee * 10_000 > (price * uint256(maxCreatorFeeBp))) {
+            if (creatorFee * ONE_HUNDRED_PERCENT_IN_BP > (price * uint256(maxCreatorFeeBp))) {
                 return CREATOR_FEE_TOO_HIGH;
             }
         }
@@ -923,7 +926,7 @@ contract OrderValidatorV2A {
                         validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                     }
 
-                    if (makerAsk.assetType == 0 && amounts[i] != 1) {
+                    if (makerAsk.assetType == ASSET_TYPE_ERC721 && amounts[i] != 1) {
                         validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                     }
 
@@ -981,7 +984,7 @@ contract OrderValidatorV2A {
                         validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                     }
 
-                    if (makerBid.assetType == 0 && amounts[i] != 1) {
+                    if (makerBid.assetType == ASSET_TYPE_ERC721 && amounts[i] != 1) {
                         validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                     }
 

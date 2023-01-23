@@ -8,13 +8,16 @@ import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.s
 
 // Shared errors
 import {BidTooLow, OrderInvalid, WrongFunctionSelector} from "../../../contracts/interfaces/SharedErrors.sol";
-import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/helpers/ValidationCodeConstants.sol";
+import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
 import {StrategyDutchAuction} from "../../../contracts/executionStrategies/StrategyDutchAuction.sol";
 
 // Other tests
 import {ProtocolBase} from "../ProtocolBase.t.sol";
+
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../contracts/constants/NumericConstants.sol";
 
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
@@ -173,7 +176,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), 0, "taker balance incorrect");
         // Maker ask user receives 98% of the whole price (2% protocol)
-        uint256 protocolFee = (executionPrice * 200) / 10_000;
+        uint256 protocolFee = (executionPrice * 200) / ONE_HUNDRED_PERCENT_IN_BP;
         assertEq(
             weth.balanceOf(makerUser),
             _initialWETHBalanceUser + (executionPrice - protocolFee),

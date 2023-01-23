@@ -15,6 +15,9 @@ import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelecto
 import {BaseStrategy} from "../BaseStrategy.sol";
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMultiplePriceFeeds.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../constants/NumericConstants.sol";
+
 /**
  * @title StrategyFloorFromChainlink
  * @notice This contract allows a seller to make a floor price + premium ask
@@ -130,7 +133,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
 
         uint256 floorPrice = _getFloorPrice(makerAsk.collection);
         uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
-        uint256 desiredPrice = (floorPrice * (10_000 + premium)) / 10_000;
+        uint256 desiredPrice = (floorPrice * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP;
 
         if (desiredPrice >= makerAsk.minPrice) {
             price = desiredPrice;
@@ -247,11 +250,11 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
 
         // @dev Discount cannot be 100%
-        if (discount >= 10_000) {
+        if (discount >= ONE_HUNDRED_PERCENT_IN_BP) {
             revert OrderInvalid();
         }
 
-        uint256 desiredPrice = (floorPrice * (10_000 - discount)) / 10_000;
+        uint256 desiredPrice = (floorPrice * (ONE_HUNDRED_PERCENT_IN_BP - discount)) / ONE_HUNDRED_PERCENT_IN_BP;
 
         if (desiredPrice >= makerBid.maxPrice) {
             price = makerBid.maxPrice;
@@ -346,7 +349,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             functionSelector ==
             StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
-            if (discount >= 10_000) {
+            if (discount >= ONE_HUNDRED_PERCENT_IN_BP) {
                 return (isValid, OrderInvalid.selector);
             }
         }

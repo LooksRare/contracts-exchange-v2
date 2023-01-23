@@ -13,6 +13,9 @@ import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfac
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721} from "../constants/NumericConstants.sol";
+
 /**
  * @title StrategyCollectionOffer
  * @notice This contract offers execution strategies for users to create maker bid offers for items in a collection.
@@ -129,7 +132,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             if (makerBid.amounts[0] == 0) {
                 return (isValid, OrderInvalid.selector);
             }
-            if (makerBid.assetType == 0) {
+            if (makerBid.assetType == ASSET_TYPE_ERC721) {
                 return (isValid, OrderInvalid.selector);
             }
         }

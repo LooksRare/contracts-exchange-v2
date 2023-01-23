@@ -7,6 +7,9 @@ import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSte
 // Royalty Fee Registry interface
 import {IRoyaltyFeeRegistry} from "../../contracts/interfaces/IRoyaltyFeeRegistry.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
 /**
  * @title MockRoyaltyFeeRegistry
  * @notice It is a royalty fee registry for the LooksRare exchange.
@@ -76,7 +79,7 @@ contract MockRoyaltyFeeRegistry is IRoyaltyFeeRegistry, OwnableTwoSteps {
     function royaltyInfo(address collection, uint256 amount) external view returns (address, uint256) {
         return (
             _royaltyFeeInfoCollection[collection].receiver,
-            (amount * _royaltyFeeInfoCollection[collection].fee) / 10_000
+            (amount * _royaltyFeeInfoCollection[collection].fee) / ONE_HUNDRED_PERCENT_IN_BP
         );
     }
 

@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import {Test} from "../../../lib/forge-std/src/Test.sol";
 
 // Assembly
-import {OutsideOfTimeRange_error_selector, OutsideOfTimeRange_error_length, Error_selector_offset} from "../../../contracts/ExecutionManagerConstants.sol";
+import {OutsideOfTimeRange_error_selector, OutsideOfTimeRange_error_length, Error_selector_offset} from "../../../contracts/constants/ExecutionManagerConstants.sol";
 
 contract NonAssemblyCode {
     error OutsideOfTimeRange();

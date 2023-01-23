@@ -8,6 +8,9 @@ import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/I
 import {ICreatorFeeManager} from "./interfaces/ICreatorFeeManager.sol";
 import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
+
 /**
  * @title CreatorFeeManagerWithRebates
  * @notice This contract retrieves the creator fee addresses and returns the creator rebate.
@@ -75,7 +78,7 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
 
         // A fixed royalty fee is applied
         if (creator != address(0)) {
-            creatorFee = (STANDARD_ROYALTY_FEE_BP * price) / 10_000;
+            creatorFee = (STANDARD_ROYALTY_FEE_BP * price) / ONE_HUNDRED_PERCENT_IN_BP;
         }
     }
 }

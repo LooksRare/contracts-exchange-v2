@@ -11,6 +11,9 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/NumericConstants.sol";
+
 contract SandboxTest is ProtocolBase {
     error ERC721TransferFromFail();
 

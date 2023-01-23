@@ -12,6 +12,9 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 // Mocks and other utils
 import {GasGriefer} from "./utils/GasGriefer.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+
 contract GasGriefingTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
     address private gasGriefer;
@@ -60,7 +63,7 @@ contract GasGriefingTest is ProtocolBase {
             abi.encode()
         );
 
-        uint256 sellerProceed = (price * 9_800) / 10_000;
+        uint256 sellerProceed = (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP;
 
         vm.expectEmit(true, true, false, true);
         emit Deposit(address(looksRareProtocol), sellerProceed);
@@ -87,7 +90,7 @@ contract GasGriefingTest is ProtocolBase {
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             address(_royaltyRecipient).balance,
-            _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / 10_000
+            _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
@@ -132,7 +135,7 @@ contract GasGriefingTest is ProtocolBase {
         // Other execution parameters
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-        uint256 sellerProceedPerItem = (price * 9_800) / 10_000;
+        uint256 sellerProceedPerItem = (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP;
 
         vm.expectEmit(true, true, false, true);
         emit Deposit(address(looksRareProtocol), sellerProceedPerItem);

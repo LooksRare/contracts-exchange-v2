@@ -15,6 +15,9 @@ import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../
 import {BaseStrategy} from "../BaseStrategy.sol";
 import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721} from "../../constants/NumericConstants.sol";
+
 /**
  * @title StrategyUSDDynamicAsk
  * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount to be in ETH.
@@ -147,7 +150,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
                 if (amount == 0) {
                     return (isValid, OrderInvalid.selector);
                 }
-                if (makerAsk.assetType == 0) {
+                if (makerAsk.assetType == ASSET_TYPE_ERC721) {
                     return (isValid, OrderInvalid.selector);
                 }
             }

@@ -11,13 +11,16 @@ import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol"
 
 // Shared errors
 import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
-import {MAKER_ORDER_INVALID_STANDARD_SALE, STRATEGY_MAKER_BID_SELECTOR_INVALID, STRATEGY_MAKER_ASK_SELECTOR_INVALID, STRATEGY_NOT_ACTIVE, START_TIME_GREATER_THAN_END_TIME, TOO_LATE_TO_EXECUTE_ORDER, TOO_EARLY_TO_EXECUTE_ORDER} from "../../contracts/helpers/ValidationCodeConstants.sol";
+import {MAKER_ORDER_INVALID_STANDARD_SALE, STRATEGY_MAKER_BID_SELECTOR_INVALID, STRATEGY_MAKER_ASK_SELECTOR_INVALID, STRATEGY_NOT_ACTIVE, START_TIME_GREATER_THAN_END_TIME, TOO_LATE_TO_EXECUTE_ORDER, TOO_EARLY_TO_EXECUTE_ORDER} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Strategies
 import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+
+// Constants
+import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     function testUpdateCreatorFeeManager() public asPrankedUser(_owner) {

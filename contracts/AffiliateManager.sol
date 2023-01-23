@@ -7,6 +7,9 @@ import {OwnableTwoSteps} from "@looksrare/contracts-libs/contracts/OwnableTwoSte
 // Interfaces
 import {IAffiliateManager} from "./interfaces/IAffiliateManager.sol";
 
+// Constants
+import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
+
 /**
  * @title AffiliateManager
  * @notice This contract handles the management of affiliates for the LooksRare protocol.
@@ -45,7 +48,7 @@ contract AffiliateManager is IAffiliateManager, OwnableTwoSteps {
             revert NotAffiliateController();
         }
 
-        if (bp > 10_000) {
+        if (bp > ONE_HUNDRED_PERCENT_IN_BP) {
             revert PercentageTooHigh();
         }
 

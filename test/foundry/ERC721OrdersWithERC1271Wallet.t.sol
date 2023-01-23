@@ -17,6 +17,9 @@ import {MaliciousIsValidSignatureERC1271Wallet} from "./utils/MaliciousIsValidSi
 // Errors
 import {InvalidSignatureERC1271} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+
 /**
  * @dev ERC1271Wallet recovers a signature's signer using ECDSA. If it matches the mock wallet's
  *      owner, it returns the magic value. Otherwise it returns an empty bytes4 value.

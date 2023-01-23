@@ -53,7 +53,7 @@ library OrderStructs {
      * @param assetType Asset type (e.g. 0 = ERC721, 1 = ERC1155)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
      * @param collection Collection address
-     * @param currency Currency address (@dev ETH is not valid as a maker bid currency)
+     * @param currency Currency address (@dev ETH is invalid as a maker bid currency)
      * @param signer Signer address
      * @param startTime Start timestamp
      * @param endTime End timestamp

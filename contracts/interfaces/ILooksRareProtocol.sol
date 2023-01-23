@@ -118,7 +118,7 @@ interface ILooksRareProtocol {
     error WrongChainId();
 
     /**
-     * @notice It is returned if the nonces are not valid.
+     * @notice It is returned if the nonces are invalid.
      */
     error WrongNonces();
 

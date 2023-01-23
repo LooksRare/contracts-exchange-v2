@@ -68,7 +68,7 @@ interface IStrategyManager {
     error StrategyHasNoSelector();
 
     /**
-     * @notice It is returned if the strategyId is not valid.
+     * @notice It is returned if the strategyId is invalid.
      */
     error StrategyNotUsed();
 

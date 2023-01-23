@@ -27,7 +27,7 @@ contract InheritedStrategy {
         OrderStructs.TakerBid calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     ) internal pure {
-        _verifyMatchingItemIdsAndAmountsAndPrice(
+        _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(
             makerAsk.assetType,
             makerAsk.amounts,
             makerAsk.itemIds,
@@ -46,7 +46,7 @@ contract InheritedStrategy {
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     ) internal pure {
-        _verifyMatchingItemIdsAndAmountsAndPrice(
+        _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(
             makerBid.assetType,
             makerBid.amounts,
             makerBid.itemIds,
@@ -55,7 +55,7 @@ contract InheritedStrategy {
         );
     }
 
-    function _verifyMatchingItemIdsAndAmountsAndPrice(
+    function _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(
         uint256 assetType,
         uint256[] calldata amounts,
         uint256[] calldata itemIds,

@@ -22,10 +22,10 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     CreatorFeeManagerWithRoyalties public creatorFeeManagerWithRoyalties;
 
     // New protocol fee
-    uint16 internal _newProtocolFee = 200;
+    uint16 internal constant _newProtocolFee = 200;
 
     // New creator royalty fee
-    uint256 internal _newCreatorRoyaltyFee = 300;
+    uint256 internal constant _newCreatorRoyaltyFee = 300;
 
     function _setUpRoyaltiesRegistry(uint256 fee) internal {
         vm.prank(_owner);

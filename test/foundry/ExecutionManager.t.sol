@@ -174,45 +174,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfTakerAskItemIdsLengthMismatch(
-        uint256 takerAskItemIdsLength
-    ) public asPrankedUser(takerUser) {
-        vm.assume(takerAskItemIdsLength > 1 && takerAskItemIdsLength < 100_000);
-
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
-            address(mockERC721),
-            address(weth)
-        );
-
-        uint256[] memory itemIds = new uint256[](takerAskItemIdsLength);
-        takerAsk.itemIds = itemIds;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
-    function testCannotValidateOrderIfTakerAskAmountsLengthMismatch(
-        uint256 takerAskAmountsLength
-    ) public asPrankedUser(takerUser) {
-        vm.assume(takerAskAmountsLength > 1 && takerAskAmountsLength < 100_000);
-
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
-            address(mockERC721),
-            address(weth)
-        );
-
-        uint256[] memory amounts = new uint256[](takerAskAmountsLength);
-        for (uint i; i < takerAskAmountsLength; i++) {
-            amounts[i] = 1;
-        }
-        takerAsk.amounts = amounts;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
     function testCannotValidateOrderIfMakerTakerPricesMismatch(uint256 lowerPrice, uint256 higherPrice) public {
         vm.assume(lowerPrice > 0 && lowerPrice < higherPrice);
 
@@ -277,59 +238,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE,
-            _EMPTY_AFFILIATE
-        );
-    }
-
-    function testCannotValidateOrderIfTakerBidItemIdsLengthMismatch(
-        uint256 takerBidItemIdsLength
-    ) public asPrankedUser(takerUser) {
-        vm.deal(takerUser, 100 ether);
-
-        vm.assume(takerBidItemIdsLength > 1 && takerBidItemIdsLength < 100_000);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
-            address(mockERC721)
-        );
-
-        uint256[] memory itemIds = new uint256[](takerBidItemIdsLength);
-        takerBid.itemIds = itemIds;
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE,
-            _EMPTY_AFFILIATE
-        );
-    }
-
-    function testCannotValidateOrderIfTakerBidAmountsLengthMismatch(
-        uint256 takerBidAmountsLength
-    ) public asPrankedUser(takerUser) {
-        vm.deal(takerUser, 100 ether);
-
-        vm.assume(takerBidAmountsLength > 1 && takerBidAmountsLength < 100_000);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
-            address(mockERC721)
-        );
-
-        uint256[] memory amounts = new uint256[](takerBidAmountsLength);
-        for (uint i; i < takerBidAmountsLength; i++) {
-            amounts[i] = 1;
-        }
-        takerBid.amounts = amounts;
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(

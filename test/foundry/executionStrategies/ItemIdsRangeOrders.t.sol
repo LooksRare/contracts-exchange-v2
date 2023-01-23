@@ -37,12 +37,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         uint256 upperBound
     ) private returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
         uint256 mid = (lowerBound + upperBound) / 2;
-        uint256[] memory makerBidItemIds = new uint256[](2);
-        makerBidItemIds[0] = lowerBound;
-        makerBidItemIds[1] = upperBound;
-
-        uint256[] memory makerBidAmounts = new uint256[](1);
-        makerBidAmounts[0] = 3;
 
         newMakerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
@@ -54,9 +48,11 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             currency: address(weth),
             signer: makerUser,
             maxPrice: 1 ether,
-            itemIds: makerBidItemIds,
-            amounts: makerBidAmounts
+            itemIds: new uint256[](0),
+            amounts: new uint256[](0)
         });
+
+        newMakerBid.additionalParameters = abi.encode(lowerBound, upperBound, 3);
 
         // This way, we can test
         // 1. lower bound is 0
@@ -153,13 +149,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
 
-        uint256[] memory makerBidItemIds = new uint256[](2);
-        makerBidItemIds[0] = lowerBound;
-        makerBidItemIds[1] = upperBound;
-
-        uint256[] memory makerBidAmounts = new uint256[](1);
-        makerBidAmounts[0] = 6;
-
         OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
@@ -170,9 +159,11 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             currency: address(weth),
             signer: makerUser,
             maxPrice: 1 ether,
-            itemIds: makerBidItemIds,
-            amounts: makerBidAmounts
+            itemIds: new uint256[](0),
+            amounts: new uint256[](0)
         });
+
+        makerBid.additionalParameters = abi.encode(lowerBound, upperBound, 6);
 
         mockERC1155.mint(takerUser, lowerBound, 2);
         mockERC1155.mint(takerUser, mid, 2);
@@ -219,7 +210,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
     }
 
-    function testMakerBidItemIdsLengthIsNotTwo() public {
+    function testInvalidMakerBidAdditionalParameters() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
@@ -227,46 +218,28 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             10
         );
 
-        // 1. ItemIds length is 1 (lower than 2)
-        makerBid.itemIds = new uint256[](1);
-        makerBid.itemIds[0] = 4;
+        makerBid.additionalParameters = abi.encode(6, 9);
+
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        vm.expectRevert(); // EVM revert
+        strategyItemIdsRange.isMakerBidValid(makerBid, selector);
 
+        vm.expectRevert(); // EVM revert
         vm.prank(takerUser);
-        vm.expectRevert(errorSelector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        // 2. ItemIds length is 3 (greater than 2)
-        makerBid.itemIds = new uint256[](3);
-        makerBid.itemIds[0] = 4;
-        makerBid.itemIds[1] = 40;
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        (isValid, errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
-
-        vm.prank(takerUser);
-        vm.expectRevert(errorSelector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testMakerBidAmountLengthIsNotOne() public {
+    function testZeroDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
-        makerBid.amounts = new uint256[](2);
 
-        // Sign order
+        makerBid.additionalParameters = abi.encode(5, 10, 0);
+
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
@@ -274,8 +247,8 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, OrderInvalid.selector);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
-        vm.prank(takerUser);
         vm.expectRevert(errorSelector);
+        vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -349,12 +322,8 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             10
         );
 
-        uint256[] memory invalidItemIds = new uint256[](2);
-        invalidItemIds[0] = 5;
         // lower band > upper band
-        invalidItemIds[1] = 4;
-
-        makerBid.itemIds = invalidItemIds;
+        makerBid.additionalParameters = abi.encode(5, 4, 1);
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -369,8 +338,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // lower band == upper band
-        invalidItemIds[1] = 5;
-        makerBid.itemIds = invalidItemIds;
+        makerBid.additionalParameters = abi.encode(5, 5, 1);
 
         // Sign order
         signature = _signMakerBid(makerBid, makerUserPK);

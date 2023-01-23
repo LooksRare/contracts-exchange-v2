@@ -295,10 +295,11 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCreatorRoyaltiesRevertForEIP2981WithBundlesIfAtLeastOneCallReverts() public {
+    function testCreatorRoyaltiesRevertForEIP2981WithBundlesIfAtLeastOneCallReverts(uint256 revertIndex) public {
         _setUpUsers();
 
         uint256 numberItemsInBundle = 5;
+        vm.assume(revertIndex < numberItemsInBundle);
 
         (
             OrderStructs.MakerBid memory makerBid,
@@ -316,19 +317,14 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
 
         // Adjust ERC721 with royalties
-        for (uint256 i; i < makerBid.itemIds.length - 1; i++) {
+        for (uint256 i; i < makerBid.itemIds.length; i++) {
             mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(
                 makerBid.itemIds[i],
                 _royaltyRecipient,
-                _newCreatorRoyaltyFee
+                // if greater than 10,000, will revert in royaltyInfo
+                i == revertIndex ? 10_001 : _newCreatorRoyaltyFee
             );
         }
-
-        mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(
-            makerBid.itemIds[numberItemsInBundle - 1],
-            _royaltyRecipient,
-            10_001 // greater than 10,000, will revert in royaltyInfo
-        );
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 

@@ -37,7 +37,7 @@ interface IExtendedExecutionStrategy {
     /**
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it return the error's 4 bytes selector
@@ -50,7 +50,7 @@ interface IExtendedExecutionStrategy {
     /**
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
@@ -221,7 +221,8 @@ contract OrderValidatorV2A {
 
         validationCodes[0] = _checkValidityMakerAskWhitelists(makerAsk.currency, makerAsk.strategyId);
 
-        // It can exit here if the strategy doesn't exist. However, if the strategy isn't valid, it can continue the execution.
+        // It can exit here if the strategy does not exist.
+        // However, if the strategy is invalid, it can continue the execution.
         if (
             validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_MAKER_ASK_SELECTOR_INVALID
         ) {
@@ -275,7 +276,8 @@ contract OrderValidatorV2A {
 
         validationCodes[0] = _checkValidityMakerBidWhitelists(makerBid.currency, makerBid.strategyId);
 
-        // It can exit here if the strategy doesn't exist. However, if the strategy isn't valid, it can continue the execution.
+        // It can exit here if the strategy does not exist.
+        // However, if the strategy is invalid, it can continue the execution.
         if (
             validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_MAKER_BID_SELECTOR_INVALID
         ) {
@@ -507,7 +509,8 @@ contract OrderValidatorV2A {
      * @param collection Address of the collection
      * @param assetType Asset type in the maker order
      * @return validationCode Validation code
-     * @dev This function may return false positives (i.e. assets that are tradable but don't implement the proper interfaceId). Use with care.
+     * @dev This function may return false positives
+     *      (i.e. assets that are tradable but do not implement the proper interfaceId).
      *      If ERC165 is not implemented, it will revert.
      */
     function _checkIfPotentialWrongAssetTypes(
@@ -681,7 +684,7 @@ contract OrderValidatorV2A {
                 }
             }
         } else {
-            // 1.2 If the balanceOfBatch doesn't work, use loop with balanceOf function
+            // 1.2 If the balanceOfBatch does not work, use loop with balanceOf function
             for (uint256 i; i < length; ) {
                 (success, data) = collection.staticcall(abi.encodeCall(IERC1155.balanceOf, (user, itemIds[i])));
 

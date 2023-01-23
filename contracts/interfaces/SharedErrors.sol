@@ -12,7 +12,7 @@ error AskTooHigh();
 error BidTooLow();
 
 /**
- * @notice Function selector is not valid for this strategy implementation.
+ * @notice Function selector is invalid for this strategy implementation.
  *         It cannot be used for this operation.
  */
 error FunctionSelectorInvalid();
@@ -34,7 +34,7 @@ error WrongAssetType(uint256 assetType);
 error WrongCaller();
 
 /**
- * @notice The currency is not valid.
+ * @notice The currency is invalid.
  */
 error WrongCurrency();
 

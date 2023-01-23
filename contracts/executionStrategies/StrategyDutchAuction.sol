@@ -17,10 +17,11 @@ import {BaseStrategy} from "./BaseStrategy.sol";
  */
 contract StrategyDutchAuction is BaseStrategy {
     /**
-     * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
+     * @notice This function validates the order under the context of the chosen strategy
+     *         and returns the fulfillable items/amounts/price/nonce invalidation status.
      *         The execution price set by the seller decreases linearly within the defined period.
-     * @param takerBid Taker bid struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerAsk Maker ask struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param takerBid Taker bid struct (taker ask-specific parameters for the execution)
+     * @param makerAsk Maker ask struct (maker bid-specific parameters for the execution)
      * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
      */
     function executeStrategyWithTakerBid(
@@ -76,8 +77,9 @@ contract StrategyDutchAuction is BaseStrategy {
 
     /**
      * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerAsk Maker ask struct (contains the maker bid-specific parameters for the execution of the transaction)
+     *         It does not revert if the maker order is invalid.
+     *         Instead it returns false and the error's 4 bytes selector.
+     * @param makerAsk Maker ask struct (maker bid-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
      * @return isValid Whether the maker struct is valid

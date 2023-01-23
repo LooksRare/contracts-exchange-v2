@@ -7,7 +7,7 @@ import {WrongCurrency_error_selector, WrongCurrency_error_length, Error_selector
 /**
  * @title CurrencyValidator
  * @notice This library validates the order currency to be the
- *         chain's native currency or the specified ERC20 token
+ *         chain's native currency or the specified ERC20 token.
  * @author LooksRare protocol team (👀,💎)
  */
 library CurrencyValidator {

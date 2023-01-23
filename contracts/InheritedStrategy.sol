@@ -71,7 +71,7 @@ contract InheritedStrategy {
                  * if (
                  *     amountsLength == 0 ||
                  *     price != counterpartyPrice ||
-                 *     amountsLength ^ itemIdsLength != 0
+                 *     amountsLength != itemIdsLength
                  * ) {
                  *     revert OrderInvalid();
                  * }

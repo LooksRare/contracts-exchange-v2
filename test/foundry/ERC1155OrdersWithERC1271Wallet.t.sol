@@ -13,6 +13,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ERC1271Wallet} from "./utils/ERC1271Wallet.sol";
 import {MaliciousERC1271Wallet} from "./utils/MaliciousERC1271Wallet.sol";
 import {MaliciousOnERC1155ReceivedERC1271Wallet} from "./utils/MaliciousOnERC1155ReceivedERC1271Wallet.sol";
+import {MaliciousOnERC1155ReceivedTheThirdTimeERC1271Wallet} from "./utils/MaliciousOnERC1155ReceivedTheThirdTimeERC1271Wallet.sol";
 import {MaliciousIsValidSignatureERC1271Wallet} from "./utils/MaliciousIsValidSignatureERC1271Wallet.sol";
 
 // Errors
@@ -225,7 +226,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    uint256 private constant numberPurchases = 3;
+    uint256 private constant numberOfPurchases = 3;
 
     function testExecuteMultipleTakerBids() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
@@ -243,7 +244,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         vm.stopPrank();
 
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             takerBids,
             makerAsks,
             signatures,
@@ -252,7 +253,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             false
         );
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             assertEq(mockERC1155.balanceOf(takerUser, i), 1);
         }
     }
@@ -279,7 +280,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
 
         vm.expectRevert(InvalidSignatureERC1271.selector);
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             takerBids,
             makerAsks,
             signatures,
@@ -305,7 +306,7 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             takerBids,
             makerAsks,
             signatures,
@@ -313,6 +314,46 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             _EMPTY_AFFILIATE,
             false
         );
+
+        for (uint256 i; i < numberOfPurchases - 1; i++) {
+            assertEq(mockERC1155.balanceOf(takerUser, i), 0);
+        }
+    }
+
+    function testExecuteMultipleTakerBidsOnERC1155ReceivedReentrancyOnlyInTheLastCall() public {
+        MaliciousOnERC1155ReceivedTheThirdTimeERC1271Wallet maliciousERC1271Wallet = new MaliciousOnERC1155ReceivedTheThirdTimeERC1271Wallet(
+                takerUser
+            );
+        _setUpUser(makerUser);
+        maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
+
+        (
+            OrderStructs.MakerAsk[] memory makerAsks,
+            OrderStructs.TakerBid[] memory takerBids,
+            OrderStructs.MerkleTree[] memory merkleTrees,
+            bytes[] memory signatures
+        ) = _multipleTakerBidsSetup(makerUser);
+
+        // Set the NFT recipient as the ERC1271 wallet to trigger onERC1155Received
+        for (uint256 i; i < numberOfPurchases; i++) {
+            takerBids[i].recipient = address(maliciousERC1271Wallet);
+        }
+
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
+            takerBids,
+            makerAsks,
+            signatures,
+            merkleTrees,
+            _EMPTY_AFFILIATE,
+            false
+        );
+
+        // First 2 purchases should go through, but the last one fails silently
+        for (uint256 i; i < numberOfPurchases - 1; i++) {
+            assertEq(mockERC1155.balanceOf(address(maliciousERC1271Wallet), i), 1);
+        }
+        assertEq(mockERC1155.balanceOf(address(maliciousERC1271Wallet), numberOfPurchases - 1), 0);
     }
 
     function _takerBidSetup(
@@ -425,11 +466,11 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
             bytes[] memory signatures
         )
     {
-        makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
-        takerBids = new OrderStructs.TakerBid[](numberPurchases);
-        signatures = new bytes[](numberPurchases);
+        makerAsks = new OrderStructs.MakerAsk[](numberOfPurchases);
+        takerBids = new OrderStructs.TakerBid[](numberOfPurchases);
+        signatures = new bytes[](numberOfPurchases);
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             // Mint asset
             mockERC1155.mint(signer, i, 1);
 
@@ -459,6 +500,6 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         }
 
         // Other execution parameters
-        merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+        merkleTrees = new OrderStructs.MerkleTree[](numberOfPurchases);
     }
 }

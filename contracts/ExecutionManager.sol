@@ -147,23 +147,13 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         // Creator fee and adjustment of protocol fee
         (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(makerBid.collection, price, itemIds);
 
-        // Compute minimum total fee amount
-        uint256 minTotalFeeAmount = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) /
-            ONE_HUNDRED_PERCENT_IN_BP;
-
-        if (feeAmounts[1] == 0) {
-            // If creator fee is null, protocol fee is set as the minimum total fee amount
-            feeAmounts[2] = minTotalFeeAmount;
-            // Net fee for seller
-            feeAmounts[0] = price - feeAmounts[2];
-        } else {
-            // If there is a creator fee, the protocol fee amount can be calculated
-            feeAmounts[2] = _calculateProtocolFeeAmount(price, makerBid.strategyId, feeAmounts[1], minTotalFeeAmount);
-            // Net fee for seller
-            feeAmounts[0] = price - feeAmounts[1] - feeAmounts[2];
-        }
-
-        recipients[0] = takerAsk.recipient == address(0) ? sender : takerAsk.recipient;
+        _setTheRestOfFeeAmountsAndRecipients(
+            makerBid.strategyId,
+            price,
+            takerAsk.recipient == address(0) ? sender : takerAsk.recipient,
+            feeAmounts,
+            recipients
+        );
     }
 
     /**
@@ -223,23 +213,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         // Creator fee amount and adjustment of protocol fee amount
         (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(makerAsk.collection, price, itemIds);
 
-        // Compute minimum total fee amount
-        uint256 minTotalFeeAmount = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) /
-            ONE_HUNDRED_PERCENT_IN_BP;
-
-        if (feeAmounts[1] == 0) {
-            // If creator fee is null, protocol fee is set as the minimum total fee amount
-            feeAmounts[2] = minTotalFeeAmount;
-            // Net fee amount for seller
-            feeAmounts[0] = price - feeAmounts[2];
-        } else {
-            // If there is a creator fee, the protocol fee amount can be calculated
-            feeAmounts[2] = _calculateProtocolFeeAmount(price, makerAsk.strategyId, feeAmounts[1], minTotalFeeAmount);
-            // Net fee amount for seller
-            feeAmounts[0] = price - feeAmounts[1] - feeAmounts[2];
-        }
-
-        recipients[0] = makerAsk.signer;
+        _setTheRestOfFeeAmountsAndRecipients(makerAsk.strategyId, price, makerAsk.signer, feeAmounts, recipients);
     }
 
     /**
@@ -305,5 +279,34 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
                 revert(Error_selector_offset, OutsideOfTimeRange_error_length)
             }
         }
+    }
+
+    /**
+     * @dev This function does not need to return feeAmounts and recipients as they are modified
+     *      in memory.
+     */
+    function _setTheRestOfFeeAmountsAndRecipients(
+        uint256 strategyId,
+        uint256 price,
+        address askRecipient,
+        uint256[3] memory feeAmounts,
+        address[2] memory recipients
+    ) private view {
+        // Compute minimum total fee amount
+        uint256 minTotalFeeAmount = (price * strategyInfo[strategyId].minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
+
+        if (feeAmounts[1] == 0) {
+            // If creator fee is null, protocol fee is set as the minimum total fee amount
+            feeAmounts[2] = minTotalFeeAmount;
+            // Net fee amount for seller
+            feeAmounts[0] = price - feeAmounts[2];
+        } else {
+            // If there is a creator fee information, the protocol fee amount can be calculated
+            feeAmounts[2] = _calculateProtocolFeeAmount(price, strategyId, feeAmounts[1], minTotalFeeAmount);
+            // Net fee amount for seller
+            feeAmounts[0] = price - feeAmounts[1] - feeAmounts[2];
+        }
+
+        recipients[0] = askRecipient;
     }
 }

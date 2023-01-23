@@ -240,7 +240,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         OrderStructs.MakerAsk memory _makerAsk,
         uint256 _signerKey
     ) internal view returns (bytes memory) {
-        bytes32 orderHash = _makerAsk.hash();
+        bytes32 orderHash = _computeOrderHashMakerAsk(_makerAsk);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,

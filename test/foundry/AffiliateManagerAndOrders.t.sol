@@ -126,8 +126,8 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
 
@@ -203,8 +203,8 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             takerBids[i] = OrderStructs.TakerBid(
                 takerUser,
                 makerAsks[i].minPrice,
-                makerAsks[i].itemIds,
-                makerAsks[i].amounts,
+                new uint256[](0),
+                new uint256[](0),
                 abi.encode()
             );
         }
@@ -304,8 +304,8 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
 

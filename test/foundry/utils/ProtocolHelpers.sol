@@ -55,8 +55,8 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
             newMakerAsk.minPrice,
-            newMakerAsk.itemIds,
-            newMakerAsk.amounts,
+            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerAsk.itemIds,
+            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerAsk.amounts,
             abi.encode()
         );
     }
@@ -165,8 +165,8 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         newTakerAsk = OrderStructs.TakerAsk(
             takerUser,
             newMakerBid.maxPrice,
-            newMakerBid.itemIds,
-            newMakerBid.amounts,
+            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerBid.itemIds,
+            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerBid.amounts,
             abi.encode()
         );
     }

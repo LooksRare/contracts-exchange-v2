@@ -40,8 +40,8 @@ contract MockOrderGenerator is ProtocolHelpers {
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
             newMakerAsk.minPrice,
-            newMakerAsk.itemIds,
-            newMakerAsk.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
     }
@@ -72,8 +72,8 @@ contract MockOrderGenerator is ProtocolHelpers {
         newTakerAsk = OrderStructs.TakerAsk(
             takerUser,
             newMakerBid.maxPrice,
-            newMakerBid.itemIds,
-            newMakerBid.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
     }
@@ -118,8 +118,8 @@ contract MockOrderGenerator is ProtocolHelpers {
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
             newMakerAsk.minPrice,
-            newMakerAsk.itemIds,
-            newMakerAsk.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
     }
@@ -165,8 +165,8 @@ contract MockOrderGenerator is ProtocolHelpers {
         newTakerAsk = OrderStructs.TakerAsk(
             takerUser,
             newMakerBid.maxPrice,
-            newMakerBid.itemIds,
-            newMakerBid.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
     }

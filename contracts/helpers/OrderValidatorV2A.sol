@@ -37,7 +37,7 @@ interface IExtendedExecutionStrategy {
     /**
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it return the error's 4 bytes selector
@@ -50,7 +50,7 @@ interface IExtendedExecutionStrategy {
     /**
      * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
      *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector

@@ -59,7 +59,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      * @notice This function allows the owner to update the maximum creator fee (in basis point).
      * @param newMaxCreatorFeeBp New maximum creator fee (in basis point)
      * @dev The maximum value that can be set is 25%.
-     *       Only callable by owner.
+     *      Only callable by owner.
      */
     function updateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) external onlyOwner {
         if (newMaxCreatorFeeBp > 2_500) {
@@ -86,8 +86,13 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
+<<<<<<< HEAD
      * @notice This function is internal and is used to execute a transaction initiated by a taker ask.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
+=======
+     * @notice This function is internal and used to execute a transaction initiated by a taker ask.
+     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
+>>>>>>> 032da6b (docs: Adjustments for length)
      * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
      * @return itemIds Array of item ids to be traded
      * @return amounts Array of amounts for each item id
@@ -163,9 +168,9 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This function is internal and is used to execute a transaction initiated by a taker bid.
-     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
+     * @notice This function is internal and used to execute a transaction initiated by a taker bid.
+     * @param takerBid Taker bid struct (taker bid-specific parameters for the execution)
+     * @param makerAsk Maker ask struct (ask-specific parameter for the maker side of the transaction)
      * @return itemIds Array of item ids to be traded
      * @return amounts Array of amounts for each item id
      * @return recipients Array of recipient addresses

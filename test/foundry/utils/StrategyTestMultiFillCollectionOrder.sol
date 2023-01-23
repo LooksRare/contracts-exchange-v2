@@ -29,8 +29,8 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
 
     /**
      * @notice Execute collection strategy with taker ask order
-     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
+     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,

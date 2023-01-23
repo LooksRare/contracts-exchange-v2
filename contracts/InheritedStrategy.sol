@@ -20,8 +20,8 @@ contract InheritedStrategy {
     /**
      * @notice This function is internal and is used to validate the parameters for a standard sale strategy
      *         when the standard transaction is initiated by a taker bid.
-     * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
-     * @param makerAsk Maker ask struct (contains the maker ask-specific parameters for the execution of the transaction)
+     * @param takerBid Taker bid struct (taker bid-specific parameters for the execution)
+     * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      */
     function _verifyStandardSaleStrategyWithTakerBid(
         OrderStructs.TakerBid calldata takerBid,
@@ -41,8 +41,8 @@ contract InheritedStrategy {
     /**
      * @notice This function is internal and is used to validate the parameters for a standard sale strategy
      *         when the standard transaction is initiated by a taker ask.
-     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
+     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function _verifyStandardSaleStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,

@@ -19,8 +19,8 @@ contract StrategyItemIdsRange is BaseStrategy {
     /**
      * @notice This function validates the order under the context of the chosen strategy and return the fulfillable items/amounts/price/nonce invalidation status.
      *         With this strategy, the bidder picks a item id range (e.g. 1-100) and a seller can fulfill the order with any tokens within the specificed ID range.
-     * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
-     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
+     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
@@ -94,7 +94,7 @@ contract StrategyItemIdsRange is BaseStrategy {
     /**
      * @notice This function validates *only the maker* order under the context of the chosen strategy.
      *         It does not revert if the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerBid Maker bid struct (contains the maker bid-specific parameters for the execution of the transaction)
+     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector

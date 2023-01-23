@@ -26,7 +26,7 @@ contract InheritedStrategy {
      *         when the standard transaction is initiated by a taker bid.
      * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      */
-    function _verifyStandardSaleStrategyWithTakerBid(OrderStructs.MakerAsk calldata makerAsk) internal pure {
+    function _verifyStandardSaleStrategyWithMakerAsk(OrderStructs.MakerAsk calldata makerAsk) internal pure {
         _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(makerAsk.assetType, makerAsk.amounts, makerAsk.itemIds);
     }
 
@@ -35,7 +35,7 @@ contract InheritedStrategy {
      *         when the standard transaction is initiated by a taker ask.
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
-    function _verifyStandardSaleStrategyWithTakerAsk(OrderStructs.MakerBid calldata makerBid) internal pure {
+    function _verifyStandardSaleStrategyWithMakerBid(OrderStructs.MakerBid calldata makerBid) internal pure {
         _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(makerBid.assetType, makerBid.amounts, makerBid.itemIds);
     }
 

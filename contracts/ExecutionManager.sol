@@ -86,7 +86,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This function is internal and used to execute a transaction initiated by a taker ask.
+     * @notice This function is internal and is used to execute a transaction initiated by a taker ask.
      * @param takerAsk Taker ask struct (contains the taker ask-specific parameters for the execution of the transaction)
      * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
      * @return itemIds Array of item ids to be traded
@@ -142,7 +142,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         }
 
         // Creator fee and adjustment of protocol fee
-        (recipients[1], feeAmounts[1]) = _calculateCreatorFeeAmountAndRecipient(makerBid.collection, price, itemIds);
+        (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(makerBid.collection, price, itemIds);
 
         // Compute minimum total fee amount
         uint256 minTotalFeeAmount = (price * strategyInfo[makerBid.strategyId].minTotalFeeBp) / 10_000;
@@ -163,7 +163,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This function is internal and used to execute a transaction initiated by a taker bid.
+     * @notice This function is internal and is used to execute a transaction initiated by a taker bid.
      * @param takerBid Taker bid struct (contains the taker bid-specific parameters for the execution of the transaction)
      * @param makerAsk Maker ask struct (contains ask-specific parameter for the maker side of the transaction)
      * @return itemIds Array of item ids to be traded
@@ -217,7 +217,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         }
 
         // Creator fee amount and adjustment of protocol fee amount
-        (recipients[1], feeAmounts[1]) = _calculateCreatorFeeAmountAndRecipient(makerAsk.collection, price, itemIds);
+        (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(makerAsk.collection, price, itemIds);
 
         // Compute minimum total fee amount
         uint256 minTotalFeeAmount = (price * strategyInfo[makerAsk.strategyId].minTotalFeeBp) / 10_000;
@@ -238,7 +238,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This function is internal and used to calculate the protocol fee amount for a given set of feeAmounts.
+     * @notice This function is internal and is used to calculate
+     *         the protocol fee amount for a set of fee amounts.
      * @param price Transaction price
      * @param strategyId Strategy id
      * @param creatorFeeAmount Creator fee amount
@@ -259,14 +260,15 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This function is internal and used to calculate the creator fee amount and retrieve the recipient address.
+     * @notice This function is internal and is used to get the creator fee address
+     *         and calculate the creator fee amount.
      * @param collection Collection address
      * @param price Transaction price
      * @param itemIds Array of item ids
      * @return creator Creator recipient
      * @return creatorFeeAmount Creator fee amount
      */
-    function _calculateCreatorFeeAmountAndRecipient(
+    function _getCreatorRecipientAndCalculateFeeAmount(
         address collection,
         uint256 price,
         uint256[] memory itemIds
@@ -285,7 +287,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This function is internal and used to verify the validity of an order in the context of the current block timestamps.
+     * @notice This function is internal and is used to verify the validity of an order
+     *         in the context of the current block timestamps.
      * @param startTime Start timestamp
      * @param endTime End timestamp
      */

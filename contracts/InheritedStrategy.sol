@@ -13,6 +13,10 @@ import {OrderInvalid_error_selector, OrderInvalid_error_length, Error_selector_o
 /**
  * @title InheritedStrategy
  * @notice This contract handles the verification of parameters for standard transactions.
+ *         We do not verify the taker struct's itemIds and amounts array as well as
+ *         minPrice (taker ask) / maxPrice (taker bid) because before the taker executes the
+ *         transaction, the maker itemIds/amounts/price should have already been seen and
+ *         confirmed off-chain.
  * @dev A standard transaction (bid or ask) is mapped to strategyId = 0.
  * @author LooksRare protocol team (👀,💎)
  */

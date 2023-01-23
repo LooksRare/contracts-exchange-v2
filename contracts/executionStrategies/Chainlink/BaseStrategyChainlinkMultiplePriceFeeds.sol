@@ -46,7 +46,7 @@ contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLa
      * @notice Constructor
      * @param _owner Owner address
      */
-    constructor(address _owner) BaseStrategyChainlinkPriceLatency(_owner) {}
+    constructor(address _owner) BaseStrategyChainlinkPriceLatency(_owner, 86_400) {}
 
     /**
      * @notice This function allows the owner to set an NFT collection's Chainlink price feed address.

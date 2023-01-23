@@ -24,7 +24,6 @@ contract MockERC721WithRoyalties is MockERC721, IERC2981 {
         address royaltyRecipient,
         uint256 royaltyFee
     ) external {
-        require(royaltyFee <= ONE_HUNDRED_PERCENT_IN_BP, "Royalty too high");
         _royaltyRecipientForTokenId[tokenId] = royaltyRecipient;
         _royaltyFeeForTokenId[tokenId] = royaltyFee;
     }
@@ -38,6 +37,7 @@ contract MockERC721WithRoyalties is MockERC721, IERC2981 {
             : _royaltyRecipientForTokenId[tokenId];
         uint256 _royaltyFee = _royaltyFeeForTokenId[tokenId];
         uint256 royaltyFee = _royaltyFee == 0 ? DEFAULT_ROYALTY_FEE : _royaltyFee;
+        require(royaltyFee <= ONE_HUNDRED_PERCENT_IN_BP, "Royalty too high");
         royaltyAmount = (royaltyFee * salePrice) / ONE_HUNDRED_PERCENT_IN_BP;
     }
 

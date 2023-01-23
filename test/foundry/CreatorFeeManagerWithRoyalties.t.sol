@@ -295,6 +295,55 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testCreatorRoyaltiesRevertForEIP2981WithBundlesIfAtLeastOneCallReverts() public {
+        _setUpUsers();
+
+        uint256 numberItemsInBundle = 5;
+
+        (
+            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.TakerAsk memory takerAsk
+        ) = _createMockMakerBidAndTakerAskWithBundle(
+                address(mockERC721WithRoyalties),
+                address(weth),
+                numberItemsInBundle
+            );
+
+        // Sign the order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Mint the items
+        mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
+
+        // Adjust ERC721 with royalties
+        for (uint256 i; i < makerBid.itemIds.length - 1; i++) {
+            mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(
+                makerBid.itemIds[i],
+                _royaltyRecipient,
+                _newCreatorRoyaltyFee
+            );
+        }
+
+        mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(
+            makerBid.itemIds[numberItemsInBundle - 1],
+            _royaltyRecipient,
+            10_001 // greater than 10,000, will revert in royaltyInfo
+        );
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+
+        // Taker user action should revert
+        vm.prank(takerUser);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ICreatorFeeManager.BundleEIP2981NotAllowed.selector,
+                address(mockERC721WithRoyalties)
+            )
+        );
+
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function testCreatorRoyaltiesRevertIfFeeHigherThanLimit() public {
         _setUpUsers();
         uint256 _creatorRoyaltyFeeTooHigh = looksRareProtocol.maxCreatorFeeBp() + 1;

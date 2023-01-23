@@ -77,22 +77,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         // Verify ownership is transferred
         assertEq(IERC721(erc721).ownerOf(itemId), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Owner receives 1.5% of the whole price
-        assertEq(
-            weth.balanceOf(_owner),
-            _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
-        // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / ONE_HUNDRED_PERCENT_IN_BP);
-        // Royalty recipient receives 0.5% of the whole price
-        assertEq(
-            weth.balanceOf(_royaltyRecipient),
-            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
-        );
-        // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        _assertSuccessfulTakerAsk(makerBid);
     }
 
     function _testCreatorFeeRebatesArePaidForBundles(address erc721) private {
@@ -107,9 +92,6 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             OrderStructs.MakerBid memory makerBid,
             OrderStructs.TakerAsk memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(erc721, address(weth), numberItemsInBundle);
-
-        // Adjust price
-        uint256 price = makerBid.maxPrice;
 
         if (erc721 == address(mockERC721)) {
             // Adjust royalties
@@ -145,23 +127,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             // Maker user has received all the assets in the bundle
             assertEq(IERC721(erc721).ownerOf(makerBid.itemIds[i]), makerUser);
         }
-
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Royalty recipient receives royalties
-        assertEq(
-            weth.balanceOf(_royaltyRecipient),
-            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
-        );
-        // Owner receives protocol fee (1.5%)
-        assertEq(
-            weth.balanceOf(_owner),
-            _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
-        // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9800) / ONE_HUNDRED_PERCENT_IN_BP);
-        // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        _assertSuccessfulTakerAsk(makerBid);
     }
 
     function testCreatorRebatesArePaidForRoyaltyFeeManager() public {
@@ -225,5 +191,26 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             )
         );
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function _assertSuccessfulTakerAsk(OrderStructs.MakerBid memory makerBid) private {
+        uint256 price = makerBid.maxPrice;
+
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        // Owner receives 1.5% of the whole price
+        assertEq(
+            weth.balanceOf(_owner),
+            _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
+        // Taker ask user receives 98% of the whole price
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
+        // Royalty recipient receives 0.5% of the whole price
+        assertEq(
+            weth.balanceOf(_royaltyRecipient),
+            _initialWETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
+        );
+        // Verify the nonce is marked as executed
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 }

@@ -20,47 +20,25 @@ contract InheritedStrategy {
     /**
      * @notice This function is internal and is used to validate the parameters for a standard sale strategy
      *         when the standard transaction is initiated by a taker bid.
-     * @param takerBid Taker bid struct (taker bid-specific parameters for the execution)
      * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      */
-    function _verifyStandardSaleStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
-    ) internal pure {
-        _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(
-            makerAsk.assetType,
-            makerAsk.amounts,
-            makerAsk.itemIds,
-            makerAsk.minPrice,
-            takerBid.maxPrice
-        );
+    function _verifyStandardSaleStrategyWithTakerBid(OrderStructs.MakerAsk calldata makerAsk) internal pure {
+        _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(makerAsk.assetType, makerAsk.amounts, makerAsk.itemIds);
     }
 
     /**
      * @notice This function is internal and is used to validate the parameters for a standard sale strategy
      *         when the standard transaction is initiated by a taker ask.
-     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
-    function _verifyStandardSaleStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
-    ) internal pure {
-        _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(
-            makerBid.assetType,
-            makerBid.amounts,
-            makerBid.itemIds,
-            makerBid.maxPrice,
-            takerAsk.minPrice
-        );
+    function _verifyStandardSaleStrategyWithTakerAsk(OrderStructs.MakerBid calldata makerBid) internal pure {
+        _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(makerBid.assetType, makerBid.amounts, makerBid.itemIds);
     }
 
     function _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(
         uint256 assetType,
         uint256[] calldata amounts,
-        uint256[] calldata itemIds,
-        uint256 price,
-        uint256 counterpartyPrice
+        uint256[] calldata itemIds
     ) private pure {
         assembly {
             let end
@@ -68,18 +46,14 @@ contract InheritedStrategy {
                 /*
                  * @dev If A == B, then A XOR B == 0.
                  *
-                 * if (
-                 *     amountsLength == 0 ||
-                 *     price != counterpartyPrice ||
-                 *     amountsLength != itemIdsLength
-                 * ) {
+                 * if (amountsLength == 0 || amountsLength != itemIdsLength) {
                  *     revert OrderInvalid();
                  * }
                  */
                 let amountsLength := amounts.length
                 let itemIdsLength := itemIds.length
 
-                if or(or(iszero(amountsLength), xor(price, counterpartyPrice)), xor(amountsLength, itemIdsLength)) {
+                if or(iszero(amountsLength), xor(amountsLength, itemIdsLength)) {
                     mstore(0x00, OrderInvalid_error_selector)
                     revert(Error_selector_offset, OrderInvalid_error_length)
                 }

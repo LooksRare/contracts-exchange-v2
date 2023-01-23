@@ -174,30 +174,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfMakerTakerPricesMismatch(uint256 lowerPrice, uint256 higherPrice) public {
-        vm.assume(lowerPrice > 0 && lowerPrice < higherPrice);
-
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
-            address(mockERC721),
-            address(weth)
-        );
-
-        makerBid.maxPrice = lowerPrice;
-        takerAsk.minPrice = higherPrice;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        // Reverse
-        makerBid.maxPrice = higherPrice;
-        takerAsk.minPrice = lowerPrice;
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
     function testCannotValidateOrderIfMakerAskItemIdsIsEmpty() public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
 
@@ -238,50 +214,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE,
-            _EMPTY_AFFILIATE
-        );
-    }
-
-    function testCannotValidateOrderIfTakerMakerPricesMismatch(
-        uint256 lowerPrice,
-        uint256 higherPrice
-    ) public asPrankedUser(takerUser) {
-        vm.assume(lowerPrice > 0 && lowerPrice < higherPrice);
-
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
-            address(mockERC721)
-        );
-
-        takerBid.maxPrice = lowerPrice;
-        makerAsk.minPrice = higherPrice;
-
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        vm.deal(takerUser, takerBid.maxPrice);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
-            takerBid,
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE,
-            _EMPTY_AFFILIATE
-        );
-
-        // Reverse
-        takerBid.maxPrice = higherPrice;
-        makerAsk.minPrice = lowerPrice;
-
-        signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        vm.deal(takerUser, takerBid.maxPrice);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(

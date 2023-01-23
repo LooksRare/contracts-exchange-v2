@@ -231,6 +231,8 @@ contract CollectionOrdersTest is ProtocolBase {
             address(weth)
         );
 
+        makerBid.strategyId = 1;
+
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 2;
         takerAsk.amounts = amounts;
@@ -251,6 +253,8 @@ contract CollectionOrdersTest is ProtocolBase {
             address(mockERC721),
             address(weth)
         );
+
+        makerBid.strategyId = 1;
 
         takerAsk.minPrice = makerBid.maxPrice + 1;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);

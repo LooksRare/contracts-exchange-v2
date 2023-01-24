@@ -12,8 +12,13 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
      * Verify initial post-deployment states are as expected
      */
     function testInitialStates() public {
-        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
+        assertEq(looksRareProtocol.owner(), _owner);
+        assertEq(looksRareProtocol.protocolFeeRecipient(), _owner);
+        assertEq(address(looksRareProtocol.transferManager()), address(transferManager));
+        assertEq(looksRareProtocol.WETH(), address(weth));
+        assertEq(looksRareProtocol.chainId(), block.chainid);
 
+        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
         bytes32 expectedDomainSeparator = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
@@ -23,7 +28,6 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
                 address(looksRareProtocol)
             )
         );
-
         assertEq(domainSeparator, expectedDomainSeparator);
 
         (

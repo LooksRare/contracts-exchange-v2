@@ -7,6 +7,12 @@ import {MockERC721} from "./MockERC721.sol";
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
+/**
+ * @dev This contract allows adding a royalty basis points higher than 10,000, which
+ *      reverts during the royaltyInfo call. The purpose is to create a scenario where
+ *      royaltyInfo returns the correct response for some token IDs and reverts for some
+ *      other token IDs. This can potentially happen in a bundle transaction.
+ */
 contract MockERC721WithRoyalties is MockERC721, IERC2981 {
     address public immutable DEFAULT_ROYALTY_RECIPIENT;
     uint256 public immutable DEFAULT_ROYALTY_FEE;
@@ -24,7 +30,6 @@ contract MockERC721WithRoyalties is MockERC721, IERC2981 {
         address royaltyRecipient,
         uint256 royaltyFee
     ) external {
-        require(royaltyFee <= ONE_HUNDRED_PERCENT_IN_BP, "Royalty too high");
         _royaltyRecipientForTokenId[tokenId] = royaltyRecipient;
         _royaltyFeeForTokenId[tokenId] = royaltyFee;
     }
@@ -38,6 +43,7 @@ contract MockERC721WithRoyalties is MockERC721, IERC2981 {
             : _royaltyRecipientForTokenId[tokenId];
         uint256 _royaltyFee = _royaltyFeeForTokenId[tokenId];
         uint256 royaltyFee = _royaltyFee == 0 ? DEFAULT_ROYALTY_FEE : _royaltyFee;
+        require(royaltyFee <= ONE_HUNDRED_PERCENT_IN_BP, "Royalty too high");
         royaltyAmount = (royaltyFee * salePrice) / ONE_HUNDRED_PERCENT_IN_BP;
     }
 

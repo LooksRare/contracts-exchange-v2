@@ -58,8 +58,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
 
@@ -111,8 +111,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
 
@@ -169,8 +169,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
 
@@ -222,8 +222,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
 
@@ -345,8 +345,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
                 takerUser,
                 makerBid.maxPrice,
-                itemIds,
-                amounts,
+                new uint256[](0),
+                new uint256[](0),
                 abi.encode()
             );
 
@@ -413,8 +413,8 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
+            new uint256[](0),
+            new uint256[](0),
             abi.encode()
         );
 

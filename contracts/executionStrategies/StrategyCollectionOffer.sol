@@ -22,6 +22,9 @@ import {ASSET_TYPE_ERC721} from "../constants/NumericConstants.sol";
  *         There are two available functions:
  *         1. executeCollectionStrategyWithTakerAsk --> it applies to all itemIds in a collection
  *         2. executeCollectionStrategyWithTakerAskWithProof --> it allows adding merkle proof criteria.
+ * @notice The bidder can only bid on 1 token ID at a time.
+ *         1. If ERC721, the amount must be 1.
+ *         2. If ERC1155, the amount can be greater than 1.
  * @dev Use cases can include trait-based offers or rarity score offers.
  * @author LooksRare protocol team (👀,💎)
  */

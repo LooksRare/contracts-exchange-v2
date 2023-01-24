@@ -66,35 +66,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
-
-        if (
-            makerAsk.itemIds.length != 1 ||
-            makerAsk.amounts.length != 1 ||
-            makerAsk.amounts[0] != 1 ||
-            makerAsk.itemIds[0] != takerBid.itemIds[0] ||
-            takerBid.amounts[0] != 1
-        ) {
-            revert OrderInvalid();
-        }
-
-        uint256 floorPrice = _getFloorPrice(makerAsk.collection);
-        uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
-        uint256 desiredPrice = floorPrice + premium;
-
-        if (desiredPrice >= makerAsk.minPrice) {
-            price = desiredPrice;
-        } else {
-            price = makerAsk.minPrice;
-        }
-
-        if (takerBid.maxPrice < price) {
-            revert BidTooLow();
-        }
-
-        itemIds = makerAsk.itemIds;
-        amounts = makerAsk.amounts;
-        isNonceInvalidated = true;
+        return _executePremiumStrategyWithTakerBid(takerBid, makerAsk, _calculateFixedPremium);
     }
 
     /**
@@ -119,35 +91,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
-
-        if (
-            makerAsk.itemIds.length != 1 ||
-            makerAsk.amounts.length != 1 ||
-            makerAsk.amounts[0] != 1 ||
-            makerAsk.itemIds[0] != takerBid.itemIds[0] ||
-            takerBid.amounts[0] != 1
-        ) {
-            revert OrderInvalid();
-        }
-
-        uint256 floorPrice = _getFloorPrice(makerAsk.collection);
-        uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
-        uint256 desiredPrice = (floorPrice * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP;
-
-        if (desiredPrice >= makerAsk.minPrice) {
-            price = desiredPrice;
-        } else {
-            price = makerAsk.minPrice;
-        }
-
-        if (takerBid.maxPrice < price) {
-            revert BidTooLow();
-        }
-
-        itemIds = makerAsk.itemIds;
-        amounts = makerAsk.amounts;
-        isNonceInvalidated = true;
+        return _executePremiumStrategyWithTakerBid(takerBid, makerAsk, _calculateBasisPointsPremium);
     }
 
     /**
@@ -172,42 +116,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerBid.currency != WETH) {
-            revert WrongCurrency();
-        }
-
-        if (
-            takerAsk.itemIds.length != 1 ||
-            takerAsk.amounts.length != 1 ||
-            takerAsk.amounts[0] != 1 ||
-            makerBid.amounts.length != 1 ||
-            makerBid.amounts[0] != 1
-        ) {
-            revert OrderInvalid();
-        }
-
-        uint256 floorPrice = _getFloorPrice(makerBid.collection);
-        uint256 discountAmount = abi.decode(makerBid.additionalParameters, (uint256));
-
-        if (floorPrice <= discountAmount) {
-            revert DiscountGreaterThanFloorPrice();
-        }
-
-        uint256 desiredPrice = floorPrice - discountAmount;
-
-        if (desiredPrice >= makerBid.maxPrice) {
-            price = makerBid.maxPrice;
-        } else {
-            price = desiredPrice;
-        }
-
-        if (takerAsk.minPrice > price) {
-            revert AskTooHigh();
-        }
-
-        itemIds = takerAsk.itemIds;
-        amounts = takerAsk.amounts;
-        isNonceInvalidated = true;
+        return _executeDiscountCollectionOfferStrategyWithTakerAsk(takerAsk, makerBid, _calculateFixedDiscount);
     }
 
     /**
@@ -232,43 +141,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        if (makerBid.currency != WETH) {
-            revert WrongCurrency();
-        }
-
-        if (
-            takerAsk.itemIds.length != 1 ||
-            takerAsk.amounts.length != 1 ||
-            takerAsk.amounts[0] != 1 ||
-            makerBid.amounts.length != 1 ||
-            makerBid.amounts[0] != 1
-        ) {
-            revert OrderInvalid();
-        }
-
-        uint256 floorPrice = _getFloorPrice(makerBid.collection);
-        uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-
-        // @dev Discount cannot be 100%
-        if (discount >= ONE_HUNDRED_PERCENT_IN_BP) {
-            revert OrderInvalid();
-        }
-
-        uint256 desiredPrice = (floorPrice * (ONE_HUNDRED_PERCENT_IN_BP - discount)) / ONE_HUNDRED_PERCENT_IN_BP;
-
-        if (desiredPrice >= makerBid.maxPrice) {
-            price = makerBid.maxPrice;
-        } else {
-            price = desiredPrice;
-        }
-
-        if (takerAsk.minPrice > price) {
-            revert AskTooHigh();
-        }
-
-        itemIds = takerAsk.itemIds;
-        amounts = takerAsk.amounts;
-        isNonceInvalidated = true;
+        return _executeDiscountCollectionOfferStrategyWithTakerAsk(takerAsk, makerBid, _calculateBasisPointsDiscount);
     }
 
     /**
@@ -370,6 +243,137 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         }
 
         isValid = true;
+    }
+
+    /**
+     * @param _calculateDesiredPrice _calculateFixedPremium or _calculateBasisPointsPremium
+     */
+    function _executePremiumStrategyWithTakerBid(
+        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.MakerAsk calldata makerAsk,
+        function(uint256 /* floorPrice */, uint256 /* premium */)
+            internal
+            pure
+            returns (uint256 /* desiredPrice */) _calculateDesiredPrice
+    )
+        private
+        view
+        returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
+    {
+        CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
+
+        if (
+            makerAsk.itemIds.length != 1 ||
+            makerAsk.amounts.length != 1 ||
+            makerAsk.amounts[0] != 1 ||
+            makerAsk.itemIds[0] != takerBid.itemIds[0] ||
+            takerBid.amounts[0] != 1
+        ) {
+            revert OrderInvalid();
+        }
+
+        uint256 floorPrice = _getFloorPrice(makerAsk.collection);
+        uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
+        uint256 desiredPrice = _calculateDesiredPrice(floorPrice, premium);
+
+        if (desiredPrice >= makerAsk.minPrice) {
+            price = desiredPrice;
+        } else {
+            price = makerAsk.minPrice;
+        }
+
+        if (takerBid.maxPrice < price) {
+            revert BidTooLow();
+        }
+
+        itemIds = makerAsk.itemIds;
+        amounts = makerAsk.amounts;
+        isNonceInvalidated = true;
+    }
+
+    function _calculateFixedPremium(uint256 floorPrice, uint256 premium) internal pure returns (uint256 desiredPrice) {
+        desiredPrice = floorPrice + premium;
+    }
+
+    function _calculateBasisPointsPremium(
+        uint256 floorPrice,
+        uint256 premium
+    ) internal pure returns (uint256 desiredPrice) {
+        desiredPrice = (floorPrice * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP;
+    }
+
+    /**
+     * @param _calculateDesiredPrice _calculateFixedDiscount or _calculateBasisPointsDiscount
+     */
+    function _executeDiscountCollectionOfferStrategyWithTakerAsk(
+        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.MakerBid calldata makerBid,
+        function(uint256 /* floorPrice */, uint256 /* discount */)
+            internal
+            pure
+            returns (uint256 /* desiredPrice */) _calculateDesiredPrice
+    )
+        private
+        view
+        returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
+    {
+        if (makerBid.currency != WETH) {
+            revert WrongCurrency();
+        }
+
+        if (
+            takerAsk.itemIds.length != 1 ||
+            takerAsk.amounts.length != 1 ||
+            takerAsk.amounts[0] != 1 ||
+            makerBid.amounts.length != 1 ||
+            makerBid.amounts[0] != 1
+        ) {
+            revert OrderInvalid();
+        }
+
+        uint256 floorPrice = _getFloorPrice(makerBid.collection);
+        uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
+
+        uint256 desiredPrice = _calculateDesiredPrice(floorPrice, discount);
+
+        if (desiredPrice >= makerBid.maxPrice) {
+            price = makerBid.maxPrice;
+        } else {
+            price = desiredPrice;
+        }
+
+        if (takerAsk.minPrice > price) {
+            revert AskTooHigh();
+        }
+
+        itemIds = takerAsk.itemIds;
+        amounts = takerAsk.amounts;
+        isNonceInvalidated = true;
+    }
+
+    function _calculateFixedDiscount(
+        uint256 floorPrice,
+        uint256 discount
+    ) internal pure returns (uint256 desiredPrice) {
+        if (floorPrice <= discount) {
+            revert DiscountGreaterThanFloorPrice();
+        }
+        unchecked {
+            desiredPrice = floorPrice - discount;
+        }
+    }
+
+    /**
+     * @dev Discount cannot be 100%
+     */
+    function _calculateBasisPointsDiscount(
+        uint256 floorPrice,
+        uint256 discount
+    ) internal pure returns (uint256 desiredPrice) {
+        if (discount >= ONE_HUNDRED_PERCENT_IN_BP) {
+            revert OrderInvalid();
+        }
+        desiredPrice = (floorPrice * (ONE_HUNDRED_PERCENT_IN_BP - discount)) / ONE_HUNDRED_PERCENT_IN_BP;
     }
 
     function _getFloorPrice(address collection) private view returns (uint256 price) {

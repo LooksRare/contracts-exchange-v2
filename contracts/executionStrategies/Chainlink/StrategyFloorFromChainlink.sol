@@ -358,7 +358,9 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         if (floorPrice <= discount) {
             revert DiscountGreaterThanFloorPrice();
         }
-        desiredPrice = floorPrice - discount;
+        unchecked {
+            desiredPrice = floorPrice - discount;
+        }
     }
 
     /**

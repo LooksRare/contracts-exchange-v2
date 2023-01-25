@@ -214,18 +214,12 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         newMakerBid.additionalParameters = abi.encode(discount);
 
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 1;
-
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1;
-
         newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: price,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
+            itemIds: new uint256[](0),
+            amounts: new uint256[](0),
+            additionalParameters: abi.encode(1, 1)
         });
     }
 

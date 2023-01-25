@@ -265,17 +265,13 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     {
         CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
-        (uint256 takerBidItemId, uint256 takerBidAmount) = abi.decode(
-            takerBid.additionalParameters,
-            (uint256, uint256)
-        );
+        uint256 takerBidItemId = abi.decode(takerBid.additionalParameters, (uint256));
 
         if (
             makerAsk.itemIds.length != 1 ||
             makerAsk.amounts.length != 1 ||
             makerAsk.amounts[0] != 1 ||
-            makerAsk.itemIds[0] != takerBidItemId ||
-            takerBidAmount != 1
+            makerAsk.itemIds[0] != takerBidItemId
         ) {
             revert OrderInvalid();
         }

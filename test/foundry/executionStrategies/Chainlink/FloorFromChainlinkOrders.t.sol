@@ -168,7 +168,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             isFixedAmount != 0
                 ? LATEST_CHAINLINK_ANSWER_IN_WAD + premium
                 : (LATEST_CHAINLINK_ANSWER_IN_WAD * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP,
-            abi.encode(1, 1)
+            abi.encode(1)
         );
     }
 

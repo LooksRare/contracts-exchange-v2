@@ -101,10 +101,16 @@ contract LooksRareProtocol is
     /**
      * @notice Constructor
      * @param _owner Owner address
+     * @param _protocolFeeRecipient Protocol fee recipient address
      * @param _transferManager Transfer manager address
      * @param _weth Wrapped ETH address
      */
-    constructor(address _owner, address _transferManager, address _weth) TransferSelectorNFT(_owner, _transferManager) {
+    constructor(
+        address _owner,
+        address _protocolFeeRecipient,
+        address _transferManager,
+        address _weth
+    ) TransferSelectorNFT(_owner, _protocolFeeRecipient, _transferManager) {
         _updateDomainSeparator();
         WETH = _weth;
     }

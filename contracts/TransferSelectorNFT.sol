@@ -29,9 +29,14 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
     /**
      * @notice Constructor
      * @param _owner Owner address
+     * @param _protocolFeeRecipient Protocol fee recipient address
      * @param _transferManager Address of the transfer manager for ERC721/ERC1155
      */
-    constructor(address _owner, address _transferManager) ExecutionManager(_owner) {
+    constructor(
+        address _owner,
+        address _protocolFeeRecipient,
+        address _transferManager
+    ) ExecutionManager(_owner, _protocolFeeRecipient) {
         transferManager = TransferManager(_transferManager);
     }
 

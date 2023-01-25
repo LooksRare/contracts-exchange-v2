@@ -183,14 +183,13 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         transferManager = new TransferManager(_owner);
         royaltyFeeRegistry = new MockRoyaltyFeeRegistry(_owner, 9500);
         creatorFeeManager = new CreatorFeeManagerWithRebates(address(royaltyFeeRegistry));
-        looksRareProtocol = new LooksRareProtocol(_owner, address(transferManager), address(weth));
+        looksRareProtocol = new LooksRareProtocol(_owner, _owner, address(transferManager), address(weth));
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 
         // Operations
         transferManager.whitelistOperator(address(looksRareProtocol));
         looksRareProtocol.updateCurrencyWhitelistStatus(ETH, true);
         looksRareProtocol.updateCurrencyWhitelistStatus(address(weth), true);
-        looksRareProtocol.updateProtocolFeeRecipient(_owner);
         looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
 
         // Fetch domain separator and store it as one of the operators

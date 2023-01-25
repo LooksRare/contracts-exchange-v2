@@ -45,8 +45,11 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     /**
      * @notice Constructor
      * @param _owner Owner address
+     * @param _protocolFeeRecipient Protocol fee recipient address
      */
-    constructor(address _owner) StrategyManager(_owner) {}
+    constructor(address _owner, address _protocolFeeRecipient) StrategyManager(_owner) {
+        _updateProtocolFeeRecipient(_protocolFeeRecipient);
+    }
 
     /**
      * @notice This function allows the owner to update the creator fee manager address.
@@ -80,12 +83,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      * @dev Only callable by owner.
      */
     function updateProtocolFeeRecipient(address newProtocolFeeRecipient) external onlyOwner {
-        if (newProtocolFeeRecipient == address(0)) {
-            revert NewProtocolFeeRecipientCannotBeNullAddress();
-        }
-
-        protocolFeeRecipient = newProtocolFeeRecipient;
-        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
+        _updateProtocolFeeRecipient(newProtocolFeeRecipient);
     }
 
     /**
@@ -308,5 +306,18 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         }
 
         recipients[0] = askRecipient;
+    }
+
+    /**
+     * @notice This private function updates the protocol fee recipient.
+     * @param newProtocolFeeRecipient New protocol fee recipient address
+     */
+    function _updateProtocolFeeRecipient(address newProtocolFeeRecipient) private {
+        if (newProtocolFeeRecipient == address(0)) {
+            revert NewProtocolFeeRecipientCannotBeNullAddress();
+        }
+
+        protocolFeeRecipient = newProtocolFeeRecipient;
+        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
     }
 }

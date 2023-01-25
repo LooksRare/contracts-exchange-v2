@@ -416,13 +416,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         mockERC1155.mint(takerUser, itemId, 1);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
     }
 
     function _batchTakerAskSetup(
@@ -455,13 +449,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         });
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
     }
 
     function _multipleTakerBidsSetup(

@@ -27,7 +27,7 @@ contract InheritedStrategy {
      * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      */
     function _verifyStandardSaleStrategyWithMakerAsk(OrderStructs.MakerAsk calldata makerAsk) internal pure {
-        _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(makerAsk.assetType, makerAsk.amounts, makerAsk.itemIds);
+        _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerAsk.assetType, makerAsk.amounts, makerAsk.itemIds);
     }
 
     /**
@@ -36,10 +36,10 @@ contract InheritedStrategy {
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function _verifyStandardSaleStrategyWithMakerBid(OrderStructs.MakerBid calldata makerBid) internal pure {
-        _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(makerBid.assetType, makerBid.amounts, makerBid.itemIds);
+        _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerBid.assetType, makerBid.amounts, makerBid.itemIds);
     }
 
-    function _verifyItemIdsAndAmountsEqualLengthsAndMatchingPrice(
+    function _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(
         uint256 assetType,
         uint256[] calldata amounts,
         uint256[] calldata itemIds

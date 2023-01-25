@@ -60,7 +60,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             makerAsk.minPrice,
             new uint256[](0),
             new uint256[](0),
-            abi.encode()
+            abi.encode(new uint256[](0), new uint256[](0))
         );
 
         vm.deal(takerUser, price);
@@ -313,9 +313,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
                 takerUser,
                 makerBid.maxPrice,
-                itemIds,
-                amounts,
-                abi.encode()
+                new uint256[](0),
+                new uint256[](0),
+                abi.encode(itemIds, amounts)
             );
 
             vm.prank(takerUser);
@@ -359,7 +359,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
                 makerBid.maxPrice,
                 new uint256[](0),
                 new uint256[](0),
-                abi.encode()
+                abi.encode(new uint256[](0), new uint256[](0))
             );
 
             vm.prank(takerUser);
@@ -427,7 +427,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             makerBid.maxPrice,
             new uint256[](0),
             new uint256[](0),
-            abi.encode()
+            abi.encode(new uint256[](0), new uint256[](0))
         );
 
         vm.prank(takerUser);

@@ -68,7 +68,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(strategyImplementation, address(strategyFloorFromChainlink));
     }
 
-    function testmaxLatency() public {
+    function testMaxLatency() public {
         assertEq(strategyFloorFromChainlink.maxLatency(), MAXIMUM_LATENCY);
     }
 

@@ -35,6 +35,13 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
+    function _offeredAmounts(uint256 length, uint256 amount) private pure returns (uint256[] memory offeredAmounts) {
+        offeredAmounts = new uint256[](length);
+        for (uint256 i; i < length; i++) {
+            offeredAmounts[i] = amount;
+        }
+    }
+
     function _createMakerBidAndTakerAsk(
         uint256 lowerBound,
         uint256 upperBound
@@ -74,17 +81,12 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAskItemIds[1] = mid;
         takerAskItemIds[2] = upperBound;
 
-        uint256[] memory takerAskAmounts = new uint256[](3);
-        takerAskAmounts[0] = 1;
-        takerAskAmounts[1] = 1;
-        takerAskAmounts[2] = 1;
-
         newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: newMakerBid.maxPrice,
-            itemIds: takerAskItemIds,
-            amounts: takerAskAmounts,
-            additionalParameters: abi.encode()
+            itemIds: new uint256[](0),
+            amounts: new uint256[](0),
+            additionalParameters: abi.encode(takerAskItemIds, _offeredAmounts({length: 3, amount: 1}))
         });
     }
 
@@ -177,17 +179,12 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAskItemIds[1] = mid;
         takerAskItemIds[2] = upperBound;
 
-        uint256[] memory takerAskAmounts = new uint256[](3);
-        takerAskAmounts[0] = 2;
-        takerAskAmounts[1] = 2;
-        takerAskAmounts[2] = 2;
-
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: makerBid.maxPrice,
-            itemIds: takerAskItemIds,
-            amounts: takerAskAmounts,
-            additionalParameters: abi.encode()
+            itemIds: new uint256[](0),
+            amounts: new uint256[](0),
+            additionalParameters: abi.encode(takerAskItemIds, _offeredAmounts({length: 3, amount: 2}))
         });
 
         // Sign order
@@ -270,7 +267,11 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, _EMPTY_BYTES4);
         _isMakerBidOrderValid(makerBid, signature);
 
-        takerAsk.itemIds = new uint256[](takerAsk.amounts.length + 1);
+        uint256[] memory takerAskItemIds = new uint256[](3);
+        takerAskItemIds[0] = 5;
+        takerAskItemIds[1] = 7;
+        takerAskItemIds[2] = 10;
+        takerAsk.additionalParameters = abi.encode(takerAskItemIds, _offeredAmounts({length: 4, amount: 1}));
 
         vm.prank(takerUser);
         vm.expectRevert(OrderInvalid.selector);
@@ -288,12 +289,18 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
+        uint256[] memory takerAskItemIds = new uint256[](3);
+        takerAskItemIds[0] = 5;
+        takerAskItemIds[1] = 7;
+        takerAskItemIds[2] = 10;
+
         uint256[] memory invalidAmounts = new uint256[](3);
         invalidAmounts[0] = 1;
         invalidAmounts[1] = 2;
         invalidAmounts[2] = 2;
 
         takerAsk.amounts = invalidAmounts;
+        takerAsk.additionalParameters = abi.encode(takerAskItemIds, invalidAmounts);
 
         // The maker bid order is still valid since the error comes from the taker ask amounts
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
@@ -364,7 +371,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         invalidItemIds[1] = 7;
         invalidItemIds[2] = 7;
 
-        takerAsk.itemIds = invalidItemIds;
+        takerAsk.additionalParameters = abi.encode(invalidItemIds, _offeredAmounts({length: 3, amount: 1}));
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -393,7 +400,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         invalidItemIds[1] = 10;
         invalidItemIds[2] = 7;
 
-        takerAsk.itemIds = invalidItemIds;
+        takerAsk.additionalParameters = abi.encode(invalidItemIds, _offeredAmounts({length: 3, amount: 1}));
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
@@ -421,13 +428,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         itemIds[0] = 5;
         itemIds[1] = 10;
 
-        takerAsk.itemIds = itemIds;
-
-        uint256[] memory invalidAmounts = new uint256[](2);
-        invalidAmounts[0] = 1;
-        invalidAmounts[1] = 1;
-
-        takerAsk.amounts = invalidAmounts;
+        takerAsk.additionalParameters = abi.encode(itemIds, _offeredAmounts({length: 2, amount: 1}));
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);

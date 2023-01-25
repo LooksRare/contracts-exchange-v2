@@ -257,15 +257,10 @@ contract CollectionOrdersTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(takerUser, tokenId);
 
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = tokenId;
-
         // Prepare the taker ask
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            itemIds,
-            makerBid.amounts,
             abi.encode(tokenId, 1)
         );
 
@@ -332,8 +327,6 @@ contract CollectionOrdersTest is ProtocolBase {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            new uint256[](0),
-            makerBid.amounts,
             abi.encode(itemIdSold, 1, proof)
         );
 
@@ -398,8 +391,6 @@ contract CollectionOrdersTest is ProtocolBase {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            new uint256[](0),
-            makerBid.amounts,
             abi.encode(itemIdSold, 1, proof)
         );
 
@@ -428,22 +419,11 @@ contract CollectionOrdersTest is ProtocolBase {
             itemId: 0
         });
 
-        // Random itemIds
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 5;
-
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            itemIds,
-            makerBid.amounts,
-            abi.encode(5, 0)
-        );
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode(5, 0));
 
         // 1. Amount is 0 (without merkle proof)
         makerBid.amounts[0] = 0;
-        takerAsk.amounts = makerBid.amounts;
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
         _assertOrderIsInvalid(makerBid, false);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -505,13 +485,7 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            makerBid.itemIds,
-            makerBid.amounts,
-            abi.encode()
-        );
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
 
         _assertOrderIsInvalid(makerBid, true);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);

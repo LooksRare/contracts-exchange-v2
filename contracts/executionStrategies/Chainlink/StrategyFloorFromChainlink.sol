@@ -339,13 +339,9 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             revert WrongCurrency();
         }
 
-        if (
-            takerAsk.itemIds.length != 1 ||
-            takerAsk.amounts.length != 1 ||
-            takerAsk.amounts[0] != 1 ||
-            makerBid.amounts.length != 1 ||
-            makerBid.amounts[0] != 1
-        ) {
+        (uint256 offeredItemId, uint256 offeredAmount) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
+
+        if (offeredAmount != 1 || makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
             revert OrderInvalid();
         }
 
@@ -364,8 +360,10 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             revert AskTooHigh();
         }
 
-        itemIds = takerAsk.itemIds;
-        amounts = takerAsk.amounts;
+        itemIds = new uint256[](1);
+        itemIds[0] = offeredItemId;
+        amounts = new uint256[](1);
+        amounts[0] = offeredAmount;
         isNonceInvalidated = true;
     }
 

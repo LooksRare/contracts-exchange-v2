@@ -74,9 +74,14 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
             revert OrderInvalid();
         }
 
+        (uint256[] memory takerBidItemIds, uint256[] memory takerBidAmounts) = abi.decode(
+            takerBid.additionalParameters,
+            (uint256[], uint256[])
+        );
+
         for (uint256 i; i < itemIdsLength; ) {
             uint256 makerAskAmount = makerAsk.amounts[i];
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || makerAskAmount != takerBid.amounts[i]) {
+            if (makerAsk.itemIds[i] != takerBidItemIds[i] || makerAskAmount != takerBidAmounts[i]) {
                 revert OrderInvalid();
             }
 

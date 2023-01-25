@@ -147,9 +147,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
             premium: premium
         });
 
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 0;
-        takerBid.amounts = amounts;
+        takerBid.additionalParameters = abi.encode(1, 0);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -171,7 +169,12 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 2;
-        takerBid.itemIds = itemIds;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
+        // Bidder bidding on something else
+        takerBid.additionalParameters = abi.encode(itemIds, amounts);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 

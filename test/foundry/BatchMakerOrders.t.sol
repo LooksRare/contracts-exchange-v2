@@ -49,9 +49,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            abi.encode()
+            abi.encode(makerAsk.itemIds, makerAsk.amounts)
         );
 
         // Execute taker bid transaction
@@ -132,9 +130,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            abi.encode()
+            abi.encode(makerAsk.itemIds, makerAsk.amounts)
         );
 
         vm.prank(takerUser);

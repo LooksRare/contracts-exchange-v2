@@ -41,12 +41,18 @@ contract StrategyDutchAuction is BaseStrategy {
             revert OrderInvalid();
         }
 
+        // TODO: Validate taker bid array lengths too?
+        (uint256[] memory takerBidItemIds, uint256[] memory takerBidAmounts) = abi.decode(
+            takerBid.additionalParameters,
+            (uint256[], uint256[])
+        );
+
         for (uint256 i; i < itemIdsLength; ) {
             uint256 amount = makerAsk.amounts[i];
 
             _validateAmount(amount, makerAsk.assetType);
 
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) {
+            if (makerAsk.itemIds[i] != takerBidItemIds[i] || amount != takerBidAmounts[i]) {
                 revert OrderInvalid();
             }
 

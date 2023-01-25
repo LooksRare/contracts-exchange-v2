@@ -79,7 +79,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.endTime = endTime;
         newMakerAsk.additionalParameters = abi.encode(startPrice);
 
-        newTakerBid = OrderStructs.TakerBid(takerUser, startPrice, itemIds, amounts, abi.encode());
+        newTakerBid = OrderStructs.TakerBid(takerUser, startPrice, abi.encode(itemIds, amounts));
     }
 
     function testNewStrategy() public {
@@ -356,8 +356,11 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 2;
 
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
         // Bidder bidding on something else
-        takerBid.itemIds = itemIds;
+        takerBid.additionalParameters = abi.encode(itemIds, amounts);
 
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);

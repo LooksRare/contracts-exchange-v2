@@ -100,7 +100,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.amounts = amounts;
         newMakerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
 
-        newTakerBid = OrderStructs.TakerBid(takerUser, 1 ether, itemIds, amounts, abi.encode());
+        newTakerBid = OrderStructs.TakerBid(takerUser, 1 ether, abi.encode(itemIds, amounts));
     }
 
     function testNewStrategy() public {
@@ -371,8 +371,11 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = 2;
 
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
         // Bidder bidding on something else
-        takerBid.itemIds = itemIds;
+        takerBid.additionalParameters = abi.encode(itemIds, amounts);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -396,7 +399,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
         makerAsk.amounts = amounts;
-        takerBid.amounts = amounts;
+        takerBid.additionalParameters = abi.encode(makerAsk.itemIds, amounts);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -420,7 +423,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 2;
         makerAsk.amounts = amounts;
-        takerBid.amounts = amounts;
+        takerBid.additionalParameters = abi.encode(makerAsk.itemIds, amounts);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 

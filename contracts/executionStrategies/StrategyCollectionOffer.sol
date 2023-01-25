@@ -42,21 +42,23 @@ contract StrategyCollectionOffer is BaseStrategy {
     )
         external
         pure
-        returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
+        returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
     {
         price = makerBid.maxPrice;
-        itemIds = takerAsk.itemIds;
         amounts = makerBid.amounts;
-        isNonceInvalidated = true;
 
         // A collection order can only be executable for 1 itemId but quantity to fill can vary
-        if (itemIds.length != 1 || amounts.length != 1 || price != takerAsk.minPrice) {
+        if (amounts.length != 1 || price != takerAsk.minPrice) {
             revert OrderInvalid();
         }
 
+        (uint256 offeredItemId, uint256 offeredAmount) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
+        itemIds = new uint256[](1);
+        itemIds[0] = offeredItemId;
+        isNonceInvalidated = true;
         uint256 makerAmount = amounts[0];
 
-        if (makerAmount != takerAsk.amounts[0]) {
+        if (makerAmount != offeredAmount) {
             revert OrderInvalid();
         }
 
@@ -77,29 +79,33 @@ contract StrategyCollectionOffer is BaseStrategy {
     )
         external
         pure
-        returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
+        returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
     {
         price = makerBid.maxPrice;
-        itemIds = takerAsk.itemIds;
         amounts = makerBid.amounts;
-        isNonceInvalidated = true;
 
         // A collection order can only be executable for 1 itemId but the actual quantity to fill can vary
-        if (itemIds.length != 1 || amounts.length != 1 || price != takerAsk.minPrice) {
+        if (amounts.length != 1 || price != takerAsk.minPrice) {
             revert OrderInvalid();
         }
 
+        (uint256 offeredItemId, uint256 offeredAmount, bytes32[] memory proof) = abi.decode(
+            takerAsk.additionalParameters,
+            (uint256, uint256, bytes32[])
+        );
+        itemIds = new uint256[](1);
+        itemIds[0] = offeredItemId;
+        isNonceInvalidated = true;
         uint256 makerAmount = amounts[0];
 
-        if (makerAmount != takerAsk.amounts[0]) {
+        if (makerAmount != offeredAmount) {
             revert OrderInvalid();
         }
 
         _validateAmount(makerAmount, makerBid.assetType);
 
         bytes32 root = abi.decode(makerBid.additionalParameters, (bytes32));
-        bytes32[] memory proof = abi.decode(takerAsk.additionalParameters, (bytes32[]));
-        bytes32 node = keccak256(abi.encodePacked(takerAsk.itemIds[0]));
+        bytes32 node = keccak256(abi.encodePacked(offeredItemId));
 
         // Verify the merkle root for the given merkle proof
         if (!MerkleProofMemory.verify(proof, root, node)) {

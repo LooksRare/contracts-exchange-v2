@@ -89,15 +89,11 @@ library OrderStructs {
      * @dev TakerAsk structs are matched against MakerBid structs at the protocol level.
      * @param recipient Recipient address (to receive non fungible tokens)
      * @param minPrice Minimum price for execution
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
      * @param additionalParameters Extra data specific for the order
      */
     struct TakerAsk {
         address recipient;
         uint256 minPrice;
-        uint256[] itemIds;
-        uint256[] amounts;
         bytes additionalParameters;
     }
 

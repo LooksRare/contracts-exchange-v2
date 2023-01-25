@@ -99,8 +99,6 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
             abi.encode(itemIds, amounts)
         );
 
@@ -134,13 +132,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         mockERC721.batchMint(secondTakerUser, itemIds);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
-            secondTakerUser,
-            makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode(itemIds, amounts)
-        );
+        takerAsk = OrderStructs.TakerAsk(secondTakerUser, makerBid.maxPrice, abi.encode(itemIds, amounts));
 
         // Execute a second taker ask transaction from the second taker user
         vm.prank(secondTakerUser);
@@ -202,13 +194,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                itemIds,
-                amounts,
-                abi.encode()
-            );
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
 
             // It should revert if strategy is not available
             vm.prank(takerUser);

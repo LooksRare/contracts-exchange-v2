@@ -104,27 +104,6 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountTakerAskZeroAmount() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: discount
-        });
-
-        // Seller will probably try 0
-        takerAsk.additionalParameters = abi.encode(1, 0);
-
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        _setPriceFeed();
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-
-        vm.expectRevert(OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
-    }
-
     function testFloorFromChainlinkDiscountMakerBidAmountNotOne() public {
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount

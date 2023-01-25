@@ -183,13 +183,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
 
         // Execute taker ask transaction
         // Taker user actions
@@ -231,13 +225,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.startPrank(takerUser);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
 
         {
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -313,8 +301,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
                 takerUser,
                 makerBid.maxPrice,
-                new uint256[](0),
-                new uint256[](0),
                 abi.encode(itemIds, amounts)
             );
 
@@ -357,8 +343,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
                 takerUser,
                 makerBid.maxPrice,
-                new uint256[](0),
-                new uint256[](0),
                 abi.encode(new uint256[](0), new uint256[](0))
             );
 
@@ -425,8 +409,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
             abi.encode(new uint256[](0), new uint256[](0))
         );
 

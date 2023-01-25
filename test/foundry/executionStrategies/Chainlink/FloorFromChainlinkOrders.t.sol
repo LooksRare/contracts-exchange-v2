@@ -217,8 +217,6 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: price,
-            itemIds: new uint256[](0),
-            amounts: new uint256[](0),
             additionalParameters: abi.encode(1, 1)
         });
     }

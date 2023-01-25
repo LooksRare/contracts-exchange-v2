@@ -162,13 +162,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
         signature = _signMakerBid(newMakerBid, makerUserPK);
 
-        newTakerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            newMakerBid.maxPrice,
-            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerBid.itemIds,
-            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerBid.amounts,
-            abi.encode()
-        );
+        newTakerAsk = OrderStructs.TakerAsk(takerUser, newMakerBid.maxPrice, abi.encode());
     }
 
     function _createSingleItemMakerBidOrder(

@@ -302,13 +302,7 @@ contract ERC721OrdersWithERC1271WalletTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
     }
 
     function _multipleTakerBidsSetup(

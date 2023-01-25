@@ -84,8 +84,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: newMakerBid.maxPrice,
-            itemIds: new uint256[](0),
-            amounts: new uint256[](0),
             additionalParameters: abi.encode(takerAskItemIds, _offeredAmounts({length: 3, amount: 1}))
         });
     }
@@ -182,8 +180,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: makerBid.maxPrice,
-            itemIds: new uint256[](0),
-            amounts: new uint256[](0),
             additionalParameters: abi.encode(takerAskItemIds, _offeredAmounts({length: 3, amount: 2}))
         });
 
@@ -299,7 +295,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         invalidAmounts[1] = 2;
         invalidAmounts[2] = 2;
 
-        takerAsk.amounts = invalidAmounts;
         takerAsk.additionalParameters = abi.encode(takerAskItemIds, invalidAmounts);
 
         // The maker bid order is still valid since the error comes from the taker ask amounts
@@ -314,9 +309,11 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Re-adjust the amounts
-        takerAsk.amounts[0] = 0;
-        takerAsk.amounts[1] = 1;
-        takerAsk.amounts[2] = 1;
+        invalidAmounts[0] = 0;
+        invalidAmounts[1] = 1;
+        invalidAmounts[2] = 1;
+
+        takerAsk.additionalParameters = abi.encode(takerAskItemIds, invalidAmounts);
 
         // It now fails at 1st item in the array (equal to 0)
         vm.expectRevert(OrderInvalid.selector);

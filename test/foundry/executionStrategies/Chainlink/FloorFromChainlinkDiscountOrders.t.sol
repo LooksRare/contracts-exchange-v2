@@ -85,46 +85,6 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountTakerAskItemIdsLengthNotOne() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: discount
-        });
-
-        takerAsk.itemIds = new uint256[](0);
-
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        _setPriceFeed();
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-
-        vm.expectRevert(OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
-    }
-
-    function testFloorFromChainlinkDiscountTakerAskAmountsLengthNotOne() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: discount
-        });
-
-        takerAsk.amounts = new uint256[](0);
-
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        _setPriceFeed();
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-
-        vm.expectRevert(OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
-    }
-
     function testFloorFromChainlinkDiscountMakerBidAmountsLengthNotOne() public {
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
@@ -149,10 +109,8 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
             discount: discount
         });
 
-        uint256[] memory amounts = new uint256[](1);
         // Seller will probably try 0
-        amounts[0] = 0;
-        takerAsk.amounts = amounts;
+        takerAsk.additionalParameters = abi.encode(1, 0);
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 

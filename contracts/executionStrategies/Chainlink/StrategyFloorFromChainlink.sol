@@ -20,8 +20,11 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../constants/NumericConstants.sol";
 
 /**
  * @title StrategyFloorFromChainlink
- * @notice This contract allows a seller to make a floor price + premium ask
+ * @notice These strategies allow a seller to make a floor price + premium ask
  *         and a buyer to make a floor price - discount collection bid.
+ *         Currently Chainlink only has price feeds for ERC721 tokens, but these
+ *         strategies can also support ERC1155 tokens as long as the trade amount
+ *         is 1.
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultiplePriceFeeds {

@@ -35,22 +35,18 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
     function executeStrategyWithTakerAsk(
         OrderStructs.TakerAsk calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
-    )
-        external
-        returns (uint256 price, uint256[] calldata itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
-    {
+    ) external returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert OrderInvalid();
         // Only available for ERC721
         if (makerBid.assetType != 0) revert OrderInvalid();
 
         bytes32 orderHash = makerBid.hash();
         uint256 countItemsFilled = countItemsFilledForOrderHash[orderHash];
-        uint256 countItemsToFill = takerAsk.amounts.length;
         uint256 countItemsFillable = makerBid.amounts[0];
 
         price = makerBid.maxPrice;
-        amounts = takerAsk.amounts;
-        itemIds = takerAsk.itemIds;
+        (itemIds, amounts) = abi.decode(takerAsk.additionalParameters, (uint256[], uint256[]));
+        uint256 countItemsToFill = amounts.length;
 
         if (
             countItemsToFill == 0 ||

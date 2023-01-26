@@ -81,7 +81,7 @@ contract NonceManager is INonceManager {
      * @notice This function increments a user's bid/ask nonces.
      * @param bid Whether to increment the user bid nonce
      * @param ask Whether to increment the user ask nonce
-     * @dev The logic for computing the quasi random number is inspired from Seaport v1.2.
+     * @dev The logic for computing the quasi-random number is inspired by Seaport v1.2.
      *      The pseudo-randomness allows non-deterministic computation of the next ask/bid nonce, which
      *      would make the cancel-all process non-effective in certain cases (orders signed with a greater
      *      ask/bid nonce).

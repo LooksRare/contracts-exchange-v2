@@ -331,12 +331,8 @@ contract OrderValidatorV2A {
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
             (, uint256 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
 
-            if (askNonce < globalAskNonce) {
-                return USER_GLOBAL_ASK_NONCE_HIGHER;
-            }
-
-            if (askNonce > globalAskNonce) {
-                return USER_GLOBAL_ASK_NONCE_LOWER;
+            if (askNonce != globalAskNonce) {
+                return WRONG_USER_GLOBAL_ASK_NONCE;
             }
         }
     }
@@ -362,12 +358,8 @@ contract OrderValidatorV2A {
         if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
             (uint256 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerSigner);
 
-            if (bidNonce < globalBidNonce) {
-                return USER_GLOBAL_BID_NONCE_HIGHER;
-            }
-
-            if (bidNonce > globalBidNonce) {
-                return USER_GLOBAL_BID_NONCE_LOWER;
+            if (bidNonce != globalBidNonce) {
+                return WRONG_USER_GLOBAL_BID_NONCE;
             }
         }
     }

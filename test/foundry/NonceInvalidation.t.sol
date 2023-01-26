@@ -6,7 +6,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {INonceManager} from "../../contracts/interfaces/INonceManager.sol";
 import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
-import {USER_GLOBAL_ASK_NONCE_HIGHER, USER_GLOBAL_ASK_NONCE_LOWER, USER_GLOBAL_BID_NONCE_HIGHER, USER_GLOBAL_BID_NONCE_LOWER, USER_SUBSET_NONCE_CANCELLED, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {WRONG_USER_GLOBAL_BID_NONCE, WRONG_USER_GLOBAL_ASK_NONCE, USER_SUBSET_NONCE_CANCELLED, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Other utils and tests
 import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFillCollectionOrder.sol";
@@ -82,7 +82,17 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
      * Cannot execute an order if maker is at a different global ask nonce than signed
      */
     function testCannotExecuteOrderIfWrongUserGlobalAskNonce(uint256 userGlobalAskNonce) public {
-        vm.assume(userGlobalAskNonce > 0);
+        // Change block number
+        vm.roll(1);
+
+        uint256 quasiRandomNumber = uint256(blockhash(block.number - 1) >> 128);
+        uint256 newAskNonce = 0 + quasiRandomNumber;
+
+        vm.prank(makerUser);
+        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        emit NewBidAskNonces(makerUser, 0, newAskNonce);
+        looksRareProtocol.incrementBidAskNonces(false, true);
+
         uint256 itemId = 420;
 
         // Mint asset
@@ -105,7 +115,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, USER_GLOBAL_ASK_NONCE_LOWER);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, WRONG_USER_GLOBAL_ASK_NONCE);
 
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
@@ -129,18 +139,23 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             _EMPTY_MERKLE_TREE,
             _EMPTY_AFFILIATE
         );
-
-        vm.prank(makerUser);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit NewBidAskNonces(makerUser, 0, 1);
-        looksRareProtocol.incrementBidAskNonces(false, true);
     }
 
     /**
      * Cannot execute an order if maker is at a different global bid nonce than signed
      */
     function testCannotExecuteOrderIfWrongUserGlobalBidNonce(uint256 userGlobalBidNonce) public {
-        vm.assume(userGlobalBidNonce > 0);
+        // Change block number
+        vm.roll(1);
+
+        uint256 quasiRandomNumber = uint256(blockhash(block.number - 1) >> 128);
+        uint256 newBidNonce = 0 + quasiRandomNumber;
+
+        vm.prank(makerUser);
+        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        emit NewBidAskNonces(makerUser, newBidNonce, 0);
+        looksRareProtocol.incrementBidAskNonces(true, false);
+
         uint256 itemId = 420;
 
         // Prepare the order hash
@@ -160,7 +175,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_GLOBAL_BID_NONCE_LOWER);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, WRONG_USER_GLOBAL_BID_NONCE);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -179,11 +194,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.prank(takerUser);
         vm.expectRevert(WrongNonces.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        vm.prank(makerUser);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit NewBidAskNonces(makerUser, 1, 0);
-        looksRareProtocol.incrementBidAskNonces(true, false);
     }
 
     /**

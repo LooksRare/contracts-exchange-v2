@@ -57,7 +57,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerBid(
             SignatureParameters({
@@ -135,7 +135,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerBid(
             SignatureParameters({
@@ -207,7 +207,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Execute taker ask transaction
         vm.prank(takerUser);
 
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerAsk(
             SignatureParameters({
@@ -275,7 +275,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerAsk(
             SignatureParameters({

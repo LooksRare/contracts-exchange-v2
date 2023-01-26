@@ -61,7 +61,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
         vm.prank(takerUser);
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerAsk(
             SignatureParameters({

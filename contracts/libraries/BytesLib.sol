@@ -7,7 +7,7 @@
  *         as that's the only function we need.
  *
  * @dev Bytes tightly packed arrays utility library for ethereum contracts written in Solidity.
- *      The library lets you concatenate, slice and type cast bytes arrays both in memory and storage.
+ *      The library lets you slice bytes arrays in memory.
  */
 pragma solidity ^0.8.17;
 

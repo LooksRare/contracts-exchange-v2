@@ -20,7 +20,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         vm.assume(newChainId != block.chainid);
 
         vm.chainId(newChainId);
-        vm.expectEmit(true, false, false, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewDomainSeparator();
         looksRareProtocol.updateDomainSeparator();
         assertEq(looksRareProtocol.chainId(), newChainId);

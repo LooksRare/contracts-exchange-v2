@@ -75,7 +75,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
 
     function testSetPriceFeed() public asPrankedUser(_owner) {
-        vm.expectEmit(true, true, true, false);
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: false});
         emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         assertEq(strategyFloorFromChainlink.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);

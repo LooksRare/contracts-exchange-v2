@@ -65,10 +65,10 @@ contract GasGriefingTest is ProtocolBase {
 
         uint256 sellerProceed = (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP;
 
-        vm.expectEmit(true, true, false, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: false, checkData: true});
         emit Deposit(address(looksRareProtocol), sellerProceed);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit Transfer(address(looksRareProtocol), gasGriefer, sellerProceed);
 
         vm.prank(takerUser);
@@ -137,10 +137,10 @@ contract GasGriefingTest is ProtocolBase {
 
         uint256 sellerProceedPerItem = (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP;
 
-        vm.expectEmit(true, true, false, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: false, checkData: true});
         emit Deposit(address(looksRareProtocol), sellerProceedPerItem);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit Transfer(address(looksRareProtocol), gasGriefer, sellerProceedPerItem);
 
         vm.prank(takerUser);

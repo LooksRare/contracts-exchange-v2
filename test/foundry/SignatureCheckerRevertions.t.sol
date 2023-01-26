@@ -128,8 +128,47 @@ contract SignatureCheckerRevertions is ProtocolBase {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotSignIfWrongSignatureLength(uint256 itemId, uint256 price, uint256 length) public {
-        // Getting OutOfGas starting from 16,776,985, probably due to memory cost
+    function testRevertIfRecoveredSignerIsNullAddress(uint256 itemId, uint256 price) public {
+        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+            assetType: ASSET_TYPE_ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: ETH,
+            signer: makerUser,
+            minPrice: price,
+            itemId: itemId
+        });
+
+        // Sign but replace r by empty bytes32
+        bytes32 orderHash = _computeOrderHashMakerAsk(makerAsk);
+        (uint8 v, , bytes32 s) = vm.sign(
+            makerUserPK,
+            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
+        );
+
+        bytes32 r;
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, NULL_SIGNER_EOA);
+
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            new uint256[](0),
+            new uint256[](0),
+            abi.encode()
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(NullSignerAddress.selector));
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testRevertIfWrongSignatureLength(uint256 itemId, uint256 price, uint256 length) public {
+        // @dev Getting OutOfGas starting from 16,776,985, probably due to memory cost
         vm.assume(length != 64 && length != 65 && length < 16_776_985);
 
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({

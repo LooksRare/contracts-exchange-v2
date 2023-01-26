@@ -19,6 +19,7 @@ import {MaliciousIsValidSignatureERC1271Wallet} from "./utils/MaliciousIsValidSi
 // Errors
 import {InvalidSignatureERC1271} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
 import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC1155Transfer.sol";
+import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Constants
 import {ASSET_TYPE_ERC1155} from "../../contracts/constants/NumericConstants.sol";
@@ -51,6 +52,8 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         transferManager.grantApprovals(operators);
         vm.stopPrank();
 
+        _isMakerAskOrderValid(makerAsk, signature);
+
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
@@ -76,6 +79,8 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         mockERC1155.setApprovalForAll(address(transferManager), true);
         transferManager.grantApprovals(operators);
         vm.stopPrank();
+
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, SIGNATURE_INVALID_EIP1271);
 
         vm.expectRevert(InvalidSignatureERC1271.selector);
         vm.prank(takerUser);
@@ -123,6 +128,8 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         vm.prank(address(wallet));
         weth.approve(address(looksRareProtocol), price);
 
+        _isMakerBidOrderValid(makerBid, signature);
+
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
@@ -142,6 +149,8 @@ contract ERC1155OrdersWithERC1271WalletTest is ProtocolBase {
         deal(address(weth), address(wallet), price);
         vm.prank(address(wallet));
         weth.approve(address(looksRareProtocol), price);
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, SIGNATURE_INVALID_EIP1271);
 
         vm.expectRevert(InvalidSignatureERC1271.selector);
         vm.prank(takerUser);

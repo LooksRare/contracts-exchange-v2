@@ -78,20 +78,34 @@ contract NonceManager is INonceManager {
     }
 
     /**
-     * @notice This function allows a user to increment her bid/ask nonces.
+     * @notice This function increments a user's bid/ask nonces.
      * @param bid Whether to increment the user bid nonce
      * @param ask Whether to increment the user ask nonce
+     * @dev The logic for computing the quasi-random number is inspired by Seaport v1.2.
+     *      The pseudo-randomness allows non-deterministic computation of the next ask/bid nonce, which
+     *      would make the cancel-all process non-effective in certain cases (orders signed with a greater
+     *      ask/bid nonce).
+     *      The same quasi-random number is used for incrementing both the bid and ask nonces if both are
+     *      incremented in the same transaction.
+     *      If this function is used twice in the same block, it will return the same quasiRandomNumber
+     *      but this will not impact the overall business logic.
      */
     function incrementBidAskNonces(bool bid, bool ask) external {
-        uint256 _bidNonce = userBidAskNonces[msg.sender].bidNonce;
-        uint256 _askNonce = userBidAskNonces[msg.sender].askNonce;
+        // Use second half of the previous block hash as a quasi-random number
+        uint256 quasiRandomNumber = uint256(blockhash(block.number - 1) >> 128);
+        uint256 newBidNonce = userBidAskNonces[msg.sender].bidNonce;
+        uint256 newAskNonce = userBidAskNonces[msg.sender].askNonce;
+
         if (bid) {
-            userBidAskNonces[msg.sender].bidNonce = ++_bidNonce;
-        }
-        if (ask) {
-            userBidAskNonces[msg.sender].askNonce = ++_askNonce;
+            newBidNonce += quasiRandomNumber;
+            userBidAskNonces[msg.sender].bidNonce = newBidNonce;
         }
 
-        emit NewBidAskNonces(msg.sender, _bidNonce, _askNonce);
+        if (ask) {
+            newAskNonce += quasiRandomNumber;
+            userBidAskNonces[msg.sender].askNonce = newAskNonce;
+        }
+
+        emit NewBidAskNonces(msg.sender, newBidNonce, newAskNonce);
     }
 }

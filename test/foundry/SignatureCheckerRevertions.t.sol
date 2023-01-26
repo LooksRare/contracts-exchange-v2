@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 // Libraries, interfaces, errors
-import {BadSignatureV, BadSignatureS, InvalidSignatureEOA, WrongSignatureLength} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
+import {BadSignatureV, BadSignatureS, InvalidSignatureEOA, NullSignerAddress, WrongSignatureLength} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Base test
@@ -13,7 +13,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/cons
 import {INVALID_S_PARAMETER_EOA, INVALID_V_PARAMETER_EOA, NULL_SIGNER_EOA, WRONG_SIGNATURE_LENGTH, WRONG_SIGNER_EOA} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 contract SignatureCheckerRevertions is ProtocolBase {
-    function testRevertsIfWrongSignatureEOA(uint256 itemId, uint256 price, uint256 randomPK) public {
+    function testRevertIfWrongSignatureEOA(uint256 itemId, uint256 price, uint256 randomPK) public {
         // Private keys 1 and 2 are used for maker/taker users
         vm.assume(
             randomPK > 2 && randomPK < 115792089237316195423570985008687907852837564279074904382605163141518161494337
@@ -50,7 +50,7 @@ contract SignatureCheckerRevertions is ProtocolBase {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotSignIfWrongVParameter(uint256 itemId, uint256 price, uint8 v) public {
+    function testRevertIfWrongVParameter(uint256 itemId, uint256 price, uint8 v) public {
         vm.assume(v != 27 && v != 28);
 
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
@@ -89,7 +89,7 @@ contract SignatureCheckerRevertions is ProtocolBase {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotSignIfWrongSParameter(uint256 itemId, uint256 price, bytes32 s) public {
+    function testRevertIfWrongSParameter(uint256 itemId, uint256 price, bytes32 s) public {
         vm.assume(uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0);
 
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({

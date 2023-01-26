@@ -866,7 +866,8 @@ contract OrderValidatorV2A {
             }
 
             address recoveredSigner = ecrecover(hash, v, r, s);
-            if (signer == address(0)) {
+
+            if (recoveredSigner == address(0)) {
                 return NULL_SIGNER_EOA;
             }
 

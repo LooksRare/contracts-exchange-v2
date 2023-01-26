@@ -685,6 +685,9 @@ contract OrderValidatorV2A {
                 if (balances[i] < amounts[i]) {
                     return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
                 }
+                unchecked {
+                    ++i;
+                }
             }
         } else {
             // 1.2 If the balanceOfBatch does not work, use loop with balanceOf function

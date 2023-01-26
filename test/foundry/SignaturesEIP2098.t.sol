@@ -11,7 +11,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
-contract SignaturesEIP2098 is ProtocolBase {
+contract SignaturesEIP2098Test is ProtocolBase {
     function testCanSignValidMakerAskEIP2098(uint256 price, uint256 itemId) public {
         vm.assume(price <= 2 ether);
 

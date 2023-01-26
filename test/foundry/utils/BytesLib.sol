@@ -1,27 +1,16 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
 
 /*
  * @title Solidity Bytes Arrays Utils
  * @author Gonçalo Sá <goncalo.sa@consensys.net>
  * @notice We only copied the `slice` function from the original https://github.com/GNSPS/solidity-bytes-utils
- *         as that's the only function we need.
- *
+ *         as that's the only function needed.
  * @dev Bytes tightly packed arrays utility library for ethereum contracts written in Solidity.
- *      The library lets you concatenate, slice and type cast bytes arrays both in memory and storage.
+ *      The library lets you slice bytes arrays in memory.
  */
-pragma solidity ^0.8.17;
-
-
 library BytesLib {
-    function slice(
-        bytes memory _bytes,
-        uint256 _start,
-        uint256 _length
-    )
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function slice(bytes memory _bytes, uint256 _start, uint256 _length) internal pure returns (bytes memory) {
         require(_length + 31 >= _length, "slice_overflow");
         require(_bytes.length >= _start + _length, "slice_outOfBounds");
 

@@ -685,6 +685,9 @@ contract OrderValidatorV2A {
                 if (balances[i] < amounts[i]) {
                     return ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT;
                 }
+                unchecked {
+                    ++i;
+                }
             }
         } else {
             // 1.2 If the balanceOfBatch does not work, use loop with balanceOf function
@@ -866,7 +869,8 @@ contract OrderValidatorV2A {
             }
 
             address recoveredSigner = ecrecover(hash, v, r, s);
-            if (signer == address(0)) {
+
+            if (recoveredSigner == address(0)) {
                 return NULL_SIGNER_EOA;
             }
 

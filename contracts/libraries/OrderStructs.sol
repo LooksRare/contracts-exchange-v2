@@ -88,12 +88,10 @@ library OrderStructs {
      * @notice TakerAsk is the struct for a taker bid order. It contains the parameters required for a direct purchase.
      * @dev TakerAsk structs are matched against MakerBid structs at the protocol level.
      * @param recipient Recipient address (to receive non fungible tokens)
-     * @param minPrice Minimum price for execution
      * @param additionalParameters Extra data specific for the order
      */
     struct TakerAsk {
         address recipient;
-        uint256 minPrice;
         bytes additionalParameters;
     }
 

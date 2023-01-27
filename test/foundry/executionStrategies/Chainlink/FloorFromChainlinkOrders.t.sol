@@ -206,11 +206,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         newMakerBid.additionalParameters = abi.encode(discount);
 
-        newTakerAsk = OrderStructs.TakerAsk({
-            recipient: takerUser,
-            minPrice: price,
-            additionalParameters: abi.encode(42)
-        });
+        newTakerAsk = OrderStructs.TakerAsk({recipient: takerUser, additionalParameters: abi.encode(42, price)});
     }
 
     function _setIsFixedAmount(uint256 _isFixedAmount) internal {

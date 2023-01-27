@@ -289,7 +289,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
 
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
 

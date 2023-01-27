@@ -193,7 +193,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
 
         // Execute taker ask transaction
         vm.prank(takerUser);

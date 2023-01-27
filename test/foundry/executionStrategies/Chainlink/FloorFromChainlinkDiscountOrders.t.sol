@@ -130,7 +130,8 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
-        makerBid.maxPrice = takerAsk.minPrice - 1 wei;
+        (, uint256 minPrice) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
+        makerBid.maxPrice = minPrice - 1 wei;
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 

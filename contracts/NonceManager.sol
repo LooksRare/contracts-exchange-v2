@@ -39,6 +39,9 @@ contract NonceManager is INonceManager {
     /**
      * @notice This function allows a user to cancel an array of order nonces.
      * @param orderNonces Array of order nonces
+     * @dev It does not check the status of the nonces to save gas
+     *      and to prevent revertion if one of the orders is filled in the same
+     *      block.
      */
     function cancelOrderNonces(uint256[] calldata orderNonces) external {
         uint256 length = orderNonces.length;
@@ -59,6 +62,7 @@ contract NonceManager is INonceManager {
     /**
      * @notice This function allows a user to cancel an array of subset nonces.
      * @param subsetNonces Array of subset nonces
+     * @dev It does not check the status of the nonces to save gas.
      */
     function cancelSubsetNonces(uint256[] calldata subsetNonces) external {
         uint256 length = subsetNonces.length;
@@ -82,11 +86,11 @@ contract NonceManager is INonceManager {
      * @param bid Whether to increment the user bid nonce
      * @param ask Whether to increment the user ask nonce
      * @dev The logic for computing the quasi-random number is inspired by Seaport v1.2.
-     *      The pseudo-randomness allows non-deterministic computation of the next ask/bid nonce, which
-     *      would make the cancel-all process non-effective in certain cases (orders signed with a greater
-     *      ask/bid nonce).
-     *      The same quasi-random number is used for incrementing both the bid and ask nonces if both are
-     *      incremented in the same transaction.
+     *      The pseudo-randomness allows non-deterministic computation of the next ask/bid nonce.
+     *      A deterministic increment would make the cancel-all process non-effective in certain cases
+     *      (orders signed with a greater ask/bid nonce).
+     *      The same quasi-random number is used for incrementing both the bid and ask nonces if both values
+     *      are incremented in the same transaction.
      *      If this function is used twice in the same block, it will return the same quasiRandomNumber
      *      but this will not impact the overall business logic.
      */

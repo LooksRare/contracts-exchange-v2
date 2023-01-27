@@ -49,7 +49,7 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
      * @param minTotalFeeBp Minimum total fee (in basis point)
      * @param maxProtocolFeeBp Maximum protocol fee (in basis point)
      * @param selector Function selector for the strategy
-     * @param isMakerBid Whether the function selector is for maker bids
+     * @param isMakerBid Whether the function selector is for maker bid
      * @param implementation Implementation address
      * @dev Strategies have an id that is incremental.
      *      Only callable by owner.

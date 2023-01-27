@@ -47,7 +47,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         vm.stopPrank();
 
         // Adjust for new creator fee manager
-        orderValidator.adjustExternalParameters();
+        orderValidator.deriveProtocolParameters();
     }
 
     function testCreatorRoyaltiesGetPaidForRoyaltyFeeManager() public {

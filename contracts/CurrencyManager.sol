@@ -25,7 +25,7 @@ contract CurrencyManager is ICurrencyManager, AffiliateManager {
     constructor(address _owner) AffiliateManager(_owner) {}
 
     /**
-     * @notice This function allows the owner to update the whitelist/blacklist status of a currency for transacting.
+     * @notice This function allows the owner to update the whitelist status of a currency.
      * @param currency Currency address (address(0) for ETH)
      * @param isWhitelisted Whether the currency is whitelisted
      * @dev Only callable by owner.

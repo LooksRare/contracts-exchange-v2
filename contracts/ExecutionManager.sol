@@ -215,6 +215,19 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
+     * @notice This private function updates the protocol fee recipient.
+     * @param newProtocolFeeRecipient New protocol fee recipient address
+     */
+    function _updateProtocolFeeRecipient(address newProtocolFeeRecipient) private {
+        if (newProtocolFeeRecipient == address(0)) {
+            revert NewProtocolFeeRecipientCannotBeNullAddress();
+        }
+
+        protocolFeeRecipient = newProtocolFeeRecipient;
+        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
+    }
+
+    /**
      * @notice This function is internal and is used to calculate
      *         the protocol fee amount for a set of fee amounts.
      * @param price Transaction price
@@ -264,22 +277,6 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This function is internal and is used to verify the validity of an order
-     *         in the context of the current block timestamps.
-     * @param startTime Start timestamp
-     * @param endTime End timestamp
-     */
-    function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) private view {
-        // if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
-        assembly {
-            if or(gt(startTime, timestamp()), lt(endTime, timestamp())) {
-                mstore(0x00, OutsideOfTimeRange_error_selector)
-                revert(Error_selector_offset, OutsideOfTimeRange_error_length)
-            }
-        }
-    }
-
-    /**
      * @dev This function does not need to return feeAmounts and recipients as they are modified
      *      in memory.
      */
@@ -309,15 +306,18 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This private function updates the protocol fee recipient.
-     * @param newProtocolFeeRecipient New protocol fee recipient address
+     * @notice This function is internal and is used to verify the validity of an order
+     *         in the context of the current block timestamps.
+     * @param startTime Start timestamp
+     * @param endTime End timestamp
      */
-    function _updateProtocolFeeRecipient(address newProtocolFeeRecipient) private {
-        if (newProtocolFeeRecipient == address(0)) {
-            revert NewProtocolFeeRecipientCannotBeNullAddress();
+    function _verifyOrderTimestampValidity(uint256 startTime, uint256 endTime) private view {
+        // if (startTime > block.timestamp || endTime < block.timestamp) revert OutsideOfTimeRange();
+        assembly {
+            if or(gt(startTime, timestamp()), lt(endTime, timestamp())) {
+                mstore(0x00, OutsideOfTimeRange_error_selector)
+                revert(Error_selector_offset, OutsideOfTimeRange_error_length)
+            }
         }
-
-        protocolFeeRecipient = newProtocolFeeRecipient;
-        emit NewProtocolFeeRecipient(newProtocolFeeRecipient);
     }
 }

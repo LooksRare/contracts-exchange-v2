@@ -145,17 +145,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
         }
 
         for (uint256 i; i < itemIdsLength; ) {
-            uint256 amount = makerAsk.amounts[i];
-
-            if (amount != 1) {
-                if (amount == 0) {
-                    return (isValid, OrderInvalid.selector);
-                }
-                if (makerAsk.assetType == ASSET_TYPE_ERC721) {
-                    return (isValid, OrderInvalid.selector);
-                }
-            }
-
+            _validateAmountNoRevert(makerAsk.amounts[i], makerAsk.assetType);
             unchecked {
                 ++i;
             }

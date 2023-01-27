@@ -225,7 +225,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             functionSelector ==
             StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
-            if (discount >= ONE_HUNDRED_PERCENT_IN_BP) {
+            if (discount > ONE_HUNDRED_PERCENT_IN_BP) {
                 return (isValid, OrderInvalid.selector);
             }
         }
@@ -238,7 +238,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             functionSelector ==
             StrategyFloorFromChainlink.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
-            if (floorPrice <= discount) {
+            if (floorPrice < discount) {
                 // A special selector is returned to differentiate with OrderInvalid
                 // since the maker can potentially become valid again
                 return (isValid, DiscountGreaterThanFloorPrice.selector);
@@ -358,7 +358,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         uint256 floorPrice,
         uint256 discount
     ) internal pure returns (uint256 desiredPrice) {
-        if (floorPrice <= discount) {
+        if (floorPrice < discount) {
             revert DiscountGreaterThanFloorPrice();
         }
         unchecked {
@@ -373,7 +373,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         uint256 floorPrice,
         uint256 discount
     ) internal pure returns (uint256 desiredPrice) {
-        if (discount >= ONE_HUNDRED_PERCENT_IN_BP) {
+        if (discount > ONE_HUNDRED_PERCENT_IN_BP) {
             revert OrderInvalid();
         }
         desiredPrice = (floorPrice * (ONE_HUNDRED_PERCENT_IN_BP - discount)) / ONE_HUNDRED_PERCENT_IN_BP;

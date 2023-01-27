@@ -147,7 +147,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
             premium: premium
         });
 
-        takerBid.maxPrice = makerAsk.minPrice - 1 wei;
+        takerBid.additionalParameters = abi.encode(makerAsk.minPrice - 1 wei);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 

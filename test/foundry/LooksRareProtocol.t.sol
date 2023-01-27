@@ -61,7 +61,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, makerAsk.minPrice, abi.encode());
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -122,7 +122,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_WHITELISTED);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, makerAsk.minPrice, abi.encode());
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
 
         vm.prank(takerUser);
         vm.expectRevert(WrongCurrency.selector);
@@ -291,7 +291,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             // Sign order
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.TakerBid(takerUser, makerAsks[i].minPrice, abi.encode());
+            takerBids[i] = OrderStructs.TakerBid(takerUser, abi.encode());
         }
 
         // Other execution parameters

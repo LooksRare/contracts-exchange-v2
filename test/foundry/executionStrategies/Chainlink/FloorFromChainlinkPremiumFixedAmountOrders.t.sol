@@ -96,7 +96,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         });
 
         makerAsk.minPrice = 9.9 ether;
-        takerBid.maxPrice = makerAsk.minPrice;
+        takerBid.additionalParameters = abi.encode(makerAsk.minPrice);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 

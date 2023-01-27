@@ -279,7 +279,8 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             price = makerAsk.minPrice;
         }
 
-        if (takerBid.maxPrice < price) {
+        uint256 maxPrice = abi.decode(takerBid.additionalParameters, (uint256));
+        if (maxPrice < price) {
             revert BidTooLow();
         }
 

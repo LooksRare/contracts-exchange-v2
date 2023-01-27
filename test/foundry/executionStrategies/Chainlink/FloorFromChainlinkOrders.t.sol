@@ -175,7 +175,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     function _createMakerBidAndTakerAsk(
         uint256 discount
     ) internal returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
-        mockERC721.mint(takerUser, 1);
+        mockERC721.mint(takerUser, 42);
 
         uint256 price;
         if (isFixedAmount != 0) {
@@ -209,7 +209,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: price,
-            additionalParameters: abi.encode(1)
+            additionalParameters: abi.encode(42)
         });
     }
 

@@ -2,13 +2,11 @@
 pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
-import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
 import {IERC165} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC165.sol";
 import {IERC20} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC20.sol";
 import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC721.sol";
 import {IERC1155} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1155.sol";
 import {IERC1271} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC1271.sol";
-import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 
 // Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
@@ -16,8 +14,6 @@ import {MerkleProofCalldata} from "../libraries/OpenZeppelin/MerkleProofCalldata
 
 // Interfaces
 import {ICreatorFeeManager} from "../interfaces/ICreatorFeeManager.sol";
-import {IExecutionManager} from "../interfaces/IExecutionManager.sol";
-import {IStrategyManager} from "../interfaces/IStrategyManager.sol";
 import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 
 // Shared errors
@@ -27,10 +23,8 @@ import {OrderInvalid} from "../interfaces/SharedErrors.sol";
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";
 import {TransferManager} from "../TransferManager.sol";
 
-// Validation codes
-import "../constants/ValidationCodeConstants.sol";
-
 // Constants
+import "../constants/ValidationCodeConstants.sol";
 import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
 
 /**
@@ -149,25 +143,25 @@ contract OrderValidatorV2A {
         looksRareProtocol = LooksRareProtocol(_looksRareProtocol);
         transferManager = looksRareProtocol.transferManager();
 
-        _adjustExternalParameters();
+        _deriveProtocolParameters();
     }
 
     /**
-     * @notice Adjust external parameters. Anyone can call this function.
+     * @notice Derive protocol parameters. Anyone can call this function.
      * @dev It allows adjusting if the domain separator or creator fee manager address were to change.
      */
-    function adjustExternalParameters() external {
-        _adjustExternalParameters();
+    function deriveProtocolParameters() external {
+        _deriveProtocolParameters();
     }
 
     /**
-     * @notice Verify the validity of an array of maker ask orders.
+     * @notice This function verifies the validity of an array of maker ask orders.
      * @param makerAsks Array of maker ask structs
      * @param signatures Array of signatures
      * @param merkleTrees Array of merkle trees
      * @return validationCodes Arrays of validation codes
      */
-    function verifyMultipleMakerAskOrders(
+    function checkMultipleMakerAskOrdersValidity(
         OrderStructs.MakerAsk[] calldata makerAsks,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
@@ -185,13 +179,13 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Verify the validity of an array of maker bid orders.
+     * @notice This function verifies the validity of an array of maker bid orders.
      * @param makerBids Array of maker bid structs
      * @param signatures Array of signatures
      * @param merkleTrees Array of merkle trees
      * @return validationCodes Arrays of validation codes
      */
-    function verifyMultipleMakerBidOrders(
+    function checkMultipleMakerBidOrdersValidity(
         OrderStructs.MakerBid[] calldata makerBids,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
@@ -209,7 +203,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Verify the validity of a maker ask order.
+     * @notice This function verifies the validity of a maker ask order.
      * @param makerAsk Maker ask struct
      * @param signature Signature
      * @param merkleTree Merkle tree
@@ -264,7 +258,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Verify the validity of a maker bid order.
+     * @notice This function verifies the validity of a maker bid order.
      * @param makerBid Maker bid struct
      * @param signature Signature
      * @param merkleTree Merkle tree
@@ -311,7 +305,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity of nonces for maker ask user
+     * @notice This function is internal and verifies the validity of nonces for maker ask order.
      * @param makerSigner Address of the maker signer
      * @param askNonce Ask nonce
      * @param orderNonce Order nonce
@@ -338,7 +332,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity of nonces for maker bid user
+     * @notice This function is internal and verifies the validity of nonces for maker bid order.
      * @param makerSigner Address of the maker signer
      * @param bidNonce Bid nonce
      * @param orderNonce Order nonce
@@ -365,7 +359,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity of subset and order nonce
+     * @notice The function is internal and verifies the validity of subset and order nonce for an order.
      * @param makerSigner Address of the maker signer
      * @param orderNonce Order nonce
      * @param subsetNonce Subset nonce
@@ -396,7 +390,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity for currency/strategy whitelists
+     * @notice This function is internal and verifies the validity for currency/strategy whitelists.
      * @param currency Address of the currency
      * @param strategyId Strategy id
      * @return validationCode Validation code
@@ -435,7 +429,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity for makerBid currency/strategy whitelists
+     * @notice This function is internal and verifies the validity for makerBid currency/strategy whitelists.
      * @param currency Address of the currency
      * @param strategyId Strategy id
      * @return validationCode Validation code
@@ -474,7 +468,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity for order timestamps
+     * @notice This function verifies the validity for order timestamps.
      * @param startTime Start time
      * @param endTime End time
      * @return validationCode Validation code
@@ -500,11 +494,11 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check if potential wrong asset types
+     * @notice This function is used to check if the asset type may be potentially wrong.
      * @param collection Address of the collection
      * @param assetType Asset type in the maker order
      * @return validationCode Validation code
-     * @dev This function may return false positives
+     * @dev This function may return false positives.
      *      (i.e. assets that are tradable but do not implement the proper interfaceId).
      *      If ERC165 is not implemented, it will revert.
      */
@@ -529,7 +523,8 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity of ERC20 approvals and balances that are required to process the maker bid order
+     * @notice This function verifies that (1) ERC20 approvals
+     *         and (2) balances are sufficient to process the maker bid order.
      * @param currency Currency address
      * @param user User address
      * @param price Price (defined by the maker order)
@@ -552,7 +547,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity of NFT assets (approvals, balances, and others)
+     * @notice This function verifies the validity of NFT assets (approvals, balances, and others).
      * @param collection Collection address
      * @param assetType Asset type
      * @param user User address
@@ -581,7 +576,8 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity of ERC721 approvals and balances required to process the maker ask order
+     * @notice This function verifies the validity of (1) ERC721 approvals
+     *         and (2) balances to process the maker ask order.
      * @param collection Collection address
      * @param user User address
      * @param itemIds Array of item ids
@@ -647,7 +643,8 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check the validity of ERC1155 approvals and balances required to process the maker ask order
+     * @notice This function verifies the validity of (1) ERC1155 approvals
+     *         (2) and balances to process the maker ask order.
      * @param collection Collection address
      * @param user User address
      * @param itemIds Array of item ids
@@ -715,9 +712,12 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Check if any of the item id in an array of item ids is repeated
+     * @notice This function checks if the same itemId is repeated
+     *         in an array of item ids.
      * @param itemIds Array of item ids
-     * @dev This is to be used for bundles
+     * @dev This is for bundles.
+     *      For example,
+     *      if itemIds = [1,2,1], it will return SAME_ITEM_ID_IN_BUNDLE.
      * @return validationCode Validation code
      */
     function _checkIfItemIdsDiffer(uint256[] memory itemIds) internal pure returns (uint256 validationCode) {
@@ -744,7 +744,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Verify validity merkle proof and order hash
+     * @notice This function verifies the validity of a Merkle proof and the order hash.
      * @param merkleTree Merkle tree struct
      * @param orderHash Order hash
      * @param signature Signature
@@ -783,6 +783,7 @@ contract OrderValidatorV2A {
             abi.encodeCall(ICreatorFeeManager.viewCreatorFeeInfo, (collection, price, itemIds))
         );
 
+        // The only path possible (to revert) in the fee manager is the bundle being not supported.
         if (!status) {
             return BUNDLE_ERC2981_NOT_SUPPORTED;
         }
@@ -797,7 +798,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Compute digest and verify
+     * @notice This function computes the digest and verify the signature.
      * @param computedHash Hash of order (maker bid or maker ask) or merkle root
      * @param makerSignature Signature of the maker
      * @param signer Signer address
@@ -817,7 +818,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Validate signature
+     * @notice This function checks the validity of the signature.
      * @param hash Message hash
      * @param signature A 64 or 65 bytes signature
      * @param signer Signer address
@@ -886,7 +887,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Verify transfer manager approvals are not revoked by user, nor owner
+     * @dev This function checks if transfer manager approvals are not revoked by user, nor by the owner
      * @param user Address of the user
      * @return validationCode Validation code
      */
@@ -1016,10 +1017,9 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice Adjust external parameters
-     * @dev It is meant to be adjustable if domain separator or creator fee manager were to change.
+     * @notice This function is internal and is used to adjust the protocol parameters.
      */
-    function _adjustExternalParameters() internal {
+    function _deriveProtocolParameters() internal {
         domainSeparator = looksRareProtocol.domainSeparator();
         creatorFeeManager = looksRareProtocol.creatorFeeManager();
         maxCreatorFeeBp = looksRareProtocol.maxCreatorFeeBp();

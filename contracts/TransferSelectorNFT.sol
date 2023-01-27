@@ -24,7 +24,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
     /**
      * @notice Transfer manager for ERC721 and ERC1155.
      */
-    TransferManager public transferManager;
+    TransferManager public immutable transferManager;
 
     /**
      * @notice Constructor

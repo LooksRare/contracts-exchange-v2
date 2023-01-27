@@ -294,10 +294,18 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         isNonceInvalidated = true;
     }
 
+    /**
+     * @dev There is no fixed premium verification. We will let the runtime reverts
+     *      the transaction if there is an overflow.
+     */
     function _calculateFixedPremium(uint256 floorPrice, uint256 premium) internal pure returns (uint256 desiredPrice) {
         desiredPrice = floorPrice + premium;
     }
 
+    /**
+     * @dev There is no basis points premium verification. We will let the runtime reverts
+     *      the transaction if there is an overflow.
+     */
     function _calculateBasisPointsPremium(
         uint256 floorPrice,
         uint256 premium
@@ -354,6 +362,12 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         isNonceInvalidated = true;
     }
 
+    /**
+     * @dev There is a fixed discount verification, unlike the premium calculation.
+     *      This is not to catch an underflow, but to demonstrate the fact that
+     *      there is a limit to the discount while the only limit to the premium
+     *      is the size of uint256.
+     */
     function _calculateFixedDiscount(
         uint256 floorPrice,
         uint256 discount
@@ -367,7 +381,10 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     }
 
     /**
-     * @dev Discount cannot be 100%
+     * @dev There is a basis points discount verification (max 99%), unlike the premium calculation.
+     *      This is not to catch an underflow, but to demonstrate the fact that
+     *      there is a limit to the discount while the only limit to the premium
+     *      is the size of uint256.
      */
     function _calculateBasisPointsDiscount(
         uint256 floorPrice,

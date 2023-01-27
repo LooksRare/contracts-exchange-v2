@@ -8,7 +8,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
+import {AdditionalParametersInvalid, OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
@@ -146,7 +146,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             functionSelector == StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             makerBid.additionalParameters.length != 32
         ) {
-            return (isValid, OrderInvalid.selector);
+            return (isValid, AdditionalParametersInvalid.selector);
         }
 
         isValid = true;

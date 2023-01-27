@@ -17,7 +17,7 @@ import {ICreatorFeeManager} from "../interfaces/ICreatorFeeManager.sol";
 import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 
 // Shared errors
-import {OrderInvalid} from "../interfaces/SharedErrors.sol";
+import {AdditionalParametersInvalid, OrderInvalid} from "../interfaces/SharedErrors.sol";
 
 // Other dependencies
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";
@@ -952,6 +952,8 @@ contract OrderValidatorV2A {
             } else {
                 if (errorSelector == OrderInvalid.selector) {
                     validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
+                } else if (errorSelector == AdditionalParametersInvalid.selector) {
+                    validationCode = MAKER_ORDER_ADDITIONAL_PARAMETERS_PERMANENTLY_INVALID_NON_STANDARD_SALE;
                 } else {
                     validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
                 }
@@ -1009,6 +1011,8 @@ contract OrderValidatorV2A {
             } else {
                 if (errorSelector == OrderInvalid.selector) {
                     validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
+                } else if (errorSelector == AdditionalParametersInvalid.selector) {
+                    validationCode = MAKER_ORDER_ADDITIONAL_PARAMETERS_PERMANENTLY_INVALID_NON_STANDARD_SALE;
                 } else {
                     validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
                 }

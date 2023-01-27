@@ -9,7 +9,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 
 // Shared errors
-import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../interfaces/SharedErrors.sol";
+import {AdditionalParametersInvalid, AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../interfaces/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -174,7 +174,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         }
 
         if (makerAsk.additionalParameters.length != 32) {
-            return (isValid, OrderInvalid.selector);
+            return (isValid, AdditionalParametersInvalid.selector);
         }
 
         if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {

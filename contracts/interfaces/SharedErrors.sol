@@ -2,6 +2,12 @@
 pragma solidity ^0.8.17;
 
 /**
+ * @notice The order's additionalParameters is invalid.
+ *         The actual data required depends on the strategy.
+ */
+error AdditionalParametersInvalid();
+
+/**
  * @notice Ask price is too high for the bid user.
  */
 error AskTooHigh();

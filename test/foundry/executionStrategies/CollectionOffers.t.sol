@@ -8,8 +8,8 @@ import {Merkle} from "../../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../../../contracts/interfaces/SharedErrors.sol";
-import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
+import {AdditionalParametersInvalid, OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../../../contracts/interfaces/SharedErrors.sol";
+import {MAKER_ORDER_ADDITIONAL_PARAMETERS_PERMANENTLY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
 import {StrategyCollectionOffer} from "../../../contracts/executionStrategies/StrategyCollectionOffer.sol";
@@ -555,8 +555,17 @@ contract CollectionOrdersTest is ProtocolBase {
             abi.encode()
         );
 
-        _assertOrderIsInvalid(makerBid, true);
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
+            makerBid,
+            StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector
+        );
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, AdditionalParametersInvalid.selector);
+        _doesMakerBidOrderReturnValidationCode(
+            makerBid,
+            signature,
+            MAKER_ORDER_ADDITIONAL_PARAMETERS_PERMANENTLY_INVALID_NON_STANDARD_SALE
+        );
 
         vm.prank(takerUser);
         vm.expectRevert(); // It should revert without data (since the root cannot be extracted since the additionalParameters length is 0)

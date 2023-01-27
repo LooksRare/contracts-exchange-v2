@@ -173,6 +173,10 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             }
         }
 
+        if (makerAsk.additionalParameters.length != 32) {
+            return (isValid, OrderInvalid.selector);
+        }
+
         if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
             return (isValid, OrderInvalid.selector);
         }

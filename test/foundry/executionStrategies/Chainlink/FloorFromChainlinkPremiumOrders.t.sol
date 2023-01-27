@@ -20,6 +20,26 @@ import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
 abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrdersTest {
     uint256 internal premium;
 
+    function testFloorFromChainlinkPremiumAdditionalParametersNotProvided() public {
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+            premium: premium
+        });
+        makerAsk.additionalParameters = new bytes(0);
+
+        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+
+        vm.prank(_owner);
+        strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+
+        // EvmError: Revert
+        vm.expectRevert();
+        _executeTakerBid(takerBid, makerAsk, signature);
+    }
+
     function testFloorFromChainlinkPremiumPriceFeedNotAvailable() public {
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium

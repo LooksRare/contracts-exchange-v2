@@ -190,6 +190,9 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      * @notice This function validates *only the maker* order under the context of the chosen strategy.
      *         It does not revert if the maker order is invalid.
      *         Instead it returns false and the error's 4 bytes selector.
+     * @notice When `isMakerBidValid` gets called, depending on the market conditions at that
+     *         specific time, the comparison between the floorPrice and the discount might cause
+     *         this function to either return isValid as true or false.
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid

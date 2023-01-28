@@ -43,7 +43,7 @@ contract StrategyItemIdsRange is BaseStrategy {
             (uint256, uint256, uint256)
         );
 
-        if (minItemId >= maxItemId) {
+        if (minItemId >= maxItemId || desiredAmount == 0) {
             revert OrderInvalid();
         }
 
@@ -114,11 +114,7 @@ contract StrategyItemIdsRange is BaseStrategy {
             (uint256, uint256, uint256)
         );
 
-        if (desiredAmount == 0) {
-            return (isValid, OrderInvalid.selector);
-        }
-
-        if (minItemId >= maxItemId) {
+        if (minItemId >= maxItemId || desiredAmount == 0) {
             return (isValid, OrderInvalid.selector);
         }
 

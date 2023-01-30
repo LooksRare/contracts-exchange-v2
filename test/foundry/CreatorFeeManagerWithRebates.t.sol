@@ -54,7 +54,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk,
+            OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
@@ -90,7 +90,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Create order
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(erc721, address(weth), numberItemsInBundle);
 
         if (erc721 == address(mockERC721)) {
@@ -153,7 +153,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
                 address(weth),
@@ -201,7 +201,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
                 address(weth),

@@ -58,8 +58,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
             makerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
             abi.encode(new uint256[](0), new uint256[](0))
         );
 
@@ -119,13 +117,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, WRONG_USER_GLOBAL_ASK_NONCE);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, makerAsk.minPrice, abi.encode());
 
         vm.deal(takerUser, price);
 

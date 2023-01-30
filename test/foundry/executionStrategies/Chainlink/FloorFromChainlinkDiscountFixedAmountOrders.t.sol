@@ -66,7 +66,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Maker user has received the asset
-        assertEq(mockERC721.ownerOf(1), makerUser);
+        assertEq(mockERC721.ownerOf(42), makerUser);
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.5 ether);
@@ -94,7 +94,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Maker user has received the asset
-        assertEq(mockERC721.ownerOf(1), makerUser);
+        assertEq(mockERC721.ownerOf(42), makerUser);
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.4 ether);

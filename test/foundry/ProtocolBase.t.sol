@@ -73,11 +73,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
             merkleTrees
         );
 
-        for (uint256 i; i < validationCodes.length; i++) {
-            for (uint256 j; j < 9; j++) {
-                assertEq(validationCodes[i][j], 0);
-            }
-        }
+        _assertValidationCodesAllZeroes(validationCodes);
     }
 
     function _doesMakerAskOrderReturnValidationCode(
@@ -154,11 +150,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
             merkleTrees
         );
 
-        for (uint256 i; i < validationCodes.length; i++) {
-            for (uint256 j; j < 9; j++) {
-                assertEq(validationCodes[i][j], 0);
-            }
-        }
+        _assertValidationCodesAllZeroes(validationCodes);
     }
 
     function _doesMakerBidOrderReturnValidationCode(
@@ -201,6 +193,14 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
         uint256 index = expectedValidationCode / 100;
         assertEq(validationCodes[0][index - 1], expectedValidationCode);
+    }
+
+    function _assertValidationCodesAllZeroes(uint256[9][] memory validationCodes) private {
+        for (uint256 i; i < validationCodes.length; i++) {
+            for (uint256 j; j < 9; j++) {
+                assertEq(validationCodes[i][j], 0);
+            }
+        }
     }
 
     function _setUpUser(address user) internal asPrankedUser(user) {

@@ -4,23 +4,23 @@ pragma solidity ^0.8.17;
 import "../../../contracts/interfaces/IStrategyManager.sol";
 import "../../../contracts/CreatorFeeManagerWithRoyalties.sol";
 
-contract LooksRareProtocolWithFaultyStrategies {
+contract MockLooksRareProtocol {
     CreatorFeeManagerWithRoyalties public creatorFeeManager;
 
     constructor() {
-        creatorFeeManager = new CreatorFeeManagerWithRoyalties(address(0));
+        creatorFeeManager = new CreatorFeeManagerWithRoyalties(address(1));
     }
 
     function transferManager() external pure returns (address) {
-        return address(0);
+        return address(2);
     }
 
-    function domainSeparator() external pure returns (address) {
-        return address(0);
+    function domainSeparator() external pure returns (bytes32) {
+        return bytes32("420");
     }
 
     function maxCreatorFeeBp() external pure returns (uint256) {
-        return 0;
+        return 69;
     }
 
     function isCurrencyWhitelisted(address) external pure returns (bool isWhitelisted) {

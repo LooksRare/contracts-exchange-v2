@@ -11,13 +11,22 @@ import {STRATEGY_NOT_IMPLEMENTED} from "../../contracts/constants/ValidationCode
 
 // Utils
 import {TestParameters} from "./utils/TestParameters.sol";
-import {LooksRareProtocolWithFaultyStrategies} from "./utils/LooksRareProtocolWithFaultyStrategies.sol";
+import {MockLooksRareProtocol} from "./utils/MockLooksRareProtocol.sol";
 
 contract OrderValidatorV2ATest is TestParameters {
     OrderValidatorV2A private validator;
 
     function setUp() public {
-        validator = new OrderValidatorV2A(address(new LooksRareProtocolWithFaultyStrategies()));
+        validator = new OrderValidatorV2A(address(new MockLooksRareProtocol()));
+    }
+
+    function testDeriveProtocolParameters() public {
+        validator.deriveProtocolParameters();
+        assertEq(address(validator.royaltyFeeRegistry()), address(1));
+        assertEq(validator.domainSeparator(), bytes32("420"));
+        // Just need to make sure it's not 0, hence copying the address from log.
+        assertEq(address(validator.creatorFeeManager()), 0x037FC82298142374d974839236D2e2dF6B5BdD8F);
+        assertEq(validator.maxCreatorFeeBp(), 69);
     }
 
     function testCheckMakerAskOrderValidityStrategyNotImplemented() public {

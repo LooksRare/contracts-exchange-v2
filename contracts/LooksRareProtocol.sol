@@ -528,16 +528,16 @@ contract LooksRareProtocol is
         address currency,
         address bidUser
     ) private {
-        // @dev There is no check for address(0), if the creator recipient is address(0), the fee is set to 0
+        // @dev There is no check for address(0) since the ask recipient can never be address(0)
+        // If ask recipient is the maker --> the signer cannot be the null address
+        // If ask is the taker --> either it is the sender address or
+        // if the recipient (in TakerAsk) is set to address(0), it is adjusted to the original taker address
         uint256 sellerProceed = feeAmounts[0];
         if (sellerProceed != 0) {
             _transferFungibleTokens(currency, bidUser, recipients[0], sellerProceed);
         }
 
-        // @dev There is no check for address(0) since the ask recipient can never be address(0)
-        // If ask recipient is the maker --> the signer cannot be the null address
-        // If ask is the taker --> either it is the sender address or
-        // if the recipient (in TakerAsk) is set to address(0), it is adjusted to the original taker address
+        // @dev There is no check for address(0), if the creator recipient is address(0), the fee is set to 0
         uint256 creatorFee = feeAmounts[1];
         if (creatorFee != 0) {
             _transferFungibleTokens(currency, bidUser, recipients[1], creatorFee);

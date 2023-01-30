@@ -10,7 +10,7 @@ import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/N
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {STRATEGY_NOT_IMPLEMENTED, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {STRATEGY_NOT_IMPLEMENTED, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Utils
 import {TestParameters} from "./utils/TestParameters.sol";
@@ -18,6 +18,7 @@ import {MockLooksRareProtocol} from "./utils/MockLooksRareProtocol.sol";
 
 // Mocks
 import {MockERC721SupportsNoInterface} from "../mock/MockERC721SupportsNoInterface.sol";
+import {MockERC1155SupportsNoInterface} from "../mock/MockERC1155SupportsNoInterface.sol";
 
 contract OrderValidatorV2ATest is TestParameters {
     OrderValidatorV2A private validator;
@@ -80,5 +81,29 @@ contract OrderValidatorV2ATest is TestParameters {
             _EMPTY_MERKLE_TREE
         );
         assertEq(validationCodes[6], POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721);
+    }
+
+    function testMakerAskWrongAssetTypeERC1155() public {
+        OrderStructs.MakerAsk memory makerAsk;
+        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.collection = address(new MockERC1155SupportsNoInterface());
+        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+            makerAsk,
+            new bytes(65),
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[6], POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155);
+    }
+
+    function testMakerBidWrongAssetTypeERC1155() public {
+        OrderStructs.MakerBid memory makerBid;
+        makerBid.assetType = ASSET_TYPE_ERC1155;
+        makerBid.collection = address(new MockERC1155SupportsNoInterface());
+        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+            makerBid,
+            new bytes(65),
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[6], POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155);
     }
 }

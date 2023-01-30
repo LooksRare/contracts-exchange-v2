@@ -5,12 +5,15 @@ import "../../../contracts/interfaces/IStrategyManager.sol";
 import "../../../contracts/CreatorFeeManagerWithRoyalties.sol";
 import "../../../contracts/TransferManager.sol";
 
+// Mocks
+import {MockRoyaltyFeeRegistry} from "../../mock/MockRoyaltyFeeRegistry.sol";
+
 contract MockLooksRareProtocol {
     CreatorFeeManagerWithRoyalties public immutable creatorFeeManager;
     TransferManager public immutable transferManager;
 
     constructor() {
-        creatorFeeManager = new CreatorFeeManagerWithRoyalties(address(1));
+        creatorFeeManager = new CreatorFeeManagerWithRoyalties(address(new MockRoyaltyFeeRegistry(msg.sender, 1_000)));
         transferManager = new TransferManager(msg.sender);
     }
 

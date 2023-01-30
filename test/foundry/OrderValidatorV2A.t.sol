@@ -34,10 +34,10 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testDeriveProtocolParameters() public {
         validator.deriveProtocolParameters();
-        assertEq(address(validator.royaltyFeeRegistry()), address(1));
+        assertEq(address(validator.royaltyFeeRegistry()), 0x037FC82298142374d974839236D2e2dF6B5BdD8F);
         assertEq(validator.domainSeparator(), bytes32("420"));
         // Just need to make sure it's not 0, hence copying the address from log.
-        assertEq(address(validator.creatorFeeManager()), 0x037FC82298142374d974839236D2e2dF6B5BdD8F);
+        assertEq(address(validator.creatorFeeManager()), 0x566B72091192CCd7013AdF77E2a1b349564acC21);
         assertEq(validator.maxCreatorFeeBp(), 69);
     }
 
@@ -221,10 +221,20 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[5], ERC721_ITEM_ID_NOT_IN_BALANCE);
     }
 
-    function testMakerAskERC1155BalanceInferiorToAmount() public {
+    function testMakerAskERC1155BalanceInferiorToAmountThroughBalanceOfBatch() public {
+        _testMakerAskERC1155BalanceInferiorToAmount(true);
+    }
+
+    function testMakerAskERC1155BalanceInferiorToAmountThroughBalanceOf() public {
+        _testMakerAskERC1155BalanceInferiorToAmount(false);
+    }
+
+    function _testMakerAskERC1155BalanceInferiorToAmount(bool revertBalanceOfBatch) public {
+        MockERC1155 mockERC1155 = new MockERC1155();
+        mockERC1155.setRevertBalanceOfBatch(revertBalanceOfBatch);
+
         OrderStructs.MakerAsk memory makerAsk;
         makerAsk.assetType = ASSET_TYPE_ERC1155;
-        MockERC1155 mockERC1155 = new MockERC1155();
         makerAsk.collection = address(mockERC1155);
         makerAsk.signer = makerUser;
         makerAsk.assetType = ASSET_TYPE_ERC1155;

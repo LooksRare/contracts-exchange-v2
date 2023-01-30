@@ -102,12 +102,14 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.212 ether);
     }
 
-    function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedAmountGreaterThanOrEqualToFloorPrice() public {
+    function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedAmountGreaterThanFloorPrice() public {
         // Floor price = 9.7 ETH, discount = 9.7 ETH, desired price = 0 ETH
         // Max price = 0 ETH
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 9.7 ether
         });
+
+        makerBid.additionalParameters = abi.encode(9.7 ether + 1);
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 

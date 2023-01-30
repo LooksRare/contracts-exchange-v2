@@ -26,7 +26,7 @@ contract StrategyItemIdsRange is BaseStrategy {
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function executeStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.TakerOrder calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
         external

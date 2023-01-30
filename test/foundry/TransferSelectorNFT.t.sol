@@ -23,7 +23,7 @@ contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
         uint256 price = 0.1 ether;
 
         //  Prepare the orders and signature
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,

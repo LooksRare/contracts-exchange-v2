@@ -61,7 +61,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
      * @dev The client has to provide the seller's desired sale price in USD as the additionalParameters
      */
     function executeStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.TakerOrder calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         external

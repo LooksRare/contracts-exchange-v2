@@ -33,7 +33,7 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function executeStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.TakerOrder calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     ) external returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert OrderInvalid();

@@ -80,7 +80,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
+        OrderStructs.TakerOrder memory takerAsk = OrderStructs.TakerOrder(takerUser, abi.encode());
 
         _isMakerBidOrderValid(makerBid, signature);
 
@@ -123,7 +123,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721WithRoyalties.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
+        OrderStructs.TakerOrder memory takerAsk = OrderStructs.TakerOrder(takerUser, abi.encode());
 
         _isMakerBidOrderValid(makerBid, signature);
 
@@ -146,7 +146,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.TakerOrder memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         // Sign the order
@@ -179,7 +179,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.TakerOrder memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
                 address(weth),
@@ -219,7 +219,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.TakerOrder memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
                 address(weth),
@@ -291,7 +291,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.TakerOrder memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
                 address(weth),
@@ -343,7 +343,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk,
+            OrderStructs.TakerOrder memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
@@ -372,7 +372,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         // Prepare the orders and signature
         OrderStructs.MakerAsk memory makerAsk;
-        OrderStructs.TakerBid memory takerBid;
+        OrderStructs.TakerOrder memory takerBid;
 
         (makerAsk, takerBid, signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,

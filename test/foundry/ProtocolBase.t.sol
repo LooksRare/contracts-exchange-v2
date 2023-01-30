@@ -216,7 +216,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
      *       needs to at least define the functions below.
      */
     function executeTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.TakerOrder calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
@@ -224,7 +224,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     ) external {}
 
     function executeTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.TakerOrder calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
@@ -232,7 +232,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     ) external payable {}
 
     function executeMultipleTakerBids(
-        OrderStructs.TakerBid[] calldata takerBids,
+        OrderStructs.TakerOrder[] calldata takerBids,
         OrderStructs.MakerAsk[] calldata makerAsks,
         bytes[] calldata makerSignatures,
         OrderStructs.MerkleTree[] calldata merkleTrees,

@@ -37,7 +37,7 @@ contract StrategyCollectionOffer is BaseStrategy {
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function executeCollectionStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.TakerOrder calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
         external
@@ -69,7 +69,7 @@ contract StrategyCollectionOffer is BaseStrategy {
      * @dev The transaction reverts if there is the maker does not include a merkle root in the additionalParameters.
      */
     function executeCollectionStrategyWithTakerAskWithProof(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.TakerOrder calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
         external

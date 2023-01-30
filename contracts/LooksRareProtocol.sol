@@ -119,7 +119,7 @@ contract LooksRareProtocol is
      * @inheritdoc ILooksRareProtocol
      */
     function executeTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.TakerOrder calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
@@ -147,7 +147,7 @@ contract LooksRareProtocol is
      * @inheritdoc ILooksRareProtocol
      */
     function executeTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.TakerOrder calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
@@ -177,7 +177,7 @@ contract LooksRareProtocol is
      * @inheritdoc ILooksRareProtocol
      */
     function executeMultipleTakerBids(
-        OrderStructs.TakerBid[] calldata takerBids,
+        OrderStructs.TakerOrder[] calldata takerBids,
         OrderStructs.MakerAsk[] calldata makerAsks,
         bytes[] calldata makerSignatures,
         OrderStructs.MerkleTree[] calldata merkleTrees,
@@ -215,7 +215,7 @@ contract LooksRareProtocol is
                         }
                     }
 
-                    OrderStructs.TakerBid calldata takerBid = takerBids[i];
+                    OrderStructs.TakerOrder calldata takerBid = takerBids[i];
                     bytes32 orderHash = makerAsk.hash();
 
                     {
@@ -240,7 +240,7 @@ contract LooksRareProtocol is
                         }
                     }
 
-                    OrderStructs.TakerBid calldata takerBid = takerBids[i];
+                    OrderStructs.TakerOrder calldata takerBid = takerBids[i];
                     bytes32 orderHash = makerAsk.hash();
 
                     {
@@ -277,7 +277,7 @@ contract LooksRareProtocol is
      * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
      */
     function restrictedExecuteTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.TakerOrder calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         address sender,
         bytes32 orderHash
@@ -326,7 +326,7 @@ contract LooksRareProtocol is
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.TakerOrder calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         bytes32 orderHash
     ) internal returns (uint256) {
@@ -390,7 +390,7 @@ contract LooksRareProtocol is
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.TakerOrder calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         address sender,
         bytes32 orderHash

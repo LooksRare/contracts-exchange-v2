@@ -41,7 +41,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
     function testTakerBid() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup(
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _takerBidSetup(
             address(wallet)
         );
 
@@ -68,7 +68,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
     function testTakerBidInvalidSignature() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup(
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _takerBidSetup(
             address(wallet)
         );
 
@@ -100,7 +100,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerBid);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _takerBidSetup(
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _takerBidSetup(
             address(maliciousERC1271Wallet)
         );
 
@@ -117,7 +117,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
     function testTakerAsk() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
-        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
+        (OrderStructs.TakerOrder memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
             address(wallet)
         );
 
@@ -138,7 +138,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
     function testTakerAskInvalidSignature() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
-        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
+        (OrderStructs.TakerOrder memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
             address(wallet)
         );
 
@@ -164,7 +164,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
-        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
+        (OrderStructs.TakerOrder memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
             address(maliciousERC1271Wallet)
         );
 
@@ -179,7 +179,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         );
         _setUpUser(address(maliciousERC1271Wallet));
 
-        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
+        (OrderStructs.TakerOrder memory takerAsk, OrderStructs.MakerBid memory makerBid) = _takerAskSetup(
             address(maliciousERC1271Wallet)
         );
 
@@ -192,7 +192,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
     function testBatchTakerAsk() public {
         ERC1271Wallet wallet = new ERC1271Wallet(makerUser);
-        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _batchTakerAskSetup(
+        (OrderStructs.TakerOrder memory takerAsk, OrderStructs.MakerBid memory makerBid) = _batchTakerAskSetup(
             address(wallet)
         );
 
@@ -217,7 +217,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         );
         _setUpUser(address(maliciousERC1271Wallet));
 
-        (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) = _batchTakerAskSetup(
+        (OrderStructs.TakerOrder memory takerAsk, OrderStructs.MakerBid memory makerBid) = _batchTakerAskSetup(
             address(maliciousERC1271Wallet)
         );
 
@@ -242,7 +242,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         (
             OrderStructs.MakerAsk[] memory makerAsks,
-            OrderStructs.TakerBid[] memory takerBids,
+            OrderStructs.TakerOrder[] memory takerBids,
             OrderStructs.MerkleTree[] memory merkleTrees,
             bytes[] memory signatures
         ) = _multipleTakerBidsSetup(address(wallet));
@@ -272,7 +272,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         (
             OrderStructs.MakerAsk[] memory makerAsks,
-            OrderStructs.TakerBid[] memory takerBids,
+            OrderStructs.TakerOrder[] memory takerBids,
             OrderStructs.MerkleTree[] memory merkleTrees,
             bytes[] memory signatures
         ) = _multipleTakerBidsSetup(address(wallet));
@@ -308,7 +308,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         (
             OrderStructs.MakerAsk[] memory makerAsks,
-            OrderStructs.TakerBid[] memory takerBids,
+            OrderStructs.TakerOrder[] memory takerBids,
             OrderStructs.MerkleTree[] memory merkleTrees,
             bytes[] memory signatures
         ) = _multipleTakerBidsSetup(address(maliciousERC1271Wallet));
@@ -338,7 +338,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         (
             OrderStructs.MakerAsk[] memory makerAsks,
-            OrderStructs.TakerBid[] memory takerBids,
+            OrderStructs.TakerOrder[] memory takerBids,
             OrderStructs.MerkleTree[] memory merkleTrees,
             bytes[] memory signatures
         ) = _multipleTakerBidsSetup(makerUser);
@@ -367,7 +367,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
     function _takerBidSetup(
         address signer
-    ) private returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) {
+    ) private returns (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) {
         // Mint asset
         mockERC1155.mint(signer, itemId, 1);
 
@@ -386,12 +386,12 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         });
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
+        takerBid = OrderStructs.TakerOrder(takerUser, abi.encode());
     }
 
     function _takerAskSetup(
         address signer
-    ) private returns (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) {
+    ) private returns (OrderStructs.TakerOrder memory takerAsk, OrderStructs.MakerBid memory makerBid) {
         // Prepare the order hash
         makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
@@ -410,12 +410,12 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         mockERC1155.mint(takerUser, itemId, 1);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
+        takerAsk = OrderStructs.TakerOrder(takerUser, abi.encode());
     }
 
     function _batchTakerAskSetup(
         address signer
-    ) private returns (OrderStructs.TakerAsk memory takerAsk, OrderStructs.MakerBid memory makerBid) {
+    ) private returns (OrderStructs.TakerOrder memory takerAsk, OrderStructs.MakerBid memory makerBid) {
         uint256[] memory itemIds = new uint256[](10);
         uint256[] memory amounts = new uint256[](10);
 
@@ -443,7 +443,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         });
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
+        takerAsk = OrderStructs.TakerOrder(takerUser, abi.encode());
     }
 
     function _multipleTakerBidsSetup(
@@ -452,13 +452,13 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         private
         returns (
             OrderStructs.MakerAsk[] memory makerAsks,
-            OrderStructs.TakerBid[] memory takerBids,
+            OrderStructs.TakerOrder[] memory takerBids,
             OrderStructs.MerkleTree[] memory merkleTrees,
             bytes[] memory signatures
         )
     {
         makerAsks = new OrderStructs.MakerAsk[](numberOfPurchases);
-        takerBids = new OrderStructs.TakerBid[](numberOfPurchases);
+        takerBids = new OrderStructs.TakerOrder[](numberOfPurchases);
         signatures = new bytes[](numberOfPurchases);
 
         for (uint256 i; i < numberOfPurchases; i++) {
@@ -481,7 +481,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.TakerBid(takerUser, abi.encode());
+            takerBids[i] = OrderStructs.TakerOrder(takerUser, abi.encode());
         }
 
         // Other execution parameters

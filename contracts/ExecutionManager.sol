@@ -97,7 +97,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      */
     function _executeStrategyForTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.TakerOrder calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         address sender
     )
@@ -165,7 +165,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      */
     function _executeStrategyForTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.TakerOrder calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         internal

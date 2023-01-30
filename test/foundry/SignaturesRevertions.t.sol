@@ -38,7 +38,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         bytes memory signature = _signMakerAsk(makerAsk, randomPK);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, WRONG_SIGNER_EOA);
 
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
+        OrderStructs.TakerOrder memory takerBid = OrderStructs.TakerOrder(takerUser, abi.encode());
 
         vm.expectRevert(InvalidSignatureEOA.selector);
         vm.prank(takerUser);
@@ -71,7 +71,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_V_PARAMETER_EOA);
 
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
+        OrderStructs.TakerOrder memory takerBid = OrderStructs.TakerOrder(takerUser, abi.encode());
 
         vm.expectRevert(abi.encodeWithSelector(BadSignatureV.selector, v));
         vm.prank(takerUser);
@@ -104,7 +104,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_S_PARAMETER_EOA);
 
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
+        OrderStructs.TakerOrder memory takerBid = OrderStructs.TakerOrder(takerUser, abi.encode());
 
         vm.expectRevert(abi.encodeWithSelector(BadSignatureS.selector));
         vm.prank(takerUser);
@@ -137,7 +137,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, NULL_SIGNER_EOA);
 
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
+        OrderStructs.TakerOrder memory takerBid = OrderStructs.TakerOrder(takerUser, abi.encode());
 
         vm.expectRevert(abi.encodeWithSelector(NullSignerAddress.selector));
         vm.prank(takerUser);
@@ -164,7 +164,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         bytes memory signature = new bytes(length);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, WRONG_SIGNATURE_LENGTH);
 
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
+        OrderStructs.TakerOrder memory takerBid = OrderStructs.TakerOrder(takerUser, abi.encode());
 
         vm.expectRevert(abi.encodeWithSelector(WrongSignatureLength.selector, length));
         vm.prank(takerUser);

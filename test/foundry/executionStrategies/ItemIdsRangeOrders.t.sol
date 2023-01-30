@@ -45,7 +45,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function _createMakerBidAndTakerAsk(
         uint256 lowerBound,
         uint256 upperBound
-    ) private returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
+    ) private returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerOrder memory newTakerAsk) {
         uint256 mid = (lowerBound + upperBound) / 2;
 
         newMakerBid = _createMultiItemMakerBidOrder({
@@ -81,7 +81,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAskItemIds[1] = mid;
         takerAskItemIds[2] = upperBound;
 
-        newTakerAsk = OrderStructs.TakerAsk({
+        newTakerAsk = OrderStructs.TakerOrder({
             recipient: takerUser,
             additionalParameters: abi.encode(takerAskItemIds, _offeredAmounts({length: 3, amount: 1}))
         });
@@ -115,7 +115,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             lowerBound,
             upperBound
         );
@@ -176,7 +176,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAskItemIds[1] = mid;
         takerAskItemIds[2] = upperBound;
 
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk({
+        OrderStructs.TakerOrder memory takerAsk = OrderStructs.TakerOrder({
             recipient: takerUser,
             additionalParameters: abi.encode(takerAskItemIds, _offeredAmounts({length: 3, amount: 2}))
         });
@@ -207,7 +207,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInvalidMakerBidAdditionalParameters() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
@@ -227,7 +227,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testZeroDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
@@ -249,7 +249,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskItemIdsAmountsLengthMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
@@ -275,7 +275,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskRevertIfAmountIsZeroOrGreaterThanOneERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
@@ -322,7 +322,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
@@ -356,7 +356,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskDuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
@@ -385,7 +385,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskUnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
@@ -414,7 +414,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );
@@ -442,7 +442,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerOrder memory takerAsk) = _createMakerBidAndTakerAsk(
             5,
             10
         );

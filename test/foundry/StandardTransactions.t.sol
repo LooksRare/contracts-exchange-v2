@@ -30,7 +30,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Prepare the orders and signature
         (
             OrderStructs.MakerAsk memory makerAsk,
-            OrderStructs.TakerBid memory takerBid,
+            OrderStructs.TakerOrder memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
                 askNonce: 0,
@@ -105,7 +105,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // Prepare the orders and signature
         (
             OrderStructs.MakerAsk memory makerAsk,
-            OrderStructs.TakerBid memory takerBid,
+            OrderStructs.TakerOrder memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
                 askNonce: 0,
@@ -176,7 +176,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk,
+            OrderStructs.TakerOrder memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
@@ -242,7 +242,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk,
+            OrderStructs.TakerOrder memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
@@ -309,7 +309,7 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 numberPurchases = 3;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
-        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        OrderStructs.TakerOrder[] memory takerBids = new OrderStructs.TakerOrder[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
@@ -333,7 +333,7 @@ contract StandardTransactionsTest is ProtocolBase {
             // Sign order
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.TakerBid(takerUser, abi.encode());
+            takerBids[i] = OrderStructs.TakerOrder(takerUser, abi.encode());
         }
 
         // Other execution parameters
@@ -380,7 +380,7 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 faultyTokenId = numberPurchases - 1;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
-        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        OrderStructs.TakerOrder[] memory takerBids = new OrderStructs.TakerOrder[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
@@ -404,7 +404,7 @@ contract StandardTransactionsTest is ProtocolBase {
             // Sign order
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.TakerBid(takerUser, abi.encode());
+            takerBids[i] = OrderStructs.TakerOrder(takerUser, abi.encode());
         }
 
         // Transfer tokenId = 2 to random user
@@ -478,7 +478,7 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 price = 1.12121111111 ether;
         uint256 numberPurchases = 3;
 
-        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        OrderStructs.TakerOrder[] memory takerBids = new OrderStructs.TakerOrder[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 

@@ -21,7 +21,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     uint256 internal premium;
 
     function testFloorFromChainlinkPremiumPriceFeedNotAvailable() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
@@ -36,7 +36,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumOraclePriceNotRecentEnough() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
@@ -62,7 +62,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     function testFloorFromChainlinkPremiumChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
@@ -84,7 +84,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumMakerAskItemIdsLengthNotOne() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
@@ -103,7 +103,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumMakerAskAmountsLengthNotOne() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
@@ -122,7 +122,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumMakerAskAmountNotOne() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
@@ -143,7 +143,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumBidTooLow() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
@@ -163,7 +163,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function testFloorFromChainlinkPremiumWrongCurrency() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerOrder memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
 
@@ -184,7 +184,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
     }
 
     function _executeTakerBid(
-        OrderStructs.TakerBid memory takerBid,
+        OrderStructs.TakerOrder memory takerBid,
         OrderStructs.MakerAsk memory makerAsk,
         bytes memory signature
     ) internal {

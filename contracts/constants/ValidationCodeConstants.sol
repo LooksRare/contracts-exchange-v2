@@ -16,7 +16,6 @@ uint256 constant MAKER_ORDER_INVALID_STANDARD_SALE = 201;
 uint256 constant MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE = 211; // The order cannot become valid again
 uint256 constant MAKER_ORDER_WRONG_CURRENCY_NON_STANDARD_SALE = 212; // The order cannot become valid again due to wrong currency
 uint256 constant MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE = 213; // The order can potentially become valid again
-uint256 constant MAKER_ORDER_ADDITIONAL_PARAMETERS_PERMANENTLY_INVALID_NON_STANDARD_SALE = 214; // The order cannot become valid again
 
 // 3. Nonce-related errors
 uint256 constant USER_SUBSET_NONCE_CANCELLED = 301;

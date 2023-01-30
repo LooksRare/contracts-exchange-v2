@@ -6,7 +6,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {WrongCurrency} from "../../../../contracts/interfaces/SharedErrors.sol";
 
 // Shared errors
-import {AdditionalParametersInvalid, BidTooLow, OrderInvalid} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid} from "../../../../contracts/interfaces/SharedErrors.sol";
 
 // Strategies
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
@@ -33,7 +33,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, AdditionalParametersInvalid.selector);
+        assertEq(errorSelector, OrderInvalid.selector);
 
         // EvmError: Revert
         vm.expectRevert();

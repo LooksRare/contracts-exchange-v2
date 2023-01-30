@@ -119,14 +119,25 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _isMakerBidOrderValid(OrderStructs.MakerBid memory makerBid, bytes memory signature) internal {
-        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
-            makerBid,
-            signature,
-            _EMPTY_MERKLE_TREE
+        OrderStructs.MakerBid[] memory makerBids = new OrderStructs.MakerBid[](1);
+        makerBids[0] = makerBid;
+
+        bytes[] memory signatures = new bytes[](1);
+        signatures[0] = signature;
+
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
+        merkleTrees[0] = _EMPTY_MERKLE_TREE;
+
+        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerBidOrdersValidity(
+            makerBids,
+            signatures,
+            merkleTrees
         );
 
-        for (uint256 i; i < 9; i++) {
-            assertEq(validationCodes[i], 0);
+        for (uint256 i; i < validationCodes.length; i++) {
+            for (uint256 j; j < 9; j++) {
+                assertEq(validationCodes[i][j], 0);
+            }
         }
     }
 
@@ -135,10 +146,25 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) internal {
-        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(makerBid, signature, merkleTree);
+        OrderStructs.MakerBid[] memory makerBids = new OrderStructs.MakerBid[](1);
+        makerBids[0] = makerBid;
 
-        for (uint256 i; i < 9; i++) {
-            assertEq(validationCodes[i], 0);
+        bytes[] memory signatures = new bytes[](1);
+        signatures[0] = signature;
+
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
+        merkleTrees[0] = merkleTree;
+
+        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerBidOrdersValidity(
+            makerBids,
+            signatures,
+            merkleTrees
+        );
+
+        for (uint256 i; i < validationCodes.length; i++) {
+            for (uint256 j; j < 9; j++) {
+                assertEq(validationCodes[i][j], 0);
+            }
         }
     }
 

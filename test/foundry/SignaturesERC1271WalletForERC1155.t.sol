@@ -386,13 +386,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         });
 
         // Prepare the taker bid
-        takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        takerBid = OrderStructs.TakerBid(takerUser, makerAsk.minPrice, abi.encode());
     }
 
     function _takerAskSetup(
@@ -487,13 +481,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.TakerBid(
-                takerUser,
-                makerAsks[i].minPrice,
-                new uint256[](0),
-                new uint256[](0),
-                abi.encode()
-            );
+            takerBids[i] = OrderStructs.TakerBid(takerUser, makerAsks[i].minPrice, abi.encode());
         }
 
         // Other execution parameters

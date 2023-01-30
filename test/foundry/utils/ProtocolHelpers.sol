@@ -52,13 +52,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
         signature = _signMakerAsk(newMakerAsk, makerUserPK);
 
-        newTakerBid = OrderStructs.TakerBid(
-            takerUser,
-            newMakerAsk.minPrice,
-            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerAsk.itemIds,
-            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerAsk.amounts,
-            abi.encode()
-        );
+        newTakerBid = OrderStructs.TakerBid(takerUser, newMakerAsk.minPrice, abi.encode());
     }
 
     function _createSingleItemMakerAskOrder(

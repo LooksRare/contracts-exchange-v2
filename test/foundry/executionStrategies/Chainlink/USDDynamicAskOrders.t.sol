@@ -100,7 +100,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.amounts = amounts;
         newMakerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
 
-        newTakerBid = OrderStructs.TakerBid(takerUser, 1 ether, itemIds, amounts, abi.encode());
+        newTakerBid = OrderStructs.TakerBid(takerUser, 1 ether, abi.encode());
     }
 
     function testNewStrategy() public {
@@ -361,31 +361,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testItemIdsMismatch() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            numberOfItems: 1,
-            numberOfAmounts: 1,
-            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
-        });
-
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 2;
-
-        // Bidder bidding on something else
-        takerBid.itemIds = itemIds;
-
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-
-        vm.expectRevert(OrderInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
     function testZeroAmount() public {
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
@@ -396,7 +371,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
         makerAsk.amounts = amounts;
-        takerBid.amounts = amounts;
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -420,7 +394,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 2;
         makerAsk.amounts = amounts;
-        takerBid.amounts = amounts;
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 

@@ -163,19 +163,11 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         newMakerAsk.additionalParameters = abi.encode(premium);
 
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 1;
-
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1;
-
         newTakerBid = OrderStructs.TakerBid(
             takerUser,
             isFixedAmount != 0
                 ? LATEST_CHAINLINK_ANSWER_IN_WAD + premium
                 : (LATEST_CHAINLINK_ANSWER_IN_WAD * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP,
-            itemIds,
-            amounts,
             abi.encode()
         );
     }
@@ -183,7 +175,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     function _createMakerBidAndTakerAsk(
         uint256 discount
     ) internal returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
-        mockERC721.mint(takerUser, 1);
+        mockERC721.mint(takerUser, 42);
 
         uint256 price;
         if (isFixedAmount != 0) {
@@ -217,7 +209,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
             minPrice: price,
-            additionalParameters: abi.encode(1, 1)
+            additionalParameters: abi.encode(42)
         });
     }
 

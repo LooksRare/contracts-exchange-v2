@@ -79,7 +79,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.endTime = endTime;
         newMakerAsk.additionalParameters = abi.encode(startPrice);
 
-        newTakerBid = OrderStructs.TakerBid(takerUser, startPrice, itemIds, amounts, abi.encode());
+        newTakerBid = OrderStructs.TakerBid(takerUser, startPrice, abi.encode());
     }
 
     function testNewStrategy() public {
@@ -338,37 +338,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
-    function testItemIdsMismatch() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            numberOfItems: 1,
-            numberOfAmounts: 1,
-            startPrice: 10 ether,
-            endPrice: 1 ether,
-            endTime: block.timestamp + 1 hours
-        });
-
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 2;
-
-        // Bidder bidding on something else
-        takerBid.itemIds = itemIds;
-
-        // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerAskOrderValid(makerAsk, signature);
-
-        vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }

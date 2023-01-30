@@ -52,17 +52,12 @@ contract StrategyCollectionOffer is BaseStrategy {
             revert OrderInvalid();
         }
 
-        (uint256 offeredItemId, uint256 offeredAmount) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
+        uint256 offeredItemId = abi.decode(takerAsk.additionalParameters, (uint256));
         itemIds = new uint256[](1);
         itemIds[0] = offeredItemId;
         isNonceInvalidated = true;
-        uint256 makerAmount = amounts[0];
 
-        if (makerAmount != offeredAmount) {
-            revert OrderInvalid();
-        }
-
-        _validateAmount(makerAmount, makerBid.assetType);
+        _validateAmount(amounts[0], makerBid.assetType);
     }
 
     /**
@@ -89,18 +84,14 @@ contract StrategyCollectionOffer is BaseStrategy {
             revert OrderInvalid();
         }
 
-        (uint256 offeredItemId, uint256 offeredAmount, bytes32[] memory proof) = abi.decode(
+        (uint256 offeredItemId, bytes32[] memory proof) = abi.decode(
             takerAsk.additionalParameters,
-            (uint256, uint256, bytes32[])
+            (uint256, bytes32[])
         );
         itemIds = new uint256[](1);
         itemIds[0] = offeredItemId;
         isNonceInvalidated = true;
         uint256 makerAmount = amounts[0];
-
-        if (makerAmount != offeredAmount) {
-            revert OrderInvalid();
-        }
 
         _validateAmount(makerAmount, makerBid.assetType);
 

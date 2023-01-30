@@ -189,7 +189,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
+        looksRareProtocol.executeTakerBid{value: makerAsk.minPrice}(
             takerBid,
             makerAsk,
             signature,
@@ -216,7 +216,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
+        looksRareProtocol.executeTakerBid{value: makerAsk.minPrice}(
             takerBid,
             makerAsk,
             signature,

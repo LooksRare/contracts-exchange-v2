@@ -52,7 +52,6 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
             countItemsToFill == 0 ||
             makerBid.amounts.length != 1 ||
             itemIds.length != countItemsToFill ||
-            makerBid.maxPrice != takerAsk.minPrice ||
             countItemsFillable < countItemsToFill + countItemsFilled
         ) revert OrderInvalid();
 

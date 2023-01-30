@@ -87,10 +87,19 @@ contract OrderValidatorV2ATest is TestParameters {
     }
 
     function testMakerBidZeroAmount() public {
+        _testMakerBidERC721InvalidAmount(0);
+    }
+
+    function testMakerBidERC721AmountNotEqualToOne() public {
+        _testMakerBidERC721InvalidAmount(2);
+    }
+
+    function _testMakerBidERC721InvalidAmount(uint256 amount) public {
         OrderStructs.MakerBid memory makerBid;
         makerBid.assetType = ASSET_TYPE_ERC721;
         makerBid.collection = address(new MockERC721());
         uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
         makerBid.amounts = amounts;
         uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
             makerBid,

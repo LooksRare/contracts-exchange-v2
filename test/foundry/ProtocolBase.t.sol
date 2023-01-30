@@ -42,14 +42,25 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     WETH public weth;
 
     function _isMakerAskOrderValid(OrderStructs.MakerAsk memory makerAsk, bytes memory signature) internal {
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE
+        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
+        makerAsks[0] = makerAsk;
+
+        bytes[] memory signatures = new bytes[](1);
+        signatures[0] = signature;
+
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
+        merkleTrees[0] = _EMPTY_MERKLE_TREE;
+
+        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerAskOrdersValidity(
+            makerAsks,
+            signatures,
+            merkleTrees
         );
 
-        for (uint256 i; i < 9; i++) {
-            assertEq(validationCodes[i], 0);
+        for (uint256 i; i < validationCodes.length; i++) {
+            for (uint256 j; j < 9; j++) {
+                assertEq(validationCodes[i][j], 0);
+            }
         }
     }
 
@@ -58,10 +69,25 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) internal {
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(makerAsk, signature, merkleTree);
+        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
+        makerAsks[0] = makerAsk;
 
-        for (uint256 i; i < 9; i++) {
-            assertEq(validationCodes[i], 0);
+        bytes[] memory signatures = new bytes[](1);
+        signatures[0] = signature;
+
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
+        merkleTrees[0] = merkleTree;
+
+        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerAskOrdersValidity(
+            makerAsks,
+            signatures,
+            merkleTrees
+        );
+
+        for (uint256 i; i < validationCodes.length; i++) {
+            for (uint256 j; j < 9; j++) {
+                assertEq(validationCodes[i][j], 0);
+            }
         }
     }
 

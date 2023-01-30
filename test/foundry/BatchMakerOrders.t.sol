@@ -47,7 +47,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         _isMakerAskOrderValidWithMerkleTree(makerAsk, signature, merkleTree);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
+        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -87,7 +87,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         mockERC721.mint(takerUser, numberOrders - 1);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -126,7 +126,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
+        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
         vm.prank(takerUser);
         vm.expectRevert(MerkleProofInvalid.selector);
@@ -156,7 +156,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
 
         vm.prank(takerUser);
         vm.expectRevert(MerkleProofInvalid.selector);

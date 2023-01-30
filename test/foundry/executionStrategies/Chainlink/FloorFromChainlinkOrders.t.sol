@@ -144,7 +144,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
     function _createMakerAskAndTakerBid(
         uint256 premium
-    ) internal returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
+    ) internal returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
         mockERC721.mint(makerUser, 1);
 
         // Prepare the order hash
@@ -167,12 +167,12 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             ? LATEST_CHAINLINK_ANSWER_IN_WAD + premium
             : (LATEST_CHAINLINK_ANSWER_IN_WAD * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP;
 
-        newTakerBid = OrderStructs.TakerBid(takerUser, abi.encode(maxPrice));
+        newTakerBid = OrderStructs.Taker(takerUser, abi.encode(maxPrice));
     }
 
     function _createMakerBidAndTakerAsk(
         uint256 discount
-    ) internal returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.TakerAsk memory newTakerAsk) {
+    ) internal returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
         mockERC721.mint(takerUser, 42);
 
         uint256 price;
@@ -204,7 +204,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         newMakerBid.additionalParameters = abi.encode(discount);
 
-        newTakerAsk = OrderStructs.TakerAsk({recipient: takerUser, additionalParameters: abi.encode(42, price)});
+        newTakerAsk = OrderStructs.Taker({recipient: takerUser, additionalParameters: abi.encode(42, price)});
     }
 
     function _setIsFixedAmount(uint256 _isFixedAmount) internal {

@@ -3,16 +3,27 @@ pragma solidity ^0.8.17;
 
 import "../../../contracts/interfaces/IStrategyManager.sol";
 import "../../../contracts/CreatorFeeManagerWithRoyalties.sol";
+import "../../../contracts/TransferManager.sol";
 
 contract MockLooksRareProtocol {
-    CreatorFeeManagerWithRoyalties public creatorFeeManager;
+    CreatorFeeManagerWithRoyalties public immutable creatorFeeManager;
+    TransferManager public immutable transferManager;
 
     constructor() {
         creatorFeeManager = new CreatorFeeManagerWithRoyalties(address(1));
+        transferManager = new TransferManager(msg.sender);
     }
 
-    function transferManager() external pure returns (address) {
-        return address(2);
+    function userBidAskNonces(address) external pure returns (uint256, uint256) {
+        return (0, 0);
+    }
+
+    function userOrderNonce(address, uint256) external pure returns (uint256) {
+        return 0;
+    }
+
+    function userSubsetNonce(address, uint256) external pure returns (uint256) {
+        return 0;
     }
 
     function domainSeparator() external pure returns (bytes32) {

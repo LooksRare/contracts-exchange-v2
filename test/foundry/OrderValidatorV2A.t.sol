@@ -3,15 +3,21 @@ pragma solidity ^0.8.17;
 
 import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 
+// Constants
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/NumericConstants.sol";
+
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {STRATEGY_NOT_IMPLEMENTED} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {STRATEGY_NOT_IMPLEMENTED, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Utils
 import {TestParameters} from "./utils/TestParameters.sol";
 import {MockLooksRareProtocol} from "./utils/MockLooksRareProtocol.sol";
+
+// Mocks
+import {MockERC721SupportsNoInterface} from "../mock/MockERC721SupportsNoInterface.sol";
 
 contract OrderValidatorV2ATest is TestParameters {
     OrderValidatorV2A private validator;
@@ -38,9 +44,6 @@ contract OrderValidatorV2ATest is TestParameters {
             _EMPTY_MERKLE_TREE
         );
         assertEq(validationCodes[0], STRATEGY_NOT_IMPLEMENTED);
-        for (uint256 i = 1; i < 9; i++) {
-            assertEq(validationCodes[i], 0);
-        }
     }
 
     function testCheckMakerBidOrderValidityStrategyNotImplemented() public {
@@ -53,8 +56,29 @@ contract OrderValidatorV2ATest is TestParameters {
             _EMPTY_MERKLE_TREE
         );
         assertEq(validationCodes[0], STRATEGY_NOT_IMPLEMENTED);
-        for (uint256 i = 1; i < 9; i++) {
-            assertEq(validationCodes[i], 0);
-        }
+    }
+
+    function testMakerAskWrongAssetTypeERC721() public {
+        OrderStructs.MakerAsk memory makerAsk;
+        makerAsk.assetType = ASSET_TYPE_ERC721;
+        makerAsk.collection = address(new MockERC721SupportsNoInterface());
+        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+            makerAsk,
+            new bytes(65),
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[6], POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721);
+    }
+
+    function testMakerBidWrongAssetTypeERC721() public {
+        OrderStructs.MakerBid memory makerBid;
+        makerBid.assetType = ASSET_TYPE_ERC721;
+        makerBid.collection = address(new MockERC721SupportsNoInterface());
+        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+            makerBid,
+            new bytes(65),
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[6], POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721);
     }
 }

@@ -286,7 +286,8 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             price = makerAsk.minPrice;
         }
 
-        if (takerBid.maxPrice < price) {
+        uint256 maxPrice = abi.decode(takerBid.additionalParameters, (uint256));
+        if (maxPrice < price) {
             revert BidTooLow();
         }
 
@@ -348,11 +349,11 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             price = desiredPrice;
         }
 
-        if (takerAsk.minPrice > price) {
+        (uint256 offeredItemId, uint256 minPrice) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
+        if (minPrice > price) {
             revert AskTooHigh();
         }
 
-        uint256 offeredItemId = abi.decode(takerAsk.additionalParameters, (uint256));
         itemIds = new uint256[](1);
         itemIds[0] = offeredItemId;
         amounts = makerBid.amounts;

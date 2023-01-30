@@ -163,13 +163,11 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         newMakerAsk.additionalParameters = abi.encode(premium);
 
-        newTakerBid = OrderStructs.TakerBid(
-            takerUser,
-            isFixedAmount != 0
-                ? LATEST_CHAINLINK_ANSWER_IN_WAD + premium
-                : (LATEST_CHAINLINK_ANSWER_IN_WAD * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP,
-            abi.encode()
-        );
+        uint256 maxPrice = isFixedAmount != 0
+            ? LATEST_CHAINLINK_ANSWER_IN_WAD + premium
+            : (LATEST_CHAINLINK_ANSWER_IN_WAD * (ONE_HUNDRED_PERCENT_IN_BP + premium)) / ONE_HUNDRED_PERCENT_IN_BP;
+
+        newTakerBid = OrderStructs.TakerBid(takerUser, abi.encode(maxPrice));
     }
 
     function _createMakerBidAndTakerAsk(
@@ -206,11 +204,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         newMakerBid.additionalParameters = abi.encode(discount);
 
-        newTakerAsk = OrderStructs.TakerAsk({
-            recipient: takerUser,
-            minPrice: price,
-            additionalParameters: abi.encode(42)
-        });
+        newTakerAsk = OrderStructs.TakerAsk({recipient: takerUser, additionalParameters: abi.encode(42, price)});
     }
 
     function _setIsFixedAmount(uint256 _isFixedAmount) internal {

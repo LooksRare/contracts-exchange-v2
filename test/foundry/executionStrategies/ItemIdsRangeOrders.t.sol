@@ -83,7 +83,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         newTakerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minPrice: newMakerBid.maxPrice,
             additionalParameters: abi.encode(takerAskItemIds, _offeredAmounts({length: 3, amount: 1}))
         });
     }
@@ -179,7 +178,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk({
             recipient: takerUser,
-            minPrice: makerBid.maxPrice,
             additionalParameters: abi.encode(takerAskItemIds, _offeredAmounts({length: 3, amount: 2}))
         });
 
@@ -426,30 +424,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         itemIds[1] = 10;
 
         takerAsk.additionalParameters = abi.encode(itemIds, _offeredAmounts({length: 2, amount: 1}));
-
-        // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
-
-        vm.expectRevert(OrderInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
-    function testTakerAskPriceTooHigh() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk(
-            5,
-            10
-        );
-
-        takerAsk.minPrice = makerBid.maxPrice + 1 wei;
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);

@@ -61,7 +61,8 @@ contract StrategyDutchAuction is BaseStrategy {
             ((endTime - block.timestamp) * startPrice + (block.timestamp - startTime) * makerAsk.minPrice) /
             (endTime - startTime);
 
-        if (takerBid.maxPrice < price) {
+        uint256 maxPrice = abi.decode(takerBid.additionalParameters, (uint256));
+        if (maxPrice < price) {
             revert BidTooLow();
         }
 

@@ -100,7 +100,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.amounts = amounts;
         newMakerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
 
-        newTakerBid = OrderStructs.TakerBid(takerUser, 1 ether, abi.encode());
+        newTakerBid = OrderStructs.TakerBid(takerUser, abi.encode(1 ether));
     }
 
     function testNewStrategy() public {
@@ -247,7 +247,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         makerAsk.currency = ETH;
         // Bidder overpays by 0.1 ETH
-        takerBid.maxPrice = 1.1 ether;
+        uint256 maxPrice = 1.1 ether;
+        takerBid.additionalParameters = abi.encode(maxPrice);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -260,7 +261,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
+        looksRareProtocol.executeTakerBid{value: maxPrice}(
             takerBid,
             makerAsk,
             signature,
@@ -414,7 +415,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        takerBid.maxPrice = 0.99 ether;
+        takerBid.additionalParameters = abi.encode(0.99 ether);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 

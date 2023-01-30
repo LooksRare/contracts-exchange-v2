@@ -333,7 +333,7 @@ contract StandardTransactionsTest is ProtocolBase {
             // Sign order
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.TakerBid(takerUser, makerAsks[i].minPrice, abi.encode());
+            takerBids[i] = OrderStructs.TakerBid(takerUser, abi.encode());
         }
 
         // Other execution parameters
@@ -404,7 +404,7 @@ contract StandardTransactionsTest is ProtocolBase {
             // Sign order
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.TakerBid(takerUser, makerAsks[i].minPrice, abi.encode());
+            takerBids[i] = OrderStructs.TakerBid(takerUser, abi.encode());
         }
 
         // Transfer tokenId = 2 to random user

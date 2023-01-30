@@ -83,10 +83,6 @@ contract StrategyItemIdsRange is BaseStrategy {
             revert OrderInvalid();
         }
 
-        if (makerBid.maxPrice != takerAsk.minPrice) {
-            revert OrderInvalid();
-        }
-
         price = makerBid.maxPrice;
         isNonceInvalidated = true;
     }

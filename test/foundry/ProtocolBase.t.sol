@@ -42,26 +42,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     WETH public weth;
 
     function _isMakerAskOrderValid(OrderStructs.MakerAsk memory makerAsk, bytes memory signature) internal {
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
-        makerAsks[0] = makerAsk;
-
-        bytes[] memory signatures = new bytes[](1);
-        signatures[0] = signature;
-
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
-        merkleTrees[0] = _EMPTY_MERKLE_TREE;
-
-        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerAskOrdersValidity(
-            makerAsks,
-            signatures,
-            merkleTrees
-        );
-
-        for (uint256 i; i < validationCodes.length; i++) {
-            for (uint256 j; j < 9; j++) {
-                assertEq(validationCodes[i][j], 0);
-            }
-        }
+        _isMakerAskOrderValid(makerAsk, signature, _EMPTY_MERKLE_TREE);
     }
 
     function _isMakerAskOrderValidWithMerkleTree(
@@ -69,6 +50,14 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) internal {
+        _isMakerAskOrderValid(makerAsk, signature, merkleTree);
+    }
+
+    function _isMakerAskOrderValid(
+        OrderStructs.MakerAsk memory makerAsk,
+        bytes memory signature,
+        OrderStructs.MerkleTree memory merkleTree
+    ) private {
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
         makerAsks[0] = makerAsk;
 

@@ -10,7 +10,7 @@ import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/N
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {ERC20_APPROVAL_INFERIOR_TO_PRICE, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155, STRATEGY_NOT_IMPLEMENTED} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {ERC20_APPROVAL_INFERIOR_TO_PRICE, ERC721_ITEM_ID_NOT_IN_BALANCE, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155, STRATEGY_NOT_IMPLEMENTED} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Utils
 import {TestParameters} from "./utils/TestParameters.sol";
@@ -131,5 +131,24 @@ contract OrderValidatorV2ATest is TestParameters {
             _EMPTY_MERKLE_TREE
         );
         assertEq(validationCodes[5], ERC20_APPROVAL_INFERIOR_TO_PRICE);
+    }
+
+    function testMakerAskDoesNotOwnERC721() public {
+        OrderStructs.MakerAsk memory makerAsk;
+        makerAsk.assetType = ASSET_TYPE_ERC721;
+        MockERC721 mockERC721 = new MockERC721();
+        mockERC721.mint(address(this), 0);
+        makerAsk.collection = address(mockERC721);
+        makerAsk.signer = makerUser;
+        makerAsk.assetType = ASSET_TYPE_ERC721;
+        uint256[] memory itemIds = new uint256[](1);
+        makerAsk.itemIds = itemIds;
+
+        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+            makerAsk,
+            new bytes(65),
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[5], ERC721_ITEM_ID_NOT_IN_BALANCE);
     }
 }

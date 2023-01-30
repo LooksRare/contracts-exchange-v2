@@ -17,7 +17,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerOrder memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         // Sign the order
@@ -47,7 +47,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerOrder memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC1155), address(weth), numberItemsInBundle);
 
         // Sign the order
@@ -78,7 +78,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerOrder memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         uint256 price = makerBid.maxPrice;
@@ -125,7 +125,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         (
             OrderStructs.MakerAsk memory makerAsk,
-            OrderStructs.TakerOrder memory takerBid
+            OrderStructs.Taker memory takerBid
         ) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
         uint256 price = makerAsk.minPrice;
@@ -161,7 +161,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         (
             OrderStructs.MakerAsk memory makerAsk,
-            OrderStructs.TakerOrder memory takerBid
+            OrderStructs.Taker memory takerBid
         ) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC1155), numberItemsInBundle);
 
         uint256 price = makerAsk.minPrice;
@@ -198,7 +198,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         (
             OrderStructs.MakerAsk memory makerAsk,
-            OrderStructs.TakerOrder memory takerBid
+            OrderStructs.Taker memory takerBid
         ) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
         uint256 price = makerAsk.minPrice;

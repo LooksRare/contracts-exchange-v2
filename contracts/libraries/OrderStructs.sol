@@ -85,12 +85,12 @@ library OrderStructs {
      */
 
     /**
-     * @notice TakerOrder is the struct for a taker ask/bid order. It contains the parameters required for a direct purchase.
-     * @dev TakerOrder struct is matched against MakerAsk/MakerBid structs at the protocol level.
+     * @notice Taker is the struct for a taker ask/bid order. It contains the parameters required for a direct purchase.
+     * @dev Taker struct is matched against MakerAsk/MakerBid structs at the protocol level.
      * @param recipient Recipient address (to receive NFTs or non-fungible tokens)
      * @param additionalParameters Extra data specific for the order
      */
-    struct TakerOrder {
+    struct Taker {
         address recipient;
         bytes additionalParameters;
     }

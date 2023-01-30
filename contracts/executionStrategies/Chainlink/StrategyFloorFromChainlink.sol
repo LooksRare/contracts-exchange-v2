@@ -62,7 +62,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      *      from the floor price as the additionalParameters.
      */
     function executeFixedPremiumStrategyWithTakerBid(
-        OrderStructs.TakerOrder calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         external
@@ -87,7 +87,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      *      from the floor price as the additionalParameters.
      */
     function executeBasisPointsPremiumStrategyWithTakerBid(
-        OrderStructs.TakerOrder calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         external
@@ -112,7 +112,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      *      from the floor price as the additionalParameters.
      */
     function executeFixedDiscountCollectionOfferStrategyWithTakerAsk(
-        OrderStructs.TakerOrder calldata takerAsk,
+        OrderStructs.Taker calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
         external
@@ -137,7 +137,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      *      from the floor price as the additionalParameters.
      */
     function executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk(
-        OrderStructs.TakerOrder calldata takerAsk,
+        OrderStructs.Taker calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
         external
@@ -252,7 +252,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      * @param _calculateDesiredPrice _calculateFixedPremium or _calculateBasisPointsPremium
      */
     function _executePremiumStrategyWithTakerBid(
-        OrderStructs.TakerOrder calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         function(uint256 /* floorPrice */, uint256 /* premium */)
             internal
@@ -304,7 +304,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      * @param _calculateDesiredPrice _calculateFixedDiscount or _calculateBasisPointsDiscount
      */
     function _executeDiscountCollectionOfferStrategyWithTakerAsk(
-        OrderStructs.TakerOrder calldata takerAsk,
+        OrderStructs.Taker calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         function(uint256 /* floorPrice */, uint256 /* discount */)
             internal

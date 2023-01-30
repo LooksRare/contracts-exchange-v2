@@ -131,7 +131,7 @@ interface ILooksRareProtocol {
      * @param affiliate Affiliate address
      */
     function executeTakerAsk(
-        OrderStructs.TakerOrder calldata takerAsk,
+        OrderStructs.Taker calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
@@ -147,7 +147,7 @@ interface ILooksRareProtocol {
      * @param affiliate Affiliate address
      */
     function executeTakerBid(
-        OrderStructs.TakerOrder calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
@@ -165,7 +165,7 @@ interface ILooksRareProtocol {
      *        i.e. whether it should revert if 1 or more transactions fail
      */
     function executeMultipleTakerBids(
-        OrderStructs.TakerOrder[] calldata takerBids,
+        OrderStructs.Taker[] calldata takerBids,
         OrderStructs.MakerAsk[] calldata makerAsks,
         bytes[] calldata makerSignatures,
         OrderStructs.MerkleTree[] calldata merkleTrees,

@@ -29,7 +29,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerOrder memory takerAsk,
+            OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
@@ -112,7 +112,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         (
             OrderStructs.MakerAsk memory makerAsk,
-            OrderStructs.TakerOrder memory takerBid,
+            OrderStructs.Taker memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
                 askNonce: 0,

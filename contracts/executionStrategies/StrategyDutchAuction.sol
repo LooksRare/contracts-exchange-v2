@@ -28,7 +28,7 @@ contract StrategyDutchAuction is BaseStrategy {
      * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
      */
     function executeStrategyWithTakerBid(
-        OrderStructs.TakerOrder calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         external

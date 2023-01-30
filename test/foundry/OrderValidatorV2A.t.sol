@@ -98,6 +98,9 @@ contract OrderValidatorV2ATest is TestParameters {
         OrderStructs.MakerBid memory makerBid;
         makerBid.assetType = ASSET_TYPE_ERC721;
         makerBid.collection = address(new MockERC721());
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = amount;
+        makerBid.itemIds = itemIds;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
         makerBid.amounts = amounts;

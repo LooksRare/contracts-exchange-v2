@@ -26,8 +26,11 @@ library MerkleProofCalldata {
         bytes32 computedHash = leaf;
         uint256 length = proof.length;
 
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length; ) {
             computedHash = _hashPair(computedHash, proof[i]);
+            unchecked {
+                ++i;
+            }
         }
         return computedHash;
     }

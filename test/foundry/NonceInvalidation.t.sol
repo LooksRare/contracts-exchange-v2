@@ -57,7 +57,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Prepare the taker bid
         OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
             takerUser,
-            makerAsk.minPrice,
             abi.encode(new uint256[](0), new uint256[](0))
         );
 
@@ -117,7 +116,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, WRONG_USER_GLOBAL_ASK_NONCE);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, makerAsk.minPrice, abi.encode());
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, abi.encode());
 
         vm.deal(takerUser, price);
 
@@ -175,7 +174,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
 
         // Execute taker ask transaction
         // Taker user actions
@@ -217,7 +216,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.startPrank(takerUser);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode());
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode());
 
         {
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -290,11 +289,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             mockERC721.mint(takerUser, itemIds[0]);
 
             // Prepare the taker ask
-            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-                takerUser,
-                makerBid.maxPrice,
-                abi.encode(itemIds, amounts)
-            );
+            OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, abi.encode(itemIds, amounts));
 
             vm.prank(takerUser);
 
@@ -334,7 +329,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             // Prepare the taker ask
             OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
                 takerUser,
-                makerBid.maxPrice,
                 abi.encode(new uint256[](0), new uint256[](0))
             );
 
@@ -400,7 +394,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Prepare the taker ask
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
-            makerBid.maxPrice,
             abi.encode(new uint256[](0), new uint256[](0))
         );
 

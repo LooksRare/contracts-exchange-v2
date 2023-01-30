@@ -47,13 +47,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         _isMakerAskOrderValidWithMerkleTree(makerAsk, signature, merkleTree);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            abi.encode()
-        );
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, makerAsk.minPrice, abi.encode());
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -132,13 +126,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            abi.encode()
-        );
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(takerUser, makerAsk.minPrice, abi.encode());
 
         vm.prank(takerUser);
         vm.expectRevert(MerkleProofInvalid.selector);

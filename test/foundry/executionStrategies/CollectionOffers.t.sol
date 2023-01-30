@@ -93,42 +93,6 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyImplementation, address(strategyCollectionOffer));
     }
 
-    function testAmountsMismatch() public {
-        _setUpUsers();
-
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
-            address(mockERC1155),
-            address(weth)
-        );
-
-        uint256[] memory makerBidAmounts = new uint256[](1);
-        makerBidAmounts[0] = 1;
-        makerBid.amounts = makerBidAmounts;
-        takerAsk.additionalParameters = abi.encode(1, 2);
-
-        // Adjust strategy for collection order and sign order
-        makerBid.strategyId = 1;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        _assertOrderIsValid(makerBid, false);
-        _isMakerBidOrderValid(makerBid, signature);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-
-        // With proof
-        makerBid.strategyId = 2;
-        makerBid.additionalParameters = abi.encode(mockMerkleRoot);
-        takerAsk.additionalParameters = abi.encode(1, 2, new bytes32[](0));
-        signature = _signMakerBid(makerBid, makerUserPK);
-
-        _assertOrderIsValid(makerBid, true);
-        _isMakerBidOrderValid(makerBid, signature);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
     function testMakerBidAmountsLengthNotOne() public {
         _setUpUsers();
 
@@ -182,27 +146,6 @@ contract CollectionOrdersTest is ProtocolBase {
 
         _assertOrderIsInvalid(makerBid, false);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
-
-        vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
-    function testBidAskAmountMismatch() public {
-        _setUpUsers();
-
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
-            address(mockERC721),
-            address(weth)
-        );
-
-        makerBid.strategyId = 1;
-
-        takerAsk.additionalParameters = abi.encode(1, 2);
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        // Maker bid still valid
-        _assertOrderIsValid(makerBid, false);
-        _isMakerBidOrderValid(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -327,7 +270,7 @@ contract CollectionOrdersTest is ProtocolBase {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            abi.encode(itemIdSold, 1, proof)
+            abi.encode(itemIdSold, proof)
         );
 
         // Verify validity of maker bid order
@@ -391,7 +334,7 @@ contract CollectionOrdersTest is ProtocolBase {
         OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
             takerUser,
             makerBid.maxPrice,
-            abi.encode(itemIdSold, 1, proof)
+            abi.encode(itemIdSold, proof)
         );
 
         // Verify validity of maker bid order
@@ -420,7 +363,7 @@ contract CollectionOrdersTest is ProtocolBase {
         });
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode(5, 0));
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(takerUser, makerBid.maxPrice, abi.encode(5));
 
         // 1. Amount is 0 (without merkle proof)
         makerBid.amounts[0] = 0;
@@ -434,7 +377,6 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // 2. Amount is too high for ERC721 (without merkle proof)
         makerBid.amounts[0] = 2;
-        takerAsk.additionalParameters = abi.encode(5, 2);
         signature = _signMakerBid(makerBid, makerUserPK);
         _assertOrderIsInvalid(makerBid, false);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -447,7 +389,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.strategyId = 2;
         makerBid.additionalParameters = abi.encode(mockMerkleRoot);
         makerBid.amounts[0] = 0;
-        takerAsk.additionalParameters = abi.encode(5, 0, new bytes32[](0));
+        takerAsk.additionalParameters = abi.encode(5, new bytes32[](0));
         signature = _signMakerBid(makerBid, makerUserPK);
         _assertOrderIsInvalid(makerBid, true);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -458,7 +400,6 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // 4. Amount is too high for ERC721 (with merkle proof)
         makerBid.amounts[0] = 2;
-        takerAsk.additionalParameters = abi.encode(5, 2, new bytes32[](0));
         signature = _signMakerBid(makerBid, makerUserPK);
         _assertOrderIsInvalid(makerBid, true);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);

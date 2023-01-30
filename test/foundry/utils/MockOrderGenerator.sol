@@ -37,13 +37,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             itemId: 0
         });
 
-        newTakerBid = OrderStructs.TakerBid(
-            takerUser,
-            newMakerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        newTakerBid = OrderStructs.TakerBid(takerUser, newMakerAsk.minPrice, abi.encode());
     }
 
     function _createMockMakerBidAndTakerAsk(
@@ -109,13 +103,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             amounts: amounts
         });
 
-        newTakerBid = OrderStructs.TakerBid(
-            takerUser,
-            newMakerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        newTakerBid = OrderStructs.TakerBid(takerUser, newMakerAsk.minPrice, abi.encode());
     }
 
     function _createMockMakerBidAndTakerAskWithBundle(

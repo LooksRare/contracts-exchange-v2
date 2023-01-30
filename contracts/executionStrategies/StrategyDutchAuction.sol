@@ -42,14 +42,7 @@ contract StrategyDutchAuction is BaseStrategy {
         }
 
         for (uint256 i; i < itemIdsLength; ) {
-            uint256 amount = makerAsk.amounts[i];
-
-            _validateAmount(amount, makerAsk.assetType);
-
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) {
-                revert OrderInvalid();
-            }
-
+            _validateAmount(makerAsk.amounts[i], makerAsk.assetType);
             unchecked {
                 ++i;
             }

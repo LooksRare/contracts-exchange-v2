@@ -265,13 +265,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     {
         CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
-        if (
-            makerAsk.itemIds.length != 1 ||
-            makerAsk.amounts.length != 1 ||
-            makerAsk.amounts[0] != 1 ||
-            makerAsk.itemIds[0] != takerBid.itemIds[0] ||
-            takerBid.amounts[0] != 1
-        ) {
+        if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
             revert OrderInvalid();
         }
 
@@ -324,9 +318,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             revert WrongCurrency();
         }
 
-        (uint256 offeredItemId, uint256 offeredAmount) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
-
-        if (offeredAmount != 1 || makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
+        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
             revert OrderInvalid();
         }
 
@@ -345,10 +337,10 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             revert AskTooHigh();
         }
 
+        uint256 offeredItemId = abi.decode(takerAsk.additionalParameters, (uint256));
         itemIds = new uint256[](1);
         itemIds[0] = offeredItemId;
-        amounts = new uint256[](1);
-        amounts[0] = offeredAmount;
+        amounts = makerBid.amounts;
         isNonceInvalidated = true;
     }
 

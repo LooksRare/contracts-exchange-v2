@@ -415,6 +415,37 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testTakerAskOfferedItemIdTooLow() public {
+        _testTakerAskOfferedItemIdOutOfRange(3, 4);
+    }
+
+    function testTakerAskOfferedItemIdTooHigh() public {
+        _testTakerAskOfferedItemIdOutOfRange(11, 12);
+    }
+
+    function _testTakerAskOfferedItemIdOutOfRange(uint256 itemIdOne, uint256 itemIdTwo) private {
+        _setUpUsers();
+        _setUpNewStrategy();
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        uint256[] memory itemIds = new uint256[](2);
+        itemIds[0] = itemIdOne;
+        itemIds[1] = itemIdTwo;
+
+        takerAsk.additionalParameters = abi.encode(itemIds, _offeredAmounts({length: 2, amount: 1}));
+
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
+        _isMakerBidOrderValid(makerBid, signature);
+
+        vm.expectRevert(OrderInvalid.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function testInactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();

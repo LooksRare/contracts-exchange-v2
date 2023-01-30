@@ -43,4 +43,19 @@ abstract contract BaseStrategy is IBaseStrategy {
             }
         }
     }
+
+    /**
+     * @dev OrderInvalid_error_selector is a left-padded 4 bytes. When we return the error
+     *      selector instead of reverting, the error selector needs to be right-padded by
+     *      28 bytes. Therefore it needs to be left shifted by 28 x 8 = 224 bits.
+     */
+    function _validateAmountNoRevert(uint256 amount, uint256 assetType) internal pure {
+        assembly {
+            if or(iszero(amount), and(xor(amount, 1), iszero(assetType))) {
+                mstore(0x00, false)
+                mstore(0x20, shl(224, OrderInvalid_error_selector))
+                return(0, 0x40)
+            }
+        }
+    }
 }

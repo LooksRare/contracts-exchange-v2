@@ -10,15 +10,17 @@ import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/N
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {STRATEGY_NOT_IMPLEMENTED, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {ERC20_APPROVAL_INFERIOR_TO_PRICE, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155, STRATEGY_NOT_IMPLEMENTED} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Utils
 import {TestParameters} from "./utils/TestParameters.sol";
 import {MockLooksRareProtocol} from "./utils/MockLooksRareProtocol.sol";
 
 // Mocks
+import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC721SupportsNoInterface} from "../mock/MockERC721SupportsNoInterface.sol";
 import {MockERC1155SupportsNoInterface} from "../mock/MockERC1155SupportsNoInterface.sol";
+import {MockERC20} from "../mock/MockERC20.sol";
 
 contract OrderValidatorV2ATest is TestParameters {
     OrderValidatorV2A private validator;
@@ -105,5 +107,29 @@ contract OrderValidatorV2ATest is TestParameters {
             _EMPTY_MERKLE_TREE
         );
         assertEq(validationCodes[6], POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155);
+    }
+
+    function testMakerBidInsufficientERC20Allowance() public {
+        OrderStructs.MakerBid memory makerBid;
+        MockERC20 mockERC20 = new MockERC20();
+        makerBid.assetType = ASSET_TYPE_ERC721;
+        makerBid.collection = address(new MockERC721());
+        makerBid.signer = makerUser;
+        makerBid.currency = address(mockERC20);
+        makerBid.assetType = ASSET_TYPE_ERC721;
+        makerBid.maxPrice = 1 ether;
+
+        mockERC20.mint(makerUser, 1 ether);
+
+        vm.startPrank(makerUser);
+        mockERC20.approve(address(validator.looksRareProtocol()), makerBid.maxPrice - 1 wei);
+        vm.stopPrank();
+
+        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+            makerBid,
+            new bytes(65),
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[5], ERC20_APPROVAL_INFERIOR_TO_PRICE);
     }
 }

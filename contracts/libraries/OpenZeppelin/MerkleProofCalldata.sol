@@ -24,7 +24,9 @@ library MerkleProofCalldata {
      */
     function processProofCalldata(bytes32[] calldata proof, bytes32 leaf) internal pure returns (bytes32) {
         bytes32 computedHash = leaf;
-        for (uint256 i = 0; i < proof.length; i++) {
+        uint256 length = proof.length;
+
+        for (uint256 i = 0; i < length; i++) {
             computedHash = _hashPair(computedHash, proof[i]);
         }
         return computedHash;

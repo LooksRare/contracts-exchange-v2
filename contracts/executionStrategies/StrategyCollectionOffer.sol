@@ -48,7 +48,7 @@ contract StrategyCollectionOffer is BaseStrategy {
         amounts = makerBid.amounts;
 
         // A collection order can only be executable for 1 itemId but quantity to fill can vary
-        if (amounts.length != 1 || price != takerAsk.minPrice) {
+        if (amounts.length != 1) {
             revert OrderInvalid();
         }
 
@@ -80,7 +80,7 @@ contract StrategyCollectionOffer is BaseStrategy {
         amounts = makerBid.amounts;
 
         // A collection order can only be executable for 1 itemId but the actual quantity to fill can vary
-        if (amounts.length != 1 || price != takerAsk.minPrice) {
+        if (amounts.length != 1) {
             revert OrderInvalid();
         }
 

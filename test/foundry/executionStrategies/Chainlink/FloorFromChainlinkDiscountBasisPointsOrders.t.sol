@@ -39,9 +39,6 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
             discount: discount
         });
 
-        makerBid.maxPrice = 9.5 ether;
-        takerAsk.minPrice = 9.5 ether;
-
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         _setPriceFeed();
@@ -65,7 +62,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         });
 
         makerBid.maxPrice = 9.5 ether;
-        takerAsk.minPrice = 9.5 ether;
+        takerAsk.additionalParameters = abi.encode(42, 9.5 ether);
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 

@@ -85,14 +85,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         bytes memory signature,
         uint256 expectedValidationCode
     ) internal {
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE
-        );
-
-        uint256 index = expectedValidationCode / 100;
-        assertEq(validationCodes[index - 1], expectedValidationCode);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, _EMPTY_MERKLE_TREE, expectedValidationCode);
     }
 
     function _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
@@ -101,10 +94,28 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         OrderStructs.MerkleTree memory merkleTree,
         uint256 expectedValidationCode
     ) internal {
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(makerAsk, signature, merkleTree);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, merkleTree, expectedValidationCode);
+    }
+
+    function _doesMakerAskOrderReturnValidationCode(
+        OrderStructs.MakerAsk memory makerAsk,
+        bytes memory signature,
+        OrderStructs.MerkleTree memory merkleTree,
+        uint256 expectedValidationCode
+    ) private {
+        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
+        makerAsks[0] = makerAsk;
+
+        bytes[] memory signatures = new bytes[](1);
+        signatures[0] = signature;
+
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
+        merkleTrees[0] = merkleTree;
+
+        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerAskOrdersValidity(makerAsks, signatures, merkleTrees);
 
         uint256 index = expectedValidationCode / 100;
-        assertEq(validationCodes[index - 1], expectedValidationCode);
+        assertEq(validationCodes[0][index - 1], expectedValidationCode);
     }
 
     function _isMakerBidOrderValid(OrderStructs.MakerBid memory makerBid, bytes memory signature) internal {

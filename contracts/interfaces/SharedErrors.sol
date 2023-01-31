@@ -18,6 +18,11 @@ error BidTooLow();
 error FunctionSelectorInvalid();
 
 /**
+ * @notice It is emitted if the merkle tree proof's length is greater than tolerated.
+ */
+error MerkleProofTooLarge(uint256 length);
+
+/**
  * @notice The order is invalid. There may be an issue with the order formatting.
  */
 error OrderInvalid();

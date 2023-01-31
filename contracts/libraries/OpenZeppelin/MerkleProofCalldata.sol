@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import {MAX_PROOF_LENGTH_CALLDATA} from "../../constants/NumericConstants.sol";
+
 /**
  * @title MerkleProofCalldata
  * @notice This library is adjusted from the work of OpenZeppelin.
@@ -9,8 +11,13 @@ pragma solidity ^0.8.17;
  */
 library MerkleProofCalldata {
     /**
+     * @notice It is emitted if the merkle tree proof's length is greater than tolerated.
+     */
+    error MerkleProofTooLarge(uint256 length);
+
+    /**
      * @notice This returns true if a `leaf` can be proved to be a part of a Merkle tree defined by `root`.
-     * For this, a `proof` must be provided, containing sibling hashes on the branch from the leaf to the 
+     * For this, a `proof` must be provided, containing sibling hashes on the branch from the leaf to the
      * root of the tree. Each pair of leaves and each pair of pre-images are assumed to be sorted.
      */
     function verifyCalldata(bytes32[] calldata proof, bytes32 root, bytes32 leaf) internal pure returns (bool) {
@@ -25,6 +32,10 @@ library MerkleProofCalldata {
     function processProofCalldata(bytes32[] calldata proof, bytes32 leaf) internal pure returns (bytes32) {
         bytes32 computedHash = leaf;
         uint256 length = proof.length;
+    
+        if (length > MAX_PROOF_LENGTH_CALLDATA) {
+            revert MerkleProofTooLarge(length);
+        }
 
         for (uint256 i = 0; i < length; ) {
             computedHash = _hashPair(computedHash, proof[i]);

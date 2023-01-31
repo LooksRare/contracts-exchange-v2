@@ -8,7 +8,7 @@ import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // OpenZeppelin's library (adjusted) for verifying Merkle proofs
-import {MerkleProofCalldata} from "./libraries/OpenZeppelin/MerkleProofCalldata.sol";
+import {MerkleProofCalldataWithProofLimit} from "./libraries/OpenZeppelin/MerkleProofCalldataWithProofLimit.sol";
 
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
@@ -17,7 +17,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {WrongCaller, WrongCurrency, WrongLengths, WrongMerkleProof} from "./interfaces/SharedErrors.sol";
+import {WrongCaller, WrongCurrency, WrongLengths, MerkleProofInvalid} from "./interfaces/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
@@ -616,8 +616,8 @@ contract LooksRareProtocol is
         address signer
     ) private view {
         if (merkleTree.proof.length != 0) {
-            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
-                revert WrongMerkleProof();
+            if (!MerkleProofCalldataWithProofLimit.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
+                revert MerkleProofInvalid();
             }
             orderHash = merkleTree.hash();
         }

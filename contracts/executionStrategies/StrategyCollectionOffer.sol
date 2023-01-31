@@ -8,7 +8,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../interfaces/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
@@ -103,7 +103,7 @@ contract StrategyCollectionOffer is BaseStrategy {
 
         // Verify the merkle root for the given merkle proof
         if (!MerkleProofMemory.verify(proof, root, node)) {
-            revert WrongMerkleProof();
+            revert MerkleProofInvalid();
         }
     }
 

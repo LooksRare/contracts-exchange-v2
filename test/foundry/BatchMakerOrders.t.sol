@@ -8,17 +8,17 @@ import {Merkle} from "../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {WrongMerkleProof} from "../../contracts/interfaces/SharedErrors.sol";
+import {MerkleProofTooLarge, MerkleProofInvalid} from "../../contracts/interfaces/SharedErrors.sol";
 import {ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
-    uint256 private constant price = 1 ether; // Fixed price of sale
+    uint256 private constant price = 1.2222 ether; // Fixed price of sale
 
     function setUp() public override {
         super.setUp();
@@ -26,9 +26,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerBidMultipleOrdersSignedERC721() public {
-        Merkle m = new Merkle();
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
+
         // The test will sell itemId = numberOrders - 1
-        uint256 numberOrders = 1_000;
+        Merkle m = new Merkle();
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         for (uint256 i; i < numberOrders; i++) {
@@ -71,9 +72,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721() public {
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
+
+        // @dev The test will sell itemId = numberOrders - 1
         Merkle m = new Merkle();
-        // The test will sell itemId = numberOrders - 1
-        uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
         OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
@@ -113,9 +115,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function testTakerBidMultipleOrdersSignedERC721WrongMerkleProof() public {
+    function testTakerBidMultipleOrdersSignedERC721MerkleProofInvalid() public {
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
+
         Merkle m = new Merkle();
-        uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
         OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
 
@@ -144,14 +147,14 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongMerkleProof.selector);
-        // Execute taker bid transaction
+        vm.expectRevert(MerkleProofInvalid.selector);
         looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _EMPTY_AFFILIATE);
     }
 
-    function testTakerAskMultipleOrdersSignedERC721WrongMerkleProof() public {
+    function testTakerAskMultipleOrdersSignedERC721MerkleProofInvalid() public {
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
+
         Merkle m = new Merkle();
-        uint256 numberOrders = 1_000;
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
         OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
 
@@ -180,8 +183,77 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongMerkleProof.selector);
-        // Execute taker ask transaction
+        vm.expectRevert(MerkleProofInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _EMPTY_AFFILIATE);
+    }
+
+    function testTakerBidRevertsIfProofTooLarge() public {
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH + 1;
+
+        // The test will sell itemId = numberOrders - 1
+        Merkle m = new Merkle();
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+
+        for (uint256 i; i < numberOrders; i++) {
+            mockERC721.mint(makerUser, i);
+        }
+
+        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
+        _verifyMerkleProof(m, merkleTree, orderHashes);
+
+        // Maker signs the root
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
+
+        // Verify validity
+        // TODO
+
+        // Prepare the taker bid
+        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
+            takerUser,
+            makerAsk.minPrice,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            abi.encode()
+        );
+
+        vm.prank(takerUser);
+        vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, MAX_CALLDATA_PROOF_LENGTH + 1));
+        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _EMPTY_AFFILIATE);
+    }
+
+    function testTakerAskRevertsIfProofTooLarge() public {
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH + 1;
+
+        // @dev The test will sell itemId = numberOrders - 1
+        Merkle m = new Merkle();
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+
+        OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
+
+        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
+        _verifyMerkleProof(m, merkleTree, orderHashes);
+
+        // Maker signs the root
+        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
+
+        // Verify validity
+        // TODO
+
+        // Mint asset
+        mockERC721.mint(takerUser, numberOrders - 1);
+
+        // Prepare the taker ask
+        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
+            takerUser,
+            makerBid.maxPrice,
+            makerBid.itemIds,
+            makerBid.amounts,
+            abi.encode()
+        );
+
+        vm.prank(takerUser);
+        vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, MAX_CALLDATA_PROOF_LENGTH + 1));
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _EMPTY_AFFILIATE);
     }
 
@@ -189,7 +261,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         Merkle m,
         bytes32[] memory orderHashes
     ) private pure returns (OrderStructs.MerkleTree memory merkleTree) {
-        uint256 numberOrders = 1_000;
+        uint256 numberOrders = orderHashes.length;
         merkleTree = OrderStructs.MerkleTree({
             root: m.getRoot(orderHashes),
             proof: m.getProof(orderHashes, numberOrders - 1)
@@ -201,7 +273,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         OrderStructs.MerkleTree memory merkleTree,
         bytes32[] memory orderHashes
     ) private {
-        uint256 numberOrders = 1_000;
+        uint256 numberOrders = orderHashes.length;
 
         for (uint256 i; i < numberOrders; i++) {
             {
@@ -214,7 +286,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     function _createBatchMakerAskOrderHashes(
         bytes32[] memory orderHashes
     ) private view returns (OrderStructs.MakerAsk memory makerAsk) {
-        uint256 numberOrders = 1_000;
+        uint256 numberOrders = orderHashes.length;
 
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
@@ -238,7 +310,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     function _createBatchMakerBidOrderHashes(
         bytes32[] memory orderHashes
     ) private view returns (OrderStructs.MakerBid memory makerBid) {
-        uint256 numberOrders = 1_000;
+        uint256 numberOrders = orderHashes.length;
 
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash

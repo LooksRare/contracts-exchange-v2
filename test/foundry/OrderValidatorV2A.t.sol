@@ -25,6 +25,10 @@ import {MockERC721SupportsNoInterface} from "../mock/MockERC721SupportsNoInterfa
 import {MockERC1155SupportsNoInterface} from "../mock/MockERC1155SupportsNoInterface.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 
+/**
+ * @dev Not everything is tested in this file. Most tests live in other files
+ * with the assert functions living in ProtocolBase.t.sol.
+ */
 contract OrderValidatorV2ATest is TestParameters {
     OrderValidatorV2A private orderValidator;
 

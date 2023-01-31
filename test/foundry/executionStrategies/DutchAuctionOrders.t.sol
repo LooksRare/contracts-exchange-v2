@@ -414,7 +414,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongSelector() public {
+    function testInvalidSelector() public {
         _setUpNewStrategy();
 
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({

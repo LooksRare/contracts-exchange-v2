@@ -493,7 +493,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongSelector() public {
+    function testInvalidSelector() public {
         _setUpNewStrategy();
 
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({

@@ -14,7 +14,7 @@ import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/N
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {ERC20_APPROVAL_INFERIOR_TO_PRICE, ERC721_ITEM_ID_NOT_IN_BALANCE, ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT, MAKER_ORDER_INVALID_STANDARD_SALE, MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155, STRATEGY_NOT_IMPLEMENTED, TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {ERC20_APPROVAL_INFERIOR_TO_PRICE, ERC721_ITEM_ID_NOT_IN_BALANCE, ERC1155_BALANCE_OF_DOES_NOT_EXIST, ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT, MAKER_ORDER_INVALID_STANDARD_SALE, MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721, POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155, STRATEGY_NOT_IMPLEMENTED, TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Utils
 import {TestParameters} from "./utils/TestParameters.sol";
@@ -24,6 +24,7 @@ import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
 import {MockERC1155WithoutBalanceOfBatch} from "../mock/MockERC1155WithoutBalanceOfBatch.sol";
+import {MockERC1155WithoutAnyBalanceOf} from "../mock/MockERC1155WithoutAnyBalanceOf.sol";
 import {MockERC721SupportsNoInterface} from "../mock/MockERC721SupportsNoInterface.sol";
 import {MockERC1155SupportsNoInterface} from "../mock/MockERC1155SupportsNoInterface.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
@@ -290,5 +291,27 @@ contract OrderValidatorV2ATest is TestParameters {
             _EMPTY_MERKLE_TREE
         );
         assertEq(validationCodes[5], ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT);
+    }
+
+    function testMakerAskERC1155BalanceOfDoesNotExist() public {
+        MockERC1155WithoutAnyBalanceOf mockERC1155 = new MockERC1155WithoutAnyBalanceOf();
+
+        OrderStructs.MakerAsk memory makerAsk;
+        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.collection = address(mockERC1155);
+        makerAsk.signer = makerUser;
+        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        uint256[] memory itemIds = new uint256[](1);
+        makerAsk.itemIds = itemIds;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+        makerAsk.amounts = amounts;
+
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+            makerAsk,
+            new bytes(65),
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[5], ERC1155_BALANCE_OF_DOES_NOT_EXIST);
     }
 }

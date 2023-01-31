@@ -26,25 +26,25 @@ import {MockERC1155SupportsNoInterface} from "../mock/MockERC1155SupportsNoInter
 import {MockERC20} from "../mock/MockERC20.sol";
 
 contract OrderValidatorV2ATest is TestParameters {
-    OrderValidatorV2A private validator;
+    OrderValidatorV2A private orderValidator;
 
     function setUp() public {
-        validator = new OrderValidatorV2A(address(new MockLooksRareProtocol()));
+        orderValidator = new OrderValidatorV2A(address(new MockLooksRareProtocol()));
     }
 
     function testDeriveProtocolParameters() public {
-        validator.deriveProtocolParameters();
-        assertEq(address(validator.royaltyFeeRegistry()), 0x037FC82298142374d974839236D2e2dF6B5BdD8F);
-        assertEq(validator.domainSeparator(), bytes32("420"));
+        orderValidator.deriveProtocolParameters();
+        assertEq(address(orderValidator.royaltyFeeRegistry()), 0x037FC82298142374d974839236D2e2dF6B5BdD8F);
+        assertEq(orderValidator.domainSeparator(), bytes32("420"));
         // Just need to make sure it's not 0, hence copying the address from log.
-        assertEq(address(validator.creatorFeeManager()), 0x566B72091192CCd7013AdF77E2a1b349564acC21);
-        assertEq(validator.maxCreatorFeeBp(), 69);
+        assertEq(address(orderValidator.creatorFeeManager()), 0x566B72091192CCd7013AdF77E2a1b349564acC21);
+        assertEq(orderValidator.maxCreatorFeeBp(), 69);
     }
 
     function testCheckMakerAskOrderValidityStrategyNotImplemented() public {
         OrderStructs.MakerAsk memory makerAsk;
         makerAsk.strategyId = 1;
-        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -56,7 +56,7 @@ contract OrderValidatorV2ATest is TestParameters {
         OrderStructs.MakerBid memory makerBid;
         makerBid.currency = address(1); // it cannot be 0
         makerBid.strategyId = 1;
-        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -71,9 +71,9 @@ contract OrderValidatorV2ATest is TestParameters {
         makerAsk.collection = address(new MockERC721());
 
         address[] memory operators = new address[](1);
-        operators[0] = address(validator.looksRareProtocol());
+        operators[0] = address(orderValidator.looksRareProtocol());
 
-        TransferManager transferManager = validator.transferManager();
+        TransferManager transferManager = orderValidator.transferManager();
 
         transferManager.whitelistOperator(operators[0]);
 
@@ -82,7 +82,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
         transferManager.removeOperator(operators[0]);
 
-        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -94,7 +94,7 @@ contract OrderValidatorV2ATest is TestParameters {
         OrderStructs.MakerAsk memory makerAsk;
         makerAsk.assetType = ASSET_TYPE_ERC721;
         makerAsk.collection = address(new MockERC721SupportsNoInterface());
-        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -106,7 +106,7 @@ contract OrderValidatorV2ATest is TestParameters {
         OrderStructs.MakerBid memory makerBid;
         makerBid.assetType = ASSET_TYPE_ERC721;
         makerBid.collection = address(new MockERC721SupportsNoInterface());
-        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -132,7 +132,7 @@ contract OrderValidatorV2ATest is TestParameters {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
         makerBid.amounts = amounts;
-        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -146,7 +146,7 @@ contract OrderValidatorV2ATest is TestParameters {
         makerBid.signer = address(this);
         makerBid.assetType = ASSET_TYPE_ERC721;
         makerBid.collection = address(new MockERC721());
-        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -158,7 +158,7 @@ contract OrderValidatorV2ATest is TestParameters {
         OrderStructs.MakerAsk memory makerAsk;
         makerAsk.assetType = ASSET_TYPE_ERC1155;
         makerAsk.collection = address(new MockERC1155SupportsNoInterface());
-        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -170,7 +170,7 @@ contract OrderValidatorV2ATest is TestParameters {
         OrderStructs.MakerBid memory makerBid;
         makerBid.assetType = ASSET_TYPE_ERC1155;
         makerBid.collection = address(new MockERC1155SupportsNoInterface());
-        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -191,10 +191,10 @@ contract OrderValidatorV2ATest is TestParameters {
         mockERC20.mint(makerUser, 1 ether);
 
         vm.startPrank(makerUser);
-        mockERC20.approve(address(validator.looksRareProtocol()), makerBid.maxPrice - 1 wei);
+        mockERC20.approve(address(orderValidator.looksRareProtocol()), makerBid.maxPrice - 1 wei);
         vm.stopPrank();
 
-        uint256[9] memory validationCodes = validator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -213,7 +213,7 @@ contract OrderValidatorV2ATest is TestParameters {
         uint256[] memory itemIds = new uint256[](1);
         makerAsk.itemIds = itemIds;
 
-        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -244,7 +244,7 @@ contract OrderValidatorV2ATest is TestParameters {
         amounts[0] = 1;
         makerAsk.amounts = amounts;
 
-        uint256[9] memory validationCodes = validator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE

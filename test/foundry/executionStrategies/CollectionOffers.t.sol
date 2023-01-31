@@ -455,7 +455,7 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongAmounts() public {
+    function testInvalidAmounts() public {
         _setUpUsers();
 
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({

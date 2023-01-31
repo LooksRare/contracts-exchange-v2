@@ -373,7 +373,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongAmounts() public {
+    function testInvalidAmounts() public {
         _setUpUsers();
         _setUpNewStrategy();
 

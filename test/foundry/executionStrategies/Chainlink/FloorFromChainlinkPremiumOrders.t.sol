@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
-import {WrongCurrency} from "../../../../contracts/errors/SharedErrors.sol";
+import {CurrencyInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Shared errors
 import {BidTooLow, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
@@ -226,7 +226,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumWrongCurrency() public {
+    function testFloorFromChainlinkPremiumCurrencyInvalid() public {
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -241,7 +241,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, WrongCurrency.selector);
+        assertEq(errorSelector, CurrencyInvalid.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);

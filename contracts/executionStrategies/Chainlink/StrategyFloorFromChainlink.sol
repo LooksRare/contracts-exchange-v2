@@ -9,7 +9,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 
 // Shared errors
-import {AskTooHigh, BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../errors/SharedErrors.sol";
+import {AskTooHigh, BidTooLow, OrderInvalid, CurrencyInvalid, WrongFunctionSelector} from "../../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -169,7 +169,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
 
         if (makerAsk.currency != address(0)) {
             if (makerAsk.currency != WETH) {
-                return (isValid, WrongCurrency.selector);
+                return (isValid, CurrencyInvalid.selector);
             }
         }
 
@@ -218,7 +218,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         }
 
         if (makerBid.currency != WETH) {
-            return (isValid, WrongCurrency.selector);
+            return (isValid, CurrencyInvalid.selector);
         }
 
         if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
@@ -336,7 +336,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
         if (makerBid.currency != WETH) {
-            revert WrongCurrency();
+            revert CurrencyInvalid();
         }
 
         if (

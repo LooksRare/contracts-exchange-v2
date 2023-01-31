@@ -47,7 +47,7 @@ error WrongCaller();
 /**
  * @notice The currency is invalid.
  */
-error WrongCurrency();
+error CurrencyInvalid();
 
 /**
  * @notice The function selector is not implemented.

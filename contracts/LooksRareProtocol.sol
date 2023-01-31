@@ -17,7 +17,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {WrongCaller, WrongCurrency, WrongLengths, MerkleProofInvalid} from "./errors/SharedErrors.sol";
+import {WrongCaller, CurrencyInvalid, WrongLengths, MerkleProofInvalid} from "./errors/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
@@ -129,7 +129,7 @@ contract LooksRareProtocol is
 
         // Verify whether the currency is whitelisted but is not ETH (address(0))
         if (!isCurrencyWhitelisted[currency] || currency == address(0)) {
-            revert WrongCurrency();
+            revert CurrencyInvalid();
         }
 
         address signer = makerBid.signer;
@@ -157,7 +157,7 @@ contract LooksRareProtocol is
 
         // Verify whether the currency is whitelisted
         if (!isCurrencyWhitelisted[currency]) {
-            revert WrongCurrency();
+            revert CurrencyInvalid();
         }
 
         bytes32 orderHash = makerAsk.hash();
@@ -195,7 +195,7 @@ contract LooksRareProtocol is
         // Verify whether the currency at array = 0 is whitelisted
         address currency = makerAsks[0].currency;
         if (!isCurrencyWhitelisted[currency]) {
-            revert WrongCurrency();
+            revert CurrencyInvalid();
         }
 
         {
@@ -211,7 +211,7 @@ contract LooksRareProtocol is
                     // Verify currency is the same
                     if (i != 0) {
                         if (makerAsk.currency != currency) {
-                            revert WrongCurrency();
+                            revert CurrencyInvalid();
                         }
                     }
 
@@ -236,7 +236,7 @@ contract LooksRareProtocol is
                     // Verify currency is the same
                     if (i != 0) {
                         if (makerAsk.currency != currency) {
-                            revert WrongCurrency();
+                            revert CurrencyInvalid();
                         }
                     }
 

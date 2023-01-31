@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 // Assembly
-import {WrongCurrency_error_selector, WrongCurrency_error_length, Error_selector_offset} from "../constants/StrategyConstants.sol";
+import {CurrencyInvalid_error_selector, CurrencyInvalid_error_length, Error_selector_offset} from "../constants/StrategyConstants.sol";
 
 /**
  * @title CurrencyValidator
@@ -15,7 +15,7 @@ library CurrencyValidator {
      * @dev This is equivalent to
      *      if (orderCurrency != address(0)) {
      *          if (orderCurrency != allowedCurrency) {
-     *              revert WrongCurrency();
+     *              revert CurrencyInvalid();
      *          }
      *      }
      *
@@ -26,8 +26,8 @@ library CurrencyValidator {
     function allowNativeOrAllowedCurrency(address orderCurrency, address allowedCurrency) internal pure {
         assembly {
             if mul(orderCurrency, iszero(eq(orderCurrency, allowedCurrency))) {
-                mstore(0x00, WrongCurrency_error_selector)
-                revert(Error_selector_offset, WrongCurrency_error_length)
+                mstore(0x00, CurrencyInvalid_error_selector)
+                revert(Error_selector_offset, CurrencyInvalid_error_length)
             }
         }
     }

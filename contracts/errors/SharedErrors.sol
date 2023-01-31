@@ -37,7 +37,7 @@ error OrderInvalid();
  * @notice The asset type is not 0 (ERC721), nor 1 (ERC1155).
  * @param assetType Asset type
  */
-error WrongAssetType(uint256 assetType);
+error AssetTypeInvalid(uint256 assetType);
 
 /**
  * @notice The function cannot be called by the sender.

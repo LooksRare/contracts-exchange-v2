@@ -252,7 +252,7 @@ contract OrderValidatorV2A {
             itemIds,
             amounts
         );
-        validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerAsk.collection, makerAsk.assetType);
+        validationCodes[6] = _checkIfPotentialInvalidAssetTypes(makerAsk.collection, makerAsk.assetType);
         validationCodes[7] = _checkValidityTransferManagerApprovals(makerAsk.signer);
         validationCodes[8] = _checkValidityCreatorFee(makerAsk.collection, price, itemIds);
     }
@@ -299,7 +299,7 @@ contract OrderValidatorV2A {
         validationCodes[3] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
         validationCodes[4] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
         validationCodes[5] = _checkValidityMakerBidERC20Assets(makerBid.currency, makerBid.signer, price);
-        validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
+        validationCodes[6] = _checkIfPotentialInvalidAssetTypes(makerBid.collection, makerBid.assetType);
         validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID; // TransferManager NFT-related
         validationCodes[8] = _checkValidityCreatorFee(makerBid.collection, price, itemIds);
     }
@@ -502,7 +502,7 @@ contract OrderValidatorV2A {
      *      (i.e. assets that are tradable but do not implement the proper interfaceId).
      *      If ERC165 is not implemented, it will revert.
      */
-    function _checkIfPotentialWrongAssetTypes(
+    function _checkIfPotentialInvalidAssetTypes(
         address collection,
         uint256 assetType
     ) internal view returns (uint256 validationCode) {

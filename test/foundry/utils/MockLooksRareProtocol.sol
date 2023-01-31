@@ -9,7 +9,7 @@ import "../../../contracts/TransferManager.sol";
 import {MockRoyaltyFeeRegistry} from "../../mock/MockRoyaltyFeeRegistry.sol";
 
 /**
- * @dev Tha main purpose of having a mock LooksRareProtocol is to be able to return
+ * @dev The main purpose of having a mock LooksRareProtocol is to be able to return
  *      an invalid strategy with implementation/selector being 0 for strategyId > 0.
  *      If we were to use the real one, we wouldn't be able to do so because addStrategy
  *      does not allow the value 0 for implementation/selector.

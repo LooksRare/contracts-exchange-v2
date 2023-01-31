@@ -102,31 +102,19 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
 
     /**
      * @notice This function transfers items across an array of collections that can be both ERC721 and ERC1155.
-     * @param collections Array of collection addresses
-     * @param assetTypes Array of asset types
+     * @param items Array of BatchTransferItem
      * @param from Sender address
      * @param to Recipient address
-     * @param itemIds Array of array of itemIds
-     * @param amounts Array of array of amounts
      * @dev If assetType for ERC721 is used, amounts aren't used.
      */
     function transferBatchItemsAcrossCollections(
-        address[] calldata collections,
-        uint256[] calldata assetTypes,
+        BatchTransferItem[] calldata items,
         address from,
-        address to,
-        uint256[][] calldata itemIds,
-        uint256[][] calldata amounts
+        address to
     ) external {
-        uint256 collectionsLength = collections.length;
+        uint256 itemsLength = items.length;
 
-        if (
-            collectionsLength == 0 ||
-            (assetTypes.length ^ collectionsLength) |
-                (itemIds.length ^ collectionsLength) |
-                (amounts.length ^ collectionsLength) !=
-            0
-        ) {
+        if (itemsLength == 0) {
             revert WrongLengths();
         }
 
@@ -134,22 +122,22 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             _isOperatorValidForTransfer(from, msg.sender);
         }
 
-        for (uint256 i; i < collectionsLength; ) {
-            uint256 itemIdsLengthForSingleCollection = itemIds[i].length;
-            if (itemIdsLengthForSingleCollection == 0 || amounts[i].length != itemIdsLengthForSingleCollection) {
+        for (uint256 i; i < itemsLength; ) {
+            uint256 itemIdsLengthForSingleCollection = items[i].itemIds.length;
+            if (itemIdsLengthForSingleCollection == 0 || items[i].amounts.length != itemIdsLengthForSingleCollection) {
                 revert WrongLengths();
             }
 
-            uint256 assetType = assetTypes[i];
+            uint256 assetType = items[i].assetType;
             if (assetType == ASSET_TYPE_ERC721) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
-                    _executeERC721TransferFrom(collections[i], from, to, itemIds[i][j]);
+                    _executeERC721TransferFrom(items[i].collection, from, to, items[i].itemIds[j]);
                     unchecked {
                         ++j;
                     }
                 }
             } else if (assetType == ASSET_TYPE_ERC1155) {
-                _executeERC1155SafeBatchTransferFrom(collections[i], from, to, itemIds[i], amounts[i]);
+                _executeERC1155SafeBatchTransferFrom(items[i].collection, from, to, items[i].itemIds, items[i].amounts);
             } else {
                 revert WrongAssetType(assetType);
             }

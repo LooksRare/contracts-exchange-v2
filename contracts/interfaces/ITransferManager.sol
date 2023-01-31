@@ -7,6 +7,20 @@ pragma solidity ^0.8.17;
  */
 interface ITransferManager {
     /**
+     * @dev Struct only used for transferBatchItemsAcrossCollections
+     * @param collection Collection address
+     * @param assetType 0 for ERC721, 1 for ERC1155
+     * @param itemids Array of item IDs to be transferred
+     * @param amounts Array of transfer amounts
+     */
+    struct BatchTransferItem {
+        address collection;
+        uint256 assetType;
+        uint256[] itemIds;
+        uint256[] amounts;
+    }
+
+    /**
      * @notice It is emitted if new operators are added to the user's whitelist.
      * @param user Address of the user
      * @param operators Array of operator addresses

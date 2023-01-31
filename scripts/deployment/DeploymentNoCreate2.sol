@@ -10,7 +10,7 @@ import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 contract DeploymentNoCreate2 is Test {
     // Custom errors
     error NoRegistryAddressSet();
-    error WrongChainId(uint256 chainId);
+    error ChainIdInvalid(uint256 chainId);
 
     // Contracts
     TransferManager public transferManager;
@@ -31,7 +31,7 @@ contract DeploymentNoCreate2 is Test {
         } else if (chainId == 5) {
             weth = 0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6;
         } else {
-            revert WrongChainId(chainId);
+            revert ChainIdInvalid(chainId);
         }
 
         vm.startBroadcast();

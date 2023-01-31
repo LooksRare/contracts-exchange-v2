@@ -339,7 +339,7 @@ contract LooksRareProtocol is
                 userSubsetNonce[signer][makerBid.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) {
-                revert WrongNonces();
+                revert NoncesInvalid();
             }
         }
 
@@ -405,7 +405,7 @@ contract LooksRareProtocol is
                 userSubsetNonce[signer][makerAsk.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) {
-                revert WrongNonces();
+                revert NoncesInvalid();
             }
         }
 
@@ -596,7 +596,7 @@ contract LooksRareProtocol is
                 makerSignature
             );
         } else {
-            revert WrongChainId();
+            revert ChainIdInvalid();
         }
     }
 

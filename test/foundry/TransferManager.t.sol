@@ -10,7 +10,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Core contracts
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {ITransferManager, TransferManager} from "../../contracts/TransferManager.sol";
-import {WrongAssetType, WrongLengths} from "../../contracts/errors/SharedErrors.sol";
+import {WrongAssetType, LengthsInvalid} from "../../contracts/errors/SharedErrors.sol";
 
 // Mocks and other utils
 import {MockERC721} from "../mock/MockERC721.sol";
@@ -269,7 +269,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
         ITransferManager.BatchTransferItem[] memory items = new ITransferManager.BatchTransferItem[](0);
 
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         vm.prank(_transferrer);
         transferManager.transferBatchItemsAcrossCollections(items, _sender, _recipient);
     }
@@ -341,7 +341,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         }
 
         vm.prank(_transferrer);
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         transferManager.transferBatchItemsAcrossCollections(items, _sender, _recipient);
     }
 
@@ -467,7 +467,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256[] memory emptyArrayUint256 = new uint256[](0);
 
         // 1. ERC721
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         transferManager.transferItemsERC721(
             address(mockERC721),
             _sender,
@@ -477,7 +477,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         );
 
         // 2. ERC1155 length is 0
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         transferManager.transferItemsERC1155(
             address(mockERC1155),
             _sender,
@@ -491,7 +491,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         uint256[] memory itemIds = new uint256[](2);
         uint256[] memory amounts = new uint256[](3);
 
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
     }
 
@@ -499,11 +499,11 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         address[] memory emptyArrayAddresses = new address[](0);
 
         // 1. Grant approvals
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         transferManager.grantApprovals(emptyArrayAddresses);
 
         // 2. Revoke approvals
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         transferManager.revokeApprovals(emptyArrayAddresses);
     }
 

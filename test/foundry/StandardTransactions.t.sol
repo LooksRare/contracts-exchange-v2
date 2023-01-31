@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 // Libraries, interfaces, errors
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {WrongLengths} from "../../contracts/errors/SharedErrors.sol";
+import {LengthsInvalid} from "../../contracts/errors/SharedErrors.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -484,7 +484,7 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(address(looksRareProtocol).balance, 1);
     }
 
-    function testThreeTakerBidsERC721WrongLengths() public {
+    function testThreeTakerBidsERC721LengthsInvalid() public {
         _setUpUsers();
 
         uint256 price = 1.12121111111 ether;
@@ -497,7 +497,7 @@ contract StandardTransactionsTest is ProtocolBase {
         // 1. Wrong maker asks length
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases - 1);
 
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
             takerBids,
@@ -512,7 +512,7 @@ contract StandardTransactionsTest is ProtocolBase {
         makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         signatures = new bytes[](numberPurchases - 1);
 
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
             takerBids,
@@ -527,7 +527,7 @@ contract StandardTransactionsTest is ProtocolBase {
         signatures = new bytes[](numberPurchases);
         merkleTrees = new OrderStructs.MerkleTree[](numberPurchases - 1);
 
-        vm.expectRevert(WrongLengths.selector);
+        vm.expectRevert(LengthsInvalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
             takerBids,

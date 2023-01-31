@@ -17,7 +17,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {WrongCaller, CurrencyInvalid, WrongLengths, MerkleProofInvalid} from "./errors/SharedErrors.sol";
+import {WrongCaller, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid} from "./errors/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
@@ -189,7 +189,7 @@ contract LooksRareProtocol is
             length == 0 ||
             (makerAsks.length ^ length) | (makerSignatures.length ^ length) | (merkleTrees.length ^ length) != 0
         ) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         // Verify whether the currency at array = 0 is whitelisted

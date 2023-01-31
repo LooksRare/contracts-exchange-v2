@@ -57,4 +57,4 @@ error WrongFunctionSelector();
 /**
  * @notice There is either a mismatch or an error in the length of the array(s).
  */
-error WrongLengths();
+error LengthsInvalid();

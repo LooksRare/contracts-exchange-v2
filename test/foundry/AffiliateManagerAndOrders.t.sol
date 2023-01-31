@@ -120,7 +120,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -192,7 +192,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
             // Verify validity of maker ask order
-            _isMakerAskOrderValid(makerAsks[i], signatures[i]);
+            _assertValidMakerAskOrder(makerAsks[i], signatures[i]);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }
@@ -283,7 +283,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Verify validity of maker bid order
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);

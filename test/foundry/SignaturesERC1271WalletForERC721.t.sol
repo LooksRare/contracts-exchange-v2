@@ -47,7 +47,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         transferManager.grantApprovals(operators);
         vm.stopPrank();
 
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
@@ -119,7 +119,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         vm.prank(address(wallet));
         weth.approve(address(looksRareProtocol), price);
 
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);

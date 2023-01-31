@@ -182,7 +182,7 @@ contract CollectionOrdersTest is ProtocolBase {
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode(tokenId, 1));
 
         _assertOrderIsValid(makerBid, false);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -245,7 +245,7 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // Verify validity of maker bid order
         _assertOrderIsValid(makerBid, true);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -305,7 +305,7 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // Verify validity of maker bid order
         _assertOrderIsValid(makerBid, true);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         vm.prank(takerUser);
         vm.expectRevert(MerkleProofInvalid.selector);

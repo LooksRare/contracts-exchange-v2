@@ -494,7 +494,7 @@ contract StandardTransactionsTest is ProtocolBase {
         bytes[] memory signatures = new bytes[](numberPurchases);
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-        // 1. Wrong maker asks length
+        // 1. Invalid maker asks length
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases - 1);
 
         vm.expectRevert(LengthsInvalid.selector);
@@ -508,7 +508,7 @@ contract StandardTransactionsTest is ProtocolBase {
             false
         );
 
-        // 2. Wrong signatures length
+        // 2. Invalid signatures length
         makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
         signatures = new bytes[](numberPurchases - 1);
 
@@ -523,7 +523,7 @@ contract StandardTransactionsTest is ProtocolBase {
             false
         );
 
-        // 3. Wrong merkle trees length
+        // 3. Invalid merkle trees length
         signatures = new bytes[](numberPurchases);
         merkleTrees = new OrderStructs.MerkleTree[](numberPurchases - 1);
 

@@ -140,7 +140,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             }
         }
 
-        // If no root is provided or wrong length, it should be invalid.
+        // If no root is provided or invalid length, it should be invalid.
         // @dev It does not mean the merkle root is valid against a specific itemId that exists in the collection.
         if (
             functionSelector == StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&

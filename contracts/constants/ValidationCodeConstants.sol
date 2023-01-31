@@ -14,23 +14,23 @@ uint256 constant STRATEGY_NOT_ACTIVE = 114;
 // 2. Maker order struct-related errors
 uint256 constant MAKER_ORDER_INVALID_STANDARD_SALE = 201;
 uint256 constant MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE = 211; // The order cannot become valid again
-uint256 constant MAKER_ORDER_WRONG_CURRENCY_NON_STANDARD_SALE = 212; // The order cannot become valid again due to wrong currency
+uint256 constant MAKER_ORDER_INVALID_CURRENCY_NON_STANDARD_SALE = 212; // The order cannot become valid again due to invalid currency
 uint256 constant MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE = 213; // The order can potentially become valid again
 
 // 3. Nonce-related errors
 uint256 constant USER_SUBSET_NONCE_CANCELLED = 301;
 uint256 constant USER_ORDER_NONCE_EXECUTED_OR_CANCELLED = 311;
 uint256 constant USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH = 312;
-uint256 constant WRONG_USER_GLOBAL_BID_NONCE = 321;
-uint256 constant WRONG_USER_GLOBAL_ASK_NONCE = 322;
+uint256 constant INVALID_USER_GLOBAL_BID_NONCE = 321;
+uint256 constant INVALID_USER_GLOBAL_ASK_NONCE = 322;
 
 // 4. Errors related to signatures (EOA, EIP-1271) and Merkle Tree computations
 uint256 constant ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE = 401;
-uint256 constant WRONG_SIGNATURE_LENGTH = 411;
+uint256 constant INVALID_SIGNATURE_LENGTH = 411;
 uint256 constant INVALID_S_PARAMETER_EOA = 412;
 uint256 constant INVALID_V_PARAMETER_EOA = 413;
 uint256 constant NULL_SIGNER_EOA = 414;
-uint256 constant WRONG_SIGNER_EOA = 415;
+uint256 constant INVALID_SIGNER_EOA = 415;
 uint256 constant MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271 = 421;
 uint256 constant SIGNATURE_INVALID_EIP1271 = 422;
 
@@ -52,8 +52,8 @@ uint256 constant ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST = 633;
 uint256 constant ERC1155_NO_APPROVAL_FOR_ALL = 634;
 
 // 7. Asset-type suggestion
-uint256 constant POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721 = 701;
-uint256 constant POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155 = 702;
+uint256 constant POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721 = 701;
+uint256 constant POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155 = 702;
 uint256 constant ASSET_TYPE_NOT_SUPPORTED = 711;
 
 // 8. Transfer manager-related

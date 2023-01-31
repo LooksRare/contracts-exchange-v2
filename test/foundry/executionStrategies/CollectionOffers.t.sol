@@ -395,7 +395,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function testTakerAskCannotExecuteWithWrongProof(uint256 itemIdSold) public {
+    function testTakerAskCannotExecuteWithInvalidProof(uint256 itemIdSold) public {
         vm.assume(itemIdSold > 5);
         _setUpUsers();
 

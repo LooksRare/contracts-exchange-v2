@@ -33,7 +33,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC20 = new MockERC20();
     }
 
-    function testCannotTradeIfWrongAmounts() public {
+    function testCannotTradeIfInvalidAmounts() public {
         _setUpUsers();
         uint256 itemId = 0;
 

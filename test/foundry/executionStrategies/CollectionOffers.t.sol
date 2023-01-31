@@ -8,7 +8,7 @@ import {Merkle} from "../../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, WrongMerkleProof} from "../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -451,7 +451,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _isMakerBidOrderValid(makerBid, signature);
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongMerkleProof.selector);
+        vm.expectRevert(MerkleProofInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 

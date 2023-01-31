@@ -7,8 +7,6 @@ import {ERC1155} from "solmate/src/tokens/ERC1155.sol";
 import {IERC2981} from "@looksrare/contracts-libs/contracts/interfaces/generic/IERC2981.sol";
 
 contract MockERC1155 is ERC1155 {
-    bool private revertBalanceOfBatch;
-
     function batchMint(address to, uint256[] memory tokenIds, uint256[] memory amounts) public {
         _batchMint(to, tokenIds, amounts, "");
     }
@@ -19,21 +17,6 @@ contract MockERC1155 is ERC1155 {
 
     function uri(uint256) public pure override returns (string memory) {
         return "uri";
-    }
-
-    function balanceOfBatch(
-        address[] calldata owners,
-        uint256[] calldata ids
-    ) public view override returns (uint256[] memory) {
-        if (revertBalanceOfBatch) {
-            revert("revertBalanceOfBatch");
-        } else {
-            return super.balanceOfBatch(owners, ids);
-        }
-    }
-
-    function setRevertBalanceOfBatch(bool _revertBalanceOfBatch) external {
-        revertBalanceOfBatch = _revertBalanceOfBatch;
     }
 
     function royaltyInfo(uint256, uint256) external pure returns (address, uint256) {

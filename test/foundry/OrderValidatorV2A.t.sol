@@ -21,6 +21,7 @@ import {MockLooksRareProtocol} from "./utils/MockLooksRareProtocol.sol";
 // Mocks
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
+import {MockERC1155WithoutBalanceOfBatch} from "../mock/MockERC1155WithoutBalanceOfBatch.sol";
 import {MockERC721SupportsNoInterface} from "../mock/MockERC721SupportsNoInterface.sol";
 import {MockERC1155SupportsNoInterface} from "../mock/MockERC1155SupportsNoInterface.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
@@ -234,12 +235,18 @@ contract OrderValidatorV2ATest is TestParameters {
     }
 
     function _testMakerAskERC1155BalanceInferiorToAmount(bool revertBalanceOfBatch) public {
-        MockERC1155 mockERC1155 = new MockERC1155();
-        mockERC1155.setRevertBalanceOfBatch(revertBalanceOfBatch);
+        address collection;
+        if (revertBalanceOfBatch) {
+            MockERC1155WithoutBalanceOfBatch mockERC1155 = new MockERC1155WithoutBalanceOfBatch();
+            collection = address(mockERC1155);
+        } else {
+            MockERC1155 mockERC1155 = new MockERC1155();
+            collection = address(mockERC1155);
+        }
 
         OrderStructs.MakerAsk memory makerAsk;
         makerAsk.assetType = ASSET_TYPE_ERC1155;
-        makerAsk.collection = address(mockERC1155);
+        makerAsk.collection = collection;
         makerAsk.signer = makerUser;
         makerAsk.assetType = ASSET_TYPE_ERC1155;
         uint256[] memory itemIds = new uint256[](1);

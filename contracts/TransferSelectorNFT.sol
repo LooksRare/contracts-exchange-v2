@@ -10,7 +10,7 @@ import {TransferManager} from "./TransferManager.sol";
 import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
 
 // Shared errors
-import {WrongAssetType} from "./interfaces/SharedErrors.sol";
+import {WrongAssetType} from "./errors/SharedErrors.sol";
 
 // Constants
 import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";

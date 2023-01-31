@@ -9,7 +9,7 @@ import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";

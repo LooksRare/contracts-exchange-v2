@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 // Libraries, interfaces, errors
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
+import {WrongLengths} from "../../contracts/errors/SharedErrors.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";

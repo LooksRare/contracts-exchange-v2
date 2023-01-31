@@ -8,7 +8,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";

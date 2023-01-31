@@ -11,7 +11,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Shared errors
-import {OrderInvalid, WrongCaller, WrongCurrency} from "../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongCaller, WrongCurrency} from "../../contracts/errors/SharedErrors.sol";
 import {CURRENCY_NOT_WHITELISTED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Other mocks and utils

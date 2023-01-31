@@ -8,7 +8,7 @@ import {Merkle} from "../../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies

@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 // Interfaces and errors
 import {INonceManager} from "./interfaces/INonceManager.sol";
-import {WrongLengths} from "./interfaces/SharedErrors.sol";
+import {WrongLengths} from "./errors/SharedErrors.sol";
 
 /**
  * @title NonceManager

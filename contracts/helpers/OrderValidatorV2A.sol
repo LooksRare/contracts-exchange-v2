@@ -17,7 +17,7 @@ import {ICreatorFeeManager} from "../interfaces/ICreatorFeeManager.sol";
 import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 
 // Shared errors
-import {OrderInvalid} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../errors/SharedErrors.sol";
 
 // Other dependencies
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";

@@ -3,10 +3,10 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
-import {WrongCurrency} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {WrongCurrency} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Strategies
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";

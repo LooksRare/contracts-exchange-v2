@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Custom errors
-import {OrderInvalid} from "../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../../../contracts/errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";

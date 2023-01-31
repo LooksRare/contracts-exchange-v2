@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid} from "./interfaces/SharedErrors.sol";
+import {OrderInvalid} from "./errors/SharedErrors.sol";
 
 // Assembly
 import {OrderInvalid_error_selector, OrderInvalid_error_length, Error_selector_offset, OneWord} from "./constants/StrategyConstants.sol";

@@ -8,7 +8,7 @@ import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLe
 
 // Interfaces and errors
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {WrongAssetType, WrongLengths} from "./interfaces/SharedErrors.sol";
+import {WrongAssetType, WrongLengths} from "./errors/SharedErrors.sol";
 
 // Constants
 import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";

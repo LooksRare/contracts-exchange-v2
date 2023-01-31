@@ -10,7 +10,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Core contracts
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {ITransferManager, TransferManager} from "../../contracts/TransferManager.sol";
-import {WrongAssetType, WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
+import {WrongAssetType, WrongLengths} from "../../contracts/errors/SharedErrors.sol";
 
 // Mocks and other utils
 import {MockERC721} from "../mock/MockERC721.sol";

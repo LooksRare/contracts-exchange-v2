@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {INonceManager} from "../../contracts/interfaces/INonceManager.sol";
-import {WrongLengths} from "../../contracts/interfaces/SharedErrors.sol";
+import {WrongLengths} from "../../contracts/errors/SharedErrors.sol";
 import {WRONG_USER_GLOBAL_BID_NONCE, WRONG_USER_GLOBAL_ASK_NONCE, USER_SUBSET_NONCE_CANCELLED, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Other utils and tests

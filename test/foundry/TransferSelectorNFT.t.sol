@@ -12,7 +12,7 @@ import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelector
 
 // Errors
 import {ASSET_TYPE_NOT_SUPPORTED} from "../../contracts/constants/ValidationCodeConstants.sol";
-import {WrongAssetType} from "../../contracts/interfaces/SharedErrors.sol";
+import {WrongAssetType} from "../../contracts/errors/SharedErrors.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";

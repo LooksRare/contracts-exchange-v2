@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionMana
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Strategies
 import {StrategyUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyUSDDynamicAsk.sol";

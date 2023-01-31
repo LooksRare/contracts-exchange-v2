@@ -9,7 +9,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {WrongFunctionSelector} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {WrongFunctionSelector} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Strategies
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";

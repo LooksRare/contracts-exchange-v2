@@ -8,7 +8,7 @@ import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/exe
 import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Shared errors
-import {AskTooHigh, OrderInvalid, WrongCurrency} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {AskTooHigh, OrderInvalid, WrongCurrency} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";

@@ -17,7 +17,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {WrongCaller, WrongCurrency, WrongLengths, WrongMerkleProof} from "./interfaces/SharedErrors.sol";
+import {WrongCaller, WrongCurrency, WrongLengths, MerkleProofInvalid} from "./interfaces/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
@@ -617,7 +617,7 @@ contract LooksRareProtocol is
     ) private view {
         if (merkleTree.proof.length != 0) {
             if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
-                revert WrongMerkleProof();
+                revert MerkleProofInvalid();
             }
             orderHash = merkleTree.hash();
         }

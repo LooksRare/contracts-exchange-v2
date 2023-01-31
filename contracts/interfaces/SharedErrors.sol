@@ -12,13 +12,19 @@ error AskTooHigh();
 error BidTooLow();
 
 /**
- * @notice Function selector is invalid for this strategy implementation.
+ * @notice The function selector is invalid for this strategy implementation.
  *         It cannot be used for this operation.
  */
 error FunctionSelectorInvalid();
 
 /**
- * @notice It is emitted if the merkle tree proof's length is greater than tolerated.
+ * @notice The merkle proof provided is invalid.
+ */
+error MerkleProofInvalid();
+
+/**
+ * @notice The length of the merkle proof provided is greater than tolerated.
+ * @param length Proof length
  */
 error MerkleProofTooLarge(uint256 length);
 
@@ -28,13 +34,13 @@ error MerkleProofTooLarge(uint256 length);
 error OrderInvalid();
 
 /**
- * @notice It is returned if the asset type is not 0, nor 1.
+ * @notice The asset type is not 0 (ERC721), nor 1 (ERC1155).
  * @param assetType Asset type
  */
 error WrongAssetType(uint256 assetType);
 
 /**
- * @notice This function cannot be called by the sender.
+ * @notice The function cannot be called by the sender.
  */
 error WrongCaller();
 
@@ -52,8 +58,3 @@ error WrongFunctionSelector();
  * @notice There is either a mismatch or an error in the length of the array(s).
  */
 error WrongLengths();
-
-/**
- * @notice It is returned if the Merkle Proof is incorrect
- */
-error WrongMerkleProof();

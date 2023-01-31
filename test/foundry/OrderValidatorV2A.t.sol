@@ -33,7 +33,9 @@ import {MockERC20} from "../mock/MockERC20.sol";
  * with the assert functions living in ProtocolBase.t.sol.
  */
 contract OrderValidatorV2ATest is TestParameters {
+    CreatorFeeManagerWithRoyalties private creatorFeeManager;
     LooksRareProtocol private looksRareProtocol;
+    MockRoyaltyFeeRegistry private royaltyFeeRegistry;
     OrderValidatorV2A private orderValidator;
 
     function setUp() public {
@@ -44,10 +46,8 @@ contract OrderValidatorV2ATest is TestParameters {
             address(transferManager),
             0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
         );
-        MockRoyaltyFeeRegistry royaltyFeeRegistry = new MockRoyaltyFeeRegistry(address(this), 9_500);
-        CreatorFeeManagerWithRoyalties creatorFeeManager = new CreatorFeeManagerWithRoyalties(
-            address(royaltyFeeRegistry)
-        );
+        royaltyFeeRegistry = new MockRoyaltyFeeRegistry(address(this), 9_500);
+        creatorFeeManager = new CreatorFeeManagerWithRoyalties(address(royaltyFeeRegistry));
         looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
         looksRareProtocol.updateCurrencyWhitelistStatus(ETH, true);
         orderValidator = new OrderValidatorV2A(address(looksRareProtocol));
@@ -55,11 +55,23 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testDeriveProtocolParameters() public {
         orderValidator.deriveProtocolParameters();
-        assertEq(address(orderValidator.royaltyFeeRegistry()), 0x037FC82298142374d974839236D2e2dF6B5BdD8F);
-        assertEq(orderValidator.domainSeparator(), bytes32("420"));
         // Just need to make sure it's not 0, hence copying the address from log.
-        assertEq(address(orderValidator.creatorFeeManager()), 0x566B72091192CCd7013AdF77E2a1b349564acC21);
-        assertEq(orderValidator.maxCreatorFeeBp(), 69);
+        assertEq(address(orderValidator.royaltyFeeRegistry()), address(royaltyFeeRegistry));
+        assertEq(
+            orderValidator.domainSeparator(),
+            keccak256(
+                abi.encode(
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                    keccak256("LooksRareProtocol"),
+                    keccak256(bytes("2")),
+                    block.chainid,
+                    address(looksRareProtocol)
+                )
+            )
+        );
+
+        assertEq(address(orderValidator.creatorFeeManager()), address(creatorFeeManager));
+        assertEq(orderValidator.maxCreatorFeeBp(), 1_000);
     }
 
     function testCheckMakerAskOrderValidityStrategyNotImplemented() public {

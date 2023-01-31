@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
+import {CreatorFeeManagerWithRoyalties} from "../../contracts/CreatorFeeManagerWithRoyalties.sol";
 
 import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 
@@ -16,9 +18,9 @@ import {ERC20_APPROVAL_INFERIOR_TO_PRICE, ERC721_ITEM_ID_NOT_IN_BALANCE, ERC1155
 
 // Utils
 import {TestParameters} from "./utils/TestParameters.sol";
-import {MockLooksRareProtocol} from "./utils/MockLooksRareProtocol.sol";
 
 // Mocks
+import {MockRoyaltyFeeRegistry} from "../mock/MockRoyaltyFeeRegistry.sol";
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
 import {MockERC1155WithoutBalanceOfBatch} from "../mock/MockERC1155WithoutBalanceOfBatch.sol";
@@ -31,10 +33,24 @@ import {MockERC20} from "../mock/MockERC20.sol";
  * with the assert functions living in ProtocolBase.t.sol.
  */
 contract OrderValidatorV2ATest is TestParameters {
+    LooksRareProtocol private looksRareProtocol;
     OrderValidatorV2A private orderValidator;
 
     function setUp() public {
-        orderValidator = new OrderValidatorV2A(address(new MockLooksRareProtocol()));
+        TransferManager transferManager = new TransferManager(address(this));
+        looksRareProtocol = new LooksRareProtocol(
+            address(this),
+            address(this),
+            address(transferManager),
+            0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+        );
+        MockRoyaltyFeeRegistry royaltyFeeRegistry = new MockRoyaltyFeeRegistry(address(this), 9_500);
+        CreatorFeeManagerWithRoyalties creatorFeeManager = new CreatorFeeManagerWithRoyalties(
+            address(royaltyFeeRegistry)
+        );
+        looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
+        looksRareProtocol.updateCurrencyWhitelistStatus(ETH, true);
+        orderValidator = new OrderValidatorV2A(address(looksRareProtocol));
     }
 
     function testDeriveProtocolParameters() public {
@@ -59,7 +75,9 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testCheckMakerBidOrderValidityStrategyNotImplemented() public {
         OrderStructs.MakerBid memory makerBid;
-        makerBid.currency = address(1); // it cannot be 0
+        address currency = address(1); // it cannot be 0
+        looksRareProtocol.updateCurrencyWhitelistStatus(currency, true);
+        makerBid.currency = currency;
         makerBid.strategyId = 1;
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,

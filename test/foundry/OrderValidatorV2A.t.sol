@@ -76,7 +76,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(orderValidator.maxCreatorFeeBp(), 1_000);
     }
 
-    function testCheckMakerAskOrderValidityStrategyNotImplemented() public {
+    function testMakerAskStrategyNotImplemented() public {
         OrderStructs.MakerAsk memory makerAsk;
         makerAsk.strategyId = 1;
         uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
@@ -87,7 +87,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[0], STRATEGY_NOT_IMPLEMENTED);
     }
 
-    function testCheckMakerBidOrderValidityStrategyNotImplemented() public {
+    function testMakerBidStrategyNotImplemented() public {
         OrderStructs.MakerBid memory makerBid;
         address currency = address(1); // it cannot be 0
         looksRareProtocol.updateCurrencyWhitelistStatus(currency, true);

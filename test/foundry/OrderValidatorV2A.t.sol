@@ -55,7 +55,6 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testDeriveProtocolParameters() public {
         orderValidator.deriveProtocolParameters();
-        // Just need to make sure it's not 0, hence copying the address from log.
         assertEq(address(orderValidator.royaltyFeeRegistry()), address(royaltyFeeRegistry));
         assertEq(
             orderValidator.domainSeparator(),

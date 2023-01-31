@@ -162,7 +162,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.warp(block.timestamp + elapsedTime);
 
@@ -260,7 +260,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.expectRevert(BidTooLow.selector);
         vm.prank(takerUser);

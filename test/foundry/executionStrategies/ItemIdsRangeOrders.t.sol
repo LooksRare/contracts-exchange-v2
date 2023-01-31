@@ -126,7 +126,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -187,7 +187,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -250,7 +250,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         uint256[] memory takerAskItemIds = new uint256[](3);
         takerAskItemIds[0] = 5;
@@ -287,7 +287,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // It fails at 2nd item in the array (greater than 1)
         vm.expectRevert(OrderInvalid.selector);
@@ -357,7 +357,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
@@ -383,7 +383,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
@@ -408,7 +408,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
@@ -439,7 +439,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);

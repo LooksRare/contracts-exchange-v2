@@ -48,7 +48,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         takerAsk.recipient = randomRecipientSaleProceeds;
 
         // Verify maker bid order
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Arrays for events
         address[2] memory expectedRecipients;
@@ -131,7 +131,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         takerBid.recipient = randomRecipientNFT;
 
         // Verify validity of maker ask order
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         // Arrays for events
         address[2] memory expectedRecipients;

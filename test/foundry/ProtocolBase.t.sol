@@ -41,19 +41,19 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     WETH public weth;
 
-    function _isMakerAskOrderValid(OrderStructs.MakerAsk memory makerAsk, bytes memory signature) internal {
-        _isMakerAskOrderValid(makerAsk, signature, _EMPTY_MERKLE_TREE);
+    function _assertValidMakerAskOrder(OrderStructs.MakerAsk memory makerAsk, bytes memory signature) internal {
+        _assertValidMakerAskOrder(makerAsk, signature, _EMPTY_MERKLE_TREE);
     }
 
-    function _isMakerAskOrderValidWithMerkleTree(
+    function _assertValidMakerAskOrderWithMerkleTree(
         OrderStructs.MakerAsk memory makerAsk,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) internal {
-        _isMakerAskOrderValid(makerAsk, signature, merkleTree);
+        _assertValidMakerAskOrder(makerAsk, signature, merkleTree);
     }
 
-    function _isMakerAskOrderValid(
+    function _assertValidMakerAskOrder(
         OrderStructs.MakerAsk memory makerAsk,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
@@ -118,19 +118,19 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         assertEq(validationCodes[0][index - 1], expectedValidationCode);
     }
 
-    function _isMakerBidOrderValid(OrderStructs.MakerBid memory makerBid, bytes memory signature) internal {
-        _isMakerBidOrderValid(makerBid, signature, _EMPTY_MERKLE_TREE);
+    function _assertValidMakerBidOrder(OrderStructs.MakerBid memory makerBid, bytes memory signature) internal {
+        _assertValidMakerBidOrder(makerBid, signature, _EMPTY_MERKLE_TREE);
     }
 
-    function _isMakerBidOrderValidWithMerkleTree(
+    function _assertValidMakerBidOrderWithMerkleTree(
         OrderStructs.MakerBid memory makerBid,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) internal {
-        _isMakerBidOrderValid(makerBid, signature, merkleTree);
+        _assertValidMakerBidOrder(makerBid, signature, merkleTree);
     }
 
-    function _isMakerBidOrderValid(
+    function _assertValidMakerBidOrder(
         OrderStructs.MakerBid memory makerBid,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree

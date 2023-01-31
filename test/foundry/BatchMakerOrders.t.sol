@@ -15,7 +15,7 @@ import {ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/constants/Val
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, MAX_PROOF_LENGTH_CALLDATA, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
@@ -26,7 +26,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerBidMultipleOrdersSignedERC721() public {
-        uint256 numberOrders = 2 ** MAX_PROOF_LENGTH_CALLDATA;
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
 
         // The test will sell itemId = numberOrders - 1
         Merkle m = new Merkle();
@@ -72,7 +72,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721() public {
-        uint256 numberOrders = 2 ** MAX_PROOF_LENGTH_CALLDATA;
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
 
         // @dev The test will sell itemId = numberOrders - 1
         Merkle m = new Merkle();
@@ -116,7 +116,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerBidMultipleOrdersSignedERC721MerkleProofInvalid() public {
-        uint256 numberOrders = 2 ** MAX_PROOF_LENGTH_CALLDATA;
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
 
         Merkle m = new Merkle();
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
@@ -152,7 +152,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerAskMultipleOrdersSignedERC721MerkleProofInvalid() public {
-        uint256 numberOrders = 2 ** MAX_PROOF_LENGTH_CALLDATA;
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
 
         Merkle m = new Merkle();
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
@@ -188,7 +188,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
     }
 
     function testTakerBidRevertsIfProofTooLarge() public {
-        uint256 numberOrders = 2 ** MAX_PROOF_LENGTH_CALLDATA + 1;
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH + 1;
 
         // The test will sell itemId = numberOrders - 1
         Merkle m = new Merkle();
@@ -218,12 +218,12 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
 
         vm.prank(takerUser);
-        vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, MAX_PROOF_LENGTH_CALLDATA + 1));
+        vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, MAX_CALLDATA_PROOF_LENGTH + 1));
         looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskRevertsIfProofTooLarge() public {
-        uint256 numberOrders = 2 ** MAX_PROOF_LENGTH_CALLDATA + 1;
+        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH + 1;
 
         // @dev The test will sell itemId = numberOrders - 1
         Merkle m = new Merkle();
@@ -253,7 +253,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
 
         vm.prank(takerUser);
-        vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, MAX_PROOF_LENGTH_CALLDATA + 1));
+        vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, MAX_CALLDATA_PROOF_LENGTH + 1));
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _EMPTY_AFFILIATE);
     }
 

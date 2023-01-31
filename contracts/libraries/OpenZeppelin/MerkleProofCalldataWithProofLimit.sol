@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {MerkleProofTooLarge} from "../../interfaces/SharedErrors.sol";
 
 // Constants
-import {MAX_PROOF_LENGTH_CALLDATA} from "../../constants/NumericConstants.sol";
+import {MAX_CALLDATA_PROOF_LENGTH} from "../../constants/NumericConstants.sol";
 
 /**
  * @title MerkleProofCalldataWithProofLimit
@@ -29,14 +29,14 @@ library MerkleProofCalldataWithProofLimit {
      *         A `proof` is valid if and only if the rebuilt hash matches the root of the tree.
      *         When processing the proof, the pairs of leafs & pre-images are assumed to be sorted.
      * @dev This contract implements a maximum length for the proof.
-     *      The maximum number of orders that can be signed is 2**MAX_PROOF_LENGTH_CALLDATA.
-     *      Since MAX_PROOF_LENGTH_CALLDATA = 10, the maximum number of orders per tree is 2**10 = 1_024 orders.
+     *      The maximum number of orders that can be signed is 2**MAX_CALLDATA_PROOF_LENGTH.
+     *      Since MAX_CALLDATA_PROOF_LENGTH = 10, the maximum number of orders per tree is 2**10 = 1_024 orders.
      */
     function processProofCalldata(bytes32[] calldata proof, bytes32 leaf) internal pure returns (bytes32) {
         bytes32 computedHash = leaf;
         uint256 length = proof.length;
 
-        if (length > MAX_PROOF_LENGTH_CALLDATA) {
+        if (length > MAX_CALLDATA_PROOF_LENGTH) {
             revert MerkleProofTooLarge(length);
         }
 

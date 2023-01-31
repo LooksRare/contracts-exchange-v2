@@ -11,7 +11,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Shared errors
-import {OrderInvalid, WrongCaller, CurrencyInvalid} from "../../contracts/errors/SharedErrors.sol";
+import {OrderInvalid, CallerInvalid, CurrencyInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {CURRENCY_NOT_WHITELISTED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Other mocks and utils
@@ -269,7 +269,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             });
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongCaller.selector);
+        vm.expectRevert(CallerInvalid.selector);
         looksRareProtocol.restrictedExecuteTakerBid(takerBid, makerAsk, takerUser, _computeOrderHashMakerAsk(makerAsk));
     }
 

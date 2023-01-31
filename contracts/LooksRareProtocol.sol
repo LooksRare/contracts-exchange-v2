@@ -17,7 +17,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {WrongCaller, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid} from "./errors/SharedErrors.sol";
+import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid} from "./errors/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
@@ -283,7 +283,7 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) external returns (uint256 protocolFeeAmount) {
         if (msg.sender != address(this)) {
-            revert WrongCaller();
+            revert CallerInvalid();
         }
 
         protocolFeeAmount = _executeTakerBid(takerBid, makerAsk, sender, orderHash);

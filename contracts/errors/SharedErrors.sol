@@ -42,7 +42,7 @@ error WrongAssetType(uint256 assetType);
 /**
  * @notice The function cannot be called by the sender.
  */
-error WrongCaller();
+error CallerInvalid();
 
 /**
  * @notice The currency is invalid.

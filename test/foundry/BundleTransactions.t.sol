@@ -24,7 +24,7 @@ contract BundleTransactionsTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Verify validity
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Mint the items
         mockERC721.batchMint(takerUser, makerBid.itemIds);
@@ -54,7 +54,7 @@ contract BundleTransactionsTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Verify validity
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Mint the items
         mockERC1155.batchMint(takerUser, makerBid.itemIds, makerBid.amounts);
@@ -87,7 +87,7 @@ contract BundleTransactionsTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Verify validity
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Mint the items
         mockERC721.batchMint(takerUser, makerBid.itemIds);
@@ -135,7 +135,7 @@ contract BundleTransactionsTest is ProtocolBase {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Verify validity
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -171,7 +171,7 @@ contract BundleTransactionsTest is ProtocolBase {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Verify validity
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -208,7 +208,7 @@ contract BundleTransactionsTest is ProtocolBase {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Verify validity
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         // Execute taker bid transaction
         vm.prank(takerUser);

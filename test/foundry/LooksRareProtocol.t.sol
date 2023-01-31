@@ -255,7 +255,15 @@ contract LooksRareProtocolTest is ProtocolBase {
     /**
      * Cannot execute two or more taker bids if the currencies are different
      */
-    function testCannotExecuteMultipleTakerBidsIfDifferentCurrencies() public {
+    function testCannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsAtomic() public {
+        _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(true);
+    }
+
+    function testCannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsNonAtomic() public {
+        _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(false);
+    }
+
+    function _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(bool isAtomic) public {
         _setUpUsers();
         vm.prank(_owner);
         looksRareProtocol.updateCurrencyWhitelistStatus(address(mockERC20), true);
@@ -305,7 +313,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             signatures,
             merkleTrees,
             _EMPTY_AFFILIATE,
-            false
+            isAtomic
         );
     }
 }

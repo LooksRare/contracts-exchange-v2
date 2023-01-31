@@ -82,7 +82,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
 
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -125,7 +125,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
 
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -156,7 +156,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.batchMint(takerUser, makerBid.itemIds);
 
         // Check order validity
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -201,7 +201,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Taker user actions
         vm.prank(takerUser);

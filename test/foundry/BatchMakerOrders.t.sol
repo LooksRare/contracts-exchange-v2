@@ -44,7 +44,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Verify validity
-        _isMakerAskOrderValidWithMerkleTree(makerAsk, signature, merkleTree);
+        _assertValidMakerAskOrderWithMerkleTree(makerAsk, signature, merkleTree);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -81,7 +81,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Verify validity
-        _isMakerBidOrderValidWithMerkleTree(makerBid, signature, merkleTree);
+        _assertValidMakerBidOrderWithMerkleTree(makerBid, signature, merkleTree);
 
         // Mint asset
         mockERC721.mint(takerUser, numberOrders - 1);

@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionMana
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, CurrencyInvalid, WrongFunctionSelector} from "../../../../contracts/errors/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Strategies
 import {StrategyUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyUSDDynamicAsk.sol";
@@ -494,6 +494,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
-        assertEq(errorSelector, WrongFunctionSelector.selector);
+        assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 }

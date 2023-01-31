@@ -8,7 +8,7 @@ import {Merkle} from "../../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../../../contracts/errors/SharedErrors.sol";
+import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -579,7 +579,7 @@ contract CollectionOrdersTest is ProtocolBase {
 
         (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(makerBid, bytes4(0));
         assertFalse(orderIsValid);
-        assertEq(errorSelector, WrongFunctionSelector.selector);
+        assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
     function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid, bool withProof) private {

@@ -9,7 +9,7 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 
 // Shared errors
-import {AskTooHigh, BidTooLow, OrderInvalid, CurrencyInvalid, WrongFunctionSelector} from "../../errors/SharedErrors.sol";
+import {AskTooHigh, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -164,7 +164,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             functionSelector != StrategyFloorFromChainlink.executeBasisPointsPremiumStrategyWithTakerBid.selector &&
             functionSelector != StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector
         ) {
-            return (isValid, WrongFunctionSelector.selector);
+            return (isValid, FunctionSelectorInvalid.selector);
         }
 
         if (makerAsk.currency != address(0)) {
@@ -214,7 +214,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             functionSelector !=
             StrategyFloorFromChainlink.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
-            return (isValid, WrongFunctionSelector.selector);
+            return (isValid, FunctionSelectorInvalid.selector);
         }
 
         if (makerBid.currency != WETH) {

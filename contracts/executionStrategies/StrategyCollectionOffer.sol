@@ -8,7 +8,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../errors/SharedErrors.sol";
+import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid} from "../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
@@ -124,7 +124,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
         ) {
-            return (isValid, WrongFunctionSelector.selector);
+            return (isValid, FunctionSelectorInvalid.selector);
         }
 
         if (makerBid.amounts.length != 1) {

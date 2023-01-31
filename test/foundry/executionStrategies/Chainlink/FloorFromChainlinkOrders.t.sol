@@ -9,7 +9,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {WrongFunctionSelector} from "../../../../contracts/errors/SharedErrors.sol";
+import {FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Strategies
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
@@ -117,7 +117,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         (bool orderIsValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
-        assertEq(errorSelector, WrongFunctionSelector.selector);
+        assertEq(errorSelector, FunctionSelectorInvalid.selector);
 
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
@@ -134,7 +134,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         (orderIsValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, bytes4(0));
         assertFalse(orderIsValid);
-        assertEq(errorSelector, WrongFunctionSelector.selector);
+        assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
     function _setSelector(bytes4 _selector, bool _isMakerBid) internal {

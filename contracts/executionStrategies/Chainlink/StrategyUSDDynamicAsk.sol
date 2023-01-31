@@ -9,7 +9,7 @@ import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, CurrencyInvalid, WrongFunctionSelector} from "../../errors/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -135,7 +135,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector) {
-            return (isValid, WrongFunctionSelector.selector);
+            return (isValid, FunctionSelectorInvalid.selector);
         }
 
         uint256 itemIdsLength = makerAsk.itemIds.length;

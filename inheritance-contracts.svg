@@ -213,11 +213,11 @@
 <ellipse fill="none" stroke="black" cx="1272.77" cy="-522" rx="42.88" ry="18" style=""/>
 <text text-anchor="middle" x="1272.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">IERC20</text>
 </g>
-<!-- MerkleProofCalldata -->
-<g id="node19" class="node" pointer-events="visible" data-name="MerkleProofCalldata">
+<!-- MerkleProofCalldataWithProofLimit -->
+<g id="node19" class="node" pointer-events="visible" data-name="MerkleProofCalldataWithProofLimit">
 
 <ellipse fill="none" stroke="black" cx="1425.77" cy="-522" rx="92.62" ry="18" style=""/>
-<text text-anchor="middle" x="1425.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">MerkleProofCalldata</text>
+<text text-anchor="middle" x="1425.77" y="-517.8" font-family="Times,serif" font-size="14.00" style="">MerkleProofCalldataWithProofLimit</text>
 </g>
 <!-- OrderStructs -->
 <g id="node20" class="node" pointer-events="visible" data-name="OrderStructs">

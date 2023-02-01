@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
-import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
+import {SignatureCheckerCalldata} from "@looksrare/contracts-libs/contracts/SignatureCheckerCalldata.sol";
 import {LowLevelETHReturnETHIfAnyExceptOneWei} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelETHReturnETHIfAnyExceptOneWei.sol";
 import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelWETH.sol";
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
@@ -590,7 +590,7 @@ contract LooksRareProtocol is
     function _computeDigestAndVerify(bytes32 computedHash, bytes calldata makerSignature, address signer) private view {
         if (chainId == block.chainid) {
             // \x19\x01 is the standard encoding prefix
-            SignatureChecker.verify(
+            SignatureCheckerCalldata.verify(
                 keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash)),
                 signer,
                 makerSignature

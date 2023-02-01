@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
-import {InvalidSignatureEOA} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
+import {SignatureEOAInvalid} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
 
 // Libraries and interfaces
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
@@ -74,7 +74,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
             });
 
         vm.prank(takerUser);
-        vm.expectRevert(InvalidSignatureEOA.selector);
+        vm.expectRevert(SignatureEOAInvalid.selector);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,

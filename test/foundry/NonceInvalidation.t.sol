@@ -79,11 +79,12 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
      * Cannot execute an order if maker is at a different global ask nonce than signed
      */
     function testCannotExecuteOrderIfInvalidUserGlobalAskNonce(uint256 userGlobalAskNonce) public {
+        uint256 quasiRandomNumber = 54570651553685478358117286254199992264;
+        vm.assume(userGlobalAskNonce < quasiRandomNumber);
         // Change block number
         vm.roll(1);
-
-        uint256 quasiRandomNumber = 54570651553685478358117286254199992264;
         assertEq(quasiRandomNumber, uint256(blockhash(block.number - 1) >> 128));
+
         uint256 newAskNonce = 0 + quasiRandomNumber;
 
         vm.prank(makerUser);
@@ -137,11 +138,12 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
      * Cannot execute an order if maker is at a different global bid nonce than signed
      */
     function testCannotExecuteOrderIfInvalidUserGlobalBidNonce(uint256 userGlobalBidNonce) public {
+        uint256 quasiRandomNumber = 54570651553685478358117286254199992264;
+        vm.assume(userGlobalBidNonce < quasiRandomNumber);
         // Change block number
         vm.roll(1);
-
-        uint256 quasiRandomNumber = 54570651553685478358117286254199992264;
         assertEq(quasiRandomNumber, uint256(blockhash(block.number - 1) >> 128));
+
         uint256 newBidNonce = 0 + quasiRandomNumber;
 
         vm.prank(makerUser);

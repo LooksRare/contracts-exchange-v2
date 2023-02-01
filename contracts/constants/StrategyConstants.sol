@@ -11,13 +11,13 @@ uint256 constant OrderInvalid_error_selector = 0x2e0c0f71;
 uint256 constant OrderInvalid_error_length = 0x04;
 
 /*
- *  @dev error WrongCurrency()
+ *  @dev error CurrencyInvalid()
  *       Memory layout:
  *         - 0x00: Left-padded selector (data begins at 0x1c)
  *       Revert buffer is memory[0x1c:0x20]
  */
-uint256 constant WrongCurrency_error_selector = 0x164fb6c2;
-uint256 constant WrongCurrency_error_length = 0x04;
+uint256 constant CurrencyInvalid_error_selector = 0x4f795487;
+uint256 constant CurrencyInvalid_error_length = 0x04;
 
 uint256 constant Error_selector_offset = 0x1c;
 

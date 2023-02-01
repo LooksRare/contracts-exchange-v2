@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionMana
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Strategies
 import {StrategyUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyUSDDynamicAsk.sol";
@@ -318,7 +318,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, WrongCurrency.selector);
+        assertEq(errorSelector, CurrencyInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -478,7 +478,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongSelector() public {
+    function testInvalidSelector() public {
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
@@ -494,6 +494,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
-        assertEq(errorSelector, WrongFunctionSelector.selector);
+        assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 }

@@ -12,7 +12,7 @@ import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelector
 
 // Errors
 import {ASSET_TYPE_NOT_SUPPORTED} from "../../contracts/constants/ValidationCodeConstants.sol";
-import {WrongAssetType} from "../../contracts/interfaces/SharedErrors.sol";
+import {AssetTypeInvalid} from "../../contracts/errors/SharedErrors.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -39,7 +39,7 @@ contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, ASSET_TYPE_NOT_SUPPORTED);
 
         vm.prank(takerUser);
-        vm.expectRevert(abi.encodeWithSelector(WrongAssetType.selector, 2));
+        vm.expectRevert(abi.encodeWithSelector(AssetTypeInvalid.selector, 2));
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,

@@ -8,7 +8,7 @@ import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLe
 
 // Interfaces and errors
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {WrongAssetType, WrongLengths} from "./interfaces/SharedErrors.sol";
+import {AssetTypeInvalid, LengthsInvalid} from "./errors/SharedErrors.sol";
 
 // Constants
 import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";
@@ -56,7 +56,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     ) external {
         uint256 length = itemIds.length;
         if (length == 0) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         _isOperatorValidForTransfer(from, msg.sender);
@@ -88,7 +88,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         uint256 length = itemIds.length;
 
         if (length == 0 || amounts.length != length) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         _isOperatorValidForTransfer(from, msg.sender);
@@ -115,7 +115,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         uint256 itemsLength = items.length;
 
         if (itemsLength == 0) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         if (from != msg.sender) {
@@ -125,7 +125,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         for (uint256 i; i < itemsLength; ) {
             uint256 itemIdsLengthForSingleCollection = items[i].itemIds.length;
             if (itemIdsLengthForSingleCollection == 0 || items[i].amounts.length != itemIdsLengthForSingleCollection) {
-                revert WrongLengths();
+                revert LengthsInvalid();
             }
 
             uint256 assetType = items[i].assetType;
@@ -139,7 +139,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             } else if (assetType == ASSET_TYPE_ERC1155) {
                 _executeERC1155SafeBatchTransferFrom(items[i].collection, from, to, items[i].itemIds, items[i].amounts);
             } else {
-                revert WrongAssetType(assetType);
+                revert AssetTypeInvalid(assetType);
             }
 
             unchecked {
@@ -158,7 +158,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         uint256 length = operators.length;
 
         if (length == 0) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         for (uint256 i; i < length; ) {
@@ -190,7 +190,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     function revokeApprovals(address[] calldata operators) external {
         uint256 length = operators.length;
         if (length == 0) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         for (uint256 i; i < length; ) {

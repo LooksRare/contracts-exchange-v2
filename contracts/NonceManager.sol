@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 // Interfaces and errors
 import {INonceManager} from "./interfaces/INonceManager.sol";
-import {WrongLengths} from "./interfaces/SharedErrors.sol";
+import {LengthsInvalid} from "./errors/SharedErrors.sol";
 
 /**
  * @title NonceManager
@@ -46,7 +46,7 @@ contract NonceManager is INonceManager {
     function cancelOrderNonces(uint256[] calldata orderNonces) external {
         uint256 length = orderNonces.length;
         if (length == 0) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         for (uint256 i; i < length; ) {
@@ -68,7 +68,7 @@ contract NonceManager is INonceManager {
         uint256 length = subsetNonces.length;
 
         if (length == 0) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         for (uint256 i; i < length; ) {

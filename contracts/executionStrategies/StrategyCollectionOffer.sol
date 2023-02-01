@@ -8,7 +8,7 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector, MerkleProofInvalid} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid} from "../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
@@ -124,7 +124,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
         ) {
-            return (isValid, WrongFunctionSelector.selector);
+            return (isValid, FunctionSelectorInvalid.selector);
         }
 
         if (makerBid.amounts.length != 1) {
@@ -140,7 +140,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             }
         }
 
-        // If no root is provided or wrong length, it should be invalid.
+        // If no root is provided or invalid length, it should be invalid.
         // @dev It does not mean the merkle root is valid against a specific itemId that exists in the collection.
         if (
             functionSelector == StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&

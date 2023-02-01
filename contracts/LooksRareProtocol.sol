@@ -17,7 +17,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {WrongCaller, WrongCurrency, WrongLengths, MerkleProofInvalid} from "./interfaces/SharedErrors.sol";
+import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid} from "./errors/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
@@ -129,7 +129,7 @@ contract LooksRareProtocol is
 
         // Verify whether the currency is whitelisted but is not ETH (address(0))
         if (!isCurrencyWhitelisted[currency] || currency == address(0)) {
-            revert WrongCurrency();
+            revert CurrencyInvalid();
         }
 
         address signer = makerBid.signer;
@@ -157,7 +157,7 @@ contract LooksRareProtocol is
 
         // Verify whether the currency is whitelisted
         if (!isCurrencyWhitelisted[currency]) {
-            revert WrongCurrency();
+            revert CurrencyInvalid();
         }
 
         bytes32 orderHash = makerAsk.hash();
@@ -189,13 +189,13 @@ contract LooksRareProtocol is
             length == 0 ||
             (makerAsks.length ^ length) | (makerSignatures.length ^ length) | (merkleTrees.length ^ length) != 0
         ) {
-            revert WrongLengths();
+            revert LengthsInvalid();
         }
 
         // Verify whether the currency at array = 0 is whitelisted
         address currency = makerAsks[0].currency;
         if (!isCurrencyWhitelisted[currency]) {
-            revert WrongCurrency();
+            revert CurrencyInvalid();
         }
 
         {
@@ -211,7 +211,7 @@ contract LooksRareProtocol is
                     // Verify currency is the same
                     if (i != 0) {
                         if (makerAsk.currency != currency) {
-                            revert WrongCurrency();
+                            revert CurrencyInvalid();
                         }
                     }
 
@@ -236,7 +236,7 @@ contract LooksRareProtocol is
                     // Verify currency is the same
                     if (i != 0) {
                         if (makerAsk.currency != currency) {
-                            revert WrongCurrency();
+                            revert CurrencyInvalid();
                         }
                     }
 
@@ -283,7 +283,7 @@ contract LooksRareProtocol is
         bytes32 orderHash
     ) external returns (uint256 protocolFeeAmount) {
         if (msg.sender != address(this)) {
-            revert WrongCaller();
+            revert CallerInvalid();
         }
 
         protocolFeeAmount = _executeTakerBid(takerBid, makerAsk, sender, orderHash);
@@ -339,7 +339,7 @@ contract LooksRareProtocol is
                 userSubsetNonce[signer][makerBid.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) {
-                revert WrongNonces();
+                revert NoncesInvalid();
             }
         }
 
@@ -405,7 +405,7 @@ contract LooksRareProtocol is
                 userSubsetNonce[signer][makerAsk.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) {
-                revert WrongNonces();
+                revert NoncesInvalid();
             }
         }
 
@@ -596,7 +596,7 @@ contract LooksRareProtocol is
                 makerSignature
             );
         } else {
-            revert WrongChainId();
+            revert ChainIdInvalid();
         }
     }
 

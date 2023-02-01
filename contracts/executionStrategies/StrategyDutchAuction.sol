@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongFunctionSelector} from "../interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, FunctionSelectorInvalid} from "../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
@@ -93,7 +93,7 @@ contract StrategyDutchAuction is BaseStrategy {
         bytes4 functionSelector
     ) external pure returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyDutchAuction.executeStrategyWithTakerBid.selector) {
-            return (isValid, WrongFunctionSelector.selector);
+            return (isValid, FunctionSelectorInvalid.selector);
         }
 
         uint256 itemIdsLength = makerAsk.itemIds.length;

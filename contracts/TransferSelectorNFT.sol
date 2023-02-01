@@ -10,7 +10,7 @@ import {TransferManager} from "./TransferManager.sol";
 import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
 
 // Shared errors
-import {WrongAssetType} from "./interfaces/SharedErrors.sol";
+import {AssetTypeInvalid} from "./errors/SharedErrors.sol";
 
 // Constants
 import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";
@@ -62,7 +62,7 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
         } else if (assetType == ASSET_TYPE_ERC1155) {
             transferManager.transferItemsERC1155(collection, sender, recipient, itemIds, amounts);
         } else {
-            revert WrongAssetType(assetType);
+            revert AssetTypeInvalid(assetType);
         }
     }
 }

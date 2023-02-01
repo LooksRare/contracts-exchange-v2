@@ -6,7 +6,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionManager.sol";
 
 // Shared errors
-import {OrderInvalid} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Strategies
 import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";

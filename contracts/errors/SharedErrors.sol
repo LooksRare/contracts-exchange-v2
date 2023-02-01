@@ -37,24 +37,19 @@ error OrderInvalid();
  * @notice The asset type is not 0 (ERC721), nor 1 (ERC1155).
  * @param assetType Asset type
  */
-error WrongAssetType(uint256 assetType);
+error AssetTypeInvalid(uint256 assetType);
 
 /**
  * @notice The function cannot be called by the sender.
  */
-error WrongCaller();
+error CallerInvalid();
 
 /**
  * @notice The currency is invalid.
  */
-error WrongCurrency();
-
-/**
- * @notice The function selector is not implemented.
- */
-error WrongFunctionSelector();
+error CurrencyInvalid();
 
 /**
  * @notice There is either a mismatch or an error in the length of the array(s).
  */
-error WrongLengths();
+error LengthsInvalid();

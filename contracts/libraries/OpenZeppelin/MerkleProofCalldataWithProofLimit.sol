@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 // Shared errors
-import {MerkleProofTooLarge} from "../../interfaces/SharedErrors.sol";
+import {MerkleProofTooLarge} from "../../errors/SharedErrors.sol";
 
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH} from "../../constants/NumericConstants.sol";

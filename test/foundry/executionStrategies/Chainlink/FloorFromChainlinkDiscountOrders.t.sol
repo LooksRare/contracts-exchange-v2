@@ -8,7 +8,7 @@ import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/exe
 import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Shared errors
-import {AskTooHigh, OrderInvalid, WrongCurrency} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {AskTooHigh, OrderInvalid, CurrencyInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
@@ -208,7 +208,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountWrongCurrency() public {
+    function testFloorFromChainlinkDiscountCurrencyInvalid() public {
         (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
@@ -223,7 +223,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, WrongCurrency.selector);
+        assertEq(errorSelector, CurrencyInvalid.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);

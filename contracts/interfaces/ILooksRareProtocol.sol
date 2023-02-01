@@ -115,12 +115,12 @@ interface ILooksRareProtocol {
     /**
      * @notice It is returned if the domain separator should change.
      */
-    error WrongChainId();
+    error ChainIdInvalid();
 
     /**
      * @notice It is returned if the nonces are invalid.
      */
-    error WrongNonces();
+    error NoncesInvalid();
 
     /**
      * @notice This function allows a user to execute a taker ask (against a maker bid).

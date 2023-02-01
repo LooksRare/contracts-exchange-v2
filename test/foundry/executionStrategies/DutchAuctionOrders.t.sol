@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, WrongFunctionSelector} from "../../../contracts/interfaces/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, FunctionSelectorInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -373,7 +373,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongAmounts() public {
+    function testInvalidAmounts() public {
         _setUpUsers();
         _setUpNewStrategy();
 
@@ -414,7 +414,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongSelector() public {
+    function testInvalidSelector() public {
         _setUpNewStrategy();
 
         OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
@@ -432,6 +432,6 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
-        assertEq(errorSelector, WrongFunctionSelector.selector);
+        assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 }

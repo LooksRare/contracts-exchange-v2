@@ -8,7 +8,7 @@ import {Merkle} from "../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {MerkleProofTooLarge, MerkleProofInvalid} from "../../contracts/interfaces/SharedErrors.sol";
+import {MerkleProofTooLarge, MerkleProofInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Base test

@@ -11,7 +11,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Shared errors
-import {OrderInvalid, WrongCaller, WrongCurrency} from "../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid, CallerInvalid, CurrencyInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {CURRENCY_NOT_WHITELISTED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Other mocks and utils
@@ -33,7 +33,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC20 = new MockERC20();
     }
 
-    function testCannotTradeIfWrongAmounts() public {
+    function testCannotTradeIfInvalidAmounts() public {
         _setUpUsers();
         uint256 itemId = 0;
 
@@ -103,7 +103,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         );
     }
 
-    function testCannotTradeIfWrongCurrency() public {
+    function testCannotTradeIfCurrencyInvalid() public {
         _setUpUsers();
         uint256 itemId = 0;
 
@@ -140,7 +140,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         );
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongCurrency.selector);
+        vm.expectRevert(CurrencyInvalid.selector);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -159,7 +159,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         signatures[0] = signature;
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongCurrency.selector);
+        vm.expectRevert(CurrencyInvalid.selector);
         looksRareProtocol.executeMultipleTakerBids{value: price}(
             takerBids,
             makerAsks,
@@ -170,7 +170,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         );
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongCurrency.selector);
+        vm.expectRevert(CurrencyInvalid.selector);
         looksRareProtocol.executeMultipleTakerBids{value: price}(
             takerBids,
             makerAsks,
@@ -218,7 +218,7 @@ contract LooksRareProtocolTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        vm.expectRevert(WrongCurrency.selector);
+        vm.expectRevert(CurrencyInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -269,7 +269,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             });
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongCaller.selector);
+        vm.expectRevert(CallerInvalid.selector);
         looksRareProtocol.restrictedExecuteTakerBid(takerBid, makerAsk, takerUser, _computeOrderHashMakerAsk(makerAsk));
     }
 
@@ -325,7 +325,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         vm.prank(takerUser);
-        vm.expectRevert(WrongCurrency.selector);
+        vm.expectRevert(CurrencyInvalid.selector);
         looksRareProtocol.executeMultipleTakerBids{value: price}(
             takerBids,
             makerAsks,

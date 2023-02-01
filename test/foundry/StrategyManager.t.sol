@@ -123,7 +123,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
      * Owner functions for strategy updates revert as expected under multiple revertion scenarios
      */
-    function testOwnerRevertionsForWrongParametersUpdateStrategy() public asPrankedUser(_owner) {
+    function testOwnerRevertionsForInvalidParametersUpdateStrategy() public asPrankedUser(_owner) {
         (
             ,
             uint16 currentStandardProtocolFee,
@@ -154,7 +154,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
      * Owner functions for strategy additions revert as expected under multiple revertion scenarios
      */
-    function testOwnerRevertionsForWrongParametersAddStrategy() public asPrankedUser(_owner) {
+    function testOwnerRevertionsForInvalidParametersAddStrategy() public asPrankedUser(_owner) {
         uint16 standardProtocolFeeBp = 250;
         uint16 minTotalFeeBp = 300;
         uint16 maxProtocolFeeBp = 300;
@@ -223,7 +223,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
             address(0)
         );
 
-        // 2. Wrong contract (e.g. LooksRareProtocol)
+        // 2. Invalid contract (e.g. LooksRareProtocol)
         vm.expectRevert();
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,

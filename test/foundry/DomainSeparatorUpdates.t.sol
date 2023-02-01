@@ -117,7 +117,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
             });
 
         vm.prank(takerUser);
-        vm.expectRevert(ILooksRareProtocol.WrongChainId.selector);
+        vm.expectRevert(ILooksRareProtocol.ChainIdInvalid.selector);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,

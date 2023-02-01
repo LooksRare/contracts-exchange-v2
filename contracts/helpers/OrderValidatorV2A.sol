@@ -17,7 +17,7 @@ import {ICreatorFeeManager} from "../interfaces/ICreatorFeeManager.sol";
 import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 
 // Shared errors
-import {OrderInvalid} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../errors/SharedErrors.sol";
 
 // Other dependencies
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";
@@ -252,7 +252,7 @@ contract OrderValidatorV2A {
             itemIds,
             amounts
         );
-        validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerAsk.collection, makerAsk.assetType);
+        validationCodes[6] = _checkIfPotentialInvalidAssetTypes(makerAsk.collection, makerAsk.assetType);
         validationCodes[7] = _checkValidityTransferManagerApprovals(makerAsk.signer);
         validationCodes[8] = _checkValidityCreatorFee(makerAsk.collection, price, itemIds);
     }
@@ -299,7 +299,7 @@ contract OrderValidatorV2A {
         validationCodes[3] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
         validationCodes[4] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
         validationCodes[5] = _checkValidityMakerBidERC20Assets(makerBid.currency, makerBid.signer, price);
-        validationCodes[6] = _checkIfPotentialWrongAssetTypes(makerBid.collection, makerBid.assetType);
+        validationCodes[6] = _checkIfPotentialInvalidAssetTypes(makerBid.collection, makerBid.assetType);
         validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID; // TransferManager NFT-related
         validationCodes[8] = _checkValidityCreatorFee(makerBid.collection, price, itemIds);
     }
@@ -326,7 +326,7 @@ contract OrderValidatorV2A {
             (, uint256 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
 
             if (askNonce != globalAskNonce) {
-                return WRONG_USER_GLOBAL_ASK_NONCE;
+                return INVALID_USER_GLOBAL_ASK_NONCE;
             }
         }
     }
@@ -353,7 +353,7 @@ contract OrderValidatorV2A {
             (uint256 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerSigner);
 
             if (bidNonce != globalBidNonce) {
-                return WRONG_USER_GLOBAL_BID_NONCE;
+                return INVALID_USER_GLOBAL_BID_NONCE;
             }
         }
     }
@@ -494,7 +494,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function is used to check if the asset type may be potentially wrong.
+     * @notice This function is used to check if the asset type may be potentially invalid.
      * @param collection Address of the collection
      * @param assetType Asset type in the maker order
      * @return validationCode Validation code
@@ -502,7 +502,7 @@ contract OrderValidatorV2A {
      *      (i.e. assets that are tradable but do not implement the proper interfaceId).
      *      If ERC165 is not implemented, it will revert.
      */
-    function _checkIfPotentialWrongAssetTypes(
+    function _checkIfPotentialInvalidAssetTypes(
         address collection,
         uint256 assetType
     ) internal view returns (uint256 validationCode) {
@@ -511,11 +511,11 @@ contract OrderValidatorV2A {
                 IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
 
             if (!isERC721) {
-                return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC721;
+                return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721;
             }
         } else if (assetType == ASSET_TYPE_ERC1155) {
             if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID)) {
-                return POTENTIAL_WRONG_ASSET_TYPE_SHOULD_BE_ERC1155;
+                return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155;
             }
         } else {
             return ASSET_TYPE_NOT_SUPPORTED;
@@ -850,7 +850,7 @@ contract OrderValidatorV2A {
                     v := byte(0, calldataload(add(signature.offset, 0x40)))
                 }
             } else {
-                return WRONG_SIGNATURE_LENGTH;
+                return INVALID_SIGNATURE_LENGTH;
             }
 
             if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
@@ -868,7 +868,7 @@ contract OrderValidatorV2A {
             }
 
             if (signer != recoveredSigner) {
-                return WRONG_SIGNER_EOA;
+                return INVALID_SIGNER_EOA;
             }
         } else {
             // Logic if ERC1271

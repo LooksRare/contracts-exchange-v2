@@ -10,7 +10,7 @@ import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.so
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {OrderInvalid} from "../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {MAKER_ORDER_INVALID_STANDARD_SALE, STRATEGY_MAKER_BID_SELECTOR_INVALID, STRATEGY_MAKER_ASK_SELECTOR_INVALID, STRATEGY_NOT_ACTIVE, START_TIME_GREATER_THAN_END_TIME, TOO_LATE_TO_EXECUTE_ORDER, TOO_EARLY_TO_EXECUTE_ORDER} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Base test

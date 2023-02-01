@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector} from "../interfaces/SharedErrors.sol";
+import {OrderInvalid, FunctionSelectorInvalid} from "../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
@@ -106,7 +106,7 @@ contract StrategyItemIdsRange is BaseStrategy {
         bytes4 functionSelector
     ) external pure returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyItemIdsRange.executeStrategyWithTakerAsk.selector) {
-            return (isValid, WrongFunctionSelector.selector);
+            return (isValid, FunctionSelectorInvalid.selector);
         }
 
         (uint256 minItemId, uint256 maxItemId, uint256 desiredAmount) = abi.decode(

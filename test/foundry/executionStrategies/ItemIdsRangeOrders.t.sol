@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {OrderInvalid, WrongFunctionSelector} from "../../../contracts/interfaces/SharedErrors.sol";
+import {OrderInvalid, FunctionSelectorInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -493,7 +493,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongSelector() public {
+    function testInvalidSelector() public {
         _setUpNewStrategy();
 
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
@@ -511,6 +511,6 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool orderIsValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, bytes4(0));
         assertFalse(orderIsValid);
-        assertEq(errorSelector, WrongFunctionSelector.selector);
+        assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 }

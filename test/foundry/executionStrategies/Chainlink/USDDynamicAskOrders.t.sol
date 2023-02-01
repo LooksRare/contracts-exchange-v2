@@ -8,6 +8,7 @@ import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManage
 
 // Shared errors
 import {BidTooLow, OrderInvalid, WrongCurrency, WrongFunctionSelector} from "../../../../contracts/interfaces/SharedErrors.sol";
+import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
 import {StrategyUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyUSDDynamicAsk.sol";
@@ -295,6 +296,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[1], MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);

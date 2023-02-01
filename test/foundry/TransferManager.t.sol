@@ -270,7 +270,6 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
         uint256 itemId = 500;
 
-        vm.prank(_sender);
         mockERC721.mint(_sender, itemId);
 
         uint256[] memory itemIds = new uint256[](1);
@@ -281,6 +280,46 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         vm.expectRevert(AmountInvalid.selector);
         vm.prank(_transferrer);
         transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
+    }
+
+    function testTransferSingleItemERC1155AmountIsZero() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        uint256 itemId = 500;
+
+        mockERC1155.mint(_sender, itemId, 1);
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemId;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 0;
+
+        vm.expectRevert(AmountInvalid.selector);
+        vm.prank(_transferrer);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
+    }
+
+    function testTransferMultipleItemsERC1155AmountIsZero() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        uint256 itemIdOne = 500;
+        uint256 itemIdTwo = 501;
+
+        mockERC1155.mint(_sender, itemIdOne, 1);
+        mockERC1155.mint(_sender, itemIdTwo, 1);
+
+        uint256[] memory itemIds = new uint256[](2);
+        itemIds[0] = itemIdOne;
+        itemIds[1] = itemIdTwo;
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 0;
+        amounts[1] = 0;
+
+        vm.expectRevert(AmountInvalid.selector);
+        vm.prank(_transferrer);
+        transferManager.transferItemsERC1155(address(mockERC1155), _sender, _recipient, itemIds, amounts);
     }
 
     function testTransferBatchItemsAcrossCollectionZeroLength() public {
@@ -311,6 +350,32 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         items[0] = ITransferManager.BatchTransferItem({
             assetType: ASSET_TYPE_ERC721,
             collection: address(mockERC721),
+            itemIds: itemIds,
+            amounts: amounts
+        });
+
+        vm.expectRevert(AmountInvalid.selector);
+        vm.prank(_sender);
+        transferManager.transferBatchItemsAcrossCollections(items, _sender, _recipient);
+    }
+
+    function testCannotBatchTransferIfERC1155AmountIsZero() public {
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        mockERC1155.mint(_transferrer, 0, 1);
+
+        ITransferManager.BatchTransferItem[] memory items = new ITransferManager.BatchTransferItem[](1);
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = 0;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 0;
+
+        items[0] = ITransferManager.BatchTransferItem({
+            assetType: ASSET_TYPE_ERC1155,
+            collection: address(mockERC1155),
             itemIds: itemIds,
             amounts: amounts
         });

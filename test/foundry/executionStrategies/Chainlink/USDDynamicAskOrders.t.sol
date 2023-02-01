@@ -389,7 +389,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, OrderInvalid.selector);
 
         vm.prank(takerUser);
-        vm.expectRevert(errorSelector);
+        vm.expectRevert(AmountInvalid.selector);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 

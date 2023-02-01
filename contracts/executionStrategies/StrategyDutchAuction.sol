@@ -41,13 +41,6 @@ contract StrategyDutchAuction is BaseStrategy {
             revert OrderInvalid();
         }
 
-        for (uint256 i; i < itemIdsLength; ) {
-            _validateAmount(makerAsk.amounts[i]);
-            unchecked {
-                ++i;
-            }
-        }
-
         uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
 
         if (startPrice < makerAsk.minPrice) {

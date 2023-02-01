@@ -147,7 +147,8 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertOrderIsInvalid(makerBid, false);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
-        vm.expectRevert(OrderInvalid.selector);
+        vm.prank(takerUser);
+        vm.expectRevert(AmountInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -319,7 +320,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
-        vm.expectRevert(OrderInvalid.selector);
+        vm.expectRevert(AmountInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // 2. Amount is too high for ERC721 (without merkle proof)
@@ -351,7 +352,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
-        vm.expectRevert(OrderInvalid.selector);
+        vm.expectRevert(AmountInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // 4. Amount is too high for ERC721 (with merkle proof)

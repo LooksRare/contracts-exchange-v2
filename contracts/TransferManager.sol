@@ -98,8 +98,20 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         _isOperatorValidForTransfer(from, msg.sender);
 
         if (length == 1) {
+            if (amounts[0] == 0) {
+                revert AmountInvalid();
+            }
             _executeERC1155SafeTransferFrom(collection, from, to, itemIds[0], amounts[0]);
         } else {
+            for (uint256 i; i < length; ) {
+                if (amounts[i] == 0) {
+                    revert AmountInvalid();
+                }
+
+                unchecked {
+                    ++i;
+                }
+            }
             _executeERC1155SafeBatchTransferFrom(collection, from, to, itemIds, amounts);
         }
     }
@@ -127,24 +139,36 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         }
 
         for (uint256 i; i < itemsLength; ) {
-            uint256 itemIdsLengthForSingleCollection = items[i].itemIds.length;
-            if (itemIdsLengthForSingleCollection == 0 || items[i].amounts.length != itemIdsLengthForSingleCollection) {
+            uint256[] calldata itemIds = items[i].itemIds;
+            uint256 itemIdsLengthForSingleCollection = itemIds.length;
+            uint256[] calldata amounts = items[i].amounts;
+
+            if (itemIdsLengthForSingleCollection == 0 || amounts.length != itemIdsLengthForSingleCollection) {
                 revert LengthsInvalid();
             }
 
             uint256 assetType = items[i].assetType;
             if (assetType == ASSET_TYPE_ERC721) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
-                    if (items[i].amounts[j] != 1) {
+                    if (amounts[j] != 1) {
                         revert AmountInvalid();
                     }
-                    _executeERC721TransferFrom(items[i].collection, from, to, items[i].itemIds[j]);
+                    _executeERC721TransferFrom(items[i].collection, from, to, itemIds[j]);
                     unchecked {
                         ++j;
                     }
                 }
             } else if (assetType == ASSET_TYPE_ERC1155) {
-                _executeERC1155SafeBatchTransferFrom(items[i].collection, from, to, items[i].itemIds, items[i].amounts);
+                for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
+                    if (amounts[j] == 0) {
+                        revert AmountInvalid();
+                    }
+
+                    unchecked {
+                        ++j;
+                    }
+                }
+                _executeERC1155SafeBatchTransferFrom(items[i].collection, from, to, itemIds, amounts);
             } else {
                 revert AssetTypeInvalid(assetType);
             }

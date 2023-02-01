@@ -365,7 +365,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, OrderInvalid.selector);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
-        vm.expectRevert(errorSelector);
+        vm.expectRevert(AmountInvalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 

@@ -30,7 +30,7 @@ abstract contract BaseStrategy is IBaseStrategy {
 
     /**
      * @dev This is equivalent to
-     *      if (amount == 0) {
+     *      if (amount == 0 || (amount != 1 && assetType == 0)) {
      *          return (0, OrderInvalid.selector);
      *      }
      * @dev OrderInvalid_error_selector is a left-padded 4 bytes. When we return the error

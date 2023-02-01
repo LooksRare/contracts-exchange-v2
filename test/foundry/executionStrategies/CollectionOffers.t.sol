@@ -218,11 +218,11 @@ contract CollectionOrdersTest is ProtocolBase {
             itemId: 0 // Not used
         });
 
-        uint256 itemIdSold = 2;
+        uint256 itemIdInMerkleTree = 2;
         (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
             owner: takerUser,
             numberOfItemsInMerkleTree: 5,
-            itemIdSold: itemIdSold
+            itemIdInMerkleTree: itemIdInMerkleTree
         });
 
         makerBid.additionalParameters = abi.encode(merkleRoot);
@@ -231,7 +231,7 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode(itemIdSold, proof));
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode(itemIdInMerkleTree, proof));
 
         // Verify validity of maker bid order
         _assertOrderIsValid(makerBid, true);
@@ -242,7 +242,7 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemIdSold), makerUser);
+        assertEq(mockERC721.ownerOf(itemIdInMerkleTree), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price (2% protocol)
@@ -272,8 +272,8 @@ contract CollectionOrdersTest is ProtocolBase {
         (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
             owner: takerUser,
             numberOfItemsInMerkleTree: 5,
-            // Doesn't matter what itemIdSold is as we are are going to tamper with the proof
-            itemIdSold: 4
+            // Doesn't matter what itemIdInMerkleTree is as we are are going to tamper with the proof
+            itemIdInMerkleTree: 4
         });
         makerBid.additionalParameters = abi.encode(merkleRoot);
 
@@ -334,18 +334,18 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // 3. Amount is 0 (with merkle proof)
         makerBid.strategyId = 2;
-        uint256 itemIdSold = 5;
+        uint256 itemIdInMerkleTree = 5;
         (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
             owner: takerUser,
             numberOfItemsInMerkleTree: 6,
-            itemIdSold: itemIdSold
+            itemIdInMerkleTree: itemIdInMerkleTree
         });
 
         makerBid.additionalParameters = abi.encode(merkleRoot);
         makerBid.amounts[0] = 0;
         signature = _signMakerBid(makerBid, makerUserPK);
 
-        takerAsk.additionalParameters = abi.encode(itemIdSold, proof);
+        takerAsk.additionalParameters = abi.encode(itemIdInMerkleTree, proof);
 
         _assertOrderIsInvalid(makerBid, true);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -433,9 +433,9 @@ contract CollectionOrdersTest is ProtocolBase {
     function _getMerkleRootAndProof(
         address owner,
         uint256 numberOfItemsInMerkleTree,
-        uint256 itemIdSold
+        uint256 itemIdInMerkleTree
     ) private returns (bytes32 merkleRoot, bytes32[] memory proof) {
-        require(itemIdSold < numberOfItemsInMerkleTree, "Invalid itemIdSold");
+        require(itemIdInMerkleTree < numberOfItemsInMerkleTree, "Invalid itemIdInMerkleTree");
 
         // Initialize Merkle Tree
         Merkle m = new Merkle();
@@ -448,8 +448,8 @@ contract CollectionOrdersTest is ProtocolBase {
 
         // Compute merkle root
         merkleRoot = m.getRoot(merkleTreeIds);
-        proof = m.getProof(merkleTreeIds, itemIdSold);
+        proof = m.getProof(merkleTreeIds, itemIdInMerkleTree);
 
-        assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[itemIdSold]));
+        assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[itemIdInMerkleTree]));
     }
 }

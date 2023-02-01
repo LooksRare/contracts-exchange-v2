@@ -9,6 +9,7 @@ import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrateg
 
 // Shared errors
 import {AskTooHigh, OrderInvalid, CurrencyInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
@@ -18,7 +19,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     uint256 internal discount;
 
     function testFloorFromChainlinkDiscountPriceFeedNotAvailable() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -33,7 +34,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountOraclePriceNotRecentEnough() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -52,6 +53,13 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         assertFalse(isValid);
         assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
+        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[1], MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
@@ -59,7 +67,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     function testFloorFromChainlinkDiscountChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -85,48 +93,8 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountTakerAskItemIdsLengthNotOne() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: discount
-        });
-
-        takerAsk.itemIds = new uint256[](0);
-
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        _setPriceFeed();
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-
-        vm.expectRevert(OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
-    }
-
-    function testFloorFromChainlinkDiscountTakerAskAmountsLengthNotOne() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: discount
-        });
-
-        takerAsk.amounts = new uint256[](0);
-
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        _setPriceFeed();
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-
-        vm.expectRevert(OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
-    }
-
     function testFloorFromChainlinkDiscountMakerBidAmountsLengthNotOne() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -144,31 +112,8 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountTakerAskZeroAmount() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
-            discount: discount
-        });
-
-        uint256[] memory amounts = new uint256[](1);
-        // Seller will probably try 0
-        amounts[0] = 0;
-        takerAsk.amounts = amounts;
-
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        _setPriceFeed();
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-
-        vm.expectRevert(OrderInvalid.selector);
-        _executeTakerAsk(takerAsk, makerBid, signature);
-    }
-
     function testFloorFromChainlinkDiscountMakerBidAmountNotOne() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -190,10 +135,11 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountAskTooHigh() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
-        makerBid.maxPrice = takerAsk.minPrice - 1 wei;
+        (, uint256 minPrice) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
+        makerBid.maxPrice = minPrice - 1 wei;
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -209,7 +155,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountCurrencyInvalid() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -234,7 +180,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function _executeTakerAsk(
-        OrderStructs.TakerAsk memory takerAsk,
+        OrderStructs.Taker memory takerAsk,
         OrderStructs.MakerBid memory makerBid,
         bytes memory signature
     ) internal {

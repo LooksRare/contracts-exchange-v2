@@ -81,40 +81,17 @@ library OrderStructs {
     }
 
     /**
-     * 2. Taker structs
+     * 2. Taker struct
      */
 
     /**
-     * @notice TakerAsk is the struct for a taker bid order. It contains the parameters required for a direct purchase.
-     * @dev TakerAsk structs are matched against MakerBid structs at the protocol level.
-     * @param recipient Recipient address (to receive non fungible tokens)
-     * @param minPrice Minimum price for execution
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
+     * @notice Taker is the struct for a taker ask/bid order. It contains the parameters required for a direct purchase.
+     * @dev Taker struct is matched against MakerAsk/MakerBid structs at the protocol level.
+     * @param recipient Recipient address (to receive NFTs or non-fungible tokens)
      * @param additionalParameters Extra data specific for the order
      */
-    struct TakerAsk {
+    struct Taker {
         address recipient;
-        uint256 minPrice;
-        uint256[] itemIds;
-        uint256[] amounts;
-        bytes additionalParameters;
-    }
-
-    /**
-     * @notice TakerBid is the struct for a taker bid order. It contains the parameters required for a direct purchase.
-     * @dev TakerBid structs are matched against MakerAsk structs at the protocol level.
-     * @param recipient Recipient address (to receive non fungible tokens)
-     * @param maxPrice Maximum price for execution
-     * @param itemIds Array of itemIds
-     * @param amounts Array of amounts
-     * @param additionalParameters Extra data specific for the order
-     */
-    struct TakerBid {
-        address recipient;
-        uint256 maxPrice;
-        uint256[] itemIds;
-        uint256[] amounts;
         bytes additionalParameters;
     }
 

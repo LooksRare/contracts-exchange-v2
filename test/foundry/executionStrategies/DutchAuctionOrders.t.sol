@@ -41,7 +41,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         uint256 startPrice,
         uint256 endPrice,
         uint256 endTime
-    ) private returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
+    ) private returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
         uint256[] memory itemIds = new uint256[](numberOfItems);
         for (uint256 i; i < numberOfItems; ) {
             mockERC721.mint(makerUser, i + 1);
@@ -79,7 +79,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.endTime = endTime;
         newMakerAsk.additionalParameters = abi.encode(startPrice);
 
-        newTakerBid = OrderStructs.TakerBid(takerUser, startPrice, itemIds, amounts, abi.encode());
+        newTakerBid = OrderStructs.Taker(takerUser, abi.encode(startPrice));
     }
 
     function testNewStrategy() public {
@@ -148,7 +148,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         deal(address(weth), takerUser, executionPrice);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             startPrice: startPrice,
@@ -162,7 +162,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.warp(block.timestamp + elapsedTime);
 
@@ -202,7 +202,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
         deal(address(weth), takerUser, executionPrice);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             startPrice: startPrice,
@@ -243,7 +243,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
         deal(address(weth), takerUser, executionPrice);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             startPrice: startPrice,
@@ -251,7 +251,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             endTime: block.timestamp + duration
         });
 
-        takerBid.maxPrice = executionPrice - 1 wei;
+        takerBid.additionalParameters = abi.encode(executionPrice - 1 wei);
 
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
@@ -260,7 +260,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.expectRevert(BidTooLow.selector);
         vm.prank(takerUser);
@@ -270,7 +270,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testInactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             startPrice: 10 ether,
@@ -297,7 +297,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testZeroItemIdsLength() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 0,
             numberOfAmounts: 0,
             startPrice: 10 ether,
@@ -321,7 +321,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testItemIdsAndAmountsLengthMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 2,
             startPrice: 10 ether,
@@ -342,43 +342,12 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testItemIdsMismatch() public {
-        _setUpUsers();
-        _setUpNewStrategy();
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            numberOfItems: 1,
-            numberOfAmounts: 1,
-            startPrice: 10 ether,
-            endPrice: 1 ether,
-            endTime: block.timestamp + 1 hours
-        });
-
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 2;
-
-        // Bidder bidding on something else
-        takerBid.itemIds = itemIds;
-
-        // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-        _isMakerAskOrderValid(makerAsk, signature);
-
-        vm.expectRevert(OrderInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
     function testInvalidAmounts() public {
         _setUpUsers();
         _setUpNewStrategy();
 
         // 1. Amount = 0
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             startPrice: 10 ether,

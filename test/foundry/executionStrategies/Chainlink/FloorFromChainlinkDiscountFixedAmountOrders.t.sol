@@ -23,12 +23,12 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     }
 
     function testInactiveStrategy() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
         });
 
         makerBid.maxPrice = 9.5 ether;
-        takerAsk.minPrice = 9.5 ether;
+        takerAsk.additionalParameters = abi.encode(42, 9.5 ether);
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -48,12 +48,12 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 0.1 ETH, desired price = 9.6 ETH
         // Max price = 9.5 ETH
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
         });
 
         makerBid.maxPrice = 9.5 ether;
-        takerAsk.minPrice = 9.5 ether;
+        takerAsk.additionalParameters = abi.encode(42, 9.5 ether);
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -66,7 +66,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Maker user has received the asset
-        assertEq(mockERC721.ownerOf(1), makerUser);
+        assertEq(mockERC721.ownerOf(42), makerUser);
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.5 ether);
@@ -77,7 +77,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedPriceLessThanMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 0.3 ETH, desired price = 9.4 ETH
         // Max price = 9.5 ETH
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.3 ether
         });
 
@@ -94,7 +94,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         _executeTakerAsk(takerAsk, makerBid, signature);
 
         // Maker user has received the asset
-        assertEq(mockERC721.ownerOf(1), makerUser);
+        assertEq(mockERC721.ownerOf(42), makerUser);
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.4 ether);
@@ -105,7 +105,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedAmountGreaterThanFloorPrice() public {
         // Floor price = 9.7 ETH, discount = 9.7 ETH, desired price = 0 ETH
         // Max price = 0 ETH
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 9.7 ether
         });
 

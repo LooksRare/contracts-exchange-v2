@@ -62,7 +62,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      *      from the floor price as the additionalParameters.
      */
     function executeFixedPremiumStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         external
@@ -87,7 +87,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      *      from the floor price as the additionalParameters.
      */
     function executeBasisPointsPremiumStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         external
@@ -112,7 +112,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      *      from the floor price as the additionalParameters.
      */
     function executeFixedDiscountCollectionOfferStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.Taker calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
         external
@@ -137,7 +137,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      *      from the floor price as the additionalParameters.
      */
     function executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.Taker calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
         external
@@ -259,7 +259,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      * @param _calculateDesiredPrice _calculateFixedPremium or _calculateBasisPointsPremium
      */
     function _executePremiumStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk,
         function(uint256 /* floorPrice */, uint256 /* premium */)
             internal
@@ -272,13 +272,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     {
         CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
-        if (
-            makerAsk.itemIds.length != 1 ||
-            makerAsk.amounts.length != 1 ||
-            makerAsk.amounts[0] != 1 ||
-            makerAsk.itemIds[0] != takerBid.itemIds[0] ||
-            takerBid.amounts[0] != 1
-        ) {
+        if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
             revert OrderInvalid();
         }
 
@@ -292,7 +286,8 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             price = makerAsk.minPrice;
         }
 
-        if (takerBid.maxPrice < price) {
+        uint256 maxPrice = abi.decode(takerBid.additionalParameters, (uint256));
+        if (maxPrice < price) {
             revert BidTooLow();
         }
 
@@ -324,7 +319,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
      * @param _calculateDesiredPrice _calculateFixedDiscount or _calculateBasisPointsDiscount
      */
     function _executeDiscountCollectionOfferStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.Taker calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid,
         function(uint256 /* floorPrice */, uint256 /* discount */)
             internal
@@ -339,13 +334,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             revert CurrencyInvalid();
         }
 
-        if (
-            takerAsk.itemIds.length != 1 ||
-            takerAsk.amounts.length != 1 ||
-            takerAsk.amounts[0] != 1 ||
-            makerBid.amounts.length != 1 ||
-            makerBid.amounts[0] != 1
-        ) {
+        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
             revert OrderInvalid();
         }
 
@@ -360,12 +349,14 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             price = desiredPrice;
         }
 
-        if (takerAsk.minPrice > price) {
+        (uint256 offeredItemId, uint256 minPrice) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
+        if (minPrice > price) {
             revert AskTooHigh();
         }
 
-        itemIds = takerAsk.itemIds;
-        amounts = takerAsk.amounts;
+        itemIds = new uint256[](1);
+        itemIds[0] = offeredItemId;
+        amounts = makerBid.amounts;
         isNonceInvalidated = true;
     }
 

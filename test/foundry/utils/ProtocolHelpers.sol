@@ -33,7 +33,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         view
         returns (
             OrderStructs.MakerAsk memory newMakerAsk,
-            OrderStructs.TakerBid memory newTakerBid,
+            OrderStructs.Taker memory newTakerBid,
             bytes memory signature
         )
     {
@@ -52,13 +52,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
         signature = _signMakerAsk(newMakerAsk, makerUserPK);
 
-        newTakerBid = OrderStructs.TakerBid(
-            takerUser,
-            newMakerAsk.minPrice,
-            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerAsk.itemIds,
-            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerAsk.amounts,
-            abi.encode()
-        );
+        newTakerBid = OrderStructs.Taker(takerUser, abi.encode());
     }
 
     function _createSingleItemMakerAskOrder(
@@ -143,7 +137,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         view
         returns (
             OrderStructs.MakerBid memory newMakerBid,
-            OrderStructs.TakerAsk memory newTakerAsk,
+            OrderStructs.Taker memory newTakerAsk,
             bytes memory signature
         )
     {
@@ -162,13 +156,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
         signature = _signMakerBid(newMakerBid, makerUserPK);
 
-        newTakerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            newMakerBid.maxPrice,
-            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerBid.itemIds,
-            strategyId == STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY ? new uint256[](0) : newMakerBid.amounts,
-            abi.encode()
-        );
+        newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());
     }
 
     function _createSingleItemMakerBidOrder(

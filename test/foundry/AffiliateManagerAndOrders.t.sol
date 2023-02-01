@@ -120,16 +120,10 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
 
@@ -173,7 +167,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 faultyTokenId = numberPurchases - 1;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
-        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
@@ -198,15 +192,9 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
             // Verify validity of maker ask order
-            _isMakerAskOrderValid(makerAsks[i], signatures[i]);
+            _assertValidMakerAskOrder(makerAsks[i], signatures[i]);
 
-            takerBids[i] = OrderStructs.TakerBid(
-                takerUser,
-                makerAsks[i].minPrice,
-                new uint256[](0),
-                new uint256[](0),
-                abi.encode()
-            );
+            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }
 
         // Transfer tokenId=2 to random user
@@ -295,19 +283,13 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Verify validity of maker bid order
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
 
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
 

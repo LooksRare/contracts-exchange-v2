@@ -8,6 +8,7 @@ import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManage
 
 // Shared errors
 import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
 import {StrategyUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyUSDDynamicAsk.sol";
@@ -64,7 +65,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256 numberOfItems,
         uint256 numberOfAmounts,
         uint256 desiredSalePriceInUSD
-    ) private returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.TakerBid memory newTakerBid) {
+    ) private returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
         uint256[] memory itemIds = new uint256[](numberOfItems);
         for (uint256 i; i < numberOfItems; ) {
             mockERC721.mint(makerUser, i + 1);
@@ -100,7 +101,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.amounts = amounts;
         newMakerAsk.additionalParameters = abi.encode(desiredSalePriceInUSD);
 
-        newTakerBid = OrderStructs.TakerBid(takerUser, 1 ether, itemIds, amounts, abi.encode());
+        newTakerBid = OrderStructs.Taker(takerUser, abi.encode(1 ether));
     }
 
     function testNewStrategy() public {
@@ -128,7 +129,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskInvalidChainlinkPrice() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -159,7 +160,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -184,7 +185,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: (LATEST_CHAINLINK_ANSWER_IN_WAD * 98) / 100
@@ -211,7 +212,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
     // This tests that we can handle fractions
     function testUSDDynamicAskUSDValueLessThanOneETH() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD / 2
@@ -239,7 +240,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskBidderOverpaid() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -247,7 +248,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         makerAsk.currency = ETH;
         // Bidder overpays by 0.1 ETH
-        takerBid.maxPrice = 1.1 ether;
+        uint256 maxPrice = 1.1 ether;
+        takerBid.additionalParameters = abi.encode(maxPrice);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -260,7 +262,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
+        looksRareProtocol.executeTakerBid{value: maxPrice}(
             takerBid,
             makerAsk,
             signature,
@@ -277,7 +279,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testOraclePriceNotRecentEnough() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -295,6 +297,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertFalse(isValid);
         assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
 
+        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE
+        );
+        assertEq(validationCodes[1], MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -305,7 +314,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         vm.prank(_owner);
         looksRareProtocol.updateCurrencyWhitelistStatus(address(fakeCurrency), true);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -326,7 +335,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testZeroItemIdsLength() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 0,
             numberOfAmounts: 0,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -344,7 +353,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testItemIdsAndAmountsLengthMismatch() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 2,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -361,33 +370,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testItemIdsMismatch() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
-            numberOfItems: 1,
-            numberOfAmounts: 1,
-            desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
-        });
-
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = 2;
-
-        // Bidder bidding on something else
-        takerBid.itemIds = itemIds;
-
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
-
-        vm.expectRevert(OrderInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
-    }
-
     function testZeroAmount() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -396,7 +380,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 0;
         makerAsk.amounts = amounts;
-        takerBid.amounts = amounts;
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -411,7 +394,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testAmountGreaterThanOneForERC721() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -420,7 +403,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 2;
         makerAsk.amounts = amounts;
-        takerBid.amounts = amounts;
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -435,13 +417,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testTakerBidTooLow() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        takerBid.maxPrice = 0.99 ether;
+        takerBid.additionalParameters = abi.encode(0.99 ether);
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
@@ -457,7 +439,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testInactiveStrategy() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD

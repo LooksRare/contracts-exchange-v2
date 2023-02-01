@@ -61,13 +61,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -86,9 +80,6 @@ contract LooksRareProtocolTest is ProtocolBase {
 
         // Sign order
         signature = _signMakerAsk(makerAsk, makerUserPK);
-
-        // Prepare the taker bid
-        takerBid.amounts = makerAsk.amounts;
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -131,13 +122,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_WHITELISTED);
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
         vm.prank(takerUser);
         vm.expectRevert(CurrencyInvalid.selector);
@@ -150,7 +135,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         );
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
-        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](1);
+        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](1);
         bytes[] memory signatures = new bytes[](1);
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
 
@@ -208,13 +193,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the taker ask
-        OrderStructs.TakerAsk memory takerAsk = OrderStructs.TakerAsk(
-            takerUser,
-            makerBid.maxPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -253,7 +232,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         // Prepare the orders and signature
         (
             OrderStructs.MakerAsk memory makerAsk,
-            OrderStructs.TakerBid memory takerBid,
+            OrderStructs.Taker memory takerBid,
 
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
                 askNonce: 0,
@@ -276,7 +255,15 @@ contract LooksRareProtocolTest is ProtocolBase {
     /**
      * Cannot execute two or more taker bids if the currencies are different
      */
-    function testCannotExecuteMultipleTakerBidsIfDifferentCurrencies() public {
+    function testCannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsAtomic() public {
+        _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(true);
+    }
+
+    function testCannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsNonAtomic() public {
+        _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(false);
+    }
+
+    function _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(bool isAtomic) public {
         _setUpUsers();
         vm.prank(_owner);
         looksRareProtocol.updateCurrencyWhitelistStatus(address(mockERC20), true);
@@ -284,7 +271,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         uint256 numberPurchases = 2;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
-        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
@@ -312,13 +299,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             // Sign order
             signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.TakerBid(
-                takerUser,
-                makerAsks[i].minPrice,
-                new uint256[](0),
-                new uint256[](0),
-                abi.encode()
-            );
+            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }
 
         // Other execution parameters
@@ -332,7 +313,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             signatures,
             merkleTrees,
             _EMPTY_AFFILIATE,
-            false
+            isAtomic
         );
     }
 }

@@ -42,7 +42,7 @@ contract SignaturesEIP2098Test is ProtocolBase {
         signature = _eip2098Signature(signature);
 
         // Verify validity of maker ask order
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
     }
 
     function testCanSignValidMakerBidEIP2098(uint256 price, uint256 itemId) public {
@@ -75,6 +75,6 @@ contract SignaturesEIP2098Test is ProtocolBase {
         signature = _eip2098Signature(signature);
 
         // Verify validity of maker bid order
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
     }
 }

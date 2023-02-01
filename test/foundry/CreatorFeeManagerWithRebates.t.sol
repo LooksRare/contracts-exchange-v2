@@ -54,7 +54,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk,
+            OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
@@ -69,7 +69,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
                 itemId: itemId
             });
 
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -90,7 +90,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Create order
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(erc721, address(weth), numberItemsInBundle);
 
         if (erc721 == address(mockERC721)) {
@@ -114,7 +114,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Sign the order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -153,7 +153,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
                 address(weth),
@@ -166,7 +166,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
 
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         /**
          * Different recipient
@@ -201,7 +201,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk
+            OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
                 address(weth),
@@ -214,7 +214,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
 
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Adjust ERC721 with royalties
         for (uint256 i; i < makerBid.itemIds.length; i++) {

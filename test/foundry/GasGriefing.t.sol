@@ -55,13 +55,7 @@ contract GasGriefingTest is ProtocolBase {
         bytes memory signature;
 
         // Prepare the taker bid
-        OrderStructs.TakerBid memory takerBid = OrderStructs.TakerBid(
-            takerUser,
-            makerAsk.minPrice,
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode()
-        );
+        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
         uint256 sellerProceed = (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP;
 
@@ -102,7 +96,7 @@ contract GasGriefingTest is ProtocolBase {
         uint256 numberPurchases = 3;
 
         OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
-        OrderStructs.TakerBid[] memory takerBids = new OrderStructs.TakerBid[](numberPurchases);
+        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
@@ -123,13 +117,7 @@ contract GasGriefingTest is ProtocolBase {
                 itemId: i // (0, 1, etc.)
             });
 
-            takerBids[i] = OrderStructs.TakerBid(
-                takerUser,
-                makerAsks[i].minPrice,
-                new uint256[](0),
-                new uint256[](0),
-                abi.encode()
-            );
+            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }
 
         // Other execution parameters

@@ -26,15 +26,16 @@ contract StrategyItemIdsRange is BaseStrategy {
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function executeStrategyWithTakerAsk(
-        OrderStructs.TakerAsk calldata takerAsk,
+        OrderStructs.Taker calldata takerAsk,
         OrderStructs.MakerBid calldata makerBid
     )
         external
         pure
         returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated)
     {
-        uint256 length = takerAsk.itemIds.length;
-        if (length != takerAsk.amounts.length) {
+        (itemIds, amounts) = abi.decode(takerAsk.additionalParameters, (uint256[], uint256[]));
+        uint256 length = itemIds.length;
+        if (length != amounts.length) {
             revert OrderInvalid();
         }
 
@@ -51,7 +52,7 @@ contract StrategyItemIdsRange is BaseStrategy {
         uint256 lastItemId;
 
         for (uint256 i; i < length; ) {
-            uint256 offeredItemId = takerAsk.itemIds[i];
+            uint256 offeredItemId = itemIds[i];
             // Force the client to sort the item ids in ascending order,
             // in order to prevent taker ask from providing duplicated
             // item ids
@@ -61,7 +62,7 @@ contract StrategyItemIdsRange is BaseStrategy {
                 }
             }
 
-            uint256 amount = takerAsk.amounts[i];
+            uint256 amount = amounts[i];
 
             _validateAmount(amount, makerBid.assetType);
 
@@ -82,13 +83,7 @@ contract StrategyItemIdsRange is BaseStrategy {
             revert OrderInvalid();
         }
 
-        if (makerBid.maxPrice != takerAsk.minPrice) {
-            revert OrderInvalid();
-        }
-
         price = makerBid.maxPrice;
-        itemIds = takerAsk.itemIds;
-        amounts = takerAsk.amounts;
         isNonceInvalidated = true;
     }
 

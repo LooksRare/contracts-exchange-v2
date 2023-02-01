@@ -29,7 +29,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         (
             OrderStructs.MakerBid memory makerBid,
-            OrderStructs.TakerAsk memory takerAsk,
+            OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
@@ -48,7 +48,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         takerAsk.recipient = randomRecipientSaleProceeds;
 
         // Verify maker bid order
-        _isMakerBidOrderValid(makerBid, signature);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         // Arrays for events
         address[2] memory expectedRecipients;
@@ -112,7 +112,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         (
             OrderStructs.MakerAsk memory makerAsk,
-            OrderStructs.TakerBid memory takerBid,
+            OrderStructs.Taker memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
                 askNonce: 0,
@@ -131,7 +131,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         takerBid.recipient = randomRecipientNFT;
 
         // Verify validity of maker ask order
-        _isMakerAskOrderValid(makerAsk, signature);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         // Arrays for events
         address[2] memory expectedRecipients;

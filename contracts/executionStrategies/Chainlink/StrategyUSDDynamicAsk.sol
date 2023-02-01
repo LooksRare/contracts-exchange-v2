@@ -61,7 +61,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
      * @dev The client has to provide the seller's desired sale price in USD as the additionalParameters
      */
     function executeStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         external
@@ -75,13 +75,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
         }
 
         for (uint256 i; i < itemIdsLength; ) {
-            uint256 makerAskAmount = makerAsk.amounts[i];
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || makerAskAmount != takerBid.amounts[i]) {
-                revert OrderInvalid();
-            }
-
-            _validateAmount(makerAskAmount, makerAsk.assetType);
-
+            _validateAmount(makerAsk.amounts[i], makerAsk.assetType);
             unchecked {
                 ++i;
             }
@@ -112,7 +106,8 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
             price = desiredSalePriceInETH;
         }
 
-        if (takerBid.maxPrice < price) {
+        uint256 maxPrice = abi.decode(takerBid.additionalParameters, (uint256));
+        if (maxPrice < price) {
             revert BidTooLow();
         }
 

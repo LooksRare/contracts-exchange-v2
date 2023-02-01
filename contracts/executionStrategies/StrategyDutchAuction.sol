@@ -28,7 +28,7 @@ contract StrategyDutchAuction is BaseStrategy {
      * @dev The client has to provide the seller's desired initial start price as the additionalParameters.
      */
     function executeStrategyWithTakerBid(
-        OrderStructs.TakerBid calldata takerBid,
+        OrderStructs.Taker calldata takerBid,
         OrderStructs.MakerAsk calldata makerAsk
     )
         external
@@ -42,14 +42,7 @@ contract StrategyDutchAuction is BaseStrategy {
         }
 
         for (uint256 i; i < itemIdsLength; ) {
-            uint256 amount = makerAsk.amounts[i];
-
-            _validateAmount(amount, makerAsk.assetType);
-
-            if (makerAsk.itemIds[i] != takerBid.itemIds[i] || amount != takerBid.amounts[i]) {
-                revert OrderInvalid();
-            }
-
+            _validateAmount(makerAsk.amounts[i], makerAsk.assetType);
             unchecked {
                 ++i;
             }
@@ -68,7 +61,8 @@ contract StrategyDutchAuction is BaseStrategy {
             ((endTime - block.timestamp) * startPrice + (block.timestamp - startTime) * makerAsk.minPrice) /
             (endTime - startTime);
 
-        if (takerBid.maxPrice < price) {
+        uint256 maxPrice = abi.decode(takerBid.additionalParameters, (uint256));
+        if (maxPrice < price) {
             revert BidTooLow();
         }
 

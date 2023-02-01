@@ -77,7 +77,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
@@ -101,7 +101,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
@@ -123,7 +123,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
@@ -139,7 +139,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
     }
 
     function testCannotValidateOrderIfMakerBidItemIdsIsEmpty() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
@@ -159,7 +159,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
     ) public asPrankedUser(takerUser) {
         vm.assume(makerBidItemIdsLength > 1 && makerBidItemIdsLength < 100_000);
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk) = _createMockMakerBidAndTakerAsk(
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
@@ -177,7 +177,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
     function testCannotValidateOrderIfMakerAskItemIdsIsEmpty() public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
 
@@ -189,7 +189,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
+        looksRareProtocol.executeTakerBid{value: makerAsk.minPrice}(
             takerBid,
             makerAsk,
             signature,
@@ -205,7 +205,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
         vm.assume(makerAskItemIdsLength > 1 && makerAskItemIdsLength < 100_000);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid) = _createMockMakerAskAndTakerBid(
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
 
@@ -216,7 +216,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: takerBid.maxPrice}(
+        looksRareProtocol.executeTakerBid{value: makerAsk.minPrice}(
             takerBid,
             makerAsk,
             signature,
@@ -248,7 +248,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Mint asset
         mockERC721.mint(makerUser, itemId);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.TakerBid memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
+        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Fake strategy
@@ -299,7 +299,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the order hash
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.TakerAsk memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
+        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Fake strategy

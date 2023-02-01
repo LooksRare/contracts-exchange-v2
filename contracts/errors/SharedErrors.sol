@@ -2,6 +2,11 @@
 pragma solidity ^0.8.17;
 
 /**
+ * @notice Transfer amount is invalid (For ERC721, any number that is not 1. For ERC1155, 0.)
+ */
+error AmountInvalid();
+
+/**
  * @notice Ask price is too high for the bid user.
  */
 error AskTooHigh();

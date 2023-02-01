@@ -8,7 +8,7 @@ import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLe
 
 // Interfaces and errors
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {AssetTypeInvalid, LengthsInvalid} from "./errors/SharedErrors.sol";
+import {AmountInvalid, AssetTypeInvalid, LengthsInvalid} from "./errors/SharedErrors.sol";
 
 // Constants
 import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";
@@ -46,13 +46,14 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @param from Sender address
      * @param to Recipient address
      * @param itemIds Array of itemIds
+     * @param amounts Array of amounts
      */
     function transferItemsERC721(
         address collection,
         address from,
         address to,
         uint256[] calldata itemIds,
-        uint256[] calldata
+        uint256[] calldata amounts
     ) external {
         uint256 length = itemIds.length;
         if (length == 0) {
@@ -62,6 +63,9 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         _isOperatorValidForTransfer(from, msg.sender);
 
         for (uint256 i; i < length; ) {
+            if (amounts[i] != 1) {
+                revert AmountInvalid();
+            }
             _executeERC721TransferFrom(collection, from, to, itemIds[i]);
             unchecked {
                 ++i;
@@ -131,6 +135,9 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             uint256 assetType = items[i].assetType;
             if (assetType == ASSET_TYPE_ERC721) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
+                    if (items[i].amounts[j] != 1) {
+                        revert AmountInvalid();
+                    }
                     _executeERC721TransferFrom(items[i].collection, from, to, items[i].itemIds[j]);
                     unchecked {
                         ++j;

@@ -10,7 +10,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Core contracts
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {ITransferManager, TransferManager} from "../../contracts/TransferManager.sol";
-import {AssetTypeInvalid, LengthsInvalid} from "../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, AssetTypeInvalid, LengthsInvalid} from "../../contracts/errors/SharedErrors.sol";
 
 // Mocks and other utils
 import {MockERC721} from "../mock/MockERC721.sol";
@@ -262,6 +262,26 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     /**
      * 2. Revertion patterns
      */
+    function testTransferItemsERC721AmountIsNotOne(uint256 amount) public {
+        vm.assume(amount != 1);
+
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        uint256 itemId = 500;
+
+        vm.prank(_sender);
+        mockERC721.mint(_sender, itemId);
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemId;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+
+        vm.expectRevert(AmountInvalid.selector);
+        vm.prank(_transferrer);
+        transferManager.transferItemsERC721(address(mockERC721), _sender, _recipient, itemIds, amounts);
+    }
 
     function testTransferBatchItemsAcrossCollectionZeroLength() public {
         _whitelistOperator(_transferrer);
@@ -271,6 +291,32 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
         vm.expectRevert(LengthsInvalid.selector);
         vm.prank(_transferrer);
+        transferManager.transferBatchItemsAcrossCollections(items, _sender, _recipient);
+    }
+
+    function testCannotBatchTransferIfERC721AmountIsNotOne(uint256 amount) public {
+        vm.assume(amount != 1);
+
+        _whitelistOperator(_transferrer);
+        _grantApprovals(_sender);
+
+        ITransferManager.BatchTransferItem[] memory items = new ITransferManager.BatchTransferItem[](1);
+
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = 0;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+
+        items[0] = ITransferManager.BatchTransferItem({
+            assetType: ASSET_TYPE_ERC721,
+            collection: address(mockERC721),
+            itemIds: itemIds,
+            amounts: amounts
+        });
+
+        vm.expectRevert(AmountInvalid.selector);
+        vm.prank(_sender);
         transferManager.transferBatchItemsAcrossCollections(items, _sender, _recipient);
     }
 

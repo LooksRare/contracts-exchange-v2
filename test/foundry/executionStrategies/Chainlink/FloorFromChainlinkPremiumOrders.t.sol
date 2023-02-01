@@ -6,7 +6,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {CurrencyInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, BidTooLow, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -166,7 +166,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
-        vm.expectRevert(errorSelector);
+        vm.expectRevert(AmountInvalid.selector);
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 

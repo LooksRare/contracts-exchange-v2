@@ -109,7 +109,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         assertEq(mockERC1155.balanceOf(_recipient, itemId), amount);
     }
 
-    function testTransferBatchItemsSameERC721() public {
+    function testTransferBatchItemsERC721() public {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 
@@ -133,7 +133,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         assertEq(mockERC721.ownerOf(tokenId2), _recipient);
     }
 
-    function testTransferBatchItemsSameERC1155() public {
+    function testTransferBatchItemsERC1155() public {
         _whitelistOperator(_transferrer);
         _grantApprovals(_sender);
 

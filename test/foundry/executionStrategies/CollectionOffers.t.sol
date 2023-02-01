@@ -8,7 +8,7 @@ import {Merkle} from "../../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid} from "../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -204,18 +204,6 @@ contract CollectionOrdersTest is ProtocolBase {
     function testTakerAskCollectionOrderWithMerkleTreeERC721() public {
         _setUpUsers();
 
-        // Initialize Merkle Tree
-        Merkle m = new Merkle();
-
-        bytes32[] memory merkleTreeIds = new bytes32[](5);
-        for (uint256 i; i < merkleTreeIds.length; i++) {
-            mockERC721.mint(takerUser, i);
-            merkleTreeIds[i] = keccak256(abi.encodePacked(i));
-        }
-
-        // Compute merkle root
-        bytes32 merkleRoot = m.getRoot(merkleTreeIds);
-
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
@@ -230,15 +218,17 @@ contract CollectionOrdersTest is ProtocolBase {
             itemId: 0 // Not used
         });
 
+        uint256 itemIdSold = 2;
+        (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
+            owner: takerUser,
+            numberOfItemsInMerkleTree: 5,
+            itemIdSold: itemIdSold
+        });
+
         makerBid.additionalParameters = abi.encode(merkleRoot);
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
-
-        uint256 itemIdSold = 2;
-        bytes32[] memory proof = m.getProof(merkleTreeIds, 2);
-
-        assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[2]));
 
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode(itemIdSold, proof));
@@ -265,18 +255,6 @@ contract CollectionOrdersTest is ProtocolBase {
         vm.assume(itemIdSold > 5);
         _setUpUsers();
 
-        // Initialize Merkle Tree
-        Merkle m = new Merkle();
-
-        bytes32[] memory merkleTreeIds = new bytes32[](5);
-        for (uint256 i; i < merkleTreeIds.length; i++) {
-            mockERC721.mint(takerUser, i);
-            merkleTreeIds[i] = keccak256(abi.encodePacked(i));
-        }
-
-        // Compute merkle root
-        bytes32 merkleRoot = m.getRoot(merkleTreeIds);
-
         // Prepare the order hash
         OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
@@ -291,16 +269,19 @@ contract CollectionOrdersTest is ProtocolBase {
             itemId: 0 // Not used
         });
 
+        (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
+            owner: takerUser,
+            numberOfItemsInMerkleTree: 5,
+            // Doesn't matter what itemIdSold is as we are are going to tamper with the proof
+            itemIdSold: 4
+        });
         makerBid.additionalParameters = abi.encode(merkleRoot);
 
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        bytes32[] memory proof = m.getProof(merkleTreeIds, 2);
-
-        assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[2]));
-
         // Prepare the taker ask
+        proof[0] = bytes32(0); // Tamper with the proof
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode(itemIdSold, proof));
 
         // Verify validity of maker bid order
@@ -348,15 +329,24 @@ contract CollectionOrdersTest is ProtocolBase {
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
-        vm.expectRevert(OrderInvalid.selector);
+        vm.expectRevert(AmountInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // 3. Amount is 0 (with merkle proof)
         makerBid.strategyId = 2;
-        makerBid.additionalParameters = abi.encode(mockMerkleRoot);
+        uint256 itemIdSold = 5;
+        (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
+            owner: takerUser,
+            numberOfItemsInMerkleTree: 6,
+            itemIdSold: itemIdSold
+        });
+
+        makerBid.additionalParameters = abi.encode(merkleRoot);
         makerBid.amounts[0] = 0;
-        takerAsk.additionalParameters = abi.encode(5, new bytes32[](0));
         signature = _signMakerBid(makerBid, makerUserPK);
+
+        takerAsk.additionalParameters = abi.encode(itemIdSold, proof);
+
         _assertOrderIsInvalid(makerBid, true);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
@@ -371,7 +361,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
-        vm.expectRevert(OrderInvalid.selector);
+        vm.expectRevert(AmountInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
@@ -424,9 +414,7 @@ contract CollectionOrdersTest is ProtocolBase {
     function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid, bool withProof) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
             makerBid,
-            withProof
-                ? StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector
-                : StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
+            withProof ? selectorWithProof : selectorNoProof
         );
         assertTrue(orderIsValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
@@ -435,12 +423,33 @@ contract CollectionOrdersTest is ProtocolBase {
     function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid, bool withProof) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
             makerBid,
-            withProof
-                ? StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector
-                : StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
+            withProof ? selectorWithProof : selectorNoProof
         );
 
         assertFalse(orderIsValid);
         assertEq(errorSelector, OrderInvalid.selector);
+    }
+
+    function _getMerkleRootAndProof(
+        address owner,
+        uint256 numberOfItemsInMerkleTree,
+        uint256 itemIdSold
+    ) private returns (bytes32 merkleRoot, bytes32[] memory proof) {
+        require(itemIdSold < numberOfItemsInMerkleTree, "Invalid itemIdSold");
+
+        // Initialize Merkle Tree
+        Merkle m = new Merkle();
+
+        bytes32[] memory merkleTreeIds = new bytes32[](numberOfItemsInMerkleTree);
+        for (uint256 i; i < numberOfItemsInMerkleTree; i++) {
+            mockERC721.mint(owner, i);
+            merkleTreeIds[i] = keccak256(abi.encodePacked(i));
+        }
+
+        // Compute merkle root
+        merkleRoot = m.getRoot(merkleTreeIds);
+        proof = m.getProof(merkleTreeIds, itemIdSold);
+
+        assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[itemIdSold]));
     }
 }

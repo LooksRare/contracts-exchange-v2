@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, FunctionSelectorInvalid} from "../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, BidTooLow, OrderInvalid, FunctionSelectorInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -379,7 +379,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
-        vm.expectRevert(OrderInvalid.selector);
+        vm.expectRevert(AmountInvalid.selector);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 

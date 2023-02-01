@@ -19,25 +19,9 @@ abstract contract BaseStrategy is IBaseStrategy {
         return true;
     }
 
-    /**
-     * @dev This is equivalent to
-     *      if (amount == 0 || (amount != 1 && assetType == 0)) {
-     *          revert OrderInvalid();
-     *      }
-     *
-     *      ERC721
-     *      1. assetType == 0, amount == 0 -> 1 && 1 == true
-     *      2. assetType == 0, amount == 1 -> 0 && 1 == false
-     *      3. assetType == 0, amount == 2 -> 1 && 1 == true
-     *
-     *      ERC1155
-     *      1. assetType == 1, amount == 0 -> 1 && 1 == true
-     *      2. assetType == 1, amount == 1 -> 0 && 0 == false
-     *      3. assetType == 1, amount == 2 -> 1 && 0 == false
-     */
-    function _validateAmount(uint256 amount, uint256 assetType) internal pure {
+    function _validateAmount(uint256 amount) internal pure {
         assembly {
-            if or(iszero(amount), and(xor(amount, 1), iszero(assetType))) {
+            if iszero(amount) {
                 mstore(0x00, OrderInvalid_error_selector)
                 revert(Error_selector_offset, OrderInvalid_error_length)
             }
@@ -45,6 +29,10 @@ abstract contract BaseStrategy is IBaseStrategy {
     }
 
     /**
+     * @dev This is equivalent to
+     *      if (amount == 0) {
+     *          return (0, OrderInvalid.selector);
+     *      }
      * @dev OrderInvalid_error_selector is a left-padded 4 bytes. When we return the error
      *      selector instead of reverting, the error selector needs to be right-padded by
      *      28 bytes. Therefore it needs to be left shifted by 28 x 8 = 224 bits.

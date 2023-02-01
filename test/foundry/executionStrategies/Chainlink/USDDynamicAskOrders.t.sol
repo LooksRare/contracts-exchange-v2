@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionMana
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -412,7 +412,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, OrderInvalid.selector);
 
         vm.prank(takerUser);
-        vm.expectRevert(errorSelector);
+        vm.expectRevert(AmountInvalid.selector);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 

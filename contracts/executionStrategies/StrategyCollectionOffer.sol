@@ -57,7 +57,7 @@ contract StrategyCollectionOffer is BaseStrategy {
         itemIds[0] = offeredItemId;
         isNonceInvalidated = true;
 
-        _validateAmount(amounts[0], makerBid.assetType);
+        _validateAmount(amounts[0]);
     }
 
     /**
@@ -93,7 +93,7 @@ contract StrategyCollectionOffer is BaseStrategy {
         isNonceInvalidated = true;
         uint256 makerAmount = amounts[0];
 
-        _validateAmount(makerAmount, makerBid.assetType);
+        _validateAmount(makerAmount);
 
         bytes32 root = abi.decode(makerBid.additionalParameters, (bytes32));
         bytes32 node = keccak256(abi.encodePacked(offeredItemId));

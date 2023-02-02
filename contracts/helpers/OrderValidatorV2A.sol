@@ -903,15 +903,7 @@ contract OrderValidatorV2A {
                 strategySelector
             );
 
-            if (isValid) {
-                validationCode = ORDER_EXPECTED_TO_BE_VALID;
-            } else {
-                if (errorSelector == OrderInvalid.selector) {
-                    validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
-                } else {
-                    validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
-                }
-            }
+            validationCode = _getOrderValidationCodeForNonStandardStrategies(isValid, errorSelector);
         }
     }
 
@@ -960,15 +952,7 @@ contract OrderValidatorV2A {
                 strategySelector
             );
 
-            if (isValid) {
-                validationCode = ORDER_EXPECTED_TO_BE_VALID;
-            } else {
-                if (errorSelector == OrderInvalid.selector) {
-                    validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
-                } else {
-                    validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
-                }
-            }
+            validationCode = _getOrderValidationCodeForNonStandardStrategies(isValid, errorSelector);
         }
     }
 
@@ -980,5 +964,20 @@ contract OrderValidatorV2A {
         creatorFeeManager = looksRareProtocol.creatorFeeManager();
         maxCreatorFeeBp = looksRareProtocol.maxCreatorFeeBp();
         royaltyFeeRegistry = creatorFeeManager.royaltyFeeRegistry();
+    }
+
+    function _getOrderValidationCodeForNonStandardStrategies(
+        bool isValid,
+        bytes4 errorSelector
+    ) private pure returns (uint256 validationCode) {
+        if (isValid) {
+            validationCode = ORDER_EXPECTED_TO_BE_VALID;
+        } else {
+            if (errorSelector == OrderInvalid.selector) {
+                validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
+            } else {
+                validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
+            }
+        }
     }
 }

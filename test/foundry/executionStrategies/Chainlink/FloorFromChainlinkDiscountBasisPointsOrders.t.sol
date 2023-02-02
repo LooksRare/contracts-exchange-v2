@@ -11,6 +11,7 @@ import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionMana
 // Errors and constants
 import {OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
+import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
 import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
@@ -40,6 +41,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _setPriceFeed();
 
         _assertOrderIsValid(makerBid);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
@@ -63,6 +65,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _setPriceFeed();
 
         _assertOrderIsValid(makerBid);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         _executeTakerAsk(takerAsk, makerBid, signature);
 
@@ -89,6 +92,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _setPriceFeed();
 
         _assertOrderIsValid(makerBid);
+        _assertValidMakerBidOrder(makerBid, signature);
 
         _executeTakerAsk(takerAsk, makerBid, signature);
 
@@ -115,6 +119,8 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
+
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);

@@ -1,11 +1,12 @@
 {
   "name": "contracts-exchange-v2",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "LooksRare exchange protocol smart contracts (v2)",
   "author": "LooksRare",
   "license": "MIT",
   "private": true,
   "keywords": [
+    "ethereum",
     "looksrare",
     "solidity"
   ],
@@ -16,8 +17,14 @@
     "url": "https://github.com/LooksRare/contracts-exchange-v2.git"
   },
   "files": [
-    "/abis/*.json",
-    "/contracts/**/*.sol",
+    "/contracts/*.sol",
+    "/contracts/constants/*.sol",
+    "/contracts/helpers/*.sol",
+    "/contracts/interfaces/*.sol",
+    "/contracts/libraries/*.sol",
+    "/contracts/errors/SharedErrors.sol",
+    "/contracts/executionStrategies/BaseStrategy.sol",
+    "/contracts/executionStrategies/StrategyCollectionOffer.sol",
     "/test/mock/MockRoyaltyFeeRegistry.sol"
   ],
   "scripts": {

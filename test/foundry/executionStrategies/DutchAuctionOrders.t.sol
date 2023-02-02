@@ -163,9 +163,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerAsk);
         _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.warp(block.timestamp + elapsedTime);
@@ -259,9 +257,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerAsk);
         _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.expectRevert(BidTooLow.selector);
@@ -286,9 +282,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
 
         vm.prank(takerUser);
@@ -396,6 +390,12 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
+    }
+
+    function _assertOrderIsValid(OrderStructs.MakerAsk memory makerAsk) private {
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
     function _assertOrderIsInvalid(OrderStructs.MakerAsk memory makerAsk) private returns (bytes4) {

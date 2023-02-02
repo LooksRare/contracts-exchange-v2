@@ -48,11 +48,11 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         transferManager.grantApprovals(approvedOperators);
     }
 
-    function _whitelistOperator(address transferrer) private {
+    function _allowOperator(address transferrer) private {
         vm.prank(_owner);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit OperatorWhitelisted(transferrer);
-        transferManager.whitelistOperator(transferrer);
+        emit OperatorAllowed(transferrer);
+        transferManager.allowOperator(transferrer);
     }
 
     function setUp() public asPrankedUser(_owner) {
@@ -70,7 +70,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
      */
 
     function testTransferSingleItemERC721() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         uint256 itemId = 500;
@@ -90,7 +90,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testTransferSingleItemERC1155() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         uint256 itemId = 1;
@@ -110,7 +110,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testTransferBatchItemsERC721() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         uint256 tokenId1 = 1;
@@ -134,7 +134,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testTransferBatchItemsERC1155() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         uint256 tokenId1 = 1;
@@ -161,7 +161,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testTransferBatchItemsAcrossCollectionERC721AndERC1155() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         ITransferManager.BatchTransferItem[] memory items = _generateValidBatchTransferItems();
@@ -193,7 +193,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     function testTransferItemsERC721AmountIsNotOne(uint256 amount) public {
         vm.assume(amount != 1);
 
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         uint256 itemId = 500;
@@ -211,7 +211,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testTransferSingleItemERC1155AmountIsZero() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         uint256 itemId = 500;
@@ -229,7 +229,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testTransferMultipleItemsERC1155AmountIsZero() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         uint256 itemIdOne = 500;
@@ -251,7 +251,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testTransferBatchItemsAcrossCollectionZeroLength() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         ITransferManager.BatchTransferItem[] memory items = new ITransferManager.BatchTransferItem[](0);
@@ -264,7 +264,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     function testCannotBatchTransferIfERC721AmountIsNotOne(uint256 amount) public {
         vm.assume(amount != 1);
 
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         ITransferManager.BatchTransferItem[] memory items = _generateValidBatchTransferItems();
@@ -276,7 +276,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testCannotBatchTransferIfERC1155AmountIsZero() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         ITransferManager.BatchTransferItem[] memory items = _generateValidBatchTransferItems();
@@ -288,7 +288,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testCannotBatchTransferIfAssetTypeIsNotZeroOrOne() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         ITransferManager.BatchTransferItem[] memory items = _generateValidBatchTransferItems();
@@ -301,7 +301,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testTransferBatchItemsAcrossCollectionPerCollectionItemIdsLengthZero() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         ITransferManager.BatchTransferItem[] memory items = _generateValidBatchTransferItems();
@@ -314,7 +314,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testCannotTransferERC721IfOperatorApprovalsRevokedByUserOrOperatorRemovedByOwner() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         // 1. User revokes the operator
@@ -346,7 +346,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testCannotTransferERC1155IfOperatorApprovalsRevokedByUserOrOperatorRemovedByOwner() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         // 1. User revokes the operator
@@ -378,7 +378,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     }
 
     function testCannotBatchTransferIfOperatorApprovalsRevoked() public {
-        _whitelistOperator(_transferrer);
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         // 1. User revokes the operator
@@ -449,57 +449,57 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         transferManager.revokeApprovals(emptyArrayAddresses);
     }
 
-    function testUserCannotGrantApprovalIfOperatorNotWhitelisted() public asPrankedUser(_owner) {
+    function testUserCannotGrantApprovalIfOperatorOperatorNotAllowed() public asPrankedUser(_owner) {
         address randomOperator = address(420);
-        transferManager.whitelistOperator(randomOperator);
-        vm.expectRevert(ITransferManager.AlreadyWhitelisted.selector);
-        transferManager.whitelistOperator(randomOperator);
+        transferManager.allowOperator(randomOperator);
+        vm.expectRevert(ITransferManager.OperatorAlreadyAllowed.selector);
+        transferManager.allowOperator(randomOperator);
     }
 
-    function testWhitelistOperatorNotOwner() public {
+    function testallowOperatorNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        transferManager.whitelistOperator(address(0));
+        transferManager.allowOperator(address(0));
     }
 
-    function testOwnerCannotWhitelistOperatorIfAlreadyWhitelisted() public asPrankedUser(_owner) {
+    function testOwnerCannotallowOperatorIfOperatorAlreadyAllowed() public asPrankedUser(_owner) {
         address randomOperator = address(420);
-        transferManager.whitelistOperator(randomOperator);
-        vm.expectRevert(ITransferManager.AlreadyWhitelisted.selector);
-        transferManager.whitelistOperator(randomOperator);
+        transferManager.allowOperator(randomOperator);
+        vm.expectRevert(ITransferManager.OperatorAlreadyAllowed.selector);
+        transferManager.allowOperator(randomOperator);
     }
 
-    function testOwnerCannotRemoveOperatorIfNotWhitelisted() public asPrankedUser(_owner) {
+    function testOwnerCannotRemoveOperatorIfOperatorNotAllowed() public asPrankedUser(_owner) {
         address notOperator = address(420);
-        vm.expectRevert(ITransferManager.NotWhitelisted.selector);
+        vm.expectRevert(ITransferManager.OperatorNotAllowed.selector);
         transferManager.removeOperator(notOperator);
     }
 
-    function testUserCannotGrantApprovalsIfNotWhitelisted() public {
+    function testUserCannotGrantApprovalsIfOperatorNotAllowed() public {
         address[] memory approvedOperators = new address[](1);
         approvedOperators[0] = _transferrer;
 
-        vm.expectRevert(ITransferManager.NotWhitelisted.selector);
+        vm.expectRevert(ITransferManager.OperatorNotAllowed.selector);
         vm.prank(_sender);
         transferManager.grantApprovals(approvedOperators);
     }
 
-    function testUserCannotGrantApprovalsIfAlreadyApproved() public {
-        _whitelistOperator(_transferrer);
+    function testUserCannotGrantApprovalsIfOperatorAlreadyApprovedByUser() public {
+        _allowOperator(_transferrer);
         _grantApprovals(_sender);
 
         address[] memory approvedOperators = new address[](1);
         approvedOperators[0] = _transferrer;
 
-        vm.expectRevert(ITransferManager.AlreadyApproved.selector);
+        vm.expectRevert(ITransferManager.OperatorAlreadyApprovedByUser.selector);
         vm.prank(_sender);
         transferManager.grantApprovals(approvedOperators);
     }
 
-    function testUserCannotRevokeApprovalsIfNotApproved() public {
+    function testUserCannotRevokeApprovalsIfOperatorNotApprovedByUser() public {
         address[] memory approvedOperators = new address[](1);
         approvedOperators[0] = _transferrer;
 
-        vm.expectRevert(ITransferManager.NotApproved.selector);
+        vm.expectRevert(ITransferManager.OperatorNotApprovedByUser.selector);
         vm.prank(_sender);
         transferManager.revokeApprovals(approvedOperators);
     }

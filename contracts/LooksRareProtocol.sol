@@ -127,8 +127,8 @@ contract LooksRareProtocol is
     ) external nonReentrant {
         address currency = makerBid.currency;
 
-        // Verify whether the currency is whitelisted but is not ETH (address(0))
-        if (!isCurrencyWhitelisted[currency] || currency == address(0)) {
+        // Verify whether the currency is allowed and is not ETH (address(0))
+        if (!isCurrencyAllowed[currency] || currency == address(0)) {
             revert CurrencyInvalid();
         }
 
@@ -155,8 +155,8 @@ contract LooksRareProtocol is
     ) external payable nonReentrant {
         address currency = makerAsk.currency;
 
-        // Verify whether the currency is whitelisted
-        if (!isCurrencyWhitelisted[currency]) {
+        // Verify whether the currency is allowed for trading.
+        if (!isCurrencyAllowed[currency]) {
             revert CurrencyInvalid();
         }
 
@@ -192,9 +192,9 @@ contract LooksRareProtocol is
             revert LengthsInvalid();
         }
 
-        // Verify whether the currency at array = 0 is whitelisted
+        // Verify whether the currency at index = 0 is allowed for trading
         address currency = makerAsks[0].currency;
-        if (!isCurrencyWhitelisted[currency]) {
+        if (!isCurrencyAllowed[currency]) {
             revert CurrencyInvalid();
         }
 
@@ -208,7 +208,7 @@ contract LooksRareProtocol is
                 for (uint256 i; i < length; ) {
                     OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
 
-                    // Verify currency is the same
+                    // Verify the currency is the same
                     if (i != 0) {
                         if (makerAsk.currency != currency) {
                             revert CurrencyInvalid();
@@ -233,7 +233,7 @@ contract LooksRareProtocol is
                 for (uint256 i; i < length; ) {
                     OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
 
-                    // Verify currency is the same
+                    // Verify the currency is the same
                     if (i != 0) {
                         if (makerAsk.currency != currency) {
                             revert CurrencyInvalid();

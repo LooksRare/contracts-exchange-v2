@@ -14,7 +14,7 @@ interface IAffiliateManager {
 
     /**
      * @notice It is emitted if the affiliate program is activated or deactivated.
-     * @param isActive Whether the affiliate program is active after the update.
+     * @param isActive Whether the affiliate program is active after the update
      */
     event NewAffiliateProgramStatus(bool isActive);
 

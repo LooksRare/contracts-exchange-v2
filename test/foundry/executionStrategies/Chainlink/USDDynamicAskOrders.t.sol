@@ -310,7 +310,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     function testCannotExecuteIfNotWETHOrETH() public {
         MockERC20 fakeCurrency = new MockERC20();
         vm.prank(_owner);
-        looksRareProtocol.updateCurrencyWhitelistStatus(address(fakeCurrency), true);
+        looksRareProtocol.updateCurrencyStatus(address(fakeCurrency), true);
 
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,

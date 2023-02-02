@@ -7,11 +7,11 @@ pragma solidity ^0.8.17;
  */
 interface ITransferManager {
     /**
-     * @dev Struct only used for transferBatchItemsAcrossCollections
+     * @notice This struct is only used for transferBatchItemsAcrossCollections.
      * @param collection Collection address
      * @param assetType 0 for ERC721, 1 for ERC1155
-     * @param itemids Array of item IDs to be transferred
-     * @param amounts Array of transfer amounts
+     * @param itemIds Array of item ids to transfer
+     * @param amounts Array of amounts to transfer
      */
     struct BatchTransferItem {
         address collection;
@@ -21,53 +21,58 @@ interface ITransferManager {
     }
 
     /**
-     * @notice It is emitted if new operators are added to the user's whitelist.
+     * @notice It is emitted if operators' approvals to transfer NFTs are granted by a user.
      * @param user Address of the user
      * @param operators Array of operator addresses
      */
     event ApprovalsGranted(address user, address[] operators);
 
     /**
-     * @notice It is emitted if existing operators are removed from the user's whitelist.
+     * @notice It is emitted if operators' approvals to transfer NFTs are revoked by a user.
      * @param user Address of the user
      * @param operators Array of operator addresses
      */
     event ApprovalsRemoved(address user, address[] operators);
 
     /**
-     * @notice It is emitted if an existing operator is removed from the whitelist.
+     * @notice It is emitted if a new operator is added to the global allowlist.
+     * @param operator Operator address
+     */
+    event OperatorAllowed(address operator);
+
+    /**
+     * @notice It is emitted if an operator is removed from the global allowlist.
      * @param operator Operator address
      */
     event OperatorRemoved(address operator);
 
     /**
-     * @notice It is emitted if a new operator is added to the whitelist.
-     * @param operator Operator address
+     * @notice It is returned if the operator to approve has already been approved by the user.
      */
-    event OperatorWhitelisted(address operator);
+    error OperatorAlreadyApprovedByUser();
 
     /**
-     * @notice It is returned if the transfer caller is already approved by the user.
+     * @notice It is returned if the operator to revoke has not been previously approved by the user.
      */
-    error AlreadyApproved();
+    error OperatorNotApprovedByUser();
 
     /**
-     * @notice It is returned if the transfer caller is already whitelisted by the owner.
+     * @notice It is returned if the transfer caller is already allowed by the owner.
+     * @dev This error can only be returned for owner operations.
      */
-    error AlreadyWhitelisted();
+    error OperatorAlreadyAllowed();
 
     /**
-     * @notice It is returned if the transfer caller to approve isn't approved by the user.
+     * @notice It is returned if the operator to approve is not in the global allowlist defined by the owner.
+     * @dev This error can be returned if the user tries to grant approval to an operator address not in the
+     *      allowlist or if the owner tries to remove the operator from the global allowlist.
      */
-    error NotApproved();
+    error OperatorNotAllowed();
 
     /**
-     * @notice It is returned if the transfer caller to approve isn't whitelisted by the owner.
-     */
-    error NotWhitelisted();
-
-    /**
-     * @notice It is returned if the transfer caller is invalid
+     * @notice It is returned if the transfer caller is invalid.
+     *         For a transfer called to be valid, the operator must be in the global allowlist and
+     *         approved by the 'from' user.
      */
     error TransferCallerInvalid();
 }

@@ -159,7 +159,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         });
 
         vm.prank(_owner);
-        looksRareProtocol.updateCurrencyWhitelistStatus(address(looksRareToken), true);
+        looksRareProtocol.updateCurrencyStatus(address(looksRareToken), true);
         makerBid.currency = address(looksRareToken);
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);

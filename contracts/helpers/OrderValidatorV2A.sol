@@ -62,7 +62,7 @@ interface IExtendedExecutionStrategy {
  * @title OrderValidatorV2A
  * @notice This contract is used to check the validity of maker ask/bid orders in the LooksRareProtocol (v2).
  *         It performs checks for:
- *         1. Internal whitelist related issues (i.e. currency or strategy not whitelisted)
+ *         1. Protocol allowlist issues (i.e. currency or strategy not allowed)
  *         2. Maker order-specific issues (e.g., order invalid due to format or other-strategy specific issues)
  *         3. Nonce related issues (e.g., nonce executed or cancelled)
  *         4. Signature related issues and merkle tree parameters
@@ -216,7 +216,7 @@ contract OrderValidatorV2A {
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerAsk.hash();
 
-        validationCodes[0] = _checkValidityMakerAskWhitelists(makerAsk.currency, makerAsk.strategyId);
+        validationCodes[0] = _checkValidityMakerAskCurrencyAndStrategy(makerAsk.currency, makerAsk.strategyId);
 
         // It can exit here if the strategy does not exist.
         // However, if the strategy is invalid, it can continue the execution.
@@ -269,7 +269,7 @@ contract OrderValidatorV2A {
     ) public view returns (uint256[9] memory validationCodes) {
         bytes32 orderHash = makerBid.hash();
 
-        validationCodes[0] = _checkValidityMakerBidWhitelists(makerBid.currency, makerBid.strategyId);
+        validationCodes[0] = _checkValidityMakerBidCurrencyAndStrategy(makerBid.currency, makerBid.strategyId);
 
         // It can exit here if the strategy does not exist.
         // However, if the strategy is invalid, it can continue the execution.
@@ -386,17 +386,17 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function is internal and verifies the validity for currency/strategy whitelists.
+     * @notice This function is internal and verifies the validity of the currency and strategy for the maker ask order.
      * @param currency Address of the currency
      * @param strategyId Strategy id
      * @return validationCode Validation code
      */
-    function _checkValidityMakerAskWhitelists(
+    function _checkValidityMakerAskCurrencyAndStrategy(
         address currency,
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
-        // 1. Verify whether the currency is whitelisted
-        if (!looksRareProtocol.isCurrencyWhitelisted(currency)) {
+        // 1. Verify whether the currency is allowed
+        if (!looksRareProtocol.isCurrencyAllowed(currency)) {
             return CURRENCY_NOT_ALLOWED;
         }
 
@@ -418,17 +418,17 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function is internal and verifies the validity for makerBid currency/strategy whitelists.
+     * @notice This function is internal and verifies the validity of the currency and strategy for the maker bid order.
      * @param currency Address of the currency
      * @param strategyId Strategy id
      * @return validationCode Validation code
      */
-    function _checkValidityMakerBidWhitelists(
+    function _checkValidityMakerBidCurrencyAndStrategy(
         address currency,
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
-        // 1. Verify whether the currency is whitelisted
-        if (currency == address(0) || !looksRareProtocol.isCurrencyWhitelisted(currency)) {
+        // 1. Verify whether the currency is allowed
+        if (currency == address(0) || !looksRareProtocol.isCurrencyAllowed(currency)) {
             return CURRENCY_NOT_ALLOWED;
         }
 
@@ -882,7 +882,7 @@ contract OrderValidatorV2A {
             return NO_TRANSFER_MANAGER_APPROVAL_BY_USER_FOR_EXCHANGE;
         }
 
-        if (!transferManager.isOperatorWhitelisted(address(looksRareProtocol))) {
+        if (!transferManager.isOperatorAllowed(address(looksRareProtocol))) {
             return TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE;
         }
     }

@@ -247,9 +247,9 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 
         // Operations
-        transferManager.whitelistOperator(address(looksRareProtocol));
-        looksRareProtocol.updateCurrencyWhitelistStatus(ETH, true);
-        looksRareProtocol.updateCurrencyWhitelistStatus(address(weth), true);
+        transferManager.allowOperator(address(looksRareProtocol));
+        looksRareProtocol.updateCurrencyStatus(ETH, true);
+        looksRareProtocol.updateCurrencyStatus(address(weth), true);
         looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
 
         // Fetch domain separator and store it as one of the operators

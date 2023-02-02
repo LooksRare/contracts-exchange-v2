@@ -7,7 +7,7 @@ pragma solidity ^0.8.17;
  */
 interface IRoyaltyFeeRegistry {
     /**
-     * @notice This function is used to retrieve the royalty information for a collection at a given transaction price.
+     * @notice This function returns the royalty information for a collection at a given transaction price.
      * @param collection Collection address
      * @param price Transaction price
      * @return receiver Receiver address

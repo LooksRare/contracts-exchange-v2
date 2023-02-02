@@ -17,6 +17,7 @@
     "url": "https://github.com/LooksRare/contracts-exchange-v2.git"
   },
   "files": [
+    "/abis/*.json",
     "/contracts/*.sol",
     "/contracts/constants/*.sol",
     "/contracts/helpers/*.sol",
@@ -36,6 +37,7 @@
     "format:write": "prettier --write '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "lint": "eslint '**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky install",
+    "release": "hardhat export-abi && release-it",
     "test:forge:gas:coverage": "FOUNDRY_PROFILE=local forge test --gas-report",
     "test:forge": "FOUNDRY_PROFILE=local forge test -vv",
     "test:forge:coverage": "forge coverage --report lcov && LCOV_EXCLUDE=(\"test/*\" \"contracts/libraries/*\" \"contracts/helpers/ProtocolHelpers.sol\") echo $LCOV_EXCLUDE | xargs lcov --output-file lcov-filtered.info --remove lcov.info genhtml lcov-filtered.info --output-directory out && open out/index.html",

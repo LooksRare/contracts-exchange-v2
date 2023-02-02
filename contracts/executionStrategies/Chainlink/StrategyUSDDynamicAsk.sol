@@ -74,13 +74,6 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
             revert OrderInvalid();
         }
 
-        for (uint256 i; i < itemIdsLength; ) {
-            _validateAmount(makerAsk.amounts[i], makerAsk.assetType);
-            unchecked {
-                ++i;
-            }
-        }
-
         CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();

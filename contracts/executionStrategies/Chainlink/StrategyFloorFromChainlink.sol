@@ -272,7 +272,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     {
         CurrencyValidator.allowNativeOrAllowedCurrency(makerAsk.currency, WETH);
 
-        if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
+        if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1) {
             revert OrderInvalid();
         }
 
@@ -334,7 +334,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
             revert CurrencyInvalid();
         }
 
-        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
+        if (makerBid.amounts.length != 1) {
             revert OrderInvalid();
         }
 

@@ -27,7 +27,7 @@ contract InheritedStrategy {
      * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      */
     function _verifyStandardSaleStrategyWithMakerAsk(OrderStructs.MakerAsk calldata makerAsk) internal pure {
-        _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerAsk.assetType, makerAsk.amounts, makerAsk.itemIds);
+        _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerAsk.amounts, makerAsk.itemIds);
     }
 
     /**
@@ -36,11 +36,10 @@ contract InheritedStrategy {
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      */
     function _verifyStandardSaleStrategyWithMakerBid(OrderStructs.MakerBid calldata makerBid) internal pure {
-        _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerBid.assetType, makerBid.amounts, makerBid.itemIds);
+        _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerBid.amounts, makerBid.itemIds);
     }
 
     function _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(
-        uint256 assetType,
         uint256[] calldata amounts,
         uint256[] calldata itemIds
     ) private pure {
@@ -68,9 +67,7 @@ contract InheritedStrategy {
                 end := shl(5, amountsLength)
             }
 
-            let _assetType := assetType
             let amountsOffset := amounts.offset
-            let itemIdsOffset := itemIds.offset
 
             for {
 
@@ -85,14 +82,8 @@ contract InheritedStrategy {
                  *
                  * for (uint256 i = end - 1; i >= 0; i--) {
                  *   uint256 amount = amounts[i];
-                 *   if (amount != 1) {
-                 *     if (amount == 0) {
-                 *        revert OrderInvalid();
-                 *     }
-                 *
-                 *     if (_assetType == 0) {
-                 *        revert OrderInvalid();
-                 *     }
+                 *   if (amount == 0) {
+                 *      revert OrderInvalid();
                  *   }
                  * }
                  */
@@ -100,9 +91,7 @@ contract InheritedStrategy {
 
                 let amount := calldataload(add(amountsOffset, end))
 
-                let invalidOrder := or(iszero(amount), and(xor(amount, 1), iszero(_assetType)))
-
-                if invalidOrder {
+                if iszero(amount) {
                     mstore(0x00, OrderInvalid_error_selector)
                     revert(Error_selector_offset, OrderInvalid_error_length)
                 }

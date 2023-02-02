@@ -55,15 +55,6 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
             countItemsFillable < countItemsToFill + countItemsFilled
         ) revert OrderInvalid();
 
-        for (uint256 i; i < countItemsToFill; ) {
-            if (amounts[i] != 1) {
-                revert OrderInvalid();
-            }
-            unchecked {
-                ++i;
-            }
-        }
-
         price *= countItemsToFill;
 
         if (countItemsToFill + countItemsFilled == countItemsFillable) {

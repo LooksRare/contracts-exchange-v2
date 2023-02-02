@@ -8,7 +8,7 @@ import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/exe
 import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
 
 // Shared errors
-import {AskTooHigh, OrderInvalid, CurrencyInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, AskTooHigh, OrderInvalid, CurrencyInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Mocks and other tests
@@ -130,7 +130,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
-        vm.expectRevert(errorSelector);
+        vm.expectRevert(AmountInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 

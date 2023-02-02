@@ -291,16 +291,10 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         vm.warp(latencyViolationTimestamp);
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, PriceNotRecentEnough.selector);
+        bytes4 errorSelector = PriceNotRecentEnough.selector;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE
-        );
-        assertEq(validationCodes[1], MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _assertOrderIsInvalid(makerAsk, errorSelector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);

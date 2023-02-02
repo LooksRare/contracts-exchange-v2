@@ -9,7 +9,7 @@ import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManage
 // Errors and constants
 import {AmountInvalid, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {ChainlinkPriceInvalid, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
-import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
+import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, STRATEGY_NOT_ACTIVE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 import {ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
 // Strategies
@@ -405,9 +405,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        _assertOrderIsInvalid(makerAsk, OrderInvalid.selector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -426,9 +425,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerAsk);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.expectRevert(BidTooLow.selector);
         vm.prank(takerUser);
@@ -448,9 +446,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerAsk);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         vm.prank(takerUser);
@@ -475,5 +472,17 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
+    }
+
+    function _assertOrderIsInvalid(OrderStructs.MakerAsk memory makerAsk, bytes4 expectedErrorSelector) private {
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, expectedErrorSelector);
+    }
+
+    function _assertOrderIsValid(OrderStructs.MakerAsk memory makerAsk) private {
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
     }
 }

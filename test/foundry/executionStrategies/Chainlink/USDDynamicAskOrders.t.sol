@@ -6,21 +6,19 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
-// Shared errors
+// Errors and constants
 import {AmountInvalid, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {InvalidChainlinkPrice, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
 import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
+import {ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
 // Strategies
 import {StrategyChainlinkUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkUSDDynamicAsk.sol";
-import {BaseStrategyChainlinkPriceLatency} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {MockERC20} from "../../../mock/MockERC20.sol";
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
-
-// Constants
-import {ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     StrategyChainlinkUSDDynamicAsk public strategyUSDDynamicAsk;
@@ -143,7 +141,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(-1);
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -152,7 +150,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
         (isValid, errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -295,7 +293,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+        assertEq(errorSelector, PriceNotRecentEnough.selector);
 
         uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,

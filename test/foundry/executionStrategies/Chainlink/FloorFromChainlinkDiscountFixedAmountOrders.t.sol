@@ -5,8 +5,8 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionManager.sol";
 
-// Shared errors
-import {OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+// Errors
+import {DiscountGreaterThanFloorPrice} from "../../../../contracts/errors/ChainlinkErrors.sol";
 
 // Strategies
 import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
@@ -117,7 +117,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyChainlinkFloor.DiscountGreaterThanFloorPrice.selector);
+        assertEq(errorSelector, DiscountGreaterThanFloorPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -129,7 +129,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         (isValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyChainlinkFloor.DiscountGreaterThanFloorPrice.selector);
+        assertEq(errorSelector, DiscountGreaterThanFloorPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);

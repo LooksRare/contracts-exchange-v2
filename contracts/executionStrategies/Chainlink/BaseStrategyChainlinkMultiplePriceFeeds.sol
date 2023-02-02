@@ -8,7 +8,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
 // Chainlink errors
-import {PriceFeedAlreadySet, InvalidDecimals} from "../../errors/ChainlinkErrors.sol";
+import {PriceFeedAlreadySet, DecimalsInvalid} from "../../errors/ChainlinkErrors.sol";
 
 /**
  * @title BaseStrategyChainlinkMultiplePriceFeeds
@@ -48,7 +48,7 @@ contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLa
         }
 
         if (AggregatorV3Interface(_priceFeed).decimals() != 18) {
-            revert InvalidDecimals();
+            revert DecimalsInvalid();
         }
 
         priceFeeds[_collection] = _priceFeed;

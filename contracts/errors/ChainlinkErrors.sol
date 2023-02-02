@@ -9,14 +9,14 @@ error DiscountGreaterThanFloorPrice();
 /**
  * @notice It is returned if the Chainlink price is invalid (e.g. negative).
  */
-error InvalidChainlinkPrice();
+error ChainlinkPriceInvalid();
 
 /**
  * @notice It is returned if the decimals from the NFT floor price feed is invalid.
  *         Chainlink price feeds are expected to have 18 decimals.
  * @dev It can only be returned for owner operations.
  */
-error InvalidDecimals();
+error DecimalsInvalid();
 
 /**
  * @notice It is returned if the latency tolerance is set too high (i.e. greater than 3,600 sec).

@@ -10,7 +10,7 @@ import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 
 // Errors
 import {AskTooHigh, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../errors/SharedErrors.sol";
-import {DiscountGreaterThanFloorPrice, InvalidChainlinkPrice, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
+import {DiscountGreaterThanFloorPrice, ChainlinkPriceInvalid, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -399,7 +399,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
 
         // Verify the answer is not null or negative
         if (answer <= 0) {
-            revert InvalidChainlinkPrice();
+            revert ChainlinkPriceInvalid();
         }
 
         // Verify the latency
@@ -420,7 +420,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
 
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV3Interface(priceFeed).latestRoundData();
         if (answer <= 0) {
-            return (floorPrice, InvalidChainlinkPrice.selector);
+            return (floorPrice, ChainlinkPriceInvalid.selector);
         }
         if (block.timestamp - updatedAt > maxLatency) {
             return (floorPrice, PriceNotRecentEnough.selector);

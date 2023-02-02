@@ -7,7 +7,7 @@ import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/
 
 // Errors and constants
 import {AmountInvalid, AskTooHigh, CurrencyInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
-import {InvalidChainlinkPrice, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
+import {ChainlinkPriceInvalid, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
 import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Mocks and other tests
@@ -77,7 +77,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, ChainlinkPriceInvalid.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -86,7 +86,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         (isValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, ChainlinkPriceInvalid.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);

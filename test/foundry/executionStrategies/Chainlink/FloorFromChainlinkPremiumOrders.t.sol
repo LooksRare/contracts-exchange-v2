@@ -226,13 +226,13 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         premium = _premium;
     }
 
-    function _assertOrderIsValid(OrderStructs.MakerAsk memory makerAsk) private {
+    function _assertOrderIsValid(OrderStructs.MakerAsk memory makerAsk) internal {
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
-    function _assertOrderIsInvalid(OrderStructs.MakerAsk memory makerAsk, bytes4 expectedErrorSelector) private {
+    function _assertOrderIsInvalid(OrderStructs.MakerAsk memory makerAsk, bytes4 expectedErrorSelector) internal {
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, expectedErrorSelector);

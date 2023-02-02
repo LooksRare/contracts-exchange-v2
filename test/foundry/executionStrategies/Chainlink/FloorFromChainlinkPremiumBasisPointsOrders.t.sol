@@ -11,6 +11,9 @@ import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/
 // Other tests
 import {FloorFromChainlinkPremiumOrdersTest} from "./FloorFromChainlinkPremiumOrders.t.sol";
 
+// Errors and constants
+import {STRATEGY_NOT_ACTIVE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
+
 /**
  * @notice The primary scenarios are tested in FloorFromChainlinkPremiumFixedAmountOrdersTest
  */
@@ -34,9 +37,8 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerAsk);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -72,9 +74,8 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         _setPriceFeed();
 
         // Verify it is valid
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(newMakerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(newMakerAsk);
+        _assertValidMakerAskOrder(newMakerAsk, signature);
 
         _executeTakerBid(newTakerBid, newMakerAsk, signature);
 
@@ -104,9 +105,8 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         _setPriceFeed();
 
         // Verify it is valid
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerAsk);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         _executeTakerBid(takerBid, makerAsk, signature);
 

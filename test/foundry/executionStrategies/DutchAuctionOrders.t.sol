@@ -83,6 +83,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         newMakerAsk.endTime = endTime;
         newMakerAsk.additionalParameters = abi.encode(startPrice);
 
+        // Using startPrice as the maxPrice
         newTakerBid = OrderStructs.Taker(takerUser, abi.encode(startPrice));
     }
 

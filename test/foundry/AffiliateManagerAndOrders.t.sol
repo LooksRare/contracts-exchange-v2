@@ -18,6 +18,10 @@ import {MockERC20} from "../mock/MockERC20.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
+    function setUp() public {
+        _setUp();
+    }
+
     // Affiliate rate
     uint256 internal _affiliateRate = 2_000;
     uint256 private constant price = 1 ether; // Fixed price of sale

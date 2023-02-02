@@ -18,6 +18,10 @@ import {AssetTypeInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract TransferSelectorNFTTest is ProtocolBase, ITransferSelectorNFT {
+    function setUp() public {
+        _setUp();
+    }
+
     function testCannotTransferIfNoManagerSelectorForAssetType() public {
         _setUpUsers();
         uint256 price = 0.1 ether;

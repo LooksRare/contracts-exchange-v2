@@ -20,6 +20,10 @@ import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
 abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrdersTest {
     uint256 internal premium;
 
+    function setUp() public virtual override {
+        super.setUp();
+    }
+
     function testFloorFromChainlinkPremiumAdditionalParametersNotProvided() public {
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium

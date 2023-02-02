@@ -23,8 +23,8 @@ contract GasGriefingTest is ProtocolBase {
     event Deposit(address indexed from, uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
-    function setUp() public override {
-        super.setUp();
+    function setUp() public {
+        _setUp();
         gasGriefer = address(new GasGriefer());
         _setUpUser(gasGriefer);
         _setUpUser(takerUser);

@@ -16,6 +16,10 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract DomainSeparatorUpdatesTest is ProtocolBase {
+    function setUp() public {
+        _setUp();
+    }
+
     function testUpdateDomainSeparator(uint64 newChainId) public asPrankedUser(_owner) {
         vm.assume(newChainId != block.chainid);
 

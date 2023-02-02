@@ -27,8 +27,8 @@ contract LooksRareProtocolTest is ProtocolBase {
     // Mock files
     MockERC20 private mockERC20;
 
-    function setUp() public override {
-        super.setUp();
+    function setUp() public {
+        _setUp();
         vm.prank(_owner);
         mockERC20 = new MockERC20();
     }

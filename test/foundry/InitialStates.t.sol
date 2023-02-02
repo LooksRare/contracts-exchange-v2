@@ -8,6 +8,10 @@ import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol"
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 contract InitialStatesTest is ProtocolBase, IStrategyManager {
+    function setUp() public {
+        _setUp();
+    }
+
     /**
      * Verify initial post-deployment states are as expected
      */

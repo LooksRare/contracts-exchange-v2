@@ -17,6 +17,10 @@ import {FloorFromChainlinkOrdersTest} from "./FloorFromChainlinkOrders.t.sol";
 abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrdersTest {
     uint256 internal discount;
 
+    function setUp() public virtual override {
+        super.setUp();
+    }
+
     function testFloorFromChainlinkDiscountPriceFeedNotAvailable() public {
         (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount

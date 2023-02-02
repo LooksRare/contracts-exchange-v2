@@ -18,6 +18,10 @@ import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol"
 contract NonceInvalidationTest is INonceManager, ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
 
+    function setUp() public {
+        _setUp();
+    }
+
     /**
      * Cannot execute an order if subset nonce is used
      */

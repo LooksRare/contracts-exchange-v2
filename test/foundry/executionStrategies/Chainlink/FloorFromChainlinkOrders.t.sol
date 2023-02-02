@@ -39,9 +39,9 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     bytes4 internal selector;
     bool internal isMakerBid;
 
-    function setUp() public virtual override {
+    function setUp() public virtual {
         vm.createSelectFork(vm.rpcUrl("goerli"), FORKED_BLOCK_NUMBER);
-        super.setUp();
+        _setUp();
         _setUpUsers();
         _setUpNewStrategy();
     }

@@ -18,8 +18,8 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
 
-    function setUp() public override {
-        super.setUp();
+    function setUp() public {
+        _setUp();
         _setUpUsers();
     }
 

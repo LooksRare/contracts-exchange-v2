@@ -23,6 +23,10 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     StrategyItemIdsRange public strategyItemIdsRange;
     bytes4 public selector = StrategyItemIdsRange.executeStrategyWithTakerAsk.selector;
 
+    function setUp() public {
+        _setUp();
+    }
+
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyItemIdsRange = new StrategyItemIdsRange();
         looksRareProtocol.addStrategy(

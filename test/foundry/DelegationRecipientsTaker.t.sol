@@ -12,6 +12,10 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract DelegationRecipientsTakerTest is ProtocolBase {
+    function setUp() public {
+        _setUp();
+    }
+
     // Fixed price of sale
     uint256 private constant price = 1 ether;
 

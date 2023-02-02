@@ -24,6 +24,10 @@ contract FalseBaseStrategy is IBaseStrategy {
 }
 
 contract StrategyManagerTest is ProtocolBase, IStrategyManager {
+    function setUp() public {
+        _setUp();
+    }
+
     /**
      * Owner can discontinue strategy
      */

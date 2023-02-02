@@ -23,6 +23,10 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
     bytes4 public selector = StrategyDutchAuction.executeStrategyWithTakerBid.selector;
 
+    function setUp() public {
+        _setUp();
+    }
+
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyDutchAuction = new StrategyDutchAuction();
         looksRareProtocol.addStrategy(

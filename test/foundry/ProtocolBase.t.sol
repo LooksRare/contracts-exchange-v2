@@ -233,7 +233,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         );
     }
 
-    function setUp() public virtual {
+    function _setUp() internal {
         vm.startPrank(_owner);
         weth = new WETH();
         looksRareToken = new MockERC20();

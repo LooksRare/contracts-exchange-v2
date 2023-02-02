@@ -37,8 +37,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         );
     }
 
-    function setUp() public virtual override {
-        super.setUp();
+    function setUp() public {
+        _setUp();
         creatorFeeManagerWithRoyalties = new CreatorFeeManagerWithRoyalties(address(royaltyFeeRegistry));
         vm.startPrank(_owner);
         looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManagerWithRoyalties));

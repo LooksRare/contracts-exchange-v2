@@ -8,8 +8,9 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 
-// Shared errors
+// Errors
 import {AskTooHigh, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../errors/SharedErrors.sol";
+import {DiscountGreaterThanFloorPrice, InvalidChainlinkPrice, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -28,11 +29,6 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../constants/NumericConstants.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePriceFeeds {
-    /**
-     * @notice It is returned if the fixed discount for a maker bid is greater than floor price.
-     */
-    error DiscountGreaterThanFloorPrice();
-
     /**
      * @notice Wrapped ether (WETH) address.
      */

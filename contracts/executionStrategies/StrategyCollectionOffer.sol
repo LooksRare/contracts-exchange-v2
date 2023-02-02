@@ -13,9 +13,6 @@ import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid} from "../erro
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../constants/NumericConstants.sol";
-
 /**
  * @title StrategyCollectionOffer
  * @notice This contract offers execution strategies for users to create maker bid offers for items in a collection.

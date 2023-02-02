@@ -10,6 +10,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 
 // Shared errors
 import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../errors/SharedErrors.sol";
+import {InvalidChainlinkPrice, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";

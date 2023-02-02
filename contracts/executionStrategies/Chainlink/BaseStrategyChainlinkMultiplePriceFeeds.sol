@@ -7,6 +7,9 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 // Dependencies
 import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
+// Chainlink errors
+import {PriceFeedAlreadySet, InvalidDecimals} from "../../errors/ChainlinkErrors.sol";
+
 /**
  * @title BaseStrategyChainlinkMultiplePriceFeeds
  * @notice This contract allows a strategy to store Chainlink price feeds for price retrieval.
@@ -20,23 +23,7 @@ contract BaseStrategyChainlinkMultiplePriceFeeds is BaseStrategyChainlinkPriceLa
     mapping(address => address) public priceFeeds;
 
     /**
-     * @notice All NFT floor price feeds are expected to have 18 decimals.
-     */
-    error InvalidDecimals();
-
-    /**
-     * @notice It is returned if the price feed for a collection is already set.
-     * @dev This error can only be retrieved by owner operation.
-     */
-    error PriceFeedAlreadySet();
-
-    /**
-     * @notice It is returned when the price feed is not available.
-     */
-    error PriceFeedNotAvailable();
-
-    /**
-     * @notice Emitted when a collection's price feed address is updated
+     * @notice It is emitted when a collection's price feed address is added.
      * @param collection NFT collection address
      * @param priceFeed Chainlink price feed address
      */

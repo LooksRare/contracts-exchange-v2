@@ -25,7 +25,8 @@
     "/contracts/errors/SharedErrors.sol",
     "/contracts/executionStrategies/BaseStrategy.sol",
     "/contracts/executionStrategies/StrategyCollectionOffer.sol",
-    "/test/mock/MockRoyaltyFeeRegistry.sol"
+    "/test/mock/MockRoyaltyFeeRegistry.sol",
+    "inheritance-contracts.svg"
   ],
   "scripts": {
     "compile:forge": "FOUNDRY_PROFILE=local forge build",

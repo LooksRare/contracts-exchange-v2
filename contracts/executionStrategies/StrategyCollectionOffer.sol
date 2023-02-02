@@ -22,7 +22,7 @@ import {ASSET_TYPE_ERC721} from "../constants/NumericConstants.sol";
  *         There are two available functions:
  *         1. executeCollectionStrategyWithTakerAsk --> it applies to all itemIds in a collection
  *         2. executeCollectionStrategyWithTakerAskWithProof --> it allows adding merkle proof criteria.
- * @notice The bidder can only bid on 1 token ID at a time.
+ * @notice The bidder can only bid on 1 item id at a time.
  *         1. If ERC721, the amount must be 1.
  *         2. If ERC1155, the amount can be greater than 1.
  * @dev Use cases can include trait-based offers or rarity score offers.
@@ -123,14 +123,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             return (isValid, OrderInvalid.selector);
         }
 
-        if (makerBid.amounts[0] != 1) {
-            if (makerBid.amounts[0] == 0) {
-                return (isValid, OrderInvalid.selector);
-            }
-            if (makerBid.assetType == ASSET_TYPE_ERC721) {
-                return (isValid, OrderInvalid.selector);
-            }
-        }
+        _validateAmountNoRevert(makerBid.amounts[0], makerBid.assetType);
 
         // If no root is provided or invalid length, it should be invalid.
         // @dev It does not mean the merkle root is valid against a specific itemId that exists in the collection.

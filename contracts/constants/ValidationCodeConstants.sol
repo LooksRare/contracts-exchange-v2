@@ -26,6 +26,7 @@ uint256 constant INVALID_USER_GLOBAL_ASK_NONCE = 322;
 
 // 4. Errors related to signatures (EOA, EIP-1271) and Merkle Tree computations
 uint256 constant ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE = 401;
+uint256 constant MERKLE_PROOF_PROOF_TOO_LARGE = 402;
 uint256 constant INVALID_SIGNATURE_LENGTH = 411;
 uint256 constant INVALID_S_PARAMETER_EOA = 412;
 uint256 constant INVALID_V_PARAMETER_EOA = 413;

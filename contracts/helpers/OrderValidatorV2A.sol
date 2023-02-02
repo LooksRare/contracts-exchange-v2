@@ -25,7 +25,7 @@ import {TransferManager} from "../TransferManager.sol";
 
 // Constants
 import "../constants/ValidationCodeConstants.sol";
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
 
 /**
  * @title IExtendedExecutionStrategy
@@ -758,6 +758,10 @@ contract OrderValidatorV2A {
         address signer
     ) internal view returns (uint256 validationCode) {
         if (merkleTree.proof.length != 0) {
+            if (merkleTree.proof.length > MAX_CALLDATA_PROOF_LENGTH) {
+                return MERKLE_PROOF_PROOF_TOO_LARGE;
+            }
+
             if (!MerkleProofCalldataWithProofLimit.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 return ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE;
             }

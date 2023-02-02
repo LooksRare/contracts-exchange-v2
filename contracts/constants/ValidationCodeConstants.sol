@@ -17,12 +17,12 @@ uint256 constant ORDER_EXPECTED_TO_BE_VALID = 0;
  */
 
 /**
- * @dev The currency is not allowed in the system.
+ * @dev The currency is not allowed in the protocol.
  */
-uint256 constant CURRENCY_NOT_WHITELISTED = 101;
+uint256 constant CURRENCY_NOT_ALLOWED = 101;
 
 /**
- * @dev The strategy is not implemented in the system.
+ * @dev The strategy is not implemented in the protocol.
  */
 uint256 constant STRATEGY_NOT_IMPLEMENTED = 111;
 
@@ -214,7 +214,8 @@ uint256 constant ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID = 623;
 uint256 constant ERC1155_BALANCE_OF_DOES_NOT_EXIST = 631;
 
 /**
- * @dev The ERC1155 collection contract does not implement balanceOf.
+ * @dev The ERC20 balance of the signer (maker ask user) is inferior to the amount
+ *      required to be sold.
  */
 uint256 constant ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT = 632;
 

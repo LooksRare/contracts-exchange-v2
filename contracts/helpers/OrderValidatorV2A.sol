@@ -397,7 +397,7 @@ contract OrderValidatorV2A {
     ) internal view returns (uint256 validationCode) {
         // 1. Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(currency)) {
-            return CURRENCY_NOT_WHITELISTED;
+            return CURRENCY_NOT_ALLOWED;
         }
 
         // 2. Verify whether the strategy is valid
@@ -429,7 +429,7 @@ contract OrderValidatorV2A {
     ) internal view returns (uint256 validationCode) {
         // 1. Verify whether the currency is whitelisted
         if (currency == address(0) || !looksRareProtocol.isCurrencyWhitelisted(currency)) {
-            return CURRENCY_NOT_WHITELISTED;
+            return CURRENCY_NOT_ALLOWED;
         }
 
         // 2. Verify whether the strategy is valid

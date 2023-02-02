@@ -9,14 +9,14 @@ import {AffiliateManager} from "./AffiliateManager.sol";
 
 /**
  * @title CurrencyManager
- * @notice This contract manages the whitelist of valid fungible currencies.
+ * @notice This contract manages the list of valid fungible currencies.
  * @author LooksRare protocol team (👀,💎)
  */
 contract CurrencyManager is ICurrencyManager, AffiliateManager {
     /**
-     * @notice It checks whether the currency is whitelisted for transacting.
+     * @notice It checks whether the currency is allowed for transacting.
      */
-    mapping(address => bool) public isCurrencyWhitelisted;
+    mapping(address => bool) public isCurrencyAllowed;
 
     /**
      * @notice Constructor
@@ -25,13 +25,13 @@ contract CurrencyManager is ICurrencyManager, AffiliateManager {
     constructor(address _owner) AffiliateManager(_owner) {}
 
     /**
-     * @notice This function allows the owner to update the whitelist status of a currency.
+     * @notice This function allows the owner to update the status of a currency.
      * @param currency Currency address (address(0) for ETH)
-     * @param isWhitelisted Whether the currency is whitelisted
+     * @param isAllowed Whether the currency should be allowed for trading
      * @dev Only callable by owner.
      */
-    function updateCurrencyWhitelistStatus(address currency, bool isWhitelisted) external onlyOwner {
-        isCurrencyWhitelisted[currency] = isWhitelisted;
-        emit CurrencyWhitelistStatusUpdated(currency, isWhitelisted);
+    function updateCurrencyStatus(address currency, bool isAllowed) external onlyOwner {
+        isCurrencyAllowed[currency] = isAllowed;
+        emit CurrencyStatusUpdated(currency, isAllowed);
     }
 }

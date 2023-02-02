@@ -10,7 +10,7 @@ import {IRoyaltyFeeRegistry} from "./interfaces/IRoyaltyFeeRegistry.sol";
 
 /**
  * @title CreatorFeeManagerWithRoyalties
- * @notice This contract retrieves the creator fee address and calculates the royalties.
+ * @notice This contract returns the creator fee address and the creator fee amount.
  * @author LooksRare protocol team (👀,💎)
  */
 contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {

@@ -37,9 +37,9 @@ contract DeploymentNoCreate2 is Test {
         vm.startBroadcast();
         transferManager = new TransferManager(msg.sender);
         looksRareProtocol = new LooksRareProtocol(msg.sender, msg.sender, address(transferManager), weth);
-        transferManager.whitelistOperator(address(looksRareProtocol));
-        looksRareProtocol.updateCurrencyWhitelistStatus(address(0), true);
-        looksRareProtocol.updateCurrencyWhitelistStatus(weth, true);
+        transferManager.allowOperator(address(looksRareProtocol));
+        looksRareProtocol.updateCurrencyStatus(address(0), true);
+        looksRareProtocol.updateCurrencyStatus(weth, true);
         orderValidatorV2A = new OrderValidatorV2A(address(looksRareProtocol));
 
         console.log("TransferManager address: ");

@@ -266,7 +266,7 @@ contract LooksRareProtocolTest is ProtocolBase {
     function _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(bool isAtomic) public {
         _setUpUsers();
         vm.prank(_owner);
-        looksRareProtocol.updateCurrencyWhitelistStatus(address(mockERC20), true);
+        looksRareProtocol.updateCurrencyStatus(address(mockERC20), true);
 
         uint256 numberPurchases = 2;
 

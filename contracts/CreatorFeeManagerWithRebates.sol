@@ -13,7 +13,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
 /**
  * @title CreatorFeeManagerWithRebates
- * @notice This contract retrieves the creator fee address and returns the creator rebate.
+ * @notice This contract returns the creator fee address and the creator rebate amount.
  * @author LooksRare protocol team (👀,💎)
  */
 contract CreatorFeeManagerWithRebates is ICreatorFeeManager {

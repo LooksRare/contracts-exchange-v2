@@ -52,7 +52,7 @@ contract OrderValidatorV2ATest is TestParameters {
         royaltyFeeRegistry = new MockRoyaltyFeeRegistry(address(this), 9_500);
         creatorFeeManager = new CreatorFeeManagerWithRoyalties(address(royaltyFeeRegistry));
         looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
-        looksRareProtocol.updateCurrencyWhitelistStatus(ETH, true);
+        looksRareProtocol.updateCurrencyStatus(ETH, true);
         orderValidator = new OrderValidatorV2A(address(looksRareProtocol));
     }
 
@@ -90,7 +90,7 @@ contract OrderValidatorV2ATest is TestParameters {
     function testMakerBidStrategyNotImplemented() public {
         OrderStructs.MakerBid memory makerBid;
         address currency = address(1); // it cannot be 0
-        looksRareProtocol.updateCurrencyWhitelistStatus(currency, true);
+        looksRareProtocol.updateCurrencyStatus(currency, true);
         makerBid.currency = currency;
         makerBid.strategyId = 1;
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
@@ -110,7 +110,7 @@ contract OrderValidatorV2ATest is TestParameters {
         address[] memory operators = new address[](1);
         operators[0] = address(orderValidator.looksRareProtocol());
 
-        transferManager.whitelistOperator(operators[0]);
+        transferManager.allowOperator(operators[0]);
 
         vm.prank(makerUser);
         transferManager.grantApprovals(operators);

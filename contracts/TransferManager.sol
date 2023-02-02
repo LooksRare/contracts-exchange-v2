@@ -30,9 +30,9 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     mapping(address => mapping(address => bool)) public hasUserApprovedOperator;
 
     /**
-     * @notice This returns whether the operator address is whitelisted by this contract's owner.
+     * @notice This returns whether the operator address is allowed by this contract's owner.
      */
-    mapping(address => bool) public isOperatorWhitelisted;
+    mapping(address => bool) public isOperatorAllowed;
 
     /**
      * @notice Constructor
@@ -79,7 +79,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @param from Sender address
      * @param to Recipient address
      * @param itemIds Array of itemIds
-     * @param amounts Array of amounts (it is not used for ERC721)
+     * @param amounts Array of amounts
      * @dev It does not allow batch transferring if from = msg.sender since native function should be used.
      */
     function transferItemsERC1155(
@@ -121,7 +121,6 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @param items Array of BatchTransferItem
      * @param from Sender address
      * @param to Recipient address
-     * @dev If assetType for ERC721 is used, amounts aren't used.
      */
     function transferBatchItemsAcrossCollections(
         BatchTransferItem[] calldata items,
@@ -181,9 +180,9 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
 
     /**
      * @notice This function allows a user to grant approvals for an array of operators.
-     *         Users cannot grant approvals if the operator is not whitelisted by this contract's owner.
+     *         Users cannot grant approvals if the operator is not allowed by this contract's owner.
      * @param operators Array of operator addresses
-     * @dev Each operator address must be globally whitelisted to be approved.
+     * @dev Each operator address must be globally allowed to be approved.
      */
     function grantApprovals(address[] calldata operators) external {
         uint256 length = operators.length;
@@ -195,12 +194,12 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
         for (uint256 i; i < length; ) {
             address operator = operators[i];
 
-            if (!isOperatorWhitelisted[operator]) {
-                revert NotWhitelisted();
+            if (!isOperatorAllowed[operator]) {
+                revert OperatorNotAllowed();
             }
 
             if (hasUserApprovedOperator[msg.sender][operator]) {
-                revert AlreadyApproved();
+                revert OperatorAlreadyApprovedByUser();
             }
 
             hasUserApprovedOperator[msg.sender][operator] = true;
@@ -228,7 +227,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
             address operator = operators[i];
 
             if (!hasUserApprovedOperator[msg.sender][operator]) {
-                revert NotApproved();
+                revert OperatorNotApprovedByUser();
             }
 
             delete hasUserApprovedOperator[msg.sender][operator];
@@ -241,31 +240,32 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
     }
 
     /**
-     * @notice This function allows the user to whitelist an operator in this transfer system.
-     * @param operator Operator address to add
+     * @notice This function allows an operator to be added for the shared transfer system.
+     *         Once the operator is allowed, users can grant NFT approvals to this operator.
+     * @param operator Operator address to allow
      * @dev Only callable by owner.
      */
-    function whitelistOperator(address operator) external onlyOwner {
-        if (isOperatorWhitelisted[operator]) {
-            revert AlreadyWhitelisted();
+    function allowOperator(address operator) external onlyOwner {
+        if (isOperatorAllowed[operator]) {
+            revert OperatorAlreadyAllowed();
         }
 
-        isOperatorWhitelisted[operator] = true;
+        isOperatorAllowed[operator] = true;
 
-        emit OperatorWhitelisted(operator);
+        emit OperatorAllowed(operator);
     }
 
     /**
-     * @notice This function allows the user to remove an operator in this transfer system.
+     * @notice This function allows the user to remove an operator for the shared transfer system.
      * @param operator Operator address to remove
      * @dev Only callable by owner.
      */
     function removeOperator(address operator) external onlyOwner {
-        if (!isOperatorWhitelisted[operator]) {
-            revert NotWhitelisted();
+        if (!isOperatorAllowed[operator]) {
+            revert OperatorNotAllowed();
         }
 
-        delete isOperatorWhitelisted[operator];
+        delete isOperatorAllowed[operator];
 
         emit OperatorRemoved(operator);
     }
@@ -277,7 +277,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
      * @param operator Operator address
      */
     function _isOperatorValidForTransfer(address user, address operator) private view {
-        if (isOperatorWhitelisted[operator] && hasUserApprovedOperator[user][operator]) {
+        if (isOperatorAllowed[operator] && hasUserApprovedOperator[user][operator]) {
             return;
         }
 

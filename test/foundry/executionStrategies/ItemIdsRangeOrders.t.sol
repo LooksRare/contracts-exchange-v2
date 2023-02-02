@@ -217,6 +217,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         strategyItemIdsRange.isMakerBidValid(makerBid, selector);
 
         vm.expectRevert(); // EVM revert
+        orderValidator.checkMakerBidOrderValidity(makerBid, signature, _EMPTY_MERKLE_TREE);
+
+        vm.expectRevert(); // EVM revert
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }

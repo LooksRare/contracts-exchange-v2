@@ -11,7 +11,7 @@ import {AmountInvalid, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelecto
 import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
-import {StrategyUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyUSDDynamicAsk.sol";
+import {StrategyChainlinkUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkUSDDynamicAsk.sol";
 import {BaseStrategyChainlinkPriceLatency} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
 
 // Mocks and other tests
@@ -23,8 +23,8 @@ import {ProtocolBase} from "../../ProtocolBase.t.sol";
 import {ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
-    StrategyUSDDynamicAsk public strategyUSDDynamicAsk;
-    bytes4 public selector = StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector;
+    StrategyChainlinkUSDDynamicAsk public strategyUSDDynamicAsk;
+    bytes4 public selector = StrategyChainlinkUSDDynamicAsk.executeStrategyWithTakerBid.selector;
 
     // At block 15740567
     // roundId         uint80  :  92233720368547793259
@@ -45,7 +45,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyUSDDynamicAsk = new StrategyUSDDynamicAsk(
+        strategyUSDDynamicAsk = new StrategyChainlinkUSDDynamicAsk(
             _owner,
             address(weth),
             0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419 // Mainnet address of the Chainlink price feed

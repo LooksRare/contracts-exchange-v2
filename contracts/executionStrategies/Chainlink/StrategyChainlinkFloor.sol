@@ -19,7 +19,7 @@ import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMu
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../constants/NumericConstants.sol";
 
 /**
- * @title StrategyFloorFromChainlink
+ * @title StrategyChainlinkFloor
  * @notice These strategies allow a seller to make a floor price + premium ask
  *         and a buyer to make a floor price - discount collection bid.
  *         Currently Chainlink only has price feeds for ERC721 tokens, but these
@@ -27,7 +27,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../constants/NumericConstants.sol";
  *         is 1.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultiplePriceFeeds {
+contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePriceFeeds {
     /**
      * @notice It is returned if the fixed discount for a maker bid is greater than floor price.
      */
@@ -161,8 +161,8 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector) {
         if (
-            functionSelector != StrategyFloorFromChainlink.executeBasisPointsPremiumStrategyWithTakerBid.selector &&
-            functionSelector != StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector
+            functionSelector != StrategyChainlinkFloor.executeBasisPointsPremiumStrategyWithTakerBid.selector &&
+            functionSelector != StrategyChainlinkFloor.executeFixedPremiumStrategyWithTakerBid.selector
         ) {
             return (isValid, FunctionSelectorInvalid.selector);
         }
@@ -210,9 +210,8 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
     ) external view returns (bool isValid, bytes4 errorSelector) {
         if (
             functionSelector !=
-            StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector &&
-            functionSelector !=
-            StrategyFloorFromChainlink.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
+            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector &&
+            functionSelector != StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
             return (isValid, FunctionSelectorInvalid.selector);
         }
@@ -230,7 +229,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
 
         if (
             functionSelector ==
-            StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
+            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
             if (discount > ONE_HUNDRED_PERCENT_IN_BP) {
                 return (isValid, OrderInvalid.selector);
@@ -242,8 +241,7 @@ contract StrategyFloorFromChainlink is BaseStrategy, BaseStrategyChainlinkMultip
         }
 
         if (
-            functionSelector ==
-            StrategyFloorFromChainlink.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
+            functionSelector == StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
             if (floorPrice < discount) {
                 // A special selector is returned to differentiate with OrderInvalid

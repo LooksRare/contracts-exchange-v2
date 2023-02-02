@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {BaseStrategyChainlinkPriceLatency} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
 // Shared errors
 import {AmountInvalid, AskTooHigh, OrderInvalid, CurrencyInvalid} from "../../../../contracts/errors/SharedErrors.sol";

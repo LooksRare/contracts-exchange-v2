@@ -19,11 +19,11 @@ import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLat
 import {ASSET_TYPE_ERC721} from "../../constants/NumericConstants.sol";
 
 /**
- * @title StrategyUSDDynamicAsk
+ * @title StrategyChainlinkUSDDynamicAsk
  * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount to be in ETH.
  * @author LooksRare protocol team (👀,💎)
  */
-contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatency {
+contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatency {
     /**
      * @dev It is possible to call priceFeed.decimals() to get the decimals,
      *      but we want to save gas so it's hard coded instead.
@@ -122,7 +122,7 @@ contract StrategyUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatenc
         OrderStructs.MakerAsk calldata makerAsk,
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector) {
-        if (functionSelector != StrategyUSDDynamicAsk.executeStrategyWithTakerBid.selector) {
+        if (functionSelector != StrategyChainlinkUSDDynamicAsk.executeStrategyWithTakerBid.selector) {
             return (isValid, FunctionSelectorInvalid.selector);
         }
 

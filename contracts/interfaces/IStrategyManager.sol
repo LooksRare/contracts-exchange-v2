@@ -62,7 +62,7 @@ interface IStrategyManager {
     error NotV2Strategy();
 
     /**
-     * @notice If the strategy has no selector.
+     * @notice It is returned if the strategy has no selector.
      * @dev It can only be returned for owner operations.
      */
     error StrategyHasNoSelector();

@@ -14,6 +14,7 @@ error InvalidChainlinkPrice();
 /**
  * @notice It is returned if the decimals from the NFT floor price feed is invalid.
  *         Chainlink price feeds are expected to have 18 decimals.
+ * @dev It can only be returned for owner operations.
  */
 error InvalidDecimals();
 
@@ -24,7 +25,7 @@ error LatencyToleranceTooHigh();
 
 /**
  * @notice It is returned if the price feed for a collection is already set.
- * @dev This error can only be retrieved by owner operation.
+ * @dev It can only be returned for owner operations.
  */
 error PriceFeedAlreadySet();
 

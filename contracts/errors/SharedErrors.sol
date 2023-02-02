@@ -35,7 +35,6 @@ error CurrencyInvalid();
 
 /**
  * @notice The function selector is invalid for this strategy implementation.
- *         It cannot be used for the requested operation.
  */
 error FunctionSelectorInvalid();
 

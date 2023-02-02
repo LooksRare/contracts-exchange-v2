@@ -15,9 +15,6 @@ import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from 
 import {BaseStrategy} from "../BaseStrategy.sol";
 import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../../constants/NumericConstants.sol";
-
 /**
  * @title StrategyChainlinkUSDDynamicAsk
  * @notice This contract allows a seller to sell an NFT priced in USD and the receivable amount to be in ETH.

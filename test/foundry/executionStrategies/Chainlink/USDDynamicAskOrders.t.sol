@@ -8,7 +8,7 @@ import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManage
 
 // Errors and constants
 import {AmountInvalid, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
-import {InvalidChainlinkPrice, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
+import {ChainlinkPriceInvalid, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
 import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 import {ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
@@ -126,7 +126,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyUSDDynamicAsk.maxLatency(), 3_600);
     }
 
-    function testUSDDynamicAskInvalidChainlinkPrice() public {
+    function testUSDDynamicAskChainlinkPriceInvalid() public {
         (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
@@ -141,7 +141,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(-1);
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, ChainlinkPriceInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -150,7 +150,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
         (isValid, errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, ChainlinkPriceInvalid.selector);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);

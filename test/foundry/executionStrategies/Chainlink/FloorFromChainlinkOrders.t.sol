@@ -10,7 +10,7 @@ import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManage
 
 // Errors and constants
 import {FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
-import {InvalidDecimals, PriceFeedAlreadySet} from "../../../../contracts/errors/ChainlinkErrors.sol";
+import {DecimalsInvalid, PriceFeedAlreadySet} from "../../../../contracts/errors/ChainlinkErrors.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
 // Strategies
@@ -79,12 +79,12 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(strategyFloorFromChainlink.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
     }
 
-    function testSetPriceFeedInvalidDecimals(uint8 decimals) public asPrankedUser(_owner) {
+    function testSetPriceFeedDecimalsInvalid(uint8 decimals) public asPrankedUser(_owner) {
         vm.assume(decimals != 18);
 
         MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
         priceFeed.setDecimals(decimals);
-        vm.expectRevert(InvalidDecimals.selector);
+        vm.expectRevert(DecimalsInvalid.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(priceFeed));
     }
 

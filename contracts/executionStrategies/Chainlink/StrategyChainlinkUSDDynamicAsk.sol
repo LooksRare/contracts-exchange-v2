@@ -10,7 +10,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 
 // Shared errors
 import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../errors/SharedErrors.sol";
-import {InvalidChainlinkPrice, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
+import {ChainlinkPriceInvalid, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -77,7 +77,7 @@ contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPr
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
 
         if (answer <= 0) {
-            revert InvalidChainlinkPrice();
+            revert ChainlinkPriceInvalid();
         }
 
         if (block.timestamp - updatedAt > maxLatency) {
@@ -146,7 +146,7 @@ contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPr
         (, int256 answer, , uint256 updatedAt, ) = priceFeed.latestRoundData();
 
         if (answer <= 0) {
-            return (isValid, InvalidChainlinkPrice.selector);
+            return (isValid, ChainlinkPriceInvalid.selector);
         }
 
         if (block.timestamp - updatedAt > maxLatency) {

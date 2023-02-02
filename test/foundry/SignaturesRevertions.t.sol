@@ -16,6 +16,10 @@ contract SignaturesRevertionsTest is ProtocolBase {
     uint256 internal constant _MAX_PRIVATE_KEY =
         115792089237316195423570985008687907852837564279074904382605163141518161494337;
 
+    function setUp() public {
+        _setUp();
+    }
+
     function testRevertIfSignatureEOAInvalid(uint256 itemId, uint256 price, uint256 randomPK) public {
         // @dev Private keys 1 and 2 are used for maker/taker users
         vm.assume(randomPK > 2 && randomPK < _MAX_PRIVATE_KEY);

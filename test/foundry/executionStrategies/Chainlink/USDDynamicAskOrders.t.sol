@@ -35,9 +35,9 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     uint256 private constant LATEST_CHAINLINK_ANSWER_IN_WAD = 126533075631 * 1e10;
     uint256 private constant MAXIMUM_LATENCY = 3_600 seconds;
 
-    function setUp() public override {
+    function setUp() public {
         vm.createSelectFork(vm.rpcUrl("mainnet"), FORKED_BLOCK_NUMBER);
-        super.setUp();
+        _setUp();
         _setUpUsers();
         _setUpNewStrategy();
     }

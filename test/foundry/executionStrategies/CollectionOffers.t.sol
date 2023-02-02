@@ -28,8 +28,8 @@ contract CollectionOrdersTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
     bytes32 private constant mockMerkleRoot = bytes32(keccak256("Mock")); // Mock merkle root
 
-    function setUp() public override {
-        super.setUp();
+    function setUp() public {
+        _setUp();
         _setUpNewStrategies();
     }
 

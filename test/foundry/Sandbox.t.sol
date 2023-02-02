@@ -39,9 +39,9 @@ contract SandboxTest is ProtocolBase {
         IERC1155(SANDBOX).setApprovalForAll(address(transferManager), true);
     }
 
-    function setUp() public override {
+    function setUp() public {
         vm.createSelectFork(vm.rpcUrl("mainnet"), FORKED_BLOCK_NUMBER);
-        super.setUp();
+        _setUp();
         _setUpUsers();
     }
 

@@ -33,8 +33,8 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
     uint256 private constant itemId = 0;
     bytes private constant _EMPTY_SIGNATURE = new bytes(0);
 
-    function setUp() public override {
-        super.setUp();
+    function setUp() public {
+        _setUp();
         _setUpUser(takerUser);
         _setupRegistryRoyalties(address(mockERC1155), _standardRoyaltyFee);
     }

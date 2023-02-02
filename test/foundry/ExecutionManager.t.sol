@@ -23,6 +23,10 @@ import {StrategyChainlinkFloor} from "../../contracts/executionStrategies/Chainl
 import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
+    function setUp() public {
+        _setUp();
+    }
+
     function testUpdateCreatorFeeManager() public asPrankedUser(_owner) {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewCreatorFeeManager(address(1));

@@ -19,6 +19,10 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
+    function setUp() public {
+        _setUp();
+    }
+
     function _setUpRoyaltiesRegistry(uint256 fee) private {
         vm.prank(_owner);
         royaltyFeeRegistry.updateRoyaltyInfoForCollection(

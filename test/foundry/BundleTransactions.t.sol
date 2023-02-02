@@ -11,6 +11,10 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
 contract BundleTransactionsTest is ProtocolBase {
+    function setUp() public {
+        _setUp();
+    }
+
     function testTakerAskERC721BundleNoRoyalties() public {
         _setUpUsers();
         uint256 numberItemsInBundle = 5;

@@ -16,6 +16,10 @@ contract StandardTransactionsTest is ProtocolBase {
 
     uint256 private constant itemId = 42;
 
+    function setUp() public {
+        _setUp();
+    }
+
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */

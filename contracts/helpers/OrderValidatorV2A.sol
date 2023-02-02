@@ -220,9 +220,7 @@ contract OrderValidatorV2A {
 
         // It can exit here if the strategy does not exist.
         // However, if the strategy is invalid, it can continue the execution.
-        if (
-            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_MAKER_ASK_SELECTOR_INVALID
-        ) {
+        if (validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_IS_NOT_MAKER_ASK) {
             return validationCodes;
         }
 
@@ -275,9 +273,7 @@ contract OrderValidatorV2A {
 
         // It can exit here if the strategy does not exist.
         // However, if the strategy is invalid, it can continue the execution.
-        if (
-            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_MAKER_BID_SELECTOR_INVALID
-        ) {
+        if (validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_IS_NOT_MAKER_BID) {
             return validationCodes;
         }
 
@@ -405,22 +401,15 @@ contract OrderValidatorV2A {
         }
 
         // 2. Verify whether the strategy is valid
-        (
-            bool strategyIsActive,
-            ,
-            ,
-            ,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(strategyId);
+        (bool strategyIsActive, , , , , bool strategyIsMakerBid, address strategyImplementation) = looksRareProtocol
+            .strategyInfo(strategyId);
 
         if (strategyId != 0 && strategyImplementation == address(0)) {
             return STRATEGY_NOT_IMPLEMENTED;
         }
 
-        if (strategyId != 0 && (strategySelector == bytes4(0) || strategyIsMakerBid)) {
-            return STRATEGY_MAKER_ASK_SELECTOR_INVALID;
+        if (strategyId != 0 && (strategyIsMakerBid)) {
+            return STRATEGY_IS_NOT_MAKER_ASK;
         }
 
         if (!strategyIsActive) {
@@ -444,22 +433,15 @@ contract OrderValidatorV2A {
         }
 
         // 2. Verify whether the strategy is valid
-        (
-            bool strategyIsActive,
-            ,
-            ,
-            ,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(strategyId);
+        (bool strategyIsActive, , , , , bool strategyIsMakerBid, address strategyImplementation) = looksRareProtocol
+            .strategyInfo(strategyId);
 
         if (strategyId != 0 && strategyImplementation == address(0)) {
             return STRATEGY_NOT_IMPLEMENTED;
         }
 
-        if (strategyId != 0 && (strategySelector == bytes4(0) || !strategyIsMakerBid)) {
-            return STRATEGY_MAKER_BID_SELECTOR_INVALID;
+        if (strategyId != 0 && (!strategyIsMakerBid)) {
+            return STRATEGY_IS_NOT_MAKER_BID;
         }
 
         if (!strategyIsActive) {

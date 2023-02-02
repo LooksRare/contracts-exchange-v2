@@ -242,7 +242,7 @@ contract CollectionOrdersTest is ProtocolBase {
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        // Taker user has received the asset
+        // Maker user has received the asset
         assertEq(mockERC721.ownerOf(itemIdInMerkleTree), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);

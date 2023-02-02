@@ -7,15 +7,13 @@ import {Merkle} from "../../lib/murky/src/Merkle.sol";
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
-// Shared errors
+// Errors and constants
 import {MerkleProofTooLarge, MerkleProofInvalid} from "../../contracts/errors/SharedErrors.sol";
-import {ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {MERKLE_PROOF_PROOF_TOO_LARGE, ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
-
-// Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
@@ -182,7 +180,12 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Verify validity
-        // TODO
+        _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
+            makerAsk,
+            signature,
+            merkleTree,
+            MERKLE_PROOF_PROOF_TOO_LARGE
+        );
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -208,7 +211,12 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
 
         // Verify validity
-        // TODO
+        _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
+            makerBid,
+            signature,
+            merkleTree,
+            MERKLE_PROOF_PROOF_TOO_LARGE
+        );
 
         // Mint asset
         mockERC721.mint(takerUser, numberOrders - 1);

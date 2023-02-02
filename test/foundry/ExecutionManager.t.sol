@@ -11,7 +11,7 @@ import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol"
 
 // Shared errors
 import {OrderInvalid} from "../../contracts/errors/SharedErrors.sol";
-import {MAKER_ORDER_INVALID_STANDARD_SALE, STRATEGY_MAKER_BID_SELECTOR_INVALID, STRATEGY_MAKER_ASK_SELECTOR_INVALID, STRATEGY_NOT_ACTIVE, START_TIME_GREATER_THAN_END_TIME, TOO_LATE_TO_EXECUTE_ORDER, TOO_EARLY_TO_EXECUTE_ORDER} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {MAKER_ORDER_INVALID_STANDARD_SALE, STRATEGY_IS_NOT_MAKER_BID, STRATEGY_IS_NOT_MAKER_ASK, STRATEGY_NOT_ACTIVE, START_TIME_GREATER_THAN_END_TIME, TOO_LATE_TO_EXECUTE_ORDER, TOO_EARLY_TO_EXECUTE_ORDER} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -261,7 +261,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             itemId: itemId
         });
 
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_MAKER_ASK_SELECTOR_INVALID);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_IS_NOT_MAKER_ASK);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForMakerAsk.selector);
@@ -312,7 +312,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             itemId: itemId
         });
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, STRATEGY_MAKER_BID_SELECTOR_INVALID);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, STRATEGY_IS_NOT_MAKER_BID);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForMakerBid.selector);

@@ -25,7 +25,7 @@ import {TransferManager} from "../TransferManager.sol";
 
 // Constants
 import "../constants/ValidationCodeConstants.sol";
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
+import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
 
 /**
  * @title IExtendedExecutionStrategy
@@ -220,9 +220,7 @@ contract OrderValidatorV2A {
 
         // It can exit here if the strategy does not exist.
         // However, if the strategy is invalid, it can continue the execution.
-        if (
-            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_MAKER_ASK_SELECTOR_INVALID
-        ) {
+        if (validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_IS_NOT_MAKER_ASK) {
             return validationCodes;
         }
 
@@ -275,9 +273,7 @@ contract OrderValidatorV2A {
 
         // It can exit here if the strategy does not exist.
         // However, if the strategy is invalid, it can continue the execution.
-        if (
-            validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_MAKER_BID_SELECTOR_INVALID
-        ) {
+        if (validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_IS_NOT_MAKER_BID) {
             return validationCodes;
         }
 
@@ -401,26 +397,19 @@ contract OrderValidatorV2A {
     ) internal view returns (uint256 validationCode) {
         // 1. Verify whether the currency is whitelisted
         if (!looksRareProtocol.isCurrencyWhitelisted(currency)) {
-            return CURRENCY_NOT_WHITELISTED;
+            return CURRENCY_NOT_ALLOWED;
         }
 
         // 2. Verify whether the strategy is valid
-        (
-            bool strategyIsActive,
-            ,
-            ,
-            ,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(strategyId);
+        (bool strategyIsActive, , , , , bool strategyIsMakerBid, address strategyImplementation) = looksRareProtocol
+            .strategyInfo(strategyId);
 
         if (strategyId != 0 && strategyImplementation == address(0)) {
             return STRATEGY_NOT_IMPLEMENTED;
         }
 
-        if (strategyId != 0 && (strategySelector == bytes4(0) || strategyIsMakerBid)) {
-            return STRATEGY_MAKER_ASK_SELECTOR_INVALID;
+        if (strategyId != 0 && (strategyIsMakerBid)) {
+            return STRATEGY_IS_NOT_MAKER_ASK;
         }
 
         if (!strategyIsActive) {
@@ -440,26 +429,19 @@ contract OrderValidatorV2A {
     ) internal view returns (uint256 validationCode) {
         // 1. Verify whether the currency is whitelisted
         if (currency == address(0) || !looksRareProtocol.isCurrencyWhitelisted(currency)) {
-            return CURRENCY_NOT_WHITELISTED;
+            return CURRENCY_NOT_ALLOWED;
         }
 
         // 2. Verify whether the strategy is valid
-        (
-            bool strategyIsActive,
-            ,
-            ,
-            ,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(strategyId);
+        (bool strategyIsActive, , , , , bool strategyIsMakerBid, address strategyImplementation) = looksRareProtocol
+            .strategyInfo(strategyId);
 
         if (strategyId != 0 && strategyImplementation == address(0)) {
             return STRATEGY_NOT_IMPLEMENTED;
         }
 
-        if (strategyId != 0 && (strategySelector == bytes4(0) || !strategyIsMakerBid)) {
-            return STRATEGY_MAKER_BID_SELECTOR_INVALID;
+        if (strategyId != 0 && (!strategyIsMakerBid)) {
+            return STRATEGY_IS_NOT_MAKER_BID;
         }
 
         if (!strategyIsActive) {
@@ -758,6 +740,10 @@ contract OrderValidatorV2A {
         address signer
     ) internal view returns (uint256 validationCode) {
         if (merkleTree.proof.length != 0) {
+            if (merkleTree.proof.length > MAX_CALLDATA_PROOF_LENGTH) {
+                return MERKLE_PROOF_PROOF_TOO_LARGE;
+            }
+
             if (!MerkleProofCalldataWithProofLimit.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 return ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE;
             }

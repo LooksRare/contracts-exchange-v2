@@ -12,7 +12,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Shared errors
 import {AmountInvalid, OrderInvalid, CallerInvalid, CurrencyInvalid} from "../../contracts/errors/SharedErrors.sol";
-import {CURRENCY_NOT_WHITELISTED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {CURRENCY_NOT_ALLOWED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Other mocks and utils
 import {MockERC20} from "../mock/MockERC20.sol";
@@ -119,7 +119,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_WHITELISTED);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_ALLOWED);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -187,7 +187,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Verify maker bid order
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_WHITELISTED);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_ALLOWED);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);

@@ -21,16 +21,12 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     bytes4 public selector = strategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
 
     // Test parameters
-    uint256 FORKED_BLOCK_NUMBER = 16_531_634;
     uint256 private constant price = 1 ether; // Fixed price of sale
 
-    function setUp() public override {
-        vm.createSelectFork(vm.rpcUrl("mainnet"), FORKED_BLOCK_NUMBER);
-        super.setUp();
-        _setUpNewStrategies();
-    }
-
     function testNewStrategies() public {
+        _setUp();
+        _setUpNewStrategies();
+
         (
             bool strategyIsActive,
             uint16 strategyStandardProtocolFee,
@@ -55,13 +51,13 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     function testTakerAskCollectionOrderERC721RevertsIfItemIsFlaggedWithReservoir() public {
         // Test parameters
         // @dev The signature timestamp was exactly the same as the one from block 16_531_634
+        uint256 FORKED_BLOCK_NUMBER = 16_531_634;
         uint256 TIMESTAMP = 1_675_226_327;
         uint256 FLAGGED_ITEM_ID = 14_412;
         address MAYC = 0x60E4d786628Fea6478F785A6d7e704777c86a7c6;
+        address TAKER_USER = 0xF5b9d00f6184954D6e725215D9Cab5F5698e8Bb3; // This address owns the flagged itemId
 
-        // This user owns the flagged item
-        address TAKER_USER = 0xF5b9d00f6184954D6e725215D9Cab5F5698e8Bb3;
-
+        _setUpForkAtBlockNumber(FORKED_BLOCK_NUMBER);
         _setUpUser(makerUser);
         _setUpUser(TAKER_USER);
 
@@ -79,7 +75,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             itemId: 0 // Not used
         });
 
-        // Add the cooldown period for transfer
+        // Maker user specifies the cooldown period for transfer
         uint256 transferCooldownPeriod = 1 hours;
         makerBid.additionalParameters = abi.encode(transferCooldownPeriod);
 
@@ -118,6 +114,12 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         vm.prank(TAKER_USER);
         vm.expectRevert(abi.encodeWithSelector(ItemIdFlagged.selector, MAYC, FLAGGED_ITEM_ID));
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function _setUpForkAtBlockNumber(uint256 blockNumber) internal {
+        vm.createSelectFork(vm.rpcUrl("mainnet"), blockNumber);
+        _setUp();
+        _setUpNewStrategies();
     }
 
     function _setUpNewStrategies() private asPrankedUser(_owner) {

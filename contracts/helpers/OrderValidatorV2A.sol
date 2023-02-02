@@ -869,25 +869,7 @@ contract OrderValidatorV2A {
             amounts = makerAsk.amounts;
             price = makerAsk.minPrice;
 
-            uint256 length = itemIds.length;
-
-            if (length == 0 || (amounts.length != length)) {
-                validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-            } else {
-                for (uint256 i; i < length; ) {
-                    if (amounts[i] == 0) {
-                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                    }
-
-                    if (makerAsk.assetType == ASSET_TYPE_ERC721 && amounts[i] != 1) {
-                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                    }
-
-                    unchecked {
-                        ++i;
-                    }
-                }
-            }
+            validationCode = _getOrderValidationCodeForStandardStrategy(makerAsk.assetType, itemIds.length, amounts);
         } else {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
@@ -919,25 +901,7 @@ contract OrderValidatorV2A {
             amounts = makerBid.amounts;
             price = makerBid.maxPrice;
 
-            uint256 length = itemIds.length;
-
-            if (length == 0 || (amounts.length != length)) {
-                validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-            } else {
-                for (uint256 i; i < length; ) {
-                    if (amounts[i] == 0) {
-                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                    }
-
-                    if (makerBid.assetType == ASSET_TYPE_ERC721 && amounts[i] != 1) {
-                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                    }
-
-                    unchecked {
-                        ++i;
-                    }
-                }
-            }
+            validationCode = _getOrderValidationCodeForStandardStrategy(makerBid.assetType, itemIds.length, amounts);
         } else {
             // @dev It should ideally be adjusted by real price
             //      amounts and itemIds are not used since most non-native maker bids won't target a single item
@@ -964,6 +928,32 @@ contract OrderValidatorV2A {
         creatorFeeManager = looksRareProtocol.creatorFeeManager();
         maxCreatorFeeBp = looksRareProtocol.maxCreatorFeeBp();
         royaltyFeeRegistry = creatorFeeManager.royaltyFeeRegistry();
+    }
+
+    function _getOrderValidationCodeForStandardStrategy(
+        uint256 assetType,
+        uint256 expectedLength,
+        uint256[] memory amounts
+    ) private pure returns (uint256 validationCode) {
+        if (expectedLength == 0 || (amounts.length != expectedLength)) {
+            validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+        } else {
+            for (uint256 i; i < expectedLength; ) {
+                uint256 amount = amounts[i];
+
+                if (amount == 0) {
+                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                }
+
+                if (assetType == ASSET_TYPE_ERC721 && amount != 1) {
+                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                }
+
+                unchecked {
+                    ++i;
+                }
+            }
+        }
     }
 
     function _getOrderValidationCodeForNonStandardStrategies(

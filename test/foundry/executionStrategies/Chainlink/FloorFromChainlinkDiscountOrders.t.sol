@@ -3,12 +3,11 @@ pragma solidity ^0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
-import {BaseStrategyChainlinkPriceLatency} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
-import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
-// Shared errors
-import {AmountInvalid, AskTooHigh, OrderInvalid, CurrencyInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+// Errors and constants
+import {AmountInvalid, AskTooHigh, CurrencyInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {InvalidChainlinkPrice, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
 import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Mocks and other tests
@@ -27,7 +26,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, BaseStrategyChainlinkMultiplePriceFeeds.PriceFeedNotAvailable.selector);
+        assertEq(errorSelector, PriceFeedNotAvailable.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -51,7 +50,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.PriceNotRecentEnough.selector);
+        assertEq(errorSelector, PriceNotRecentEnough.selector);
 
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
@@ -78,7 +77,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -87,7 +86,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         (isValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, BaseStrategyChainlinkPriceLatency.InvalidChainlinkPrice.selector);
+        assertEq(errorSelector, InvalidChainlinkPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);

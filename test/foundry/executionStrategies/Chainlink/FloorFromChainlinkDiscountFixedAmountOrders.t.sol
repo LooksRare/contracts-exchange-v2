@@ -5,11 +5,11 @@ pragma solidity ^0.8.17;
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionManager.sol";
 
-// Shared errors
-import {OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+// Errors
+import {DiscountGreaterThanFloorPrice} from "../../../../contracts/errors/ChainlinkErrors.sol";
 
 // Strategies
-import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
 // Other tests
 import {FloorFromChainlinkDiscountOrdersTest} from "./FloorFromChainlinkDiscountOrders.t.sol";
@@ -18,7 +18,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
     function setUp() public override {
         _setIsFixedAmount(1);
         _setDiscount(0.1 ether);
-        _setSelector(StrategyFloorFromChainlink.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector, true);
+        _setSelector(StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector, true);
         super.setUp();
     }
 
@@ -117,7 +117,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyFloorFromChainlink.DiscountGreaterThanFloorPrice.selector);
+        assertEq(errorSelector, DiscountGreaterThanFloorPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -129,7 +129,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         (isValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
-        assertEq(errorSelector, StrategyFloorFromChainlink.DiscountGreaterThanFloorPrice.selector);
+        assertEq(errorSelector, DiscountGreaterThanFloorPrice.selector);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);

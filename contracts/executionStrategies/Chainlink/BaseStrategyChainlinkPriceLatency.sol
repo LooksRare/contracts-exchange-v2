@@ -23,22 +23,6 @@ contract BaseStrategyChainlinkPriceLatency is OwnableTwoSteps {
     uint256 public immutable maxLatency;
 
     /**
-     * @notice It is returned if the Chainlink price is invalid (e.g. negative).
-     */
-    error InvalidChainlinkPrice();
-
-    /**
-     * @notice It is returned if the latency tolerance is set too high (i.e. greater than 3,600 sec).
-     */
-    error LatencyToleranceTooHigh();
-
-    /**
-     * @notice It is returned if the current block time relative to the latest price's update time
-     *         is greater than the latency tolerance.
-     */
-    error PriceNotRecentEnough();
-
-    /**
      * @notice Constructor
      * @param _owner Owner address
      * @param _maxLatency Maximum price latency allowed

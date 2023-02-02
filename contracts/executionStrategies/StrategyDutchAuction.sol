@@ -10,9 +10,6 @@ import {BidTooLow, OrderInvalid, FunctionSelectorInvalid} from "../errors/Shared
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../constants/NumericConstants.sol";
-
 /**
  * @title StrategyDutchAuction
  * @notice This contract offers a single execution strategy for users to create Dutch auctions.

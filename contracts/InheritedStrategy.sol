@@ -8,7 +8,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {OrderInvalid} from "./errors/SharedErrors.sol";
 
 // Assembly
-import {OrderInvalid_error_selector, OrderInvalid_error_length, Error_selector_offset, OneWord} from "./constants/StrategyConstants.sol";
+import {OrderInvalid_error_selector, OrderInvalid_error_length, Error_selector_offset, OneWord} from "./constants/AssemblyConstants.sol";
 
 /**
  * @title InheritedStrategy

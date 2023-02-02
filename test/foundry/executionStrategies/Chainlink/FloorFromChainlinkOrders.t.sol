@@ -8,22 +8,20 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
-// Shared errors
+// Errors and constants
 import {FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {InvalidDecimals, PriceFeedAlreadySet} from "../../../../contracts/errors/ChainlinkErrors.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
 // Strategies
-import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
-// Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
-
 abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager {
-    StrategyFloorFromChainlink internal strategyFloorFromChainlink;
+    StrategyChainlinkFloor internal strategyFloorFromChainlink;
 
     // At block 15740567
     // roundId         uint80  : 18446744073709552305
@@ -86,13 +84,13 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
         MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
         priceFeed.setDecimals(decimals);
-        vm.expectRevert(BaseStrategyChainlinkMultiplePriceFeeds.InvalidDecimals.selector);
+        vm.expectRevert(InvalidDecimals.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(priceFeed));
     }
 
     function testPriceFeedCannotBeSetTwice() public asPrankedUser(_owner) {
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
-        vm.expectRevert(BaseStrategyChainlinkMultiplePriceFeeds.PriceFeedAlreadySet.selector);
+        vm.expectRevert(PriceFeedAlreadySet.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
@@ -212,7 +210,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     }
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
-        strategyFloorFromChainlink = new StrategyFloorFromChainlink(_owner, address(weth));
+        strategyFloorFromChainlink = new StrategyChainlinkFloor(_owner, address(weth));
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,
             _minTotalFeeBp,

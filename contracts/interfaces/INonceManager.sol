@@ -15,6 +15,7 @@ interface INonceManager {
         uint256 bidNonce;
         uint256 askNonce;
     }
+
     /**
      * @notice It is emitted when there is an update of the global bid/ask nonces for a user.
      * @param user Address of the user

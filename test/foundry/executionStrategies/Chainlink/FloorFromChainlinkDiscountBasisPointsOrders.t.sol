@@ -8,27 +8,23 @@ import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/I
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionManager.sol";
 
-// Shared errors
+// Errors and constants
 import {OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
 
 // Strategies
-import {BaseStrategyChainlinkPriceLatency} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkPriceLatency.sol";
-import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
-import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
 // Mocks and other tests
 import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol";
 import {FloorFromChainlinkDiscountOrdersTest} from "./FloorFromChainlinkDiscountOrders.t.sol";
-
-// Constants
-import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
 
 contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDiscountOrdersTest {
     function setUp() public override {
         _setIsFixedAmount(0);
         _setDiscount(100);
         _setSelector(
-            StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector,
+            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector,
             true
         );
         super.setUp();

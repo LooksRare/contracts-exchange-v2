@@ -6,7 +6,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../../../contracts/interfaces/IExecutionManager.sol";
 
 // Strategies
-import {StrategyFloorFromChainlink} from "../../../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
 // Other tests
 import {FloorFromChainlinkPremiumOrdersTest} from "./FloorFromChainlinkPremiumOrders.t.sol";
@@ -15,7 +15,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
     function setUp() public override {
         _setPremium(0.1 ether);
         _setIsFixedAmount(1);
-        _setSelector(StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector, false);
+        _setSelector(StrategyChainlinkFloor.executeFixedPremiumStrategyWithTakerBid.selector, false);
         super.setUp();
     }
 
@@ -40,7 +40,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
     function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloorFromChainlink = StrategyFloorFromChainlink(implementation);
+        strategyFloorFromChainlink = StrategyChainlinkFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.7 ETH
@@ -52,7 +52,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
     function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceEqualToMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloorFromChainlink = StrategyFloorFromChainlink(implementation);
+        strategyFloorFromChainlink = StrategyChainlinkFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.8 ETH
@@ -87,7 +87,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
     function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
-        strategyFloorFromChainlink = StrategyFloorFromChainlink(implementation);
+        strategyFloorFromChainlink = StrategyChainlinkFloor(implementation);
 
         // Floor price = 9.7 ETH, premium = 0.1 ETH, desired price = 9.8 ETH
         // Min price = 9.9 ETH

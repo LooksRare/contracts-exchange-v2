@@ -17,7 +17,7 @@ import {MAKER_ORDER_INVALID_STANDARD_SALE, STRATEGY_MAKER_BID_SELECTOR_INVALID, 
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Strategies
-import {StrategyFloorFromChainlink} from "../../contracts/executionStrategies/Chainlink/StrategyFloorFromChainlink.sol";
+import {StrategyChainlinkFloor} from "../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
 // Constants
 import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
@@ -229,7 +229,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _setUpUsers();
 
         vm.prank(_owner);
-        StrategyFloorFromChainlink strategy = new StrategyFloorFromChainlink(_owner, address(weth));
+        StrategyChainlinkFloor strategy = new StrategyChainlinkFloor(_owner, address(weth));
 
         bool isMakerBid = true;
         vm.prank(_owner);
@@ -237,7 +237,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             250,
             250,
             300,
-            StrategyFloorFromChainlink.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector,
+            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector,
             isMakerBid,
             address(strategy)
         );
@@ -278,7 +278,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _setUpUsers();
 
         vm.prank(_owner);
-        StrategyFloorFromChainlink strategy = new StrategyFloorFromChainlink(_owner, address(weth));
+        StrategyChainlinkFloor strategy = new StrategyChainlinkFloor(_owner, address(weth));
 
         bool isMakerBid = false;
         vm.prank(_owner);
@@ -287,7 +287,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             250,
             250,
             300,
-            StrategyFloorFromChainlink.executeFixedPremiumStrategyWithTakerBid.selector,
+            StrategyChainlinkFloor.executeFixedPremiumStrategyWithTakerBid.selector,
             isMakerBid,
             address(strategy)
         );

@@ -219,9 +219,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
@@ -312,9 +310,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
@@ -336,9 +332,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
@@ -364,9 +358,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(AmountInvalid.selector);
@@ -377,9 +369,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         makerAsk.amounts[0] = 2;
         signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        (isValid, errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
@@ -406,5 +396,13 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
+    }
+
+    function _assertOrderIsInvalid(OrderStructs.MakerAsk memory makerAsk) private returns (bytes4) {
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+
+        return errorSelector;
     }
 }

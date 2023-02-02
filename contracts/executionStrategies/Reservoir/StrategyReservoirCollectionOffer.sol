@@ -42,7 +42,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
     /**
      * @notice Default validity period of a signature.
      */
-    uint256 public constant SIGNATURE_VALIDITY_PERIOD = 0 seconds;
+    uint256 public constant SIGNATURE_VALIDITY_PERIOD = 90 seconds;
 
     /**
      * @notice This function validates the order under the context of the chosen strategy and

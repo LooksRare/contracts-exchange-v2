@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 // LooksRare unopinionated libraries
-import {SignatureChecker} from "@looksrare/contracts-libs/contracts/SignatureChecker.sol";
+import {SignatureCheckerCalldata} from "@looksrare/contracts-libs/contracts/SignatureCheckerCalldata.sol";
 
 // Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
@@ -69,7 +69,7 @@ contract ProtocolHelpers {
      * @param makerAsk Maker ask struct
      * @param makerSignature Maker signature
      * @param signer Signer address
-     * @dev It returns true only if the SignatureChecker does not revert before.
+     * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
      */
     function verifyMakerAskOrder(
         OrderStructs.MakerAsk memory makerAsk,
@@ -77,7 +77,7 @@ contract ProtocolHelpers {
         address signer
     ) public view returns (bool) {
         bytes32 digest = computeDigestMakerAsk(makerAsk);
-        SignatureChecker.verify(digest, signer, makerSignature);
+        SignatureCheckerCalldata.verify(digest, signer, makerSignature);
         return true;
     }
 
@@ -86,7 +86,7 @@ contract ProtocolHelpers {
      * @param makerBid Maker bid struct
      * @param makerSignature Maker signature
      * @param signer Signer address
-     * @dev It returns true only if the SignatureChecker does not revert before.
+     * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
      */
     function verifyMakerBidOrder(
         OrderStructs.MakerBid memory makerBid,
@@ -94,7 +94,7 @@ contract ProtocolHelpers {
         address signer
     ) public view returns (bool) {
         bytes32 digest = computeDigestMakerBid(makerBid);
-        SignatureChecker.verify(digest, signer, makerSignature);
+        SignatureCheckerCalldata.verify(digest, signer, makerSignature);
         return true;
     }
 
@@ -103,7 +103,7 @@ contract ProtocolHelpers {
      * @param merkleTree Merkle tree struct
      * @param makerSignature Maker signature
      * @param signer Signer address
-     * @dev It returns true only if the SignatureChecker does not revert before.
+     * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
      */
     function verifyMerkleTree(
         OrderStructs.MerkleTree memory merkleTree,
@@ -111,7 +111,7 @@ contract ProtocolHelpers {
         address signer
     ) public view returns (bool) {
         bytes32 digest = computeDigestMerkleTree(merkleTree);
-        SignatureChecker.verify(digest, signer, makerSignature);
+        SignatureCheckerCalldata.verify(digest, signer, makerSignature);
         return true;
     }
 }

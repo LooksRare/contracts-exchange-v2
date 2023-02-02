@@ -17,8 +17,8 @@ import {MaliciousOnERC1155ReceivedTheThirdTimeERC1271Wallet} from "./utils/Malic
 import {MaliciousIsValidSignatureERC1271Wallet} from "./utils/MaliciousIsValidSignatureERC1271Wallet.sol";
 
 // Errors
-import {InvalidSignatureERC1271} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
-import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC1155Transfer.sol";
+import {SignatureERC1271Invalid} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
+import {ERC1155SafeTransferFromFail, ERC1155SafeBatchTransferFromFail} from "@looksrare/contracts-libs/contracts/errors/LowLevelErrors.sol";
 import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Constants
@@ -78,7 +78,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, SIGNATURE_INVALID_EIP1271);
 
-        vm.expectRevert(InvalidSignatureERC1271.selector);
+        vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
@@ -144,7 +144,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, SIGNATURE_INVALID_EIP1271);
 
-        vm.expectRevert(InvalidSignatureERC1271.selector);
+        vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -177,7 +177,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
-        vm.expectRevert(LowLevelERC1155Transfer.ERC1155SafeTransferFromFail.selector);
+        vm.expectRevert(ERC1155SafeTransferFromFail.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, _EMPTY_SIGNATURE, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -222,7 +222,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteTakerAsk);
 
-        vm.expectRevert(LowLevelERC1155Transfer.ERC1155SafeBatchTransferFrom.selector);
+        vm.expectRevert(ERC1155SafeBatchTransferFromFail.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -279,7 +279,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         transferManager.grantApprovals(operators);
         vm.stopPrank();
 
-        vm.expectRevert(InvalidSignatureERC1271.selector);
+        vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             takerBids,

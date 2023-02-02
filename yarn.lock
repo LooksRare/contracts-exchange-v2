@@ -1034,10 +1034,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@looksrare/contracts-libs@2.5.1":
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-2.5.1.tgz#cc6c049e31bd16db7a309c02213eb6b18d717e52"
-  integrity sha512-Mddt94e25GzMFik9hkC77Wkwma4AjVLNCFXsKB0lMRMKf0wDq8/ko8CZEVfh+rqccBlhGwzGitPaCU1YJTIPeg==
+"@looksrare/contracts-libs@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@looksrare/contracts-libs/-/contracts-libs-3.0.2.tgz#1a0f1b850a614bb4c14f1a5ce21413eb3f7542ad"
+  integrity sha512-bKU3YOfBzFT9MxY52aYhehlqWhHrpMmquLtukmDY8jTqGMsOk3W7Irm/a4+bMygIKEpYb2e5CE5RMKC0xalasg==
 
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
@@ -7604,8 +7604,6 @@ level-post@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/level-post/-/level-post-1.0.7.tgz#19ccca9441a7cc527879a0635000f06d5e8f27d0"
   integrity sha512-PWYqG4Q00asOrLhX7BejSajByB4EmG2GaKHfj3h5UmmZ2duciXLPGYWIjBzLECFWUGOZWlm5B20h/n3Gs3HKew==
-  dependencies:
-    ltgt "^2.1.2"
 
 level-sublevel@6.6.4:
   version "6.6.4"
@@ -7865,15 +7863,15 @@ lru_map@^0.3.3:
   resolved "https://registry.yarnpkg.com/lru_map/-/lru_map-0.3.3.tgz#b5c8351b9464cbd750335a79650a0ec0e56118dd"
   integrity sha512-Pn9cox5CsMYngeDbmChANltQl+5pi6XmTrraMSzhPmMBbmgcxmqWry0U3PGapCU1yB4/LqCcom7qhHZiF/jGfQ==
 
-ltgt@^2.1.2, ltgt@~2.2.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.2.1.tgz#f35ca91c493f7b73da0e07495304f17b31f87ee5"
-  integrity sha512-AI2r85+4MquTw9ZYqabu4nMwy9Oftlfa/e/52t9IjtfG+mGBbTNdAoZ3RQKLHR6r0wQnwZnPIEh/Ya6XTWAKNA==
-
 ltgt@~2.1.1:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.1.3.tgz#10851a06d9964b971178441c23c9e52698eece34"
   integrity sha512-5VjHC5GsENtIi5rbJd+feEpDKhfr7j0odoUR2Uh978g+2p93nd5o34cTjQWohXsPsCZeqoDnIqEf88mPCe0Pfw==
+
+ltgt@~2.2.0:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/ltgt/-/ltgt-2.2.1.tgz#f35ca91c493f7b73da0e07495304f17b31f87ee5"
+  integrity sha512-AI2r85+4MquTw9ZYqabu4nMwy9Oftlfa/e/52t9IjtfG+mGBbTNdAoZ3RQKLHR6r0wQnwZnPIEh/Ya6XTWAKNA==
 
 macos-release@^3.0.1:
   version "3.1.0"

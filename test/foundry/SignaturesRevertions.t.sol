@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 // Libraries, interfaces, errors
-import {BadSignatureV, BadSignatureS, InvalidSignatureEOA, NullSignerAddress, WrongSignatureLength} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
+import {SignatureParameterVInvalid, SignatureParameterSInvalid, SignatureEOAInvalid, NullSignerAddress, SignatureLengthInvalid} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Base test
@@ -16,7 +16,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
     uint256 internal constant _MAX_PRIVATE_KEY =
         115792089237316195423570985008687907852837564279074904382605163141518161494337;
 
-    function testRevertIfInvalidSignatureEOA(uint256 itemId, uint256 price, uint256 randomPK) public {
+    function testRevertIfSignatureEOAInvalid(uint256 itemId, uint256 price, uint256 randomPK) public {
         // @dev Private keys 1 and 2 are used for maker/taker users
         vm.assume(randomPK > 2 && randomPK < _MAX_PRIVATE_KEY);
 
@@ -40,7 +40,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
-        vm.expectRevert(InvalidSignatureEOA.selector);
+        vm.expectRevert(SignatureEOAInvalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -73,7 +73,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
-        vm.expectRevert(abi.encodeWithSelector(BadSignatureV.selector, v));
+        vm.expectRevert(abi.encodeWithSelector(SignatureParameterVInvalid.selector, v));
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -106,7 +106,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
-        vm.expectRevert(abi.encodeWithSelector(BadSignatureS.selector));
+        vm.expectRevert(abi.encodeWithSelector(SignatureParameterSInvalid.selector));
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -166,7 +166,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
-        vm.expectRevert(abi.encodeWithSelector(WrongSignatureLength.selector, length));
+        vm.expectRevert(abi.encodeWithSelector(SignatureLengthInvalid.selector, length));
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }

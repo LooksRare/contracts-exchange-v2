@@ -32,7 +32,7 @@ interface INonceManager {
     event OrderNoncesCancelled(address user, uint256[] orderNonces);
 
     /**
-     * @notice It is emitted when order nonces are cancelled for a user.
+     * @notice It is emitted when subset nonces are cancelled for a user.
      * @param user Address of the user
      * @param subsetNonces Array of subset nonces cancelled
      */

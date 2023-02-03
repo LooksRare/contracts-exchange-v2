@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity 0.8.17;
 
 import {ILooksRareProtocol} from "../../../contracts/interfaces/ILooksRareProtocol.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";

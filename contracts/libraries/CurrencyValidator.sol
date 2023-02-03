@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity 0.8.17;
 
 // Assembly
 import {CurrencyInvalid_error_selector, CurrencyInvalid_error_length, Error_selector_offset} from "../constants/AssemblyConstants.sol";

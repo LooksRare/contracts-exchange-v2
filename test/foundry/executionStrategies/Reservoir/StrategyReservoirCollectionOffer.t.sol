@@ -104,6 +104,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             address collection,
             uint256 itemId,
             address itemOwner,
+            ,
             bytes memory takerAdditionalParameters
         ) = _returnValidNonFlaggedItemDataFromReservoir();
 
@@ -151,7 +152,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             uint256 forkedBlockNumber,
             ,
             address collection,
-            uint256 itemId,
+            ,
             address itemOwner,
             bytes memory takerAdditionalParameters
         ) = _returnInvalidNonFlaggedItemDataFromReservoir();
@@ -198,8 +199,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             uint256 forkedBlockNumber,
             uint256 timestamp,
             address collection,
-            uint256 itemId,
+            ,
             address itemOwner,
+            ,
             bytes memory takerAdditionalParameters
         ) = _returnValidNonFlaggedItemDataFromReservoir();
 
@@ -245,6 +247,53 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testTakerAskReservoirCollectionOrderERC721RevertsIfTransferWithinCooldownPeriod() public {
+        (
+            uint256 forkedBlockNumber,
+            ,
+            address collection,
+            uint256 itemId,
+            address itemOwner,
+            uint256 lastTransferTime,
+            bytes memory takerAdditionalParameters
+        ) = _returnValidNonFlaggedItemDataFromReservoir();
+
+        _setUpForkAtBlockNumber(forkedBlockNumber);
+        _setUpUser(makerUser);
+        _setUpTakerUserAndGrantApprovals(itemOwner, collection);
+
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1,
+            assetType: ASSET_TYPE_ERC721,
+            orderNonce: 0,
+            collection: collection,
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Not used
+        });
+
+        // Maker user specifies the cooldown period for transfer
+        uint256 transferCooldownPeriod = block.timestamp - lastTransferTime + 1;
+        makerBid.additionalParameters = abi.encode(transferCooldownPeriod);
+
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Prepare taker ask
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
+
+        _assertOrderIsValid(makerBid);
+        _assertValidMakerBidOrder(makerBid, signature);
+
+        vm.expectRevert(abi.encodeWithSelector(ItemTransferredTooRecently.selector, collection, itemId));
+        vm.prank(itemOwner);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function testTakerAskReservoirCollectionOrderERC721RevertsIfItemIdDiffers(uint256 itemId) public {
         // 420 is the itemId that is from the Reservoir's data
         vm.assume(itemId != 420);
@@ -252,10 +301,11 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         //      will generate an invalid message id.
         (
             uint256 forkedBlockNumber,
-            uint256 timestamp,
+            ,
             address collection,
             ,
             address itemOwner,
+            ,
             bytes memory takerAdditionalParameters
         ) = _returnValidNonFlaggedItemDataFromReservoir();
 
@@ -410,6 +460,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             address collection,
             uint256 itemId,
             address itemOwner,
+            uint256 lastTransferTime,
             bytes memory takerAdditionalParameters
         )
     {
@@ -434,6 +485,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         itemId = 420;
         collection = 0x60E4d786628Fea6478F785A6d7e704777c86a7c6;
         itemOwner = 0xE052113bd7D7700d623414a0a4585BCaE754E9d5; // This address owns the itemId
+        lastTransferTime = 1_652_309_738;
 
         takerAdditionalParameters = abi.encode(
             bytes32(0xdfe46268693892a9f04f448e598fdf46e54128885f9f152fabb92b3a1628623e),
@@ -442,18 +494,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             hex"f3eeeef0bc09cc510fb8edde0196fa4208e868232649a4d0fd565f00aed176a608899f2609aaada31457388ced8c16c84f52a9d132d817bb3db7d61ab96d8eb61b",
             uint256(itemId)
         );
-    }
-
-    function _corruptTakerAdditionalParametersByChangingItemId(
-        bytes memory takerAdditionalParameters,
-        uint256 newItemId
-    ) private view returns (bytes memory corruptedTakerAdditionalParameters) {
-        (bytes32 messageId, bytes memory payload, uint256 timestamp, bytes memory signature, ) = abi.decode(
-            takerAdditionalParameters,
-            (bytes32, bytes, uint256, bytes, uint256)
-        );
-
-        corruptedTakerAdditionalParameters = abi.encode(messageId, payload, timestamp, signature, newItemId);
     }
 
     function _setUpNewStrategies() private asPrankedUser(_owner) {
@@ -486,5 +526,17 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
         assertFalse(orderIsValid);
         assertEq(errorSelector, OrderInvalid.selector);
+    }
+
+    function _corruptTakerAdditionalParametersByChangingItemId(
+        bytes memory takerAdditionalParameters,
+        uint256 newItemId
+    ) private pure returns (bytes memory corruptedTakerAdditionalParameters) {
+        (bytes32 messageId, bytes memory payload, uint256 timestamp, bytes memory signature, ) = abi.decode(
+            takerAdditionalParameters,
+            (bytes32, bytes, uint256, bytes, uint256)
+        );
+
+        corruptedTakerAdditionalParameters = abi.encode(messageId, payload, timestamp, signature, newItemId);
     }
 }

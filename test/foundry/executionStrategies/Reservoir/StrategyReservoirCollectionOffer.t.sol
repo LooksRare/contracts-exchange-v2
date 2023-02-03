@@ -245,6 +245,61 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testTakerAskReservoirCollectionOrderERC721RevertsIfItemIdDiffers(uint256 itemId) public {
+        // 420 is the itemId that is from the Reservoir's data
+        vm.assume(itemId != 420);
+        // @dev Trying to sell an itemId that is not the one in the Reservoir's data
+        //      will generate an invalid message id.
+        (
+            uint256 forkedBlockNumber,
+            uint256 timestamp,
+            address collection,
+            ,
+            address itemOwner,
+            bytes memory takerAdditionalParameters
+        ) = _returnValidNonFlaggedItemDataFromReservoir();
+
+        takerAdditionalParameters = _corruptTakerAdditionalParametersByChangingItemId(
+            takerAdditionalParameters,
+            itemId
+        );
+
+        _setUpForkAtBlockNumber(forkedBlockNumber);
+        _setUpUser(makerUser);
+        _setUpTakerUserAndGrantApprovals(itemOwner, collection);
+
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1,
+            assetType: ASSET_TYPE_ERC721,
+            orderNonce: 0,
+            collection: collection,
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Not used
+        });
+
+        // Maker user specifies the cooldown period for transfer
+        uint256 transferCooldownPeriod = 1 hours;
+        makerBid.additionalParameters = abi.encode(transferCooldownPeriod);
+
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Prepare taker ask
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
+
+        _assertOrderIsValid(makerBid);
+        _assertValidMakerBidOrder(makerBid, signature);
+
+        vm.expectRevert(MessageIdInvalid.selector);
+        vm.prank(itemOwner);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function _setUpForkAtBlockNumber(uint256 blockNumber) internal {
         vm.createSelectFork(vm.rpcUrl("mainnet"), blockNumber);
         _setUp();
@@ -387,6 +442,18 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             hex"f3eeeef0bc09cc510fb8edde0196fa4208e868232649a4d0fd565f00aed176a608899f2609aaada31457388ced8c16c84f52a9d132d817bb3db7d61ab96d8eb61b",
             uint256(itemId)
         );
+    }
+
+    function _corruptTakerAdditionalParametersByChangingItemId(
+        bytes memory takerAdditionalParameters,
+        uint256 newItemId
+    ) private view returns (bytes memory corruptedTakerAdditionalParameters) {
+        (bytes32 messageId, bytes memory payload, uint256 timestamp, bytes memory signature, ) = abi.decode(
+            takerAdditionalParameters,
+            (bytes32, bytes, uint256, bytes, uint256)
+        );
+
+        corruptedTakerAdditionalParameters = abi.encode(messageId, payload, timestamp, signature, newItemId);
     }
 
     function _setUpNewStrategies() private asPrankedUser(_owner) {

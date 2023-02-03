@@ -127,9 +127,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
@@ -188,9 +186,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
@@ -221,6 +217,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         strategyItemIdsRange.isMakerBidValid(makerBid, selector);
 
         vm.expectRevert(); // EVM revert
+        orderValidator.checkMakerBidOrderValidity(makerBid, signature, _EMPTY_MERKLE_TREE);
+
+        vm.expectRevert(); // EVM revert
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -234,9 +233,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
@@ -251,9 +248,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
 
         uint256[] memory takerAskItemIds = new uint256[](3);
@@ -288,9 +283,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(takerAskItemIds, invalidAmounts);
 
         // The maker bid order is still valid since the error comes from the taker ask amounts
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
 
         // It fails at 2nd item in the array (greater than 1)
@@ -322,9 +315,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
@@ -358,9 +349,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
@@ -384,9 +373,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
@@ -409,9 +396,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
@@ -440,9 +425,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Sign order
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(OrderInvalid.selector);
@@ -462,9 +445,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerBid);
         // but... the OrderValidator catches this
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, STRATEGY_NOT_ACTIVE);
 
@@ -492,5 +473,18 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (bool orderIsValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
+    }
+
+    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) private {
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
+    }
+
+    function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid) private returns (bytes4) {
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, OrderInvalid.selector);
+        return errorSelector;
     }
 }

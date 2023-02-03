@@ -14,6 +14,7 @@ import {MerkleProofCalldataWithProofLimit} from "../libraries/OpenZeppelin/Merkl
 
 // Interfaces
 import {ICreatorFeeManager} from "../interfaces/ICreatorFeeManager.sol";
+import {IExtendedExecutionStrategy} from "../interfaces/IExtendedExecutionStrategy.sol";
 import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 
 // Shared errors
@@ -26,37 +27,6 @@ import {TransferManager} from "../TransferManager.sol";
 // Constants
 import "../constants/ValidationCodeConstants.sol";
 import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
-
-/**
- * @title IExtendedExecutionStrategy
- */
-interface IExtendedExecutionStrategy {
-    /**
-     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
-     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
-     * @param functionSelector Function selector for the strategy
-     * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it return the error's 4 bytes selector
-     */
-    function isMakerAskValid(
-        OrderStructs.MakerAsk calldata makerAsk,
-        bytes4 functionSelector
-    ) external view returns (bool isValid, bytes4 errorSelector);
-
-    /**
-     * @notice Validate *only the maker* order under the context of the chosen strategy. It does not revert if
-     *         the maker order is invalid. Instead it returns false and the error's 4 bytes selector.
-     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @param functionSelector Function selector for the strategy
-     * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
-     */
-    function isMakerBidValid(
-        OrderStructs.MakerBid calldata makerBid,
-        bytes4 functionSelector
-    ) external pure returns (bool isValid, bytes4 errorSelector);
-}
 
 /**
  * @title OrderValidatorV2A
@@ -899,25 +869,7 @@ contract OrderValidatorV2A {
             amounts = makerAsk.amounts;
             price = makerAsk.minPrice;
 
-            uint256 length = itemIds.length;
-
-            if (length == 0 || (amounts.length != length)) {
-                validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-            } else {
-                for (uint256 i; i < length; ) {
-                    if (amounts[i] == 0) {
-                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                    }
-
-                    if (makerAsk.assetType == ASSET_TYPE_ERC721 && amounts[i] != 1) {
-                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                    }
-
-                    unchecked {
-                        ++i;
-                    }
-                }
-            }
+            validationCode = _getOrderValidationCodeForStandardStrategy(makerAsk.assetType, itemIds.length, amounts);
         } else {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
@@ -933,15 +885,7 @@ contract OrderValidatorV2A {
                 strategySelector
             );
 
-            if (isValid) {
-                validationCode = ORDER_EXPECTED_TO_BE_VALID;
-            } else {
-                if (errorSelector == OrderInvalid.selector) {
-                    validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
-                } else {
-                    validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
-                }
-            }
+            validationCode = _getOrderValidationCodeForNonStandardStrategies(isValid, errorSelector);
         }
     }
 
@@ -957,25 +901,7 @@ contract OrderValidatorV2A {
             amounts = makerBid.amounts;
             price = makerBid.maxPrice;
 
-            uint256 length = itemIds.length;
-
-            if (length == 0 || (amounts.length != length)) {
-                validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-            } else {
-                for (uint256 i; i < length; ) {
-                    if (amounts[i] == 0) {
-                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                    }
-
-                    if (makerBid.assetType == ASSET_TYPE_ERC721 && amounts[i] != 1) {
-                        validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
-                    }
-
-                    unchecked {
-                        ++i;
-                    }
-                }
-            }
+            validationCode = _getOrderValidationCodeForStandardStrategy(makerBid.assetType, itemIds.length, amounts);
         } else {
             // @dev It should ideally be adjusted by real price
             //      amounts and itemIds are not used since most non-native maker bids won't target a single item
@@ -990,15 +916,7 @@ contract OrderValidatorV2A {
                 strategySelector
             );
 
-            if (isValid) {
-                validationCode = ORDER_EXPECTED_TO_BE_VALID;
-            } else {
-                if (errorSelector == OrderInvalid.selector) {
-                    validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
-                } else {
-                    validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
-                }
-            }
+            validationCode = _getOrderValidationCodeForNonStandardStrategies(isValid, errorSelector);
         }
     }
 
@@ -1010,5 +928,46 @@ contract OrderValidatorV2A {
         creatorFeeManager = looksRareProtocol.creatorFeeManager();
         maxCreatorFeeBp = looksRareProtocol.maxCreatorFeeBp();
         royaltyFeeRegistry = creatorFeeManager.royaltyFeeRegistry();
+    }
+
+    function _getOrderValidationCodeForStandardStrategy(
+        uint256 assetType,
+        uint256 expectedLength,
+        uint256[] memory amounts
+    ) private pure returns (uint256 validationCode) {
+        if (expectedLength == 0 || (amounts.length != expectedLength)) {
+            validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+        } else {
+            for (uint256 i; i < expectedLength; ) {
+                uint256 amount = amounts[i];
+
+                if (amount == 0) {
+                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                }
+
+                if (assetType == ASSET_TYPE_ERC721 && amount != 1) {
+                    validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
+                }
+
+                unchecked {
+                    ++i;
+                }
+            }
+        }
+    }
+
+    function _getOrderValidationCodeForNonStandardStrategies(
+        bool isValid,
+        bytes4 errorSelector
+    ) private pure returns (uint256 validationCode) {
+        if (isValid) {
+            validationCode = ORDER_EXPECTED_TO_BE_VALID;
+        } else {
+            if (errorSelector == OrderInvalid.selector) {
+                validationCode = MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE;
+            } else {
+                validationCode = MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE;
+            }
+        }
     }
 }

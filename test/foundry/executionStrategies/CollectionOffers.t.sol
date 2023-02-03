@@ -189,14 +189,7 @@ contract CollectionOrdersTest is ProtocolBase {
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(tokenId), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
-        // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        _assertSuccessfulTakerAsk(makerBid, tokenId);
     }
 
     /**
@@ -242,14 +235,7 @@ contract CollectionOrdersTest is ProtocolBase {
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemIdInMerkleTree), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
-        // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        _assertSuccessfulTakerAsk(makerBid, itemIdInMerkleTree);
     }
 
     function testTakerAskCannotExecuteWithInvalidProof(uint256 itemIdSold) public {
@@ -452,5 +438,16 @@ contract CollectionOrdersTest is ProtocolBase {
         proof = m.getProof(merkleTreeIds, itemIdInMerkleTree);
 
         assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[itemIdInMerkleTree]));
+    }
+
+    function _assertSuccessfulTakerAsk(OrderStructs.MakerBid memory makerBid, uint256 tokenId) private {
+        // Taker user has received the asset
+        assertEq(mockERC721.ownerOf(tokenId), makerUser);
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        // Taker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
+        // Verify the nonce is marked as executed
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 }

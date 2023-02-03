@@ -7,7 +7,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 // Errors and constants
 import {AmountInvalid, BidTooLow, CurrencyInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {ChainlinkPriceInvalid, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
-import {MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
+import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "../../../../contracts/executionStrategies/Chainlink/BaseStrategyChainlinkMultiplePriceFeeds.sol";
@@ -35,9 +35,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         vm.prank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = OrderInvalid.selector;
+
+        _assertOrderIsInvalid(makerAsk, errorSelector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         // EvmError: Revert
         vm.expectRevert();
@@ -51,9 +52,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, PriceFeedNotAvailable.selector);
+        bytes4 errorSelector = PriceFeedNotAvailable.selector;
+
+        _assertOrderIsInvalid(makerAsk, errorSelector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -75,16 +77,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         vm.warp(latencyViolationTimestamp);
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, PriceNotRecentEnough.selector);
+        bytes4 errorSelector = PriceNotRecentEnough.selector;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE
-        );
-        assertEq(validationCodes[1], MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _assertOrderIsInvalid(makerAsk, errorSelector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -102,9 +98,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         vm.prank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, ChainlinkPriceInvalid.selector);
+        bytes4 errorSelector = ChainlinkPriceInvalid.selector;
+
+        _assertOrderIsInvalid(makerAsk, errorSelector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -125,9 +122,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = OrderInvalid.selector;
+
+        _assertOrderIsInvalid(makerAsk, errorSelector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -144,9 +142,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        bytes4 errorSelector = OrderInvalid.selector;
+
+        _assertOrderIsInvalid(makerAsk, errorSelector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -165,9 +164,8 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, OrderInvalid.selector);
+        _assertOrderIsInvalid(makerAsk, OrderInvalid.selector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(AmountInvalid.selector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -185,9 +183,8 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _setPriceFeed();
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertTrue(isValid);
-        assertEq(errorSelector, _EMPTY_BYTES4);
+        _assertOrderIsValid(makerAsk);
+        _assertValidMakerAskOrder(makerAsk, signature);
 
         vm.expectRevert(BidTooLow.selector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -206,9 +203,10 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
-        assertFalse(isValid);
-        assertEq(errorSelector, CurrencyInvalid.selector);
+        bytes4 errorSelector = CurrencyInvalid.selector;
+
+        _assertOrderIsInvalid(makerAsk, errorSelector);
+        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -226,5 +224,17 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
 
     function _setPremium(uint256 _premium) internal {
         premium = _premium;
+    }
+
+    function _assertOrderIsValid(OrderStructs.MakerAsk memory makerAsk) internal {
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
+        assertTrue(isValid);
+        assertEq(errorSelector, _EMPTY_BYTES4);
+    }
+
+    function _assertOrderIsInvalid(OrderStructs.MakerAsk memory makerAsk, bytes4 expectedErrorSelector) internal {
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, selector);
+        assertFalse(isValid);
+        assertEq(errorSelector, expectedErrorSelector);
     }
 }

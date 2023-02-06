@@ -284,14 +284,13 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
             revert LastTransferTimeInvalid();
         }
 
-        // Check if item was transferred too recently
+        // Check if item was transferred too recently or transfer outside of the cooldown period
+        if (block.timestamp < lastTransferTime + transferCooldownPeriod) {
+            revert ItemTransferredTooRecently(collection, itemId);
+        }
 
         if (transferCooldownPeriod > MAXIMUM_TRANSFER_COOLDOWN_PERIOD) {
             revert TransferCooldownPeriodTooHigh();
-        }
-
-        if (block.timestamp < lastTransferTime + transferCooldownPeriod) {
-            revert ItemTransferredTooRecently(collection, itemId);
         }
     }
 

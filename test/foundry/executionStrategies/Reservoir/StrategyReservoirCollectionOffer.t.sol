@@ -12,7 +12,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 
 // Errors and constants
 import {FunctionSelectorInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
-import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureTimestampExpired} from "../../../../contracts/errors/ReservoirErrors.sol";
+import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureTimestampExpired, TransferCooldownPeriodTooHigh} from "../../../../contracts/errors/ReservoirErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
@@ -29,6 +29,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         strategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
 
     uint256 public SIGNATURE_VALIDITY_PERIOD;
+    uint256 public MAXIMUM_TRANSFER_COOLDOWN_PERIOD;
 
     // Test parameters
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -115,7 +116,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _assertOrderIsValid(makerBid, false);
         _assertValidMakerBidOrder(makerBid, signature);
 
-        // Execute taker ask transaction
         vm.prank(itemOwner);
         vm.expectRevert(abi.encodeWithSelector(ItemIdFlagged.selector, collection, flaggedItemId));
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -268,7 +268,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testTakerAskReservoirCollectionOrderERC721RevertsIfTransferWithinCooldownPeriod() public {
+    function testTakerAskReservoirCollectionOrderERC721RevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh()
+        public
+    {
         (
             uint256 forkedBlockNumber,
             ,
@@ -307,10 +309,25 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         // Prepare taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
-        _assertOrderIsValid(makerBid, false);
-        _assertValidMakerBidOrder(makerBid, signature);
+        // It fails because transferCooldownPeriod > MAXIMUM_TRANSFER_COOLDOWN_PERIOD
+        _assertOrderIsInvalid(makerBid, false);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
+        // 1. Reverts if transfer too recent
         vm.expectRevert(abi.encodeWithSelector(ItemTransferredTooRecently.selector, collection, itemId));
+        vm.prank(itemOwner);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // Maker user specifies the cooldown period for transfer
+        transferCooldownPeriod = MAXIMUM_TRANSFER_COOLDOWN_PERIOD + 1;
+        makerBid.additionalParameters = abi.encode(transferCooldownPeriod);
+        signature = _signMakerBid(makerBid, makerUserPK);
+
+        _assertOrderIsInvalid(makerBid, false);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        // 2. Reverts if transfer cooldown period is too high
+        vm.expectRevert(TransferCooldownPeriodTooHigh.selector);
         vm.prank(itemOwner);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
@@ -400,7 +417,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         });
 
         (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-            numberOfItemsInMerkleTree: 1000,
+            numberOfItemsInMerkleTree: itemId > 1000 ? itemId + 50 : 1000,
             itemIdInMerkleTree: itemId
         });
 
@@ -425,12 +442,64 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         assertEq(IERC721(collection).ownerOf(itemId), makerUser);
     }
 
+    function testTakerAskReservoirCollectionOrderWithMerkleTreeRevertsIfItemIsFlagged() public {
+        (
+            uint256 forkedBlockNumber,
+            ,
+            address collection,
+            uint256 flaggedItemId,
+            address itemOwner,
+            bytes memory takerAdditionalParameters
+        ) = _returnFlaggedItemDataFromReservoir();
+
+        _setUpForkAtBlockNumber(forkedBlockNumber);
+        _setUpUser(makerUser);
+        _setUpTakerUserAndGrantApprovals(itemOwner, collection);
+
+        // Prepare the order hash
+        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: ASSET_TYPE_ERC721,
+            orderNonce: 0,
+            collection: collection,
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0
+        });
+
+        (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
+            numberOfItemsInMerkleTree: flaggedItemId > 1000 ? flaggedItemId + 50 : 1000,
+            itemIdInMerkleTree: flaggedItemId
+        });
+
+        makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
+
+        // Sign order
+        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+
+        // Add the proof to the taker additional parameters and generate the Taker struct
+        takerAdditionalParameters = _addProofToTakerAdditionalParameters(takerAdditionalParameters, proof);
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, takerAdditionalParameters);
+
+        // Verify validity of maker bid order
+        _assertOrderIsValid(makerBid, true);
+        _assertValidMakerBidOrder(makerBid, signature);
+
+        vm.prank(itemOwner);
+        vm.expectRevert(abi.encodeWithSelector(ItemIdFlagged.selector, collection, flaggedItemId));
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
     function _setUpForkAtBlockNumber(uint256 blockNumber) internal {
         vm.createSelectFork(vm.rpcUrl("mainnet"), blockNumber);
         _setUp();
         _setUpNewStrategies();
 
         SIGNATURE_VALIDITY_PERIOD = strategyReservoirCollectionOffer.SIGNATURE_VALIDITY_PERIOD();
+        MAXIMUM_TRANSFER_COOLDOWN_PERIOD = strategyReservoirCollectionOffer.MAXIMUM_TRANSFER_COOLDOWN_PERIOD();
     }
 
     function _setUpTakerUserAndGrantApprovals(address user, address collection) internal {

@@ -41,6 +41,8 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
 
     /**
      * @notice Default validity period of a signature.
+     * @dev For this strategy, clients must request users to send the transaction
+     *      with a very high gas price to make sure it is included while the signature is valid.
      */
     uint256 public constant SIGNATURE_VALIDITY_PERIOD = 90 seconds;
 

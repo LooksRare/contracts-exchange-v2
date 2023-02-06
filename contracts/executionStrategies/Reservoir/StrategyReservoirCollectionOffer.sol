@@ -12,7 +12,7 @@ import {MerkleProofMemory} from "../../libraries/OpenZeppelin/MerkleProofMemory.
 
 // Errors
 import {FunctionSelectorInvalid, MerkleProofInvalid, OrderInvalid} from "../../errors/SharedErrors.sol";
-import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureTimestampExpired, TransferCooldownPeriodTooHigh} from "../../errors/ReservoirErrors.sol";
+import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureExpired, TransferCooldownPeriodTooHigh} from "../../errors/ReservoirErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -24,8 +24,8 @@ import {ASSET_TYPE_ERC721} from "../../constants/NumericConstants.sol";
  * @title StrategyReservoirCollectionOffer
  * @notice This contract offers execution strategies for users, which allow them
  *         to create advanced maker bid offers for items in a collection.
- *         The taker must provide the proof that the item is not flagged and that it hasn't been transferred for
- *         a specific time.
+ *         The taker must provide the proof that (1) the itemId is not flagged
+ *         and (2) the item has not been transferred after a specific time.
  *         This strategy is only available for ERC721 tokens (assetType = 0).
  *         There are two available functions:
  *         1. executeCollectionStrategyWithTakerAsk --> it applies to all itemIds in a collection
@@ -86,10 +86,10 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
     /**
      * @notice This function validates the order under the context of the chosen strategy
      *         and returns the fulfillable items/amounts/price/nonce invalidation status.
-     *         This strategy executes a collection offer against a taker ask order with the need of merkle proofs.
+     *         This strategy executes a collection offer against a taker ask order with the need of a merkle proof.
      * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @dev The transaction reverts if there is the maker does not include a merkle root in the additionalParameters.
+     * @dev @dev The transaction reverts if the maker does not include a merkle root in the additionalParameters.
      */
     function executeCollectionStrategyWithTakerAskWithProof(
         OrderStructs.Taker calldata takerAsk,
@@ -255,7 +255,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
     ) private view {
         // Check the signature timestamp
         if (block.timestamp > timestamp + SIGNATURE_VALIDITY_PERIOD) {
-            revert SignatureTimestampExpired();
+            revert SignatureExpired();
         }
 
         // Check the message id

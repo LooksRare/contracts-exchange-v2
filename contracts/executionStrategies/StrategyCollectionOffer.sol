@@ -58,10 +58,10 @@ contract StrategyCollectionOffer is BaseStrategy {
     /**
      * @notice This function validates the order under the context of the chosen strategy
      *         and returns the fulfillable items/amounts/price/nonce invalidation status.
-     *         This strategy executes a collection offer against a taker ask order with the need of merkle proofs.
+     *         This strategy executes a collection offer against a taker ask order with the need of a merkle proof.
      * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @dev The transaction reverts if there is the maker does not include a merkle root in the additionalParameters.
+     * @dev @dev The transaction reverts if the maker does not include a merkle root in the additionalParameters.
      */
     function executeCollectionStrategyWithTakerAskWithProof(
         OrderStructs.Taker calldata takerAsk,

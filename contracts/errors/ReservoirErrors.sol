@@ -26,7 +26,7 @@ error MessageIdInvalid();
 /**
  * @notice It is returned if the signature from the Reservoir's offchain oracle has expired.
  */
-error SignatureTimestampExpired();
+error SignatureExpired();
 
 /**
  * @notice It is returned if the transfer cooldown period specified in the the maker bid order is greater

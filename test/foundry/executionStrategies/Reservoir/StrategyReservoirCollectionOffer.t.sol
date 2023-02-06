@@ -12,7 +12,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 
 // Errors and constants
 import {FunctionSelectorInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
-import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureTimestampExpired, TransferCooldownPeriodTooHigh} from "../../../../contracts/errors/ReservoirErrors.sol";
+import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureExpired, TransferCooldownPeriodTooHigh} from "../../../../contracts/errors/ReservoirErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
@@ -443,7 +443,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         // Time travel
         vm.warp(timestamp + SIGNATURE_VALIDITY_PERIOD + 1);
 
-        vm.expectRevert(SignatureTimestampExpired.selector);
+        vm.expectRevert(SignatureExpired.selector);
         vm.prank(itemOwner);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }

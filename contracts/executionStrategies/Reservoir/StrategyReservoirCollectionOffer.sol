@@ -12,7 +12,7 @@ import {MerkleProofMemory} from "../../libraries/OpenZeppelin/MerkleProofMemory.
 
 // Errors
 import {FunctionSelectorInvalid, MerkleProofInvalid, OrderInvalid} from "../../errors/SharedErrors.sol";
-import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureTimestampExpired} from "../../errors/ReservoirErrors.sol";
+import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureTimestampExpired, TransferCooldownPeriodTooHigh} from "../../errors/ReservoirErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
@@ -43,6 +43,11 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
      * @notice Default validity period of a signature.
      */
     uint256 public constant SIGNATURE_VALIDITY_PERIOD = 90 seconds;
+
+    /**
+     * @notice Maximum cooldown period.
+     */
+    uint256 public constant MAXIMUM_TRANSFER_COOLDOWN_PERIOD = 24 hours;
 
     /**
      * @notice This function validates the order under the context of the chosen strategy and
@@ -140,21 +145,34 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
 
         // If transfer cooldown period is not provided or invalid length, it should be invalid.
-        if (
-            functionSelector == StrategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAsk.selector &&
-            makerBid.additionalParameters.length != 32
-        ) {
-            return (isValid, OrderInvalid.selector);
+        if (functionSelector == StrategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAsk.selector) {
+            if (makerBid.additionalParameters.length != 32) {
+                return (isValid, OrderInvalid.selector);
+            } else {
+                uint256 transferCooldownPeriod = abi.decode(makerBid.additionalParameters, (uint256));
+
+                // @dev It returns OrderInvalid even if a custom error exists (for order invalidation purposes).
+                if (transferCooldownPeriod > MAXIMUM_TRANSFER_COOLDOWN_PERIOD) {
+                    return (isValid, OrderInvalid.selector);
+                }
+            }
         }
 
         // If root and transfer cooldown period are not provided or invalid length, it should be invalid.
         // @dev It does not mean the merkle root is valid against a specific itemId that exists in the collection.
         if (
-            functionSelector ==
-            StrategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
-            makerBid.additionalParameters.length != 64
+            functionSelector == StrategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector
         ) {
-            return (isValid, OrderInvalid.selector);
+            if (makerBid.additionalParameters.length != 64) {
+                return (isValid, OrderInvalid.selector);
+            } else {
+                (, uint256 transferCooldownPeriod) = abi.decode(makerBid.additionalParameters, (bytes32, uint256));
+
+                // @dev It returns OrderInvalid even if a custom error exists (for order invalidation purposes).
+                if (transferCooldownPeriod > MAXIMUM_TRANSFER_COOLDOWN_PERIOD) {
+                    return (isValid, OrderInvalid.selector);
+                }
+            }
         }
 
         isValid = true;
@@ -267,6 +285,11 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
 
         // Check if item was transferred too recently
+
+        if (transferCooldownPeriod > MAXIMUM_TRANSFER_COOLDOWN_PERIOD) {
+            revert TransferCooldownPeriodTooHigh();
+        }
+
         if (block.timestamp < lastTransferTime + transferCooldownPeriod) {
             revert ItemTransferredTooRecently(collection, itemId);
         }

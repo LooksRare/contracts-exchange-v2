@@ -8,6 +8,31 @@
 
 This project contains core smart contracts used for the LooksRare exchange protocol ("v2").
 
+It also contains a peripheral contract (`OrderValidatorV2A`) that is used to verify the validity of (maker) orders.
+
+## Installation
+
+```shell
+# Yarn
+yarn add @looksrare/contracts-exchange-v2
+
+# NPM
+npm install @looksrare/contracts-exchange-v2
+```
+
+## NPM package
+
+The NPM package contains the following:
+
+- Solidity smart contracts (_".sol"_)
+- ABIs (_".json"_)
+
+ABIs are also distributed in the `@looksrare/sdk-v2` package.
+
+## Documentation
+
+The documentation for the exchange smart contracts will be available [here](https://docs.looksrare.org/developers/welcome).
+
 ## Architecture
 
 ![inheritance](./inheritance-contracts.svg)
@@ -29,7 +54,6 @@ It is a hybrid [Hardhat](https://hardhat.org/) repo that also requires [Foundry]
 
 ### Run tests
 
-- TypeScript tests are included in the `hardhat` folder in the `test` folder at the root of the repo.
 - Solidity tests are included in the `foundry` folder in the `test` folder at the root of the repo.
 
 ### Example of Foundry/Forge commands
@@ -41,19 +65,9 @@ forge test -vv
 forge tree
 ```
 
-### Example of Hardhat commands
+### Example of shell commands
 
 ```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
 npx eslint '**/*.{js,ts}'
 npx eslint '**/*.{js,ts}' --fix
 npx prettier '**/*.{json,sol,md}' --check

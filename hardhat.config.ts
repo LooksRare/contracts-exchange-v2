@@ -55,7 +55,7 @@ const config: HardhatUserConfig = {
     runOnCompile: true,
     clear: true,
     flat: true,
-    pretty: false,
+    only: ["LooksRareProtocol.sol", "TransferManager.sol"],
     except: ["test*"],
   },
   gasReporter: {

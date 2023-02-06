@@ -25,8 +25,9 @@ npm install @looksrare/contracts-exchange-v2
 The NPM package contains the following:
 
 - Solidity smart contracts (_".sol"_)
+- ABIs (_".json"_)
 
-ABIs are distributed in the `@looksrare/sdk-v2` package.
+ABIs are also distributed in the `@looksrare/sdk-v2` package.
 
 ## Documentation
 

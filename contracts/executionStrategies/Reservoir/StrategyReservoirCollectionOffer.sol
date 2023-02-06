@@ -35,19 +35,6 @@ import {ASSET_TYPE_ERC721} from "../../constants/NumericConstants.sol";
  */
 contract StrategyReservoirCollectionOffer is BaseStrategy {
     /**
-     * @notice Message's typehash constant.
-     * @dev It is used to compute the hash of the message using the (message) id, the payload, and the timestamp.
-     */
-    bytes32 public constant TYPEHASH_MESSAGE_CONSTANT =
-        keccak256("Message(bytes32 id,bytes payload,uint256 timestamp)");
-
-    /**
-     * @notice Token's typehash constant.
-     * @dev It is used to compute the expected message id and verifies it against the message id signed.
-     */
-    bytes32 public constant TYPEHASH_TOKEN_CONSTANT = keccak256("Token(address contract,uint256 tokenId)");
-
-    /**
      * @notice Reservoir's oracle address.
      */
     address public constant ORACLE_ADDRESS = 0xAeB1D03929bF87F69888f381e73FBf75753d75AF;
@@ -61,6 +48,18 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
      * @notice Maximum cooldown period.
      */
     uint256 public constant MAXIMUM_TRANSFER_COOLDOWN_PERIOD = 24 hours;
+
+    /**
+     * @notice Message's typehash constant.
+     * @dev It is used to compute the hash of the message using the (message) id, the payload, and the timestamp.
+     */
+    bytes32 internal constant _MESSAGE_HASH = keccak256("Message(bytes32 id,bytes payload,uint256 timestamp)");
+
+    /**
+     * @notice Token's typehash constant.
+     * @dev It is used to compute the expected message id and verifies it against the message id signed.
+     */
+    bytes32 internal constant _TOKEN_HASH = keccak256("Token(address contract,uint256 tokenId)");
 
     /**
      * @notice This function validates the order under the context of the chosen strategy and
@@ -102,7 +101,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
      *         This strategy executes a collection offer against a taker ask order with the need of a merkle proof.
      * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @dev @dev The transaction reverts if the maker does not include a merkle root in the additionalParameters.
+     * @dev The transaction reverts if the maker does not include a merkle root in the additionalParameters.
      */
     function executeCollectionStrategyWithTakerAskWithProof(
         OrderStructs.Taker calldata takerAsk,
@@ -272,7 +271,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
 
         // Check the message id
-        bytes32 expectedMessageId = keccak256(abi.encode(TYPEHASH_TOKEN_CONSTANT, collection, itemId));
+        bytes32 expectedMessageId = keccak256(abi.encode(_TOKEN_HASH, collection, itemId));
 
         if (expectedMessageId != messageId) {
             revert MessageIdInvalid();
@@ -313,7 +312,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         bytes32 messageHash = keccak256(
             abi.encodePacked(
                 "\x19Ethereum Signed Message:\n32",
-                keccak256(abi.encode(TYPEHASH_MESSAGE_CONSTANT, id, keccak256(payload), timestamp))
+                keccak256(abi.encode(_MESSAGE_HASH, id, keccak256(payload), timestamp))
             )
         );
 

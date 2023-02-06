@@ -28,8 +28,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     bytes4 public selectorWithProof =
         strategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
 
-    uint256 public SIGNATURE_VALIDITY_PERIOD;
-    uint256 public MAXIMUM_TRANSFER_COOLDOWN_PERIOD;
+    // Constants
+    uint256 public constant SIGNATURE_VALIDITY_PERIOD = 90 seconds;
+    uint256 public constant MAXIMUM_TRANSFER_COOLDOWN_PERIOD = 24 hours;
 
     // Test parameters
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -38,6 +39,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     function testNewStrategies() public {
         _setUp();
         _setUpNewStrategies();
+
+        assertEq(strategyReservoirCollectionOffer.SIGNATURE_VALIDITY_PERIOD(), SIGNATURE_VALIDITY_PERIOD);
+        assertEq(strategyReservoirCollectionOffer.MAXIMUM_TRANSFER_COOLDOWN_PERIOD(), MAXIMUM_TRANSFER_COOLDOWN_PERIOD);
 
         (
             bool strategyIsActive,
@@ -100,12 +104,12 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _testRevertsIfLastTransferTimeIs0(true);
     }
 
-    function testCollectionOrderRevertsIfSignatureTimestampExpires() public {
-        _testRevertsIfSignatureTimestampExpires(false);
+    function testCollectionOrderRevertsIfSignatureExpires() public {
+        _testRevertsIfSignatureExpires(false);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfSignatureTimestampExpires() public {
-        _testRevertsIfSignatureTimestampExpires(true);
+    function testCollectionOrderWithMerkleTreeRevertsIfSignatureExpires() public {
+        _testRevertsIfSignatureExpires(true);
     }
 
     function testCollectionOrderRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh() public {
@@ -119,14 +123,10 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     }
 
     function testCollectionOrderRevertsIfItemIdDiffers(uint16 itemId) public {
-        // 420 is the itemId that is from the Reservoir's data
-        vm.assume(itemId != 420 && itemId <= 20000);
         _testCollectionOrderRevertsIfItemIdDiffers(false, itemId);
     }
 
     function testCollectionOrderWithMerkleTreeRevertsIfItemIdDiffers(uint16 itemId) public {
-        // 420 is the itemId that is from the Reservoir's data
-        vm.assume(itemId != 420 && itemId <= 20000);
         _testCollectionOrderRevertsIfItemIdDiffers(true, itemId);
     }
 
@@ -387,7 +387,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function _testRevertsIfSignatureTimestampExpires(bool withProof) public {
+    function _testRevertsIfSignatureExpires(bool withProof) public {
         (
             uint256 forkedBlockNumber,
             uint256 timestamp,
@@ -449,6 +449,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     }
 
     function _testCollectionOrderRevertsIfItemIdDiffers(bool withProof, uint256 itemId) internal {
+        // 420 is the itemId that is from the Reservoir's data
+        vm.assume(itemId != 420 && itemId <= 20000);
+
         // @dev Trying to sell an itemId that is not the one in the Reservoir's data
         //      will generate an invalid message id.
         (
@@ -515,9 +518,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         vm.createSelectFork(vm.rpcUrl("mainnet"), blockNumber);
         _setUp();
         _setUpNewStrategies();
-
-        SIGNATURE_VALIDITY_PERIOD = strategyReservoirCollectionOffer.SIGNATURE_VALIDITY_PERIOD();
-        MAXIMUM_TRANSFER_COOLDOWN_PERIOD = strategyReservoirCollectionOffer.MAXIMUM_TRANSFER_COOLDOWN_PERIOD();
     }
 
     function _setUpTakerUserAndGrantApprovals(address user, address collection) private {

@@ -35,6 +35,19 @@ import {ASSET_TYPE_ERC721} from "../../constants/NumericConstants.sol";
  */
 contract StrategyReservoirCollectionOffer is BaseStrategy {
     /**
+     * @notice Message's typehash constant.
+     * @dev It is used to compute the hash of the message using the (message) id, the payload, and the timestamp.
+     */
+    bytes32 public constant TYPEHASH_MESSAGE_CONSTANT =
+        keccak256("Message(bytes32 id,bytes payload,uint256 timestamp)");
+
+    /**
+     * @notice Token's typehash constant.
+     * @dev It is used to compute the expected message id and verifies it against the message id signed.
+     */
+    bytes32 public constant TYPEHASH_TOKEN_CONSTANT = keccak256("Token(address contract,uint256 tokenId)");
+
+    /**
      * @notice Reservoir's oracle address.
      */
     address public constant ORACLE_ADDRESS = 0xAeB1D03929bF87F69888f381e73FBf75753d75AF;
@@ -259,17 +272,14 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
 
         // Check the message id
-        bytes32 expectedMessageId = keccak256(
-            abi.encode(keccak256("Token(address contract,uint256 tokenId)"), collection, itemId)
-        );
+        bytes32 expectedMessageId = keccak256(abi.encode(TYPEHASH_TOKEN_CONSTANT, collection, itemId));
 
         if (expectedMessageId != messageId) {
             revert MessageIdInvalid();
         }
 
-        // Check the signature is from the oracle
-        bytes32 hash = _computeMessageHash(messageId, payload, timestamp);
-        SignatureCheckerMemory.verify(hash, ORACLE_ADDRESS, signature);
+        // Compute the message hash and verify the signature is from the oracle
+        _computeMessageHashAndVerify(messageId, payload, timestamp, signature);
 
         // Fetch the flagged item
         (bool isFlagged, uint256 lastTransferTime) = abi.decode(payload, (bool, uint256));
@@ -294,24 +304,19 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
     }
 
-    function _computeMessageHash(
+    function _computeMessageHashAndVerify(
         bytes32 id,
         bytes memory payload,
-        uint256 timestamp
-    ) private pure returns (bytes32 hash) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    "\x19Ethereum Signed Message:\n32",
-                    keccak256(
-                        abi.encode(
-                            keccak256("Message(bytes32 id,bytes payload,uint256 timestamp)"),
-                            id,
-                            keccak256(payload),
-                            timestamp
-                        )
-                    )
-                )
-            );
+        uint256 timestamp,
+        bytes memory signature
+    ) private view {
+        bytes32 messageHash = keccak256(
+            abi.encodePacked(
+                "\x19Ethereum Signed Message:\n32",
+                keccak256(abi.encode(TYPEHASH_MESSAGE_CONSTANT, id, keccak256(payload), timestamp))
+            )
+        );
+
+        SignatureCheckerMemory.verify(messageHash, ORACLE_ADDRESS, signature);
     }
 }

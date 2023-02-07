@@ -116,9 +116,9 @@ library OrderStructs {
      */
 
     /**
-     * @notice This is the constant used to compute the maker ask order hash.
+     * @notice This is the type hash constant used to compute the maker ask order hash.
      */
-    bytes32 internal constant _MAKER_ASK_HASH =
+    bytes32 internal constant _MAKER_ASK_TYPEHASH =
         keccak256(
             "MakerAsk("
             "uint256 askNonce,"
@@ -139,9 +139,9 @@ library OrderStructs {
         );
 
     /**
-     * @notice This is the constant used to compute the maker bid order hash.
+     * @notice This is the typehash constant used to compute the maker bid order hash.
      */
-    bytes32 internal constant _MAKER_BID_HASH =
+    bytes32 internal constant _MAKER_BID_TYPEHASH =
         keccak256(
             "MakerBid("
             "uint256 bidNonce,"
@@ -162,10 +162,10 @@ library OrderStructs {
         );
 
     /**
-     * @notice This is the constant used to compute the merkle root order hash.
+     * @notice This is the typehash constant used to compute the merkle root order hash.
      * @dev The proof is not included in the hashing function.
      */
-    bytes32 internal constant _MERKLE_TREE_HASH =
+    bytes32 internal constant _MERKLE_TREE_TYPEHASH =
         keccak256(
             "MerkleTree("
             "bytes32 root"
@@ -187,7 +187,7 @@ library OrderStructs {
             keccak256(
                 bytes.concat(
                     abi.encode(
-                        _MAKER_ASK_HASH,
+                        _MAKER_ASK_TYPEHASH,
                         makerAsk.askNonce,
                         makerAsk.subsetNonce,
                         makerAsk.strategyId,
@@ -219,7 +219,7 @@ library OrderStructs {
             keccak256(
                 bytes.concat(
                     abi.encode(
-                        _MAKER_BID_HASH,
+                        _MAKER_BID_TYPEHASH,
                         makerBid.bidNonce,
                         makerBid.subsetNonce,
                         makerBid.strategyId,
@@ -248,6 +248,6 @@ library OrderStructs {
      * @return merkleTreeHash Hash of the merkle tree struct
      */
     function hash(MerkleTree memory merkleTree) internal pure returns (bytes32 merkleTreeHash) {
-        merkleTreeHash = (keccak256(abi.encode(_MERKLE_TREE_HASH, merkleTree.root)));
+        merkleTreeHash = (keccak256(abi.encode(_MERKLE_TREE_TYPEHASH, merkleTree.root)));
     }
 }

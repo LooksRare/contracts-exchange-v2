@@ -161,7 +161,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
         if (withProof) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId > 1000 ? itemId + 50 : 1000,
+                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
                 itemIdInMerkleTree: itemId
             });
 
@@ -275,7 +275,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
         if (withProof) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId > 1000 ? itemId + 50 : 1000,
+                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
                 itemIdInMerkleTree: itemId
             });
 
@@ -341,7 +341,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         if (withProof) {
             bytes32[] memory proof;
             (merkleRoot, proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId > 1000 ? itemId + 50 : 1000,
+                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
                 itemIdInMerkleTree: itemId
             });
 
@@ -421,7 +421,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
         if (withProof) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId > 1000 ? itemId + 50 : 1000,
+                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
                 itemIdInMerkleTree: itemId
             });
 
@@ -489,7 +489,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
         if (withProof) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId > 1000 ? itemId + 50 : 1000,
+                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
                 itemIdInMerkleTree: itemId
             });
 

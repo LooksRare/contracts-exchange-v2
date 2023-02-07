@@ -55,13 +55,13 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
      * @notice Message's typehash constant.
      * @dev It is used to compute the hash of the message using the (message) id, the payload, and the timestamp.
      */
-    bytes32 internal constant _MESSAGE_HASH = keccak256("Message(bytes32 id,bytes payload,uint256 timestamp)");
+    bytes32 internal constant _MESSAGE_TYPEHASH = keccak256("Message(bytes32 id,bytes payload,uint256 timestamp)");
 
     /**
      * @notice Token's typehash constant.
      * @dev It is used to compute the expected message id and verifies it against the message id signed.
      */
-    bytes32 internal constant _TOKEN_HASH = keccak256("Token(address contract,uint256 tokenId)");
+    bytes32 internal constant _TOKEN_TYPEHASH = keccak256("Token(address contract,uint256 tokenId)");
 
     /**
      * @notice This function validates the order under the context of the chosen strategy and
@@ -273,7 +273,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
 
         // Check the message id
-        bytes32 expectedMessageId = keccak256(abi.encode(_TOKEN_HASH, collection, itemId));
+        bytes32 expectedMessageId = keccak256(abi.encode(_TOKEN_TYPEHASH, collection, itemId));
 
         if (expectedMessageId != messageId) {
             revert MessageIdInvalid();
@@ -314,7 +314,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         bytes32 messageHash = keccak256(
             abi.encodePacked(
                 "\x19Ethereum Signed Message:\n32",
-                keccak256(abi.encode(_MESSAGE_HASH, id, keccak256(payload), timestamp))
+                keccak256(abi.encode(_MESSAGE_TYPEHASH, id, keccak256(payload), timestamp))
             )
         );
 

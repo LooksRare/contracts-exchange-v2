@@ -299,4 +299,6 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         address affiliate,
         bool isAtomic
     ) external payable {}
+
+    function domainSeparator() external view returns (bytes32) {}
 }

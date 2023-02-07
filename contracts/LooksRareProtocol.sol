@@ -8,7 +8,7 @@ import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // OpenZeppelin's library (adjusted) for verifying Merkle proofs
-import {MerkleProofCalldataWithProofLimit} from "./libraries/OpenZeppelin/MerkleProofCalldataWithProofLimit.sol";
+import {MerkleProofCalldata} from "./libraries/OpenZeppelin/MerkleProofCalldata.sol";
 
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
@@ -17,13 +17,13 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid} from "./errors/SharedErrors.sol";
+import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, MerkleProofTooLarge} from "./errors/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
+import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
 /**
  * @title LooksRareProtocol
@@ -615,10 +615,17 @@ contract LooksRareProtocol is
         bytes calldata signature,
         address signer
     ) private view {
-        if (merkleTree.proof.length != 0) {
-            if (!MerkleProofCalldataWithProofLimit.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
+        uint256 proofLength = merkleTree.proof.length;
+
+        if (proofLength != 0) {
+            if (proofLength > MAX_CALLDATA_PROOF_LENGTH) {
+                revert MerkleProofTooLarge(proofLength);
+            }
+
+            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 revert MerkleProofInvalid();
             }
+
             orderHash = merkleTree.hash();
         }
 

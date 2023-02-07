@@ -86,6 +86,106 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
+    function testTakerBidMultipleOrdersSignedERC721FromSDK() public {
+        address seller = 0x90F79bf6EB2c4f870365E785982E1f101E93b906;
+        _setUpUser(seller);
+
+        bytes32 root = hex"f3909fc2edba95a4306626b6f4b96d22c54861b7c2abb0da472122ad61c5142b";
+        bytes
+            memory signature = hex"d207e8c4d42e51ebf124aa417faff624d0e201686276243101a11d706f52fa447a0a580ec61a70cfdb7d22c0e5b26c293d35ff6fac554212c0683209578d1c871b";
+
+        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](2);
+
+        makerAsks[0].askNonce = 0;
+        makerAsks[0].subsetNonce = 0;
+        makerAsks[0].strategyId = 0;
+        makerAsks[0].assetType = 0;
+        makerAsks[0].orderNonce = 0;
+        makerAsks[0].collection = address(mockERC721);
+        makerAsks[0].currency = address(weth);
+        makerAsks[0].signer = seller;
+        makerAsks[0].startTime = 1675788113;
+        makerAsks[0].endTime = 1677602513;
+        makerAsks[0].minPrice = 1 ether;
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = 1;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+        makerAsks[0].itemIds = itemIds;
+        makerAsks[0].amounts = amounts;
+
+        makerAsks[1].askNonce = 0;
+        makerAsks[1].subsetNonce = 0;
+        makerAsks[1].strategyId = 0;
+        makerAsks[1].assetType = 0;
+        makerAsks[1].orderNonce = 0;
+        makerAsks[1].collection = address(mockERC721);
+        makerAsks[1].currency = address(weth);
+        makerAsks[1].signer = seller;
+        makerAsks[1].startTime = 1675788113;
+        makerAsks[1].endTime = 1677602513;
+        makerAsks[1].minPrice = 1 ether;
+        uint256[] memory itemIdsTwo = new uint256[](1);
+        itemIdsTwo[0] = 2;
+        makerAsks[1].itemIds = itemIdsTwo;
+        makerAsks[1].amounts = amounts;
+
+        uint256 numberOrders = 2 ** 1; // 2
+        uint256 makerAskIndex = 0; // The 1st maker ask
+
+        for (uint256 i = 1; i <= numberOrders; i++) {
+            mockERC721.mint(seller, i);
+        }
+
+        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        for (uint256 i; i < numberOrders; i++) {
+            orderHashes[i] = _computeOrderHashMakerAsk(makerAsks[i]);
+        }
+
+        // bytes32[] memory proof = new bytes32[](2);
+        bytes32[] memory proof = new bytes32[](1);
+        proof[0] = hex"420d61e3890d7c0f02a0418690205fc56ed5b0b4f54ef00a470a53b09552ae15";
+        // proof[1] = hex"20817d86c67bf108b25591d82c9615dbeecb365a0299f6d64b01df7a204e2e8e";
+
+        OrderStructs.MerkleTree memory merkleTree = OrderStructs.MerkleTree({root: root, proof: proof});
+        _verifyMerkleProof(merkleTree, orderHashes);
+
+        // Verify validity
+        // _assertValidMakerAskOrderWithMerkleTree(makerAsk, signature, merkleTree);
+
+        // Prepare the taker bid
+        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
+
+        vm.warp(makerAsks[0].startTime + 1);
+
+        // Execute taker bid transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeTakerBid{value: 1 ether}(
+            takerBid,
+            makerAsks[makerAskIndex],
+            signature,
+            merkleTree,
+            _EMPTY_AFFILIATE
+        );
+
+        // token ID 2 is not sold
+        assertEq(mockERC721.ownerOf(2), seller);
+
+        // Taker user has received the asset
+        assertEq(mockERC721.ownerOf(1), takerUser);
+        // // Taker bid user pays the whole price
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 1 ether);
+        // Maker ask user receives 98% of the whole price (2% protocol)
+        assertEq(weth.balanceOf(seller), _initialWETHBalanceUser + (1 ether * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
+        // No leftover in the balance of the contract
+        assertEq(weth.balanceOf(address(looksRareProtocol)), 0);
+        // Verify the nonce is marked as executed
+        assertEq(
+            looksRareProtocol.userOrderNonce(seller, makerAsks[makerAskIndex].orderNonce),
+            MAGIC_VALUE_ORDER_NONCE_EXECUTED
+        );
+    }
+
     // function testTakerAskMultipleOrdersSignedERC721() public {
     //     uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
 

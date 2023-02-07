@@ -310,9 +310,9 @@ uint256 constant TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE = 802;
  */
 
 /**
- * @dev The collection contract has a flexibile royalty fee structure that
+ * @dev The collection contract has a flexible royalty fee structure that
  *      prevents this bundle to be traded.
- *      It is applied at the protocol level.
+ *      It applies at the protocol level.
  *      For instance, 2 items in a bundle have different creator recipients.
  */
 uint256 constant BUNDLE_ERC2981_NOT_SUPPORTED = 901;
@@ -320,7 +320,7 @@ uint256 constant BUNDLE_ERC2981_NOT_SUPPORTED = 901;
 /**
  * @dev The creator fee applied at the protocol is higher than the threshold
  *      allowed. The transaction will revert.
- *      It is applied at the protocol level.
+ *      It applies at the protocol level.
  *      This maker order can become valid only with the creator's action.
  */
 uint256 constant CREATOR_FEE_TOO_HIGH = 902;

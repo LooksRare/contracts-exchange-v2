@@ -160,10 +160,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         });
 
         if (withProof) {
-            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
-                itemIdInMerkleTree: itemId
-            });
+            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
             // Add the proof to the taker additional parameters and generate the Taker struct
@@ -218,10 +215,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         });
 
         if (withProof) {
-            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: flaggedItemId > 1000 ? flaggedItemId + 50 : 1000,
-                itemIdInMerkleTree: flaggedItemId
-            });
+            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: flaggedItemId});
 
             // Encode with the merkle root with the transfer cooldown period
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
@@ -274,10 +268,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         });
 
         if (withProof) {
-            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
-                itemIdInMerkleTree: itemId
-            });
+            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
             // Add the proof to the taker additional parameters and generate the Taker struct
@@ -340,10 +331,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
         if (withProof) {
             bytes32[] memory proof;
-            (merkleRoot, proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
-                itemIdInMerkleTree: itemId
-            });
+            (merkleRoot, proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, transferCooldownPeriod);
             // Add the proof to the taker additional parameters and generate the Taker struct
@@ -420,10 +408,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         makerBid.endTime = timestamp + SIGNATURE_VALIDITY_PERIOD + 1;
 
         if (withProof) {
-            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
-                itemIdInMerkleTree: itemId
-            });
+            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
             // Add the proof to the taker additional parameters and generate the Taker struct
@@ -488,10 +473,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         });
 
         if (withProof) {
-            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
-                numberOfItemsInMerkleTree: itemId >= 1000 ? itemId + 50 : 1000,
-                itemIdInMerkleTree: itemId
-            });
+            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
             // Add the proof to the taker additional parameters and generate the Taker struct
@@ -700,9 +682,10 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     }
 
     function _getMerkleRootAndProof(
-        uint256 numberOfItemsInMerkleTree,
         uint256 itemIdInMerkleTree
     ) private returns (bytes32 merkleRoot, bytes32[] memory proof) {
+        uint256 numberOfItemsInMerkleTree = (itemIdInMerkleTree >= 1000) ? itemIdInMerkleTree + 50 : 1000;
+
         Merkle m = new Merkle();
 
         bytes32[] memory merkleTreeIds = new bytes32[](numberOfItemsInMerkleTree);

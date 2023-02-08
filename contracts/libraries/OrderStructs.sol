@@ -139,6 +139,7 @@ library OrderStructs {
                 bytes.concat(
                     abi.encode(
                         _MAKER_TYPEHASH,
+                        maker.quoteType,
                         maker.globalNonce,
                         maker.subsetNonce,
                         maker.orderNonce,

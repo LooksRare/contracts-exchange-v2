@@ -17,8 +17,8 @@ import {CURRENCY_NOT_ALLOWED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../con
 // Other mocks and utils
 import {MockERC20} from "../mock/MockERC20.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract LooksRareProtocolTest is ProtocolBase {
     // Fixed price of sale
@@ -41,11 +41,11 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -58,7 +58,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         makerAsk.amounts[0] = 0;
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -79,7 +79,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         makerAsk.amounts[0] = 2;
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        signature = _signMakerOrder(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -102,11 +102,11 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(mockERC20),
@@ -116,7 +116,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_ALLOWED);
@@ -134,7 +134,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             _EMPTY_AFFILIATE
         );
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](1);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](1);
         bytes[] memory signatures = new bytes[](1);
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
@@ -170,11 +170,11 @@ contract LooksRareProtocolTest is ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -184,7 +184,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify maker bid order
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_ALLOWED);
@@ -231,14 +231,14 @@ contract LooksRareProtocolTest is ProtocolBase {
 
         // Prepare the orders and signature
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
 
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -249,7 +249,7 @@ contract LooksRareProtocolTest is ProtocolBase {
 
         vm.prank(takerUser);
         vm.expectRevert(CallerInvalid.selector);
-        looksRareProtocol.restrictedExecuteTakerBid(takerBid, makerAsk, takerUser, _computeOrderHashMakerAsk(makerAsk));
+        looksRareProtocol.restrictedExecuteTakerBid(takerBid, makerAsk, takerUser, _computeOrderHash(makerAsk));
     }
 
     /**
@@ -270,7 +270,7 @@ contract LooksRareProtocolTest is ProtocolBase {
 
         uint256 numberPurchases = 2;
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
@@ -283,7 +283,7 @@ contract LooksRareProtocolTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -297,7 +297,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             }
 
             // Sign order
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }

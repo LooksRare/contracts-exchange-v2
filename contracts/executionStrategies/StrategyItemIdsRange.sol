@@ -27,7 +27,7 @@ contract StrategyItemIdsRange is BaseStrategy {
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.Maker calldata makerBid
     )
         external
         pure
@@ -79,7 +79,7 @@ contract StrategyItemIdsRange is BaseStrategy {
             revert OrderInvalid();
         }
 
-        price = makerBid.maxPrice;
+        price = makerBid.price;
         isNonceInvalidated = true;
     }
 
@@ -93,7 +93,7 @@ contract StrategyItemIdsRange is BaseStrategy {
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
     function isMakerBidValid(
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes4 functionSelector
     ) external pure returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyItemIdsRange.executeStrategyWithTakerAsk.selector) {

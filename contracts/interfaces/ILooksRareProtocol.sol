@@ -132,7 +132,7 @@ interface ILooksRareProtocol {
      */
     function executeTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
@@ -148,7 +148,7 @@ interface ILooksRareProtocol {
      */
     function executeTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
@@ -166,7 +166,7 @@ interface ILooksRareProtocol {
      */
     function executeMultipleTakerBids(
         OrderStructs.Taker[] calldata takerBids,
-        OrderStructs.MakerAsk[] calldata makerAsks,
+        OrderStructs.Maker[] calldata makerAsks,
         bytes[] calldata makerSignatures,
         OrderStructs.MerkleTree[] calldata merkleTrees,
         address affiliate,

@@ -3,7 +3,6 @@ pragma solidity 0.8.17;
 
 // Libraries, interfaces, errors
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
-import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {INonceManager} from "../../contracts/interfaces/INonceManager.sol";
 import {LengthsInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {INVALID_USER_GLOBAL_BID_NONCE, INVALID_USER_GLOBAL_ASK_NONCE, USER_SUBSET_NONCE_CANCELLED, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED} from "../../contracts/constants/ValidationCodeConstants.sol";
@@ -12,8 +11,8 @@ import {INVALID_USER_GLOBAL_BID_NONCE, INVALID_USER_GLOBAL_ASK_NONCE, USER_SUBSE
 import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFillCollectionOrder.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract NonceInvalidationTest is INonceManager, ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -32,11 +31,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: subsetNonce,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -46,7 +45,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         uint256[] memory subsetNonces = new uint256[](1);
         subsetNonces[0] = subsetNonce;
@@ -102,11 +101,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: userGlobalAskNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -116,7 +115,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_USER_GLOBAL_ASK_NONCE);
 
@@ -158,11 +157,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 420;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: userGlobalBidNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -172,7 +171,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, INVALID_USER_GLOBAL_BID_NONCE);
 
@@ -199,11 +198,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -213,7 +212,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -268,11 +267,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         amounts[0] = amountsToFill;
 
         // Prepare the first order
-        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: orderNonce,
             collection: address(mockERC721),
             currency: address(weth),
@@ -283,7 +282,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // First taker user actions
         {
@@ -317,7 +316,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: orderNonce,
                 collection: address(mockERC721),
                 currency: address(weth),
@@ -328,7 +327,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             });
 
             // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
+            signature = _signMakerOrder(makerBid, makerUserPK);
 
             _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH);
 
@@ -376,11 +375,11 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: orderNonce,
             collection: address(mockERC721),
             currency: address(weth),
@@ -390,7 +389,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
 

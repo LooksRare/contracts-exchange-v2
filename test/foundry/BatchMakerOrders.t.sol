@@ -10,10 +10,13 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Errors and constants
 import {MerkleProofTooLarge, MerkleProofInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {MERKLE_PROOF_PROOF_TOO_LARGE, ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/constants/ValidationCodeConstants.sol";
-import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH} from "../../contracts/constants/NumericConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
+
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
@@ -34,7 +37,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             mockERC721.mint(makerUser, i);
         }
 
-        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
+        OrderStructs.Maker memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
 
@@ -70,7 +73,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         Merkle m = new Merkle();
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
-        OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
+        OrderStructs.Maker memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
@@ -106,7 +109,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         Merkle m = new Merkle();
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
-        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
+        OrderStructs.Maker memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
@@ -136,7 +139,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         Merkle m = new Merkle();
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
-        OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
+        OrderStructs.Maker memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
@@ -172,7 +175,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             mockERC721.mint(makerUser, i);
         }
 
-        OrderStructs.MakerAsk memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
+        OrderStructs.Maker memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
 
@@ -202,7 +205,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         Merkle m = new Merkle();
         bytes32[] memory orderHashes = new bytes32[](numberOrders);
 
-        OrderStructs.MakerBid memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
+        OrderStructs.Maker memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
 
         OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
         _verifyMerkleProof(m, merkleTree, orderHashes);
@@ -257,7 +260,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
     function _createBatchMakerAskOrderHashes(
         bytes32[] memory orderHashes
-    ) private view returns (OrderStructs.MakerAsk memory makerAsk) {
+    ) private view returns (OrderStructs.Maker memory makerAsk) {
         uint256 numberOrders = orderHashes.length;
 
         for (uint256 i; i < numberOrders; i++) {
@@ -266,7 +269,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 askNonce: 0, // askNonce
                 subsetNonce: 0, // subsetNonce
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: ETH,
@@ -275,13 +278,13 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 itemId: i
             });
 
-            orderHashes[i] = _computeOrderHashMakerAsk(makerAsk);
+            orderHashes[i] = _computeOrderHash(makerAsk);
         }
     }
 
     function _createBatchMakerBidOrderHashes(
         bytes32[] memory orderHashes
-    ) private view returns (OrderStructs.MakerBid memory makerBid) {
+    ) private view returns (OrderStructs.Maker memory makerBid) {
         uint256 numberOrders = orderHashes.length;
 
         for (uint256 i; i < numberOrders; i++) {
@@ -290,7 +293,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: address(weth),
@@ -299,7 +302,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 itemId: i
             });
 
-            orderHashes[i] = _computeOrderHashMakerBid(makerBid);
+            orderHashes[i] = _computeOrderHash(makerBid);
         }
     }
 }

@@ -16,7 +16,10 @@ import {BUNDLE_ERC2981_NOT_SUPPORTED, CREATOR_FEE_TOO_HIGH} from "../../contract
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     CreatorFeeManagerWithRoyalties public creatorFeeManagerWithRoyalties;
@@ -60,11 +63,11 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -74,7 +77,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -103,11 +106,11 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(itemId, _royaltyRecipient, _newCreatorRoyaltyFee);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721WithRoyalties),
             currency: address(weth),
@@ -117,7 +120,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721WithRoyalties.mint(takerUser, itemId);
@@ -145,12 +148,12 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721.batchMint(takerUser, makerBid.itemIds);
@@ -178,7 +181,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
@@ -187,7 +190,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
@@ -218,7 +221,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
@@ -227,7 +230,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
@@ -290,7 +293,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         vm.assume(revertIndex < numberItemsInBundle);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
@@ -299,7 +302,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
@@ -342,14 +345,14 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: address(weth),
@@ -371,14 +374,14 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the orders and signature
-        OrderStructs.MakerAsk memory makerAsk;
+        OrderStructs.Maker memory makerAsk;
         OrderStructs.Taker memory takerBid;
 
         (makerAsk, takerBid, signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -401,8 +404,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         );
     }
 
-    function _assertSuccessfulTakerAsk(OrderStructs.MakerBid memory makerBid) private {
-        uint256 price = makerBid.maxPrice;
+    function _assertSuccessfulTakerAsk(OrderStructs.Maker memory makerBid) private {
+        uint256 price = makerBid.price;
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
@@ -422,8 +425,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function _assertSuccessfulTakerAskBundle(OrderStructs.MakerBid memory makerBid) private {
-        uint256 price = makerBid.maxPrice;
+    function _assertSuccessfulTakerAskBundle(OrderStructs.Maker memory makerBid) private {
+        uint256 price = makerBid.price;
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);

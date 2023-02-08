@@ -10,8 +10,11 @@ import {OrderInvalid} from "../../../contracts/errors/SharedErrors.sol";
 // Base strategy contracts
 import {BaseStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";
 
+// Enums
+import {AssetType} from "../../../contracts/enums/AssetType.sol";
+
 contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
-    using OrderStructs for OrderStructs.MakerBid;
+    using OrderStructs for OrderStructs.Maker;
 
     // Address of the protocol
     address public immutable LOOKSRARE_PROTOCOL;
@@ -34,17 +37,17 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
      */
     function executeStrategyWithTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.Maker calldata makerBid
     ) external returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert OrderInvalid();
         // Only available for ERC721
-        if (makerBid.assetType != 0) revert OrderInvalid();
+        if (makerBid.assetType != AssetType.ERC721) revert OrderInvalid();
 
         bytes32 orderHash = makerBid.hash();
         uint256 countItemsFilled = countItemsFilledForOrderHash[orderHash];
         uint256 countItemsFillable = makerBid.amounts[0];
 
-        price = makerBid.maxPrice;
+        price = makerBid.price;
         (itemIds, amounts) = abi.decode(takerAsk.additionalParameters, (uint256[], uint256[]));
         uint256 countItemsToFill = amounts.length;
 

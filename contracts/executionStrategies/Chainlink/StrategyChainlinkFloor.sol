@@ -59,7 +59,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      */
     function executeFixedPremiumStrategyWithTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
+        OrderStructs.Maker calldata makerAsk
     )
         external
         view
@@ -84,7 +84,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      */
     function executeBasisPointsPremiumStrategyWithTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
+        OrderStructs.Maker calldata makerAsk
     )
         external
         view
@@ -109,7 +109,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      */
     function executeFixedDiscountCollectionOfferStrategyWithTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.Maker calldata makerBid
     )
         external
         view
@@ -134,7 +134,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      */
     function executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.Maker calldata makerBid
     )
         external
         view
@@ -153,7 +153,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
     function isMakerAskValid(
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector) {
         if (
@@ -201,7 +201,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      *      from the floor price as the additionalParameters.
      */
     function isMakerBidValid(
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector) {
         if (
@@ -254,7 +254,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      */
     function _executePremiumStrategyWithTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         function(uint256 /* floorPrice */, uint256 /* premium */)
             internal
             pure
@@ -274,10 +274,10 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
         uint256 premium = abi.decode(makerAsk.additionalParameters, (uint256));
         uint256 desiredPrice = _calculateDesiredPrice(floorPrice, premium);
 
-        if (desiredPrice >= makerAsk.minPrice) {
+        if (desiredPrice >= makerAsk.price) {
             price = desiredPrice;
         } else {
-            price = makerAsk.minPrice;
+            price = makerAsk.price;
         }
 
         uint256 maxPrice = abi.decode(takerBid.additionalParameters, (uint256));
@@ -314,7 +314,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      */
     function _executeDiscountCollectionOfferStrategyWithTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         function(uint256 /* floorPrice */, uint256 /* discount */)
             internal
             pure
@@ -337,8 +337,8 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
 
         uint256 desiredPrice = _calculateDesiredPrice(floorPrice, discount);
 
-        if (desiredPrice >= makerBid.maxPrice) {
-            price = makerBid.maxPrice;
+        if (desiredPrice >= makerBid.price) {
+            price = makerBid.price;
         } else {
             price = desiredPrice;
         }

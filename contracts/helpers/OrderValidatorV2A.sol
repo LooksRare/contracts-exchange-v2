@@ -26,7 +26,10 @@ import {TransferManager} from "../TransferManager.sol";
 
 // Constants
 import "../constants/ValidationCodeConstants.sol";
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
+import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
+
+// Enums
+import {AssetType} from "../enums/AssetType.sol";
 
 /**
  * @title OrderValidatorV2A
@@ -45,8 +48,7 @@ import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, MAX_CALLDATA_PROOF_LENGTH, ONE_HU
  * @author LooksRare protocol team (👀,💎)
  */
 contract OrderValidatorV2A {
-    using OrderStructs for OrderStructs.MakerAsk;
-    using OrderStructs for OrderStructs.MakerBid;
+    using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
 
     /**
@@ -132,7 +134,7 @@ contract OrderValidatorV2A {
      * @return validationCodes Arrays of validation codes
      */
     function checkMultipleMakerAskOrdersValidity(
-        OrderStructs.MakerAsk[] calldata makerAsks,
+        OrderStructs.Maker[] calldata makerAsks,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
     ) external view returns (uint256[9][] memory validationCodes) {
@@ -156,7 +158,7 @@ contract OrderValidatorV2A {
      * @return validationCodes Arrays of validation codes
      */
     function checkMultipleMakerBidOrdersValidity(
-        OrderStructs.MakerBid[] calldata makerBids,
+        OrderStructs.Maker[] calldata makerBids,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
     ) external view returns (uint256[9][] memory validationCodes) {
@@ -180,7 +182,7 @@ contract OrderValidatorV2A {
      * @return validationCodes Array of validation codes
      */
     function checkMakerAskOrderValidity(
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes calldata signature,
         OrderStructs.MerkleTree calldata merkleTree
     ) public view returns (uint256[9] memory validationCodes) {
@@ -205,7 +207,7 @@ contract OrderValidatorV2A {
 
         validationCodes[2] = _checkValidityMakerAskNonces(
             makerAsk.signer,
-            makerAsk.askNonce,
+            makerAsk.globalNonce,
             makerAsk.orderNonce,
             makerAsk.subsetNonce,
             orderHash
@@ -233,7 +235,7 @@ contract OrderValidatorV2A {
      * @return validationCodes Array of validation codes
      */
     function checkMakerBidOrderValidity(
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes calldata signature,
         OrderStructs.MerkleTree calldata merkleTree
     ) public view returns (uint256[9] memory validationCodes) {
@@ -257,7 +259,7 @@ contract OrderValidatorV2A {
         validationCodes[1] = validationCode1;
         validationCodes[2] = _checkValidityMakerBidNonces(
             makerBid.signer,
-            makerBid.bidNonce,
+            makerBid.globalNonce,
             makerBid.orderNonce,
             makerBid.subsetNonce,
             orderHash
@@ -456,16 +458,16 @@ contract OrderValidatorV2A {
      */
     function _checkIfPotentialInvalidAssetTypes(
         address collection,
-        uint256 assetType
+        AssetType assetType
     ) internal view returns (uint256 validationCode) {
-        if (assetType == ASSET_TYPE_ERC721) {
+        if (assetType == AssetType.ERC721) {
             bool isERC721 = IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_1) ||
                 IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
 
             if (!isERC721) {
                 return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721;
             }
-        } else if (assetType == ASSET_TYPE_ERC1155) {
+        } else if (assetType == AssetType.ERC1155) {
             if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID)) {
                 return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155;
             }
@@ -509,7 +511,7 @@ contract OrderValidatorV2A {
      */
     function _checkValidityMakerAskNFTAssets(
         address collection,
-        uint256 assetType,
+        AssetType assetType,
         address user,
         uint256[] memory itemIds,
         uint256[] memory amounts
@@ -520,9 +522,9 @@ contract OrderValidatorV2A {
             return validationCode;
         }
 
-        if (assetType == ASSET_TYPE_ERC721) {
+        if (assetType == AssetType.ERC721) {
             validationCode = _checkValidityERC721AndEquivalents(collection, user, itemIds);
-        } else if (assetType == ASSET_TYPE_ERC1155) {
+        } else if (assetType == AssetType.ERC1155) {
             validationCode = _checkValidityERC1155(collection, user, itemIds, amounts);
         }
     }
@@ -858,7 +860,7 @@ contract OrderValidatorV2A {
     }
 
     function _checkValidityMakerAskItemIdsAndAmountsAndPrice(
-        OrderStructs.MakerAsk memory makerAsk
+        OrderStructs.Maker memory makerAsk
     )
         internal
         view
@@ -867,14 +869,14 @@ contract OrderValidatorV2A {
         if (makerAsk.strategyId == 0) {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
-            price = makerAsk.minPrice;
+            price = makerAsk.price;
 
             validationCode = _getOrderValidationCodeForStandardStrategy(makerAsk.assetType, itemIds.length, amounts);
         } else {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
             // @dev It should ideally be adjusted by real price
-            price = makerAsk.minPrice;
+            price = makerAsk.price;
 
             (, , , , bytes4 strategySelector, , address strategyImplementation) = looksRareProtocol.strategyInfo(
                 makerAsk.strategyId
@@ -890,7 +892,7 @@ contract OrderValidatorV2A {
     }
 
     function _checkValidityMakerBidItemIdsAndAmountsAndPrice(
-        OrderStructs.MakerBid memory makerBid
+        OrderStructs.Maker memory makerBid
     )
         internal
         view
@@ -899,13 +901,13 @@ contract OrderValidatorV2A {
         if (makerBid.strategyId == 0) {
             itemIds = makerBid.itemIds;
             amounts = makerBid.amounts;
-            price = makerBid.maxPrice;
+            price = makerBid.price;
 
             validationCode = _getOrderValidationCodeForStandardStrategy(makerBid.assetType, itemIds.length, amounts);
         } else {
             // @dev It should ideally be adjusted by real price
             //      amounts and itemIds are not used since most non-native maker bids won't target a single item
-            price = makerBid.maxPrice;
+            price = makerBid.price;
 
             (, , , , bytes4 strategySelector, , address strategyImplementation) = looksRareProtocol.strategyInfo(
                 makerBid.strategyId
@@ -931,7 +933,7 @@ contract OrderValidatorV2A {
     }
 
     function _getOrderValidationCodeForStandardStrategy(
-        uint256 assetType,
+        AssetType assetType,
         uint256 expectedLength,
         uint256[] memory amounts
     ) private pure returns (uint256 validationCode) {
@@ -945,7 +947,7 @@ contract OrderValidatorV2A {
                     validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                 }
 
-                if (assetType == ASSET_TYPE_ERC721 && amount != 1) {
+                if (assetType == AssetType.ERC721 && amount != 1) {
                     validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                 }
 

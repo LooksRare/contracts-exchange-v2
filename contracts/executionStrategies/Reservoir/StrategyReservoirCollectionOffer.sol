@@ -17,8 +17,8 @@ import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, Mess
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../../constants/NumericConstants.sol";
+// Enums
+import {AssetType} from "../../enums/AssetType.sol";
 
 /**
  * @title StrategyReservoirCollectionOffer
@@ -72,17 +72,17 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
      */
     function executeCollectionStrategyWithTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.Maker calldata makerBid
     )
         external
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
     {
-        price = makerBid.maxPrice;
+        price = makerBid.price;
         amounts = makerBid.amounts;
 
         // It can be executed only for 1 itemId and only for ERC721
-        if (amounts.length != 1 || makerBid.assetType != ASSET_TYPE_ERC721) {
+        if (amounts.length != 1 || makerBid.assetType != AssetType.ERC721) {
             revert OrderInvalid();
         }
 
@@ -107,17 +107,17 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
      */
     function executeCollectionStrategyWithTakerAskWithProof(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid
+        OrderStructs.Maker calldata makerBid
     )
         external
         view
         returns (uint256 price, uint256[] memory itemIds, uint256[] calldata amounts, bool isNonceInvalidated)
     {
-        price = makerBid.maxPrice;
+        price = makerBid.price;
         amounts = makerBid.amounts;
 
         // It can be executed only for 1 itemId and only for ERC721
-        if (amounts.length != 1 || makerBid.assetType != ASSET_TYPE_ERC721) {
+        if (amounts.length != 1 || makerBid.assetType != AssetType.ERC721) {
             revert OrderInvalid();
         }
 
@@ -142,7 +142,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
     function isMakerBidValid(
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes4 functionSelector
     ) external pure returns (bool isValid, bytes4 errorSelector) {
         if (
@@ -154,7 +154,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
 
         // Amounts length must be 1, amount can only be 1 since only ERC721 can be traded.
-        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1 || makerBid.assetType != ASSET_TYPE_ERC721) {
+        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1 || makerBid.assetType != AssetType.ERC721) {
             return (isValid, OrderInvalid.selector);
         }
 

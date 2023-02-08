@@ -69,18 +69,6 @@
 <path fill="none" stroke="black" d="M785.55,-509.29C796.29,-507.43 807.34,-505.59 817.77,-504 944.43,-484.71 976.79,-484.99 1103.77,-468 1112.67,-466.81 1121.93,-465.54 1131.19,-464.26" style=""/>
 <polygon fill="black" stroke="black" points="1131.54,-467.75 1140.97,-462.9 1130.58,-460.81 1131.54,-467.75" style=""/>
 </g>
-<!-- ITransferSelectorNFT -->
-<g id="node21" class="node" pointer-events="visible" data-name="ITransferSelectorNFT">
-
-<ellipse fill="none" stroke="black" cx="215.77" cy="-378" rx="96.68" ry="18" style=""/>
-<text text-anchor="middle" x="215.77" y="-373.8" font-family="Times,serif" font-size="14.00" style="">ITransferSelectorNFT</text>
-</g>
-<!-- TransferSelectorNFT&#45;&gt;ITransferSelectorNFT -->
-<g id="edge12" class="edge" data-name="TransferSelectorNFT-&gt;ITransferSelectorNFT">
-
-<path fill="none" stroke="black" d="M371.1,-433.64C341.52,-423.23 302.22,-409.41 270.54,-398.27" style=""/>
-<polygon fill="black" stroke="black" points="271.71,-394.97 261.11,-394.95 269.39,-401.57 271.71,-394.97" style=""/>
-</g>
 <!-- ExecutionManager -->
 <g id="node22" class="node" pointer-events="visible" data-name="ExecutionManager">
 

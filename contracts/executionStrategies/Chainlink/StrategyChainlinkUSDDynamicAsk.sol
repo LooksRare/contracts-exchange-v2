@@ -60,7 +60,7 @@ contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPr
      */
     function executeStrategyWithTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
+        OrderStructs.Maker calldata makerAsk
     )
         external
         view
@@ -88,7 +88,7 @@ contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPr
         uint256 desiredSalePriceInUSD = abi.decode(makerAsk.additionalParameters, (uint256));
 
         uint256 ethPriceInUSD = uint256(answer);
-        uint256 minPriceInETH = makerAsk.minPrice;
+        uint256 minPriceInETH = makerAsk.price;
         uint256 desiredSalePriceInETH = (desiredSalePriceInUSD * ETH_USD_PRICE_FEED_DECIMALS) / ethPriceInUSD;
 
         if (minPriceInETH >= desiredSalePriceInETH) {
@@ -117,7 +117,7 @@ contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPr
      * @return errorSelector If isValid is false, it return the error's 4 bytes selector
      */
     function isMakerAskValid(
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyChainlinkUSDDynamicAsk.executeStrategyWithTakerBid.selector) {

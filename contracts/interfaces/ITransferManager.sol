@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+// Libraries
+import {OrderStructs} from "../libraries/OrderStructs.sol";
+
+// Enums
+import {AssetType} from "../enums/AssetType.sol";
+
 /**
  * @title ITransferManager
  * @author LooksRare protocol team (👀,💎)
@@ -15,7 +21,7 @@ interface ITransferManager {
      */
     struct BatchTransferItem {
         address collection;
-        uint256 assetType;
+        AssetType assetType;
         uint256[] itemIds;
         uint256[] amounts;
     }

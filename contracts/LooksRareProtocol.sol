@@ -17,13 +17,16 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, MerkleProofTooLarge} from "./errors/SharedErrors.sol";
+import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, MerkleProofTooLarge, QuoteTypeInvalid} from "./errors/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
+
+// Enums
+import {QuoteType} from "./enums/QuoteType.sol";
 
 /**
  * @title LooksRareProtocol
@@ -72,8 +75,7 @@ contract LooksRareProtocol is
     LowLevelWETH,
     LowLevelERC20Transfer
 {
-    using OrderStructs for OrderStructs.MakerAsk;
-    using OrderStructs for OrderStructs.MakerBid;
+    using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
 
     /**
@@ -120,7 +122,7 @@ contract LooksRareProtocol is
      */
     function executeTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
@@ -148,7 +150,7 @@ contract LooksRareProtocol is
      */
     function executeTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
@@ -178,7 +180,7 @@ contract LooksRareProtocol is
      */
     function executeMultipleTakerBids(
         OrderStructs.Taker[] calldata takerBids,
-        OrderStructs.MakerAsk[] calldata makerAsks,
+        OrderStructs.Maker[] calldata makerAsks,
         bytes[] calldata makerSignatures,
         OrderStructs.MerkleTree[] calldata merkleTrees,
         address affiliate,
@@ -206,7 +208,7 @@ contract LooksRareProtocol is
             // If not atomic, it uses a catch/revert pattern with external function.
             if (isAtomic) {
                 for (uint256 i; i < length; ) {
-                    OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
+                    OrderStructs.Maker calldata makerAsk = makerAsks[i];
 
                     // Verify the currency is the same
                     if (i != 0) {
@@ -231,7 +233,7 @@ contract LooksRareProtocol is
                 }
             } else {
                 for (uint256 i; i < length; ) {
-                    OrderStructs.MakerAsk calldata makerAsk = makerAsks[i];
+                    OrderStructs.Maker calldata makerAsk = makerAsks[i];
 
                     // Verify the currency is the same
                     if (i != 0) {
@@ -278,7 +280,7 @@ contract LooksRareProtocol is
      */
     function restrictedExecuteTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         address sender,
         bytes32 orderHash
     ) external returns (uint256 protocolFeeAmount) {
@@ -327,15 +329,19 @@ contract LooksRareProtocol is
      */
     function _executeTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes32 orderHash
     ) internal returns (uint256) {
+        if (makerBid.quoteType != QuoteType.Bid) {
+            revert QuoteTypeInvalid();
+        }
+
         address signer = makerBid.signer;
         {
             bytes32 userOrderNonceStatus = userOrderNonce[signer][makerBid.orderNonce];
             // Verify nonces
             if (
-                userBidAskNonces[signer].bidNonce != makerBid.bidNonce ||
+                userBidAskNonces[signer].bidNonce != makerBid.globalNonce ||
                 userSubsetNonce[signer][makerBid.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) {
@@ -391,17 +397,21 @@ contract LooksRareProtocol is
      */
     function _executeTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
+        if (makerAsk.quoteType != QuoteType.Ask) {
+            revert QuoteTypeInvalid();
+        }
+
         address signer = makerAsk.signer;
         {
             // Verify nonces
             bytes32 userOrderNonceStatus = userOrderNonce[signer][makerAsk.orderNonce];
 
             if (
-                userBidAskNonces[signer].askNonce != makerAsk.askNonce ||
+                userBidAskNonces[signer].askNonce != makerAsk.globalNonce ||
                 userSubsetNonce[signer][makerAsk.subsetNonce] ||
                 (userOrderNonceStatus != bytes32(0) && userOrderNonceStatus != orderHash)
             ) {

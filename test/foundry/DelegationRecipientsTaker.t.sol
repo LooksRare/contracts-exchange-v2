@@ -2,14 +2,16 @@
 pragma solidity 0.8.17;
 
 // Libraries and interfaces
-import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract DelegationRecipientsTakerTest is ProtocolBase {
     function setUp() public {
@@ -32,14 +34,14 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: address(weth),
@@ -69,7 +71,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         emit TakerAsk(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerBid(makerBid),
+                orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -115,14 +117,14 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -151,7 +153,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         emit TakerBid(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerAsk(makerAsk),
+                orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
             }),

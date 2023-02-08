@@ -15,7 +15,10 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
     function setUp() public {
@@ -107,11 +110,11 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -121,7 +124,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         });
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
         _assertValidMakerAskOrder(makerAsk, signature);
@@ -170,7 +173,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
@@ -183,7 +186,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -193,7 +196,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             });
 
             // Sign order
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
             // Verify validity of maker ask order
             _assertValidMakerAskOrder(makerAsks[i], signatures[i]);
@@ -270,11 +273,11 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -284,7 +287,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify validity of maker bid order
         _assertValidMakerBidOrder(makerBid, signature);

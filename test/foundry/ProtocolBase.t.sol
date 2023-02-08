@@ -41,12 +41,12 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     WETH public weth;
 
-    function _assertValidMakerAskOrder(OrderStructs.MakerAsk memory makerAsk, bytes memory signature) internal {
+    function _assertValidMakerAskOrder(OrderStructs.Maker memory makerAsk, bytes memory signature) internal {
         _assertValidMakerAskOrder(makerAsk, signature, _EMPTY_MERKLE_TREE);
     }
 
     function _assertValidMakerAskOrderWithMerkleTree(
-        OrderStructs.MakerAsk memory makerAsk,
+        OrderStructs.Maker memory makerAsk,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) internal {
@@ -54,11 +54,11 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _assertValidMakerAskOrder(
-        OrderStructs.MakerAsk memory makerAsk,
+        OrderStructs.Maker memory makerAsk,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) private {
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](1);
         makerAsks[0] = makerAsk;
 
         bytes[] memory signatures = new bytes[](1);
@@ -77,7 +77,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _doesMakerAskOrderReturnValidationCode(
-        OrderStructs.MakerAsk memory makerAsk,
+        OrderStructs.Maker memory makerAsk,
         bytes memory signature,
         uint256 expectedValidationCode
     ) internal {
@@ -85,7 +85,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
-        OrderStructs.MakerAsk memory makerAsk,
+        OrderStructs.Maker memory makerAsk,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree,
         uint256 expectedValidationCode
@@ -94,12 +94,12 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _doesMakerAskOrderReturnValidationCode(
-        OrderStructs.MakerAsk memory makerAsk,
+        OrderStructs.Maker memory makerAsk,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree,
         uint256 expectedValidationCode
     ) private {
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](1);
         makerAsks[0] = makerAsk;
 
         bytes[] memory signatures = new bytes[](1);
@@ -118,12 +118,12 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         assertEq(validationCodes[0][index - 1], expectedValidationCode);
     }
 
-    function _assertValidMakerBidOrder(OrderStructs.MakerBid memory makerBid, bytes memory signature) internal {
+    function _assertValidMakerBidOrder(OrderStructs.Maker memory makerBid, bytes memory signature) internal {
         _assertValidMakerBidOrder(makerBid, signature, _EMPTY_MERKLE_TREE);
     }
 
     function _assertValidMakerBidOrderWithMerkleTree(
-        OrderStructs.MakerBid memory makerBid,
+        OrderStructs.Maker memory makerBid,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) internal {
@@ -131,11 +131,11 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _assertValidMakerBidOrder(
-        OrderStructs.MakerBid memory makerBid,
+        OrderStructs.Maker memory makerBid,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) private {
-        OrderStructs.MakerBid[] memory makerBids = new OrderStructs.MakerBid[](1);
+        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](1);
         makerBids[0] = makerBid;
 
         bytes[] memory signatures = new bytes[](1);
@@ -154,7 +154,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _doesMakerBidOrderReturnValidationCode(
-        OrderStructs.MakerBid memory makerBid,
+        OrderStructs.Maker memory makerBid,
         bytes memory signature,
         uint256 expectedValidationCode
     ) internal {
@@ -162,7 +162,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
-        OrderStructs.MakerBid memory makerBid,
+        OrderStructs.Maker memory makerBid,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree,
         uint256 expectedValidationCode
@@ -171,12 +171,12 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _doesMakerBidOrderReturnValidationCode(
-        OrderStructs.MakerBid memory makerBid,
+        OrderStructs.Maker memory makerBid,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree,
         uint256 expectedValidationCode
     ) private {
-        OrderStructs.MakerBid[] memory makerBids = new OrderStructs.MakerBid[](1);
+        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](1);
         makerBids[0] = makerBid;
 
         bytes[] memory signatures = new bytes[](1);
@@ -277,7 +277,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
      */
     function executeTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
@@ -285,7 +285,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     function executeTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes calldata makerSignature,
         OrderStructs.MerkleTree calldata merkleTree,
         address affiliate
@@ -293,7 +293,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     function executeMultipleTakerBids(
         OrderStructs.Taker[] calldata takerBids,
-        OrderStructs.MakerAsk[] calldata makerAsks,
+        OrderStructs.Maker[] calldata makerAsks,
         bytes[] calldata makerSignatures,
         OrderStructs.MerkleTree[] calldata merkleTrees,
         address affiliate,

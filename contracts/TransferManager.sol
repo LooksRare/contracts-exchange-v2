@@ -8,10 +8,13 @@ import {LowLevelERC1155Transfer} from "@looksrare/contracts-libs/contracts/lowLe
 
 // Interfaces and errors
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
-import {AmountInvalid, AssetTypeInvalid, LengthsInvalid} from "./errors/SharedErrors.sol";
+import {AmountInvalid, LengthsInvalid} from "./errors/SharedErrors.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";
+// Libraries
+import {OrderStructs} from "./libraries/OrderStructs.sol";
+
+// Enums
+import {AssetType} from "./enums/AssetType.sol";
 
 /**
  * @title TransferManager
@@ -146,8 +149,8 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
                 revert LengthsInvalid();
             }
 
-            uint256 assetType = items[i].assetType;
-            if (assetType == ASSET_TYPE_ERC721) {
+            AssetType assetType = items[i].assetType;
+            if (assetType == AssetType.ERC721) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     if (amounts[j] != 1) {
                         revert AmountInvalid();
@@ -157,7 +160,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
                         ++j;
                     }
                 }
-            } else if (assetType == ASSET_TYPE_ERC1155) {
+            } else if (assetType == AssetType.ERC1155) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     if (amounts[j] == 0) {
                         revert AmountInvalid();
@@ -168,8 +171,6 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
                     }
                 }
                 _executeERC1155SafeBatchTransferFrom(items[i].collection, from, to, itemIds, amounts);
-            } else {
-                revert AssetTypeInvalid(assetType);
             }
 
             unchecked {

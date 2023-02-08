@@ -25,6 +25,9 @@ import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
+// Enums
+import {QuoteType} from "./enums/QuoteType.sol";
+
 /**
  * @title LooksRareProtocol
  * @notice This contract is the core smart contract of the LooksRare protocol ("v2").
@@ -329,7 +332,7 @@ contract LooksRareProtocol is
         OrderStructs.Maker calldata makerBid,
         bytes32 orderHash
     ) internal returns (uint256) {
-        if (makerBid.quoteType != OrderStructs.QuoteType.Bid) {
+        if (makerBid.quoteType != QuoteType.Bid) {
             revert QuoteTypeInvalid();
         }
 
@@ -398,7 +401,7 @@ contract LooksRareProtocol is
         address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
-        if (makerAsk.quoteType != OrderStructs.QuoteType.Ask) {
+        if (makerAsk.quoteType != QuoteType.Ask) {
             revert QuoteTypeInvalid();
         }
 

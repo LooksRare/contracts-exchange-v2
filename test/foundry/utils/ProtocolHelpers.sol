@@ -10,6 +10,7 @@ import {TestParameters} from "./TestParameters.sol";
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract ProtocolHelpers is TestHelpers, TestParameters {
     using OrderStructs for OrderStructs.Maker;
@@ -71,7 +72,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         amounts[0] = 1;
 
         newMakerAsk = OrderStructs.Maker({
-            quoteType: OrderStructs.QuoteType.Ask,
+            quoteType: QuoteType.Ask,
             globalNonce: askNonce,
             orderNonce: orderNonce,
             subsetNonce: subsetNonce,
@@ -103,7 +104,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory amounts
     ) internal view returns (OrderStructs.Maker memory newMakerAsk) {
         newMakerAsk = OrderStructs.Maker({
-            quoteType: OrderStructs.QuoteType.Ask,
+            quoteType: QuoteType.Ask,
             globalNonce: askNonce,
             orderNonce: orderNonce,
             subsetNonce: subsetNonce,
@@ -173,7 +174,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         amounts[0] = 1;
 
         newMakerBid = OrderStructs.Maker({
-            quoteType: OrderStructs.QuoteType.Bid,
+            quoteType: QuoteType.Bid,
             globalNonce: bidNonce,
             subsetNonce: subsetNonce,
             orderNonce: orderNonce,
@@ -205,7 +206,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory amounts
     ) internal view returns (OrderStructs.Maker memory newMakerBid) {
         newMakerBid = OrderStructs.Maker({
-            quoteType: OrderStructs.QuoteType.Bid,
+            quoteType: QuoteType.Bid,
             globalNonce: bidNonce,
             subsetNonce: subsetNonce,
             orderNonce: orderNonce,

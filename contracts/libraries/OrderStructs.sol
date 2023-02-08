@@ -3,6 +3,7 @@ pragma solidity 0.8.17;
 
 // Enums
 import {AssetType} from "../enums/AssetType.sol";
+import {QuoteType} from "../enums/QuoteType.sol";
 
 /**
  * @title OrderStructs
@@ -10,11 +11,6 @@ import {AssetType} from "../enums/AssetType.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 library OrderStructs {
-    /**
-     * @notice QuoteType is used in OrderStructs.Maker's quoteType to determine whether the maker order is a bid or an ask.
-     */
-    enum QuoteType { Bid, Ask }
-
     /**
      * 1. Maker struct
      */

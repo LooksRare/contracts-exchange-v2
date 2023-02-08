@@ -8,9 +8,6 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {TestHelpers} from "./TestHelpers.sol";
 import {TestParameters} from "./TestParameters.sol";
 
-// Constants
-import {MAKER_BID_QUOTE_TYPE, MAKER_ASK_QUOTE_TYPE} from "../../../contracts/constants/NumericConstants.sol";
-
 contract ProtocolHelpers is TestHelpers, TestParameters {
     using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
@@ -71,7 +68,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         amounts[0] = 1;
 
         newMakerAsk = OrderStructs.Maker({
-            quoteType: MAKER_ASK_QUOTE_TYPE,
+            quoteType: OrderStructs.QuoteType.Ask,
             globalNonce: askNonce,
             orderNonce: orderNonce,
             subsetNonce: subsetNonce,
@@ -103,7 +100,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory amounts
     ) internal view returns (OrderStructs.Maker memory newMakerAsk) {
         newMakerAsk = OrderStructs.Maker({
-            quoteType: MAKER_ASK_QUOTE_TYPE,
+            quoteType: OrderStructs.QuoteType.Ask,
             globalNonce: askNonce,
             orderNonce: orderNonce,
             subsetNonce: subsetNonce,
@@ -173,7 +170,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         amounts[0] = 1;
 
         newMakerBid = OrderStructs.Maker({
-            quoteType: MAKER_BID_QUOTE_TYPE,
+            quoteType: OrderStructs.QuoteType.Bid,
             globalNonce: bidNonce,
             subsetNonce: subsetNonce,
             orderNonce: orderNonce,
@@ -205,7 +202,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory amounts
     ) internal view returns (OrderStructs.Maker memory newMakerBid) {
         newMakerBid = OrderStructs.Maker({
-            quoteType: MAKER_BID_QUOTE_TYPE,
+            quoteType: OrderStructs.QuoteType.Bid,
             globalNonce: bidNonce,
             subsetNonce: subsetNonce,
             orderNonce: orderNonce,

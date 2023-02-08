@@ -8,6 +8,11 @@ pragma solidity 0.8.17;
  */
 library OrderStructs {
     /**
+     * @notice QuoteType is used in OrderStructs.Maker's quoteType to determine whether the maker order is a bid or an ask.
+     */
+    enum QuoteType { Bid, Ask }
+
+    /**
      * 1. Maker struct
      */
 
@@ -30,7 +35,7 @@ library OrderStructs {
      * @param additionalParameters Extra data specific for the order
      */
     struct Maker {
-        uint256 quoteType;
+        QuoteType quoteType;
         uint256 globalNonce;
         uint256 subsetNonce;
         uint256 orderNonce;
@@ -88,7 +93,7 @@ library OrderStructs {
     bytes32 internal constant _MAKER_TYPEHASH =
         keccak256(
             "Maker("
-            "uint256 quoteType"
+            "uint8 quoteType"
             "uint256 globalNonce,"
             "uint256 orderNonce,"
             "uint256 subsetNonce,"
@@ -133,6 +138,7 @@ library OrderStructs {
                 bytes.concat(
                     abi.encode(
                         _MAKER_TYPEHASH,
+                        maker.quoteType,
                         maker.globalNonce,
                         maker.subsetNonce,
                         maker.orderNonce,

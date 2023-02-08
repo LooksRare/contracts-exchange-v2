@@ -23,7 +23,7 @@ import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, Merk
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 // Constants
-import {MAKER_BID_QUOTE_TYPE, MAKER_ASK_QUOTE_TYPE, MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
+import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
 /**
  * @title LooksRareProtocol
@@ -329,7 +329,7 @@ contract LooksRareProtocol is
         OrderStructs.Maker calldata makerBid,
         bytes32 orderHash
     ) internal returns (uint256) {
-        if (makerBid.quoteType != MAKER_BID_QUOTE_TYPE) {
+        if (makerBid.quoteType != OrderStructs.QuoteType.Bid) {
             revert QuoteTypeInvalid();
         }
 
@@ -398,7 +398,7 @@ contract LooksRareProtocol is
         address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
-        if (makerAsk.quoteType != MAKER_ASK_QUOTE_TYPE) {
+        if (makerAsk.quoteType != OrderStructs.QuoteType.Ask) {
             revert QuoteTypeInvalid();
         }
 

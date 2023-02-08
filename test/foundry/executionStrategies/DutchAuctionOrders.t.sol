@@ -162,7 +162,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         _assertOrderIsValid(makerAsk);
         _assertValidMakerAskOrder(makerAsk, signature);
@@ -216,7 +216,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         makerAsk.price = startPrice + 1 wei;
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -255,7 +255,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         takerBid.additionalParameters = abi.encode(executionPrice - 1 wei);
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerAsk);
@@ -281,7 +281,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         _assertOrderIsValid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
@@ -303,7 +303,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -325,7 +325,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -351,7 +351,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         makerAsk.amounts[0] = 0;
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -362,7 +362,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         // 2. ERC721 amount > 1
         makerAsk.amounts[0] = 2;
-        signature = _signMaker(makerAsk, makerUserPK);
+        signature = _signMakerOrder(makerAsk, makerUserPK);
 
         errorSelector = _assertOrderIsInvalid(makerAsk);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);

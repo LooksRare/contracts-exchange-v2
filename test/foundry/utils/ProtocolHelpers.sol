@@ -48,7 +48,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             itemId
         );
 
-        signature = _signMaker(newMakerAsk, makerUserPK);
+        signature = _signMakerOrder(newMakerAsk, makerUserPK);
 
         newTakerBid = OrderStructs.Taker(takerUser, abi.encode());
     }
@@ -150,7 +150,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             itemId
         );
 
-        signature = _signMaker(newMakerBid, makerUserPK);
+        signature = _signMakerOrder(newMakerBid, makerUserPK);
 
         newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());
     }
@@ -223,7 +223,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         });
     }
 
-    function _signMaker(OrderStructs.Maker memory maker, uint256 signerKey) internal view returns (bytes memory) {
+    function _signMakerOrder(OrderStructs.Maker memory maker, uint256 signerKey) internal view returns (bytes memory) {
         bytes32 orderHash = _computeOrderHash(maker);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(

@@ -31,7 +31,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         makerBid.price = 9.5 ether;
         takerAsk.additionalParameters = abi.encode(42, 9.5 ether);
 
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -55,7 +55,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         makerBid.price = 9.5 ether;
         takerAsk.additionalParameters = abi.encode(42, 9.5 ether);
 
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -82,7 +82,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         makerBid.price = 9.41 ether;
 
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -109,7 +109,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         makerBid.additionalParameters = abi.encode(9.7 ether + 1);
 
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -125,7 +125,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         // Floor price = 9.7 ETH, discount = 9.8 ETH, desired price = -0.1 ETH
         // Max price = -0.1 ETH
         makerBid.additionalParameters = abi.encode(9.8 ether);
-        signature = _signMaker(makerBid, makerUserPK);
+        signature = _signMakerOrder(makerBid, makerUserPK);
 
         (isValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);

@@ -39,7 +39,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         address randomUser = vm.addr(randomPK);
         _setUpUser(randomUser);
-        bytes memory signature = _signMaker(makerAsk, randomPK);
+        bytes memory signature = _signMakerOrder(makerAsk, randomPK);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNER_EOA);
 
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());

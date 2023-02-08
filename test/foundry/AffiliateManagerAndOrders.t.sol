@@ -121,7 +121,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
         _assertValidMakerAskOrder(makerAsk, signature);
@@ -193,7 +193,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             });
 
             // Sign order
-            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
+            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
             // Verify validity of maker ask order
             _assertValidMakerAskOrder(makerAsks[i], signatures[i]);
@@ -284,7 +284,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify validity of maker bid order
         _assertValidMakerBidOrder(makerBid, signature);

@@ -16,9 +16,6 @@ import {StrategyItemIdsRange} from "../../../contracts/executionStrategies/Strat
 // Base test
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../../contracts/constants/NumericConstants.sol";
-
 contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     StrategyItemIdsRange public strategyItemIdsRange;
     bytes4 public selector = StrategyItemIdsRange.executeStrategyWithTakerAsk.selector;
@@ -56,7 +53,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -157,7 +154,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: ASSET_TYPE_ERC1155,
+            assetType: OrderStructs.AssetType.ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: address(weth),
@@ -461,7 +458,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

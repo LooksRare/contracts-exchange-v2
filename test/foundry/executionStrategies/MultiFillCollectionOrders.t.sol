@@ -13,7 +13,7 @@ import {StrategyTestMultiFillCollectionOrder} from "../utils/StrategyTestMultiFi
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericConstants.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -79,7 +79,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -169,7 +169,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

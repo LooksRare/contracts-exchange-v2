@@ -19,9 +19,6 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 // Strategies
 import {StrategyChainlinkFloor} from "../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
-
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     function setUp() public {
         _setUp();
@@ -256,7 +253,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Fake strategy
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -307,7 +304,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Fake strategy
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

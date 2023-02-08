@@ -14,7 +14,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {FunctionSelectorInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureExpired, TransferCooldownPeriodTooHigh} from "../../../../contracts/errors/ReservoirErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
 
 // Strategies
 import {StrategyReservoirCollectionOffer} from "../../../../contracts/executionStrategies/Reservoir/StrategyReservoirCollectionOffer.sol";
@@ -150,7 +150,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -205,7 +205,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -258,7 +258,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -311,7 +311,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -395,7 +395,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -463,7 +463,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),

@@ -13,6 +13,12 @@ library OrderStructs {
     enum QuoteType { Bid, Ask }
 
     /**
+     * @notice AssetType is used in OrderStructs.Maker's assetType to determine the asset
+     *         type being traded.
+     */
+    enum AssetType { ERC721, ERC1155 }
+
+    /**
      * 1. Maker struct
      */
 
@@ -40,7 +46,7 @@ library OrderStructs {
         uint256 subsetNonce;
         uint256 orderNonce;
         uint256 strategyId;
-        uint256 assetType;
+        AssetType assetType;
         address collection;
         address currency;
         address signer;
@@ -98,7 +104,7 @@ library OrderStructs {
             "uint256 orderNonce,"
             "uint256 subsetNonce,"
             "uint256 strategyId,"
-            "uint256 assetType,"
+            "uint8 assetType,"
             "address collection,"
             "address currency,"
             "address signer,"

@@ -15,7 +15,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
 contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
     function setUp() public {
@@ -111,7 +111,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -183,7 +183,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: OrderStructs.AssetType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -274,7 +274,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

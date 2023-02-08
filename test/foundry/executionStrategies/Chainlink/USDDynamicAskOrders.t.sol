@@ -10,7 +10,6 @@ import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManage
 import {AmountInvalid, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {ChainlinkPriceInvalid, PriceNotRecentEnough} from "../../../../contracts/errors/ChainlinkErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, STRATEGY_NOT_ACTIVE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
-import {ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
 
 // Strategies
 import {StrategyChainlinkUSDDynamicAsk} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkUSDDynamicAsk.sol";
@@ -86,7 +85,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -454,7 +453,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

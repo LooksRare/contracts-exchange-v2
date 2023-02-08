@@ -11,7 +11,7 @@ import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManage
 // Errors and constants
 import {FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {DecimalsInvalid, PriceFeedAlreadySet} from "../../../../contracts/errors/ChainlinkErrors.sol";
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
 
 // Strategies
 import {StrategyChainlinkFloor} from "../../../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
@@ -104,7 +104,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -121,7 +121,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -150,7 +150,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -191,7 +191,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

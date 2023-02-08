@@ -21,9 +21,6 @@ import {SignatureERC1271Invalid} from "@looksrare/contracts-libs/contracts/error
 import {ERC1155SafeTransferFromFail, ERC1155SafeBatchTransferFromFail} from "@looksrare/contracts-libs/contracts/errors/LowLevelErrors.sol";
 import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCodeConstants.sol";
 
-// Constants
-import {ASSET_TYPE_ERC1155} from "../../contracts/constants/NumericConstants.sol";
-
 /**
  * @dev ERC1271Wallet recovers a signature's signer using ECDSA. If it matches the mock wallet's
  *      owner, it returns the magic value. Otherwise it returns an empty bytes4 value.
@@ -366,7 +363,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC1155,
+            assetType: OrderStructs.AssetType.ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: ETH,
@@ -387,7 +384,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC1155,
+            assetType: OrderStructs.AssetType.ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: address(weth),
@@ -422,7 +419,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC1155,
+            assetType: OrderStructs.AssetType.ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: address(weth),
@@ -460,7 +457,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC1155,
+                assetType: OrderStructs.AssetType.ERC1155,
                 orderNonce: i,
                 collection: address(mockERC1155),
                 currency: ETH,

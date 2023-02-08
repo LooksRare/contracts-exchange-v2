@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+// Libraries
+import {OrderStructs} from "../libraries/OrderStructs.sol";
+
 /**
  * @title ITransferSelectorNFT
  * @author LooksRare protocol team (👀,💎)
@@ -11,11 +14,11 @@ interface ITransferSelectorNFT {
      * @param collection Collection address
      * @param assetType Asset type id
      */
-    error NFTTransferFail(address collection, uint256 assetType);
+    error NFTTransferFail(address collection, OrderStructs.AssetType assetType);
 
     /**
      * @notice It is returned if there is no transfer manager for the asset type.
      * @param assetType Asset type id
      */
-    error NoTransferManagerForAssetType(uint256 assetType);
+    error NoTransferManagerForAssetType(OrderStructs.AssetType assetType);
 }

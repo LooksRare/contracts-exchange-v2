@@ -9,7 +9,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 import {INVALID_S_PARAMETER_EOA, INVALID_V_PARAMETER_EOA, NULL_SIGNER_EOA, INVALID_SIGNATURE_LENGTH, INVALID_SIGNER_EOA} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 contract SignaturesRevertionsTest is ProtocolBase {
@@ -28,7 +28,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -56,7 +56,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -89,7 +89,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -120,7 +120,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -156,7 +156,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: OrderStructs.AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,

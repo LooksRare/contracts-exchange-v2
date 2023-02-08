@@ -12,9 +12,6 @@ import {ILooksRareProtocol} from "../../contracts/interfaces/ILooksRareProtocol.
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
-
 contract DomainSeparatorUpdatesTest is ProtocolBase {
     function setUp() public {
         _setUp();
@@ -68,7 +65,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: OrderStructs.AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -111,7 +108,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: OrderStructs.AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: ETH,

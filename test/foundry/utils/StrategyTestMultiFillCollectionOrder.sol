@@ -38,7 +38,7 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
     ) external returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert OrderInvalid();
         // Only available for ERC721
-        if (makerBid.assetType != 0) revert OrderInvalid();
+        if (makerBid.assetType != OrderStructs.AssetType.ERC721) revert OrderInvalid();
 
         bytes32 orderHash = makerBid.hash();
         uint256 countItemsFilled = countItemsFilledForOrderHash[orderHash];

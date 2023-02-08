@@ -9,11 +9,8 @@ import {TransferManager} from "./TransferManager.sol";
 // Interfaces
 import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
 
-// Shared errors
-import {AssetTypeInvalid} from "./errors/SharedErrors.sol";
-
-// Constants
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";
+// Libraries
+import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 /**
  * @title TransferSelectorNFT
@@ -51,18 +48,16 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
      */
     function _transferNFT(
         address collection,
-        uint256 assetType,
+        OrderStructs.AssetType assetType,
         address sender,
         address recipient,
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
-        if (assetType == ASSET_TYPE_ERC721) {
+        if (assetType == OrderStructs.AssetType.ERC721) {
             transferManager.transferItemsERC721(collection, sender, recipient, itemIds, amounts);
-        } else if (assetType == ASSET_TYPE_ERC1155) {
+        } else if (assetType == OrderStructs.AssetType.ERC1155) {
             transferManager.transferItemsERC1155(collection, sender, recipient, itemIds, amounts);
-        } else {
-            revert AssetTypeInvalid(assetType);
         }
     }
 }

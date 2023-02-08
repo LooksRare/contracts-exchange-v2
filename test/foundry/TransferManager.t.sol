@@ -10,16 +10,13 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Core contracts
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {ITransferManager, TransferManager} from "../../contracts/TransferManager.sol";
-import {AmountInvalid, AssetTypeInvalid, LengthsInvalid} from "../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, LengthsInvalid} from "../../contracts/errors/SharedErrors.sol";
 
 // Mocks and other utils
 import {MockERC721} from "../mock/MockERC721.sol";
 import {MockERC1155} from "../mock/MockERC1155.sol";
 import {TestHelpers} from "./utils/TestHelpers.sol";
 import {TestParameters} from "./utils/TestParameters.sol";
-
-// Constants
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/NumericConstants.sol";
 
 contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
     address[] public operators;
@@ -287,19 +284,6 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         transferManager.transferBatchItemsAcrossCollections(items, _sender, _recipient);
     }
 
-    function testCannotBatchTransferIfAssetTypeIsNotZeroOrOne() public {
-        _allowOperator(_transferrer);
-        _grantApprovals(_sender);
-
-        ITransferManager.BatchTransferItem[] memory items = _generateValidBatchTransferItems();
-        items[0].assetType = 2;
-
-        vm.prank(_sender);
-        vm.expectRevert(abi.encodeWithSelector(AssetTypeInvalid.selector, 2));
-
-        transferManager.transferBatchItemsAcrossCollections(items, _sender, _recipient);
-    }
-
     function testTransferBatchItemsAcrossCollectionPerCollectionItemIdsLengthZero() public {
         _allowOperator(_transferrer);
         _grantApprovals(_sender);
@@ -533,13 +517,13 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
             items[0] = ITransferManager.BatchTransferItem({
                 collection: address(mockERC1155),
-                assetType: ASSET_TYPE_ERC1155,
+                assetType: OrderStructs.AssetType.ERC1155,
                 itemIds: tokenIdsERC1155,
                 amounts: amountsERC1155
             });
             items[1] = ITransferManager.BatchTransferItem({
                 collection: address(mockERC721),
-                assetType: ASSET_TYPE_ERC721,
+                assetType: OrderStructs.AssetType.ERC721,
                 itemIds: tokenIdsERC721,
                 amounts: amountsERC721
             });

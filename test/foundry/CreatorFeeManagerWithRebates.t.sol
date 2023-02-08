@@ -16,7 +16,7 @@ import {BUNDLE_ERC2981_NOT_SUPPORTED} from "../../contracts/constants/Validation
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
 contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
     function setUp() public {
@@ -64,7 +64,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: OrderStructs.AssetType.ERC721,
                 orderNonce: 0,
                 collection: erc721,
                 currency: address(weth),

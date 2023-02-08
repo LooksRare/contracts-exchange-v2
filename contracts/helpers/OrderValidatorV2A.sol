@@ -23,6 +23,7 @@ import {OrderInvalid} from "../errors/SharedErrors.sol";
 // Other dependencies
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";
 import {TransferManager} from "../TransferManager.sol";
+import {BatchOrderTypehashRegistry} from "../BatchOrderTypehashRegistry.sol";
 
 // Constants
 import "../constants/ValidationCodeConstants.sol";
@@ -720,7 +721,10 @@ contract OrderValidatorV2A {
                 return ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE;
             }
 
-            return _computeDigestAndVerify(merkleTree.hash(), signature, signer);
+            BatchOrderTypehashRegistry batchOrderTypehashRegistry = looksRareProtocol.batchOrderTypehashRegistry();
+            bytes32 batchOrderHash = batchOrderTypehashRegistry.hash(merkleTree);
+
+            return _computeDigestAndVerify(batchOrderHash, signature, signer);
         } else {
             return _computeDigestAndVerify(orderHash, signature, signer);
         }

@@ -92,32 +92,21 @@ library OrderStructs {
     bytes32 internal constant _MAKER_TYPEHASH =
         keccak256(
             "Maker("
-            "QuoteType quoteType"
-            "uint256 globalNonce,"
-            "uint256 orderNonce,"
-            "uint256 subsetNonce,"
-            "uint256 strategyId,"
-            "AssetType assetType,"
-            "address collection,"
-            "address currency,"
-            "address signer,"
-            "uint256 startTime,"
-            "uint256 endTime,"
-            "uint256 price,"
-            "uint256[] itemIds,"
-            "uint256[] amounts,"
-            "bytes additionalParameters"
-            ")"
-        );
-
-    /**
-     * @notice This is the typehash constant used to compute the merkle root order hash.
-     * @dev The proof is not included in the hashing function.
-     */
-    bytes32 internal constant _MERKLE_TREE_TYPEHASH =
-        keccak256(
-            "MerkleTree("
-            "bytes32 root"
+                "QuoteType quoteType"
+                "uint256 globalNonce,"
+                "uint256 orderNonce,"
+                "uint256 subsetNonce,"
+                "uint256 strategyId,"
+                "AssetType assetType,"
+                "address collection,"
+                "address currency,"
+                "address signer,"
+                "uint256 startTime,"
+                "uint256 endTime,"
+                "uint256 price,"
+                "uint256[] itemIds,"
+                "uint256[] amounts,"
+                "bytes additionalParameters"
             ")"
         );
 
@@ -157,14 +146,5 @@ library OrderStructs {
                     )
                 )
             );
-    }
-
-    /**
-     * @notice This function is used to compute the hash for a merkle tree struct.
-     * @param merkleTree Merkle tree struct
-     * @return merkleTreeHash Hash of the merkle tree struct
-     */
-    function hash(MerkleTree memory merkleTree) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_MERKLE_TREE_TYPEHASH, merkleTree.root));
     }
 }

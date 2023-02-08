@@ -8,12 +8,6 @@ pragma solidity 0.8.17;
 error AmountInvalid();
 
 /**
- * @notice It is returned if asset type is neither 0 (ERC721), nor 1 (ERC1155).
- * @param assetType Asset type
- */
-error AssetTypeInvalid(uint256 assetType);
-
-/**
  * @notice It is returned if the ask price is too high for the bid user.
  */
 error AskTooHigh();

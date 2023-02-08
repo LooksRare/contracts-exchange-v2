@@ -2,14 +2,16 @@
 pragma solidity 0.8.17;
 
 // Libraries and interfaces
-import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract DelegationRecipientsTakerTest is ProtocolBase {
     function setUp() public {
@@ -39,7 +41,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: address(weth),
@@ -122,7 +124,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: ETH,

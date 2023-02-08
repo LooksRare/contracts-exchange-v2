@@ -7,9 +7,6 @@ import {CreatorFeeManagerWithRoyalties} from "../../contracts/CreatorFeeManagerW
 
 import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../contracts/constants/NumericConstants.sol";
-
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
@@ -29,6 +26,9 @@ import {MockERC1155WithoutIsApprovedForAll} from "../mock/MockERC1155WithoutIsAp
 import {MockERC721SupportsNoInterface} from "../mock/MockERC721SupportsNoInterface.sol";
 import {MockERC1155SupportsNoInterface} from "../mock/MockERC1155SupportsNoInterface.sol";
 import {MockERC20} from "../mock/MockERC20.sol";
+
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 /**
  * @dev Not everything is tested in this file. Most tests live in other files
@@ -104,7 +104,7 @@ contract OrderValidatorV2ATest is TestParameters {
     function testMakerAskLooksRareProtocolIsNotAWhitelistedOperator() public {
         OrderStructs.Maker memory makerAsk;
         makerAsk.signer = makerUser;
-        makerAsk.assetType = ASSET_TYPE_ERC721;
+        makerAsk.assetType = AssetType.ERC721;
         makerAsk.collection = address(new MockERC721());
 
         address[] memory operators = new address[](1);
@@ -127,7 +127,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerAskWrongAssetTypeERC721() public {
         OrderStructs.Maker memory makerAsk;
-        makerAsk.assetType = ASSET_TYPE_ERC721;
+        makerAsk.assetType = AssetType.ERC721;
         makerAsk.collection = address(new MockERC721SupportsNoInterface());
         uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
@@ -139,7 +139,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerBidWrongAssetTypeERC721() public {
         OrderStructs.Maker memory makerBid;
-        makerBid.assetType = ASSET_TYPE_ERC721;
+        makerBid.assetType = AssetType.ERC721;
         makerBid.collection = address(new MockERC721SupportsNoInterface());
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
@@ -159,7 +159,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function _testMakerBidERC721InvalidAmount(uint256 amount) public {
         OrderStructs.Maker memory makerBid;
-        makerBid.assetType = ASSET_TYPE_ERC721;
+        makerBid.assetType = AssetType.ERC721;
         makerBid.collection = address(new MockERC721());
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = amount;
@@ -179,7 +179,7 @@ contract OrderValidatorV2ATest is TestParameters {
         OrderStructs.Maker memory makerBid;
         // This contract does not have isValidSignature implemented
         makerBid.signer = address(this);
-        makerBid.assetType = ASSET_TYPE_ERC721;
+        makerBid.assetType = AssetType.ERC721;
         makerBid.collection = address(new MockERC721());
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
@@ -191,7 +191,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerAskWrongAssetTypeERC1155() public {
         OrderStructs.Maker memory makerAsk;
-        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = address(new MockERC1155SupportsNoInterface());
         uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
             makerAsk,
@@ -203,7 +203,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerBidWrongAssetTypeERC1155() public {
         OrderStructs.Maker memory makerBid;
-        makerBid.assetType = ASSET_TYPE_ERC1155;
+        makerBid.assetType = AssetType.ERC1155;
         makerBid.collection = address(new MockERC1155SupportsNoInterface());
         uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
             makerBid,
@@ -216,11 +216,11 @@ contract OrderValidatorV2ATest is TestParameters {
     function testMakerBidInsufficientERC20Allowance() public {
         OrderStructs.Maker memory makerBid;
         MockERC20 mockERC20 = new MockERC20();
-        makerBid.assetType = ASSET_TYPE_ERC721;
+        makerBid.assetType = AssetType.ERC721;
         makerBid.collection = address(new MockERC721());
         makerBid.signer = makerUser;
         makerBid.currency = address(mockERC20);
-        makerBid.assetType = ASSET_TYPE_ERC721;
+        makerBid.assetType = AssetType.ERC721;
         makerBid.price = 1 ether;
 
         mockERC20.mint(makerUser, 1 ether);
@@ -243,10 +243,10 @@ contract OrderValidatorV2ATest is TestParameters {
         mockERC721.mint(makerUser, 1);
 
         OrderStructs.Maker memory makerAsk;
-        makerAsk.assetType = ASSET_TYPE_ERC721;
+        makerAsk.assetType = AssetType.ERC721;
         makerAsk.collection = address(mockERC721);
         makerAsk.signer = makerUser;
-        makerAsk.assetType = ASSET_TYPE_ERC721;
+        makerAsk.assetType = AssetType.ERC721;
 
         // Only approve token 0 but not token 1, this is to test the loop
         vm.prank(makerUser);
@@ -272,12 +272,12 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerAskDoesNotOwnERC721() public {
         OrderStructs.Maker memory makerAsk;
-        makerAsk.assetType = ASSET_TYPE_ERC721;
+        makerAsk.assetType = AssetType.ERC721;
         MockERC721 mockERC721 = new MockERC721();
         mockERC721.mint(address(this), 0);
         makerAsk.collection = address(mockERC721);
         makerAsk.signer = makerUser;
-        makerAsk.assetType = ASSET_TYPE_ERC721;
+        makerAsk.assetType = AssetType.ERC721;
         uint256[] memory itemIds = new uint256[](1);
         makerAsk.itemIds = itemIds;
 
@@ -308,10 +308,10 @@ contract OrderValidatorV2ATest is TestParameters {
         }
 
         OrderStructs.Maker memory makerAsk;
-        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = collection;
         makerAsk.signer = makerUser;
-        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.assetType = AssetType.ERC1155;
         uint256[] memory itemIds = new uint256[](1);
         makerAsk.itemIds = itemIds;
         uint256[] memory amounts = new uint256[](1);
@@ -330,10 +330,10 @@ contract OrderValidatorV2ATest is TestParameters {
         MockERC1155WithoutAnyBalanceOf mockERC1155 = new MockERC1155WithoutAnyBalanceOf();
 
         OrderStructs.Maker memory makerAsk;
-        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = address(mockERC1155);
         makerAsk.signer = makerUser;
-        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.assetType = AssetType.ERC1155;
         uint256[] memory itemIds = new uint256[](1);
         makerAsk.itemIds = itemIds;
         uint256[] memory amounts = new uint256[](1);
@@ -353,10 +353,10 @@ contract OrderValidatorV2ATest is TestParameters {
         mockERC1155.mint({to: makerUser, tokenId: 0, amount: 1});
 
         OrderStructs.Maker memory makerAsk;
-        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = address(mockERC1155);
         makerAsk.signer = makerUser;
-        makerAsk.assetType = ASSET_TYPE_ERC1155;
+        makerAsk.assetType = AssetType.ERC1155;
         uint256[] memory itemIds = new uint256[](1);
         makerAsk.itemIds = itemIds;
         uint256[] memory amounts = new uint256[](1);

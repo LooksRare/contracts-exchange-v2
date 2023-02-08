@@ -6,21 +6,18 @@ import {PackableReentrancyGuard} from "@looksrare/contracts-libs/contracts/Packa
 import {ExecutionManager} from "./ExecutionManager.sol";
 import {TransferManager} from "./TransferManager.sol";
 
-// Interfaces
-import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
+// Libraries
+import {OrderStructs} from "./libraries/OrderStructs.sol";
 
-// Shared errors
-import {AssetTypeInvalid} from "./errors/SharedErrors.sol";
-
-// Constants
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "./constants/NumericConstants.sol";
+// Enums
+import {AssetType} from "./enums/AssetType.sol";
 
 /**
  * @title TransferSelectorNFT
  * @notice This contract handles the logic for transferring non-fungible items.
  * @author LooksRare protocol team (👀,💎)
  */
-contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, PackableReentrancyGuard {
+contract TransferSelectorNFT is ExecutionManager, PackableReentrancyGuard {
     /**
      * @notice Transfer manager for ERC721 and ERC1155.
      */
@@ -51,18 +48,16 @@ contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, Packable
      */
     function _transferNFT(
         address collection,
-        uint256 assetType,
+        AssetType assetType,
         address sender,
         address recipient,
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
-        if (assetType == ASSET_TYPE_ERC721) {
+        if (assetType == AssetType.ERC721) {
             transferManager.transferItemsERC721(collection, sender, recipient, itemIds, amounts);
-        } else if (assetType == ASSET_TYPE_ERC1155) {
+        } else if (assetType == AssetType.ERC1155) {
             transferManager.transferItemsERC1155(collection, sender, recipient, itemIds, amounts);
-        } else {
-            revert AssetTypeInvalid(assetType);
         }
     }
 }

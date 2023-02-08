@@ -26,7 +26,10 @@ import {TransferManager} from "../TransferManager.sol";
 
 // Constants
 import "../constants/ValidationCodeConstants.sol";
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
+import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
+
+// Enums
+import {AssetType} from "../enums/AssetType.sol";
 
 /**
  * @title OrderValidatorV2A
@@ -455,16 +458,16 @@ contract OrderValidatorV2A {
      */
     function _checkIfPotentialInvalidAssetTypes(
         address collection,
-        uint256 assetType
+        AssetType assetType
     ) internal view returns (uint256 validationCode) {
-        if (assetType == ASSET_TYPE_ERC721) {
+        if (assetType == AssetType.ERC721) {
             bool isERC721 = IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_1) ||
                 IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
 
             if (!isERC721) {
                 return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721;
             }
-        } else if (assetType == ASSET_TYPE_ERC1155) {
+        } else if (assetType == AssetType.ERC1155) {
             if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID)) {
                 return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155;
             }
@@ -508,7 +511,7 @@ contract OrderValidatorV2A {
      */
     function _checkValidityMakerAskNFTAssets(
         address collection,
-        uint256 assetType,
+        AssetType assetType,
         address user,
         uint256[] memory itemIds,
         uint256[] memory amounts
@@ -519,9 +522,9 @@ contract OrderValidatorV2A {
             return validationCode;
         }
 
-        if (assetType == ASSET_TYPE_ERC721) {
+        if (assetType == AssetType.ERC721) {
             validationCode = _checkValidityERC721AndEquivalents(collection, user, itemIds);
-        } else if (assetType == ASSET_TYPE_ERC1155) {
+        } else if (assetType == AssetType.ERC1155) {
             validationCode = _checkValidityERC1155(collection, user, itemIds, amounts);
         }
     }
@@ -930,7 +933,7 @@ contract OrderValidatorV2A {
     }
 
     function _getOrderValidationCodeForStandardStrategy(
-        uint256 assetType,
+        AssetType assetType,
         uint256 expectedLength,
         uint256[] memory amounts
     ) private pure returns (uint256 validationCode) {
@@ -944,7 +947,7 @@ contract OrderValidatorV2A {
                     validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                 }
 
-                if (assetType == ASSET_TYPE_ERC721 && amount != 1) {
+                if (assetType == AssetType.ERC721 && amount != 1) {
                     validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                 }
 

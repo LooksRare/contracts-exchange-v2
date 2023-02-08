@@ -10,10 +10,13 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Errors and constants
 import {MerkleProofTooLarge, MerkleProofInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {MERKLE_PROOF_PROOF_TOO_LARGE, ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE} from "../../contracts/constants/ValidationCodeConstants.sol";
-import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH} from "../../contracts/constants/NumericConstants.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
+
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
@@ -266,7 +269,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 askNonce: 0, // askNonce
                 subsetNonce: 0, // subsetNonce
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: ETH,
@@ -290,7 +293,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: address(weth),

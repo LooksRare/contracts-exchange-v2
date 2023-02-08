@@ -17,8 +17,8 @@ import {CURRENCY_NOT_ALLOWED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../con
 // Other mocks and utils
 import {MockERC20} from "../mock/MockERC20.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract LooksRareProtocolTest is ProtocolBase {
     // Fixed price of sale
@@ -45,7 +45,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -106,7 +106,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(mockERC20),
@@ -174,7 +174,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -238,7 +238,7 @@ contract LooksRareProtocolTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: ETH,
@@ -283,7 +283,7 @@ contract LooksRareProtocolTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,

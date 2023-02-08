@@ -3,7 +3,6 @@ pragma solidity 0.8.17;
 
 // Libraries and interfaces
 import {IReentrancyGuard} from "@looksrare/contracts-libs/contracts/interfaces/IReentrancyGuard.sol";
-import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Base test
@@ -18,8 +17,8 @@ import {MaliciousIsValidSignatureERC1271Wallet} from "./utils/MaliciousIsValidSi
 import {SignatureERC1271Invalid} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
 import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCodeConstants.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 /**
  * @dev ERC1271Wallet recovers a signature's signer using ECDSA. If it matches the mock wallet's
@@ -263,7 +262,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -284,7 +283,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -324,7 +323,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,

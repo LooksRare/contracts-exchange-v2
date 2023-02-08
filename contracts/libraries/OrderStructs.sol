@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+// Enums
+import {AssetType} from "../enums/AssetType.sol";
+
 /**
  * @title OrderStructs
  * @notice This library contains all order struct types for the LooksRare protocol (v2).
@@ -40,7 +43,7 @@ library OrderStructs {
         uint256 subsetNonce;
         uint256 orderNonce;
         uint256 strategyId;
-        uint256 assetType;
+        AssetType assetType;
         address collection;
         address currency;
         address signer;
@@ -98,7 +101,7 @@ library OrderStructs {
             "uint256 orderNonce,"
             "uint256 subsetNonce,"
             "uint256 strategyId,"
-            "uint256 assetType,"
+            "uint8 assetType,"
             "address collection,"
             "address currency,"
             "address signer,"

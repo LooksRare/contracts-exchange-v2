@@ -10,18 +10,18 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 // Other helpers
 import {ProtocolHelpers} from "../utils/ProtocolHelpers.sol";
 
-// Constants
-import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155} from "../../../contracts/constants/NumericConstants.sol";
+// Enums
+import {AssetType} from "../../../contracts/enums/AssetType.sol";
 
 contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerAskAndTakerBid(
         address collection
     ) internal view returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
-        uint256 assetType = ASSET_TYPE_ERC721;
+        AssetType assetType = AssetType.ERC721;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = ASSET_TYPE_ERC1155;
+            assetType = AssetType.ERC1155;
         }
 
         newMakerAsk = _createSingleItemMakerAskOrder({
@@ -44,10 +44,10 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         address currency
     ) internal view returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
-        uint256 assetType = ASSET_TYPE_ERC721;
+        AssetType assetType = AssetType.ERC721;
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = ASSET_TYPE_ERC1155;
+            assetType = AssetType.ERC1155;
         }
 
         newMakerBid = _createSingleItemMakerBidOrder({
@@ -70,11 +70,11 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         uint256 numberTokens
     ) internal view returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
-        uint256 assetType = ASSET_TYPE_ERC721;
+        AssetType assetType = AssetType.ERC721;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = ASSET_TYPE_ERC1155;
+            assetType = AssetType.ERC1155;
         }
 
         uint256[] memory itemIds = new uint256[](numberTokens);
@@ -82,7 +82,7 @@ contract MockOrderGenerator is ProtocolHelpers {
 
         for (uint256 i; i < itemIds.length; i++) {
             itemIds[i] = i;
-            if (assetType != 1) {
+            if (assetType != AssetType.ERC1155) {
                 amounts[i] = 1;
             } else {
                 amounts[i] = 1 + i;
@@ -111,11 +111,11 @@ contract MockOrderGenerator is ProtocolHelpers {
         address currency,
         uint256 numberTokens
     ) internal view returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
-        uint256 assetType = ASSET_TYPE_ERC721;
+        AssetType assetType = AssetType.ERC721;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = ASSET_TYPE_ERC1155;
+            assetType = AssetType.ERC1155;
         }
 
         uint256[] memory itemIds = new uint256[](numberTokens);
@@ -123,7 +123,7 @@ contract MockOrderGenerator is ProtocolHelpers {
 
         for (uint256 i; i < itemIds.length; i++) {
             itemIds[i] = i;
-            if (assetType != 1) {
+            if (assetType != AssetType.ERC1155) {
                 amounts[i] = 1;
             } else {
                 amounts[i] = 1 + i;

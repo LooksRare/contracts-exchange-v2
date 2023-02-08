@@ -2,7 +2,6 @@
 pragma solidity 0.8.17;
 
 // Libraries and interfaces
-import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {WETH} from "solmate/src/tokens/WETH.sol";
 
@@ -13,7 +12,10 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {GasGriefer} from "./utils/GasGriefer.sol";
 
 // Constants
-import {ONE_HUNDRED_PERCENT_IN_BP, ASSET_TYPE_ERC721} from "../../contracts/constants/NumericConstants.sol";
+import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
+
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract GasGriefingTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -43,7 +45,7 @@ contract GasGriefingTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: ASSET_TYPE_ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -108,7 +110,7 @@ contract GasGriefingTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: ASSET_TYPE_ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,

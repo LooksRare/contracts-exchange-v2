@@ -14,6 +14,9 @@ import {GasGriefer} from "./utils/GasGriefer.sol";
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
+
 contract GasGriefingTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
     address private gasGriefer;
@@ -42,7 +45,7 @@ contract GasGriefingTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -107,7 +110,7 @@ contract GasGriefingTest is ProtocolBase {
                 askNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: OrderStructs.AssetType.ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,

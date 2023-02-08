@@ -13,6 +13,9 @@ import {AmountInvalid, LengthsInvalid} from "./errors/SharedErrors.sol";
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
+// Enums
+import {AssetType} from "./enums/AssetType.sol";
+
 /**
  * @title TransferManager
  * @notice This contract provides the transfer functions for ERC721/ERC1155 for contracts that require them.
@@ -146,8 +149,8 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
                 revert LengthsInvalid();
             }
 
-            OrderStructs.AssetType assetType = items[i].assetType;
-            if (assetType == OrderStructs.AssetType.ERC721) {
+            AssetType assetType = items[i].assetType;
+            if (assetType == AssetType.ERC721) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     if (amounts[j] != 1) {
                         revert AmountInvalid();
@@ -157,7 +160,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
                         ++j;
                     }
                 }
-            } else if (assetType == OrderStructs.AssetType.ERC1155) {
+            } else if (assetType == AssetType.ERC1155) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     if (amounts[j] == 0) {
                         revert AmountInvalid();

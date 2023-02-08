@@ -17,6 +17,9 @@ import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, Mess
 // Base strategy contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
 
+// Enums
+import {AssetType} from "../../enums/AssetType.sol";
+
 /**
  * @title StrategyReservoirCollectionOffer
  * @notice This contract offers execution strategies for users, which allow them
@@ -79,7 +82,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         amounts = makerBid.amounts;
 
         // It can be executed only for 1 itemId and only for ERC721
-        if (amounts.length != 1 || makerBid.assetType != OrderStructs.AssetType.ERC721) {
+        if (amounts.length != 1 || makerBid.assetType != AssetType.ERC721) {
             revert OrderInvalid();
         }
 
@@ -114,7 +117,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         amounts = makerBid.amounts;
 
         // It can be executed only for 1 itemId and only for ERC721
-        if (amounts.length != 1 || makerBid.assetType != OrderStructs.AssetType.ERC721) {
+        if (amounts.length != 1 || makerBid.assetType != AssetType.ERC721) {
             revert OrderInvalid();
         }
 
@@ -151,11 +154,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
 
         // Amounts length must be 1, amount can only be 1 since only ERC721 can be traded.
-        if (
-            makerBid.amounts.length != 1 ||
-            makerBid.amounts[0] != 1 ||
-            makerBid.assetType != OrderStructs.AssetType.ERC721
-        ) {
+        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1 || makerBid.assetType != AssetType.ERC721) {
             return (isValid, OrderInvalid.selector);
         }
 

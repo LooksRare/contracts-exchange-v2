@@ -8,6 +8,9 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {TestHelpers} from "./TestHelpers.sol";
 import {TestParameters} from "./TestParameters.sol";
 
+// Enums
+import {AssetType} from "../../../contracts/enums/AssetType.sol";
+
 contract ProtocolHelpers is TestHelpers, TestParameters {
     using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
@@ -20,7 +23,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 askNonce,
         uint256 subsetNonce,
         uint256 strategyId,
-        OrderStructs.AssetType assetType,
+        AssetType assetType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -54,7 +57,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 askNonce,
         uint256 subsetNonce,
         uint256 strategyId,
-        OrderStructs.AssetType assetType,
+        AssetType assetType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -90,7 +93,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 askNonce,
         uint256 subsetNonce,
         uint256 strategyId,
-        OrderStructs.AssetType assetType,
+        AssetType assetType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -122,7 +125,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 bidNonce,
         uint256 subsetNonce,
         uint256 strategyId,
-        OrderStructs.AssetType assetType,
+        AssetType assetType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -156,7 +159,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 bidNonce,
         uint256 subsetNonce,
         uint256 strategyId,
-        OrderStructs.AssetType assetType,
+        AssetType assetType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -192,7 +195,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 bidNonce,
         uint256 subsetNonce,
         uint256 strategyId,
-        OrderStructs.AssetType assetType,
+        AssetType assetType,
         uint256 orderNonce,
         address collection,
         address currency,

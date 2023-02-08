@@ -22,6 +22,9 @@ import {StrategyReservoirCollectionOffer} from "../../../../contracts/executionS
 // Base test
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
+// Enums
+import {AssetType} from "../../../../contracts/enums/AssetType.sol";
+
 contract CollectionOffersWithReservoirTest is ProtocolBase {
     StrategyReservoirCollectionOffer public strategyReservoirCollectionOffer;
     bytes4 public selectorNoProof = strategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
@@ -150,7 +153,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -205,7 +208,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -258,7 +261,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -311,7 +314,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -395,7 +398,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -463,7 +466,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),

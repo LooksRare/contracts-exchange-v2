@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+// Enums
+import {AssetType} from "../enums/AssetType.sol";
+
 /**
  * @title OrderStructs
  * @notice This library contains all order struct types for the LooksRare protocol (v2).
@@ -11,12 +14,6 @@ library OrderStructs {
      * @notice QuoteType is used in OrderStructs.Maker's quoteType to determine whether the maker order is a bid or an ask.
      */
     enum QuoteType { Bid, Ask }
-
-    /**
-     * @notice AssetType is used in OrderStructs.Maker's assetType to determine the asset
-     *         type being traded.
-     */
-    enum AssetType { ERC721, ERC1155 }
 
     /**
      * 1. Maker struct

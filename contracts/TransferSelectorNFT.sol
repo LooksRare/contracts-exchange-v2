@@ -9,6 +9,9 @@ import {TransferManager} from "./TransferManager.sol";
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
+// Enums
+import {AssetType} from "./enums/AssetType.sol";
+
 /**
  * @title TransferSelectorNFT
  * @notice This contract handles the logic for transferring non-fungible items.
@@ -45,15 +48,15 @@ contract TransferSelectorNFT is ExecutionManager, PackableReentrancyGuard {
      */
     function _transferNFT(
         address collection,
-        OrderStructs.AssetType assetType,
+        AssetType assetType,
         address sender,
         address recipient,
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
-        if (assetType == OrderStructs.AssetType.ERC721) {
+        if (assetType == AssetType.ERC721) {
             transferManager.transferItemsERC721(collection, sender, recipient, itemIds, amounts);
-        } else if (assetType == OrderStructs.AssetType.ERC1155) {
+        } else if (assetType == AssetType.ERC1155) {
             transferManager.transferItemsERC1155(collection, sender, recipient, itemIds, amounts);
         }
     }

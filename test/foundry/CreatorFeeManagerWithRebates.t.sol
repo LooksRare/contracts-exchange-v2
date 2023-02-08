@@ -18,6 +18,9 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
+
 contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
     function setUp() public {
         _setUp();
@@ -64,7 +67,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: OrderStructs.AssetType.ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: erc721,
                 currency: address(weth),

@@ -18,6 +18,9 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
+
 contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     CreatorFeeManagerWithRoyalties public creatorFeeManagerWithRoyalties;
 
@@ -64,7 +67,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -107,7 +110,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721WithRoyalties),
             currency: address(weth),
@@ -349,7 +352,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: OrderStructs.AssetType.ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: 0,
                 collection: address(mockERC721),
                 currency: address(weth),
@@ -378,7 +381,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,

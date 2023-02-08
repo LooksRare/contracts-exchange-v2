@@ -15,6 +15,9 @@ import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH} from "../../contra
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
+
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
 
@@ -266,7 +269,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 askNonce: 0, // askNonce
                 subsetNonce: 0, // subsetNonce
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: OrderStructs.AssetType.ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: ETH,
@@ -290,7 +293,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: OrderStructs.AssetType.ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: address(weth),

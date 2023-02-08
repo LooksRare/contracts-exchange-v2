@@ -11,6 +11,9 @@ import {INVALID_USER_GLOBAL_BID_NONCE, INVALID_USER_GLOBAL_ASK_NONCE, USER_SUBSE
 import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFillCollectionOrder.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
+
 contract NonceInvalidationTest is INonceManager, ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
 
@@ -32,7 +35,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             askNonce: 0,
             subsetNonce: subsetNonce,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -102,7 +105,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             askNonce: userGlobalAskNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -158,7 +161,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             bidNonce: userGlobalBidNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -199,7 +202,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -268,7 +271,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: orderNonce,
             collection: address(mockERC721),
             currency: address(weth),
@@ -313,7 +316,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: OrderStructs.AssetType.ERC721,
+                assetType: AssetType.ERC721,
                 orderNonce: orderNonce,
                 collection: address(mockERC721),
                 currency: address(weth),
@@ -376,7 +379,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: orderNonce,
             collection: address(mockERC721),
             currency: address(weth),

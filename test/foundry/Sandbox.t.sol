@@ -11,6 +11,9 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
+
 contract SandboxTest is ProtocolBase {
     error ERC721TransferFromFail();
 
@@ -57,7 +60,7 @@ contract SandboxTest is ProtocolBase {
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721, // it should be ERC1155
+            assetType: AssetType.ERC721, // it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,
             currency: address(weth),
@@ -78,7 +81,7 @@ contract SandboxTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Adjust asset type and sign order again
-        makerBid.assetType = OrderStructs.AssetType.ERC1155;
+        makerBid.assetType = AssetType.ERC1155;
         signature = _signMakerOrder(makerBid, makerUserPK);
 
         // It shouldn't fail with assetType = 0
@@ -104,7 +107,7 @@ contract SandboxTest is ProtocolBase {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: OrderStructs.AssetType.ERC721, // it should be ERC1155
+            assetType: AssetType.ERC721, // it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,
             currency: ETH,
@@ -131,7 +134,7 @@ contract SandboxTest is ProtocolBase {
         );
 
         // Adjust asset type and sign order again
-        makerAsk.assetType = OrderStructs.AssetType.ERC1155;
+        makerAsk.assetType = AssetType.ERC1155;
         signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // It shouldn't fail with assetType = 0

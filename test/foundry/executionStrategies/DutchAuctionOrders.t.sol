@@ -19,6 +19,9 @@ import {ProtocolBase} from "../ProtocolBase.t.sol";
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericConstants.sol";
 
+// Enums
+import {AssetType} from "../../contracts/enums/AssetType.sol";
+
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
     bytes4 public selector = StrategyDutchAuction.executeStrategyWithTakerBid.selector;
@@ -68,7 +71,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -379,7 +382,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: OrderStructs.AssetType.ERC721,
+            assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

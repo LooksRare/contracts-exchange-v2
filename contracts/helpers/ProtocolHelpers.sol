@@ -35,23 +35,13 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Compute digest for maker ask struct
-     * @param makerAsk Maker ask struct
-     * @return digest Digest
-     */
-    function computeDigestMakerAsk(OrderStructs.Maker memory makerAsk) public view returns (bytes32 digest) {
-        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerAsk.hash()));
-    }
-
-    /**
      * @notice Compute digest for maker bid struct
-     * @param makerBid Maker bid struct
+     * @param maker Maker struct
      * @return digest Digest
      */
-    function computeDigestMakerBid(OrderStructs.Maker memory makerBid) public view returns (bytes32 digest) {
+    function computeDigestMaker(OrderStructs.Maker memory maker) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerBid.hash()));
+        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, maker.hash()));
     }
 
     /**
@@ -65,35 +55,18 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Verify maker ask order signature
-     * @param makerAsk Maker ask struct
+     * @notice Verify maker order signature
+     * @param maker Maker struct
      * @param makerSignature Maker signature
      * @param signer Signer address
      * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
      */
-    function verifyMakerAskOrder(
-        OrderStructs.Maker memory makerAsk,
+    function verifyMaker(
+        OrderStructs.Maker memory maker,
         bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {
-        bytes32 digest = computeDigestMakerAsk(makerAsk);
-        SignatureCheckerCalldata.verify(digest, signer, makerSignature);
-        return true;
-    }
-
-    /**
-     * @notice Verify maker bid order signature
-     * @param makerBid Maker bid struct
-     * @param makerSignature Maker signature
-     * @param signer Signer address
-     * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
-     */
-    function verifyMakerBidOrder(
-        OrderStructs.Maker memory makerBid,
-        bytes calldata makerSignature,
-        address signer
-    ) public view returns (bool) {
-        bytes32 digest = computeDigestMakerBid(makerBid);
+        bytes32 digest = computeDigestMaker(maker);
         SignatureCheckerCalldata.verify(digest, signer, makerSignature);
         return true;
     }

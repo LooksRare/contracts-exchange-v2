@@ -39,7 +39,7 @@ contract ProtocolHelpers {
      * @param maker Maker struct
      * @return digest Digest
      */
-    function computeDigestMaker(OrderStructs.Maker memory maker) public view returns (bytes32 digest) {
+    function computeMakerDigest(OrderStructs.Maker memory maker) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, maker.hash()));
     }
@@ -61,12 +61,12 @@ contract ProtocolHelpers {
      * @param signer Signer address
      * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
      */
-    function verifyMaker(
+    function verifyMakerSignature(
         OrderStructs.Maker memory maker,
         bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {
-        bytes32 digest = computeDigestMaker(maker);
+        bytes32 digest = computeMakerDigest(maker);
         SignatureCheckerCalldata.verify(digest, signer, makerSignature);
         return true;
     }

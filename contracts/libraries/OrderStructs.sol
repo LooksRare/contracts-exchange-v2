@@ -17,12 +17,12 @@ library OrderStructs {
 
     /**
      * @notice Maker is the struct for a maker order.
+     * @param assetType Asset type (i.e. 0 = ERC721, 1 = ERC1155)
      * @param quoteType Quote type (i.e. 0 = BID, 1 = ASK)
      * @param globalNonce Global user order nonce for maker orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
      * @param strategyId Strategy id
-     * @param assetType Asset type (i.e. 0 = ERC721, 1 = ERC1155)
      * @param collection Collection address
      * @param currency Currency address (@dev address(0) = ETH)
      * @param signer Signer address
@@ -34,12 +34,12 @@ library OrderStructs {
      * @param additionalParameters Extra data specific for the order
      */
     struct Maker {
+        AssetType assetType;
         QuoteType quoteType;
         uint256 globalNonce;
         uint256 subsetNonce;
         uint256 orderNonce;
         uint256 strategyId;
-        AssetType assetType;
         address collection;
         address currency;
         address signer;
@@ -92,12 +92,12 @@ library OrderStructs {
     bytes32 internal constant _MAKER_TYPEHASH =
         keccak256(
             "Maker("
+            "uint8 assetType,"
             "uint8 quoteType"
             "uint256 globalNonce,"
             "uint256 orderNonce,"
             "uint256 subsetNonce,"
             "uint256 strategyId,"
-            "uint8 assetType,"
             "address collection,"
             "address currency,"
             "address signer,"
@@ -137,12 +137,12 @@ library OrderStructs {
                 bytes.concat(
                     abi.encode(
                         _MAKER_TYPEHASH,
+                        maker.assetType,
                         maker.quoteType,
                         maker.globalNonce,
                         maker.subsetNonce,
                         maker.orderNonce,
                         maker.strategyId,
-                        maker.assetType,
                         maker.collection,
                         maker.currency
                     ),

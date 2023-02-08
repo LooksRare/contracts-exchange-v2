@@ -102,12 +102,12 @@ contract NonceManager is INonceManager {
 
         if (bid) {
             newBidNonce += quasiRandomNumber;
-            userBidAskNonces[msg.sender].askNonce = newBidNonce;
+            userBidAskNonces[msg.sender].bidNonce = newBidNonce;
         }
 
         if (ask) {
             newAskNonce += quasiRandomNumber;
-            userBidAskNonces[msg.sender].bidNonce = newAskNonce;
+            userBidAskNonces[msg.sender].askNonce = newAskNonce;
         }
 
         emit NewBidAskNonces(msg.sender, newBidNonce, newAskNonce);

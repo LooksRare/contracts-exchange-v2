@@ -63,7 +63,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256 numberOfItems,
         uint256 numberOfAmounts,
         uint256 desiredSalePriceInUSD
-    ) private returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
+    ) private returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
         uint256[] memory itemIds = new uint256[](numberOfItems);
         for (uint256 i; i < numberOfItems; ) {
             mockERC721.mint(makerUser, i + 1);
@@ -127,13 +127,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskChainlinkPriceInvalid() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
         vm.etch(CHAINLINK_ETH_USD_PRICE_FEED, address(priceFeed).code);
@@ -158,13 +158,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskUSDValueGreaterThanOrEqualToMinAcceptedEthValue() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -183,13 +183,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: (LATEST_CHAINLINK_ANSWER_IN_WAD * 98) / 100
         });
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -210,15 +210,15 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
     // This tests that we can handle fractions
     function testUSDDynamicAskUSDValueLessThanOneETH() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD / 2
         });
 
-        makerAsk.minPrice = 0.49 ether;
+        makerAsk.price = 0.49 ether;
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -238,7 +238,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testUSDDynamicAskBidderOverpaid() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -249,7 +249,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256 maxPrice = 1.1 ether;
         takerBid.additionalParameters = abi.encode(maxPrice);
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         uint256 initialETHBalanceTakerUser = address(takerUser).balance;
         uint256 initialETHBalanceMakerUser = address(makerUser).balance;
@@ -277,7 +277,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testOraclePriceNotRecentEnough() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -287,7 +287,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256 latencyViolationTimestamp = CHAINLINK_PRICE_UPDATED_AT + MAXIMUM_LATENCY + 1 seconds;
         makerAsk.endTime = latencyViolationTimestamp;
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         vm.warp(latencyViolationTimestamp);
 
@@ -306,7 +306,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         vm.prank(_owner);
         looksRareProtocol.updateCurrencyStatus(address(fakeCurrency), true);
 
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -315,7 +315,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         // Adjust the currency to something creative
         makerAsk.currency = address(fakeCurrency);
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -327,13 +327,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testZeroItemIdsLength() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 0,
             numberOfAmounts: 0,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -345,13 +345,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testItemIdsAndAmountsLengthMismatch() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 2,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -363,7 +363,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testZeroAmount() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -373,7 +373,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = 0;
         makerAsk.amounts = amounts;
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
@@ -386,7 +386,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testAmountGreaterThanOneForERC721() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -396,7 +396,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = 2;
         makerAsk.amounts = amounts;
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsInvalid(makerAsk, OrderInvalid.selector);
@@ -408,7 +408,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testTakerBidTooLow() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
@@ -416,7 +416,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         takerBid.additionalParameters = abi.encode(0.99 ether);
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerAsk);
@@ -429,13 +429,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testInactiveStrategy() public {
-        (OrderStructs.MakerAsk memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
@@ -450,7 +450,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testInvalidSelector() public {
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -468,13 +468,13 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
-    function _assertOrderIsInvalid(OrderStructs.MakerAsk memory makerAsk, bytes4 expectedErrorSelector) private {
+    function _assertOrderIsInvalid(OrderStructs.Maker memory makerAsk, bytes4 expectedErrorSelector) private {
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, expectedErrorSelector);
     }
 
-    function _assertOrderIsValid(OrderStructs.MakerAsk memory makerAsk) private {
+    function _assertOrderIsValid(OrderStructs.Maker memory makerAsk) private {
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);

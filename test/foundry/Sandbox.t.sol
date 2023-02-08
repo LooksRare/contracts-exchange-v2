@@ -56,7 +56,7 @@ contract SandboxTest is ProtocolBase {
         uint256 itemId = _transferItemIdToUser(takerUser);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -70,7 +70,7 @@ contract SandboxTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
@@ -82,7 +82,7 @@ contract SandboxTest is ProtocolBase {
 
         // Adjust asset type and sign order again
         makerBid.assetType = ASSET_TYPE_ERC1155;
-        signature = _signMakerBid(makerBid, makerUserPK);
+        signature = _signMaker(makerBid, makerUserPK);
 
         // It shouldn't fail with assetType = 0
         vm.prank(takerUser);
@@ -103,7 +103,7 @@ contract SandboxTest is ProtocolBase {
         uint256 itemId = _transferItemIdToUser(makerUser);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -117,7 +117,7 @@ contract SandboxTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -135,7 +135,7 @@ contract SandboxTest is ProtocolBase {
 
         // Adjust asset type and sign order again
         makerAsk.assetType = ASSET_TYPE_ERC1155;
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        signature = _signMaker(makerAsk, makerUserPK);
 
         // It shouldn't fail with assetType = 0
         vm.prank(takerUser);

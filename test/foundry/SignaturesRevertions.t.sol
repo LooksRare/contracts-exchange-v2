@@ -24,7 +24,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         // @dev Private keys 1 and 2 are used for maker/taker users
         vm.assume(randomPK > 2 && randomPK < _MAX_PRIVATE_KEY);
 
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -39,7 +39,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         address randomUser = vm.addr(randomPK);
         _setUpUser(randomUser);
-        bytes memory signature = _signMakerAsk(makerAsk, randomPK);
+        bytes memory signature = _signMaker(makerAsk, randomPK);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNER_EOA);
 
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -52,7 +52,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
     function testRevertIfInvalidVParameter(uint256 itemId, uint256 price, uint8 v) public {
         vm.assume(v != 27 && v != 28);
 
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -66,7 +66,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         });
 
         // Sign but replace v by the fuzzed v
-        bytes32 orderHash = _computeOrderHashMakerAsk(makerAsk);
+        bytes32 orderHash = _computeOrderHash(makerAsk);
         (, bytes32 r, bytes32 s) = vm.sign(
             makerUserPK,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
@@ -85,7 +85,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
     function testRevertIfInvalidSParameter(uint256 itemId, uint256 price, bytes32 s) public {
         vm.assume(uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0);
 
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -99,7 +99,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         });
 
         // Sign but replace s by the fuzzed s
-        bytes32 orderHash = _computeOrderHashMakerAsk(makerAsk);
+        bytes32 orderHash = _computeOrderHash(makerAsk);
         (uint8 v, bytes32 r, ) = vm.sign(
             makerUserPK,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
@@ -116,7 +116,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
     }
 
     function testRevertIfRecoveredSignerIsNullAddress(uint256 itemId, uint256 price) public {
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -130,7 +130,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         });
 
         // Sign but replace r by empty bytes32
-        bytes32 orderHash = _computeOrderHashMakerAsk(makerAsk);
+        bytes32 orderHash = _computeOrderHash(makerAsk);
         (uint8 v, , bytes32 s) = vm.sign(
             makerUserPK,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
@@ -152,7 +152,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         // @dev Getting OutOfGas starting from 16,776,985, probably due to memory cost
         vm.assume(length != 64 && length != 65 && length < 16_776_985);
 
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,

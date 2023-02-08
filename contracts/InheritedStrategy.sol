@@ -24,25 +24,13 @@ contract InheritedStrategy {
     /**
      * @notice This function is internal and is used to validate the parameters for a standard sale strategy
      *         when the standard transaction is initiated by a taker bid.
-     * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
+     * @param amounts Array of amounts
+     * @param itemIds Array of item ids
      */
-    function _verifyStandardSaleStrategyWithMakerAsk(OrderStructs.MakerAsk calldata makerAsk) internal pure {
-        _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerAsk.amounts, makerAsk.itemIds);
-    }
-
-    /**
-     * @notice This function is internal and is used to validate the parameters for a standard sale strategy
-     *         when the standard transaction is initiated by a taker ask.
-     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     */
-    function _verifyStandardSaleStrategyWithMakerBid(OrderStructs.MakerBid calldata makerBid) internal pure {
-        _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerBid.amounts, makerBid.itemIds);
-    }
-
     function _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(
         uint256[] calldata amounts,
         uint256[] calldata itemIds
-    ) private pure {
+    ) internal pure {
         assembly {
             let end
             {

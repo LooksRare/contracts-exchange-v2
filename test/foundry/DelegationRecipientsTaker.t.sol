@@ -32,7 +32,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
@@ -69,7 +69,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         emit TakerAsk(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerBid(makerBid),
+                orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -115,7 +115,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
@@ -151,7 +151,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         emit TakerBid(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerAsk(makerAsk),
+                orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
             }),

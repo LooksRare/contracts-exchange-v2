@@ -33,7 +33,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Prepare the orders and signature
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
@@ -65,7 +65,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerBid(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerAsk(makerAsk),
+                orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -108,7 +108,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Prepare the orders and signature
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
@@ -143,7 +143,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerBid(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerAsk(makerAsk),
+                orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -179,7 +179,7 @@ contract StandardTransactionsTest is ProtocolBase {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
@@ -215,7 +215,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerAsk(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerBid(makerBid),
+                orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -245,7 +245,7 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
@@ -283,7 +283,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerAsk(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerBid(makerBid),
+                orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -312,7 +312,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         uint256 numberPurchases = 3;
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
@@ -335,7 +335,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }
@@ -383,7 +383,7 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 numberPurchases = 3;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
@@ -406,7 +406,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }
@@ -487,7 +487,7 @@ contract StandardTransactionsTest is ProtocolBase {
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         // 1. Invalid maker asks length
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases - 1);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases - 1);
 
         vm.expectRevert(LengthsInvalid.selector);
         vm.prank(takerUser);
@@ -501,7 +501,7 @@ contract StandardTransactionsTest is ProtocolBase {
         );
 
         // 2. Invalid signatures length
-        makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        makerAsks = new OrderStructs.Maker[](numberPurchases);
         signatures = new bytes[](numberPurchases - 1);
 
         vm.expectRevert(LengthsInvalid.selector);

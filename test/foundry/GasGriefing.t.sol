@@ -39,7 +39,7 @@ contract GasGriefingTest is ProtocolBase {
         mockERC721.mint(gasGriefer, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -95,7 +95,7 @@ contract GasGriefingTest is ProtocolBase {
     function testThreeTakerBidsGasGriefing() public {
         uint256 numberPurchases = 3;
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 

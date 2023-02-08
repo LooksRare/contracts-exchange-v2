@@ -100,7 +100,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     }
 
     function testInvalidSelector() public {
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -117,7 +117,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
 
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -142,7 +142,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
     function _createMakerAskAndTakerBid(
         uint256 premium
-    ) internal returns (OrderStructs.MakerAsk memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
+    ) internal returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
         mockERC721.mint(makerUser, 1);
 
         // Prepare the order hash
@@ -170,7 +170,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
     function _createMakerBidAndTakerAsk(
         uint256 discount
-    ) internal returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
+    ) internal returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
         mockERC721.mint(takerUser, 42);
 
         uint256 price;

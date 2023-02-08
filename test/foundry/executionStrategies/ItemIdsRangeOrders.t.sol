@@ -49,7 +49,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function _createMakerBidAndTakerAsk(
         uint256 lowerBound,
         uint256 upperBound
-    ) private returns (OrderStructs.MakerBid memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
+    ) private returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
         uint256 mid = (lowerBound + upperBound) / 2;
 
         newMakerBid = _createMultiItemMakerBidOrder({
@@ -119,13 +119,13 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(
             lowerBound,
             upperBound
         );
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
@@ -153,7 +153,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
 
-        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
@@ -184,7 +184,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
@@ -207,11 +207,11 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInvalidMakerBidAdditionalParameters() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         makerBid.additionalParameters = abi.encode(6, 9);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         vm.expectRevert(); // EVM revert
         strategyItemIdsRange.isMakerBidValid(makerBid, selector);
@@ -227,11 +227,11 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testZeroDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         makerBid.additionalParameters = abi.encode(5, 10, 0);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -244,9 +244,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskItemIdsAmountsLengthMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
@@ -265,10 +265,10 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskRevertIfAmountIsZeroOrGreaterThanOneERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         uint256[] memory takerAskItemIds = new uint256[](3);
         takerAskItemIds[0] = 5;
@@ -307,13 +307,13 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testMakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         // lower band > upper band
         makerBid.additionalParameters = abi.encode(5, 4, 1);
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -326,7 +326,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         makerBid.additionalParameters = abi.encode(5, 5, 1);
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        signature = _signMaker(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
@@ -336,7 +336,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskDuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         uint256[] memory invalidItemIds = new uint256[](3);
         invalidItemIds[0] = 5;
@@ -346,7 +346,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(invalidItemIds, _offeredAmounts({length: 3, amount: 1}));
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerBid);
@@ -360,7 +360,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskUnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         uint256[] memory invalidItemIds = new uint256[](3);
         invalidItemIds[0] = 5;
@@ -370,7 +370,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(invalidItemIds, _offeredAmounts({length: 3, amount: 1}));
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerBid);
@@ -384,7 +384,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testTakerAskOfferedAmountNotEqualToDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         uint256[] memory itemIds = new uint256[](2);
         itemIds[0] = 5;
@@ -393,7 +393,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(itemIds, _offeredAmounts({length: 2, amount: 1}));
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerBid);
@@ -415,7 +415,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function _testTakerAskOfferedItemIdOutOfRange(uint256 itemIdOne, uint256 itemIdTwo) private {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
         uint256[] memory itemIds = new uint256[](2);
         itemIds[0] = itemIdOne;
         itemIds[1] = itemIdTwo;
@@ -423,7 +423,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(itemIds, _offeredAmounts({length: 2, amount: 1}));
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
@@ -436,10 +436,10 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
@@ -457,7 +457,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInvalidSelector() public {
         _setUpNewStrategy();
 
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -475,13 +475,13 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
-    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) private {
+    function _assertOrderIsValid(OrderStructs.Maker memory makerBid) private {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
-    function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid) private returns (bytes4) {
+    function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid) private returns (bytes4) {
         (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);

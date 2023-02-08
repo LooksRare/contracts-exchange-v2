@@ -32,7 +32,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: subsetNonce,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -46,7 +46,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         uint256[] memory subsetNonces = new uint256[](1);
         subsetNonces[0] = subsetNonce;
@@ -102,7 +102,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: userGlobalAskNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -116,7 +116,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_USER_GLOBAL_ASK_NONCE);
 
@@ -158,7 +158,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 420;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: userGlobalBidNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -172,7 +172,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, INVALID_USER_GLOBAL_BID_NONCE);
 
@@ -199,7 +199,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -213,7 +213,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -268,7 +268,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         amounts[0] = amountsToFill;
 
         // Prepare the first order
-        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
@@ -283,7 +283,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // First taker user actions
         {
@@ -328,7 +328,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             });
 
             // Sign order
-            signature = _signMakerBid(makerBid, makerUserPK);
+            signature = _signMaker(makerBid, makerUserPK);
 
             _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH);
 
@@ -376,7 +376,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -390,7 +390,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
 

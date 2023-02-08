@@ -20,12 +20,12 @@ contract BundleTransactionsTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Verify validity
         _assertValidMakerBidOrder(makerBid, signature);
@@ -50,12 +50,12 @@ contract BundleTransactionsTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC1155), address(weth), numberItemsInBundle);
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Verify validity
         _assertValidMakerBidOrder(makerBid, signature);
@@ -81,14 +81,14 @@ contract BundleTransactionsTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
-        uint256 price = makerBid.maxPrice;
+        uint256 price = makerBid.price;
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Verify validity
         _assertValidMakerBidOrder(makerBid, signature);
@@ -128,15 +128,15 @@ contract BundleTransactionsTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid
         ) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
-        uint256 price = makerAsk.minPrice;
+        uint256 price = makerAsk.price;
 
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Verify validity
         _assertValidMakerAskOrder(makerAsk, signature);
@@ -164,15 +164,15 @@ contract BundleTransactionsTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid
         ) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC1155), numberItemsInBundle);
 
-        uint256 price = makerAsk.minPrice;
+        uint256 price = makerAsk.price;
 
         // Mint the items and sign the order
         mockERC1155.batchMint(makerUser, makerAsk.itemIds, makerAsk.amounts);
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Verify validity
         _assertValidMakerAskOrder(makerAsk, signature);
@@ -201,15 +201,15 @@ contract BundleTransactionsTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid
         ) = _createMockMakerAskAndTakerBidWithBundle(address(mockERC721), numberItemsInBundle);
 
-        uint256 price = makerAsk.minPrice;
+        uint256 price = makerAsk.price;
 
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Verify validity
         _assertValidMakerAskOrder(makerAsk, signature);
@@ -250,8 +250,8 @@ contract BundleTransactionsTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function _assertSuccessfulTakerAskNoRoyalties(OrderStructs.MakerBid memory makerBid) private {
-        uint256 price = makerBid.maxPrice;
+    function _assertSuccessfulTakerAskNoRoyalties(OrderStructs.Maker memory makerBid) private {
+        uint256 price = makerBid.price;
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
@@ -268,8 +268,8 @@ contract BundleTransactionsTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function _assertSuccessfulTakerBidNoRoyalties(OrderStructs.MakerAsk memory makerAsk) private {
-        uint256 price = makerAsk.minPrice;
+    function _assertSuccessfulTakerBidNoRoyalties(OrderStructs.Maker memory makerAsk) private {
+        uint256 price = makerAsk.price;
 
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);

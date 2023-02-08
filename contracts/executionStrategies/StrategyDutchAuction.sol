@@ -26,7 +26,7 @@ contract StrategyDutchAuction is BaseStrategy {
      */
     function executeStrategyWithTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
+        OrderStructs.Maker calldata makerAsk
     )
         external
         view
@@ -40,7 +40,7 @@ contract StrategyDutchAuction is BaseStrategy {
 
         uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
 
-        if (startPrice < makerAsk.minPrice) {
+        if (startPrice < makerAsk.price) {
             revert OrderInvalid();
         }
 
@@ -48,7 +48,7 @@ contract StrategyDutchAuction is BaseStrategy {
         uint256 endTime = makerAsk.endTime;
 
         price =
-            ((endTime - block.timestamp) * startPrice + (block.timestamp - startTime) * makerAsk.minPrice) /
+            ((endTime - block.timestamp) * startPrice + (block.timestamp - startTime) * makerAsk.price) /
             (endTime - startTime);
 
         uint256 maxPrice = abi.decode(takerBid.additionalParameters, (uint256));
@@ -73,7 +73,7 @@ contract StrategyDutchAuction is BaseStrategy {
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
     function isMakerAskValid(
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes4 functionSelector
     ) external pure returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyDutchAuction.executeStrategyWithTakerBid.selector) {
@@ -95,7 +95,7 @@ contract StrategyDutchAuction is BaseStrategy {
 
         uint256 startPrice = abi.decode(makerAsk.additionalParameters, (uint256));
 
-        if (startPrice < makerAsk.minPrice) {
+        if (startPrice < makerAsk.price) {
             return (isValid, OrderInvalid.selector);
         }
 

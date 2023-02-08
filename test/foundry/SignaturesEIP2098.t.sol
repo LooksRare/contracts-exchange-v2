@@ -26,7 +26,7 @@ contract SignaturesEIP2098Test is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             ,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
@@ -59,7 +59,7 @@ contract SignaturesEIP2098Test is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             ,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({

@@ -8,14 +8,16 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {TestHelpers} from "./TestHelpers.sol";
 import {TestParameters} from "./TestParameters.sol";
 
+// Constants
+import {MAKER_BID_QUOTE_TYPE, MAKER_ASK_QUOTE_TYPE} from "../../../contracts/constants/NumericConstants.sol";
+
 contract ProtocolHelpers is TestHelpers, TestParameters {
-    using OrderStructs for OrderStructs.MakerAsk;
-    using OrderStructs for OrderStructs.MakerBid;
+    using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
 
-    receive() external payable {}
-
     bytes32 internal _domainSeparator;
+
+    receive() external payable {}
 
     function _createSingleItemMakerAskAndTakerBidOrderAndSignature(
         uint256 askNonce,
@@ -31,11 +33,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     )
         internal
         view
-        returns (
-            OrderStructs.MakerAsk memory newMakerAsk,
-            OrderStructs.Taker memory newTakerBid,
-            bytes memory signature
-        )
+        returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid, bytes memory signature)
     {
         newMakerAsk = _createSingleItemMakerAskOrder(
             askNonce,
@@ -50,7 +48,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             itemId
         );
 
-        signature = _signMakerAsk(newMakerAsk, makerUserPK);
+        signature = _signMaker(newMakerAsk, makerUserPK);
 
         newTakerBid = OrderStructs.Taker(takerUser, abi.encode());
     }
@@ -66,24 +64,25 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         address signer,
         uint256 minPrice,
         uint256 itemId
-    ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk) {
+    ) internal view returns (OrderStructs.Maker memory newMakerAsk) {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
 
-        newMakerAsk = OrderStructs.MakerAsk({
-            askNonce: askNonce,
+        newMakerAsk = OrderStructs.Maker({
+            quoteType: MAKER_ASK_QUOTE_TYPE,
+            globalNonce: askNonce,
+            orderNonce: orderNonce,
             subsetNonce: subsetNonce,
             strategyId: strategyId,
             assetType: assetType,
-            orderNonce: orderNonce,
             collection: collection,
             currency: currency,
             signer: signer,
             startTime: block.timestamp,
             endTime: block.timestamp + 1,
-            minPrice: minPrice,
+            price: minPrice,
             itemIds: itemIds,
             amounts: amounts,
             additionalParameters: abi.encode()
@@ -102,19 +101,20 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 minPrice,
         uint256[] memory itemIds,
         uint256[] memory amounts
-    ) internal view returns (OrderStructs.MakerAsk memory newMakerAsk) {
-        newMakerAsk = OrderStructs.MakerAsk({
-            askNonce: askNonce,
+    ) internal view returns (OrderStructs.Maker memory newMakerAsk) {
+        newMakerAsk = OrderStructs.Maker({
+            quoteType: MAKER_ASK_QUOTE_TYPE,
+            globalNonce: askNonce,
+            orderNonce: orderNonce,
             subsetNonce: subsetNonce,
             strategyId: strategyId,
             assetType: assetType,
-            orderNonce: orderNonce,
             collection: collection,
             currency: currency,
             signer: signer,
             startTime: block.timestamp,
             endTime: block.timestamp + 1,
-            minPrice: minPrice,
+            price: minPrice,
             itemIds: itemIds,
             amounts: amounts,
             additionalParameters: abi.encode()
@@ -135,11 +135,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     )
         internal
         view
-        returns (
-            OrderStructs.MakerBid memory newMakerBid,
-            OrderStructs.Taker memory newTakerAsk,
-            bytes memory signature
-        )
+        returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk, bytes memory signature)
     {
         newMakerBid = _createSingleItemMakerBidOrder(
             bidNonce,
@@ -154,7 +150,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             itemId
         );
 
-        signature = _signMakerBid(newMakerBid, makerUserPK);
+        signature = _signMaker(newMakerBid, makerUserPK);
 
         newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());
     }
@@ -170,23 +166,25 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         address signer,
         uint256 maxPrice,
         uint256 itemId
-    ) internal view returns (OrderStructs.MakerBid memory newMakerBid) {
+    ) internal view returns (OrderStructs.Maker memory newMakerBid) {
         uint256[] memory itemIds = new uint256[](1);
         itemIds[0] = itemId;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1;
-        newMakerBid = OrderStructs.MakerBid({
-            bidNonce: bidNonce,
+
+        newMakerBid = OrderStructs.Maker({
+            quoteType: MAKER_BID_QUOTE_TYPE,
+            globalNonce: bidNonce,
             subsetNonce: subsetNonce,
+            orderNonce: orderNonce,
             strategyId: strategyId,
             assetType: assetType,
-            orderNonce: orderNonce,
             collection: collection,
             currency: currency,
             signer: signer,
             startTime: block.timestamp,
             endTime: block.timestamp + 1,
-            maxPrice: maxPrice,
+            price: maxPrice,
             itemIds: itemIds,
             amounts: amounts,
             additionalParameters: abi.encode()
@@ -205,47 +203,31 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 maxPrice,
         uint256[] memory itemIds,
         uint256[] memory amounts
-    ) internal view returns (OrderStructs.MakerBid memory newMakerBid) {
-        newMakerBid = OrderStructs.MakerBid({
-            bidNonce: bidNonce,
+    ) internal view returns (OrderStructs.Maker memory newMakerBid) {
+        newMakerBid = OrderStructs.Maker({
+            quoteType: MAKER_BID_QUOTE_TYPE,
+            globalNonce: bidNonce,
             subsetNonce: subsetNonce,
+            orderNonce: orderNonce,
             strategyId: strategyId,
             assetType: assetType,
-            orderNonce: orderNonce,
             collection: collection,
             currency: currency,
             signer: signer,
             startTime: block.timestamp,
             endTime: block.timestamp + 1,
-            maxPrice: maxPrice,
+            price: maxPrice,
             itemIds: itemIds,
             amounts: amounts,
             additionalParameters: abi.encode()
         });
     }
 
-    function _signMakerAsk(
-        OrderStructs.MakerAsk memory _makerAsk,
-        uint256 _signerKey
-    ) internal view returns (bytes memory) {
-        bytes32 orderHash = _computeOrderHashMakerAsk(_makerAsk);
+    function _signMaker(OrderStructs.Maker memory maker, uint256 signerKey) internal view returns (bytes memory) {
+        bytes32 orderHash = _computeOrderHash(maker);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            _signerKey,
-            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
-        );
-
-        return abi.encodePacked(r, s, v);
-    }
-
-    function _signMakerBid(
-        OrderStructs.MakerBid memory _makerBid,
-        uint256 _signerKey
-    ) internal view returns (bytes memory) {
-        bytes32 orderHash = _computeOrderHashMakerBid(_makerBid);
-
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            _signerKey,
+            signerKey,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
         );
 
@@ -253,22 +235,18 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     }
 
     function _signMerkleProof(
-        OrderStructs.MerkleTree memory _merkleTree,
-        uint256 _signerKey
+        OrderStructs.MerkleTree memory merkleTree,
+        uint256 signerKey
     ) internal view returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            _signerKey,
-            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, _merkleTree.hash()))
+            signerKey,
+            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleTree.hash()))
         );
 
         return abi.encodePacked(r, s, v);
     }
 
-    function _computeOrderHashMakerAsk(OrderStructs.MakerAsk memory _makerAsk) internal pure returns (bytes32) {
-        return _makerAsk.hash();
-    }
-
-    function _computeOrderHashMakerBid(OrderStructs.MakerBid memory _makerBid) internal pure returns (bytes32) {
-        return _makerBid.hash();
+    function _computeOrderHash(OrderStructs.Maker memory maker) internal pure returns (bytes32) {
+        return maker.hash();
     }
 }

@@ -98,7 +98,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      */
     function _executeStrategyForTakerAsk(
         OrderStructs.Taker calldata takerAsk,
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         address sender
     )
         internal
@@ -116,8 +116,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
 
         if (makerBid.strategyId == 0) {
-            _verifyStandardSaleStrategyWithMakerBid(makerBid);
-            (price, itemIds, amounts) = (makerBid.maxPrice, makerBid.itemIds, makerBid.amounts);
+            _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerBid.amounts, makerBid.itemIds);
+            (price, itemIds, amounts) = (makerBid.price, makerBid.itemIds, makerBid.amounts);
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerBid.strategyId].isActive) {
@@ -166,7 +166,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      */
     function _executeStrategyForTakerBid(
         OrderStructs.Taker calldata takerBid,
-        OrderStructs.MakerAsk calldata makerAsk
+        OrderStructs.Maker calldata makerAsk
     )
         internal
         returns (
@@ -182,8 +182,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
 
         if (makerAsk.strategyId == 0) {
-            _verifyStandardSaleStrategyWithMakerAsk(makerAsk);
-            (price, itemIds, amounts) = (makerAsk.minPrice, makerAsk.itemIds, makerAsk.amounts);
+            _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerAsk.amounts, makerAsk.itemIds);
+            (price, itemIds, amounts) = (makerAsk.price, makerAsk.itemIds, makerAsk.amounts);
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerAsk.strategyId].isActive) {

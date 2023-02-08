@@ -39,7 +39,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         address randomUser = vm.addr(randomPK);
         _setUpUser(randomUser);
-        bytes memory signature = _signMakerAsk(makerAsk, randomPK);
+        bytes memory signature = _signMaker(makerAsk, randomPK);
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNER_EOA);
 
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -66,7 +66,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         });
 
         // Sign but replace v by the fuzzed v
-        bytes32 orderHash = _computeOrderHashMakerAsk(makerAsk);
+        bytes32 orderHash = _computeOrderHash(makerAsk);
         (, bytes32 r, bytes32 s) = vm.sign(
             makerUserPK,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
@@ -99,7 +99,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         });
 
         // Sign but replace s by the fuzzed s
-        bytes32 orderHash = _computeOrderHashMakerAsk(makerAsk);
+        bytes32 orderHash = _computeOrderHash(makerAsk);
         (uint8 v, bytes32 r, ) = vm.sign(
             makerUserPK,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
@@ -130,7 +130,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         });
 
         // Sign but replace r by empty bytes32
-        bytes32 orderHash = _computeOrderHashMakerAsk(makerAsk);
+        bytes32 orderHash = _computeOrderHash(makerAsk);
         (uint8 v, , bytes32 s) = vm.sign(
             makerUserPK,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))

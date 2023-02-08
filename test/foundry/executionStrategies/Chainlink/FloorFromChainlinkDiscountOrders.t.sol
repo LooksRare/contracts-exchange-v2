@@ -26,7 +26,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
             discount: discount
         });
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         bytes4 errorSelector = PriceFeedNotAvailable.selector;
 
@@ -46,7 +46,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         uint256 latencyViolationTimestamp = CHAINLINK_PRICE_UPDATED_AT + MAXIMUM_LATENCY + 1 seconds;
         makerBid.endTime = latencyViolationTimestamp;
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         bytes4 errorSelector = PriceNotRecentEnough.selector;
 
@@ -69,7 +69,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
             discount: discount
         });
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         vm.prank(_owner);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(aggregator));
@@ -98,7 +98,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
         makerBid.amounts = new uint256[](0);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -121,7 +121,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         amounts[0] = 2;
         makerBid.amounts = amounts;
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -141,7 +141,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         (, uint256 minPrice) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
         makerBid.price = minPrice - 1 wei;
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -162,7 +162,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         looksRareProtocol.updateCurrencyStatus(address(looksRareToken), true);
         makerBid.currency = address(looksRareToken);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _setPriceFeed();
 

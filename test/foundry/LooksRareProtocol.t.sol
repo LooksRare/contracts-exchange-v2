@@ -58,7 +58,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         makerAsk.amounts[0] = 0;
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -79,7 +79,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         makerAsk.amounts[0] = 2;
 
         // Sign order
-        signature = _signMakerAsk(makerAsk, makerUserPK);
+        signature = _signMaker(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -116,7 +116,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_ALLOWED);
@@ -184,7 +184,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Verify maker bid order
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_ALLOWED);
@@ -249,7 +249,7 @@ contract LooksRareProtocolTest is ProtocolBase {
 
         vm.prank(takerUser);
         vm.expectRevert(CallerInvalid.selector);
-        looksRareProtocol.restrictedExecuteTakerBid(takerBid, makerAsk, takerUser, _computeOrderHashMakerAsk(makerAsk));
+        looksRareProtocol.restrictedExecuteTakerBid(takerBid, makerAsk, takerUser, _computeOrderHash(makerAsk));
     }
 
     /**
@@ -297,7 +297,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             }
 
             // Sign order
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }

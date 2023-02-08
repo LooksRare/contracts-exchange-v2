@@ -65,7 +65,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerBid(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerAsk(makerAsk),
+                orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -143,7 +143,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerBid(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerAsk(makerAsk),
+                orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -215,7 +215,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerAsk(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerBid(makerBid),
+                orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -283,7 +283,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         emit TakerAsk(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerBid(makerBid),
+                orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -335,7 +335,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }
@@ -406,7 +406,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }

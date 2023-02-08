@@ -43,7 +43,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _takerBidSetup(address(wallet));
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         vm.startPrank(address(wallet));
         mockERC1155.setApprovalForAll(address(transferManager), true);
@@ -69,7 +69,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _takerBidSetup(address(wallet));
 
         // Signed by a different private key
-        bytes memory signature = _signMakerAsk(makerAsk, takerUserPK);
+        bytes memory signature = _signMaker(makerAsk, takerUserPK);
 
         vm.startPrank(address(wallet));
         mockERC1155.setApprovalForAll(address(transferManager), true);
@@ -115,7 +115,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
         (OrderStructs.Taker memory takerAsk, OrderStructs.Maker memory makerBid) = _takerAskSetup(address(wallet));
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Wallet needs to hold WETH and have given WETH approval
         deal(address(weth), address(wallet), price);
@@ -135,7 +135,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         (OrderStructs.Taker memory takerAsk, OrderStructs.Maker memory makerBid) = _takerAskSetup(address(wallet));
 
         // Signed by a different private key
-        bytes memory signature = _signMakerBid(makerBid, takerUserPK);
+        bytes memory signature = _signMaker(makerBid, takerUserPK);
 
         // Wallet needs to hold WETH and have given WETH approval
         deal(address(weth), address(wallet), price);
@@ -186,7 +186,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         ERC1271Wallet wallet = new ERC1271Wallet(makerUser);
         (OrderStructs.Taker memory takerAsk, OrderStructs.Maker memory makerBid) = _batchTakerAskSetup(address(wallet));
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Wallet needs to hold WETH and have given WETH approval
         deal(address(weth), address(wallet), price);
@@ -211,7 +211,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             address(maliciousERC1271Wallet)
         );
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Wallet needs to hold WETH and have given WETH approval
         deal(address(weth), address(maliciousERC1271Wallet), price);
@@ -269,7 +269,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         // Signed by a different private key
         for (uint256 i; i < signatures.length; i++) {
-            signatures[i] = _signMakerAsk(makerAsks[i], takerUserPK);
+            signatures[i] = _signMaker(makerAsks[i], takerUserPK);
         }
 
         vm.startPrank(address(wallet));
@@ -469,7 +469,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
                 itemId: i // 0, 1, etc.
             });
 
-            signatures[i] = _signMakerAsk(makerAsks[i], makerUserPK);
+            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }

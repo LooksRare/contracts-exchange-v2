@@ -26,7 +26,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         _setPriceFeed();
 
@@ -69,7 +69,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         OrderStructs.Maker memory makerAsk,
         OrderStructs.Taker memory takerBid
     ) public {
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         _setPriceFeed();
 
@@ -99,7 +99,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         makerAsk.price = 9.9 ether;
         takerBid.additionalParameters = abi.encode(makerAsk.price);
 
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         _setPriceFeed();
 

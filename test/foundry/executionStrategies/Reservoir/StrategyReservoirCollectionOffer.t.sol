@@ -171,7 +171,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         }
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, takerAdditionalParameters);
 
         // Verify validity of maker bid order
@@ -227,7 +227,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         }
 
         // Sign order and prepare taker ask
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, takerAdditionalParameters);
 
         // Verify validity of maker bid order
@@ -279,7 +279,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         }
 
         // Sign order and prepare taker ask
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
         _assertOrderIsValid(makerBid, withProof);
@@ -341,7 +341,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         }
 
         // Sign order and prepare taker ask
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
         // It fails because transferCooldownPeriod > MAXIMUM_TRANSFER_COOLDOWN_PERIOD
@@ -365,7 +365,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             makerBid.additionalParameters = abi.encode(transferCooldownPeriod);
         }
 
-        signature = _signMakerBid(makerBid, makerUserPK);
+        signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, withProof);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -419,7 +419,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         }
 
         // Sign order and prepare taker ask
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
         _assertOrderIsValid(makerBid, withProof);
@@ -484,7 +484,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         }
 
         // Sign order and prepare taker ask
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
         // Verify validity of maker bid order

@@ -36,7 +36,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
             discount: discount
         });
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -60,7 +60,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         makerBid.price = 9.5 ether;
         takerAsk.additionalParameters = abi.encode(42, 9.5 ether);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -87,7 +87,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
 
         makerBid.price = 9.41 ether;
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _setPriceFeed();
 
@@ -112,7 +112,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
             discount: ONE_HUNDRED_PERCENT_IN_BP + 1
         });
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _setPriceFeed();
 

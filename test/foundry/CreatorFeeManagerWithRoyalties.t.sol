@@ -74,7 +74,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -117,7 +117,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721WithRoyalties.mint(takerUser, itemId);
@@ -150,7 +150,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721.batchMint(takerUser, makerBid.itemIds);
@@ -187,7 +187,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
@@ -227,7 +227,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
@@ -299,7 +299,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);

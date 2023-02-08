@@ -90,7 +90,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         itemIds = new uint256[](1);
         amounts = new uint256[](1);
@@ -113,7 +113,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Verify the nonce is not marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), _computeOrderHashMakerBid(makerBid));
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), _computeOrderHash(makerBid));
 
         // Second taker user actions
         address secondTakerUser = address(420);
@@ -180,7 +180,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);

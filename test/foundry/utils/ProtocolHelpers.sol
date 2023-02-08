@@ -8,14 +8,16 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {TestHelpers} from "./TestHelpers.sol";
 import {TestParameters} from "./TestParameters.sol";
 
+// Constants
+import {MAKER_BID_QUOTE_TYPE, MAKER_ASK_QUOTE_TYPE} from "../../../contracts/constants/NumericConstants.sol";
+
 contract ProtocolHelpers is TestHelpers, TestParameters {
-    using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
 
-    receive() external payable {}
-
     bytes32 internal _domainSeparator;
+
+    receive() external payable {}
 
     function _createSingleItemMakerAskAndTakerBidOrderAndSignature(
         uint256 askNonce,
@@ -46,7 +48,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             itemId
         );
 
-        signature = _signMakerAsk(newMakerAsk, makerUserPK);
+        signature = _signMaker(newMakerAsk, makerUserPK);
 
         newTakerBid = OrderStructs.Taker(takerUser, abi.encode());
     }
@@ -69,7 +71,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         amounts[0] = 1;
 
         newMakerAsk = OrderStructs.Maker({
-            quoteType: 1,
+            quoteType: MAKER_ASK_QUOTE_TYPE,
             globalNonce: askNonce,
             orderNonce: orderNonce,
             subsetNonce: subsetNonce,
@@ -101,7 +103,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory amounts
     ) internal view returns (OrderStructs.Maker memory newMakerAsk) {
         newMakerAsk = OrderStructs.Maker({
-            quoteType: 1,
+            quoteType: MAKER_ASK_QUOTE_TYPE,
             globalNonce: askNonce,
             orderNonce: orderNonce,
             subsetNonce: subsetNonce,
@@ -148,7 +150,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             itemId
         );
 
-        signature = _signMakerBid(newMakerBid, makerUserPK);
+        signature = _signMaker(newMakerBid, makerUserPK);
 
         newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());
     }
@@ -171,7 +173,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         amounts[0] = 1;
 
         newMakerBid = OrderStructs.Maker({
-            quoteType: 0,
+            quoteType: MAKER_BID_QUOTE_TYPE,
             globalNonce: bidNonce,
             subsetNonce: subsetNonce,
             orderNonce: orderNonce,
@@ -203,7 +205,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256[] memory amounts
     ) internal view returns (OrderStructs.Maker memory newMakerBid) {
         newMakerBid = OrderStructs.Maker({
-            quoteType: 0,
+            quoteType: MAKER_BID_QUOTE_TYPE,
             globalNonce: bidNonce,
             subsetNonce: subsetNonce,
             orderNonce: orderNonce,
@@ -221,25 +223,8 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         });
     }
 
-    function _signMakerAsk(
-        OrderStructs.Maker memory _makerAsk,
-        uint256 _signerKey
-    ) internal view returns (bytes memory) {
-        bytes32 orderHash = _computeOrderHashMakerAsk(_makerAsk);
-
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            _signerKey,
-            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
-        );
-
-        return abi.encodePacked(r, s, v);
-    }
-
-    function _signMakerBid(
-        OrderStructs.Maker memory _makerBid,
-        uint256 _signerKey
-    ) internal view returns (bytes memory) {
-        bytes32 orderHash = _computeOrderHashMakerBid(_makerBid);
+    function _signMaker(OrderStructs.Maker memory _maker, uint256 _signerKey) internal view returns (bytes memory) {
+        bytes32 orderHash = _computeOrderHash(_maker);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             _signerKey,
@@ -261,11 +246,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         return abi.encodePacked(r, s, v);
     }
 
-    function _computeOrderHashMakerAsk(OrderStructs.Maker memory _makerAsk) internal pure returns (bytes32) {
-        return _makerAsk.hash();
-    }
-
-    function _computeOrderHashMakerBid(OrderStructs.Maker memory _makerBid) internal pure returns (bytes32) {
-        return _makerBid.hash();
+    function _computeOrderHash(OrderStructs.Maker memory _maker) internal pure returns (bytes32) {
+        return _maker.hash();
     }
 }

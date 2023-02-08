@@ -116,7 +116,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         }
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertValidMakerBidOrder(makerBid, signature);
 
@@ -165,7 +165,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             );
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
@@ -213,7 +213,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             );
 
         // Sign the order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);

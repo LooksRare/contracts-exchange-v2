@@ -125,7 +125,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         );
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
@@ -184,7 +184,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         });
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
@@ -211,7 +211,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         makerBid.additionalParameters = abi.encode(6, 9);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         vm.expectRevert(); // EVM revert
         strategyItemIdsRange.isMakerBidValid(makerBid, selector);
@@ -231,7 +231,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         makerBid.additionalParameters = abi.encode(5, 10, 0);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -246,7 +246,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
@@ -268,7 +268,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         uint256[] memory takerAskItemIds = new uint256[](3);
         takerAskItemIds[0] = 5;
@@ -313,7 +313,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         makerBid.additionalParameters = abi.encode(5, 4, 1);
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
@@ -326,7 +326,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         makerBid.additionalParameters = abi.encode(5, 5, 1);
 
         // Sign order
-        signature = _signMakerBid(makerBid, makerUserPK);
+        signature = _signMaker(makerBid, makerUserPK);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(takerUser);
@@ -346,7 +346,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(invalidItemIds, _offeredAmounts({length: 3, amount: 1}));
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerBid);
@@ -370,7 +370,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(invalidItemIds, _offeredAmounts({length: 3, amount: 1}));
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerBid);
@@ -393,7 +393,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(itemIds, _offeredAmounts({length: 2, amount: 1}));
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerBid);
@@ -423,7 +423,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         takerAsk.additionalParameters = abi.encode(itemIds, _offeredAmounts({length: 2, amount: 1}));
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _assertOrderIsValid(makerBid);
         _assertValidMakerBidOrder(makerBid, signature);
@@ -439,7 +439,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
 
         // Sign order
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);

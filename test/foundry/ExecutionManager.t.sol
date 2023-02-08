@@ -91,7 +91,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
         // Maker bid is valid if its start time is within 5 minutes into the future
         vm.warp(makerBid.startTime - 5 minutes);
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
 
         // Maker bid is invalid if its start time is not within 5 minutes into the future
@@ -112,7 +112,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
         makerBid.startTime = block.timestamp - 1 seconds;
         makerBid.endTime = block.timestamp;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         vm.warp(block.timestamp);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
@@ -134,7 +134,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
         makerBid.startTime = block.timestamp + 1 seconds;
         makerBid.endTime = block.timestamp;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);
 
@@ -150,7 +150,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
         uint256[] memory itemIds = new uint256[](0);
         makerBid.itemIds = itemIds;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -170,7 +170,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
         uint256[] memory itemIds = new uint256[](makerBidItemIdsLength);
         makerBid.itemIds = itemIds;
-        bytes memory signature = _signMakerBid(makerBid, makerUserPK);
+        bytes memory signature = _signMaker(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -188,7 +188,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Change maker itemIds array to make its length equal to 0
         uint256[] memory itemIds = new uint256[](0);
         makerAsk.itemIds = itemIds;
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -215,7 +215,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
         uint256[] memory itemIds = new uint256[](makerAskItemIdsLength);
         makerAsk.itemIds = itemIds;
-        bytes memory signature = _signMakerAsk(makerAsk, makerUserPK);
+        bytes memory signature = _signMaker(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 

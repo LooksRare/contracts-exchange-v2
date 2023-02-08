@@ -69,7 +69,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         emit TakerAsk(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerBid(makerBid),
+                orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
             }),
@@ -151,7 +151,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         emit TakerBid(
             SignatureParameters({
-                orderHash: _computeOrderHashMakerAsk(makerAsk),
+                orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
             }),

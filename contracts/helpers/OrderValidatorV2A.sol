@@ -46,7 +46,6 @@ import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, MAX_CALLDATA_PROOF_LENGTH, ONE_HU
  */
 contract OrderValidatorV2A {
     using OrderStructs for OrderStructs.Maker;
-    using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
 
     /**

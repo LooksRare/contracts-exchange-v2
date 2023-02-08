@@ -6,9 +6,6 @@ import {PackableReentrancyGuard} from "@looksrare/contracts-libs/contracts/Packa
 import {ExecutionManager} from "./ExecutionManager.sol";
 import {TransferManager} from "./TransferManager.sol";
 
-// Interfaces
-import {ITransferSelectorNFT} from "./interfaces/ITransferSelectorNFT.sol";
-
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
@@ -17,7 +14,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
  * @notice This contract handles the logic for transferring non-fungible items.
  * @author LooksRare protocol team (👀,💎)
  */
-contract TransferSelectorNFT is ITransferSelectorNFT, ExecutionManager, PackableReentrancyGuard {
+contract TransferSelectorNFT is ExecutionManager, PackableReentrancyGuard {
     /**
      * @notice Transfer manager for ERC721 and ERC1155.
      */

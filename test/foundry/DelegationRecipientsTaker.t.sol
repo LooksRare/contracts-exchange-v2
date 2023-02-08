@@ -2,7 +2,6 @@
 pragma solidity 0.8.17;
 
 // Libraries and interfaces
-import {ITransferSelectorNFT} from "../../contracts/interfaces/ITransferSelectorNFT.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Base test

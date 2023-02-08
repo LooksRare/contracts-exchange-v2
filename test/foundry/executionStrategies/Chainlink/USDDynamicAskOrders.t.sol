@@ -133,7 +133,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
         vm.etch(CHAINLINK_ETH_USD_PRICE_FEED, address(priceFeed).code);
@@ -164,7 +164,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -189,7 +189,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             desiredSalePriceInUSD: (LATEST_CHAINLINK_ANSWER_IN_WAD * 98) / 100
         });
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -218,7 +218,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         makerAsk.price = 0.49 ether;
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertTrue(isValid);
@@ -249,7 +249,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256 maxPrice = 1.1 ether;
         takerBid.additionalParameters = abi.encode(maxPrice);
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         uint256 initialETHBalanceTakerUser = address(takerUser).balance;
         uint256 initialETHBalanceMakerUser = address(makerUser).balance;
@@ -287,7 +287,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256 latencyViolationTimestamp = CHAINLINK_PRICE_UPDATED_AT + MAXIMUM_LATENCY + 1 seconds;
         makerAsk.endTime = latencyViolationTimestamp;
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         vm.warp(latencyViolationTimestamp);
 
@@ -315,7 +315,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         // Adjust the currency to something creative
         makerAsk.currency = address(fakeCurrency);
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -333,7 +333,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -351,7 +351,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
         assertFalse(isValid);
@@ -373,7 +373,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = 0;
         makerAsk.amounts = amounts;
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
@@ -396,7 +396,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = 2;
         makerAsk.amounts = amounts;
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsInvalid(makerAsk, OrderInvalid.selector);
@@ -416,7 +416,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         takerBid.additionalParameters = abi.encode(0.99 ether);
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerAsk);
@@ -435,7 +435,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             desiredSalePriceInUSD: LATEST_CHAINLINK_ANSWER_IN_WAD
         });
 
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);

@@ -46,7 +46,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         uint256[] memory subsetNonces = new uint256[](1);
         subsetNonces[0] = subsetNonce;
@@ -116,7 +116,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_USER_GLOBAL_ASK_NONCE);
 
@@ -172,7 +172,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, INVALID_USER_GLOBAL_BID_NONCE);
 
@@ -213,7 +213,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -283,7 +283,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // First taker user actions
         {
@@ -328,7 +328,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             });
 
             // Sign order
-            signature = _signMaker(makerBid, makerUserPK);
+            signature = _signMakerOrder(makerBid, makerUserPK);
 
             _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH);
 
@@ -390,7 +390,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         });
 
         // Sign order
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
 

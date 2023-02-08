@@ -335,7 +335,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
+            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }
@@ -406,7 +406,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMaker(makerAsks[i], makerUserPK);
+            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
             takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
         }

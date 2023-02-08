@@ -25,7 +25,7 @@ contract BundleTransactionsTest is ProtocolBase {
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
         // Sign the order
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify validity
         _assertValidMakerBidOrder(makerBid, signature);
@@ -55,7 +55,7 @@ contract BundleTransactionsTest is ProtocolBase {
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC1155), address(weth), numberItemsInBundle);
 
         // Sign the order
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify validity
         _assertValidMakerBidOrder(makerBid, signature);
@@ -88,7 +88,7 @@ contract BundleTransactionsTest is ProtocolBase {
         uint256 price = makerBid.price;
 
         // Sign the order
-        bytes memory signature = _signMaker(makerBid, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify validity
         _assertValidMakerBidOrder(makerBid, signature);
@@ -136,7 +136,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Verify validity
         _assertValidMakerAskOrder(makerAsk, signature);
@@ -172,7 +172,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         // Mint the items and sign the order
         mockERC1155.batchMint(makerUser, makerAsk.itemIds, makerAsk.amounts);
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Verify validity
         _assertValidMakerAskOrder(makerAsk, signature);
@@ -209,7 +209,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         // Mint the items and sign the order
         mockERC721.batchMint(makerUser, makerAsk.itemIds);
-        bytes memory signature = _signMaker(makerAsk, makerUserPK);
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Verify validity
         _assertValidMakerAskOrder(makerAsk, signature);

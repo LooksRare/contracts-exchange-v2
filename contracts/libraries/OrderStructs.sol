@@ -8,8 +8,7 @@ pragma solidity 0.8.17;
  */
 library OrderStructs {
     /**
-     * @notice QuoteType is used in OrderStructs.Maker's quoteType to determine whether the maker
-     *         order is a bid or an ask.
+     * @notice QuoteType is used in OrderStructs.Maker's quoteType to determine whether the maker order is a bid or an ask.
      */
     enum QuoteType { Bid, Ask }
 

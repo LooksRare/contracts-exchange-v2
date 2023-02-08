@@ -21,7 +21,7 @@ import {ProtocolBase} from "../ProtocolBase.t.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericConstants.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {AssetType} from "../../../contracts/enums/AssetType.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
     StrategyCollectionOffer public strategyCollectionOffer;

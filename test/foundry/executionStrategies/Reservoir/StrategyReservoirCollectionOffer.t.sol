@@ -146,7 +146,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
@@ -201,7 +201,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
@@ -254,7 +254,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
@@ -307,7 +307,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
@@ -391,7 +391,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
@@ -459,7 +459,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: withProof ? 2 : 1,
@@ -662,7 +662,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         );
     }
 
-    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid, bool withProof) private {
+    function _assertOrderIsValid(OrderStructs.Maker memory makerBid, bool withProof) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerBidValid(
             makerBid,
             withProof ? selectorWithProof : selectorNoProof
@@ -671,7 +671,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
-    function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid, bool withProof) private {
+    function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid, bool withProof) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerBidValid(
             makerBid,
             withProof ? selectorWithProof : selectorNoProof

@@ -41,7 +41,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -102,7 +102,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -134,7 +134,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             _EMPTY_AFFILIATE
         );
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](1);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](1);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](1);
         bytes[] memory signatures = new bytes[](1);
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
@@ -170,7 +170,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -231,7 +231,7 @@ contract LooksRareProtocolTest is ProtocolBase {
 
         // Prepare the orders and signature
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
 
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
@@ -270,7 +270,7 @@ contract LooksRareProtocolTest is ProtocolBase {
 
         uint256 numberPurchases = 2;
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 

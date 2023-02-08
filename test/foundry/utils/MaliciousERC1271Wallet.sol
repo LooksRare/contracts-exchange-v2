@@ -43,7 +43,7 @@ abstract contract MaliciousERC1271Wallet {
 
     function _executeTakerAsk(bytes memory signature) internal {
         OrderStructs.Taker memory takerAsk;
-        OrderStructs.MakerBid memory makerBid;
+        OrderStructs.Maker memory makerBid;
         OrderStructs.MerkleTree memory merkleTree;
 
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, address(this));
@@ -51,7 +51,7 @@ abstract contract MaliciousERC1271Wallet {
 
     function _executeTakerBid(bytes memory signature) internal {
         OrderStructs.Taker memory takerBid;
-        OrderStructs.MakerAsk memory makerAsk;
+        OrderStructs.Maker memory makerAsk;
         OrderStructs.MerkleTree memory merkleTree;
 
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, merkleTree, address(this));
@@ -59,7 +59,7 @@ abstract contract MaliciousERC1271Wallet {
 
     function _executeMultipleTakerBids() internal {
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](2);
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](2);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](2);
         bytes[] memory signatures = new bytes[](2);
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](2);
 

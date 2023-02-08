@@ -22,7 +22,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountPriceFeedNotAvailable() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -38,7 +38,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountOraclePriceNotRecentEnough() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -65,7 +65,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     function testFloorFromChainlinkDiscountChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -92,7 +92,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountMakerBidAmountsLengthNotOne() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -112,7 +112,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountMakerBidAmountNotOne() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -135,11 +135,11 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountAskTooHigh() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
         (, uint256 minPrice) = abi.decode(takerAsk.additionalParameters, (uint256, uint256));
-        makerBid.maxPrice = minPrice - 1 wei;
+        makerBid.price = minPrice - 1 wei;
 
         bytes memory signature = _signMakerBid(makerBid, makerUserPK);
 
@@ -154,7 +154,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
     }
 
     function testFloorFromChainlinkDiscountCurrencyInvalid() public {
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
 
@@ -181,7 +181,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
 
     function _executeTakerAsk(
         OrderStructs.Taker memory takerAsk,
-        OrderStructs.MakerBid memory makerBid,
+        OrderStructs.Maker memory makerBid,
         bytes memory signature
     ) internal {
         vm.prank(takerUser);
@@ -189,14 +189,14 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid) internal {
+    function _assertOrderIsValid(OrderStructs.Maker memory makerBid) internal {
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
     function _assertOrderIsInvalid(
-        OrderStructs.MakerBid memory makerBid,
+        OrderStructs.Maker memory makerBid,
         bytes4 expectedErrorSelector
     ) private returns (bytes4) {
         (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);

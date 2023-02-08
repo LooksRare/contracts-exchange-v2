@@ -107,7 +107,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -170,7 +170,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        OrderStructs.MakerAsk[] memory makerAsks = new OrderStructs.MakerAsk[](numberPurchases);
+        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
         OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
         bytes[] memory signatures = new bytes[](numberPurchases);
 
@@ -270,7 +270,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,

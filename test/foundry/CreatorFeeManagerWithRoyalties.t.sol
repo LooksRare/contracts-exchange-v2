@@ -60,7 +60,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -103,7 +103,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(itemId, _royaltyRecipient, _newCreatorRoyaltyFee);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -145,7 +145,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(address(mockERC721), address(weth), numberItemsInBundle);
 
@@ -178,7 +178,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
@@ -218,7 +218,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
@@ -290,7 +290,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         vm.assume(revertIndex < numberItemsInBundle);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
@@ -342,7 +342,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.mint(takerUser, itemId);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
@@ -371,7 +371,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the orders and signature
-        OrderStructs.MakerAsk memory makerAsk;
+        OrderStructs.Maker memory makerAsk;
         OrderStructs.Taker memory takerBid;
 
         (makerAsk, takerBid, signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
@@ -401,8 +401,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         );
     }
 
-    function _assertSuccessfulTakerAsk(OrderStructs.MakerBid memory makerBid) private {
-        uint256 price = makerBid.maxPrice;
+    function _assertSuccessfulTakerAsk(OrderStructs.Maker memory makerBid) private {
+        uint256 price = makerBid.price;
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
@@ -422,8 +422,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function _assertSuccessfulTakerAskBundle(OrderStructs.MakerBid memory makerBid) private {
-        uint256 price = makerBid.maxPrice;
+    function _assertSuccessfulTakerAskBundle(OrderStructs.Maker memory makerBid) private {
+        uint256 price = makerBid.price;
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);

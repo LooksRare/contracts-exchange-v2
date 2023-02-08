@@ -57,7 +57,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         }
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
         ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
@@ -93,7 +93,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
 
         // Create order
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(erc721, address(weth), numberItemsInBundle);
 
@@ -156,7 +156,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         uint256 numberItemsInBundle = 5;
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
@@ -204,7 +204,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         vm.assume(revertIndex < numberItemsInBundle);
 
         (
-            OrderStructs.MakerBid memory makerBid,
+            OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk
         ) = _createMockMakerBidAndTakerAskWithBundle(
                 address(mockERC721WithRoyalties),
@@ -242,8 +242,8 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function _assertSuccessfulTakerAsk(OrderStructs.MakerBid memory makerBid) private {
-        uint256 price = makerBid.maxPrice;
+    function _assertSuccessfulTakerAsk(OrderStructs.Maker memory makerBid) private {
+        uint256 price = makerBid.price;
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);

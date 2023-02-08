@@ -32,7 +32,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: 0,
             subsetNonce: subsetNonce,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -102,7 +102,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.MakerAsk memory makerAsk = _createSingleItemMakerAskOrder({
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
             askNonce: userGlobalAskNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -158,7 +158,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 420;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: userGlobalBidNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -199,7 +199,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -268,7 +268,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         amounts[0] = amountsToFill;
 
         // Prepare the first order
-        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
@@ -376,7 +376,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,

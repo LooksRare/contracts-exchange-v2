@@ -75,7 +75,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = amountsToFill;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
@@ -165,7 +165,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = amountsToFill;
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createMultiItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer

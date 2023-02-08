@@ -61,7 +61,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
 
         // Prepare the orders and signature
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
@@ -104,7 +104,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
 
         // Prepare the orders and signature
         (
-            OrderStructs.MakerAsk memory makerAsk,
+            OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
         ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({

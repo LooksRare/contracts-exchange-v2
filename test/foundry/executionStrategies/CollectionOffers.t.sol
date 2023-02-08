@@ -96,7 +96,7 @@ contract CollectionOrdersTest is ProtocolBase {
     function testMakerBidAmountsLengthNotOne() public {
         _setUpUsers();
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
@@ -131,7 +131,7 @@ contract CollectionOrdersTest is ProtocolBase {
     function testZeroAmount() public {
         _setUpUsers();
 
-        (OrderStructs.MakerBid memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
         );
@@ -160,7 +160,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _setUpUsers();
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
@@ -199,7 +199,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _setUpUsers();
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -243,7 +243,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _setUpUsers();
 
         // Prepare the order hash
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -283,7 +283,7 @@ contract CollectionOrdersTest is ProtocolBase {
     function testInvalidAmounts() public {
         _setUpUsers();
 
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
@@ -353,7 +353,7 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testMerkleRootLengthIsNot32() public {
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
@@ -380,7 +380,7 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testInvalidSelector() public {
-        OrderStructs.MakerBid memory makerBid = _createSingleItemMakerBidOrder({
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
             strategyId: 3,
@@ -398,7 +398,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
-    function _assertOrderIsValid(OrderStructs.MakerBid memory makerBid, bool withProof) private {
+    function _assertOrderIsValid(OrderStructs.Maker memory makerBid, bool withProof) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
             makerBid,
             withProof ? selectorWithProof : selectorNoProof
@@ -407,7 +407,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
-    function _assertOrderIsInvalid(OrderStructs.MakerBid memory makerBid, bool withProof) private {
+    function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid, bool withProof) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
             makerBid,
             withProof ? selectorWithProof : selectorNoProof
@@ -440,7 +440,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertTrue(m.verifyProof(merkleRoot, proof, merkleTreeIds[itemIdInMerkleTree]));
     }
 
-    function _assertSuccessfulTakerAsk(OrderStructs.MakerBid memory makerBid, uint256 tokenId) private {
+    function _assertSuccessfulTakerAsk(OrderStructs.Maker memory makerBid, uint256 tokenId) private {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(tokenId), makerUser);
         // Maker bid user pays the whole price

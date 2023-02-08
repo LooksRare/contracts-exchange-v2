@@ -23,7 +23,7 @@ import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, Merk
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 // Constants
-import {MAKER_BID_QUOTE_TYPE, MAKER_ASK_QUOTE_TYPE, MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
+import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
 // Enums
 import {QuoteType} from "./enums/QuoteType.sol";

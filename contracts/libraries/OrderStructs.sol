@@ -12,6 +12,11 @@ import {QuoteType} from "../enums/QuoteType.sol";
  */
 library OrderStructs {
     /**
+     * @notice QuoteType is used in OrderStructs.Maker's quoteType to determine whether the maker order is a bid or an ask.
+     */
+    enum QuoteType { Bid, Ask }
+
+    /**
      * 1. Maker struct
      */
 

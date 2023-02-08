@@ -25,6 +25,8 @@ import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
+import {TypehashDirectory} from "./TypehashDirectory.sol";
+
 /**
  * @title LooksRareProtocol
  * @notice This contract is the core smart contract of the LooksRare protocol ("v2").
@@ -76,6 +78,8 @@ contract LooksRareProtocol is
     using OrderStructs for OrderStructs.MakerBid;
     using OrderStructs for OrderStructs.MerkleTree;
 
+    TypehashDirectory public immutable typehashDirectory;
+
     /**
      * @notice Wrapped ETH.
      */
@@ -113,6 +117,7 @@ contract LooksRareProtocol is
     ) TransferSelectorNFT(_owner, _protocolFeeRecipient, _transferManager) {
         _updateDomainSeparator();
         WETH = _weth;
+        typehashDirectory = new TypehashDirectory();
     }
 
     /**
@@ -614,12 +619,14 @@ contract LooksRareProtocol is
         bytes32 orderHash,
         bytes calldata signature,
         address signer
-    ) private view {
+    ) private {
         if (merkleTree.proof.length != 0) {
             if (!MerkleProofCalldataWithProofLimit.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 revert MerkleProofInvalid();
             }
-            orderHash = merkleTree.hash();
+            bytes32 merkleOrderTypehash = typehashDirectory.get(merkleTree.proof.length);
+            // TODO: Should we still name this orderHash?
+            orderHash = keccak256(abi.encode(merkleOrderTypehash, merkleTree.root));
         }
 
         _computeDigestAndVerify(orderHash, signature, signer);

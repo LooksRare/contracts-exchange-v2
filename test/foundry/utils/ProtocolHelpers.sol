@@ -223,11 +223,11 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         });
     }
 
-    function _signMaker(OrderStructs.Maker memory _maker, uint256 _signerKey) internal view returns (bytes memory) {
-        bytes32 orderHash = _computeOrderHash(_maker);
+    function _signMaker(OrderStructs.Maker memory maker, uint256 signerKey) internal view returns (bytes memory) {
+        bytes32 orderHash = _computeOrderHash(maker);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            _signerKey,
+            signerKey,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
         );
 
@@ -235,18 +235,18 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
     }
 
     function _signMerkleProof(
-        OrderStructs.MerkleTree memory _merkleTree,
-        uint256 _signerKey
+        OrderStructs.MerkleTree memory merkleTree,
+        uint256 signerKey
     ) internal view returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            _signerKey,
-            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, _merkleTree.hash()))
+            signerKey,
+            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleTree.hash()))
         );
 
         return abi.encodePacked(r, s, v);
     }
 
-    function _computeOrderHash(OrderStructs.Maker memory _maker) internal pure returns (bytes32) {
-        return _maker.hash();
+    function _computeOrderHash(OrderStructs.Maker memory maker) internal pure returns (bytes32) {
+        return maker.hash();
     }
 }

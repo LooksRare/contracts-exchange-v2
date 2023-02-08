@@ -59,3 +59,8 @@ error MerkleProofTooLarge(uint256 length);
  *         There may be an issue with the order formatting.
  */
 error OrderInvalid();
+
+/**
+ * @notice It is returned if the maker quote type is invalid.
+ */
+error QuoteTypeInvalid();

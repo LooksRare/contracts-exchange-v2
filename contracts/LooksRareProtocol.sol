@@ -17,13 +17,13 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {ILooksRareProtocol} from "./interfaces/ILooksRareProtocol.sol";
 
 // Shared errors
-import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, MerkleProofTooLarge} from "./errors/SharedErrors.sol";
+import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, MerkleProofTooLarge, QuoteTypeInvalid} from "./errors/SharedErrors.sol";
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
 
 // Constants
-import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
+import {MAKER_BID_QUOTE_TYPE, MAKER_ASK_QUOTE_TYPE, MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
 /**
  * @title LooksRareProtocol
@@ -329,8 +329,8 @@ contract LooksRareProtocol is
         OrderStructs.Maker calldata makerBid,
         bytes32 orderHash
     ) internal returns (uint256) {
-        if (makerBid.quoteType != 0) {
-            revert();
+        if (makerBid.quoteType != MAKER_BID_QUOTE_TYPE) {
+            revert QuoteTypeInvalid();
         }
 
         address signer = makerBid.signer;
@@ -398,8 +398,8 @@ contract LooksRareProtocol is
         address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
-        if (makerAsk.quoteType != 1) {
-            revert();
+        if (makerAsk.quoteType != MAKER_ASK_QUOTE_TYPE) {
+            revert QuoteTypeInvalid();
         }
 
         address signer = makerAsk.signer;

@@ -17,7 +17,7 @@ interface IExtendedExecutionStrategy {
      * @return errorSelector If isValid is false, it return the error's 4 bytes selector
      */
     function isMakerAskValid(
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector);
 
@@ -30,7 +30,7 @@ interface IExtendedExecutionStrategy {
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
     function isMakerBidValid(
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes4 functionSelector
     ) external pure returns (bool isValid, bytes4 errorSelector);
 }

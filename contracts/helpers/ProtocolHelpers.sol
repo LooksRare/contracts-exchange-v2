@@ -16,8 +16,8 @@ import {LooksRareProtocol} from "../LooksRareProtocol.sol";
  * @author LooksRare protocol team (👀,💎)
  */
 contract ProtocolHelpers {
-    using OrderStructs for OrderStructs.MakerAsk;
-    using OrderStructs for OrderStructs.MakerBid;
+    using OrderStructs for OrderStructs.Maker;
+    using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
 
     // Encoding prefix for EIP-712 signatures
@@ -39,7 +39,7 @@ contract ProtocolHelpers {
      * @param makerAsk Maker ask struct
      * @return digest Digest
      */
-    function computeDigestMakerAsk(OrderStructs.MakerAsk memory makerAsk) public view returns (bytes32 digest) {
+    function computeDigestMakerAsk(OrderStructs.Maker memory makerAsk) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerAsk.hash()));
     }
@@ -49,7 +49,7 @@ contract ProtocolHelpers {
      * @param makerBid Maker bid struct
      * @return digest Digest
      */
-    function computeDigestMakerBid(OrderStructs.MakerBid memory makerBid) public view returns (bytes32 digest) {
+    function computeDigestMakerBid(OrderStructs.Maker memory makerBid) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, makerBid.hash()));
     }
@@ -72,7 +72,7 @@ contract ProtocolHelpers {
      * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
      */
     function verifyMakerAskOrder(
-        OrderStructs.MakerAsk memory makerAsk,
+        OrderStructs.Maker memory makerAsk,
         bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {
@@ -89,7 +89,7 @@ contract ProtocolHelpers {
      * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
      */
     function verifyMakerBidOrder(
-        OrderStructs.MakerBid memory makerBid,
+        OrderStructs.Maker memory makerBid,
         bytes calldata makerSignature,
         address signer
     ) public view returns (bool) {

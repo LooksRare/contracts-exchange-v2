@@ -45,8 +45,8 @@ import {ASSET_TYPE_ERC721, ASSET_TYPE_ERC1155, MAX_CALLDATA_PROOF_LENGTH, ONE_HU
  * @author LooksRare protocol team (👀,💎)
  */
 contract OrderValidatorV2A {
-    using OrderStructs for OrderStructs.MakerAsk;
-    using OrderStructs for OrderStructs.MakerBid;
+    using OrderStructs for OrderStructs.Maker;
+    using OrderStructs for OrderStructs.Maker;
     using OrderStructs for OrderStructs.MerkleTree;
 
     /**
@@ -132,7 +132,7 @@ contract OrderValidatorV2A {
      * @return validationCodes Arrays of validation codes
      */
     function checkMultipleMakerAskOrdersValidity(
-        OrderStructs.MakerAsk[] calldata makerAsks,
+        OrderStructs.Maker[] calldata makerAsks,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
     ) external view returns (uint256[9][] memory validationCodes) {
@@ -156,7 +156,7 @@ contract OrderValidatorV2A {
      * @return validationCodes Arrays of validation codes
      */
     function checkMultipleMakerBidOrdersValidity(
-        OrderStructs.MakerBid[] calldata makerBids,
+        OrderStructs.Maker[] calldata makerBids,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
     ) external view returns (uint256[9][] memory validationCodes) {
@@ -180,7 +180,7 @@ contract OrderValidatorV2A {
      * @return validationCodes Array of validation codes
      */
     function checkMakerAskOrderValidity(
-        OrderStructs.MakerAsk calldata makerAsk,
+        OrderStructs.Maker calldata makerAsk,
         bytes calldata signature,
         OrderStructs.MerkleTree calldata merkleTree
     ) public view returns (uint256[9] memory validationCodes) {
@@ -205,7 +205,7 @@ contract OrderValidatorV2A {
 
         validationCodes[2] = _checkValidityMakerAskNonces(
             makerAsk.signer,
-            makerAsk.askNonce,
+            makerAsk.globalNonce,
             makerAsk.orderNonce,
             makerAsk.subsetNonce,
             orderHash
@@ -233,7 +233,7 @@ contract OrderValidatorV2A {
      * @return validationCodes Array of validation codes
      */
     function checkMakerBidOrderValidity(
-        OrderStructs.MakerBid calldata makerBid,
+        OrderStructs.Maker calldata makerBid,
         bytes calldata signature,
         OrderStructs.MerkleTree calldata merkleTree
     ) public view returns (uint256[9] memory validationCodes) {
@@ -257,7 +257,7 @@ contract OrderValidatorV2A {
         validationCodes[1] = validationCode1;
         validationCodes[2] = _checkValidityMakerBidNonces(
             makerBid.signer,
-            makerBid.bidNonce,
+            makerBid.globalNonce,
             makerBid.orderNonce,
             makerBid.subsetNonce,
             orderHash
@@ -858,7 +858,7 @@ contract OrderValidatorV2A {
     }
 
     function _checkValidityMakerAskItemIdsAndAmountsAndPrice(
-        OrderStructs.MakerAsk memory makerAsk
+        OrderStructs.Maker memory makerAsk
     )
         internal
         view
@@ -867,14 +867,14 @@ contract OrderValidatorV2A {
         if (makerAsk.strategyId == 0) {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
-            price = makerAsk.minPrice;
+            price = makerAsk.price;
 
             validationCode = _getOrderValidationCodeForStandardStrategy(makerAsk.assetType, itemIds.length, amounts);
         } else {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
             // @dev It should ideally be adjusted by real price
-            price = makerAsk.minPrice;
+            price = makerAsk.price;
 
             (, , , , bytes4 strategySelector, , address strategyImplementation) = looksRareProtocol.strategyInfo(
                 makerAsk.strategyId
@@ -890,7 +890,7 @@ contract OrderValidatorV2A {
     }
 
     function _checkValidityMakerBidItemIdsAndAmountsAndPrice(
-        OrderStructs.MakerBid memory makerBid
+        OrderStructs.Maker memory makerBid
     )
         internal
         view
@@ -899,13 +899,13 @@ contract OrderValidatorV2A {
         if (makerBid.strategyId == 0) {
             itemIds = makerBid.itemIds;
             amounts = makerBid.amounts;
-            price = makerBid.maxPrice;
+            price = makerBid.price;
 
             validationCode = _getOrderValidationCodeForStandardStrategy(makerBid.assetType, itemIds.length, amounts);
         } else {
             // @dev It should ideally be adjusted by real price
             //      amounts and itemIds are not used since most non-native maker bids won't target a single item
-            price = makerBid.maxPrice;
+            price = makerBid.price;
 
             (, , , , bytes4 strategySelector, , address strategyImplementation) = looksRareProtocol.strategyInfo(
                 makerBid.strategyId

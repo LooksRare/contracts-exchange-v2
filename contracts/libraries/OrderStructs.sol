@@ -92,10 +92,10 @@ library OrderStructs {
     bytes32 internal constant _MAKER_TYPEHASH =
         keccak256(
             "Maker("
-            "QuoteType quoteType"
+            "QuoteType quoteType,"
             "uint256 globalNonce,"
-            "uint256 orderNonce,"
             "uint256 subsetNonce,"
+            "uint256 orderNonce,"
             "uint256 strategyId,"
             "AssetType assetType,"
             "address collection,"
@@ -157,14 +157,5 @@ library OrderStructs {
                     )
                 )
             );
-    }
-
-    /**
-     * @notice This function is used to compute the hash for a merkle tree struct.
-     * @param merkleTree Merkle tree struct
-     * @return merkleTreeHash Hash of the merkle tree struct
-     */
-    function hash(MerkleTree memory merkleTree) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_MERKLE_TREE_TYPEHASH, merkleTree.root));
     }
 }

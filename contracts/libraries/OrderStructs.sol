@@ -158,13 +158,4 @@ library OrderStructs {
                 )
             );
     }
-
-    /**
-     * @notice This function is used to compute the hash for a merkle tree struct.
-     * @param merkleTree Merkle tree struct
-     * @return merkleTreeHash Hash of the merkle tree struct
-     */
-    function hash(MerkleTree memory merkleTree) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_MERKLE_TREE_TYPEHASH, merkleTree.root));
-    }
 }

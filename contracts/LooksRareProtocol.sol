@@ -21,6 +21,7 @@ import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, Merk
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
+import {BatchOrderTypehashRegistry} from "./BatchOrderTypehashRegistry.sol";
 
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
@@ -76,7 +77,11 @@ contract LooksRareProtocol is
     LowLevelERC20Transfer
 {
     using OrderStructs for OrderStructs.Maker;
-    using OrderStructs for OrderStructs.MerkleTree;
+
+    /**
+     * @notice Typehash registry for batch orders.
+     */
+    BatchOrderTypehashRegistry public immutable batchOrderTypehashRegistry;
 
     /**
      * @notice Wrapped ETH.
@@ -115,6 +120,7 @@ contract LooksRareProtocol is
     ) TransferSelectorNFT(_owner, _protocolFeeRecipient, _transferManager) {
         _updateDomainSeparator();
         WETH = _weth;
+        batchOrderTypehashRegistry = new BatchOrderTypehashRegistry();
     }
 
     /**
@@ -636,7 +642,7 @@ contract LooksRareProtocol is
                 revert MerkleProofInvalid();
             }
 
-            orderHash = merkleTree.hash();
+            orderHash = batchOrderTypehashRegistry.hash(merkleTree.root, proofLength);
         }
 
         _computeDigestAndVerify(orderHash, signature, signer);

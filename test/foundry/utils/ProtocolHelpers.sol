@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+// Dependencies
+import {BatchOrderTypehashRegistry} from "../../../contracts/BatchOrderTypehashRegistry.sol";
+
 // Libraries
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
@@ -230,18 +233,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             signerKey,
             keccak256(abi.encodePacked("\x19\x01", _domainSeparator, orderHash))
-        );
-
-        return abi.encodePacked(r, s, v);
-    }
-
-    function _signMerkleProof(
-        OrderStructs.MerkleTree memory merkleTree,
-        uint256 signerKey
-    ) internal view returns (bytes memory) {
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            signerKey,
-            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, merkleTree.hash()))
         );
 
         return abi.encodePacked(r, s, v);

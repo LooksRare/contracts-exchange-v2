@@ -92,10 +92,10 @@ library OrderStructs {
     bytes32 internal constant _MAKER_TYPEHASH =
         keccak256(
             "Maker("
-            "QuoteType quoteType"
+            "QuoteType quoteType,"
             "uint256 globalNonce,"
-            "uint256 orderNonce,"
             "uint256 subsetNonce,"
+            "uint256 orderNonce,"
             "uint256 strategyId,"
             "AssetType assetType,"
             "address collection,"

@@ -281,13 +281,6 @@ uint256 constant POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721 = 701;
 uint256 constant POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155 = 702;
 
 /**
- * @dev The asset type is not supported in the protocol.
- *      An asset type must be either 0 or 1.
- *      This maker order will never be valid.
- */
-uint256 constant ASSET_TYPE_NOT_SUPPORTED = 711;
-
-/**
  * 8. Transfer manager-related codes
  */
 

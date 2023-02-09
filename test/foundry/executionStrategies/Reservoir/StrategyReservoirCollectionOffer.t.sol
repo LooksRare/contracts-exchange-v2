@@ -11,7 +11,7 @@ import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IE
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 
 // Errors and constants
-import {FunctionSelectorInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, FunctionSelectorInvalid, MerkleProofInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureExpired, TransferCooldownPeriodTooHigh} from "../../../../contracts/errors/ReservoirErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
@@ -19,25 +19,28 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/Numeric
 // Strategies
 import {StrategyReservoirCollectionOffer} from "../../../../contracts/executionStrategies/Reservoir/StrategyReservoirCollectionOffer.sol";
 
-// Base test
-import {ProtocolBase} from "../../ProtocolBase.t.sol";
-
 // Enums
 import {AssetType} from "../../../../contracts/enums/AssetType.sol";
 
+// Base test
+import {ProtocolBase} from "../../ProtocolBase.t.sol";
+
 contract CollectionOffersWithReservoirTest is ProtocolBase {
     StrategyReservoirCollectionOffer public strategyReservoirCollectionOffer;
-    bytes4 public selectorNoProof = strategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
-    bytes4 public selectorWithProof =
-        strategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
 
-    // Constants
+    // Constants from the strategy contract
     uint256 public constant SIGNATURE_VALIDITY_PERIOD = 90 seconds;
     uint256 public constant MAXIMUM_TRANSFER_COOLDOWN_PERIOD = 24 hours;
 
-    // Test parameters
+    // Selectors
+    bytes4 public immutable selectorNoProof =
+        strategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
+    bytes4 public immutable selectorWithProof =
+        strategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector;
+
+    // Other test parameters
     uint256 private constant price = 1 ether; // Fixed price of sale
-    uint256 private constant defaultTransferCooldownPeriod = 1 hours;
+    uint256 private constant defaultTransferCooldownPeriod = 1 hours; // Default transfer cooldown period
 
     function testNewStrategies() public {
         _setUp();
@@ -46,41 +49,25 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         assertEq(strategyReservoirCollectionOffer.SIGNATURE_VALIDITY_PERIOD(), SIGNATURE_VALIDITY_PERIOD);
         assertEq(strategyReservoirCollectionOffer.MAXIMUM_TRANSFER_COOLDOWN_PERIOD(), MAXIMUM_TRANSFER_COOLDOWN_PERIOD);
 
-        (
-            bool strategyIsActive,
-            uint16 strategyStandardProtocolFee,
-            uint16 strategyMinTotalFee,
-            uint16 strategyMaxProtocolFee,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
+        for (uint256 i = 1; i < 3; i++) {
+            (
+                bool strategyIsActive,
+                uint16 strategyStandardProtocolFee,
+                uint16 strategyMinTotalFee,
+                uint16 strategyMaxProtocolFee,
+                bytes4 strategySelector,
+                bool strategyIsMakerBid,
+                address strategyImplementation
+            ) = looksRareProtocol.strategyInfo(i);
 
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selectorNoProof);
-        assertTrue(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyReservoirCollectionOffer));
-
-        (
-            strategyIsActive,
-            strategyStandardProtocolFee,
-            strategyMinTotalFee,
-            strategyMaxProtocolFee,
-            strategySelector,
-            strategyIsMakerBid,
-            strategyImplementation
-        ) = looksRareProtocol.strategyInfo(2);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selectorWithProof);
-        assertTrue(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyReservoirCollectionOffer));
+            assertTrue(strategyIsActive);
+            assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+            assertEq(strategyMinTotalFee, _minTotalFeeBp);
+            assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
+            assertEq(strategySelector, i == 1 ? selectorNoProof : selectorWithProof);
+            assertTrue(strategyIsMakerBid);
+            assertEq(strategyImplementation, address(strategyReservoirCollectionOffer));
+        }
     }
 
     function testCollectionOrderRevertsIfItemIsFlagged() public {
@@ -99,12 +86,12 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _testWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough(true);
     }
 
-    function testCollectionOrderRevertsIfLastTransferTimeIs0() public {
-        _testRevertsIfLastTransferTimeIs0(false);
+    function testCollectionOrderRevertsIfLastTransferTimeIsZero() public {
+        _testRevertsIfLastTransferTimeIsZero(false);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfLastTransferTimeIs0() public {
-        _testRevertsIfLastTransferTimeIs0(true);
+    function testCollectionOrderWithMerkleTreeRevertsIfLastTransferTimeIsZero() public {
+        _testRevertsIfLastTransferTimeIsZero(true);
     }
 
     function testCollectionOrderRevertsIfSignatureExpires() public {
@@ -133,7 +120,123 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _testCollectionOrderRevertsIfItemIdDiffers(true, itemId);
     }
 
-    function _testWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough(bool withProof) internal {
+    function testCollectionOrderRevertsIfAssetTypeIsNotERC721() public {
+        _testRevertsIfAssetTypeIsNotERC721(false);
+    }
+
+    function testCollectionOrderWithMerkleTreeRevertsIfAssetTypeIsNotERC721() public {
+        _testRevertsIfAssetTypeIsNotERC721(true);
+    }
+
+    function testCollectionOrdersAmountsInvalid() public {
+        _testAmountsInvalid(false);
+    }
+
+    function testCollectionOrdersWithMerkleTreeAmountsInvalid() public {
+        _testAmountsInvalid(true);
+    }
+
+    function testCollectionOrdersAdditionalParametersLengthInvalid() public {
+        _testAdditionalParametersLengthInvalid(false);
+    }
+
+    function testCollectionOrdersWithMerkleTreeAdditionalParametersLengthInvalid() public {
+        _testAdditionalParametersLengthInvalid(true);
+    }
+
+    function testCollectionOrdersWithMerkleTreeRevertsWithInvalidMerkleProof(uint16 randomItemId) public {
+        uint256 numberOfItemsInMerkleTree = 1000;
+
+        // 420 is the itemId that is from the Reservoir's data
+        vm.assume(randomItemId != 420 && randomItemId < numberOfItemsInMerkleTree);
+
+        (
+            uint256 forkedBlockNumber,
+            ,
+            address collection,
+            ,
+            address itemOwner,
+            ,
+            bytes memory takerAdditionalParameters
+        ) = _returnValidNonFlaggedItemDataFromReservoir();
+
+        _setUpForkAtBlockNumber(forkedBlockNumber);
+        _setUpUser(makerUser);
+        _setUpTakerUserAndGrantApprovals(itemOwner, collection);
+
+        // Prepare the order hash
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: collection,
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0
+        });
+
+        // Initialize the merkle tree object
+        Merkle m = new Merkle();
+
+        bytes32[] memory merkleTreeIds = new bytes32[](numberOfItemsInMerkleTree);
+        for (uint256 i; i < numberOfItemsInMerkleTree; i++) {
+            merkleTreeIds[i] = keccak256(abi.encodePacked(i));
+        }
+
+        // Compute the merkle root
+        bytes32 merkleRoot = m.getRoot(merkleTreeIds);
+
+        // Pick random proof that is not the correct one
+        bytes32[] memory proof = m.getProof(merkleTreeIds, randomItemId);
+        makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
+
+        // Add the proof to the taker additional parameters and generate the Taker struct
+        takerAdditionalParameters = _addProofToTakerAdditionalParameters(takerAdditionalParameters, proof);
+
+        // Sign order and prepare taker ask
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, takerAdditionalParameters);
+
+        // Verify validity of maker bid order
+        // @dev It is still valid because the merkle root is properly defined (type-wise)
+        _assertOrderIsValid(makerBid, true);
+        _assertValidMakerBidOrder(makerBid, signature);
+
+        vm.prank(itemOwner);
+        vm.expectRevert(MerkleProofInvalid.selector);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testInvalidSelector() public {
+        _setUp();
+        _setUpNewStrategies();
+
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 3,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0
+        });
+
+        (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerBidValid(
+            makerBid,
+            bytes4(0)
+        );
+
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, FunctionSelectorInvalid.selector);
+    }
+
+    function _testWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough(bool withMerkleTreeCriteria) internal {
         (
             uint256 forkedBlockNumber,
             ,
@@ -152,7 +255,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: withProof ? 2 : 1,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
@@ -162,7 +265,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             itemId: 0
         });
 
-        if (withProof) {
+        if (withMerkleTreeCriteria) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
@@ -178,7 +281,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, takerAdditionalParameters);
 
         // Verify validity of maker bid order
-        _assertOrderIsValid(makerBid, withProof);
+        _assertOrderIsValid(makerBid, withMerkleTreeCriteria);
         _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
@@ -189,7 +292,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         assertEq(IERC721(collection).ownerOf(itemId), makerUser);
     }
 
-    function _testRevertsIfItemIsFlagged(bool withProof) internal {
+    function _testRevertsIfItemIsFlagged(bool withMerkleTreeCriteria) internal {
         (
             uint256 forkedBlockNumber,
             ,
@@ -207,7 +310,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: withProof ? 2 : 1,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
@@ -217,7 +320,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             itemId: 0
         });
 
-        if (withProof) {
+        if (withMerkleTreeCriteria) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: flaggedItemId});
 
             // Encode with the merkle root with the transfer cooldown period
@@ -234,7 +337,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, takerAdditionalParameters);
 
         // Verify validity of maker bid order
-        _assertOrderIsValid(makerBid, withProof);
+        _assertOrderIsValid(makerBid, withMerkleTreeCriteria);
         _assertValidMakerBidOrder(makerBid, signature);
 
         vm.prank(itemOwner);
@@ -242,7 +345,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function _testRevertsIfLastTransferTimeIs0(bool withProof) internal {
+    function _testRevertsIfLastTransferTimeIsZero(bool withMerkleTreeCriteria) internal {
         (
             uint256 forkedBlockNumber,
             ,
@@ -260,7 +363,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: withProof ? 2 : 1,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
@@ -270,7 +373,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             itemId: 0 // Not used
         });
 
-        if (withProof) {
+        if (withMerkleTreeCriteria) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
@@ -285,7 +388,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
-        _assertOrderIsValid(makerBid, withProof);
+        _assertOrderIsValid(makerBid, withMerkleTreeCriteria);
         _assertValidMakerBidOrder(makerBid, signature);
 
         // Execute taker ask transaction
@@ -294,7 +397,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function _testRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh(bool withProof) internal {
+    function _testRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh(
+        bool withMerkleTreeCriteria
+    ) internal {
         (
             uint256 forkedBlockNumber,
             ,
@@ -313,7 +418,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: withProof ? 2 : 1,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
@@ -330,9 +435,10 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         // Maker user specifies the cooldown period for transfer
         uint256 transferCooldownPeriod = block.timestamp - lastTransferTime + 1;
 
+        // Initialize merkle root since it is reused multiple times in this test
         bytes32 merkleRoot;
 
-        if (withProof) {
+        if (withMerkleTreeCriteria) {
             bytes32[] memory proof;
             (merkleRoot, proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
@@ -348,7 +454,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
         // It fails because transferCooldownPeriod > MAXIMUM_TRANSFER_COOLDOWN_PERIOD
-        _assertOrderIsInvalid(makerBid, withProof);
+        _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(abi.encodeWithSelector(ItemTransferredTooRecently.selector, collection, itemId));
@@ -362,7 +468,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         // Maker user specifies the cooldown period for transfer as limit + 1
         transferCooldownPeriod = MAXIMUM_TRANSFER_COOLDOWN_PERIOD + 1;
 
-        if (withProof) {
+        if (withMerkleTreeCriteria) {
             makerBid.additionalParameters = abi.encode(merkleRoot, transferCooldownPeriod);
         } else {
             makerBid.additionalParameters = abi.encode(transferCooldownPeriod);
@@ -370,7 +476,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
         signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _assertOrderIsInvalid(makerBid, withProof);
+        _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
         _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(TransferCooldownPeriodTooHigh.selector);
@@ -378,7 +484,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function _testRevertsIfSignatureExpires(bool withProof) public {
+    function _testRevertsIfSignatureExpires(bool withMerkleTreeCriteria) public {
         (
             uint256 forkedBlockNumber,
             uint256 timestamp,
@@ -397,7 +503,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: withProof ? 2 : 1,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
@@ -410,7 +516,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         // End time is increased to prevent OutsideOfTimeRange() after vm.warp
         makerBid.endTime = timestamp + SIGNATURE_VALIDITY_PERIOD + 1;
 
-        if (withProof) {
+        if (withMerkleTreeCriteria) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
@@ -425,7 +531,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
-        _assertOrderIsValid(makerBid, withProof);
+        _assertOrderIsValid(makerBid, withMerkleTreeCriteria);
         _assertValidMakerBidOrder(makerBid, signature);
 
         // Time travel
@@ -436,7 +542,155 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function _testCollectionOrderRevertsIfItemIdDiffers(bool withProof, uint256 itemId) internal {
+    function _testRevertsIfAssetTypeIsNotERC721(bool withMerkleTreeCriteria) public {
+        (
+            uint256 forkedBlockNumber,
+            uint256 timestamp,
+            address collection,
+            uint256 itemId,
+            address itemOwner,
+            ,
+            bytes memory takerAdditionalParameters
+        ) = _returnValidNonFlaggedItemDataFromReservoir();
+
+        _setUpForkAtBlockNumber(forkedBlockNumber);
+        _setUpUser(makerUser);
+        _setUpTakerUserAndGrantApprovals(itemOwner, collection);
+
+        // Prepare the order hash
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
+            assetType: AssetType.ERC1155,
+            orderNonce: 0,
+            collection: collection,
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Not used
+        });
+
+        // End time is increased to prevent OutsideOfTimeRange() after vm.warp
+        makerBid.endTime = timestamp + SIGNATURE_VALIDITY_PERIOD + 1;
+
+        if (withMerkleTreeCriteria) {
+            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
+
+            makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
+            // Add the proof to the taker additional parameters and generate the Taker struct
+            takerAdditionalParameters = _addProofToTakerAdditionalParameters(takerAdditionalParameters, proof);
+        } else {
+            // Encode the transfer cooldown period
+            makerBid.additionalParameters = abi.encode(defaultTransferCooldownPeriod);
+        }
+
+        // Sign order and prepare taker ask
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
+
+        _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.expectRevert(OrderInvalid.selector);
+        vm.prank(itemOwner);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function _testAmountsInvalid(bool withMerkleTreeCriteria) internal {
+        (
+            uint256 forkedBlockNumber,
+            ,
+            address collection,
+            uint256 itemId,
+            address itemOwner,
+            ,
+            bytes memory takerAdditionalParameters
+        ) = _returnValidNonFlaggedItemDataFromReservoir();
+
+        _setUpForkAtBlockNumber(forkedBlockNumber);
+        _setUpUser(makerUser);
+        _setUpTakerUserAndGrantApprovals(itemOwner, collection);
+
+        // Prepare the order hash
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: collection,
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Not used
+        });
+
+        // 1. Adjust amounts to array length = 2
+        uint256[] memory amounts = new uint256[](2);
+        makerBid.amounts = amounts;
+
+        if (withMerkleTreeCriteria) {
+            (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
+
+            makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
+            // Add the proof to the taker additional parameters and generate the Taker struct
+            takerAdditionalParameters = _addProofToTakerAdditionalParameters(takerAdditionalParameters, proof);
+        } else {
+            // Encode the transfer cooldown period
+            makerBid.additionalParameters = abi.encode(defaultTransferCooldownPeriod);
+        }
+
+        // Sign order and prepare taker ask
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
+        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
+
+        _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.expectRevert(OrderInvalid.selector);
+        vm.prank(itemOwner);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 2. Adjust amounts to array length = 0
+        amounts = new uint256[](0);
+        makerBid.amounts = amounts;
+        signature = _signMakerOrder(makerBid, makerUserPK);
+
+        _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.expectRevert(OrderInvalid.selector);
+        vm.prank(itemOwner);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 3. Adjust amounts to array length = 1 but amount is 0
+        amounts = new uint256[](1);
+        amounts[0] = 0;
+        makerBid.amounts = amounts;
+        signature = _signMakerOrder(makerBid, makerUserPK);
+
+        _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.expectRevert(AmountInvalid.selector);
+        vm.prank(itemOwner);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 4. Adjust amounts to array length = 1 but amount is 2
+        amounts[0] = 2;
+        makerBid.amounts = amounts;
+        signature = _signMakerOrder(makerBid, makerUserPK);
+
+        _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+
+        vm.expectRevert(AmountInvalid.selector);
+        vm.prank(itemOwner);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function _testCollectionOrderRevertsIfItemIdDiffers(bool withMerkleTreeCriteria, uint256 itemId) internal {
         // 420 is the itemId that is from the Reservoir's data
         vm.assume(itemId != 420 && itemId <= 20000);
 
@@ -465,7 +719,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
             bidNonce: 0,
             subsetNonce: 0,
-            strategyId: withProof ? 2 : 1,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
             orderNonce: 0,
             collection: collection,
@@ -475,7 +729,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             itemId: 0 // Not used
         });
 
-        if (withProof) {
+        if (withMerkleTreeCriteria) {
             (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({itemIdInMerkleTree: itemId});
 
             makerBid.additionalParameters = abi.encode(merkleRoot, defaultTransferCooldownPeriod);
@@ -491,12 +745,37 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
         // Verify validity of maker bid order
-        _assertOrderIsValid(makerBid, withProof);
+        _assertOrderIsValid(makerBid, withMerkleTreeCriteria);
         _assertValidMakerBidOrder(makerBid, signature);
 
         vm.expectRevert(MessageIdInvalid.selector);
         vm.prank(itemOwner);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function _testAdditionalParametersLengthInvalid(bool withMerkleTreeCriteria) internal {
+        _setUp();
+        _setUpNewStrategies();
+
+        // Prepare the order hash
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: withMerkleTreeCriteria ? 2 : 1,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0 // Not used
+        });
+
+        // Sign order and prepare taker ask
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
+
+        _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
+        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
     }
 
     function _setUpForkAtBlockNumber(uint256 blockNumber) private {
@@ -665,19 +944,19 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         );
     }
 
-    function _assertOrderIsValid(OrderStructs.Maker memory makerBid, bool withProof) private {
+    function _assertOrderIsValid(OrderStructs.Maker memory makerBid, bool withMerkleTreeCriteria) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerBidValid(
             makerBid,
-            withProof ? selectorWithProof : selectorNoProof
+            withMerkleTreeCriteria ? selectorWithProof : selectorNoProof
         );
         assertTrue(orderIsValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
-    function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid, bool withProof) private {
+    function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid, bool withMerkleTreeCriteria) private {
         (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerBidValid(
             makerBid,
-            withProof ? selectorWithProof : selectorNoProof
+            withMerkleTreeCriteria ? selectorWithProof : selectorNoProof
         );
 
         assertFalse(orderIsValid);

@@ -49,7 +49,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
 
         // Verify validity
-        _assertValidMakerAskOrderWithMerkleTree(makerAskToExecute, signature, merkleTree);
+        _assertValidMakerOrderWithMerkleTree(makerAskToExecute, signature, merkleTree);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -94,7 +94,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
 
         // Verify validity
-        _assertValidMakerBidOrderWithMerkleTree(makerBidToExecute, signature, merkleTree);
+        _assertValidMakerOrderWithMerkleTree(makerBidToExecute, signature, merkleTree);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -134,7 +134,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
 
         // Verify invalidity of maker ask order
-        _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
+        _doesMakerOrderReturnValidationCodeWithMerkleTree(
             makerAskToExecute,
             signature,
             merkleTree,
@@ -173,7 +173,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
 
         // Verify invalidity of maker bid order
-        _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
+        _doesMakerOrderReturnValidationCodeWithMerkleTree(
             makerBidToExecute,
             signature,
             merkleTree,
@@ -207,7 +207,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
 
             // Verify validity
-            _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
+            _doesMakerOrderReturnValidationCodeWithMerkleTree(
                 makerAskToExecute,
                 signature,
                 merkleTree,
@@ -248,7 +248,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
 
             // Verify validity
-            _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
+            _doesMakerOrderReturnValidationCodeWithMerkleTree(
                 makerBidToExecute,
                 signature,
                 merkleTree,

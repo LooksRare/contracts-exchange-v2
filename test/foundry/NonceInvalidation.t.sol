@@ -55,7 +55,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         emit SubsetNoncesCancelled(makerUser, subsetNonces);
         looksRareProtocol.cancelSubsetNonces(subsetNonces);
 
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, USER_SUBSET_NONCE_CANCELLED);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, USER_SUBSET_NONCE_CANCELLED);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(
@@ -117,7 +117,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, INVALID_USER_GLOBAL_ASK_NONCE);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_USER_GLOBAL_ASK_NONCE);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -173,7 +173,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, INVALID_USER_GLOBAL_BID_NONCE);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, INVALID_USER_GLOBAL_BID_NONCE);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -226,7 +226,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         {
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-            _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
+            _doesMakerOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
 
             // Second one fails
             vm.expectRevert(NoncesInvalid.selector);
@@ -329,7 +329,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             // Sign order
             signature = _signMakerOrder(makerBid, makerUserPK);
 
-            _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH);
+            _doesMakerOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH);
 
             // Prepare the taker ask
             OrderStructs.Taker memory takerAsk = OrderStructs.Taker(
@@ -391,7 +391,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, USER_ORDER_NONCE_EXECUTED_OR_CANCELLED);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);

@@ -303,8 +303,13 @@ contract OrderValidatorV2A {
             return STRATEGY_NOT_IMPLEMENTED;
         }
 
-        if (strategyId != 0 && (strategyIsMakerBid && quoteType != QuoteType.Bid)) {
-            return STRATEGY_INVALID_QUOTE_TYPE;
+        if (strategyId != 0) {
+            if (
+                (strategyIsMakerBid && quoteType != QuoteType.Bid) ||
+                (!strategyIsMakerBid && quoteType != QuoteType.Ask)
+            ) {
+                return STRATEGY_INVALID_QUOTE_TYPE;
+            }
         }
 
         if (!strategyIsActive) {

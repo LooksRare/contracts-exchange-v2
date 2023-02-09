@@ -76,7 +76,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
                 itemId: itemId
             });
 
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -121,7 +121,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Sign the order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -173,7 +173,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
 
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         /**
          * Different recipient
@@ -188,7 +188,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             );
         }
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         vm.prank(takerUser);
         vm.expectRevert(
@@ -221,7 +221,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Mint the items
         mockERC721WithRoyalties.batchMint(takerUser, makerBid.itemIds);
 
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Adjust ERC721 with royalties
         for (uint256 i; i < makerBid.itemIds.length; i++) {
@@ -233,7 +233,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             );
         }
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         vm.prank(takerUser);
         vm.expectRevert(

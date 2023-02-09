@@ -145,7 +145,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
                 QuoteType quoteType = makerOrder.quoteType;
                 bool isMakerBid = strategyInfo[makerOrder.strategyId].isMakerBid;
                 assembly {
-                    if iszero(xor(quoteType, isMakerBid)) {
+                    if eq(quoteType, isMakerBid) {
                         mstore(0x00, NoSelectorForStrategy_error_selector)
                         revert(Error_selector_offset, NoSelectorForStrategy_error_length)
                     }

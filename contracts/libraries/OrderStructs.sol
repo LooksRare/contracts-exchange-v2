@@ -111,17 +111,6 @@ library OrderStructs {
         );
 
     /**
-     * @notice This is the typehash constant used to compute the merkle root order hash.
-     * @dev The proof is not included in the hashing function.
-     */
-    bytes32 internal constant _MERKLE_TREE_TYPEHASH =
-        keccak256(
-            "MerkleTree("
-                "bytes32 root"
-            ")"
-        );
-
-    /**
      * 5. Hash functions
      */
 

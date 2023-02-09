@@ -11,7 +11,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Shared errors
-import {AmountInvalid, OrderInvalid, CallerInvalid, CurrencyInvalid} from "../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, CallerInvalid, CurrencyInvalid, OrderInvalid, QuoteTypeInvalid} from "../../contracts/errors/SharedErrors.sol";
 import {CURRENCY_NOT_ALLOWED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Other mocks and utils
@@ -199,6 +199,53 @@ contract LooksRareProtocolTest is ProtocolBase {
         vm.prank(takerUser);
         vm.expectRevert(CurrencyInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testCannotTradeIfInvalidQuoteType() public {
+        // 1. QuoteType = BID but executeTakerBid
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: price,
+            itemId: 0
+        });
+
+        // Sign order
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
+
+        // Prepare a generic taker
+        OrderStructs.Taker memory taker = OrderStructs.Taker(takerUser, abi.encode());
+
+        vm.prank(takerUser);
+        vm.expectRevert(QuoteTypeInvalid.selector);
+        looksRareProtocol.executeTakerBid(taker, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+
+        // 2. QuoteType = ASK but executeTakerAsk
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            minPrice: price,
+            itemId: 0
+        });
+
+        // Sign order
+        signature = _signMakerOrder(makerAsk, makerUserPK);
+
+        vm.prank(takerUser);
+        vm.expectRevert(QuoteTypeInvalid.selector);
+        looksRareProtocol.executeTakerAsk(taker, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testUpdateETHGasLimitForTransfer() public asPrankedUser(_owner) {

@@ -41,7 +41,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _setPriceFeed();
 
         _assertOrderIsValid(makerBid);
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         vm.prank(_owner);
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
@@ -65,7 +65,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _setPriceFeed();
 
         _assertOrderIsValid(makerBid);
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         _executeTakerAsk(takerAsk, makerBid, signature);
 
@@ -92,7 +92,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _setPriceFeed();
 
         _assertOrderIsValid(makerBid);
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         _executeTakerAsk(takerAsk, makerBid, signature);
 
@@ -120,7 +120,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);

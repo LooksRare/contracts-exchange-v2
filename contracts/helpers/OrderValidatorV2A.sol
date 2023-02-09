@@ -31,6 +31,7 @@ import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants
 
 // Enums
 import {AssetType} from "../enums/AssetType.sol";
+import {QuoteType} from "../enums/QuoteType.sol";
 
 /**
  * @title OrderValidatorV2A
@@ -128,23 +129,23 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function verifies the validity of an array of maker ask orders.
-     * @param makerAsks Array of maker ask structs
+     * @notice This function verifies the validity of an array of maker orders.
+     * @param makerOrders Array of maker orders
      * @param signatures Array of signatures
      * @param merkleTrees Array of merkle trees
      * @return validationCodes Arrays of validation codes
      */
-    function checkMultipleMakerAskOrdersValidity(
-        OrderStructs.Maker[] calldata makerAsks,
+    function checkMultipleMakerOrderValidities(
+        OrderStructs.Maker[] calldata makerOrders,
         bytes[] calldata signatures,
         OrderStructs.MerkleTree[] calldata merkleTrees
     ) external view returns (uint256[9][] memory validationCodes) {
-        uint256 length = makerAsks.length;
+        uint256 length = makerOrders.length;
 
         validationCodes = new uint256[CRITERIA_GROUPS][](length);
 
         for (uint256 i; i < length; ) {
-            validationCodes[i] = checkMakerAskOrderValidity(makerAsks[i], signatures[i], merkleTrees[i]);
+            validationCodes[i] = checkMakerOrderValidity(makerOrders[i], signatures[i], merkleTrees[i]);
             unchecked {
                 ++i;
             }
@@ -152,191 +153,96 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function verifies the validity of an array of maker bid orders.
-     * @param makerBids Array of maker bid structs
-     * @param signatures Array of signatures
-     * @param merkleTrees Array of merkle trees
-     * @return validationCodes Arrays of validation codes
-     */
-    function checkMultipleMakerBidOrdersValidity(
-        OrderStructs.Maker[] calldata makerBids,
-        bytes[] calldata signatures,
-        OrderStructs.MerkleTree[] calldata merkleTrees
-    ) external view returns (uint256[9][] memory validationCodes) {
-        uint256 length = makerBids.length;
-
-        validationCodes = new uint256[CRITERIA_GROUPS][](length);
-
-        for (uint256 i; i < length; ) {
-            validationCodes[i] = checkMakerBidOrderValidity(makerBids[i], signatures[i], merkleTrees[i]);
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /**
-     * @notice This function verifies the validity of a maker ask order.
-     * @param makerAsk Maker ask struct
+     * @notice This function verifies the validity of a maker order.
+     * @param makerOrder Maker struct
      * @param signature Signature
      * @param merkleTree Merkle tree
      * @return validationCodes Array of validation codes
      */
-    function checkMakerAskOrderValidity(
-        OrderStructs.Maker calldata makerAsk,
+    function checkMakerOrderValidity(
+        OrderStructs.Maker calldata makerOrder,
         bytes calldata signature,
         OrderStructs.MerkleTree calldata merkleTree
     ) public view returns (uint256[9] memory validationCodes) {
-        bytes32 orderHash = makerAsk.hash();
+        bytes32 orderHash = makerOrder.hash();
 
-        validationCodes[0] = _checkValidityMakerAskCurrencyAndStrategy(makerAsk.currency, makerAsk.strategyId);
+        validationCodes[0] = _checkValidityCurrencyAndStrategy(
+            makerOrder.quoteType,
+            makerOrder.currency,
+            makerOrder.strategyId
+        );
 
-        // It can exit here if the strategy does not exist.
-        // However, if the strategy is invalid, it can continue the execution.
-        if (validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_IS_NOT_MAKER_ASK) {
+        // It will exit here if the strategy does not exist.
+        // However, if the strategy is implemented but invalid (except if wrong quote type),
+        // it can continue the validation process.
+        if (validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_INVALID_QUOTE_TYPE) {
             return validationCodes;
         }
 
-        (
-            uint256 validationCode1,
-            uint256[] memory itemIds,
-            uint256[] memory amounts,
-            uint256 price
-        ) = _checkValidityMakerAskItemIdsAndAmountsAndPrice(makerAsk);
+        uint256 validationCode1;
+        uint256[] memory itemIds;
+        uint256[] memory amounts;
+        uint256 price;
+
+        if (makerOrder.quoteType == QuoteType.Ask) {
+            (validationCode1, itemIds, amounts, price) = _checkValidityMakerAskItemIdsAndAmountsAndPrice(makerOrder);
+        } else {
+            (validationCode1, itemIds, , price) = _checkValidityMakerBidItemIdsAndAmountsAndPrice(makerOrder);
+        }
 
         validationCodes[1] = validationCode1;
 
-        validationCodes[2] = _checkValidityMakerAskNonces(
-            makerAsk.signer,
-            makerAsk.globalNonce,
-            makerAsk.orderNonce,
-            makerAsk.subsetNonce,
+        validationCodes[2] = _checkValidityNonces(
+            makerOrder.quoteType,
+            makerOrder.signer,
+            makerOrder.globalNonce,
+            makerOrder.orderNonce,
+            makerOrder.subsetNonce,
             orderHash
         );
-        validationCodes[3] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerAsk.signer);
-        validationCodes[4] = _checkValidityTimestamps(makerAsk.startTime, makerAsk.endTime);
 
-        validationCodes[5] = _checkValidityMakerAskNFTAssets(
-            makerAsk.collection,
-            makerAsk.assetType,
-            makerAsk.signer,
-            itemIds,
-            amounts
-        );
-        validationCodes[6] = _checkIfPotentialInvalidAssetTypes(makerAsk.collection, makerAsk.assetType);
-        validationCodes[7] = _checkValidityTransferManagerApprovals(makerAsk.signer);
-        validationCodes[8] = _checkValidityCreatorFee(makerAsk.collection, price, itemIds);
-    }
+        validationCodes[3] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerOrder.signer);
+        validationCodes[4] = _checkValidityTimestamps(makerOrder.startTime, makerOrder.endTime);
 
-    /**
-     * @notice This function verifies the validity of a maker bid order.
-     * @param makerBid Maker bid struct
-     * @param signature Signature
-     * @param merkleTree Merkle tree
-     * @return validationCodes Array of validation codes
-     */
-    function checkMakerBidOrderValidity(
-        OrderStructs.Maker calldata makerBid,
-        bytes calldata signature,
-        OrderStructs.MerkleTree calldata merkleTree
-    ) public view returns (uint256[9] memory validationCodes) {
-        bytes32 orderHash = makerBid.hash();
+        validationCodes[3] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerOrder.signer);
+        validationCodes[4] = _checkValidityTimestamps(makerOrder.startTime, makerOrder.endTime);
 
-        validationCodes[0] = _checkValidityMakerBidCurrencyAndStrategy(makerBid.currency, makerBid.strategyId);
-
-        // It can exit here if the strategy does not exist.
-        // However, if the strategy is invalid, it can continue the execution.
-        if (validationCodes[0] == STRATEGY_NOT_IMPLEMENTED || validationCodes[0] == STRATEGY_IS_NOT_MAKER_BID) {
-            return validationCodes;
+        if (makerOrder.quoteType == QuoteType.Bid) {
+            validationCodes[5] = _checkValidityMakerBidERC20Assets(makerOrder.currency, makerOrder.signer, price);
+        } else {
+            validationCodes[5] = _checkValidityMakerAskNFTAssets(
+                makerOrder.collection,
+                makerOrder.assetType,
+                makerOrder.signer,
+                itemIds,
+                amounts
+            );
         }
 
-        (
-            uint256 validationCode1,
-            uint256[] memory itemIds,
-            ,
-            uint256 price
-        ) = _checkValidityMakerBidItemIdsAndAmountsAndPrice(makerBid);
+        validationCodes[6] = _checkIfPotentialInvalidAssetTypes(makerOrder.collection, makerOrder.assetType);
 
-        validationCodes[1] = validationCode1;
-        validationCodes[2] = _checkValidityMakerBidNonces(
-            makerBid.signer,
-            makerBid.globalNonce,
-            makerBid.orderNonce,
-            makerBid.subsetNonce,
-            orderHash
-        );
-        validationCodes[3] = _checkValidityMerkleProofAndOrderHash(merkleTree, orderHash, signature, makerBid.signer);
-        validationCodes[4] = _checkValidityTimestamps(makerBid.startTime, makerBid.endTime);
-        validationCodes[5] = _checkValidityMakerBidERC20Assets(makerBid.currency, makerBid.signer, price);
-        validationCodes[6] = _checkIfPotentialInvalidAssetTypes(makerBid.collection, makerBid.assetType);
-        validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID; // TransferManager NFT-related
-        validationCodes[8] = _checkValidityCreatorFee(makerBid.collection, price, itemIds);
+        if (makerOrder.quoteType == QuoteType.Bid) {
+            validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID;
+        } else {
+            validationCodes[7] = _checkValidityTransferManagerApprovals(makerOrder.signer);
+        }
+
+        validationCodes[8] = _checkValidityCreatorFee(makerOrder.collection, price, itemIds);
     }
 
     /**
-     * @notice This function is internal and verifies the validity of nonces for maker ask order.
+     * @notice This function is internal and verifies the validity of nonces for maker order.
      * @param makerSigner Address of the maker signer
-     * @param askNonce Ask nonce
+     * @param globalNonce Global nonce
      * @param orderNonce Order nonce
      * @param subsetNonce Subset nonce
      * @param orderHash Order hash
      * @return validationCode Validation code
      */
-    function _checkValidityMakerAskNonces(
+    function _checkValidityNonces(
+        QuoteType quoteType,
         address makerSigner,
-        uint256 askNonce,
-        uint256 orderNonce,
-        uint256 subsetNonce,
-        bytes32 orderHash
-    ) internal view returns (uint256 validationCode) {
-        validationCode = _checkValiditySubsetAndOrderNonce(makerSigner, orderNonce, subsetNonce, orderHash);
-
-        if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
-            (, uint256 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
-
-            if (askNonce != globalAskNonce) {
-                return INVALID_USER_GLOBAL_ASK_NONCE;
-            }
-        }
-    }
-
-    /**
-     * @notice This function is internal and verifies the validity of nonces for maker bid order.
-     * @param makerSigner Address of the maker signer
-     * @param bidNonce Bid nonce
-     * @param orderNonce Order nonce
-     * @param subsetNonce Subset nonce
-     * @param orderHash Order hash
-     * @return validationCode Validation code
-     */
-    function _checkValidityMakerBidNonces(
-        address makerSigner,
-        uint256 bidNonce,
-        uint256 orderNonce,
-        uint256 subsetNonce,
-        bytes32 orderHash
-    ) internal view returns (uint256 validationCode) {
-        validationCode = _checkValiditySubsetAndOrderNonce(makerSigner, orderNonce, subsetNonce, orderHash);
-
-        if (validationCode == ORDER_EXPECTED_TO_BE_VALID) {
-            (uint256 globalBidNonce, ) = looksRareProtocol.userBidAskNonces(makerSigner);
-
-            if (bidNonce != globalBidNonce) {
-                return INVALID_USER_GLOBAL_BID_NONCE;
-            }
-        }
-    }
-
-    /**
-     * @notice The function is internal and verifies the validity of subset and order nonce for an order.
-     * @param makerSigner Address of the maker signer
-     * @param orderNonce Order nonce
-     * @param subsetNonce Subset nonce
-     * @param orderHash Order hash
-     * @return validationCode Validation code
-     */
-    function _checkValiditySubsetAndOrderNonce(
-        address makerSigner,
+        uint256 globalNonce,
         uint256 orderNonce,
         uint256 subsetNonce,
         bytes32 orderHash
@@ -356,15 +262,27 @@ contract OrderValidatorV2A {
         if (orderNonceStatus != bytes32(0) && orderNonceStatus != orderHash) {
             return USER_ORDER_NONCE_IN_EXECUTION_WITH_OTHER_HASH;
         }
+
+        // 3. Check global nonces
+        (uint256 globalBidNonce, uint256 globalAskNonce) = looksRareProtocol.userBidAskNonces(makerSigner);
+
+        if (quoteType == QuoteType.Bid && globalNonce != globalBidNonce) {
+            return INVALID_USER_GLOBAL_BID_NONCE;
+        }
+        if (quoteType == QuoteType.Ask && globalNonce != globalAskNonce) {
+            return INVALID_USER_GLOBAL_ASK_NONCE;
+        }
     }
 
     /**
-     * @notice This function is internal and verifies the validity of the currency and strategy for the maker ask order.
+     * @notice This function is internal and verifies the validity of the currency and strategy.
+     * @param quoteType Quote type
      * @param currency Address of the currency
      * @param strategyId Strategy id
      * @return validationCode Validation code
      */
-    function _checkValidityMakerAskCurrencyAndStrategy(
+    function _checkValidityCurrencyAndStrategy(
+        QuoteType quoteType,
         address currency,
         uint256 strategyId
     ) internal view returns (uint256 validationCode) {
@@ -373,35 +291,7 @@ contract OrderValidatorV2A {
             return CURRENCY_NOT_ALLOWED;
         }
 
-        // 2. Verify whether the strategy is valid
-        (bool strategyIsActive, , , , , bool strategyIsMakerBid, address strategyImplementation) = looksRareProtocol
-            .strategyInfo(strategyId);
-
-        if (strategyId != 0 && strategyImplementation == address(0)) {
-            return STRATEGY_NOT_IMPLEMENTED;
-        }
-
-        if (strategyId != 0 && (strategyIsMakerBid)) {
-            return STRATEGY_IS_NOT_MAKER_ASK;
-        }
-
-        if (!strategyIsActive) {
-            return STRATEGY_NOT_ACTIVE;
-        }
-    }
-
-    /**
-     * @notice This function is internal and verifies the validity of the currency and strategy for the maker bid order.
-     * @param currency Address of the currency
-     * @param strategyId Strategy id
-     * @return validationCode Validation code
-     */
-    function _checkValidityMakerBidCurrencyAndStrategy(
-        address currency,
-        uint256 strategyId
-    ) internal view returns (uint256 validationCode) {
-        // 1. Verify whether the currency is allowed
-        if (currency == address(0) || !looksRareProtocol.isCurrencyAllowed(currency)) {
+        if (currency == address(0) && quoteType == QuoteType.Bid) {
             return CURRENCY_NOT_ALLOWED;
         }
 
@@ -413,8 +303,13 @@ contract OrderValidatorV2A {
             return STRATEGY_NOT_IMPLEMENTED;
         }
 
-        if (strategyId != 0 && (!strategyIsMakerBid)) {
-            return STRATEGY_IS_NOT_MAKER_BID;
+        if (strategyId != 0) {
+            if (
+                (strategyIsMakerBid && quoteType != QuoteType.Bid) ||
+                (!strategyIsMakerBid && quoteType != QuoteType.Ask)
+            ) {
+                return STRATEGY_INVALID_QUOTE_TYPE;
+            }
         }
 
         if (!strategyIsActive) {
@@ -759,7 +654,7 @@ contract OrderValidatorV2A {
 
     /**
      * @notice This function computes the digest and verify the signature.
-     * @param computedHash Hash of order (maker bid or maker ask) or merkle root
+     * @param computedHash Hash of order or merkle root
      * @param makerSignature Signature of the maker
      * @param signer Signer address
      * @return validationCode Validation code

@@ -93,6 +93,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      * @notice This function is internal and is used to execute a transaction initiated by a taker order.
      * @param takerOrder Taker order struct (taker specific parameters for the execution)
      * @param makerOrder Maker order struct (maker specific parameter for the execution)
+     * @param sender The address that sent the transaction
      * @return itemIds Array of item ids to be traded
      * @return amounts Array of amounts for each item id
      * @return recipients Array of recipient addresses
@@ -101,7 +102,8 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
      */
     function _executeStrategyForTakerOrder(
         OrderStructs.Taker calldata takerOrder,
-        OrderStructs.Maker calldata makerOrder
+        OrderStructs.Maker calldata makerOrder,
+        address sender
     )
         internal
         returns (
@@ -178,7 +180,7 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             _setTheRestOfFeeAmountsAndRecipients(
                 makerOrder.strategyId,
                 price,
-                takerOrder.recipient == address(0) ? msg.sender : takerOrder.recipient,
+                takerOrder.recipient == address(0) ? sender : takerOrder.recipient,
                 feeAmounts,
                 recipients
             );

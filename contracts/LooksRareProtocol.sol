@@ -21,13 +21,16 @@ import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, Merk
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
-import {BatchOrderTypehashRegistry} from "./BatchOrderTypehashRegistry.sol";
+// import {BatchOrderTypehashRegistry} from "./BatchOrderTypehashRegistry.sol";
+import {BatchOrderTypehashRegistryV2} from "./BatchOrderTypehashRegistryV2.sol";
 
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
 // Enums
 import {QuoteType} from "./enums/QuoteType.sol";
+
+import {OneWord, OneWordShift} from "./constants/AssemblyConstants.sol";
 
 /**
  * @title LooksRareProtocol
@@ -81,7 +84,7 @@ contract LooksRareProtocol is
     /**
      * @notice Typehash registry for batch orders.
      */
-    BatchOrderTypehashRegistry public immutable batchOrderTypehashRegistry;
+    BatchOrderTypehashRegistryV2 public immutable batchOrderTypehashRegistry;
 
     /**
      * @notice Wrapped ETH.
@@ -120,7 +123,7 @@ contract LooksRareProtocol is
     ) TransferSelectorNFT(_owner, _protocolFeeRecipient, _transferManager) {
         _updateDomainSeparator();
         WETH = _weth;
-        batchOrderTypehashRegistry = new BatchOrderTypehashRegistry();
+        batchOrderTypehashRegistry = new BatchOrderTypehashRegistryV2();
     }
 
     /**
@@ -642,9 +645,19 @@ contract LooksRareProtocol is
                 revert MerkleProofInvalid();
             }
 
-            orderHash = batchOrderTypehashRegistry.hash(merkleTree.root, proofLength);
+            bytes32 typehash = getBatchOrderTypehash(merkleTree.proof.length);
+            orderHash = keccak256(abi.encode(typehash, merkleTree.root));
         }
 
         _computeDigestAndVerify(orderHash, signature, signer);
+    }
+
+    function getBatchOrderTypehash(uint256 treeHeight) public view returns (bytes32 typehash) {
+        BatchOrderTypehashRegistryV2 registry = batchOrderTypehashRegistry;
+        assembly {
+            let typehashOffset := add(1, shl(OneWordShift, sub(treeHeight, 1)))
+            extcodecopy(registry, 0, typehashOffset, OneWord)
+            typehash := mload(0)
+        }
     }
 }

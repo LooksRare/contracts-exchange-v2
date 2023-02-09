@@ -45,18 +45,6 @@ contract ProtocolHelpers {
     }
 
     /**
-     * @notice Compute digest for merkle tree struct
-     * @param merkleTree Merkle tree struct
-     * @return digest Digest
-     */
-    function computeDigestMerkleTree(OrderStructs.MerkleTree memory merkleTree) public view returns (bytes32 digest) {
-        bytes32 domainSeparator = looksRareProtocol.domainSeparator();
-        BatchOrderTypehashRegistry batchOrderTypehashRegistry = looksRareProtocol.batchOrderTypehashRegistry();
-        bytes32 batchOrderHash = batchOrderTypehashRegistry.hash(merkleTree.root, merkleTree.proof.length);
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, batchOrderHash));
-    }
-
-    /**
      * @notice Verify maker order signature
      * @param maker Maker struct
      * @param makerSignature Maker signature
@@ -69,23 +57,6 @@ contract ProtocolHelpers {
         address signer
     ) public view returns (bool) {
         bytes32 digest = computeMakerDigest(maker);
-        SignatureCheckerCalldata.verify(digest, signer, makerSignature);
-        return true;
-    }
-
-    /**
-     * @notice Verify merkle tree signature
-     * @param merkleTree Merkle tree struct
-     * @param makerSignature Maker signature
-     * @param signer Signer address
-     * @dev It returns true only if the SignatureCheckerCalldata does not revert before.
-     */
-    function verifyMerkleTree(
-        OrderStructs.MerkleTree memory merkleTree,
-        bytes calldata makerSignature,
-        address signer
-    ) public view returns (bool) {
-        bytes32 digest = computeDigestMerkleTree(merkleTree);
         SignatureCheckerCalldata.verify(digest, signer, makerSignature);
         return true;
     }

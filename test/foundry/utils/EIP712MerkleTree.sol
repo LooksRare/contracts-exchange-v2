@@ -79,7 +79,6 @@ contract EIP712MerkleTree is Test {
     }
 
     function _getTypehash(uint256 treeHeight) private view returns (bytes32 batchOrderTypehash) {
-        BatchOrderTypehashRegistry batchOrderTypehashRegistry = looksRareProtocol.batchOrderTypehashRegistry();
         if (treeHeight > MAX_CALLDATA_PROOF_LENGTH) {
             if (treeHeight == 11) {
                 batchOrderTypehash = hex"9a3ce74af1cf5f60b4762d883e0f75912ccffd3a5a75d18399d9273faed739fb";
@@ -89,7 +88,7 @@ contract EIP712MerkleTree is Test {
                 batchOrderTypehash = hex"0aa2f1d0d9d5bfd8e18b7fa947f3957ab4283e016dbec7aa4406586fbfabeb85";
             }
         } else {
-            batchOrderTypehash = batchOrderTypehashRegistry.getTypehash(treeHeight);
+            batchOrderTypehash = looksRareProtocol.getBatchOrderTypehash(treeHeight);
         }
     }
 }

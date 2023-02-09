@@ -30,4 +30,7 @@ uint256 constant OutsideOfTimeRange_error_length = 0x04;
 
 uint256 constant Error_selector_offset = 0x1c;
 
+uint256 constant FreeMemoryPointerSlot = 0x40;
 uint256 constant OneWord = 0x20;
+uint256 constant OneWordShift = 0x5;
+uint256 constant ThirtyOneBytes = 0x1f;

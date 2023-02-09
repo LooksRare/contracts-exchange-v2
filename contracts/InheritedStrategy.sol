@@ -8,7 +8,7 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 import {OrderInvalid} from "./errors/SharedErrors.sol";
 
 // Assembly
-import {OrderInvalid_error_selector, OrderInvalid_error_length, Error_selector_offset, OneWord} from "./constants/AssemblyConstants.sol";
+import {OrderInvalid_error_selector, OrderInvalid_error_length, Error_selector_offset, OneWord, OneWordShift} from "./constants/AssemblyConstants.sol";
 
 /**
  * @title InheritedStrategy
@@ -52,7 +52,7 @@ contract InheritedStrategy {
                 /**
                  * @dev Shifting left 5 times is equivalent to amountsLength * 32 bytes
                  */
-                end := shl(5, amountsLength)
+                end := shl(OneWordShift, amountsLength)
             }
 
             let amountsOffset := amounts.offset

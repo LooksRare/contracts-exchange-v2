@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-// Constants
-import {MAX_CALLDATA_PROOF_LENGTH} from "./constants/NumericConstants.sol";
-
 // Shared errors
 import {MerkleProofTooLarge} from "./errors/SharedErrors.sol";
 
@@ -13,10 +10,6 @@ contract BatchOrderTypehashRegistry {
     }
 
     function getTypehash(uint256 height) public pure returns (bytes32 typehash) {
-        if (height == 0 || height > MAX_CALLDATA_PROOF_LENGTH) {
-            revert MerkleProofTooLarge(height);
-        }
-
         /**
          * It looks like this for each height
          * height == 1: BatchOrder(Maker[2] tree)Maker(QuoteType quoteType,uint256 globalNonce,uint256 orderNonce,uint256 subsetNonce,uint256 strategyId,AssetType assetType,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 price,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)
@@ -43,6 +36,8 @@ contract BatchOrderTypehashRegistry {
             typehash = hex"d07a0372a4b6f6bebf9360c1a1d772c31bc415527972c03003c518fcbafd3ac8";
         } else if (height == 10) {
             typehash = hex"8c97dccf7be0b886237955fffbbb1a401134006da146b3d8b0de943bfa52cecb";
+        } else {
+            revert MerkleProofTooLarge(height);
         }
     }
 }

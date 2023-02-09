@@ -7,12 +7,10 @@ import {OrderStructs} from "./libraries/OrderStructs.sol";
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH} from "./constants/NumericConstants.sol";
 
-contract BatchOrderTypehashRegistry {
-    /**
-     * @notice We only support up to 2**10 == 1024 orders in a merkle tree.
-     */
-    error HeightNotSupported();
+// Shared errors
+import {MerkleProofTooLarge} from "./errors/SharedErrors.sol";
 
+contract BatchOrderTypehashRegistry {
     function hash(OrderStructs.MerkleTree calldata merkleTree) external pure returns (bytes32 batchOrderHashHash) {
         bytes32 batchOrderTypehash = getTypehash(merkleTree.proof.length);
         batchOrderHashHash = keccak256(abi.encode(batchOrderTypehash, merkleTree.root));
@@ -20,7 +18,7 @@ contract BatchOrderTypehashRegistry {
 
     function getTypehash(uint256 height) public pure returns (bytes32 typehash) {
         if (height == 0 || height > MAX_CALLDATA_PROOF_LENGTH) {
-            revert HeightNotSupported();
+            revert MerkleProofTooLarge(height);
         }
 
         /**

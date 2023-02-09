@@ -392,6 +392,7 @@ contract OrderValidatorV2ATest is TestParameters {
         mockERC1155.mint({to: makerUser, tokenId: 0, amount: 1});
 
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = address(mockERC1155);
         makerAsk.signer = makerUser;
@@ -402,7 +403,7 @@ contract OrderValidatorV2ATest is TestParameters {
         amounts[0] = 1;
         makerAsk.amounts = amounts;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE

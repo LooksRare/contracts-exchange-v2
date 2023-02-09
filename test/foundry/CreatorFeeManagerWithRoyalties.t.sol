@@ -85,7 +85,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
 
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -128,7 +128,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
 
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -159,7 +159,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721.batchMint(takerUser, makerBid.itemIds);
 
         // Check order validity
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -204,7 +204,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Taker user actions
         vm.prank(takerUser);
@@ -248,7 +248,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         // Taker user action should revert
         vm.prank(takerUser);
@@ -273,7 +273,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         vm.prank(takerUser);
         vm.expectRevert(
@@ -317,7 +317,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         // Taker user action should revert
         vm.prank(takerUser);
@@ -361,7 +361,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 itemId: itemId
             });
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
 
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
         vm.prank(takerUser);
@@ -390,7 +390,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             itemId: itemId
         });
 
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
 
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
         vm.prank(takerUser);

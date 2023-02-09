@@ -46,7 +46,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         transferManager.grantApprovals(operators);
         vm.stopPrank();
 
-        _assertValidMakerAskOrder(makerAsk, signature);
+        _assertValidMakerOrder(makerAsk, signature);
 
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
@@ -72,7 +72,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         transferManager.grantApprovals(operators);
         vm.stopPrank();
 
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, SIGNATURE_INVALID_EIP1271);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, SIGNATURE_INVALID_EIP1271);
 
         vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
@@ -118,7 +118,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         vm.prank(address(wallet));
         weth.approve(address(looksRareProtocol), price);
 
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -138,7 +138,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         vm.prank(address(wallet));
         weth.approve(address(looksRareProtocol), price);
 
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, SIGNATURE_INVALID_EIP1271);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, SIGNATURE_INVALID_EIP1271);
 
         vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);

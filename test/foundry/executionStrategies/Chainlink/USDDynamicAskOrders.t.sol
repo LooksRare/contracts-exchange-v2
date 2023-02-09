@@ -296,7 +296,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         bytes4 errorSelector = PriceNotRecentEnough.selector;
 
         _assertOrderIsInvalid(makerAsk, errorSelector);
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -402,7 +402,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsInvalid(makerAsk, OrderInvalid.selector);
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -422,7 +422,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerAsk);
-        _assertValidMakerAskOrder(makerAsk, signature);
+        _assertValidMakerOrder(makerAsk, signature);
 
         vm.expectRevert(BidTooLow.selector);
         vm.prank(takerUser);
@@ -443,7 +443,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         _assertOrderIsValid(makerAsk);
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         vm.prank(takerUser);

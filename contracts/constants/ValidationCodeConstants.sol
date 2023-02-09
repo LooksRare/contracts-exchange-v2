@@ -30,22 +30,16 @@ uint256 constant CURRENCY_NOT_ALLOWED = 101;
 uint256 constant STRATEGY_NOT_IMPLEMENTED = 111;
 
 /**
- * @dev The strategy is not a maker ask strategy.
+ * @dev The strategy is not for this quote type.
  *      This maker order can never become valid.
  */
-uint256 constant STRATEGY_IS_NOT_MAKER_ASK = 112;
-
-/**
- * @dev The strategy is not a maker bid strategy.
- *      This maker order can never become valid.
- */
-uint256 constant STRATEGY_IS_NOT_MAKER_BID = 113;
+uint256 constant STRATEGY_INVALID_QUOTE_TYPE = 112;
 
 /**
  * @dev The strategy exists but is not currently active.
  *      This maker order can become valid again only with owner action.
  */
-uint256 constant STRATEGY_NOT_ACTIVE = 114;
+uint256 constant STRATEGY_NOT_ACTIVE = 113;
 
 /**
  * 2. Maker order struct-related codes

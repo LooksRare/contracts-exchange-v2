@@ -82,11 +82,11 @@ contract EIP712MerkleTree is Test {
         BatchOrderTypehashRegistry batchOrderTypehashRegistry = looksRareProtocol.batchOrderTypehashRegistry();
         if (treeHeight > MAX_CALLDATA_PROOF_LENGTH) {
             if (treeHeight == 11) {
-                batchOrderTypehash = hex"9e57c4795d748b22bed196a50d5db40033bb0aaf647cb5ccafc013c79f148468";
+                batchOrderTypehash = hex"9a3ce74af1cf5f60b4762d883e0f75912ccffd3a5a75d18399d9273faed739fb";
             } else if (treeHeight == 12) {
-                batchOrderTypehash = hex"215eba812ae377db858beef9413fa31c720c53b8e5ab79dc7556e2c2452fcba4";
+                batchOrderTypehash = hex"06195feea862ccec6fab4646f653db6df0ea88e1312269e92c502071c7f57c16";
             } else if (treeHeight == 13) {
-                batchOrderTypehash = hex"f9caca4f4ff7e69fbc09582b1cbecf985f749cabcaf8bf8e8b1f2272661d7459";
+                batchOrderTypehash = hex"0aa2f1d0d9d5bfd8e18b7fa947f3957ab4283e016dbec7aa4406586fbfabeb85";
             }
         } else {
             batchOrderTypehash = batchOrderTypehashRegistry.getTypehash(treeHeight);

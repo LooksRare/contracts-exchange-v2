@@ -8,9 +8,8 @@ import {MAX_CALLDATA_PROOF_LENGTH} from "./constants/NumericConstants.sol";
 import {MerkleProofTooLarge} from "./errors/SharedErrors.sol";
 
 contract BatchOrderTypehashRegistry {
-    function hash(bytes32 root, uint256 proofLength) external pure returns (bytes32 batchOrderHashHash) {
-        bytes32 batchOrderTypehash = getTypehash(proofLength);
-        batchOrderHashHash = keccak256(abi.encode(batchOrderTypehash, root));
+    function hash(bytes32 root, uint256 proofLength) external pure returns (bytes32 batchOrderTypehash) {
+        batchOrderTypehash = keccak256(abi.encode(getTypehash(proofLength), root));
     }
 
     function getTypehash(uint256 height) public pure returns (bytes32 typehash) {

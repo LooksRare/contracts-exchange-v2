@@ -14,7 +14,7 @@ import {NonceManager} from "./NonceManager.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 
 // Assembly
-import {OutsideOfTimeRange_error_selector, OutsideOfTimeRange_error_length, Error_selector_offset} from "./constants/AssemblyConstants.sol";
+import {NoSelectorForStrategy_error_selector, NoSelectorForStrategy_error_length, OutsideOfTimeRange_error_selector, OutsideOfTimeRange_error_length, Error_selector_offset} from "./constants/AssemblyConstants.sol";
 
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
@@ -123,13 +123,31 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
             isNonceInvalidated = true;
         } else {
             if (strategyInfo[makerOrder.strategyId].isActive) {
-                if (makerOrder.quoteType == QuoteType.Bid) {
-                    if (!strategyInfo[makerOrder.strategyId].isMakerBid) {
-                        revert NoSelectorForMakerBid();
-                    }
-                } else {
-                    if (strategyInfo[makerOrder.strategyId].isMakerBid) {
-                        revert NoSelectorForMakerAsk();
+                /**
+                 * @dev This is equivalent to
+                 *
+                 * if (makerOrder.quoteType == QuoteType.Bid) {
+                 *     if (!strategyInfo[makerOrder.strategyId].isMakerBid) {
+                 *         revert NoSelectorForStrategy();
+                 *     }
+                 * } else {
+                 *     if (strategyInfo[makerOrder.strategyId].isMakerBid) {
+                 *         revert NoSelectorForStrategy();
+                 *     }
+                 * }
+                 *
+                 * because one must be 0 and another must be 1 for the function
+                 * to not revert.
+                 *
+                 * Both quoteType (an enum with 2 values) and isMakerBid (a bool)
+                 * can only be 0 or 1.
+                 */
+                QuoteType quoteType = makerOrder.quoteType;
+                bool isMakerBid = strategyInfo[makerOrder.strategyId].isMakerBid;
+                assembly {
+                    if iszero(xor(quoteType, isMakerBid)) {
+                        mstore(0x00, NoSelectorForStrategy_error_selector)
+                        revert(Error_selector_offset, NoSelectorForStrategy_error_length)
                     }
                 }
 

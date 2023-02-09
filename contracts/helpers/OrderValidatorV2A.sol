@@ -471,8 +471,6 @@ contract OrderValidatorV2A {
             if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID)) {
                 return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155;
             }
-        } else {
-            return ASSET_TYPE_NOT_SUPPORTED;
         }
     }
 

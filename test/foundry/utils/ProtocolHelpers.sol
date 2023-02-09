@@ -238,20 +238,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         return abi.encodePacked(r, s, v);
     }
 
-    function _signMerkleProof(
-        OrderStructs.MerkleTree memory merkleTree,
-        uint256 signerKey
-    ) internal returns (bytes memory) {
-        BatchOrderTypehashRegistry batchOrderTypehashRegistry = new BatchOrderTypehashRegistry();
-        bytes32 batchOrderHash = batchOrderTypehashRegistry.hash(merkleTree);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            signerKey,
-            keccak256(abi.encodePacked("\x19\x01", _domainSeparator, batchOrderHash))
-        );
-
-        return abi.encodePacked(r, s, v);
-    }
-
     function _computeOrderHash(OrderStructs.Maker memory maker) internal pure returns (bytes32) {
         return maker.hash();
     }

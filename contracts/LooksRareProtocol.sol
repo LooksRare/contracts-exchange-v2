@@ -642,7 +642,7 @@ contract LooksRareProtocol is
                 revert MerkleProofInvalid();
             }
 
-            orderHash = batchOrderTypehashRegistry.hash(merkleTree);
+            orderHash = batchOrderTypehashRegistry.hash(merkleTree.root, proofLength);
         }
 
         _computeDigestAndVerify(orderHash, signature, signer);

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-// Libraries
-import {OrderStructs} from "./libraries/OrderStructs.sol";
-
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH} from "./constants/NumericConstants.sol";
 
@@ -11,9 +8,9 @@ import {MAX_CALLDATA_PROOF_LENGTH} from "./constants/NumericConstants.sol";
 import {MerkleProofTooLarge} from "./errors/SharedErrors.sol";
 
 contract BatchOrderTypehashRegistry {
-    function hash(OrderStructs.MerkleTree calldata merkleTree) external pure returns (bytes32 batchOrderHashHash) {
-        bytes32 batchOrderTypehash = getTypehash(merkleTree.proof.length);
-        batchOrderHashHash = keccak256(abi.encode(batchOrderTypehash, merkleTree.root));
+    function hash(bytes32 root, uint256 proofLength) external pure returns (bytes32 batchOrderHashHash) {
+        bytes32 batchOrderTypehash = getTypehash(proofLength);
+        batchOrderHashHash = keccak256(abi.encode(batchOrderTypehash, root));
     }
 
     function getTypehash(uint256 height) public pure returns (bytes32 typehash) {

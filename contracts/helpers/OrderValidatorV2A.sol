@@ -722,7 +722,7 @@ contract OrderValidatorV2A {
             }
 
             BatchOrderTypehashRegistry batchOrderTypehashRegistry = looksRareProtocol.batchOrderTypehashRegistry();
-            bytes32 batchOrderHash = batchOrderTypehashRegistry.hash(merkleTree);
+            bytes32 batchOrderHash = batchOrderTypehashRegistry.hash(merkleTree.root, merkleTree.proof.length);
 
             return _computeDigestAndVerify(batchOrderHash, signature, signer);
         } else {

@@ -361,7 +361,7 @@ contract LooksRareProtocol is
             address[2] memory recipients,
             uint256[3] memory feeAmounts,
             bool isNonceInvalidated
-        ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
+        ) = _executeStrategyForTakerOrder(takerAsk, makerBid, msg.sender);
 
         // Order nonce status is updated
         _updateUserOrderNonce(isNonceInvalidated, signer, makerBid.orderNonce, orderHash);
@@ -431,7 +431,7 @@ contract LooksRareProtocol is
             address[2] memory recipients,
             uint256[3] memory feeAmounts,
             bool isNonceInvalidated
-        ) = _executeStrategyForTakerBid(takerBid, makerAsk);
+        ) = _executeStrategyForTakerOrder(takerBid, makerAsk, msg.sender);
 
         // Order nonce status is updated
         _updateUserOrderNonce(isNonceInvalidated, signer, makerAsk.orderNonce, orderHash);

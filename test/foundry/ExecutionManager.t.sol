@@ -268,7 +268,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _doesMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_INVALID_QUOTE_TYPE);
 
         vm.prank(takerUser);
-        vm.expectRevert(IExecutionManager.NoSelectorForMakerAsk.selector);
+        vm.expectRevert(IExecutionManager.NoSelectorForStrategy.selector);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -319,7 +319,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _doesMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_INVALID_QUOTE_TYPE);
 
         vm.prank(takerUser);
-        vm.expectRevert(IExecutionManager.NoSelectorForMakerBid.selector);
+        vm.expectRevert(IExecutionManager.NoSelectorForStrategy.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 }

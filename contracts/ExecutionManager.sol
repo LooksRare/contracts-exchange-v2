@@ -19,6 +19,9 @@ import {OutsideOfTimeRange_error_selector, OutsideOfTimeRange_error_length, Erro
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
 
+// Enums
+import {QuoteType} from "./enums/QuoteType.sol";
+
 /**
  * @title ExecutionManager
  * @notice This contract handles the execution and resolution of transactions. A transaction is executed on-chain
@@ -87,19 +90,18 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
     }
 
     /**
-     * @notice This function is internal and is used to execute a transaction initiated by a taker ask.
-     * @param takerAsk Taker ask struct (taker ask-specific parameters for the execution)
-     * @param makerBid Maker bid struct (contains bid-specific parameter for the maker side of the transaction)
+     * @notice This function is internal and is used to execute a transaction initiated by a taker order.
+     * @param takerOrder Taker order struct (taker specific parameters for the execution)
+     * @param makerOrder Maker order struct (maker specific parameter for the execution)
      * @return itemIds Array of item ids to be traded
      * @return amounts Array of amounts for each item id
      * @return recipients Array of recipient addresses
      * @return feeAmounts Array of fee amounts
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      */
-    function _executeStrategyForTakerAsk(
-        OrderStructs.Taker calldata takerAsk,
-        OrderStructs.Maker calldata makerBid,
-        address sender
+    function _executeStrategyForTakerOrder(
+        OrderStructs.Taker calldata takerOrder,
+        OrderStructs.Maker calldata makerOrder
     )
         internal
         returns (
@@ -113,20 +115,26 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
         uint256 price;
 
         // Verify the order validity for timestamps
-        _verifyOrderTimestampValidity(makerBid.startTime, makerBid.endTime);
+        _verifyOrderTimestampValidity(makerOrder.startTime, makerOrder.endTime);
 
-        if (makerBid.strategyId == 0) {
-            _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerBid.amounts, makerBid.itemIds);
-            (price, itemIds, amounts) = (makerBid.price, makerBid.itemIds, makerBid.amounts);
+        if (makerOrder.strategyId == 0) {
+            _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerOrder.amounts, makerOrder.itemIds);
+            (price, itemIds, amounts) = (makerOrder.price, makerOrder.itemIds, makerOrder.amounts);
             isNonceInvalidated = true;
         } else {
-            if (strategyInfo[makerBid.strategyId].isActive) {
-                if (!strategyInfo[makerBid.strategyId].isMakerBid) {
-                    revert NoSelectorForMakerBid();
+            if (strategyInfo[makerOrder.strategyId].isActive) {
+                if (makerOrder.quoteType == QuoteType.Bid) {
+                    if (!strategyInfo[makerOrder.strategyId].isMakerBid) {
+                        revert NoSelectorForMakerBid();
+                    }
+                } else {
+                    if (strategyInfo[makerOrder.strategyId].isMakerBid) {
+                        revert NoSelectorForMakerAsk();
+                    }
                 }
 
-                (bool status, bytes memory data) = strategyInfo[makerBid.strategyId].implementation.call(
-                    abi.encodeWithSelector(strategyInfo[makerBid.strategyId].selector, takerAsk, makerBid)
+                (bool status, bytes memory data) = strategyInfo[makerOrder.strategyId].implementation.call(
+                    abi.encodeWithSelector(strategyInfo[makerOrder.strategyId].selector, takerOrder, makerOrder)
                 );
 
                 if (!status) {
@@ -138,80 +146,33 @@ contract ExecutionManager is InheritedStrategy, NonceManager, StrategyManager, I
 
                 (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
             } else {
-                revert StrategyNotAvailable(makerBid.strategyId);
+                revert StrategyNotAvailable(makerOrder.strategyId);
             }
         }
 
         // Creator fee and adjustment of protocol fee
-        (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(makerBid.collection, price, itemIds);
-
-        _setTheRestOfFeeAmountsAndRecipients(
-            makerBid.strategyId,
+        (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(
+            makerOrder.collection,
             price,
-            takerAsk.recipient == address(0) ? sender : takerAsk.recipient,
-            feeAmounts,
-            recipients
+            itemIds
         );
-    }
-
-    /**
-     * @notice This function is internal and used to execute a transaction initiated by a taker bid.
-     * @param takerBid Taker bid struct (taker bid-specific parameters for the execution)
-     * @param makerAsk Maker ask struct (ask-specific parameter for the maker side of the transaction)
-     * @return itemIds Array of item ids to be traded
-     * @return amounts Array of amounts for each item id
-     * @return recipients Array of recipient addresses
-     * @return feeAmounts Array of fee amounts
-     * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
-     */
-    function _executeStrategyForTakerBid(
-        OrderStructs.Taker calldata takerBid,
-        OrderStructs.Maker calldata makerAsk
-    )
-        internal
-        returns (
-            uint256[] memory itemIds,
-            uint256[] memory amounts,
-            address[2] memory recipients,
-            uint256[3] memory feeAmounts,
-            bool isNonceInvalidated
-        )
-    {
-        uint256 price;
-
-        _verifyOrderTimestampValidity(makerAsk.startTime, makerAsk.endTime);
-
-        if (makerAsk.strategyId == 0) {
-            _verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(makerAsk.amounts, makerAsk.itemIds);
-            (price, itemIds, amounts) = (makerAsk.price, makerAsk.itemIds, makerAsk.amounts);
-            isNonceInvalidated = true;
+        if (makerOrder.quoteType == QuoteType.Bid) {
+            _setTheRestOfFeeAmountsAndRecipients(
+                makerOrder.strategyId,
+                price,
+                takerOrder.recipient == address(0) ? msg.sender : takerOrder.recipient,
+                feeAmounts,
+                recipients
+            );
         } else {
-            if (strategyInfo[makerAsk.strategyId].isActive) {
-                if (strategyInfo[makerAsk.strategyId].isMakerBid) {
-                    revert NoSelectorForMakerAsk();
-                }
-
-                (bool status, bytes memory data) = strategyInfo[makerAsk.strategyId].implementation.call(
-                    abi.encodeWithSelector(strategyInfo[makerAsk.strategyId].selector, takerBid, makerAsk)
-                );
-
-                if (!status) {
-                    // @dev It forwards the revertion message from the low-level call
-                    assembly {
-                        revert(add(data, 32), mload(data))
-                    }
-                }
-
-                (price, itemIds, amounts, isNonceInvalidated) = abi.decode(data, (uint256, uint256[], uint256[], bool));
-            } else {
-                revert StrategyNotAvailable(makerAsk.strategyId);
-            }
+            _setTheRestOfFeeAmountsAndRecipients(
+                makerOrder.strategyId,
+                price,
+                makerOrder.signer,
+                feeAmounts,
+                recipients
+            );
         }
-
-        // Creator fee amount and adjustment of protocol fee amount
-        (recipients[1], feeAmounts[1]) = _getCreatorRecipientAndCalculateFeeAmount(makerAsk.collection, price, itemIds);
-
-        _setTheRestOfFeeAmountsAndRecipients(makerAsk.strategyId, price, makerAsk.signer, feeAmounts, recipients);
     }
 
     /**

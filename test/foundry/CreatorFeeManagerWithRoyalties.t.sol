@@ -60,29 +60,17 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_newCreatorRoyaltyFee);
 
-        uint256 price = 1 ether; // Fixed price of sale
-        uint256 itemId = 0;
-
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
-            quoteType: QuoteType.Bid,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            price: price,
-            itemId: itemId
-        });
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         _assertValidMakerOrder(makerBid, signature);
 
@@ -97,39 +85,31 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         );
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), makerUser);
+        assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
         _assertSuccessfulTakerAsk(makerBid);
     }
 
     function testCreatorRoyaltiesGetPaidForERC2981() public {
-        uint256 itemId = 0;
-        uint256 price = 1 ether; // Fixed price of sale
-
         _setUpUsers();
 
-        // Adjust ERC721 with royalties
-        mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(itemId, _royaltyRecipient, _newCreatorRoyaltyFee);
-
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
-            quoteType: QuoteType.Bid,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721WithRoyalties),
-            currency: address(weth),
-            signer: makerUser,
-            price: price,
-            itemId: itemId
-        });
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721WithRoyalties),
+            address(weth)
+        );
+
+        // Adjust ERC721 with royalties
+        mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(
+            makerBid.itemIds[0],
+            _royaltyRecipient,
+            _newCreatorRoyaltyFee
+        );
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
-        mockERC721WithRoyalties.mint(takerUser, itemId);
+        mockERC721WithRoyalties.mint(takerUser, makerBid.itemIds[0]);
 
         _assertValidMakerOrder(makerBid, signature);
 
@@ -144,7 +124,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         );
 
         // Taker user has received the asset
-        assertEq(mockERC721WithRoyalties.ownerOf(itemId), makerUser);
+        assertEq(mockERC721WithRoyalties.ownerOf(makerBid.itemIds[0]), makerUser);
         _assertSuccessfulTakerAsk(makerBid);
     }
 

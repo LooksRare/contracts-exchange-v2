@@ -36,25 +36,14 @@ contract GasGriefingTest is ProtocolBase {
     function testTakerBidGasGriefing() public {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        uint256 itemId = 0;
+        // Prepare the order hash
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.signer = gasGriefer;
 
         // Mint asset
-        mockERC721.mint(gasGriefer, itemId);
-
-        // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
-            quoteType: QuoteType.Ask,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: gasGriefer,
-            price: price,
-            itemId: itemId
-        });
+        mockERC721.mint(gasGriefer, makerAsk.itemIds[0]);
 
         bytes memory signature;
 
@@ -69,7 +58,7 @@ contract GasGriefingTest is ProtocolBase {
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid{value: price}(
-            _genericTakerOrder(),
+            takerBid,
             makerAsk,
             signature,
             _EMPTY_MERKLE_TREE,
@@ -77,7 +66,7 @@ contract GasGriefingTest is ProtocolBase {
         );
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), takerUser);
+        assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)

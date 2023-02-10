@@ -176,31 +176,17 @@ contract SignaturesRevertionsTest is ProtocolBase {
         // @dev Getting OutOfGas starting from 16,776,985, probably due to memory cost
         vm.assume(length != 64 && length != 65 && length < 16_776_985);
 
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
-            quoteType: QuoteType.Ask,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            price: price,
-            itemId: itemId
-        });
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.itemIds[0] = itemId;
+        makerAsk.price = price;
 
         bytes memory signature = new bytes(length);
         _assertMakerOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNATURE_LENGTH);
 
         vm.expectRevert(abi.encodeWithSelector(SignatureLengthInvalid.selector, length));
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(
-            _genericTakerOrder(),
-            makerAsk,
-            signature,
-            _EMPTY_MERKLE_TREE,
-            _EMPTY_AFFILIATE
-        );
+        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 }

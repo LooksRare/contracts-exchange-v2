@@ -32,19 +32,10 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
-            quoteType: QuoteType.Ask,
-            globalNonce: 0,
-            subsetNonce: subsetNonce,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            price: price,
-            itemId: itemId
-        });
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.subsetNonce = subsetNonce;
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
@@ -58,12 +49,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         looksRareProtocol.cancelSubsetNonces(subsetNonces);
 
         _assertMakerOrderReturnValidationCode(makerAsk, signature, USER_SUBSET_NONCE_CANCELLED);
-
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(
-            takerUser,
-            abi.encode(new uint256[](0), new uint256[](0))
-        );
 
         vm.deal(takerUser, price);
 
@@ -97,25 +82,13 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         emit NewBidAskNonces(makerUser, 0, newAskNonce);
         looksRareProtocol.incrementBidAskNonces(false, true);
 
-        uint256 itemId = 420;
+        // Prepare the order hash
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
-
-        // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
-            quoteType: QuoteType.Ask,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            price: price,
-            itemId: itemId
-        });
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
@@ -129,7 +102,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.prank(takerUser);
         vm.expectRevert(NoncesInvalid.selector);
         looksRareProtocol.executeTakerBid{value: price}(
-            _genericTakerOrder(),
+            takerBid,
             makerAsk,
             signature,
             _EMPTY_MERKLE_TREE,
@@ -202,19 +175,10 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
-            quoteType: QuoteType.Bid,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            price: price,
-            itemId: itemId
-        });
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
@@ -224,9 +188,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         // Taker user actions
         vm.startPrank(takerUser);
-
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = _genericTakerOrder();
 
         {
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);

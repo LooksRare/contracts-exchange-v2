@@ -8,7 +8,10 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Shared errors
-import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid} from "../errors/SharedErrors.sol";
+import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid, QuoteTypeInvalid} from "../errors/SharedErrors.sol";
+
+// Enums
+import {QuoteType} from "../enums/QuoteType.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
@@ -105,7 +108,7 @@ contract StrategyCollectionOffer is BaseStrategy {
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
-    function isMakerBidValid(
+    function isMakerOrderValid(
         OrderStructs.Maker calldata makerBid,
         bytes4 functionSelector
     ) external pure returns (bool isValid, bytes4 errorSelector) {
@@ -114,6 +117,10 @@ contract StrategyCollectionOffer is BaseStrategy {
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
         ) {
             return (isValid, FunctionSelectorInvalid.selector);
+        }
+
+        if (makerBid.quoteType != QuoteType.Bid) {
+            return (isValid, QuoteTypeInvalid.selector);
         }
 
         if (makerBid.amounts.length != 1) {

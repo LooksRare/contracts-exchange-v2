@@ -4,8 +4,11 @@ pragma solidity 0.8.17;
 // Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
+// Enums
+import {QuoteType} from "../enums/QuoteType.sol";
+
 // Shared errors
-import {BidTooLow, OrderInvalid, FunctionSelectorInvalid} from "../errors/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, FunctionSelectorInvalid, QuoteTypeInvalid} from "../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy} from "./BaseStrategy.sol";
@@ -72,12 +75,16 @@ contract StrategyDutchAuction is BaseStrategy {
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
-    function isMakerAskValid(
+    function isMakerOrderValid(
         OrderStructs.Maker calldata makerAsk,
         bytes4 functionSelector
     ) external pure returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyDutchAuction.executeStrategyWithTakerBid.selector) {
             return (isValid, FunctionSelectorInvalid.selector);
+        }
+
+        if (makerAsk.quoteType != QuoteType.Ask) {
+            return (isValid, QuoteTypeInvalid.selector);
         }
 
         uint256 itemIdsLength = makerAsk.itemIds.length;

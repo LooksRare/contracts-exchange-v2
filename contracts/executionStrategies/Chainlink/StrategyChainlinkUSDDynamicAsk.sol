@@ -8,8 +8,11 @@ import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 // Interfaces
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
+// Enums
+import {QuoteType} from "../../enums/QuoteType.sol";
+
 // Shared errors
-import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../errors/SharedErrors.sol";
+import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid, QuoteTypeInvalid} from "../../errors/SharedErrors.sol";
 import {ChainlinkPriceInvalid, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
 
 // Base strategy contracts
@@ -116,12 +119,16 @@ contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPr
      * @return isValid Whether the maker struct is valid
      * @return errorSelector If isValid is false, it return the error's 4 bytes selector
      */
-    function isMakerAskValid(
+    function isMakerOrderValid(
         OrderStructs.Maker calldata makerAsk,
         bytes4 functionSelector
     ) external view returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyChainlinkUSDDynamicAsk.executeStrategyWithTakerBid.selector) {
             return (isValid, FunctionSelectorInvalid.selector);
+        }
+
+        if (makerAsk.quoteType != QuoteType.Ask) {
+            return (isValid, QuoteTypeInvalid.selector);
         }
 
         uint256 itemIdsLength = makerAsk.itemIds.length;

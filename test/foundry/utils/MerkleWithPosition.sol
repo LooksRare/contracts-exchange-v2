@@ -7,30 +7,6 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
  * @dev Modified from MurkyBase to add each node's position after hashing.
  */
 contract MerkleWithPosition {
-    /**********************
-     * PROOF VERIFICATION *
-     **********************/
-
-    function verifyProof(
-        bytes32 root,
-        OrderStructs.MerkleTreeNode[] memory proof,
-        bytes32 valueToProve
-    ) external pure returns (bool) {
-        // proof length must be less than max array size
-        bytes32 rollingHash = valueToProve;
-        uint256 length = proof.length;
-        unchecked {
-            for (uint i = 0; i < length; ++i) {
-                if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Left) {
-                    rollingHash = hashLeafPairsWithoutSort(proof[i].value, rollingHash);
-                } else if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Right) {
-                    rollingHash = hashLeafPairsWithoutSort(rollingHash, proof[i].value);
-                }
-            }
-        }
-        return root == rollingHash;
-    }
-
     /********************
      * PROOF GENERATION *
      ********************/
@@ -221,14 +197,6 @@ contract MerkleWithPosition {
                 mstore(0x20, right)
                 _swapped := 0x0
             }
-            _hash := keccak256(0x0, 0x40)
-        }
-    }
-
-    function hashLeafPairsWithoutSort(bytes32 left, bytes32 right) private pure returns (bytes32 _hash) {
-        assembly {
-            mstore(0x0, left)
-            mstore(0x20, right)
             _hash := keccak256(0x0, 0x40)
         }
     }

@@ -21,6 +21,7 @@ import {CallerInvalid, CurrencyInvalid, LengthsInvalid, MerkleProofInvalid, Merk
 
 // Direct dependencies
 import {TransferSelectorNFT} from "./TransferSelectorNFT.sol";
+import {BatchOrderTypehashRegistry} from "./BatchOrderTypehashRegistry.sol";
 
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "./constants/NumericConstants.sol";
@@ -73,10 +74,10 @@ contract LooksRareProtocol is
     TransferSelectorNFT,
     LowLevelETHReturnETHIfAnyExceptOneWei,
     LowLevelWETH,
-    LowLevelERC20Transfer
+    LowLevelERC20Transfer,
+    BatchOrderTypehashRegistry
 {
     using OrderStructs for OrderStructs.Maker;
-    using OrderStructs for OrderStructs.MerkleTree;
 
     /**
      * @notice Wrapped ETH.
@@ -355,7 +356,7 @@ contract LooksRareProtocol is
             address[2] memory recipients,
             uint256[3] memory feeAmounts,
             bool isNonceInvalidated
-        ) = _executeStrategyForTakerAsk(takerAsk, makerBid, msg.sender);
+        ) = _executeStrategyForTakerOrder(takerAsk, makerBid, msg.sender);
 
         // Order nonce status is updated
         _updateUserOrderNonce(isNonceInvalidated, signer, makerBid.orderNonce, orderHash);
@@ -425,7 +426,7 @@ contract LooksRareProtocol is
             address[2] memory recipients,
             uint256[3] memory feeAmounts,
             bool isNonceInvalidated
-        ) = _executeStrategyForTakerBid(takerBid, makerAsk);
+        ) = _executeStrategyForTakerOrder(takerBid, makerAsk, msg.sender);
 
         // Order nonce status is updated
         _updateUserOrderNonce(isNonceInvalidated, signer, makerAsk.orderNonce, orderHash);
@@ -636,7 +637,7 @@ contract LooksRareProtocol is
                 revert MerkleProofInvalid();
             }
 
-            orderHash = merkleTree.hash();
+            orderHash = hashBatchOrder(merkleTree.root, proofLength);
         }
 
         _computeDigestAndVerify(orderHash, signature, signer);

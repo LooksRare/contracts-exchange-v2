@@ -35,14 +35,10 @@ interface IExecutionManager {
     error NewProtocolFeeRecipientCannotBeNullAddress();
 
     /**
-     * @notice It is returned if there is no selector for maker bid for a given strategyId.
+     * @notice It is returned if there is no selector for maker ask/bid for a given strategyId,
+     *         depending on the quote type.
      */
-    error NoSelectorForMakerBid();
-
-    /**
-     * @notice It is returned if there is no selector for maker ask for a given strategy id.
-     */
-    error NoSelectorForMakerAsk();
+    error NoSelectorForStrategy();
 
     /**
      * @notice It is returned if the current block timestamp is not between start and end times in the maker order.

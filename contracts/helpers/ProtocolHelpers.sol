@@ -50,7 +50,8 @@ contract ProtocolHelpers {
      */
     function computeDigestMerkleTree(OrderStructs.MerkleTree memory merkleTree) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
-        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, merkleTree.hash()));
+        bytes32 batchOrderHash = looksRareProtocol.hashBatchOrder(merkleTree.root, merkleTree.proof.length);
+        return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, batchOrderHash));
     }
 
     /**

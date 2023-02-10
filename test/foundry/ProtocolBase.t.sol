@@ -41,25 +41,31 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     WETH public weth;
 
-    function _assertValidMakerAskOrder(OrderStructs.Maker memory makerAsk, bytes memory signature) internal {
-        _assertValidMakerAskOrder(makerAsk, signature, _EMPTY_MERKLE_TREE);
-    }
-
-    function _assertValidMakerAskOrderWithMerkleTree(
-        OrderStructs.Maker memory makerAsk,
+    function _doesMakerOrderReturnValidationCode(
+        OrderStructs.Maker memory makerOrder,
         bytes memory signature,
-        OrderStructs.MerkleTree memory merkleTree
+        uint256 expectedValidationCode
     ) internal {
-        _assertValidMakerAskOrder(makerAsk, signature, merkleTree);
+        _doesMakerOrderReturnValidationCode(makerOrder, signature, _EMPTY_MERKLE_TREE, expectedValidationCode);
     }
 
-    function _assertValidMakerAskOrder(
-        OrderStructs.Maker memory makerAsk,
+    function _doesMakerOrderReturnValidationCodeWithMerkleTree(
+        OrderStructs.Maker memory makerOrder,
         bytes memory signature,
-        OrderStructs.MerkleTree memory merkleTree
+        OrderStructs.MerkleTree memory merkleTree,
+        uint256 expectedValidationCode
+    ) internal {
+        _doesMakerOrderReturnValidationCode(makerOrder, signature, merkleTree, expectedValidationCode);
+    }
+
+    function _doesMakerOrderReturnValidationCode(
+        OrderStructs.Maker memory makerOrder,
+        bytes memory signature,
+        OrderStructs.MerkleTree memory merkleTree,
+        uint256 expectedValidationCode
     ) private {
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](1);
-        makerAsks[0] = makerAsk;
+        OrderStructs.Maker[] memory makerOrders = new OrderStructs.Maker[](1);
+        makerOrders[0] = makerOrder;
 
         bytes[] memory signatures = new bytes[](1);
         signatures[0] = signature;
@@ -67,49 +73,8 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
         merkleTrees[0] = merkleTree;
 
-        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerAskOrdersValidity(
-            makerAsks,
-            signatures,
-            merkleTrees
-        );
-
-        _assertValidationCodesAllZeroes(validationCodes);
-    }
-
-    function _doesMakerAskOrderReturnValidationCode(
-        OrderStructs.Maker memory makerAsk,
-        bytes memory signature,
-        uint256 expectedValidationCode
-    ) internal {
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, _EMPTY_MERKLE_TREE, expectedValidationCode);
-    }
-
-    function _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
-        OrderStructs.Maker memory makerAsk,
-        bytes memory signature,
-        OrderStructs.MerkleTree memory merkleTree,
-        uint256 expectedValidationCode
-    ) internal {
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, merkleTree, expectedValidationCode);
-    }
-
-    function _doesMakerAskOrderReturnValidationCode(
-        OrderStructs.Maker memory makerAsk,
-        bytes memory signature,
-        OrderStructs.MerkleTree memory merkleTree,
-        uint256 expectedValidationCode
-    ) private {
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](1);
-        makerAsks[0] = makerAsk;
-
-        bytes[] memory signatures = new bytes[](1);
-        signatures[0] = signature;
-
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
-        merkleTrees[0] = merkleTree;
-
-        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerAskOrdersValidity(
-            makerAsks,
+        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerOrderValidities(
+            makerOrders,
             signatures,
             merkleTrees
         );
@@ -118,25 +83,25 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         assertEq(validationCodes[0][index - 1], expectedValidationCode);
     }
 
-    function _assertValidMakerBidOrder(OrderStructs.Maker memory makerBid, bytes memory signature) internal {
-        _assertValidMakerBidOrder(makerBid, signature, _EMPTY_MERKLE_TREE);
+    function _assertValidMakerOrder(OrderStructs.Maker memory makerOrder, bytes memory signature) internal {
+        _assertValidMakerOrder(makerOrder, signature, _EMPTY_MERKLE_TREE);
     }
 
-    function _assertValidMakerBidOrderWithMerkleTree(
-        OrderStructs.Maker memory makerBid,
+    function _assertValidMakerOrderWithMerkleTree(
+        OrderStructs.Maker memory makerOrder,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) internal {
-        _assertValidMakerBidOrder(makerBid, signature, merkleTree);
+        _assertValidMakerOrder(makerOrder, signature, merkleTree);
     }
 
-    function _assertValidMakerBidOrder(
-        OrderStructs.Maker memory makerBid,
+    function _assertValidMakerOrder(
+        OrderStructs.Maker memory makerOrder,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree
     ) private {
-        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](1);
-        makerBids[0] = makerBid;
+        OrderStructs.Maker[] memory makerOrders = new OrderStructs.Maker[](1);
+        makerOrders[0] = makerOrder;
 
         bytes[] memory signatures = new bytes[](1);
         signatures[0] = signature;
@@ -144,55 +109,13 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
         merkleTrees[0] = merkleTree;
 
-        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerBidOrdersValidity(
-            makerBids,
+        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerOrderValidities(
+            makerOrders,
             signatures,
             merkleTrees
         );
 
         _assertValidationCodesAllZeroes(validationCodes);
-    }
-
-    function _doesMakerBidOrderReturnValidationCode(
-        OrderStructs.Maker memory makerBid,
-        bytes memory signature,
-        uint256 expectedValidationCode
-    ) internal {
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, _EMPTY_MERKLE_TREE, expectedValidationCode);
-    }
-
-    function _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
-        OrderStructs.Maker memory makerBid,
-        bytes memory signature,
-        OrderStructs.MerkleTree memory merkleTree,
-        uint256 expectedValidationCode
-    ) internal {
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, merkleTree, expectedValidationCode);
-    }
-
-    function _doesMakerBidOrderReturnValidationCode(
-        OrderStructs.Maker memory makerBid,
-        bytes memory signature,
-        OrderStructs.MerkleTree memory merkleTree,
-        uint256 expectedValidationCode
-    ) private {
-        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](1);
-        makerBids[0] = makerBid;
-
-        bytes[] memory signatures = new bytes[](1);
-        signatures[0] = signature;
-
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
-        merkleTrees[0] = merkleTree;
-
-        uint256[9][] memory validationCodes = orderValidator.checkMultipleMakerBidOrdersValidity(
-            makerBids,
-            signatures,
-            merkleTrees
-        );
-
-        uint256 index = expectedValidationCode / 100;
-        assertEq(validationCodes[0][index - 1], expectedValidationCode);
     }
 
     function _assertValidationCodesAllZeroes(uint256[9][] memory validationCodes) private {

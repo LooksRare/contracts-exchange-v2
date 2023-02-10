@@ -63,7 +63,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
 
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(OrderInvalid.selector);
@@ -81,7 +81,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         // Sign order
         signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -119,7 +119,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_ALLOWED);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_ALLOWED);
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -187,7 +187,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify maker bid order
-        _doesMakerBidOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_ALLOWED);
+        _doesMakerOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_ALLOWED);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);

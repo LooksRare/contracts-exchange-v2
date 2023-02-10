@@ -15,47 +15,54 @@ import {ONE_HUNDRED_PERCENT_IN_BP, MAX_CALLDATA_PROOF_LENGTH} from "../../contra
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
+// Helpers
+import {EIP712MerkleTree} from "./utils/EIP712MerkleTree.sol";
+
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
+    EIP712MerkleTree private eip712MerkleTree;
 
     function setUp() public {
         _setUp();
         _setUpUsers();
+        eip712MerkleTree = new EIP712MerkleTree(looksRareProtocol);
     }
 
-    function testTakerBidMultipleOrdersSignedERC721() public {
-        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
+    function testTakerBidMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
+        _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
-        // The test will sell itemId = numberOrders - 1
-        Merkle m = new Merkle();
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        mockERC721.batchMint(makerUser, numberOrders);
 
-        for (uint256 i; i < numberOrders; i++) {
-            mockERC721.mint(makerUser, i);
-        }
+        OrderStructs.Maker[] memory makerAsks = _createBatchMakerAsks(numberOrders);
 
-        OrderStructs.Maker memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
-        _verifyMerkleProof(m, merkleTree, orderHashes);
-
-        // Maker signs the root
-        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
-
-        // Verify validity
-        _assertValidMakerAskOrderWithMerkleTree(makerAsk, signature, merkleTree);
+        (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) = eip712MerkleTree.sign(
+            makerUserPK,
+            makerAsks,
+            orderIndex
+        );
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
+
+        // Verify validity
+        _assertValidMakerOrderWithMerkleTree(makerAskToExecute, signature, merkleTree);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAskToExecute,
+            signature,
+            merkleTree,
+            _EMPTY_AFFILIATE
+        );
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(numberOrders - 1), takerUser);
+        assertEq(mockERC721.ownerOf(orderIndex), takerUser);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2% protocol)
@@ -63,211 +70,210 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        assertEq(
+            looksRareProtocol.userOrderNonce(makerUser, makerAskToExecute.orderNonce),
+            MAGIC_VALUE_ORDER_NONCE_EXECUTED
+        );
     }
 
-    function testTakerAskMultipleOrdersSignedERC721() public {
-        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
+    function testTakerAskMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
+        _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
-        // @dev The test will sell itemId = numberOrders - 1
-        Merkle m = new Merkle();
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        mockERC721.batchMint(takerUser, numberOrders);
 
-        OrderStructs.Maker memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
+        OrderStructs.Maker[] memory makerBids = _createBatchMakerBids(numberOrders);
 
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
-        _verifyMerkleProof(m, merkleTree, orderHashes);
-
-        // Maker signs the root
-        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
-
-        // Verify validity
-        _assertValidMakerBidOrderWithMerkleTree(makerBid, signature, merkleTree);
-
-        // Mint asset
-        mockERC721.mint(takerUser, numberOrders - 1);
+        (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) = eip712MerkleTree.sign(
+            makerUserPK,
+            makerBids,
+            orderIndex
+        );
 
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
+
+        // Verify validity
+        _assertValidMakerOrderWithMerkleTree(makerBidToExecute, signature, merkleTree);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBidToExecute, signature, merkleTree, _EMPTY_AFFILIATE);
 
         // Maker user has received the asset
-        assertEq(mockERC721.ownerOf(numberOrders - 1), makerUser);
+        assertEq(mockERC721.ownerOf(orderIndex), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of the whole price (2% protocol)
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
         // Verify the nonce is marked as executed
-        assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        assertEq(
+            looksRareProtocol.userOrderNonce(makerUser, makerBidToExecute.orderNonce),
+            MAGIC_VALUE_ORDER_NONCE_EXECUTED
+        );
     }
 
-    function testTakerBidMultipleOrdersSignedERC721MerkleProofInvalid() public {
-        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
+    function testTakerBidMultipleOrdersSignedERC721MerkleProofInvalid(uint256 numberOrders, uint256 orderIndex) public {
+        _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
-        Merkle m = new Merkle();
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
-        OrderStructs.Maker memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
+        mockERC721.batchMint(makerUser, numberOrders);
 
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
-        bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
-        merkleTree.root = tamperedRoot;
+        OrderStructs.Maker[] memory makerAsks = _createBatchMakerAsks(numberOrders);
 
-        // Maker signs the root
-        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
-
-        // Verify invalidity of maker ask order
-        _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
-            makerAsk,
-            signature,
-            merkleTree,
-            ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE
+        (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) = eip712MerkleTree.sign(
+            makerUserPK,
+            makerAsks,
+            orderIndex
         );
+
+        bytes32 tamperedRoot = bytes32(uint256(merkleTree.root) + 1);
+        merkleTree.root = tamperedRoot;
 
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
 
-        vm.prank(takerUser);
-        vm.expectRevert(MerkleProofInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _EMPTY_AFFILIATE);
-    }
-
-    function testTakerAskMultipleOrdersSignedERC721MerkleProofInvalid() public {
-        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH;
-
-        Merkle m = new Merkle();
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
-        OrderStructs.Maker memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
-
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
-        bytes32 tamperedRoot = bytes32(uint256(m.getRoot(orderHashes)) + 1);
-        merkleTree.root = tamperedRoot;
-
-        // Maker signs the root
-        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
-
-        // Verify invalidity of maker bid order
-        _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
-            makerBid,
+        // Verify invalidity of maker ask order
+        _doesMakerOrderReturnValidationCodeWithMerkleTree(
+            makerAskToExecute,
             signature,
             merkleTree,
             ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE
         );
 
+        vm.prank(takerUser);
+        vm.expectRevert(MerkleProofInvalid.selector);
+        looksRareProtocol.executeTakerBid{value: price}(
+            takerBid,
+            makerAskToExecute,
+            signature,
+            merkleTree,
+            _EMPTY_AFFILIATE
+        );
+    }
+
+    function testTakerAskMultipleOrdersSignedERC721MerkleProofInvalid(uint256 numberOrders, uint256 orderIndex) public {
+        _assertMerkleTreeAssumptions(numberOrders, orderIndex);
+
+        mockERC721.batchMint(takerUser, numberOrders);
+
+        OrderStructs.Maker[] memory makerBids = _createBatchMakerBids(numberOrders);
+
+        (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) = eip712MerkleTree.sign(
+            makerUserPK,
+            makerBids,
+            orderIndex
+        );
+
+        bytes32 tamperedRoot = bytes32(uint256(merkleTree.root) + 1);
+        merkleTree.root = tamperedRoot;
+
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
+
+        // Verify invalidity of maker bid order
+        _doesMakerOrderReturnValidationCodeWithMerkleTree(
+            makerBidToExecute,
+            signature,
+            merkleTree,
+            ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE
+        );
 
         vm.prank(takerUser);
         vm.expectRevert(MerkleProofInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(takerAsk, makerBidToExecute, signature, merkleTree, _EMPTY_AFFILIATE);
     }
 
     function testTakerBidRevertsIfProofTooLarge() public {
-        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH + 1;
+        uint256 testProofLengthUpTo = MAX_CALLDATA_PROOF_LENGTH + 3;
+        mockERC721.batchMint(makerUser, 2 ** testProofLengthUpTo);
 
-        // The test will sell itemId = numberOrders - 1
-        Merkle m = new Merkle();
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        // Keep it reasonably large
+        for (uint256 proofLength = MAX_CALLDATA_PROOF_LENGTH + 1; proofLength <= testProofLengthUpTo; proofLength++) {
+            uint256 numberOrders = 2 ** proofLength;
+            uint256 orderIndex = numberOrders - 1;
 
-        for (uint256 i; i < numberOrders; i++) {
-            mockERC721.mint(makerUser, i);
+            OrderStructs.Maker[] memory makerAsks = _createBatchMakerAsks(numberOrders);
+
+            (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) = eip712MerkleTree.sign(
+                makerUserPK,
+                makerAsks,
+                orderIndex
+            );
+
+            // Prepare the taker bid
+            OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
+            OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
+
+            // Verify validity
+            _doesMakerOrderReturnValidationCodeWithMerkleTree(
+                makerAskToExecute,
+                signature,
+                merkleTree,
+                MERKLE_PROOF_PROOF_TOO_LARGE
+            );
+
+            vm.prank(takerUser);
+            vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, proofLength));
+            looksRareProtocol.executeTakerBid{value: price}(
+                takerBid,
+                makerAskToExecute,
+                signature,
+                merkleTree,
+                _EMPTY_AFFILIATE
+            );
         }
-
-        OrderStructs.Maker memory makerAsk = _createBatchMakerAskOrderHashes(orderHashes);
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
-        _verifyMerkleProof(m, merkleTree, orderHashes);
-
-        // Maker signs the root
-        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
-
-        // Verify validity
-        _doesMakerAskOrderReturnValidationCodeWithMerkleTree(
-            makerAsk,
-            signature,
-            merkleTree,
-            MERKLE_PROOF_PROOF_TOO_LARGE
-        );
-
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
-        vm.prank(takerUser);
-        vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, MAX_CALLDATA_PROOF_LENGTH + 1));
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, merkleTree, _EMPTY_AFFILIATE);
     }
 
     function testTakerAskRevertsIfProofTooLarge() public {
-        uint256 numberOrders = 2 ** MAX_CALLDATA_PROOF_LENGTH + 1;
+        uint256 testProofLengthUpTo = MAX_CALLDATA_PROOF_LENGTH + 3;
+        mockERC721.batchMint(takerUser, 2 ** testProofLengthUpTo);
 
-        // @dev The test will sell itemId = numberOrders - 1
-        Merkle m = new Merkle();
-        bytes32[] memory orderHashes = new bytes32[](numberOrders);
+        // Keep it reasonably large
+        for (uint256 proofLength = MAX_CALLDATA_PROOF_LENGTH + 1; proofLength <= testProofLengthUpTo; proofLength++) {
+            uint256 numberOrders = 2 ** proofLength;
+            uint256 orderIndex = numberOrders - 1;
 
-        OrderStructs.Maker memory makerBid = _createBatchMakerBidOrderHashes(orderHashes);
+            OrderStructs.Maker[] memory makerBids = _createBatchMakerBids(numberOrders);
 
-        OrderStructs.MerkleTree memory merkleTree = _getMerkleTree(m, orderHashes);
-        _verifyMerkleProof(m, merkleTree, orderHashes);
+            (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) = eip712MerkleTree.sign(
+                makerUserPK,
+                makerBids,
+                orderIndex
+            );
 
-        // Maker signs the root
-        bytes memory signature = _signMerkleProof(merkleTree, makerUserPK);
+            // Prepare the taker bid
+            OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+            OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
 
-        // Verify validity
-        _doesMakerBidOrderReturnValidationCodeWithMerkleTree(
-            makerBid,
-            signature,
-            merkleTree,
-            MERKLE_PROOF_PROOF_TOO_LARGE
-        );
+            // Verify validity
+            _doesMakerOrderReturnValidationCodeWithMerkleTree(
+                makerBidToExecute,
+                signature,
+                merkleTree,
+                MERKLE_PROOF_PROOF_TOO_LARGE
+            );
 
-        // Mint asset
-        mockERC721.mint(takerUser, numberOrders - 1);
-
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
-        vm.prank(takerUser);
-        vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, MAX_CALLDATA_PROOF_LENGTH + 1));
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, merkleTree, _EMPTY_AFFILIATE);
-    }
-
-    function _getMerkleTree(
-        Merkle m,
-        bytes32[] memory orderHashes
-    ) private pure returns (OrderStructs.MerkleTree memory merkleTree) {
-        uint256 numberOrders = orderHashes.length;
-        merkleTree = OrderStructs.MerkleTree({
-            root: m.getRoot(orderHashes),
-            proof: m.getProof(orderHashes, numberOrders - 1)
-        });
-    }
-
-    function _verifyMerkleProof(
-        Merkle m,
-        OrderStructs.MerkleTree memory merkleTree,
-        bytes32[] memory orderHashes
-    ) private {
-        uint256 numberOrders = orderHashes.length;
-
-        for (uint256 i; i < numberOrders; i++) {
-            {
-                bytes32[] memory tempMerkleProof = m.getProof(orderHashes, i);
-                assertTrue(m.verifyProof(merkleTree.root, tempMerkleProof, orderHashes[i]));
-            }
+            vm.prank(takerUser);
+            vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, proofLength));
+            looksRareProtocol.executeTakerBid{value: price}(
+                takerAsk,
+                makerBidToExecute,
+                signature,
+                merkleTree,
+                _EMPTY_AFFILIATE
+            );
         }
     }
 
-    function _createBatchMakerAskOrderHashes(
-        bytes32[] memory orderHashes
-    ) private view returns (OrderStructs.Maker memory makerAsk) {
-        uint256 numberOrders = orderHashes.length;
-
+    function _createBatchMakerAsks(uint256 numberOrders) private view returns (OrderStructs.Maker[] memory makerAsks) {
+        makerAsks = new OrderStructs.Maker[](numberOrders);
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
-            makerAsk = _createSingleItemMakerAskOrder({
-                askNonce: 0, // askNonce
-                subsetNonce: 0, // subsetNonce
+            makerAsks[i] = _createSingleItemMakerAskOrder({
+                askNonce: 0,
+                subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
                 orderNonce: i, // incremental
@@ -277,19 +283,14 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 minPrice: price,
                 itemId: i
             });
-
-            orderHashes[i] = _computeOrderHash(makerAsk);
         }
     }
 
-    function _createBatchMakerBidOrderHashes(
-        bytes32[] memory orderHashes
-    ) private view returns (OrderStructs.Maker memory makerBid) {
-        uint256 numberOrders = orderHashes.length;
-
+    function _createBatchMakerBids(uint256 numberOrders) private view returns (OrderStructs.Maker[] memory makerBids) {
+        makerBids = new OrderStructs.Maker[](numberOrders);
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
-            makerBid = _createSingleItemMakerBidOrder({
+            makerBids[i] = _createSingleItemMakerBidOrder({
                 bidNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
@@ -301,8 +302,11 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 maxPrice: price,
                 itemId: i
             });
-
-            orderHashes[i] = _computeOrderHash(makerBid);
         }
+    }
+
+    function _assertMerkleTreeAssumptions(uint256 numberOrders, uint256 orderIndex) private pure {
+        vm.assume(numberOrders > 0 && numberOrders <= 2 ** MAX_CALLDATA_PROOF_LENGTH);
+        vm.assume(orderIndex < numberOrders);
     }
 }

@@ -29,6 +29,7 @@ import {MockERC20} from "../mock/MockERC20.sol";
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 /**
  * @dev Not everything is tested in this file. Most tests live in other files
@@ -78,8 +79,9 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerAskStrategyNotImplemented() public {
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.strategyId = 1;
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -89,11 +91,12 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerBidStrategyNotImplemented() public {
         OrderStructs.Maker memory makerBid;
+        makerBid.quoteType = QuoteType.Bid;
         address currency = address(1); // it cannot be 0
         looksRareProtocol.updateCurrencyStatus(currency, true);
         makerBid.currency = currency;
         makerBid.strategyId = 1;
-        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -103,6 +106,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerAskLooksRareProtocolIsNotAWhitelistedOperator() public {
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.signer = makerUser;
         makerAsk.assetType = AssetType.ERC721;
         makerAsk.collection = address(new MockERC721());
@@ -117,7 +121,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
         transferManager.removeOperator(operators[0]);
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -127,9 +131,10 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerAskWrongAssetTypeERC721() public {
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.assetType = AssetType.ERC721;
         makerAsk.collection = address(new MockERC721SupportsNoInterface());
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -139,9 +144,10 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerBidWrongAssetTypeERC721() public {
         OrderStructs.Maker memory makerBid;
+        makerBid.quoteType = QuoteType.Bid;
         makerBid.assetType = AssetType.ERC721;
         makerBid.collection = address(new MockERC721SupportsNoInterface());
-        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -159,6 +165,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function _testMakerBidERC721InvalidAmount(uint256 amount) public {
         OrderStructs.Maker memory makerBid;
+        makerBid.quoteType = QuoteType.Bid;
         makerBid.assetType = AssetType.ERC721;
         makerBid.collection = address(new MockERC721());
         uint256[] memory itemIds = new uint256[](1);
@@ -167,7 +174,7 @@ contract OrderValidatorV2ATest is TestParameters {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
         makerBid.amounts = amounts;
-        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -178,10 +185,11 @@ contract OrderValidatorV2ATest is TestParameters {
     function testMakerBidMissingIsValidSignature() public {
         OrderStructs.Maker memory makerBid;
         // This contract does not have isValidSignature implemented
+        makerBid.quoteType = QuoteType.Bid;
         makerBid.signer = address(this);
         makerBid.assetType = AssetType.ERC721;
         makerBid.collection = address(new MockERC721());
-        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -193,7 +201,7 @@ contract OrderValidatorV2ATest is TestParameters {
         OrderStructs.Maker memory makerAsk;
         makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = address(new MockERC1155SupportsNoInterface());
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -203,9 +211,10 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerBidWrongAssetTypeERC1155() public {
         OrderStructs.Maker memory makerBid;
+        makerBid.quoteType = QuoteType.Bid;
         makerBid.assetType = AssetType.ERC1155;
         makerBid.collection = address(new MockERC1155SupportsNoInterface());
-        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -215,6 +224,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerBidInsufficientERC20Allowance() public {
         OrderStructs.Maker memory makerBid;
+        makerBid.quoteType = QuoteType.Bid;
         MockERC20 mockERC20 = new MockERC20();
         makerBid.assetType = AssetType.ERC721;
         makerBid.collection = address(new MockERC721());
@@ -229,7 +239,7 @@ contract OrderValidatorV2ATest is TestParameters {
         mockERC20.approve(address(orderValidator.looksRareProtocol()), makerBid.price - 1 wei);
         vm.stopPrank();
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerBidOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerBid,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -243,6 +253,7 @@ contract OrderValidatorV2ATest is TestParameters {
         mockERC721.mint(makerUser, 1);
 
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.assetType = AssetType.ERC721;
         makerAsk.collection = address(mockERC721);
         makerAsk.signer = makerUser;
@@ -262,7 +273,7 @@ contract OrderValidatorV2ATest is TestParameters {
         amounts[1] = 1;
         makerAsk.amounts = amounts;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -272,6 +283,7 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testMakerAskDoesNotOwnERC721() public {
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.assetType = AssetType.ERC721;
         MockERC721 mockERC721 = new MockERC721();
         mockERC721.mint(address(this), 0);
@@ -281,11 +293,12 @@ contract OrderValidatorV2ATest is TestParameters {
         uint256[] memory itemIds = new uint256[](1);
         makerAsk.itemIds = itemIds;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
         );
+
         assertEq(validationCodes[5], ERC721_ITEM_ID_NOT_IN_BALANCE);
     }
 
@@ -308,6 +321,7 @@ contract OrderValidatorV2ATest is TestParameters {
         }
 
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = collection;
         makerAsk.signer = makerUser;
@@ -318,7 +332,7 @@ contract OrderValidatorV2ATest is TestParameters {
         amounts[0] = 1;
         makerAsk.amounts = amounts;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -330,6 +344,7 @@ contract OrderValidatorV2ATest is TestParameters {
         MockERC1155WithoutAnyBalanceOf mockERC1155 = new MockERC1155WithoutAnyBalanceOf();
 
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = address(mockERC1155);
         makerAsk.signer = makerUser;
@@ -340,7 +355,7 @@ contract OrderValidatorV2ATest is TestParameters {
         amounts[0] = 1;
         makerAsk.amounts = amounts;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -353,6 +368,7 @@ contract OrderValidatorV2ATest is TestParameters {
         mockERC1155.mint({to: makerUser, tokenId: 0, amount: 1});
 
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = address(mockERC1155);
         makerAsk.signer = makerUser;
@@ -363,7 +379,7 @@ contract OrderValidatorV2ATest is TestParameters {
         amounts[0] = 1;
         makerAsk.amounts = amounts;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE
@@ -376,6 +392,7 @@ contract OrderValidatorV2ATest is TestParameters {
         mockERC1155.mint({to: makerUser, tokenId: 0, amount: 1});
 
         OrderStructs.Maker memory makerAsk;
+        makerAsk.quoteType = QuoteType.Ask;
         makerAsk.assetType = AssetType.ERC1155;
         makerAsk.collection = address(mockERC1155);
         makerAsk.signer = makerUser;
@@ -386,7 +403,7 @@ contract OrderValidatorV2ATest is TestParameters {
         amounts[0] = 1;
         makerAsk.amounts = amounts;
 
-        uint256[9] memory validationCodes = orderValidator.checkMakerAskOrderValidity(
+        uint256[9] memory validationCodes = orderValidator.checkMakerOrderValidity(
             makerAsk,
             new bytes(65),
             _EMPTY_MERKLE_TREE

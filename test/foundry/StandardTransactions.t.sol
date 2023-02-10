@@ -53,7 +53,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
         // Verify validity of maker ask order
-        _assertValidMakerAskOrder(makerAsk, signature);
+        _assertValidMakerOrder(makerAsk, signature);
 
         // Arrays for events
         uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: _standardRoyaltyFee});
@@ -131,7 +131,7 @@ contract StandardTransactionsTest is ProtocolBase {
         takerBid.recipient = address(0);
 
         // Verify validity of maker ask order
-        _assertValidMakerAskOrder(makerAsk, signature);
+        _assertValidMakerOrder(makerAsk, signature);
 
         // Arrays for events
         uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: 0});
@@ -199,7 +199,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
         // Verify maker bid order
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Mint asset
         mockERC721.mint(takerUser, itemId);
@@ -265,7 +265,7 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
         // Verify maker bid order
-        _assertValidMakerBidOrder(makerBid, signature);
+        _assertValidMakerOrder(makerBid, signature);
 
         // Adjustment
         takerAsk.recipient = address(0);

@@ -38,7 +38,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         _assertOrderIsValid(makerAsk);
-        _doesMakerAskOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
+        _doesMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         _executeTakerBid(takerBid, makerAsk, signature);
@@ -75,7 +75,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
 
         // Verify it is valid
         _assertOrderIsValid(newMakerAsk);
-        _assertValidMakerAskOrder(newMakerAsk, signature);
+        _assertValidMakerOrder(newMakerAsk, signature);
 
         _executeTakerBid(newTakerBid, newMakerAsk, signature);
 
@@ -106,7 +106,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
 
         // Verify it is valid
         _assertOrderIsValid(makerAsk);
-        _assertValidMakerAskOrder(makerAsk, signature);
+        _assertValidMakerOrder(makerAsk, signature);
 
         _executeTakerBid(takerBid, makerAsk, signature);
 

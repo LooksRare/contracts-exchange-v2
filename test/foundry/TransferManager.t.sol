@@ -443,7 +443,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         transferManager.allowOperator(randomOperator);
     }
 
-    function testallowOperatorNotOwner() public {
+    function testAllowOperatorNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         transferManager.allowOperator(address(0));
     }

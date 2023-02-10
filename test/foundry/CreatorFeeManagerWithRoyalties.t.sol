@@ -61,10 +61,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _setUpRoyaltiesRegistry(_newCreatorRoyaltyFee);
 
         // Prepare the order hash
-        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
-            address(mockERC721),
-            address(weth)
-        );
+        (OrderStructs.Maker memory makerBid, ) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
@@ -93,7 +90,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _setUpUsers();
 
         // Prepare the order hash
-        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+        (OrderStructs.Maker memory makerBid, ) = _createMockMakerBidAndTakerAsk(
             address(mockERC721WithRoyalties),
             address(weth)
         );

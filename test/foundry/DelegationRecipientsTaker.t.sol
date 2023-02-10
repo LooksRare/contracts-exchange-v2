@@ -98,7 +98,6 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
      */
     function testTakerBidERC721WithRoyaltiesFromRegistryWithDelegation() public {
         address randomRecipientNFT = address(420);
-        uint256 itemId = 0;
 
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);

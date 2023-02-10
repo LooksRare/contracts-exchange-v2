@@ -214,14 +214,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             );
 
         vm.prank(_owner);
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            true,
-            address(strategyMultiFillCollectionOrder)
-        );
+        _addStrategy(address(strategyMultiFillCollectionOrder), selector, true);
 
         // 1. Maker signs a message and execute a partial fill on it
         uint256 amountsToFill = 4;

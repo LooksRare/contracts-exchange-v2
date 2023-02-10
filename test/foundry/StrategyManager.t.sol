@@ -206,14 +206,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
 
     function testAddStrategyNoSelector() public asPrankedUser(_owner) {
         vm.expectRevert(IStrategyManager.StrategyHasNoSelector.selector);
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            _EMPTY_BYTES4,
-            true,
-            address(0)
-        );
+        _addStrategy(address(0), _EMPTY_BYTES4, true);
     }
 
     function testAddStrategyNotV2Strategy() public asPrankedUser(_owner) {
@@ -221,50 +214,22 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
 
         // 1. EOA
         vm.expectRevert();
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            randomSelector,
-            true,
-            address(0)
-        );
+        _addStrategy(address(0), randomSelector, true);
 
         // 2. Invalid contract (e.g. LooksRareProtocol)
         vm.expectRevert();
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            randomSelector,
-            true,
-            address(looksRareProtocol)
-        );
+        _addStrategy(address(looksRareProtocol), randomSelector, true);
 
         // 3. Contract that implements the function but returns false
         FalseBaseStrategy falseStrategy = new FalseBaseStrategy();
 
         vm.expectRevert(NotV2Strategy.selector);
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            randomSelector,
-            true,
-            address(falseStrategy)
-        );
+        _addStrategy(address(falseStrategy), randomSelector, true);
     }
 
     function testAddStrategyNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            _EMPTY_BYTES4,
-            true,
-            address(0)
-        );
+        _addStrategy(address(0), _EMPTY_BYTES4, true);
     }
 
     function testUpdateStrategyNotOwner() public {

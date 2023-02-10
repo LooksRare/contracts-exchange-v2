@@ -153,10 +153,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        for (uint256 i; i < makerBid.itemIds.length; i++) {
-            // Maker user has received all the assets in the bundle
-            assertEq(mockERC721.ownerOf(makerBid.itemIds[i]), makerUser);
-        }
+        _assertMockERC721Ownership(makerBid.itemIds, makerUser);
 
         _assertSuccessfulTakerAskBundle(makerBid);
     }

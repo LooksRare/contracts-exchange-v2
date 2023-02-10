@@ -233,6 +233,12 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         assertEq(strategyImplementation, expectedStrategyAddress);
     }
 
+    function _assertMockERC721Ownership(uint256[] memory itemIds, address owner) internal {
+        for (uint256 i; i < itemIds.length; i++) {
+            assertEq(mockERC721.ownerOf(itemIds[i]), owner);
+        }
+    }
+
     /**
      * NOTE: It inherits from ILooksRareProtocol, so it
      *       needs to at least define the functions below.

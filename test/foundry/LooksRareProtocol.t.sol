@@ -215,29 +215,14 @@ contract LooksRareProtocolTest is ProtocolBase {
 
     function testCannotCallRestrictedExecuteTakerBid() public {
         _setUpUsers();
-        uint256 itemId = 0;
+
+        // Prepare the orders
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
-
-        // Prepare the orders and signature
-        (
-            OrderStructs.Maker memory makerAsk,
-            OrderStructs.Taker memory takerBid,
-
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Ask,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                price: price,
-                itemId: itemId
-            });
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         vm.prank(takerUser);
         vm.expectRevert(CallerInvalid.selector);

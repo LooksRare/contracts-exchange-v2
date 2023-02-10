@@ -29,28 +29,16 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
         address randomRecipientSaleProceeds = address(420);
-        uint256 itemId = 0;
+
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
-
-        (
-            OrderStructs.Maker memory makerBid,
-            OrderStructs.Taker memory takerAsk,
-            bytes memory signature
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Bid,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                price: price,
-                itemId: itemId
-            });
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         // Adjust recipient
         takerAsk.recipient = randomRecipientSaleProceeds;
@@ -90,7 +78,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), makerUser);
+        assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Random recipient user receives 98% of the whole price and taker user receives nothing.
@@ -115,26 +103,14 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        // Mint asset
-        mockERC721.mint(makerUser, itemId);
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
-        (
-            OrderStructs.Maker memory makerAsk,
-            OrderStructs.Taker memory takerBid,
-            bytes memory signature
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Ask,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                price: price,
-                itemId: itemId
-            });
+        // Mint asset
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
+
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Adjust recipient to random recipient
         takerBid.recipient = randomRecipientNFT;
@@ -180,7 +156,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         );
 
         // Random recipient user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), randomRecipientNFT);
+        assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), randomRecipientNFT);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 98% of the whole price (2%)

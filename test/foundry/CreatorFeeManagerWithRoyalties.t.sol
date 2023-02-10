@@ -327,23 +327,12 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_creatorRoyaltyFeeTooHigh);
 
-        (
-            OrderStructs.Maker memory makerBid,
-            OrderStructs.Taker memory takerAsk,
-            bytes memory signature
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Bid,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                price: 1 ether,
-                itemId: 420
-            });
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
         mockERC721.mint(takerUser, makerBid.itemIds[0]);
@@ -359,24 +348,13 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(makerUser, 1);
 
-        // Prepare the orders and signature
-        OrderStructs.Maker memory makerAsk;
-        OrderStructs.Taker memory takerBid;
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        // The itemId changes as it is already minted before
+        makerAsk.itemIds[0] = 1;
 
-        (makerAsk, takerBid, signature) = _createSingleItemMakerAndTakerOrderAndSignature({
-            quoteType: QuoteType.Ask,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            price: 1 ether,
-            // The itemId changes as it is already minted before
-            itemId: 1
-        });
+        signature = _signMakerOrder(makerAsk, makerUserPK);
 
         _assertMakerOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
 

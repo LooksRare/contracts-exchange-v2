@@ -18,7 +18,7 @@ import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 contract StandardTransactionsTest is ProtocolBase {
     error ERC721TransferFromFail();
 
-    uint256 private constant itemId = 42;
+    uint256 private constant itemId = 420;
 
     function setUp() public {
         _setUp();
@@ -32,27 +32,16 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        // Mint asset
-        mockERC721.mint(makerUser, itemId);
-
         // Prepare the orders and signature
-        (
-            OrderStructs.Maker memory makerAsk,
-            OrderStructs.Taker memory takerBid,
-            bytes memory signature
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Ask,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                price: price,
-                itemId: itemId
-            });
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.price = price;
+
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
+
+        // Mint asset
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         // Verify validity of maker ask order
         _assertValidMakerOrder(makerAsk, signature);
@@ -108,27 +97,16 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.assume(price <= 2 ether);
         _setUpUsers();
 
-        // Mint asset
-        mockERC721.mint(makerUser, itemId);
-
         // Prepare the orders and signature
-        (
-            OrderStructs.Maker memory makerAsk,
-            OrderStructs.Taker memory takerBid,
-            bytes memory signature
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Ask,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                price: price,
-                itemId: itemId
-            });
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.price = price;
+
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
+
+        // Mint asset
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         // Adjustment
         takerBid.recipient = address(0);
@@ -184,29 +162,20 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        (
-            OrderStructs.Maker memory makerBid,
-            OrderStructs.Taker memory takerAsk,
-            bytes memory signature
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Bid,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                price: price,
-                itemId: itemId
-            });
+        // Prepare the orders and signature
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+        makerBid.price = price;
+
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify maker bid order
         _assertValidMakerOrder(makerBid, signature);
 
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         // Arrays for events
         uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: _standardRoyaltyFee});
@@ -251,23 +220,13 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.assume(price <= 2 ether);
         _setUpUsers();
 
-        (
-            OrderStructs.Maker memory makerBid,
-            OrderStructs.Taker memory takerAsk,
-            bytes memory signature
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Bid,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                price: price,
-                itemId: itemId
-            });
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+        makerBid.price = price;
+
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify maker bid order
         _assertValidMakerOrder(makerBid, signature);
@@ -276,7 +235,7 @@ contract StandardTransactionsTest is ProtocolBase {
         takerAsk.recipient = address(0);
 
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         // Arrays for events
         uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: 0});

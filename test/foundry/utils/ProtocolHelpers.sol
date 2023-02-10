@@ -93,46 +93,6 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         });
     }
 
-    function _createSingleItemMakerAndTakerOrderAndSignature(
-        QuoteType quoteType,
-        uint256 globalNonce,
-        uint256 subsetNonce,
-        uint256 strategyId,
-        AssetType assetType,
-        uint256 orderNonce,
-        address collection,
-        address currency,
-        address signer,
-        uint256 price,
-        uint256 itemId
-    )
-        internal
-        view
-        returns (
-            OrderStructs.Maker memory newMakerOrder,
-            OrderStructs.Taker memory newTakerOrder,
-            bytes memory signature
-        )
-    {
-        newMakerOrder = _createSingleItemMakerOrder(
-            quoteType,
-            globalNonce,
-            subsetNonce,
-            strategyId,
-            assetType,
-            orderNonce,
-            collection,
-            currency,
-            signer,
-            price,
-            itemId
-        );
-
-        signature = _signMakerOrder(newMakerOrder, makerUserPK);
-
-        newTakerOrder = OrderStructs.Taker(takerUser, abi.encode());
-    }
-
     function _signMakerOrder(OrderStructs.Maker memory maker, uint256 signerKey) internal view returns (bytes memory) {
         bytes32 orderHash = _computeOrderHash(maker);
 

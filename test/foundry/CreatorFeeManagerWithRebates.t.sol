@@ -40,43 +40,28 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
     function _testCreatorFeeRebatesArePaid(address erc721) private {
         _setUpUsers();
 
-        // Parameters
-        uint256 price = 1 ether;
-        uint256 itemId = 42;
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            erc721,
+            address(weth)
+        );
+
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         if (erc721 == address(mockERC721)) {
             // Adjust royalties
             _setUpRoyaltiesRegistry(_standardRoyaltyFee);
             // Mint asset
-            mockERC721.mint(takerUser, itemId);
+            mockERC721.mint(takerUser, makerBid.itemIds[0]);
         } else if (erc721 == address(mockERC721WithRoyalties)) {
             // Adjust ERC721 with royalties
             mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(
-                itemId,
+                makerBid.itemIds[0],
                 _royaltyRecipient,
                 _standardRoyaltyFee
             );
             // Mint asset
-            mockERC721WithRoyalties.mint(takerUser, itemId);
+            mockERC721WithRoyalties.mint(takerUser, makerBid.itemIds[0]);
         }
-
-        (
-            OrderStructs.Maker memory makerBid,
-            OrderStructs.Taker memory takerAsk,
-            bytes memory signature
-        ) = _createSingleItemMakerAndTakerOrderAndSignature({
-                quoteType: QuoteType.Bid,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: erc721,
-                currency: address(weth),
-                signer: makerUser,
-                price: price,
-                itemId: itemId
-            });
 
         _assertValidMakerOrder(makerBid, signature);
 
@@ -85,7 +70,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Verify ownership is transferred
-        assertEq(IERC721(erc721).ownerOf(itemId), makerUser);
+        assertEq(IERC721(erc721).ownerOf(makerBid.itemIds[0]), makerUser);
         _assertSuccessfulTakerAsk(makerBid);
     }
 

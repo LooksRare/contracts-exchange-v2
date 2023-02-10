@@ -247,31 +247,21 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(strategy)
         );
 
-        uint256 itemId = 0;
-        uint256 price = 1 ether;
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.strategyId = 1; // Fake strategy
+
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
-
-        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid, bytes memory signature) = _createSingleItemMakerAndTakerOrderAndSignature({
-            quoteType: QuoteType.Ask,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: 1, // Fake strategy
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            price: price,
-            itemId: itemId
-        });
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         _assertMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_INVALID_QUOTE_TYPE);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForStrategy.selector);
-        looksRareProtocol.executeTakerBid{value: price}(
+        looksRareProtocol.executeTakerBid{value: makerAsk.price}(
             takerBid,
             makerAsk,
             signature,
@@ -298,26 +288,17 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(strategy)
         );
 
-        uint256 itemId = 0;
-        uint256 price = 1 ether;
+        // Prepare the order hash
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+        makerBid.strategyId = 1; // Fake strategy
+
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset to ask user
-        mockERC721.mint(takerUser, itemId);
-
-        // Prepare the order hash
-        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk, bytes memory signature) = _createSingleItemMakerAndTakerOrderAndSignature({
-            quoteType: QuoteType.Bid,
-            globalNonce: 0,
-            subsetNonce: 0,
-            strategyId: 1, // Fake strategy
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            price: price,
-            itemId: itemId
-        });
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         _assertMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_INVALID_QUOTE_TYPE);
 

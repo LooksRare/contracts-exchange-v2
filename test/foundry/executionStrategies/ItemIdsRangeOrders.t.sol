@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {OrderInvalid, FunctionSelectorInvalid} from "../../../contracts/errors/SharedErrors.sol";
+import {OrderInvalid, FunctionSelectorInvalid, QuoteTypeInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -18,6 +18,7 @@ import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     StrategyItemIdsRange public strategyItemIdsRange;
@@ -239,6 +240,17 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testWrongQuoteType() public {
+        _setUpNewStrategy();
+        (OrderStructs.Maker memory makerBid, ) = _createMakerBidAndTakerAsk(5, 10);
+        makerBid.quoteType = QuoteType.Ask;
+
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerOrderValid(makerBid, selector);
+
+        assertFalse(isValid);
+        assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
     function testTakerAskItemIdsAmountsLengthMismatch() public {

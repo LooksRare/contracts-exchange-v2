@@ -11,7 +11,7 @@ import {IERC721} from "@looksrare/contracts-libs/contracts/interfaces/generic/IE
 import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 
 // Errors and constants
-import {AmountInvalid, FunctionSelectorInvalid, MerkleProofInvalid, OrderInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, FunctionSelectorInvalid, MerkleProofInvalid, OrderInvalid, QuoteTypeInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureExpired, TransferCooldownPeriodTooHigh} from "../../../../contracts/errors/ReservoirErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../../contracts/constants/ValidationCodeConstants.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
@@ -208,6 +208,32 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         vm.prank(itemOwner);
         vm.expectRevert(MerkleProofInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+    }
+
+    function testWrongQuoteType() public {
+        _setUp();
+        _setUpNewStrategies();
+
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            minPrice: price,
+            itemId: 0
+        });
+
+        (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerOrderValid(
+            makerAsk,
+            selectorNoProof
+        );
+
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
     function testInvalidSelector() public {

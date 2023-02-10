@@ -237,7 +237,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -330,7 +330,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -461,7 +461,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerBid);
         // but... the OrderValidator catches this
-        _doesMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_NOT_ACTIVE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_NOT_ACTIVE);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         vm.prank(takerUser);

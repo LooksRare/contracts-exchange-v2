@@ -93,7 +93,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Maker bid is valid if its start time is within 5 minutes into the future
         vm.warp(makerBid.startTime - 5 minutes);
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
 
         // Maker bid is invalid if its start time is not within 5 minutes into the future
         vm.warp(makerBid.startTime - 5 minutes - 1 seconds);
@@ -116,7 +116,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         vm.warp(block.timestamp);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
 
         vm.warp(block.timestamp + 1 seconds);
         vm.expectRevert(OutsideOfTimeRange.selector);
@@ -137,7 +137,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.endTime = block.timestamp;
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -153,7 +153,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -173,7 +173,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -191,7 +191,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: makerAsk.price}(
@@ -218,7 +218,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: makerAsk.price}(
@@ -267,7 +267,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             itemId: itemId
         });
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_INVALID_QUOTE_TYPE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_INVALID_QUOTE_TYPE);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForStrategy.selector);
@@ -319,7 +319,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             itemId: itemId
         });
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_INVALID_QUOTE_TYPE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_INVALID_QUOTE_TYPE);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForStrategy.selector);

@@ -73,7 +73,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         transferManager.grantApprovals(operators);
         vm.stopPrank();
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, SIGNATURE_INVALID_EIP1271);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, SIGNATURE_INVALID_EIP1271);
 
         vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
@@ -139,7 +139,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         vm.prank(address(wallet));
         weth.approve(address(looksRareProtocol), price);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, SIGNATURE_INVALID_EIP1271);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, SIGNATURE_INVALID_EIP1271);
 
         vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);

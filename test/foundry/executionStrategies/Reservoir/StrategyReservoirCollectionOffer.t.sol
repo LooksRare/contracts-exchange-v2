@@ -489,7 +489,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
         // It fails because transferCooldownPeriod > MAXIMUM_TRANSFER_COOLDOWN_PERIOD
         _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(abi.encodeWithSelector(ItemTransferredTooRecently.selector, collection, itemId));
         vm.prank(itemOwner);
@@ -511,7 +511,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         signature = _signMakerOrder(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(TransferCooldownPeriodTooHigh.selector);
         vm.prank(itemOwner);
@@ -626,7 +626,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
         _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(itemOwner);
@@ -683,7 +683,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         OrderStructs.Taker memory takerAsk = OrderStructs.Taker(itemOwner, takerAdditionalParameters);
 
         _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(itemOwner);
@@ -695,7 +695,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         signature = _signMakerOrder(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         vm.prank(itemOwner);
@@ -708,7 +708,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         signature = _signMakerOrder(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(AmountInvalid.selector);
         vm.prank(itemOwner);
@@ -720,7 +720,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         signature = _signMakerOrder(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(AmountInvalid.selector);
         vm.prank(itemOwner);
@@ -814,7 +814,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, withMerkleTreeCriteria);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
     }
 
     function _setUpForkAtBlockNumber(uint256 blockNumber) private {

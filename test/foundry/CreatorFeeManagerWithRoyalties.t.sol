@@ -257,7 +257,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         // Taker user action should revert
         vm.prank(takerUser);
@@ -282,7 +282,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         vm.prank(takerUser);
         vm.expectRevert(
@@ -326,7 +326,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         // Taker user action should revert
         vm.prank(takerUser);
@@ -368,7 +368,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 itemId: 0
             });
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
 
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
         vm.prank(takerUser);
@@ -398,7 +398,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             itemId: 1
         });
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
 
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
         vm.prank(takerUser);

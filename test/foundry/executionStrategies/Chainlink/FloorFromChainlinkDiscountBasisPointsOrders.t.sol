@@ -120,7 +120,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);

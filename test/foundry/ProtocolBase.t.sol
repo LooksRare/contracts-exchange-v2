@@ -41,24 +41,24 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     WETH public weth;
 
-    function _doesMakerOrderReturnValidationCode(
+    function _assertMakerOrderReturnValidationCode(
         OrderStructs.Maker memory makerOrder,
         bytes memory signature,
         uint256 expectedValidationCode
     ) internal {
-        _doesMakerOrderReturnValidationCode(makerOrder, signature, _EMPTY_MERKLE_TREE, expectedValidationCode);
+        _assertMakerOrderReturnValidationCode(makerOrder, signature, _EMPTY_MERKLE_TREE, expectedValidationCode);
     }
 
-    function _doesMakerOrderReturnValidationCodeWithMerkleTree(
+    function _assertMakerOrderReturnValidationCodeWithMerkleTree(
         OrderStructs.Maker memory makerOrder,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree,
         uint256 expectedValidationCode
     ) internal {
-        _doesMakerOrderReturnValidationCode(makerOrder, signature, merkleTree, expectedValidationCode);
+        _assertMakerOrderReturnValidationCode(makerOrder, signature, merkleTree, expectedValidationCode);
     }
 
-    function _doesMakerOrderReturnValidationCode(
+    function _assertMakerOrderReturnValidationCode(
         OrderStructs.Maker memory makerOrder,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree,

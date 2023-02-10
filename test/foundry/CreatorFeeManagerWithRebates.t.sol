@@ -190,7 +190,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             );
         }
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         vm.prank(takerUser);
         vm.expectRevert(
@@ -235,7 +235,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             );
         }
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         vm.prank(takerUser);
         vm.expectRevert(

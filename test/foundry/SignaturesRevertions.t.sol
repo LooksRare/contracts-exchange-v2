@@ -45,7 +45,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         address randomUser = vm.addr(randomPK);
         _setUpUser(randomUser);
         bytes memory signature = _signMakerOrder(makerAsk, randomPK);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNER_EOA);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNER_EOA);
 
         vm.expectRevert(SignatureEOAInvalid.selector);
         vm.prank(takerUser);
@@ -83,7 +83,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         );
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_V_PARAMETER_EOA);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, INVALID_V_PARAMETER_EOA);
 
         vm.expectRevert(abi.encodeWithSelector(SignatureParameterVInvalid.selector, v));
         vm.prank(takerUser);
@@ -121,7 +121,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         );
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_S_PARAMETER_EOA);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, INVALID_S_PARAMETER_EOA);
 
         vm.expectRevert(abi.encodeWithSelector(SignatureParameterSInvalid.selector));
         vm.prank(takerUser);
@@ -159,7 +159,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         bytes32 r;
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, NULL_SIGNER_EOA);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, NULL_SIGNER_EOA);
 
         vm.expectRevert(abi.encodeWithSelector(NullSignerAddress.selector));
         vm.prank(takerUser);
@@ -191,7 +191,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         });
 
         bytes memory signature = new bytes(length);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNATURE_LENGTH);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNATURE_LENGTH);
 
         vm.expectRevert(abi.encodeWithSelector(SignatureLengthInvalid.selector, length));
         vm.prank(takerUser);

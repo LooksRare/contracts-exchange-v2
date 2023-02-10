@@ -15,7 +15,7 @@ interface IStrategy {
      * @param makerOrder Maker struct (maker specific parameters for the execution)
      * @param functionSelector Function selector for the strategy
      * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it return the error's 4 bytes selector
+     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
      */
     function isMakerOrderValid(
         OrderStructs.Maker calldata makerOrder,

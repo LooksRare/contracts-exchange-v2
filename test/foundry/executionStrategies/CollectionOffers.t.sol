@@ -44,6 +44,8 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testNewStrategies() public {
+        _assertStrategyAttributes(address(strategyCollectionOffer), selectorNoProof, true);
+
         (
             bool strategyIsActive,
             uint16 strategyStandardProtocolFee,
@@ -52,24 +54,6 @@ contract CollectionOrdersTest is ProtocolBase {
             bytes4 strategySelector,
             bool strategyIsMakerBid,
             address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selectorNoProof);
-        assertTrue(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyCollectionOffer));
-
-        (
-            strategyIsActive,
-            strategyStandardProtocolFee,
-            strategyMinTotalFee,
-            strategyMaxProtocolFee,
-            strategySelector,
-            strategyIsMakerBid,
-            strategyImplementation
         ) = looksRareProtocol.strategyInfo(2);
 
         assertTrue(strategyIsActive);

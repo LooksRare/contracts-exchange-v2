@@ -63,7 +63,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             currency: currency,
             signer: makerUser,
             price: 1 ether,
-            itemId: 0
+            itemId: 420
         });
 
         newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());

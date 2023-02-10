@@ -327,9 +327,6 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_creatorRoyaltyFeeTooHigh);
 
-        // Mint asset
-        mockERC721.mint(takerUser, 0);
-
         (
             OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
@@ -345,8 +342,11 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 currency: address(weth),
                 signer: makerUser,
                 price: 1 ether,
-                itemId: 0
+                itemId: 420
             });
+
+        // Mint asset
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         _assertMakerOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
 

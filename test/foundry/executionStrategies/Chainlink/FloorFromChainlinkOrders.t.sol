@@ -115,7 +115,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             currency: address(weth),
             signer: makerUser,
             price: 1 ether,
-            itemId: 0
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(makerAsk, bytes4(0));
@@ -133,7 +133,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             currency: address(weth),
             signer: makerUser,
             price: 1 ether,
-            itemId: 0
+            itemId: 420
         });
 
         (orderIsValid, errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(makerBid, bytes4(0));

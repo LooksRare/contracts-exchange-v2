@@ -378,7 +378,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             currency: address(weth),
             signer: makerUser,
             price: 1 ether,
-            itemId: 0
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerBid, selector);
@@ -486,7 +486,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             currency: address(weth),
             signer: makerUser,
             price: 1 ether,
-            itemId: 0
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, bytes4(0));

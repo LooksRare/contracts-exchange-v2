@@ -391,7 +391,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             currency: address(weth),
             signer: makerUser,
             price: 1 ether,
-            itemId: 0
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerBid, selector);
@@ -414,7 +414,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             currency: address(weth),
             signer: makerUser,
             price: 1 ether,
-            itemId: 0
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerAsk, bytes4(0));

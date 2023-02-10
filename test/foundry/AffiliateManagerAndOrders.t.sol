@@ -258,8 +258,6 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _setUpUsers();
         _setUpAffiliate();
 
-        uint256 itemId = 0;
-
         // Prepare the order hash
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
@@ -273,7 +271,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _assertValidMakerOrder(makerBid, signature);
 
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
 
@@ -284,7 +282,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _affiliate);
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), makerUser);
+        assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Taker ask user receives 98% of whole price (protocol fee)

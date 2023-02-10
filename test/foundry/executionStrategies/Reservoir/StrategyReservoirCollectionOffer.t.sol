@@ -963,24 +963,8 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
 
     function _setUpNewStrategies() private asPrankedUser(_owner) {
         strategyReservoirCollectionOffer = new StrategyReservoirCollectionOffer();
-
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selectorNoProof,
-            true,
-            address(strategyReservoirCollectionOffer)
-        );
-
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selectorWithProof,
-            true,
-            address(strategyReservoirCollectionOffer)
-        );
+        _addStrategy(address(strategyReservoirCollectionOffer), selectorNoProof, true);
+        _addStrategy(address(strategyReservoirCollectionOffer), selectorWithProof, true);
     }
 
     function _assertOrderIsValid(OrderStructs.Maker memory makerBid, bool withMerkleTreeCriteria) private {

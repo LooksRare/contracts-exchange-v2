@@ -51,15 +51,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             address(weth),
             0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419 // Mainnet address of the Chainlink price feed
         );
-
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            false,
-            address(strategyUSDDynamicAsk)
-        );
+        _addStrategy(address(strategyUSDDynamicAsk), selector, false);
     }
 
     function _createMakerAskAndTakerBid(

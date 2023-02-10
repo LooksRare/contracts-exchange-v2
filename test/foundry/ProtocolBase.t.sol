@@ -198,6 +198,17 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         takerOrder = OrderStructs.Taker(takerUser, abi.encode());
     }
 
+    function _addStrategy(address strategy, bytes4 selector, bool isMakerBid) internal {
+        looksRareProtocol.addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            selector,
+            isMakerBid,
+            strategy
+        );
+    }
+
     /**
      * NOTE: It inherits from ILooksRareProtocol, so it
      *       needs to at least define the functions below.

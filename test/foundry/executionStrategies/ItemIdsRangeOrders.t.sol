@@ -30,14 +30,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyItemIdsRange = new StrategyItemIdsRange();
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            true,
-            address(strategyItemIdsRange)
-        );
+        _addStrategy(address(strategyItemIdsRange), selector, true);
     }
 
     function _offeredAmounts(uint256 length, uint256 amount) private pure returns (uint256[] memory offeredAmounts) {

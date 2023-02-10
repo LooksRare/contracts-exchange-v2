@@ -219,14 +219,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyFloorFromChainlink = new StrategyChainlinkFloor(_owner, address(weth));
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            isMakerBid,
-            address(strategyFloorFromChainlink)
-        );
+        _addStrategy(address(strategyFloorFromChainlink), selector, isMakerBid);
     }
 
     function _setPriceFeed() internal asPrankedUser(_owner) {

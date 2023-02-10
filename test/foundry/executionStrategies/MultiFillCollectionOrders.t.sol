@@ -32,14 +32,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyMultiFillCollectionOrder = new StrategyTestMultiFillCollectionOrder(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            true,
-            address(strategyMultiFillCollectionOrder)
-        );
+        _addStrategy(address(strategyMultiFillCollectionOrder), selector, true);
     }
 
     function testNewStrategy() public {

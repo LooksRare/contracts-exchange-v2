@@ -39,24 +39,8 @@ contract CollectionOrdersTest is ProtocolBase {
 
     function _setUpNewStrategies() private asPrankedUser(_owner) {
         strategyCollectionOffer = new StrategyCollectionOffer();
-
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selectorNoProof,
-            true,
-            address(strategyCollectionOffer)
-        );
-
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selectorWithProof,
-            true,
-            address(strategyCollectionOffer)
-        );
+        _addStrategy(address(strategyCollectionOffer), selectorNoProof, true);
+        _addStrategy(address(strategyCollectionOffer), selectorWithProof, true);
     }
 
     function testNewStrategies() public {

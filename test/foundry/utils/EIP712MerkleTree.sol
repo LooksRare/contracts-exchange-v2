@@ -51,9 +51,10 @@ contract EIP712MerkleTree is Test {
         Merkle merkle = new Merkle();
         bytes32[] memory proof = merkle.getProof(leaves, makerOrderIndex);
         bytes32 root = merkle.getRoot(leaves);
+        OrderStructs.MerkleProofNode[] memory proofWithSide = new OrderStructs.MerkleProofNode[](proof.length);
 
         signature = _sign(privateKey, batchOrderTypehash, root);
-        merkleTree = OrderStructs.MerkleTree({root: root, proof: proof});
+        merkleTree = OrderStructs.MerkleTree({root: root, proof: proofWithSide});
     }
 
     function _emptyMakerOrderHash() private pure returns (bytes32 makerOrderHash) {

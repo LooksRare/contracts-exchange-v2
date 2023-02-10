@@ -67,4 +67,11 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
             countItemsFilledForOrderHash[orderHash] += countItemsToFill;
         }
     }
+
+    function isMakerOrderValid(
+        OrderStructs.Maker calldata,
+        bytes4
+    ) external view override returns (bool isValid, bytes4 errorSelector) {
+        //
+    }
 }

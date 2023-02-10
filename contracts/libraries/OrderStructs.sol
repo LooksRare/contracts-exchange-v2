@@ -70,7 +70,7 @@ library OrderStructs {
      * 3. Merkle tree struct
      */
 
-    enum MerkleProofSide { Left, Right }
+    enum MerkleProofSide { None, Left, Right }
 
     struct MerkleProofNode {
         bytes32 proofHash;

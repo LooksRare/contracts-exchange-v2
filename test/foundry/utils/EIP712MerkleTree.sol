@@ -11,7 +11,8 @@ import "../../../contracts/LooksRareProtocol.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {Test} from "forge-std/Test.sol";
 import {Math} from "../../../contracts/libraries/OpenZeppelin/Math.sol";
-import {Merkle} from "../../../lib/murky/src/Merkle.sol";
+// import {Merkle} from "../../../lib/murky/src/Merkle.sol";
+import {MerkleWithPosition} from "./MerkleWithPosition.sol";
 
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH} from "../../../contracts/constants/NumericConstants.sol";
@@ -37,24 +38,29 @@ contract EIP712MerkleTree is Test {
         }
         bytes32 batchOrderTypehash = _getBatchOrderTypehash(treeHeight);
         uint256 leafCount = 2 ** treeHeight;
-        bytes32[] memory leaves = new bytes32[](leafCount);
+        OrderStructs.MerkleProofNode[] memory leaves = new OrderStructs.MerkleProofNode[](leafCount);
 
         for (uint256 i; i < bidCount; i++) {
-            leaves[i] = makerOrders[i].hash();
+            leaves[i] = OrderStructs.MerkleProofNode({
+                proofHash: makerOrders[i].hash(),
+                side: OrderStructs.MerkleProofSide.None
+            });
         }
 
         bytes32 emptyMakerOrderHash = _emptyMakerOrderHash();
         for (uint256 i = bidCount; i < leafCount; i++) {
-            leaves[i] = emptyMakerOrderHash;
+            leaves[i] = OrderStructs.MerkleProofNode({
+                proofHash: emptyMakerOrderHash,
+                side: OrderStructs.MerkleProofSide.None
+            });
         }
 
-        Merkle merkle = new Merkle();
-        bytes32[] memory proof = merkle.getProof(leaves, makerOrderIndex);
+        MerkleWithPosition merkle = new MerkleWithPosition();
+        OrderStructs.MerkleProofNode[] memory proof = merkle.getProof(leaves, makerOrderIndex);
         bytes32 root = merkle.getRoot(leaves);
-        OrderStructs.MerkleProofNode[] memory proofWithSide = new OrderStructs.MerkleProofNode[](proof.length);
 
         signature = _sign(privateKey, batchOrderTypehash, root);
-        merkleTree = OrderStructs.MerkleTree({root: root, proof: proofWithSide});
+        merkleTree = OrderStructs.MerkleTree({root: root, proof: proof});
     }
 
     function _emptyMakerOrderHash() private pure returns (bytes32 makerOrderHash) {

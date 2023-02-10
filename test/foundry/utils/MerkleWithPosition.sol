@@ -227,8 +227,8 @@ contract MerkleWithPosition {
 
     function hashLeafPairsWithoutSort(bytes32 left, bytes32 right) private pure returns (bytes32 _hash) {
         assembly {
-            mstore(0x0, right)
-            mstore(0x20, left)
+            mstore(0x0, left)
+            mstore(0x20, right)
             _hash := keccak256(0x0, 0x40)
         }
     }

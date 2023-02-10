@@ -9,7 +9,6 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Other dependencies
 import {LooksRareProtocol} from "../LooksRareProtocol.sol";
-import {BatchOrderTypehashRegistry} from "../BatchOrderTypehashRegistry.sol";
 
 /**
  * @title ProtocolHelpers
@@ -51,8 +50,7 @@ contract ProtocolHelpers {
      */
     function computeDigestMerkleTree(OrderStructs.MerkleTree memory merkleTree) public view returns (bytes32 digest) {
         bytes32 domainSeparator = looksRareProtocol.domainSeparator();
-        BatchOrderTypehashRegistry batchOrderTypehashRegistry = looksRareProtocol.batchOrderTypehashRegistry();
-        bytes32 batchOrderHash = batchOrderTypehashRegistry.hash(merkleTree.root, merkleTree.proof.length);
+        bytes32 batchOrderHash = looksRareProtocol.hashBatchOrder(merkleTree.root, merkleTree.proof.length);
         return keccak256(abi.encodePacked(_ENCODING_PREFIX, domainSeparator, batchOrderHash));
     }
 

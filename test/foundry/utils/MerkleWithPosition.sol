@@ -84,11 +84,11 @@ contract MerkleWithPosition {
             uint256 length = data.length;
             if (length & 0x1 == 1) {
                 result = new OrderStructs.MerkleTreeNode[](length / 2 + 1);
-                (bytes32 hashed, bool swapped) = hashLeafPairs(data[length - 1].value, bytes32(0));
-                OrderStructs.MerkleTreeNodePosition position = swapped
-                    ? OrderStructs.MerkleTreeNodePosition.Right
-                    : OrderStructs.MerkleTreeNodePosition.Left;
-                result[result.length - 1] = OrderStructs.MerkleTreeNode({value: hashed, position: position});
+                (bytes32 hashed, ) = hashLeafPairs(data[length - 1].value, bytes32(0));
+                result[result.length - 1] = OrderStructs.MerkleTreeNode({
+                    value: hashed,
+                    position: OrderStructs.MerkleTreeNodePosition.None
+                });
             } else {
                 result = new OrderStructs.MerkleTreeNode[](length / 2);
             }

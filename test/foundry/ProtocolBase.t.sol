@@ -209,6 +209,30 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         );
     }
 
+    function _assertStrategyAttributes(
+        address expectedStrategyAddress,
+        bytes4 expectedSelector,
+        bool expectedIsMakerBid
+    ) internal {
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelector,
+            bool strategyIsMakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(1);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
+        assertEq(strategySelector, expectedSelector);
+        assertEq(strategyIsMakerBid, expectedIsMakerBid);
+        assertEq(strategyImplementation, expectedStrategyAddress);
+    }
+
     /**
      * NOTE: It inherits from ILooksRareProtocol, so it
      *       needs to at least define the functions below.

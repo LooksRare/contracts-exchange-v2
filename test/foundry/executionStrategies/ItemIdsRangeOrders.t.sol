@@ -88,23 +88,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
     function testNewStrategy() public {
         _setUpNewStrategy();
-        (
-            bool strategyIsActive,
-            uint16 strategyStandardProtocolFee,
-            uint16 strategyMinTotalFee,
-            uint16 strategyMaxProtocolFee,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selector);
-        assertTrue(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyItemIdsRange));
+        _assertStrategyAttributes(address(strategyItemIdsRange), selector, true);
     }
 
     function testTokenIdsRangeERC721(uint256 lowerBound, uint256 upperBound) public {

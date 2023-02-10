@@ -77,9 +77,6 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         StrategyCollectionOffer strategy = new StrategyCollectionOffer();
 
         uint256 strategyId = 1;
-        uint16 standardProtocolFeeBp = 0;
-        uint16 minTotalFeeBp = 200;
-        uint16 maxProtocolFeeBp = 200;
         bytes4 selector = StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
         bool isMakerBid = true;
         address implementation = address(strategy);
@@ -87,22 +84,15 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewStrategy(
             strategyId,
-            standardProtocolFeeBp,
-            minTotalFeeBp,
-            maxProtocolFeeBp,
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
             selector,
             isMakerBid,
             implementation
         );
 
-        looksRareProtocol.addStrategy(
-            standardProtocolFeeBp,
-            minTotalFeeBp,
-            maxProtocolFeeBp,
-            selector,
-            isMakerBid,
-            implementation
-        );
+        _addStrategy(implementation, selector, isMakerBid);
     }
 
     /**

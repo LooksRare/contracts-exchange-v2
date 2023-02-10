@@ -14,7 +14,7 @@ import {MerkleProofCalldata} from "../libraries/OpenZeppelin/MerkleProofCalldata
 
 // Interfaces
 import {ICreatorFeeManager} from "../interfaces/ICreatorFeeManager.sol";
-import {IExecutionStrategy} from "../interfaces/IExecutionStrategy.sol";
+import {IStrategy} from "../interfaces/IStrategy.sol";
 import {IRoyaltyFeeRegistry} from "../interfaces/IRoyaltyFeeRegistry.sol";
 
 // Shared errors
@@ -777,7 +777,7 @@ contract OrderValidatorV2A {
                 makerAsk.strategyId
             );
 
-            (bool isValid, bytes4 errorSelector) = IExecutionStrategy(strategyImplementation).isMakerOrderValid(
+            (bool isValid, bytes4 errorSelector) = IStrategy(strategyImplementation).isMakerOrderValid(
                 makerAsk,
                 strategySelector
             );
@@ -808,7 +808,7 @@ contract OrderValidatorV2A {
                 makerBid.strategyId
             );
 
-            (bool isValid, bytes4 errorSelector) = IExecutionStrategy(strategyImplementation).isMakerOrderValid(
+            (bool isValid, bytes4 errorSelector) = IStrategy(strategyImplementation).isMakerOrderValid(
                 makerBid,
                 strategySelector
             );

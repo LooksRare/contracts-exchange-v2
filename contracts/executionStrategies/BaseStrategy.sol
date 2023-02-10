@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 // Interfaces
-import {IBaseStrategy} from "../interfaces/IBaseStrategy.sol";
+import {IStrategy} from "../interfaces/IStrategy.sol";
 
 // Assembly constants
 import {OrderInvalid_error_selector} from "../constants/AssemblyConstants.sol";
@@ -17,9 +17,9 @@ import {AssetType} from "../enums/AssetType.sol";
  * @title BaseStrategy
  * @author LooksRare protocol team (👀,💎)
  */
-abstract contract BaseStrategy is IBaseStrategy {
+abstract contract BaseStrategy is IStrategy {
     /**
-     * @inheritdoc IBaseStrategy
+     * @inheritdoc IStrategy
      */
     function isLooksRareV2Strategy() external pure override returns (bool) {
         return true;

@@ -157,76 +157,13 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
             functionSelector == StrategyChainlinkFloor.executeBasisPointsPremiumStrategyWithTakerBid.selector ||
             functionSelector == StrategyChainlinkFloor.executeFixedPremiumStrategyWithTakerBid.selector
         ) {
-            if (makerOrder.quoteType != QuoteType.Ask) {
-                revert QuoteTypeInvalid();
-            }
-
-            if (makerOrder.currency != address(0)) {
-                if (makerOrder.currency != WETH) {
-                    return (isValid, CurrencyInvalid.selector);
-                }
-            }
-
-            if (makerOrder.additionalParameters.length != 32) {
-                return (isValid, OrderInvalid.selector);
-            }
-
-            if (makerOrder.itemIds.length != 1 || makerOrder.amounts.length != 1 || makerOrder.amounts[0] != 1) {
-                return (isValid, OrderInvalid.selector);
-            }
-
-            (, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerOrder.collection);
-
-            if (priceFeedErrorSelector == bytes4(0)) {
-                isValid = true;
-            } else {
-                errorSelector = priceFeedErrorSelector;
-            }
+            (isValid, errorSelector) = _isMakerAskValid(makerOrder);
         } else if (
             functionSelector ==
             StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector ||
             functionSelector == StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
-            if (makerOrder.quoteType != QuoteType.Bid) {
-                revert QuoteTypeInvalid();
-            }
-
-            if (makerOrder.currency != WETH) {
-                return (isValid, CurrencyInvalid.selector);
-            }
-
-            if (makerOrder.amounts.length != 1 || makerOrder.amounts[0] != 1) {
-                return (isValid, OrderInvalid.selector);
-            }
-
-            (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerOrder.collection);
-            uint256 discount = abi.decode(makerOrder.additionalParameters, (uint256));
-
-            if (
-                functionSelector ==
-                StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
-            ) {
-                if (discount > ONE_HUNDRED_PERCENT_IN_BP) {
-                    return (isValid, OrderInvalid.selector);
-                }
-            }
-
-            if (priceFeedErrorSelector != bytes4(0)) {
-                return (isValid, priceFeedErrorSelector);
-            }
-
-            if (
-                functionSelector ==
-                StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
-            ) {
-                if (floorPrice < discount) {
-                    // A special selector is returned to differentiate with OrderInvalid
-                    // since the maker can potentially become valid again
-                    return (isValid, DiscountGreaterThanFloorPrice.selector);
-                }
-            }
-
-            isValid = true;
+            (isValid, errorSelector) = _isMakerBidValid(makerOrder, functionSelector);
         } else {
             return (isValid, FunctionSelectorInvalid.selector);
         }
@@ -410,5 +347,81 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
         }
 
         return (uint256(answer), bytes4(0));
+    }
+
+    function _isMakerAskValid(
+        OrderStructs.Maker calldata makerOrder
+    ) private view returns (bool isValid, bytes4 errorSelector) {
+        if (makerOrder.quoteType != QuoteType.Ask) {
+            revert QuoteTypeInvalid();
+        }
+
+        if (makerOrder.currency != address(0)) {
+            if (makerOrder.currency != WETH) {
+                return (isValid, CurrencyInvalid.selector);
+            }
+        }
+
+        if (makerOrder.additionalParameters.length != 32) {
+            return (isValid, OrderInvalid.selector);
+        }
+
+        if (makerOrder.itemIds.length != 1 || makerOrder.amounts.length != 1 || makerOrder.amounts[0] != 1) {
+            return (isValid, OrderInvalid.selector);
+        }
+
+        (, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerOrder.collection);
+
+        if (priceFeedErrorSelector == bytes4(0)) {
+            isValid = true;
+        } else {
+            errorSelector = priceFeedErrorSelector;
+        }
+    }
+
+    function _isMakerBidValid(
+        OrderStructs.Maker calldata makerOrder,
+        bytes4 functionSelector
+    ) private view returns (bool isValid, bytes4 errorSelector) {
+        if (makerOrder.quoteType != QuoteType.Bid) {
+            revert QuoteTypeInvalid();
+        }
+
+        if (makerOrder.currency != WETH) {
+            return (isValid, CurrencyInvalid.selector);
+        }
+
+        if (makerOrder.amounts.length != 1 || makerOrder.amounts[0] != 1) {
+            return (isValid, OrderInvalid.selector);
+        }
+
+        (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerOrder.collection);
+
+        if (priceFeedErrorSelector != bytes4(0)) {
+            return (isValid, priceFeedErrorSelector);
+        }
+
+        uint256 discount = abi.decode(makerOrder.additionalParameters, (uint256));
+
+        if (
+            functionSelector ==
+            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
+        ) {
+            if (discount > ONE_HUNDRED_PERCENT_IN_BP) {
+                return (isValid, OrderInvalid.selector);
+            }
+        }
+
+        if (
+            functionSelector == StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
+        ) {
+            if (floorPrice < discount) {
+                // A special selector is returned to differentiate with OrderInvalid
+                // since the maker can potentially become valid again
+                return (isValid, DiscountGreaterThanFloorPrice.selector);
+            }
+        }
+
+        isValid = true;
     }
 }

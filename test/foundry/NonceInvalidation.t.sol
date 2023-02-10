@@ -13,6 +13,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract NonceInvalidationTest is INonceManager, ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -31,8 +32,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: subsetNonce,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -40,7 +42,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -101,8 +103,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         mockERC721.mint(makerUser, itemId);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: userGlobalAskNonce,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -110,7 +113,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -154,8 +157,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 420;
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: userGlobalBidNonce,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: userGlobalBidNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -163,7 +167,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -198,8 +202,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -207,7 +212,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -267,8 +272,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         amounts[0] = amountsToFill;
 
         // Prepare the first order
-        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
             assetType: AssetType.ERC721,
@@ -276,7 +282,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemIds: itemIds,
             amounts: amounts
         });
@@ -312,8 +318,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             amounts[0] = 1;
 
             // Prepare the second order
-            makerBid = _createMultiItemMakerBidOrder({
-                bidNonce: 0,
+            makerBid = _createMultiItemMakerOrder({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -321,7 +328,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
                 collection: address(mockERC721),
                 currency: address(weth),
                 signer: makerUser,
-                maxPrice: price,
+                price: price,
                 itemIds: itemIds,
                 amounts: amounts
             });
@@ -375,8 +382,9 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -384,7 +392,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 

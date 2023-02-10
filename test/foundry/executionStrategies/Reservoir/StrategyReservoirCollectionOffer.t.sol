@@ -21,6 +21,7 @@ import {StrategyReservoirCollectionOffer} from "../../../../contracts/executionS
 
 // Enums
 import {AssetType} from "../../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../../contracts/enums/QuoteType.sol";
 
 // Base test
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
@@ -165,8 +166,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -174,7 +176,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0
         });
 
@@ -214,8 +216,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUp();
         _setUpNewStrategies();
 
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -223,7 +226,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: 0
         });
 
@@ -240,8 +243,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUp();
         _setUpNewStrategies();
 
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 3,
             assetType: AssetType.ERC721,
@@ -249,7 +253,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0
         });
 
@@ -278,8 +282,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
@@ -287,7 +292,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0
         });
 
@@ -333,8 +338,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
@@ -342,7 +348,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0
         });
 
@@ -386,8 +392,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
@@ -395,7 +402,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -441,8 +448,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
@@ -450,7 +458,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -526,8 +534,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
@@ -535,7 +544,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -584,8 +593,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC1155,
@@ -593,7 +603,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -639,8 +649,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
@@ -648,7 +659,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -742,8 +753,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
@@ -751,7 +763,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: collection,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -784,8 +796,9 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpNewStrategies();
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
             assetType: AssetType.ERC721,
@@ -793,7 +806,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 

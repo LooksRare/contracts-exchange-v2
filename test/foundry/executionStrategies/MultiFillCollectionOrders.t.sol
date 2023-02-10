@@ -17,6 +17,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericCon
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -78,8 +79,9 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = amountsToFill;
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
             assetType: AssetType.ERC721,
@@ -87,7 +89,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemIds: itemIds,
             amounts: amounts
         });
@@ -168,8 +170,9 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         amounts[0] = amountsToFill;
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
             assetType: AssetType.ERC721,
@@ -177,7 +180,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemIds: itemIds,
             amounts: amounts
         });

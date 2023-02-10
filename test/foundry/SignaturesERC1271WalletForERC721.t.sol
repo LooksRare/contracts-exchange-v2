@@ -19,6 +19,7 @@ import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCod
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 /**
  * @dev ERC1271Wallet recovers a signature's signer using ECDSA. If it matches the mock wallet's
@@ -258,8 +259,9 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         mockERC721.mint(signer, itemId);
 
         // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -267,7 +269,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: signer,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -279,8 +281,9 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         address signer
     ) private returns (OrderStructs.Taker memory takerAsk, OrderStructs.Maker memory makerBid) {
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -288,7 +291,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: signer,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -319,8 +322,9 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
             mockERC721.mint(signer, i);
 
             // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -328,7 +332,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: signer,
-                minPrice: price,
+                price: price,
                 itemId: i // 0, 1, etc.
             });
 

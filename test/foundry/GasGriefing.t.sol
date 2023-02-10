@@ -16,6 +16,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract GasGriefingTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -41,8 +42,9 @@ contract GasGriefingTest is ProtocolBase {
         mockERC721.mint(gasGriefer, itemId);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -50,7 +52,7 @@ contract GasGriefingTest is ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: gasGriefer,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -103,8 +105,9 @@ contract GasGriefingTest is ProtocolBase {
             mockERC721.mint(gasGriefer, i);
 
             // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -112,7 +115,7 @@ contract GasGriefingTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: gasGriefer,
-                minPrice: price, // Fixed
+                price: price, // Fixed
                 itemId: i // (0, 1, etc.)
             });
 

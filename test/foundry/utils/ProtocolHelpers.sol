@@ -23,8 +23,9 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
 
     receive() external payable {}
 
-    function _createSingleItemMakerAskAndTakerBidOrderAndSignature(
-        uint256 askNonce,
+    function _createSingleItemMakerOrder(
+        QuoteType quoteType,
+        uint256 globalNonce,
         uint256 subsetNonce,
         uint256 strategyId,
         AssetType assetType,
@@ -32,15 +33,90 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         address collection,
         address currency,
         address signer,
-        uint256 minPrice,
+        uint256 price,
+        uint256 itemId
+    ) internal view returns (OrderStructs.Maker memory makerOrder) {
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = itemId;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
+        makerOrder = OrderStructs.Maker({
+            quoteType: quoteType,
+            globalNonce: globalNonce,
+            subsetNonce: subsetNonce,
+            orderNonce: orderNonce,
+            strategyId: strategyId,
+            assetType: assetType,
+            collection: collection,
+            currency: currency,
+            signer: signer,
+            startTime: block.timestamp,
+            endTime: block.timestamp + 1,
+            price: price,
+            itemIds: itemIds,
+            amounts: amounts,
+            additionalParameters: abi.encode()
+        });
+    }
+
+    function _createMultiItemMakerOrder(
+        QuoteType quoteType,
+        uint256 globalNonce,
+        uint256 subsetNonce,
+        uint256 strategyId,
+        AssetType assetType,
+        uint256 orderNonce,
+        address collection,
+        address currency,
+        address signer,
+        uint256 price,
+        uint256[] memory itemIds,
+        uint256[] memory amounts
+    ) internal view returns (OrderStructs.Maker memory newMakerBid) {
+        newMakerBid = OrderStructs.Maker({
+            quoteType: quoteType,
+            globalNonce: globalNonce,
+            subsetNonce: subsetNonce,
+            orderNonce: orderNonce,
+            strategyId: strategyId,
+            assetType: assetType,
+            collection: collection,
+            currency: currency,
+            signer: signer,
+            startTime: block.timestamp,
+            endTime: block.timestamp + 1,
+            price: price,
+            itemIds: itemIds,
+            amounts: amounts,
+            additionalParameters: abi.encode()
+        });
+    }
+
+    function _createSingleItemMakerAndTakerOrderAndSignature(
+        QuoteType quoteType,
+        uint256 globalNonce,
+        uint256 subsetNonce,
+        uint256 strategyId,
+        AssetType assetType,
+        uint256 orderNonce,
+        address collection,
+        address currency,
+        address signer,
+        uint256 price,
         uint256 itemId
     )
         internal
         view
-        returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid, bytes memory signature)
+        returns (
+            OrderStructs.Maker memory newMakerOrder,
+            OrderStructs.Taker memory newTakerOrder,
+            bytes memory signature
+        )
     {
-        newMakerAsk = _createSingleItemMakerAskOrder(
-            askNonce,
+        newMakerOrder = _createSingleItemMakerOrder(
+            quoteType,
+            globalNonce,
             subsetNonce,
             strategyId,
             assetType,
@@ -48,183 +124,13 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             collection,
             currency,
             signer,
-            minPrice,
+            price,
             itemId
         );
 
-        signature = _signMakerOrder(newMakerAsk, makerUserPK);
+        signature = _signMakerOrder(newMakerOrder, makerUserPK);
 
-        newTakerBid = OrderStructs.Taker(takerUser, abi.encode());
-    }
-
-    function _createSingleItemMakerAskOrder(
-        uint256 askNonce,
-        uint256 subsetNonce,
-        uint256 strategyId,
-        AssetType assetType,
-        uint256 orderNonce,
-        address collection,
-        address currency,
-        address signer,
-        uint256 minPrice,
-        uint256 itemId
-    ) internal view returns (OrderStructs.Maker memory newMakerAsk) {
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = itemId;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1;
-
-        newMakerAsk = OrderStructs.Maker({
-            quoteType: QuoteType.Ask,
-            globalNonce: askNonce,
-            orderNonce: orderNonce,
-            subsetNonce: subsetNonce,
-            strategyId: strategyId,
-            assetType: assetType,
-            collection: collection,
-            currency: currency,
-            signer: signer,
-            startTime: block.timestamp,
-            endTime: block.timestamp + 1,
-            price: minPrice,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
-        });
-    }
-
-    function _createMultiItemMakerAskOrder(
-        uint256 askNonce,
-        uint256 subsetNonce,
-        uint256 strategyId,
-        AssetType assetType,
-        uint256 orderNonce,
-        address collection,
-        address currency,
-        address signer,
-        uint256 minPrice,
-        uint256[] memory itemIds,
-        uint256[] memory amounts
-    ) internal view returns (OrderStructs.Maker memory newMakerAsk) {
-        newMakerAsk = OrderStructs.Maker({
-            quoteType: QuoteType.Ask,
-            globalNonce: askNonce,
-            orderNonce: orderNonce,
-            subsetNonce: subsetNonce,
-            strategyId: strategyId,
-            assetType: assetType,
-            collection: collection,
-            currency: currency,
-            signer: signer,
-            startTime: block.timestamp,
-            endTime: block.timestamp + 1,
-            price: minPrice,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
-        });
-    }
-
-    function _createSingleItemMakerBidAndTakerAskOrderAndSignature(
-        uint256 bidNonce,
-        uint256 subsetNonce,
-        uint256 strategyId,
-        AssetType assetType,
-        uint256 orderNonce,
-        address collection,
-        address currency,
-        address signer,
-        uint256 maxPrice,
-        uint256 itemId
-    )
-        internal
-        view
-        returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk, bytes memory signature)
-    {
-        newMakerBid = _createSingleItemMakerBidOrder(
-            bidNonce,
-            subsetNonce,
-            strategyId,
-            assetType,
-            orderNonce,
-            collection,
-            currency,
-            signer,
-            maxPrice,
-            itemId
-        );
-
-        signature = _signMakerOrder(newMakerBid, makerUserPK);
-
-        newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());
-    }
-
-    function _createSingleItemMakerBidOrder(
-        uint256 bidNonce,
-        uint256 subsetNonce,
-        uint256 strategyId,
-        AssetType assetType,
-        uint256 orderNonce,
-        address collection,
-        address currency,
-        address signer,
-        uint256 maxPrice,
-        uint256 itemId
-    ) internal view returns (OrderStructs.Maker memory newMakerBid) {
-        uint256[] memory itemIds = new uint256[](1);
-        itemIds[0] = itemId;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1;
-
-        newMakerBid = OrderStructs.Maker({
-            quoteType: QuoteType.Bid,
-            globalNonce: bidNonce,
-            subsetNonce: subsetNonce,
-            orderNonce: orderNonce,
-            strategyId: strategyId,
-            assetType: assetType,
-            collection: collection,
-            currency: currency,
-            signer: signer,
-            startTime: block.timestamp,
-            endTime: block.timestamp + 1,
-            price: maxPrice,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
-        });
-    }
-
-    function _createMultiItemMakerBidOrder(
-        uint256 bidNonce,
-        uint256 subsetNonce,
-        uint256 strategyId,
-        AssetType assetType,
-        uint256 orderNonce,
-        address collection,
-        address currency,
-        address signer,
-        uint256 maxPrice,
-        uint256[] memory itemIds,
-        uint256[] memory amounts
-    ) internal view returns (OrderStructs.Maker memory newMakerBid) {
-        newMakerBid = OrderStructs.Maker({
-            quoteType: QuoteType.Bid,
-            globalNonce: bidNonce,
-            subsetNonce: subsetNonce,
-            orderNonce: orderNonce,
-            strategyId: strategyId,
-            assetType: assetType,
-            collection: collection,
-            currency: currency,
-            signer: signer,
-            startTime: block.timestamp,
-            endTime: block.timestamp + 1,
-            price: maxPrice,
-            itemIds: itemIds,
-            amounts: amounts,
-            additionalParameters: abi.encode()
-        });
+        newTakerOrder = OrderStructs.Taker(takerUser, abi.encode());
     }
 
     function _signMakerOrder(OrderStructs.Maker memory maker, uint256 signerKey) internal view returns (bytes memory) {

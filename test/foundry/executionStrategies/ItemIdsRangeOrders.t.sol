@@ -53,8 +53,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     ) private returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
         uint256 mid = (lowerBound + upperBound) / 2;
 
-        newMakerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        newMakerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -62,7 +63,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemIds: new uint256[](0),
             amounts: new uint256[](0)
         });
@@ -154,8 +155,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
 
-        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC1155,
@@ -163,7 +165,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC1155),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemIds: new uint256[](0),
             amounts: new uint256[](0)
         });
@@ -469,8 +471,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInvalidSelector() public {
         _setUpNewStrategy();
 
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -478,7 +481,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemId: 0
         });
 

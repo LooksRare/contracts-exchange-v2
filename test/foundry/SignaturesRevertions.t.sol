@@ -14,6 +14,7 @@ import {INVALID_S_PARAMETER_EOA, INVALID_V_PARAMETER_EOA, NULL_SIGNER_EOA, INVAL
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract SignaturesRevertionsTest is ProtocolBase {
     uint256 internal constant _MAX_PRIVATE_KEY =
@@ -27,8 +28,9 @@ contract SignaturesRevertionsTest is ProtocolBase {
         // @dev Private keys 1 and 2 are used for maker/taker users
         vm.assume(randomPK > 2 && randomPK < _MAX_PRIVATE_KEY);
 
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -36,7 +38,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -59,8 +61,9 @@ contract SignaturesRevertionsTest is ProtocolBase {
     function testRevertIfInvalidVParameter(uint256 itemId, uint256 price, uint8 v) public {
         vm.assume(v != 27 && v != 28);
 
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -68,7 +71,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -96,8 +99,9 @@ contract SignaturesRevertionsTest is ProtocolBase {
     function testRevertIfInvalidSParameter(uint256 itemId, uint256 price, bytes32 s) public {
         vm.assume(uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0);
 
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -105,7 +109,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -131,8 +135,9 @@ contract SignaturesRevertionsTest is ProtocolBase {
     }
 
     function testRevertIfRecoveredSignerIsNullAddress(uint256 itemId, uint256 price) public {
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -140,7 +145,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -171,8 +176,9 @@ contract SignaturesRevertionsTest is ProtocolBase {
         // @dev Getting OutOfGas starting from 16,776,985, probably due to memory cost
         vm.assume(length != 64 && length != 65 && length < 16_776_985);
 
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -180,7 +186,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 

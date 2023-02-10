@@ -22,6 +22,7 @@ import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCod
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 /**
  * @dev ERC1271Wallet recovers a signature's signer using ECDSA. If it matches the mock wallet's
@@ -361,8 +362,9 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         mockERC1155.mint(signer, itemId, 1);
 
         // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC1155,
@@ -370,7 +372,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             collection: address(mockERC1155),
             currency: ETH,
             signer: signer,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -382,8 +384,9 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         address signer
     ) private returns (OrderStructs.Taker memory takerAsk, OrderStructs.Maker memory makerBid) {
         // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC1155,
@@ -391,7 +394,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             collection: address(mockERC1155),
             currency: address(weth),
             signer: signer,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -417,8 +420,9 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         }
 
         // Prepare the first order
-        makerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        makerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC1155,
@@ -426,7 +430,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             collection: address(mockERC1155),
             currency: address(weth),
             signer: signer,
-            maxPrice: price,
+            price: price,
             itemIds: itemIds,
             amounts: amounts
         });
@@ -455,8 +459,9 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             mockERC1155.mint(signer, i, 1);
 
             // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC1155,
@@ -464,7 +469,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
                 collection: address(mockERC1155),
                 currency: ETH,
                 signer: signer,
-                minPrice: price,
+                price: price,
                 itemId: i // 0, 1, etc.
             });
 

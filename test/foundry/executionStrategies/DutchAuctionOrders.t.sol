@@ -68,8 +68,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         }
 
         // Prepare the order hash
-        newMakerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        newMakerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -77,7 +78,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: endPrice,
+            price: endPrice,
             itemId: 1
         });
 
@@ -379,8 +380,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testWrongQuoteType() public {
         _setUpNewStrategy();
 
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -388,7 +390,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemId: 0
         });
 
@@ -401,8 +403,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testInvalidSelector() public {
         _setUpNewStrategy();
 
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -410,7 +413,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: 1 ether,
+            price: 1 ether,
             itemId: 0
         });
 

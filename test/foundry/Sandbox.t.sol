@@ -13,6 +13,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract SandboxTest is ProtocolBase {
     error ERC721TransferFromFail();
@@ -56,8 +57,9 @@ contract SandboxTest is ProtocolBase {
         uint256 itemId = _transferItemIdToUser(takerUser);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721, // it should be ERC1155
@@ -65,7 +67,7 @@ contract SandboxTest is ProtocolBase {
             collection: SANDBOX,
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -103,8 +105,9 @@ contract SandboxTest is ProtocolBase {
         uint256 itemId = _transferItemIdToUser(makerUser);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721, // it should be ERC1155
@@ -112,7 +115,7 @@ contract SandboxTest is ProtocolBase {
             collection: SANDBOX,
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 

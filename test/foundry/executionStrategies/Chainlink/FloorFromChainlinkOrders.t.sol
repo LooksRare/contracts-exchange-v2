@@ -22,6 +22,7 @@ import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
 // Enums
 import {AssetType} from "../../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../../contracts/enums/QuoteType.sol";
 
 abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager {
     StrategyChainlinkFloor internal strategyFloorFromChainlink;
@@ -103,8 +104,9 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     }
 
     function testInvalidSelector() public {
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -112,7 +114,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: 1 ether,
+            price: 1 ether,
             itemId: 0
         });
 
@@ -120,8 +122,9 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
 
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -129,7 +132,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemId: 0
         });
 
@@ -149,8 +152,9 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         mockERC721.mint(makerUser, 1);
 
         // Prepare the order hash
-        newMakerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        newMakerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -158,7 +162,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: LATEST_CHAINLINK_ANSWER_IN_WAD,
+            price: LATEST_CHAINLINK_ANSWER_IN_WAD,
             itemId: 1
         });
 
@@ -190,8 +194,9 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         }
 
         // Prepare the order hash
-        newMakerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        newMakerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -199,7 +204,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Doesn't matter, not used
         });
 

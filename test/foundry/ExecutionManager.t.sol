@@ -21,6 +21,7 @@ import {StrategyChainlinkFloor} from "../../contracts/executionStrategies/Chainl
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     function setUp() public {
@@ -252,8 +253,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Mint asset
         mockERC721.mint(makerUser, itemId);
 
-        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-            askNonce: 0,
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid, bytes memory signature) = _createSingleItemMakerAndTakerOrderAndSignature({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Fake strategy
             assetType: AssetType.ERC721,
@@ -261,7 +263,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -303,8 +305,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         mockERC721.mint(takerUser, itemId);
 
         // Prepare the order hash
-        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-            bidNonce: 0,
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk, bytes memory signature) = _createSingleItemMakerAndTakerOrderAndSignature({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Fake strategy
             assetType: AssetType.ERC721,
@@ -312,7 +315,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 

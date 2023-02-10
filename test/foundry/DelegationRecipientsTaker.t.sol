@@ -12,6 +12,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract DelegationRecipientsTakerTest is ProtocolBase {
     function setUp() public {
@@ -37,8 +38,9 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
             OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
-        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-                bidNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -46,7 +48,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: address(weth),
                 signer: makerUser,
-                maxPrice: price,
+                price: price,
                 itemId: itemId
             });
 
@@ -120,8 +122,9 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
             OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -129,7 +132,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price,
+                price: price,
                 itemId: itemId
             });
 

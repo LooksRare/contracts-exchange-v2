@@ -13,6 +13,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract StandardTransactionsTest is ProtocolBase {
     error ERC721TransferFromFail();
@@ -39,8 +40,9 @@ contract StandardTransactionsTest is ProtocolBase {
             OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -48,7 +50,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price,
+                price: price,
                 itemId: itemId
             });
 
@@ -114,8 +116,9 @@ contract StandardTransactionsTest is ProtocolBase {
             OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -123,7 +126,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price,
+                price: price,
                 itemId: itemId
             });
 
@@ -185,8 +188,9 @@ contract StandardTransactionsTest is ProtocolBase {
             OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
-        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-                bidNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -194,7 +198,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: address(weth),
                 signer: makerUser,
-                maxPrice: price,
+                price: price,
                 itemId: itemId
             });
 
@@ -251,8 +255,9 @@ contract StandardTransactionsTest is ProtocolBase {
             OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
-        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-                bidNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -260,7 +265,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: address(weth),
                 signer: makerUser,
-                maxPrice: price,
+                price: price,
                 itemId: itemId
             });
 
@@ -324,8 +329,9 @@ contract StandardTransactionsTest is ProtocolBase {
             mockERC721.mint(makerUser, i);
 
             // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -333,7 +339,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price, // Fixed
+                price: price, // Fixed
                 itemId: i // (0, 1, etc.)
             });
 
@@ -379,8 +385,6 @@ contract StandardTransactionsTest is ProtocolBase {
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */
     function testThreeTakerBidsERC721OneFails() public {
-        uint256 price = 1.4 ether;
-
         _setUpUsers();
 
         uint256 numberPurchases = 3;
@@ -395,8 +399,9 @@ contract StandardTransactionsTest is ProtocolBase {
             mockERC721.mint(makerUser, i);
 
             // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -404,7 +409,7 @@ contract StandardTransactionsTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price, // Fixed
+                price: 1.4 ether, // Fixed
                 itemId: i // (0, 1, etc.)
             });
 
@@ -428,7 +433,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
             vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
             vm.prank(takerUser);
-            looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberPurchases}(
                 takerBids,
                 makerAsks,
                 signatures,
@@ -447,7 +452,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
             vm.prank(takerUser);
             // Execute taker bid transaction
-            looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+            looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberPurchases}(
                 takerBids,
                 makerAsks,
                 signatures,
@@ -469,11 +474,11 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * price));
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * 1.4 ether));
         // Maker ask user receives 98% of the whole price (2% protocol)
         assertEq(
             address(makerUser).balance,
-            _initialETHBalanceUser + ((price * 9_800) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
+            _initialETHBalanceUser + ((1.4 ether * 9_800) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);

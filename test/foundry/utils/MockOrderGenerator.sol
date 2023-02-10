@@ -12,6 +12,7 @@ import {ProtocolHelpers} from "../utils/ProtocolHelpers.sol";
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerAskAndTakerBid(
@@ -24,8 +25,9 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType = AssetType.ERC1155;
         }
 
-        newMakerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        newMakerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
@@ -33,7 +35,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             collection: collection,
             currency: ETH,
             signer: makerUser,
-            minPrice: 1 ether,
+            price: 1 ether,
             itemId: 0
         });
 
@@ -50,8 +52,9 @@ contract MockOrderGenerator is ProtocolHelpers {
             assetType = AssetType.ERC1155;
         }
 
-        newMakerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        newMakerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
@@ -59,7 +62,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             collection: collection,
             currency: currency,
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemId: 0
         });
 
@@ -89,8 +92,9 @@ contract MockOrderGenerator is ProtocolHelpers {
             }
         }
 
-        newMakerAsk = _createMultiItemMakerAskOrder({
-            askNonce: 0,
+        newMakerAsk = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
@@ -98,7 +102,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             collection: collection,
             currency: ETH,
             signer: makerUser,
-            minPrice: 1 ether,
+            price: 1 ether,
             itemIds: itemIds,
             amounts: amounts
         });
@@ -130,8 +134,9 @@ contract MockOrderGenerator is ProtocolHelpers {
             }
         }
 
-        newMakerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        newMakerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
@@ -139,7 +144,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             collection: collection,
             currency: currency,
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemIds: itemIds,
             amounts: amounts
         });

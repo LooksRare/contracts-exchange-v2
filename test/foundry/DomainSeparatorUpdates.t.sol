@@ -14,6 +14,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract DomainSeparatorUpdatesTest is ProtocolBase {
     function setUp() public {
@@ -64,8 +65,9 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
             OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -73,7 +75,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price,
+                price: price,
                 itemId: itemId
             });
 
@@ -107,8 +109,9 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
             OrderStructs.Maker memory makerAsk,
             OrderStructs.Taker memory takerBid,
             bytes memory signature
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -116,7 +119,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price,
+                price: price,
                 itemId: itemId
             });
 

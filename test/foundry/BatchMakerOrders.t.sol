@@ -20,6 +20,7 @@ import {EIP712MerkleTree} from "./utils/EIP712MerkleTree.sol";
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
@@ -271,8 +272,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         makerAsks = new OrderStructs.Maker[](numberOrders);
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -280,7 +282,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price,
+                price: price,
                 itemId: i
             });
         }
@@ -290,8 +292,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
         makerBids = new OrderStructs.Maker[](numberOrders);
         for (uint256 i; i < numberOrders; i++) {
             // Prepare the order hash
-            makerBids[i] = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
+            makerBids[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -299,7 +302,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: address(weth),
                 signer: makerUser,
-                maxPrice: price,
+                price: price,
                 itemId: i
             });
         }

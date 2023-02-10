@@ -13,6 +13,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract SignaturesEIP2098Test is ProtocolBase {
     function setUp() public {
@@ -32,8 +33,9 @@ contract SignaturesEIP2098Test is ProtocolBase {
             OrderStructs.Maker memory makerAsk,
             ,
             bytes memory signature
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -41,7 +43,7 @@ contract SignaturesEIP2098Test is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price,
+                price: price,
                 itemId: itemId
             });
 
@@ -65,8 +67,9 @@ contract SignaturesEIP2098Test is ProtocolBase {
             OrderStructs.Maker memory makerBid,
             ,
             bytes memory signature
-        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-                bidNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -74,7 +77,7 @@ contract SignaturesEIP2098Test is ProtocolBase {
                 collection: address(mockERC721),
                 currency: address(weth),
                 signer: makerUser,
-                maxPrice: price,
+                price: price,
                 itemId: itemId
             });
 

@@ -20,6 +20,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     CreatorFeeManagerWithRoyalties public creatorFeeManagerWithRoyalties;
@@ -63,8 +64,9 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         uint256 itemId = 0;
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -72,7 +74,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -109,8 +111,9 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(itemId, _royaltyRecipient, _newCreatorRoyaltyFee);
 
         // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -118,7 +121,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             collection: address(mockERC721WithRoyalties),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: itemId
         });
 
@@ -344,18 +347,16 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_creatorRoyaltyFeeTooHigh);
 
-        uint256 price = 1 ether; // Fixed price of sale
-        uint256 itemId = 0;
-
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
+        mockERC721.mint(takerUser, 0);
 
         (
             OrderStructs.Maker memory makerBid,
             OrderStructs.Taker memory takerAsk,
             bytes memory signature
-        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-                bidNonce: 0,
+        ) = _createSingleItemMakerAndTakerOrderAndSignature({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -363,8 +364,8 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: address(weth),
                 signer: makerUser,
-                maxPrice: price,
-                itemId: itemId
+                price: 1 ether,
+                itemId: 0
             });
 
         _doesMakerOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
@@ -374,17 +375,17 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // 2. Maker ask
-        itemId = 1; // The itemId changes as it is already minted before
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
+        mockERC721.mint(makerUser, 1);
 
         // Prepare the orders and signature
         OrderStructs.Maker memory makerAsk;
         OrderStructs.Taker memory takerBid;
 
-        (makerAsk, takerBid, signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-            askNonce: 0,
+        (makerAsk, takerBid, signature) = _createSingleItemMakerAndTakerOrderAndSignature({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: AssetType.ERC721,
@@ -392,8 +393,9 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             collection: address(mockERC721),
             currency: ETH,
             signer: makerUser,
-            minPrice: price,
-            itemId: itemId
+            price: 1 ether,
+            // The itemId changes as it is already minted before
+            itemId: 1
         });
 
         _doesMakerOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
@@ -401,7 +403,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
         vm.prank(takerUser);
 
-        looksRareProtocol.executeTakerBid{value: price}(
+        looksRareProtocol.executeTakerBid{value: 1 ether}(
             takerBid,
             makerAsk,
             signature,

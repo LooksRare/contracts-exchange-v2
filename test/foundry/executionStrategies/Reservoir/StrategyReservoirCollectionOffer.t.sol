@@ -227,7 +227,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             itemId: 0
         });
 
-        (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerBidValid(
+        (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerOrderValid(
             makerBid,
             bytes4(0)
         );
@@ -945,7 +945,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     }
 
     function _assertOrderIsValid(OrderStructs.Maker memory makerBid, bool withMerkleTreeCriteria) private {
-        (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerBidValid(
+        (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerOrderValid(
             makerBid,
             withMerkleTreeCriteria ? selectorWithProof : selectorNoProof
         );
@@ -954,7 +954,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     }
 
     function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid, bool withMerkleTreeCriteria) private {
-        (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerBidValid(
+        (bool orderIsValid, bytes4 errorSelector) = strategyReservoirCollectionOffer.isMakerOrderValid(
             makerBid,
             withMerkleTreeCriteria ? selectorWithProof : selectorNoProof
         );

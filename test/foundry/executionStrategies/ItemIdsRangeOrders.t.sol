@@ -214,7 +214,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         vm.expectRevert(); // EVM revert
-        strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        strategyItemIdsRange.isMakerOrderValid(makerBid, selector);
 
         vm.expectRevert(); // EVM revert
         orderValidator.checkMakerOrderValidity(makerBid, signature, _EMPTY_MERKLE_TREE);
@@ -470,19 +470,19 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             itemId: 0
         });
 
-        (bool orderIsValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, bytes4(0));
+        (bool orderIsValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerOrderValid(makerBid, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
     function _assertOrderIsValid(OrderStructs.Maker memory makerBid) private {
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerOrderValid(makerBid, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
     function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid) private returns (bytes4) {
-        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerBidValid(makerBid, selector);
+        (bool isValid, bytes4 errorSelector) = strategyItemIdsRange.isMakerOrderValid(makerBid, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
         return errorSelector;

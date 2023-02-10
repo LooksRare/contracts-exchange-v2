@@ -141,7 +141,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         vm.etch(CHAINLINK_ETH_USD_PRICE_FEED, address(priceFeed).code);
 
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(-1);
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, ChainlinkPriceInvalid.selector);
 
@@ -150,7 +150,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         MockChainlinkAggregator(CHAINLINK_ETH_USD_PRICE_FEED).setAnswer(0);
-        (isValid, errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (isValid, errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, ChainlinkPriceInvalid.selector);
 
@@ -168,7 +168,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
@@ -193,7 +193,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
@@ -222,7 +222,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
@@ -256,7 +256,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         uint256 initialETHBalanceTakerUser = address(takerUser).balance;
         uint256 initialETHBalanceMakerUser = address(makerUser).balance;
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
 
@@ -319,7 +319,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, CurrencyInvalid.selector);
 
@@ -337,7 +337,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
@@ -355,7 +355,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
@@ -378,7 +378,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Valid, taker struct validation only happens during execution
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 
@@ -465,19 +465,19 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             itemId: 0
         });
 
-        (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, bytes4(0));
+        (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
     function _assertOrderIsInvalid(OrderStructs.Maker memory makerAsk, bytes4 expectedErrorSelector) private {
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, expectedErrorSelector);
     }
 
     function _assertOrderIsValid(OrderStructs.Maker memory makerAsk) private {
-        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }

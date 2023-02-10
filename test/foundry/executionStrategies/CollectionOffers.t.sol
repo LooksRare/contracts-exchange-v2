@@ -396,13 +396,13 @@ contract CollectionOrdersTest is ProtocolBase {
             itemId: 0
         });
 
-        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(makerBid, bytes4(0));
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerOrderValid(makerBid, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
     function _assertOrderIsValid(OrderStructs.Maker memory makerBid, bool withProof) private {
-        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerOrderValid(
             makerBid,
             withProof ? selectorWithProof : selectorNoProof
         );
@@ -411,7 +411,7 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid, bool withProof) private {
-        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerOrderValid(
             makerBid,
             withProof ? selectorWithProof : selectorNoProof
         );

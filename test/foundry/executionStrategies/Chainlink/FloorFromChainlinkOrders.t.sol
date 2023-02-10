@@ -116,7 +116,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             itemId: 0
         });
 
-        (bool orderIsValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerAskValid(makerAsk, bytes4(0));
+        (bool orderIsValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
 
@@ -133,7 +133,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             itemId: 0
         });
 
-        (orderIsValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, bytes4(0));
+        (orderIsValid, errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(makerBid, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }

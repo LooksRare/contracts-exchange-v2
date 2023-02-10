@@ -391,19 +391,19 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             itemId: 0
         });
 
-        (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, bytes4(0));
+        (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
     function _assertOrderIsValid(OrderStructs.Maker memory makerAsk) private {
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
     function _assertOrderIsInvalid(OrderStructs.Maker memory makerAsk) private returns (bytes4) {
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 

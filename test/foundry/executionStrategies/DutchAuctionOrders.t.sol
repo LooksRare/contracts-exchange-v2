@@ -7,7 +7,7 @@ import {IExecutionManager} from "../../../contracts/interfaces/IExecutionManager
 import {IStrategyManager} from "../../../contracts/interfaces/IStrategyManager.sol";
 
 // Shared errors
-import {AmountInvalid, BidTooLow, OrderInvalid, FunctionSelectorInvalid} from "../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, BidTooLow, OrderInvalid, FunctionSelectorInvalid, QuoteTypeInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {STRATEGY_NOT_ACTIVE, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -21,6 +21,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericCon
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     StrategyDutchAuction public strategyDutchAuction;
@@ -375,6 +376,28 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
+    function testWrongQuoteType() public {
+        _setUpNewStrategy();
+
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
+            bidNonce: 0,
+            subsetNonce: 0,
+            strategyId: 1,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            maxPrice: 1 ether,
+            itemId: 0
+        });
+
+        (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerBid, selector);
+
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, QuoteTypeInvalid.selector);
+    }
+
     function testInvalidSelector() public {
         _setUpNewStrategy();
 
@@ -391,19 +414,19 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             itemId: 0
         });
 
-        (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, bytes4(0));
+        (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerAsk, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
     function _assertOrderIsValid(OrderStructs.Maker memory makerAsk) private {
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
     }
 
     function _assertOrderIsInvalid(OrderStructs.Maker memory makerAsk) private returns (bytes4) {
-        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerAskValid(makerAsk, selector);
+        (bool isValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerAsk, selector);
         assertFalse(isValid);
         assertEq(errorSelector, OrderInvalid.selector);
 

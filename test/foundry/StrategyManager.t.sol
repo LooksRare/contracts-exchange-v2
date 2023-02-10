@@ -4,9 +4,12 @@ pragma solidity 0.8.17;
 // LooksRare unopinionated libraries
 import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
 
+// Libraries
+import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+
 // Interfaces
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
-import {IBaseStrategy} from "../../contracts/interfaces/IBaseStrategy.sol";
+import {IStrategy} from "../../contracts/interfaces/IStrategy.sol";
 
 // Random strategy
 import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
@@ -14,9 +17,19 @@ import {StrategyCollectionOffer} from "../../contracts/executionStrategies/Strat
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-contract FalseBaseStrategy is IBaseStrategy {
+contract FalseBaseStrategy is IStrategy {
     /**
-     * @inheritdoc IBaseStrategy
+     * @inheritdoc IStrategy
+     */
+    function isMakerOrderValid(
+        OrderStructs.Maker calldata,
+        bytes4
+    ) external view override returns (bool isValid, bytes4 errorSelector) {
+        //
+    }
+
+    /**
+     * @inheritdoc IStrategy
      */
     function isLooksRareV2Strategy() external pure override returns (bool) {
         return false;

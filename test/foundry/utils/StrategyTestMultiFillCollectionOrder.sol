@@ -8,7 +8,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {OrderInvalid} from "../../../contracts/errors/SharedErrors.sol";
 
 // Base strategy contracts
-import {BaseStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";
+import {BaseStrategy, IStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
@@ -66,5 +66,12 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
         } else {
             countItemsFilledForOrderHash[orderHash] += countItemsToFill;
         }
+    }
+
+    function isMakerOrderValid(
+        OrderStructs.Maker calldata,
+        bytes4
+    ) external view override returns (bool isValid, bytes4 errorSelector) {
+        //
     }
 }

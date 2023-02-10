@@ -8,7 +8,7 @@ import {Merkle} from "../../../lib/murky/src/Merkle.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {AmountInvalid, OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid} from "../../../contracts/errors/SharedErrors.sol";
+import {AmountInvalid, OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid, QuoteTypeInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE} from "../../../contracts/constants/ValidationCodeConstants.sol";
 
 // Strategies
@@ -396,13 +396,36 @@ contract CollectionOrdersTest is ProtocolBase {
             itemId: 0
         });
 
-        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(makerBid, bytes4(0));
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerOrderValid(makerBid, bytes4(0));
         assertFalse(orderIsValid);
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
+    function testWrongQuoteType() public {
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
+            askNonce: 0,
+            subsetNonce: 0,
+            strategyId: 2,
+            assetType: AssetType.ERC721,
+            orderNonce: 0,
+            collection: address(mockERC721),
+            currency: address(weth),
+            signer: makerUser,
+            minPrice: price,
+            itemId: 0
+        });
+
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerOrderValid(
+            makerAsk,
+            selectorNoProof
+        );
+
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, QuoteTypeInvalid.selector);
+    }
+
     function _assertOrderIsValid(OrderStructs.Maker memory makerBid, bool withProof) private {
-        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerOrderValid(
             makerBid,
             withProof ? selectorWithProof : selectorNoProof
         );
@@ -411,7 +434,7 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function _assertOrderIsInvalid(OrderStructs.Maker memory makerBid, bool withProof) private {
-        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerBidValid(
+        (bool orderIsValid, bytes4 errorSelector) = strategyCollectionOffer.isMakerOrderValid(
             makerBid,
             withProof ? selectorWithProof : selectorNoProof
         );

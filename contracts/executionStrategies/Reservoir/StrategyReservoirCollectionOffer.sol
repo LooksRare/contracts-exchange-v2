@@ -11,11 +11,14 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {MerkleProofMemory} from "../../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
 // Errors
-import {FunctionSelectorInvalid, MerkleProofInvalid, OrderInvalid} from "../../errors/SharedErrors.sol";
+import {FunctionSelectorInvalid, MerkleProofInvalid, OrderInvalid, QuoteTypeInvalid} from "../../errors/SharedErrors.sol";
 import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureExpired, TransferCooldownPeriodTooHigh} from "../../errors/ReservoirErrors.sol";
 
+// Enums
+import {QuoteType} from "../../enums/QuoteType.sol";
+
 // Base strategy contracts
-import {BaseStrategy} from "../BaseStrategy.sol";
+import {BaseStrategy, IStrategy} from "../BaseStrategy.sol";
 
 // Enums
 import {AssetType} from "../../enums/AssetType.sol";
@@ -133,24 +136,22 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
     }
 
     /**
-     * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid.
-     *         Instead it returns false and the error's 4 bytes selector.
-     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @param functionSelector Function selector for the strategy
-     * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
+     * @inheritdoc IStrategy
      */
-    function isMakerBidValid(
+    function isMakerOrderValid(
         OrderStructs.Maker calldata makerBid,
         bytes4 functionSelector
-    ) external pure returns (bool isValid, bytes4 errorSelector) {
+    ) external pure override returns (bool isValid, bytes4 errorSelector) {
         if (
             functionSelector !=
             StrategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             functionSelector != StrategyReservoirCollectionOffer.executeCollectionStrategyWithTakerAsk.selector
         ) {
             return (isValid, FunctionSelectorInvalid.selector);
+        }
+
+        if (makerBid.quoteType != QuoteType.Bid) {
+            return (isValid, QuoteTypeInvalid.selector);
         }
 
         // Amounts length must be 1, amount can only be 1 since only ERC721 can be traded.

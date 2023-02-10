@@ -9,11 +9,14 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 import {CurrencyValidator} from "../../libraries/CurrencyValidator.sol";
 
 // Errors
-import {AskTooHigh, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid} from "../../errors/SharedErrors.sol";
+import {AskTooHigh, BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid, QuoteTypeInvalid} from "../../errors/SharedErrors.sol";
 import {DiscountGreaterThanFloorPrice, ChainlinkPriceInvalid, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
 
+// Enums
+import {QuoteType} from "../../enums/QuoteType.sol";
+
 // Base strategy contracts
-import {BaseStrategy} from "../BaseStrategy.sol";
+import {BaseStrategy, IStrategy} from "../BaseStrategy.sol";
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMultiplePriceFeeds.sol";
 
 // Constants
@@ -144,109 +147,26 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
     }
 
     /**
-     * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid.
-     *         Instead it returns false and the error's 4 bytes selector.
-     * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
-     * @param functionSelector Function selector for the strategy
-     * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
+     * @inheritdoc IStrategy
      */
-    function isMakerAskValid(
-        OrderStructs.Maker calldata makerAsk,
+    function isMakerOrderValid(
+        OrderStructs.Maker calldata makerOrder,
         bytes4 functionSelector
-    ) external view returns (bool isValid, bytes4 errorSelector) {
+    ) external view override returns (bool isValid, bytes4 errorSelector) {
         if (
-            functionSelector != StrategyChainlinkFloor.executeBasisPointsPremiumStrategyWithTakerBid.selector &&
-            functionSelector != StrategyChainlinkFloor.executeFixedPremiumStrategyWithTakerBid.selector
+            functionSelector == StrategyChainlinkFloor.executeBasisPointsPremiumStrategyWithTakerBid.selector ||
+            functionSelector == StrategyChainlinkFloor.executeFixedPremiumStrategyWithTakerBid.selector
         ) {
-            return (isValid, FunctionSelectorInvalid.selector);
-        }
-
-        if (makerAsk.currency != address(0)) {
-            if (makerAsk.currency != WETH) {
-                return (isValid, CurrencyInvalid.selector);
-            }
-        }
-
-        if (makerAsk.additionalParameters.length != 32) {
-            return (isValid, OrderInvalid.selector);
-        }
-
-        if (makerAsk.itemIds.length != 1 || makerAsk.amounts.length != 1 || makerAsk.amounts[0] != 1) {
-            return (isValid, OrderInvalid.selector);
-        }
-
-        (, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerAsk.collection);
-
-        if (priceFeedErrorSelector == bytes4(0)) {
-            isValid = true;
-        } else {
-            errorSelector = priceFeedErrorSelector;
-        }
-    }
-
-    /**
-     * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid.
-     *         Instead it returns false and the error's 4 bytes selector.
-     * @notice When `isMakerBidValid` gets called, depending on the market conditions at that
-     *         specific time, the comparison between the floorPrice and the discount might cause
-     *         this function to either return isValid as true or false.
-     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @param functionSelector Function selector for the strategy
-     * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
-     * @dev The client has to provide the bidder's desired discount amount in ETH
-     *      from the floor price as the additionalParameters.
-     */
-    function isMakerBidValid(
-        OrderStructs.Maker calldata makerBid,
-        bytes4 functionSelector
-    ) external view returns (bool isValid, bytes4 errorSelector) {
-        if (
-            functionSelector !=
-            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector &&
-            functionSelector != StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
-        ) {
-            return (isValid, FunctionSelectorInvalid.selector);
-        }
-
-        if (makerBid.currency != WETH) {
-            return (isValid, CurrencyInvalid.selector);
-        }
-
-        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1) {
-            return (isValid, OrderInvalid.selector);
-        }
-
-        (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerBid.collection);
-        uint256 discount = abi.decode(makerBid.additionalParameters, (uint256));
-
-        if (
+            (isValid, errorSelector) = _isMakerAskValid(makerOrder);
+        } else if (
             functionSelector ==
-            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
-        ) {
-            if (discount > ONE_HUNDRED_PERCENT_IN_BP) {
-                return (isValid, OrderInvalid.selector);
-            }
-        }
-
-        if (priceFeedErrorSelector != bytes4(0)) {
-            return (isValid, priceFeedErrorSelector);
-        }
-
-        if (
+            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector ||
             functionSelector == StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
         ) {
-            if (floorPrice < discount) {
-                // A special selector is returned to differentiate with OrderInvalid
-                // since the maker can potentially become valid again
-                return (isValid, DiscountGreaterThanFloorPrice.selector);
-            }
+            (isValid, errorSelector) = _isMakerBidValid(makerOrder, functionSelector);
+        } else {
+            return (isValid, FunctionSelectorInvalid.selector);
         }
-
-        isValid = true;
     }
 
     /**
@@ -427,5 +347,81 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
         }
 
         return (uint256(answer), bytes4(0));
+    }
+
+    function _isMakerAskValid(
+        OrderStructs.Maker calldata makerOrder
+    ) private view returns (bool isValid, bytes4 errorSelector) {
+        if (makerOrder.quoteType != QuoteType.Ask) {
+            revert QuoteTypeInvalid();
+        }
+
+        if (makerOrder.currency != address(0)) {
+            if (makerOrder.currency != WETH) {
+                return (isValid, CurrencyInvalid.selector);
+            }
+        }
+
+        if (makerOrder.additionalParameters.length != 32) {
+            return (isValid, OrderInvalid.selector);
+        }
+
+        if (makerOrder.itemIds.length != 1 || makerOrder.amounts.length != 1 || makerOrder.amounts[0] != 1) {
+            return (isValid, OrderInvalid.selector);
+        }
+
+        (, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerOrder.collection);
+
+        if (priceFeedErrorSelector == bytes4(0)) {
+            isValid = true;
+        } else {
+            errorSelector = priceFeedErrorSelector;
+        }
+    }
+
+    function _isMakerBidValid(
+        OrderStructs.Maker calldata makerOrder,
+        bytes4 functionSelector
+    ) private view returns (bool isValid, bytes4 errorSelector) {
+        if (makerOrder.quoteType != QuoteType.Bid) {
+            revert QuoteTypeInvalid();
+        }
+
+        if (makerOrder.currency != WETH) {
+            return (isValid, CurrencyInvalid.selector);
+        }
+
+        if (makerOrder.amounts.length != 1 || makerOrder.amounts[0] != 1) {
+            return (isValid, OrderInvalid.selector);
+        }
+
+        (uint256 floorPrice, bytes4 priceFeedErrorSelector) = _getFloorPriceNoRevert(makerOrder.collection);
+
+        if (priceFeedErrorSelector != bytes4(0)) {
+            return (isValid, priceFeedErrorSelector);
+        }
+
+        uint256 discount = abi.decode(makerOrder.additionalParameters, (uint256));
+
+        if (
+            functionSelector ==
+            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
+        ) {
+            if (discount > ONE_HUNDRED_PERCENT_IN_BP) {
+                return (isValid, OrderInvalid.selector);
+            }
+        }
+
+        if (
+            functionSelector == StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
+        ) {
+            if (floorPrice < discount) {
+                // A special selector is returned to differentiate with OrderInvalid
+                // since the maker can potentially become valid again
+                return (isValid, DiscountGreaterThanFloorPrice.selector);
+            }
+        }
+
+        isValid = true;
     }
 }

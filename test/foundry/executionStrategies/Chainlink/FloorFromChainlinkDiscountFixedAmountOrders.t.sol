@@ -113,7 +113,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
 
         _setPriceFeed();
 
-        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        (bool isValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(makerBid, selector);
         assertFalse(isValid);
         assertEq(errorSelector, DiscountGreaterThanFloorPrice.selector);
 
@@ -127,7 +127,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         makerBid.additionalParameters = abi.encode(9.8 ether);
         signature = _signMakerOrder(makerBid, makerUserPK);
 
-        (isValid, errorSelector) = strategyFloorFromChainlink.isMakerBidValid(makerBid, selector);
+        (isValid, errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(makerBid, selector);
         assertFalse(isValid);
         assertEq(errorSelector, DiscountGreaterThanFloorPrice.selector);
 

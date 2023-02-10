@@ -194,6 +194,10 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         vm.stopPrank();
     }
 
+    function _genericTakerOrder() internal view returns (OrderStructs.Taker memory takerOrder) {
+        takerOrder = OrderStructs.Taker(takerUser, abi.encode());
+    }
+
     /**
      * NOTE: It inherits from ILooksRareProtocol, so it
      *       needs to at least define the functions below.

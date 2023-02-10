@@ -56,9 +56,6 @@ contract GasGriefingTest is ProtocolBase {
 
         bytes memory signature;
 
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
         uint256 sellerProceed = (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP;
 
         vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: false, checkData: true});
@@ -70,7 +67,7 @@ contract GasGriefingTest is ProtocolBase {
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeTakerBid{value: price}(
-            takerBid,
+            _genericTakerOrder(),
             makerAsk,
             signature,
             _EMPTY_MERKLE_TREE,
@@ -119,7 +116,7 @@ contract GasGriefingTest is ProtocolBase {
                 itemId: i // (0, 1, etc.)
             });
 
-            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
+            takerBids[i] = _genericTakerOrder();
         }
 
         // Other execution parameters

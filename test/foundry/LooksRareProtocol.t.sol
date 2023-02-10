@@ -61,7 +61,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Taker memory takerBid = _genericTakerOrder();
 
         _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
@@ -122,7 +122,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         _doesMakerOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_ALLOWED);
 
         // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Taker memory takerBid = _genericTakerOrder();
 
         vm.prank(takerUser);
         vm.expectRevert(CurrencyInvalid.selector);
@@ -192,13 +192,16 @@ contract LooksRareProtocolTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
         // Execute taker ask transaction
         vm.prank(takerUser);
         vm.expectRevert(CurrencyInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 
     function testCannotTradeIfInvalidQuoteType() public {
@@ -220,7 +223,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Prepare a generic taker
-        OrderStructs.Taker memory taker = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Taker memory taker = _genericTakerOrder();
 
         vm.prank(takerUser);
         vm.expectRevert(QuoteTypeInvalid.selector);
@@ -346,7 +349,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             // Sign order
             signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
+            takerBids[i] = _genericTakerOrder();
         }
 
         // Other execution parameters

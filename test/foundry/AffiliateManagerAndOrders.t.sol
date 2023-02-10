@@ -129,16 +129,19 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         // Verify validity of maker ask order
         _assertValidMakerOrder(makerAsk, signature);
 
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit AffiliatePayment(_affiliate, makerAsk.currency, expectedAffiliateFeeAmount);
-        looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _affiliate);
+        looksRareProtocol.executeTakerBid{value: price}(
+            _genericTakerOrder(),
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _affiliate
+        );
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), takerUser);
@@ -201,7 +204,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             // Verify validity of maker ask order
             _assertValidMakerOrder(makerAsks[i], signatures[i]);
 
-            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
+            takerBids[i] = _genericTakerOrder();
         }
 
         // Transfer tokenId=2 to random user
@@ -295,16 +298,13 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit AffiliatePayment(_affiliate, makerBid.currency, expectedAffiliateFeeAmount);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _affiliate);
+        looksRareProtocol.executeTakerAsk(_genericTakerOrder(), makerBid, signature, _EMPTY_MERKLE_TREE, _affiliate);
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);

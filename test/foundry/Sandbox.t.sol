@@ -73,7 +73,7 @@ contract SandboxTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Taker memory takerAsk = _genericTakerOrder();
 
         // It should fail with assetType = 0
         vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
@@ -120,7 +120,7 @@ contract SandboxTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Taker memory takerBid = _genericTakerOrder();
 
         // It should fail with assetType = 0
         vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));

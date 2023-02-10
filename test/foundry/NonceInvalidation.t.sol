@@ -119,9 +119,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_USER_GLOBAL_ASK_NONCE);
 
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
         vm.deal(takerUser, price);
 
         // Execute taker bid transaction
@@ -129,7 +126,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.prank(takerUser);
         vm.expectRevert(NoncesInvalid.selector);
         looksRareProtocol.executeTakerBid{value: price}(
-            takerBid,
+            _genericTakerOrder(),
             makerAsk,
             signature,
             _EMPTY_MERKLE_TREE,
@@ -178,14 +175,17 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
         // Execute taker ask transaction
         // Taker user actions
         vm.prank(takerUser);
         vm.expectRevert(NoncesInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 
     /**
@@ -221,7 +221,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.startPrank(takerUser);
 
         // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        OrderStructs.Taker memory takerAsk = _genericTakerOrder();
 
         {
             looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);

@@ -45,11 +45,15 @@ contract SignaturesRevertionsTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerAsk, randomPK);
         _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNER_EOA);
 
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
         vm.expectRevert(SignatureEOAInvalid.selector);
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerBid(
+            _genericTakerOrder(),
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 
     function testRevertIfInvalidVParameter(uint256 itemId, uint256 price, uint8 v) public {
@@ -78,11 +82,15 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_V_PARAMETER_EOA);
 
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
         vm.expectRevert(abi.encodeWithSelector(SignatureParameterVInvalid.selector, v));
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerBid(
+            _genericTakerOrder(),
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 
     function testRevertIfInvalidSParameter(uint256 itemId, uint256 price, bytes32 s) public {
@@ -111,11 +119,15 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_S_PARAMETER_EOA);
 
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
         vm.expectRevert(abi.encodeWithSelector(SignatureParameterSInvalid.selector));
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerBid(
+            _genericTakerOrder(),
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 
     function testRevertIfRecoveredSignerIsNullAddress(uint256 itemId, uint256 price) public {
@@ -144,11 +156,15 @@ contract SignaturesRevertionsTest is ProtocolBase {
 
         _doesMakerOrderReturnValidationCode(makerAsk, signature, NULL_SIGNER_EOA);
 
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
         vm.expectRevert(abi.encodeWithSelector(NullSignerAddress.selector));
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerBid(
+            _genericTakerOrder(),
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 
     function testRevertIfInvalidSignatureLength(uint256 itemId, uint256 price, uint256 length) public {
@@ -171,10 +187,14 @@ contract SignaturesRevertionsTest is ProtocolBase {
         bytes memory signature = new bytes(length);
         _doesMakerOrderReturnValidationCode(makerAsk, signature, INVALID_SIGNATURE_LENGTH);
 
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
         vm.expectRevert(abi.encodeWithSelector(SignatureLengthInvalid.selector, length));
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerBid(
+            _genericTakerOrder(),
+            makerAsk,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 }

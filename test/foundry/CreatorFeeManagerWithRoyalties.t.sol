@@ -82,14 +82,17 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Mint asset
         mockERC721.mint(takerUser, itemId);
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
         _assertValidMakerOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(itemId), makerUser);
@@ -125,14 +128,17 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Mint asset
         mockERC721WithRoyalties.mint(takerUser, itemId);
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
         _assertValidMakerOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
 
         // Taker user has received the asset
         assertEq(mockERC721WithRoyalties.ownerOf(itemId), makerUser);

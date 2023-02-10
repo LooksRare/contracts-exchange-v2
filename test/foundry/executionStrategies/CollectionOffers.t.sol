@@ -371,15 +371,18 @@ contract CollectionOrdersTest is ProtocolBase {
 
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
         _assertOrderIsInvalid(makerBid, true);
         _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(); // It should revert without data (since the root cannot be extracted since the additionalParameters length is 0)
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 
     function testInvalidSelector() public {

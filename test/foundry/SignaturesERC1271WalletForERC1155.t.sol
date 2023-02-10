@@ -375,7 +375,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         });
 
         // Prepare the taker bid
-        takerBid = OrderStructs.Taker(takerUser, abi.encode());
+        takerBid = _genericTakerOrder();
     }
 
     function _takerAskSetup(
@@ -399,7 +399,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         mockERC1155.mint(takerUser, itemId, 1);
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        takerAsk = _genericTakerOrder();
     }
 
     function _batchTakerAskSetup(
@@ -432,7 +432,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         });
 
         // Prepare the taker ask
-        takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        takerAsk = _genericTakerOrder();
     }
 
     function _multipleTakerBidsSetup(
@@ -470,7 +470,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
             signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
+            takerBids[i] = _genericTakerOrder();
         }
 
         // Other execution parameters

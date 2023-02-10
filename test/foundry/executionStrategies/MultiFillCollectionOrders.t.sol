@@ -196,13 +196,16 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
             mockERC721.mint(takerUser, itemIds[0]);
 
-            // Prepare the taker ask
-            OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
             // It should revert if strategy is not available
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+            looksRareProtocol.executeTakerAsk(
+                _genericTakerOrder(),
+                makerBid,
+                signature,
+                _EMPTY_MERKLE_TREE,
+                _EMPTY_AFFILIATE
+            );
         }
     }
 }

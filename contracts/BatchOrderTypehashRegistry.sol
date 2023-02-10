@@ -5,11 +5,11 @@ pragma solidity 0.8.17;
 import {MerkleProofTooLarge} from "./errors/SharedErrors.sol";
 
 contract BatchOrderTypehashRegistry {
-    function hash(bytes32 root, uint256 proofLength) external pure returns (bytes32 batchOrderTypehash) {
-        batchOrderTypehash = keccak256(abi.encode(getTypehash(proofLength), root));
+    function hashBatchOrder(bytes32 root, uint256 proofLength) public pure returns (bytes32 batchOrderTypehash) {
+        batchOrderTypehash = keccak256(abi.encode(_getBatchOrderTypehash(proofLength), root));
     }
 
-    function getTypehash(uint256 height) public pure returns (bytes32 typehash) {
+    function _getBatchOrderTypehash(uint256 height) internal pure returns (bytes32 typehash) {
         /**
          * It looks like this for each height
          * height == 1: BatchOrder(Maker[2] tree)Maker(uint8 quoteType,uint256 globalNonce,uint256 subsetNonce,uint256 orderNonce,uint256 strategyId,uint8 assetType,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 price,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)

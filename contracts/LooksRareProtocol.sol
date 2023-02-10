@@ -74,14 +74,10 @@ contract LooksRareProtocol is
     TransferSelectorNFT,
     LowLevelETHReturnETHIfAnyExceptOneWei,
     LowLevelWETH,
-    LowLevelERC20Transfer
+    LowLevelERC20Transfer,
+    BatchOrderTypehashRegistry
 {
     using OrderStructs for OrderStructs.Maker;
-
-    /**
-     * @notice Typehash registry for batch orders.
-     */
-    BatchOrderTypehashRegistry public immutable batchOrderTypehashRegistry;
 
     /**
      * @notice Wrapped ETH.
@@ -120,7 +116,6 @@ contract LooksRareProtocol is
     ) TransferSelectorNFT(_owner, _protocolFeeRecipient, _transferManager) {
         _updateDomainSeparator();
         WETH = _weth;
-        batchOrderTypehashRegistry = new BatchOrderTypehashRegistry();
     }
 
     /**
@@ -642,7 +637,7 @@ contract LooksRareProtocol is
                 revert MerkleProofInvalid();
             }
 
-            orderHash = batchOrderTypehashRegistry.hash(merkleTree.root, proofLength);
+            orderHash = hashBatchOrder(merkleTree.root, proofLength);
         }
 
         _computeDigestAndVerify(orderHash, signature, signer);

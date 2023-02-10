@@ -92,32 +92,21 @@ library OrderStructs {
     bytes32 internal constant _MAKER_TYPEHASH =
         keccak256(
             "Maker("
-            "QuoteType quoteType,"
-            "uint256 globalNonce,"
-            "uint256 subsetNonce,"
-            "uint256 orderNonce,"
-            "uint256 strategyId,"
-            "AssetType assetType,"
-            "address collection,"
-            "address currency,"
-            "address signer,"
-            "uint256 startTime,"
-            "uint256 endTime,"
-            "uint256 price,"
-            "uint256[] itemIds,"
-            "uint256[] amounts,"
-            "bytes additionalParameters"
-            ")"
-        );
-
-    /**
-     * @notice This is the typehash constant used to compute the merkle root order hash.
-     * @dev The proof is not included in the hashing function.
-     */
-    bytes32 internal constant _MERKLE_TREE_TYPEHASH =
-        keccak256(
-            "MerkleTree("
-            "bytes32 root"
+                "uint8 quoteType,"
+                "uint256 globalNonce,"
+                "uint256 subsetNonce,"
+                "uint256 orderNonce,"
+                "uint256 strategyId,"
+                "uint8 assetType,"
+                "address collection,"
+                "address currency,"
+                "address signer,"
+                "uint256 startTime,"
+                "uint256 endTime,"
+                "uint256 price,"
+                "uint256[] itemIds,"
+                "uint256[] amounts,"
+                "bytes additionalParameters"
             ")"
         );
 

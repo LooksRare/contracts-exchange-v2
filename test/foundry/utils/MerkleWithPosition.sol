@@ -3,6 +3,9 @@ pragma solidity 0.8.17;
 
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
+/**
+ * @dev Modified from MurkyBase to add each node's position after hashing.
+ */
 contract MerkleWithPosition {
     /**********************
      * PROOF VERIFICATION *

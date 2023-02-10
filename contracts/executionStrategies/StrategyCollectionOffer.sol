@@ -14,7 +14,7 @@ import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid, QuoteTypeInva
 import {QuoteType} from "../enums/QuoteType.sol";
 
 // Base strategy contracts
-import {BaseStrategy} from "./BaseStrategy.sol";
+import {BaseStrategy, IStrategy} from "./BaseStrategy.sol";
 
 /**
  * @title StrategyCollectionOffer
@@ -100,18 +100,12 @@ contract StrategyCollectionOffer is BaseStrategy {
     }
 
     /**
-     * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid.
-     *         Instead it returns false and the error's 4 bytes selector.
-     * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
-     * @param functionSelector Function selector for the strategy
-     * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
+     * @inheritdoc IStrategy
      */
     function isMakerOrderValid(
         OrderStructs.Maker calldata makerBid,
         bytes4 functionSelector
-    ) external pure returns (bool isValid, bytes4 errorSelector) {
+    ) external pure override returns (bool isValid, bytes4 errorSelector) {
         if (
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector &&
             functionSelector != StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector

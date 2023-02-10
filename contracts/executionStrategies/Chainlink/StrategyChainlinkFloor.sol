@@ -16,7 +16,7 @@ import {DiscountGreaterThanFloorPrice, ChainlinkPriceInvalid, PriceFeedNotAvaila
 import {QuoteType} from "../../enums/QuoteType.sol";
 
 // Base strategy contracts
-import {BaseStrategy} from "../BaseStrategy.sol";
+import {BaseStrategy, IStrategy} from "../BaseStrategy.sol";
 import {BaseStrategyChainlinkMultiplePriceFeeds} from "./BaseStrategyChainlinkMultiplePriceFeeds.sol";
 
 // Constants
@@ -147,18 +147,12 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
     }
 
     /**
-     * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid.
-     *         Instead it returns false and the error's 4 bytes selector.
-     * @param makerOrder Maker struct (maker specific parameters for the execution)
-     * @param functionSelector Function selector for the strategy
-     * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it returns the error's 4 bytes selector
+     * @inheritdoc IStrategy
      */
     function isMakerOrderValid(
         OrderStructs.Maker calldata makerOrder,
         bytes4 functionSelector
-    ) external view returns (bool isValid, bytes4 errorSelector) {
+    ) external view override returns (bool isValid, bytes4 errorSelector) {
         if (
             functionSelector == StrategyChainlinkFloor.executeBasisPointsPremiumStrategyWithTakerBid.selector ||
             functionSelector == StrategyChainlinkFloor.executeFixedPremiumStrategyWithTakerBid.selector

@@ -16,7 +16,7 @@ import {BidTooLow, OrderInvalid, CurrencyInvalid, FunctionSelectorInvalid, Quote
 import {ChainlinkPriceInvalid, PriceFeedNotAvailable, PriceNotRecentEnough} from "../../errors/ChainlinkErrors.sol";
 
 // Base strategy contracts
-import {BaseStrategy} from "../BaseStrategy.sol";
+import {BaseStrategy, IStrategy} from "../BaseStrategy.sol";
 import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLatency.sol";
 
 /**
@@ -111,18 +111,12 @@ contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPr
     }
 
     /**
-     * @notice This function validates *only the maker* order under the context of the chosen strategy.
-     *         It does not revert if the maker order is invalid.
-     *         Instead it returns false and the error's 4 bytes selector.
-     * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
-     * @param functionSelector Function selector for the strategy
-     * @return isValid Whether the maker struct is valid
-     * @return errorSelector If isValid is false, it return the error's 4 bytes selector
+     * @inheritdoc IStrategy
      */
     function isMakerOrderValid(
         OrderStructs.Maker calldata makerAsk,
         bytes4 functionSelector
-    ) external view returns (bool isValid, bytes4 errorSelector) {
+    ) external view override returns (bool isValid, bytes4 errorSelector) {
         if (functionSelector != StrategyChainlinkUSDDynamicAsk.executeStrategyWithTakerBid.selector) {
             return (isValid, FunctionSelectorInvalid.selector);
         }

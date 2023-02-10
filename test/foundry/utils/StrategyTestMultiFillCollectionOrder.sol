@@ -8,7 +8,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {OrderInvalid} from "../../../contracts/errors/SharedErrors.sol";
 
 // Base strategy contracts
-import {BaseStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";
+import {BaseStrategy, IStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";

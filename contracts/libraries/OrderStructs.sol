@@ -70,11 +70,18 @@ library OrderStructs {
      * 3. Merkle tree struct
      */
 
-    enum MerkleProofSide { None, Left, Right }
+    enum MerkleTreeNodePosition { None, Left, Right }
 
-    struct MerkleProofNode {
-        bytes32 proofHash;
-        MerkleProofSide side;
+    /**
+     * @notice MerkleTreeNode is a MerkleTree's node.
+     * @param value It can be an order hash or a proof
+     * @param position The node's position in its branch.
+     *                 It can be left or right or none
+     *                 (before the tree is sorted).
+     */
+    struct MerkleTreeNode {
+        bytes32 value;
+        MerkleTreeNodePosition position;
     }
 
     /**
@@ -86,7 +93,7 @@ library OrderStructs {
      */
     struct MerkleTree {
         bytes32 root;
-        MerkleProofNode[] proof;
+        MerkleTreeNode[] proof;
     }
 
     /**

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.17;
 
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
@@ -10,7 +10,7 @@ contract MerkleWithPosition {
 
     function verifyProof(
         bytes32 root,
-        OrderStructs.MerkleProofNode[] memory proof,
+        OrderStructs.MerkleTreeNode[] memory proof,
         bytes32 valueToProve
     ) external pure returns (bool) {
         // proof length must be less than max array size
@@ -18,10 +18,10 @@ contract MerkleWithPosition {
         uint256 length = proof.length;
         unchecked {
             for (uint i = 0; i < length; ++i) {
-                if (proof[i].side == OrderStructs.MerkleProofSide.Left) {
-                    rollingHash = hashLeafPairsWithoutSort(proof[i].proofHash, rollingHash);
-                } else if (proof[i].side == OrderStructs.MerkleProofSide.Right) {
-                    rollingHash = hashLeafPairsWithoutSort(rollingHash, proof[i].proofHash);
+                if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Left) {
+                    rollingHash = hashLeafPairsWithoutSort(proof[i].value, rollingHash);
+                } else if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Right) {
+                    rollingHash = hashLeafPairsWithoutSort(rollingHash, proof[i].value);
                 }
             }
         }
@@ -32,21 +32,21 @@ contract MerkleWithPosition {
      * PROOF GENERATION *
      ********************/
 
-    function getRoot(OrderStructs.MerkleProofNode[] memory data) public pure returns (bytes32) {
+    function getRoot(OrderStructs.MerkleTreeNode[] memory data) public pure returns (bytes32) {
         require(data.length > 1, "won't generate root for single leaf");
         while (data.length > 1) {
             data = hashLevel(data);
         }
-        return data[0].proofHash;
+        return data[0].value;
     }
 
     function getProof(
-        OrderStructs.MerkleProofNode[] memory data,
+        OrderStructs.MerkleTreeNode[] memory data,
         uint256 node
-    ) public pure returns (OrderStructs.MerkleProofNode[] memory result) {
+    ) public pure returns (OrderStructs.MerkleTreeNode[] memory result) {
         require(data.length > 1, "won't generate proof for single leaf");
         // The size of the proof is equal to the ceiling of log2(numLeaves)
-        result = new OrderStructs.MerkleProofNode[](log2ceilBitMagic(data.length));
+        result = new OrderStructs.MerkleTreeNode[](log2ceilBitMagic(data.length));
         uint256 pos = 0;
 
         // Two overflow risks: node, pos
@@ -58,9 +58,9 @@ contract MerkleWithPosition {
                 if (node & 0x1 == 1) {
                     result[pos] = data[node - 1];
                 } else if (node + 1 == data.length) {
-                    result[pos] = OrderStructs.MerkleProofNode({
-                        proofHash: bytes32(0),
-                        side: OrderStructs.MerkleProofSide.None
+                    result[pos] = OrderStructs.MerkleTreeNode({
+                        value: bytes32(0),
+                        position: OrderStructs.MerkleTreeNodePosition.None
                     });
                 } else {
                     result[pos] = data[node + 1];
@@ -75,37 +75,37 @@ contract MerkleWithPosition {
 
     ///@dev function is private to prevent unsafe data from being passed
     function hashLevel(
-        OrderStructs.MerkleProofNode[] memory data
-    ) private pure returns (OrderStructs.MerkleProofNode[] memory result) {
+        OrderStructs.MerkleTreeNode[] memory data
+    ) private pure returns (OrderStructs.MerkleTreeNode[] memory result) {
         // Function is private, and all internal callers check that data.length >=2.
         // Underflow is not possible as lowest possible value for data/result index is 1
         // overflow should be safe as length is / 2 always.
         unchecked {
             uint256 length = data.length;
             if (length & 0x1 == 1) {
-                result = new OrderStructs.MerkleProofNode[](length / 2 + 1);
-                (bytes32 hashed, bool swapped) = hashLeafPairs(data[length - 1].proofHash, bytes32(0));
-                OrderStructs.MerkleProofSide side = swapped
-                    ? OrderStructs.MerkleProofSide.Right
-                    : OrderStructs.MerkleProofSide.Left;
-                result[result.length - 1] = OrderStructs.MerkleProofNode({proofHash: hashed, side: side});
+                result = new OrderStructs.MerkleTreeNode[](length / 2 + 1);
+                (bytes32 hashed, bool swapped) = hashLeafPairs(data[length - 1].value, bytes32(0));
+                OrderStructs.MerkleTreeNodePosition position = swapped
+                    ? OrderStructs.MerkleTreeNodePosition.Right
+                    : OrderStructs.MerkleTreeNodePosition.Left;
+                result[result.length - 1] = OrderStructs.MerkleTreeNode({value: hashed, position: position});
             } else {
-                result = new OrderStructs.MerkleProofNode[](length / 2);
+                result = new OrderStructs.MerkleTreeNode[](length / 2);
             }
             // pos is upper bounded by data.length / 2, so safe even if array is at max size
             uint256 pos = 0;
             for (uint256 i = 0; i < length - 1; i += 2) {
-                (bytes32 hashed, bool swapped) = hashLeafPairs(data[i].proofHash, data[i + 1].proofHash);
-                result[pos] = OrderStructs.MerkleProofNode({
-                    proofHash: hashed,
-                    side: OrderStructs.MerkleProofSide.None
+                (bytes32 hashed, bool swapped) = hashLeafPairs(data[i].value, data[i + 1].value);
+                result[pos] = OrderStructs.MerkleTreeNode({
+                    value: hashed,
+                    position: OrderStructs.MerkleTreeNodePosition.None
                 });
                 if (swapped) {
-                    data[i].side = OrderStructs.MerkleProofSide.Right;
-                    data[i + 1].side = OrderStructs.MerkleProofSide.Left;
+                    data[i].position = OrderStructs.MerkleTreeNodePosition.Right;
+                    data[i + 1].position = OrderStructs.MerkleTreeNodePosition.Left;
                 } else {
-                    data[i].side = OrderStructs.MerkleProofSide.Left;
-                    data[i + 1].side = OrderStructs.MerkleProofSide.Right;
+                    data[i].position = OrderStructs.MerkleTreeNodePosition.Left;
+                    data[i + 1].position = OrderStructs.MerkleTreeNodePosition.Right;
                 }
                 ++pos;
             }

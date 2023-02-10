@@ -38,25 +38,25 @@ contract EIP712MerkleTree is Test {
         }
         bytes32 batchOrderTypehash = _getBatchOrderTypehash(treeHeight);
         uint256 leafCount = 2 ** treeHeight;
-        OrderStructs.MerkleProofNode[] memory leaves = new OrderStructs.MerkleProofNode[](leafCount);
+        OrderStructs.MerkleTreeNode[] memory leaves = new OrderStructs.MerkleTreeNode[](leafCount);
 
         for (uint256 i; i < bidCount; i++) {
-            leaves[i] = OrderStructs.MerkleProofNode({
-                proofHash: makerOrders[i].hash(),
-                side: OrderStructs.MerkleProofSide.None
+            leaves[i] = OrderStructs.MerkleTreeNode({
+                value: makerOrders[i].hash(),
+                position: OrderStructs.MerkleTreeNodePosition.None
             });
         }
 
         bytes32 emptyMakerOrderHash = _emptyMakerOrderHash();
         for (uint256 i = bidCount; i < leafCount; i++) {
-            leaves[i] = OrderStructs.MerkleProofNode({
-                proofHash: emptyMakerOrderHash,
-                side: OrderStructs.MerkleProofSide.None
+            leaves[i] = OrderStructs.MerkleTreeNode({
+                value: emptyMakerOrderHash,
+                position: OrderStructs.MerkleTreeNodePosition.None
             });
         }
 
         MerkleWithPosition merkle = new MerkleWithPosition();
-        OrderStructs.MerkleProofNode[] memory proof = merkle.getProof(leaves, makerOrderIndex);
+        OrderStructs.MerkleTreeNode[] memory proof = merkle.getProof(leaves, makerOrderIndex);
         bytes32 root = merkle.getRoot(leaves);
 
         signature = _sign(privateKey, batchOrderTypehash, root);

@@ -15,7 +15,7 @@ library MerkleProofCalldata {
      *         For this, a `proof` must be provided, containing sibling hashes on the branch from the leaf to the
      *         root of the tree. Each pair of leaves and each pair of pre-images are assumed to be sorted.
      */
-    function verifyCalldata(OrderStructs.MerkleProofNode[] calldata proof, bytes32 root, bytes32 leaf) internal pure returns (bool) {
+    function verifyCalldata(OrderStructs.MerkleTreeNode[] calldata proof, bytes32 root, bytes32 leaf) internal pure returns (bool) {
         return processProofCalldata(proof, leaf) == root;
     }
 
@@ -24,15 +24,15 @@ library MerkleProofCalldata {
      *         A `proof` is valid if and only if the rebuilt hash matches the root of the tree.
      *         When processing the proof, the pairs of leafs & pre-images are assumed to be sorted.
      */
-    function processProofCalldata(OrderStructs.MerkleProofNode[] calldata proof, bytes32 leaf) internal pure returns (bytes32) {
+    function processProofCalldata(OrderStructs.MerkleTreeNode[] calldata proof, bytes32 leaf) internal pure returns (bytes32) {
         bytes32 computedHash = leaf;
         uint256 length = proof.length;
 
         for (uint256 i = 0; i < length; ) {
-            if (proof[i].side == OrderStructs.MerkleProofSide.Left) {
-                computedHash = _hashPair(proof[i].proofHash, computedHash);
+            if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Left) {
+                computedHash = _hashPair(proof[i].value, computedHash);
             } else {
-                computedHash = _hashPair(computedHash, proof[i].proofHash);
+                computedHash = _hashPair(computedHash, proof[i].value);
             }
             unchecked {
                 ++i;

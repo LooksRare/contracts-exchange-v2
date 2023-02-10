@@ -82,6 +82,9 @@ contract DeploymentNoCreate2 is Script {
         looksRareProtocol.updateCurrencyStatus(weth, true);
         looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
 
+        // @dev Transfer 1 wei
+        address(looksRareProtocol).transfer(1);
+
         console.log("TransferManager address:");
         console.log(transferManagerAddress);
         console.log("LooksRareProtocol address:");

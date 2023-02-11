@@ -74,14 +74,16 @@ contract MerkleWithPosition {
             }
             // pos is upper bounded by data.length / 2, so safe even if array is at max size
             uint256 pos = 0;
+            bool nextIsLeft = true;
             for (uint256 i = 0; i < length - 1; i += 2) {
                 bytes32 hashed = hashLeafPairs(data[i].value, data[i + 1].value);
                 result[pos] = OrderStructs.MerkleTreeNode({
                     value: hashed,
-                    position: OrderStructs.MerkleTreeNodePosition.Left
+                    position: nextIsLeft
+                        ? OrderStructs.MerkleTreeNodePosition.Left
+                        : OrderStructs.MerkleTreeNodePosition.Right
                 });
-                data[i].position = OrderStructs.MerkleTreeNodePosition.Left;
-                data[i + 1].position = OrderStructs.MerkleTreeNodePosition.Right;
+                nextIsLeft = !nextIsLeft;
                 ++pos;
             }
         }

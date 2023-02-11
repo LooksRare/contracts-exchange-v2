@@ -70,7 +70,7 @@ library OrderStructs {
      * 3. Merkle tree struct
      */
 
-    enum MerkleTreeNodePosition { None, Left, Right }
+    enum MerkleTreeNodePosition { Left, Right }
 
     /**
      * @notice MerkleTreeNode is a MerkleTree's node.

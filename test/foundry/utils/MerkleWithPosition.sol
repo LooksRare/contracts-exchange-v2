@@ -39,7 +39,7 @@ contract MerkleWithPosition {
                 } else if (node + 1 == data.length) {
                     result[pos] = OrderStructs.MerkleTreeNode({
                         value: bytes32(0),
-                        position: OrderStructs.MerkleTreeNodePosition.None
+                        position: OrderStructs.MerkleTreeNodePosition.Left
                     });
                 } else {
                     result[pos] = data[node + 1];
@@ -66,7 +66,7 @@ contract MerkleWithPosition {
                 (bytes32 hashed, ) = hashLeafPairs(data[length - 1].value, bytes32(0));
                 result[result.length - 1] = OrderStructs.MerkleTreeNode({
                     value: hashed,
-                    position: OrderStructs.MerkleTreeNodePosition.None
+                    position: OrderStructs.MerkleTreeNodePosition.Left
                 });
             } else {
                 result = new OrderStructs.MerkleTreeNode[](length / 2);
@@ -77,7 +77,7 @@ contract MerkleWithPosition {
                 (bytes32 hashed, bool swapped) = hashLeafPairs(data[i].value, data[i + 1].value);
                 result[pos] = OrderStructs.MerkleTreeNode({
                     value: hashed,
-                    position: OrderStructs.MerkleTreeNodePosition.None
+                    position: OrderStructs.MerkleTreeNodePosition.Left
                 });
                 if (swapped) {
                     data[i].position = OrderStructs.MerkleTreeNodePosition.Right;

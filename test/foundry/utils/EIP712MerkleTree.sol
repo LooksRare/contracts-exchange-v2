@@ -42,7 +42,9 @@ contract EIP712MerkleTree is Test {
         for (uint256 i; i < bidCount; i++) {
             leaves[i] = OrderStructs.MerkleTreeNode({
                 value: makerOrders[i].hash(),
-                position: OrderStructs.MerkleTreeNodePosition.None
+                position: i % 2 == 0
+                    ? OrderStructs.MerkleTreeNodePosition.Left
+                    : OrderStructs.MerkleTreeNodePosition.Right
             });
         }
 
@@ -50,7 +52,9 @@ contract EIP712MerkleTree is Test {
         for (uint256 i = bidCount; i < leafCount; i++) {
             leaves[i] = OrderStructs.MerkleTreeNode({
                 value: emptyMakerOrderHash,
-                position: OrderStructs.MerkleTreeNodePosition.None
+                position: i % 2 == 0
+                    ? OrderStructs.MerkleTreeNodePosition.Left
+                    : OrderStructs.MerkleTreeNodePosition.Right
             });
         }
 

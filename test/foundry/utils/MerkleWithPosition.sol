@@ -5,6 +5,7 @@ import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 
 /**
  * @dev Modified from MurkyBase to add each node's position after hashing.
+ *      hashLeafPair does not sort the nodes to match EIP-712.
  */
 contract MerkleWithPosition {
     /********************
@@ -63,7 +64,7 @@ contract MerkleWithPosition {
             uint256 length = data.length;
             if (length & 0x1 == 1) {
                 result = new OrderStructs.MerkleTreeNode[](length / 2 + 1);
-                (bytes32 hashed, ) = hashLeafPairs(data[length - 1].value, bytes32(0));
+                bytes32 hashed = hashLeafPairs(data[length - 1].value, bytes32(0));
                 result[result.length - 1] = OrderStructs.MerkleTreeNode({
                     value: hashed,
                     position: OrderStructs.MerkleTreeNodePosition.Left
@@ -74,18 +75,13 @@ contract MerkleWithPosition {
             // pos is upper bounded by data.length / 2, so safe even if array is at max size
             uint256 pos = 0;
             for (uint256 i = 0; i < length - 1; i += 2) {
-                (bytes32 hashed, bool swapped) = hashLeafPairs(data[i].value, data[i + 1].value);
+                bytes32 hashed = hashLeafPairs(data[i].value, data[i + 1].value);
                 result[pos] = OrderStructs.MerkleTreeNode({
                     value: hashed,
                     position: OrderStructs.MerkleTreeNodePosition.Left
                 });
-                if (swapped) {
-                    data[i].position = OrderStructs.MerkleTreeNodePosition.Right;
-                    data[i + 1].position = OrderStructs.MerkleTreeNodePosition.Left;
-                } else {
-                    data[i].position = OrderStructs.MerkleTreeNodePosition.Left;
-                    data[i + 1].position = OrderStructs.MerkleTreeNodePosition.Right;
-                }
+                data[i].position = OrderStructs.MerkleTreeNodePosition.Left;
+                data[i + 1].position = OrderStructs.MerkleTreeNodePosition.Right;
                 ++pos;
             }
         }
@@ -144,19 +140,10 @@ contract MerkleWithPosition {
         }
     }
 
-    function hashLeafPairs(bytes32 left, bytes32 right) public pure returns (bytes32 _hash, bool _swapped) {
+    function hashLeafPairs(bytes32 left, bytes32 right) public pure returns (bytes32 _hash) {
         assembly {
-            switch lt(left, right)
-            case 0 {
-                mstore(0x0, right)
-                mstore(0x20, left)
-                _swapped := 0x1
-            }
-            default {
-                mstore(0x0, left)
-                mstore(0x20, right)
-                _swapped := 0x0
-            }
+            mstore(0x0, left)
+            mstore(0x20, right)
             _hash := keccak256(0x0, 0x40)
         }
     }

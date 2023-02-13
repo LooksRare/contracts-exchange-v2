@@ -266,13 +266,13 @@ uint256 constant ERC1155_NO_APPROVAL_FOR_ALL = 634;
  * @dev The asset type specified in the order seems incorrect.
  *      It is expected to be collectionType = 0.
  */
-uint256 constant POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721 = 701;
+uint256 constant POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721 = 701;
 
 /**
  * @dev The asset type specified in the order seems incorrect.
  *      It is expected to be collectionType = 1.
  */
-uint256 constant POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155 = 702;
+uint256 constant POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155 = 702;
 
 /**
  * 8. Transfer manager-related codes

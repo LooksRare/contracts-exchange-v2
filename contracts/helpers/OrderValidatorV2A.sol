@@ -360,11 +360,11 @@ contract OrderValidatorV2A {
                 IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
 
             if (!isERC721) {
-                return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721;
+                return POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721;
             }
         } else if (collectionType == CollectionType.ERC1155) {
             if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID)) {
-                return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155;
+                return POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155;
             }
         }
     }

@@ -11,7 +11,7 @@ import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Shared errors
-import {ERC20_APPROVAL_INFERIOR_TO_PRICE, ERC721_ITEM_ID_NOT_IN_BALANCE, ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID, ERC1155_BALANCE_OF_DOES_NOT_EXIST, ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT, ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST, ERC1155_NO_APPROVAL_FOR_ALL, MAKER_ORDER_INVALID_STANDARD_SALE, MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271, POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721, POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155, STRATEGY_NOT_IMPLEMENTED, TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {ERC20_APPROVAL_INFERIOR_TO_PRICE, ERC721_ITEM_ID_NOT_IN_BALANCE, ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID, ERC1155_BALANCE_OF_DOES_NOT_EXIST, ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT, ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST, ERC1155_NO_APPROVAL_FOR_ALL, MAKER_ORDER_INVALID_STANDARD_SALE, MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271, POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721, POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155, STRATEGY_NOT_IMPLEMENTED, TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Utils
 import {TestParameters} from "./utils/TestParameters.sol";
@@ -139,7 +139,7 @@ contract OrderValidatorV2ATest is TestParameters {
             new bytes(65),
             _EMPTY_MERKLE_TREE
         );
-        assertEq(validationCodes[6], POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721);
+        assertEq(validationCodes[6], POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721);
     }
 
     function testMakerBidWrongCollectionTypeERC721() public {
@@ -152,7 +152,7 @@ contract OrderValidatorV2ATest is TestParameters {
             new bytes(65),
             _EMPTY_MERKLE_TREE
         );
-        assertEq(validationCodes[6], POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721);
+        assertEq(validationCodes[6], POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721);
     }
 
     function testMakerBidZeroAmount() public {
@@ -206,7 +206,7 @@ contract OrderValidatorV2ATest is TestParameters {
             new bytes(65),
             _EMPTY_MERKLE_TREE
         );
-        assertEq(validationCodes[6], POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155);
+        assertEq(validationCodes[6], POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155);
     }
 
     function testMakerBidWrongCollectionTypeERC1155() public {
@@ -219,7 +219,7 @@ contract OrderValidatorV2ATest is TestParameters {
             new bytes(65),
             _EMPTY_MERKLE_TREE
         );
-        assertEq(validationCodes[6], POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155);
+        assertEq(validationCodes[6], POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155);
     }
 
     function testMakerBidInsufficientERC20Allowance() public {

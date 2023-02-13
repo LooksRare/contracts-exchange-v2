@@ -55,7 +55,6 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amountsToFill;
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -146,7 +145,6 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amountsToFill;
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,

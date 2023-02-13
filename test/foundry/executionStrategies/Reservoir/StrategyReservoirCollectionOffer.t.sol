@@ -165,7 +165,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -281,7 +280,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -337,7 +335,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -391,7 +388,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -447,7 +443,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -533,7 +528,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -592,7 +586,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -648,7 +641,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -752,7 +744,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUpUser(makerUser);
         _setUpTakerUserAndGrantApprovals(itemOwner, collection);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -795,7 +786,6 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _setUp();
         _setUpNewStrategies();
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,

@@ -60,7 +60,6 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_newCreatorRoyaltyFee);
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerBid, ) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         // Sign order
@@ -89,7 +88,6 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     function testCreatorRoyaltiesGetPaidForERC2981() public {
         _setUpUsers();
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerBid, ) = _createMockMakerBidAndTakerAsk(
             address(mockERC721WithRoyalties),
             address(weth)

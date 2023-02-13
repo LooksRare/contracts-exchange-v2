@@ -55,7 +55,6 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         vm.prank(_owner);
         looksRareProtocol.updateDomainSeparator();
 
-        // Prepare the orders and signature
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -84,7 +83,6 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         // ChainId update
         vm.chainId(newChainId);
 
-        // Prepare the orders and signature
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );

@@ -56,7 +56,6 @@ contract SandboxTest is ProtocolBase {
         _setUpApprovalsForSandbox(takerUser);
         uint256 itemId = _transferItemIdToUser(takerUser);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -104,7 +103,6 @@ contract SandboxTest is ProtocolBase {
         _setUpApprovalsForSandbox(makerUser);
         uint256 itemId = _transferItemIdToUser(makerUser);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,

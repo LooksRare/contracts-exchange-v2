@@ -37,7 +37,6 @@ contract LooksRareProtocolTest is ProtocolBase {
     function testCannotTradeIfInvalidAmounts() public {
         _setUpUsers();
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -85,7 +84,6 @@ contract LooksRareProtocolTest is ProtocolBase {
     function testCannotTradeIfCurrencyInvalid() public {
         _setUpUsers();
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -143,7 +141,6 @@ contract LooksRareProtocolTest is ProtocolBase {
     }
 
     function testCannotTradeIfETHIsUsedForMakerBid() public {
-        // Prepare the order hash
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             ETH
@@ -216,7 +213,6 @@ contract LooksRareProtocolTest is ProtocolBase {
     function testCannotCallRestrictedExecuteTakerBid() public {
         _setUpUsers();
 
-        // Prepare the orders
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -255,7 +251,6 @@ contract LooksRareProtocolTest is ProtocolBase {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
-            // Prepare the order hash
             makerAsks[i] = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,

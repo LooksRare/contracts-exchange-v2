@@ -105,7 +105,6 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _setUpUsers();
         _setUpAffiliate();
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -168,7 +167,6 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
-            // Prepare the order hash
             makerAsks[i] = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,
@@ -258,7 +256,6 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _setUpUsers();
         _setUpAffiliate();
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)

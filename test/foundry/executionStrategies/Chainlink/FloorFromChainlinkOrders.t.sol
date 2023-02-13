@@ -135,7 +135,6 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     ) internal returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
         mockERC721.mint(makerUser, 1);
 
-        // Prepare the order hash
         newMakerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,
@@ -177,7 +176,6 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             }
         }
 
-        // Prepare the order hash
         newMakerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,

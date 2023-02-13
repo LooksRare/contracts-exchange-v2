@@ -31,7 +31,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         // Mint asset
         mockERC721.mint(makerUser, itemId);
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -82,7 +81,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         emit NewBidAskNonces(makerUser, 0, newAskNonce);
         looksRareProtocol.incrementBidAskNonces(false, true);
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -129,7 +127,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
 
         uint256 itemId = 420;
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: userGlobalBidNonce,
@@ -172,7 +169,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
@@ -333,7 +329,6 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         vm.prank(makerUser);
         looksRareProtocol.cancelOrderNonces(orderNonces);
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,

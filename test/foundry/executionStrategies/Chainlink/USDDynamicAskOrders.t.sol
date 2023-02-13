@@ -76,7 +76,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             }
         }
 
-        // Prepare the order hash
         newMakerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,

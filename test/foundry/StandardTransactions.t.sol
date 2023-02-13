@@ -32,7 +32,6 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        // Prepare the orders and signature
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -97,7 +96,6 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.assume(price <= 2 ether);
         _setUpUsers();
 
-        // Prepare the orders and signature
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -162,7 +160,6 @@ contract StandardTransactionsTest is ProtocolBase {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        // Prepare the orders and signature
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
@@ -287,7 +284,6 @@ contract StandardTransactionsTest is ProtocolBase {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
-            // Prepare the order hash
             makerAsks[i] = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,
@@ -357,7 +353,6 @@ contract StandardTransactionsTest is ProtocolBase {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
-            // Prepare the order hash
             makerAsks[i] = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,

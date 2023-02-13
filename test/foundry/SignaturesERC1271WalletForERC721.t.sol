@@ -254,7 +254,6 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
     function _takerBidSetup(
         address signer
     ) private returns (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) {
-        // Prepare the order hash
         (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
         makerAsk.signer = signer;
         // Mint asset
@@ -264,7 +263,6 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
     function _takerAskSetup(
         address signer
     ) private returns (OrderStructs.Taker memory takerAsk, OrderStructs.Maker memory makerBid) {
-        // Prepare the order hash
         (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
         makerBid.signer = signer;
         // Mint asset
@@ -290,7 +288,6 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
             // Mint asset
             mockERC721.mint(signer, i);
 
-            // Prepare the order hash
             makerAsks[i] = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,

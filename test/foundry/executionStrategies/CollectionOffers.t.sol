@@ -131,7 +131,6 @@ contract CollectionOrdersTest is ProtocolBase {
     function testTakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -171,7 +170,6 @@ contract CollectionOrdersTest is ProtocolBase {
     function testTakerAskCollectionOrderWithMerkleTreeERC721() public {
         _setUpUsers();
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -216,7 +214,6 @@ contract CollectionOrdersTest is ProtocolBase {
         vm.assume(itemIdSold > 5);
         _setUpUsers();
 
-        // Prepare the order hash
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,

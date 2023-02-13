@@ -36,7 +36,6 @@ contract GasGriefingTest is ProtocolBase {
     function testTakerBidGasGriefing() public {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
         );
@@ -93,7 +92,6 @@ contract GasGriefingTest is ProtocolBase {
             // Mint asset
             mockERC721.mint(gasGriefer, i);
 
-            // Prepare the order hash
             makerAsks[i] = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,

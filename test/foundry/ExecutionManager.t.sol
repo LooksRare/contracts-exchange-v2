@@ -288,7 +288,6 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(strategy)
         );
 
-        // Prepare the order hash
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)

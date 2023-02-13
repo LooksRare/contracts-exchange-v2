@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+import {OrderStructs} from "../../libraries/OrderStructs.sol";
+
 /**
  * @title MerkleProofCalldata
  * @notice This library is adjusted from the work of OpenZeppelin.
@@ -13,7 +15,7 @@ library MerkleProofCalldata {
      *         For this, a `proof` must be provided, containing sibling hashes on the branch from the leaf to the
      *         root of the tree. Each pair of leaves and each pair of pre-images are assumed to be sorted.
      */
-    function verifyCalldata(bytes32[] calldata proof, bytes32 root, bytes32 leaf) internal pure returns (bool) {
+    function verifyCalldata(OrderStructs.MerkleTreeNode[] calldata proof, bytes32 root, bytes32 leaf) internal pure returns (bool) {
         return processProofCalldata(proof, leaf) == root;
     }
 
@@ -22,21 +24,21 @@ library MerkleProofCalldata {
      *         A `proof` is valid if and only if the rebuilt hash matches the root of the tree.
      *         When processing the proof, the pairs of leafs & pre-images are assumed to be sorted.
      */
-    function processProofCalldata(bytes32[] calldata proof, bytes32 leaf) internal pure returns (bytes32) {
+    function processProofCalldata(OrderStructs.MerkleTreeNode[] calldata proof, bytes32 leaf) internal pure returns (bytes32) {
         bytes32 computedHash = leaf;
         uint256 length = proof.length;
 
         for (uint256 i = 0; i < length; ) {
-            computedHash = _hashPair(computedHash, proof[i]);
+            if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Left) {
+                computedHash = _efficientHash(proof[i].value, computedHash);
+            } else {
+                computedHash = _efficientHash(computedHash, proof[i].value);
+            }
             unchecked {
                 ++i;
             }
         }
         return computedHash;
-    }
-
-    function _hashPair(bytes32 a, bytes32 b) private pure returns (bytes32) {
-        return a < b ? _efficientHash(a, b) : _efficientHash(b, a);
     }
 
     function _efficientHash(bytes32 a, bytes32 b) private pure returns (bytes32 value) {

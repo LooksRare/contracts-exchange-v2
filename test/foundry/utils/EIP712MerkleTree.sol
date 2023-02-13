@@ -11,7 +11,7 @@ import "../../../contracts/LooksRareProtocol.sol";
 import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
 import {Test} from "forge-std/Test.sol";
 import {Math} from "../../../contracts/libraries/OpenZeppelin/Math.sol";
-import {Merkle} from "../../../lib/murky/src/Merkle.sol";
+import {MerkleWithPosition} from "./MerkleWithPosition.sol";
 
 // Constants
 import {MAX_CALLDATA_PROOF_LENGTH} from "../../../contracts/constants/NumericConstants.sol";
@@ -37,19 +37,29 @@ contract EIP712MerkleTree is Test {
         }
         bytes32 batchOrderTypehash = _getBatchOrderTypehash(treeHeight);
         uint256 leafCount = 2 ** treeHeight;
-        bytes32[] memory leaves = new bytes32[](leafCount);
+        OrderStructs.MerkleTreeNode[] memory leaves = new OrderStructs.MerkleTreeNode[](leafCount);
 
         for (uint256 i; i < bidCount; i++) {
-            leaves[i] = makerOrders[i].hash();
+            leaves[i] = OrderStructs.MerkleTreeNode({
+                value: makerOrders[i].hash(),
+                position: i % 2 == 0
+                    ? OrderStructs.MerkleTreeNodePosition.Left
+                    : OrderStructs.MerkleTreeNodePosition.Right
+            });
         }
 
         bytes32 emptyMakerOrderHash = _emptyMakerOrderHash();
         for (uint256 i = bidCount; i < leafCount; i++) {
-            leaves[i] = emptyMakerOrderHash;
+            leaves[i] = OrderStructs.MerkleTreeNode({
+                value: emptyMakerOrderHash,
+                position: i % 2 == 0
+                    ? OrderStructs.MerkleTreeNodePosition.Left
+                    : OrderStructs.MerkleTreeNodePosition.Right
+            });
         }
 
-        Merkle merkle = new Merkle();
-        bytes32[] memory proof = merkle.getProof(leaves, makerOrderIndex);
+        MerkleWithPosition merkle = new MerkleWithPosition();
+        OrderStructs.MerkleTreeNode[] memory proof = merkle.getProof(leaves, makerOrderIndex);
         bytes32 root = merkle.getRoot(leaves);
 
         signature = _sign(privateKey, batchOrderTypehash, root);

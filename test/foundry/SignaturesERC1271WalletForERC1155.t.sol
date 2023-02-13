@@ -21,7 +21,7 @@ import {ERC1155SafeTransferFromFail, ERC1155SafeBatchTransferFromFail} from "@lo
 import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 /**
@@ -366,7 +366,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC1155,
+            collectionType: CollectionType.ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: ETH,
@@ -387,7 +387,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC1155,
+            collectionType: CollectionType.ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: address(weth),
@@ -423,7 +423,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC1155,
+            collectionType: CollectionType.ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: address(weth),
@@ -461,7 +461,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
                 globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC1155,
+                collectionType: CollectionType.ERC1155,
                 orderNonce: i,
                 collection: address(mockERC1155),
                 currency: ETH,

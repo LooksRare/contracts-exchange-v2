@@ -12,10 +12,6 @@ import {ILooksRareProtocol} from "../../contracts/interfaces/ILooksRareProtocol.
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
-// Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
-import {QuoteType} from "../../contracts/enums/QuoteType.sol";
-
 contract DomainSeparatorUpdatesTest is ProtocolBase {
     function setUp() public {
         _setUp();

@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 // Enums
-import {AssetType} from "../enums/AssetType.sol";
+import {CollectionType} from "../enums/CollectionType.sol";
 import {QuoteType} from "../enums/QuoteType.sol";
 
 /**
@@ -22,7 +22,7 @@ library OrderStructs {
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
      * @param strategyId Strategy id
-     * @param assetType Asset type (i.e. 0 = ERC721, 1 = ERC1155)
+     * @param collectionType Asset type (i.e. 0 = ERC721, 1 = ERC1155)
      * @param collection Collection address
      * @param currency Currency address (@dev address(0) = ETH)
      * @param signer Signer address
@@ -39,7 +39,7 @@ library OrderStructs {
         uint256 subsetNonce;
         uint256 orderNonce;
         uint256 strategyId;
-        AssetType assetType;
+        CollectionType collectionType;
         address collection;
         address currency;
         address signer;
@@ -111,7 +111,7 @@ library OrderStructs {
                 "uint256 subsetNonce,"
                 "uint256 orderNonce,"
                 "uint256 strategyId,"
-                "uint8 assetType,"
+                "uint8 collectionType,"
                 "address collection,"
                 "address currency,"
                 "address signer,"
@@ -145,7 +145,7 @@ library OrderStructs {
                         maker.subsetNonce,
                         maker.orderNonce,
                         maker.strategyId,
-                        maker.assetType,
+                        maker.collectionType,
                         maker.collection,
                         maker.currency
                     ),

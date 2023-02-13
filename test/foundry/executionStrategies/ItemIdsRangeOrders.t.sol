@@ -17,7 +17,7 @@ import {StrategyItemIdsRange} from "../../../contracts/executionStrategies/Strat
 import {ProtocolBase} from "../ProtocolBase.t.sol";
 
 // Enums
-import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
@@ -51,7 +51,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -137,7 +137,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: AssetType.ERC1155,
+            collectionType: CollectionType.ERC1155,
             orderNonce: 0,
             collection: address(mockERC1155),
             currency: address(weth),
@@ -453,7 +453,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

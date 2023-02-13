@@ -12,7 +12,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract SandboxTest is ProtocolBase {
@@ -48,10 +48,10 @@ contract SandboxTest is ProtocolBase {
 
     /**
      * @notice Sandbox implements both ERC721 and ERC1155 interfaceIds.
-     *         This test verifies that only assetType = 1 works.
+     *         This test verifies that only collectionType = 1 works.
      *         It is for taker ask (matching maker bid).
      */
-    function testTakerAskCannotTransferSandboxWithERC721AssetTypeButERC1155AssetTypeWorks() public {
+    function testTakerAskCannotTransferSandboxWithERC721CollectionTypeButERC1155CollectionTypeWorks() public {
         // Taker user is the one selling the item
         _setUpApprovalsForSandbox(takerUser);
         uint256 itemId = _transferItemIdToUser(takerUser);
@@ -61,7 +61,7 @@ contract SandboxTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721, // it should be ERC1155
+            collectionType: CollectionType.ERC721, // it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,
             currency: address(weth),
@@ -76,16 +76,16 @@ contract SandboxTest is ProtocolBase {
         // Prepare the taker ask
         OrderStructs.Taker memory takerAsk = _genericTakerOrder();
 
-        // It should fail with assetType = 0
+        // It should fail with collectionType = 0
         vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Adjust asset type and sign order again
-        makerBid.assetType = AssetType.ERC1155;
+        makerBid.collectionType = CollectionType.ERC1155;
         signature = _signMakerOrder(makerBid, makerUserPK);
 
-        // It shouldn't fail with assetType = 0
+        // It shouldn't fail with collectionType = 0
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
@@ -95,10 +95,10 @@ contract SandboxTest is ProtocolBase {
 
     /**
      * @notice Sandbox implements both ERC721 and ERC1155 interfaceIds.
-     *         This test verifies that only assetType = 1 works.
+     *         This test verifies that only collectionType = 1 works.
      *         It is for taker bid (matching maker ask).
      */
-    function testTakerBidCannotTransferSandboxWithERC721AssetTypeButERC1155AssetTypeWorks() public {
+    function testTakerBidCannotTransferSandboxWithERC721CollectionTypeButERC1155CollectionTypeWorks() public {
         // Maker user is the one selling the item
         _setUpApprovalsForSandbox(makerUser);
         uint256 itemId = _transferItemIdToUser(makerUser);
@@ -108,7 +108,7 @@ contract SandboxTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721, // it should be ERC1155
+            collectionType: CollectionType.ERC721, // it should be ERC1155
             orderNonce: 0,
             collection: SANDBOX,
             currency: ETH,
@@ -123,7 +123,7 @@ contract SandboxTest is ProtocolBase {
         // Prepare the taker bid
         OrderStructs.Taker memory takerBid = _genericTakerOrder();
 
-        // It should fail with assetType = 0
+        // It should fail with collectionType = 0
         vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
@@ -135,10 +135,10 @@ contract SandboxTest is ProtocolBase {
         );
 
         // Adjust asset type and sign order again
-        makerAsk.assetType = AssetType.ERC1155;
+        makerAsk.collectionType = CollectionType.ERC1155;
         signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        // It shouldn't fail with assetType = 0
+        // It shouldn't fail with collectionType = 0
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,

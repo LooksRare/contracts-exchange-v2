@@ -12,30 +12,30 @@ contract BatchOrderTypehashRegistry {
     function _getBatchOrderTypehash(uint256 height) internal pure returns (bytes32 typehash) {
         /**
          * It looks like this for each height
-         * height == 1: BatchOrder(Maker[2] tree)Maker(uint8 quoteType,uint256 globalNonce,uint256 subsetNonce,uint256 orderNonce,uint256 strategyId,uint8 assetType,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 price,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)
-         * height == 2: BatchOrder(Maker[2][2] tree)Maker(uint8 quoteType,uint256 globalNonce,uint256 subsetNonce,uint256 orderNonce,uint256 strategyId,uint8 assetType,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 price,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)
-         * height == n: BatchOrder(Maker[2]...[2] tree)Maker(uint8 quoteType,uint256 globalNonce,uint256 subsetNonce,uint256 orderNonce,uint256 strategyId,uint8 assetType,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 price,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)
+         * height == 1: BatchOrder(Maker[2] tree)Maker(uint8 quoteType,uint256 globalNonce,uint256 subsetNonce,uint256 orderNonce,uint256 strategyId,uint8 collectionType,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 price,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)
+         * height == 2: BatchOrder(Maker[2][2] tree)Maker(uint8 quoteType,uint256 globalNonce,uint256 subsetNonce,uint256 orderNonce,uint256 strategyId,uint8 collectionType,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 price,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)
+         * height == n: BatchOrder(Maker[2]...[2] tree)Maker(uint8 quoteType,uint256 globalNonce,uint256 subsetNonce,uint256 orderNonce,uint256 strategyId,uint8 collectionType,address collection,address currency,address signer,uint256 startTime,uint256 endTime,uint256 price,uint256[] itemIds,uint256[] amounts,bytes additionalParameters)
          */
         if (height == 1) {
-            typehash = hex"cbbc55854abc707c09d732e7a51c3a1afc570dbbbd52fc5a98e4405f5379b60a";
+            typehash = hex"9661287f7a4aa4867db46a2453ee15bebac4e8fc25667a58718da658f15de643";
         } else if (height == 2) {
-            typehash = hex"17a0c314d856b89d3cacb1db1904702847910f15e9092b28cfa5ef32ae2b851b";
+            typehash = hex"a54ab330ea9e1dfccee2b86f3666989e7fbd479704416c757c8de8e820142a08";
         } else if (height == 3) {
-            typehash = hex"73d811d61eeec3b062bc4e79135b198acd0036360931714173b6d31e8da1838d";
+            typehash = hex"93390f5d45ede9dea305f16aec86b2472af4f823851637f1b7019ad0775cea49";
         } else if (height == 4) {
-            typehash = hex"9a418ad3a5100c9f4baf19fa46c9863f0cfe8e47ed76281e0b31cf59db8f0d7a";
+            typehash = hex"9dda2c8358da895e43d574bb15954ce5727b22e923a2d8f28261f297bce42f0b";
         } else if (height == 5) {
-            typehash = hex"added5faf1d2f37945d7b637b2c838e38814d49c683d79e665d2996f4a2b1ace";
+            typehash = hex"92dc717124e161262f9d10c7079e7d54dc51271893fba54aa4a0f270fecdcc98";
         } else if (height == 6) {
-            typehash = hex"ec13b4bc83cfc2d7885d4f0c3cacb5b70d6e85c746f307e63b382deaa1d72e0d";
+            typehash = hex"ce02aee5a7a35d40d974463c4c6e5534954fb07a7e7bc966fee268a15337bfd8";
         } else if (height == 7) {
-            typehash = hex"4d13a175331d7cb26822d3f8a43ff58d186b0d7199bbc4a8f3d6bd424fe9329f";
+            typehash = hex"f7a65efd167a18f7091b2bb929d687dd94503cf0a43620487055ed7d6b727559";
         } else if (height == 8) {
-            typehash = hex"06a7cb7b48e9ae3539ba1e484c81abb2618e41ccdc3825b2057a5fd22a17b447";
+            typehash = hex"def24acacad1318b664520f7c10e8bc6d1e7f6f6f7c8b031e70624ceb42266a6";
         } else if (height == 9) {
-            typehash = hex"b7a574557d8026c2a7da2f7b5494254ca1367ae18b2118ccdbb6f2f6fe3d1a61";
+            typehash = hex"4cb4080dc4e7bae88b4dc4307ad5117fa4f26195998a1b5f40368809d7f4c7f2";
         } else if (height == 10) {
-            typehash = hex"8660a645605d92be3fca6dd485f2662e51c0cd2295a59b3db32bf713fbb81ee4";
+            typehash = hex"f8b1f864164d8d6e0b45f1399bd711223117a4ab0b057a9c2d7779e86a7c88db";
         } else {
             revert MerkleProofTooLarge(height);
         }

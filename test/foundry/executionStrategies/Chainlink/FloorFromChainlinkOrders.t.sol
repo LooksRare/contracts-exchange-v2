@@ -21,7 +21,7 @@ import {MockChainlinkAggregator} from "../../../mock/MockChainlinkAggregator.sol
 import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
 // Enums
-import {AssetType} from "../../../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../../../contracts/enums/QuoteType.sol";
 
 abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager {
@@ -93,7 +93,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -111,7 +111,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -140,7 +140,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -181,7 +181,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

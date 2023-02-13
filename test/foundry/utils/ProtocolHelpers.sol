@@ -12,7 +12,7 @@ import {TestHelpers} from "./TestHelpers.sol";
 import {TestParameters} from "./TestParameters.sol";
 
 // Enums
-import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract ProtocolHelpers is TestHelpers, TestParameters {
@@ -28,7 +28,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 globalNonce,
         uint256 subsetNonce,
         uint256 strategyId,
-        AssetType assetType,
+        CollectionType collectionType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -47,7 +47,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             subsetNonce: subsetNonce,
             orderNonce: orderNonce,
             strategyId: strategyId,
-            assetType: assetType,
+            collectionType: collectionType,
             collection: collection,
             currency: currency,
             signer: signer,
@@ -65,7 +65,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
         uint256 globalNonce,
         uint256 subsetNonce,
         uint256 strategyId,
-        AssetType assetType,
+        CollectionType collectionType,
         uint256 orderNonce,
         address collection,
         address currency,
@@ -80,7 +80,7 @@ contract ProtocolHelpers is TestHelpers, TestParameters {
             subsetNonce: subsetNonce,
             orderNonce: orderNonce,
             strategyId: strategyId,
-            assetType: assetType,
+            collectionType: collectionType,
             collection: collection,
             currency: currency,
             signer: signer,

@@ -12,7 +12,7 @@ import {StrategyTestMultiFillCollectionOrder} from "./utils/StrategyTestMultiFil
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract NonceInvalidationTest is INonceManager, ProtocolBase {
@@ -132,7 +132,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             globalNonce: userGlobalBidNonce,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -225,7 +225,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: orderNonce,
             collection: address(mockERC721),
             currency: address(weth),
@@ -271,7 +271,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
                 globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
+                collectionType: CollectionType.ERC721,
                 orderNonce: orderNonce,
                 collection: address(mockERC721),
                 currency: address(weth),
@@ -334,7 +334,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: orderNonce,
             collection: address(mockERC721),
             currency: address(weth),

@@ -12,7 +12,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract SignaturesEIP2098Test is ProtocolBase {

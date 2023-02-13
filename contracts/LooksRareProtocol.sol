@@ -362,7 +362,7 @@ contract LooksRareProtocol is
         _updateUserOrderNonce(isNonceInvalidated, signer, makerBid.orderNonce, orderHash);
 
         // Taker action goes first
-        _transferNFT(makerBid.collection, makerBid.assetType, msg.sender, signer, itemIds, amounts);
+        _transferNFT(makerBid.collection, makerBid.collectionType, msg.sender, signer, itemIds, amounts);
 
         // Maker action goes second
         _transferToAskRecipientAndCreatorIfAny(recipients, feeAmounts, makerBid.currency, signer);
@@ -437,7 +437,7 @@ contract LooksRareProtocol is
         // Maker action goes second
         _transferNFT(
             makerAsk.collection,
-            makerAsk.assetType,
+            makerAsk.collectionType,
             signer,
             takerBid.recipient == address(0) ? sender : takerBid.recipient,
             itemIds,

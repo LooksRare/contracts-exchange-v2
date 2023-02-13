@@ -121,7 +121,7 @@ contract StrategyCollectionOffer is BaseStrategy {
             return (isValid, OrderInvalid.selector);
         }
 
-        _validateAmountNoRevert(makerBid.amounts[0], makerBid.assetType);
+        _validateAmountNoRevert(makerBid.amounts[0], makerBid.collectionType);
 
         // If no root is provided or invalid length, it should be invalid.
         // @dev It does not mean the merkle root is valid against a specific itemId that exists in the collection.

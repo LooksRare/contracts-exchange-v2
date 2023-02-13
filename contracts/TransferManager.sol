@@ -14,7 +14,7 @@ import {AmountInvalid, LengthsInvalid} from "./errors/SharedErrors.sol";
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Enums
-import {AssetType} from "./enums/AssetType.sol";
+import {CollectionType} from "./enums/CollectionType.sol";
 
 /**
  * @title TransferManager
@@ -149,8 +149,8 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
                 revert LengthsInvalid();
             }
 
-            AssetType assetType = items[i].assetType;
-            if (assetType == AssetType.ERC721) {
+            CollectionType collectionType = items[i].collectionType;
+            if (collectionType == CollectionType.ERC721) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     if (amounts[j] != 1) {
                         revert AmountInvalid();
@@ -160,7 +160,7 @@ contract TransferManager is ITransferManager, LowLevelERC721Transfer, LowLevelER
                         ++j;
                     }
                 }
-            } else if (assetType == AssetType.ERC1155) {
+            } else if (collectionType == CollectionType.ERC1155) {
                 for (uint256 j; j < itemIdsLengthForSingleCollection; ) {
                     if (amounts[j] == 0) {
                         revert AmountInvalid();

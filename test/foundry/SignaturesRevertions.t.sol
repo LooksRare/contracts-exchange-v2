@@ -13,7 +13,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 import {INVALID_S_PARAMETER_EOA, INVALID_V_PARAMETER_EOA, NULL_SIGNER_EOA, INVALID_SIGNATURE_LENGTH, INVALID_SIGNER_EOA} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract SignaturesRevertionsTest is ProtocolBase {
@@ -33,7 +33,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -66,7 +66,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -104,7 +104,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,
@@ -140,7 +140,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: ETH,

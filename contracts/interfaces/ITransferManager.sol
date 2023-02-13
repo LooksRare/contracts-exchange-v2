@@ -5,7 +5,7 @@ pragma solidity 0.8.17;
 import {OrderStructs} from "../libraries/OrderStructs.sol";
 
 // Enums
-import {AssetType} from "../enums/AssetType.sol";
+import {CollectionType} from "../enums/CollectionType.sol";
 
 /**
  * @title ITransferManager
@@ -15,13 +15,13 @@ interface ITransferManager {
     /**
      * @notice This struct is only used for transferBatchItemsAcrossCollections.
      * @param collection Collection address
-     * @param assetType 0 for ERC721, 1 for ERC1155
+     * @param collectionType 0 for ERC721, 1 for ERC1155
      * @param itemIds Array of item ids to transfer
      * @param amounts Array of amounts to transfer
      */
     struct BatchTransferItem {
         address collection;
-        AssetType assetType;
+        CollectionType collectionType;
         uint256[] itemIds;
         uint256[] amounts;
     }

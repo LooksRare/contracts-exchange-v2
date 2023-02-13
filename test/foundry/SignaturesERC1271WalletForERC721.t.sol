@@ -18,7 +18,7 @@ import {SignatureERC1271Invalid} from "@looksrare/contracts-libs/contracts/error
 import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 /**
@@ -293,7 +293,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
                 globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
+                collectionType: CollectionType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,

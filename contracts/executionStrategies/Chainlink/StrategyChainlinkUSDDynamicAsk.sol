@@ -132,7 +132,7 @@ contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPr
         }
 
         for (uint256 i; i < itemIdsLength; ) {
-            _validateAmountNoRevert(makerAsk.amounts[i], makerAsk.assetType);
+            _validateAmountNoRevert(makerAsk.amounts[i], makerAsk.collectionType);
             unchecked {
                 ++i;
             }

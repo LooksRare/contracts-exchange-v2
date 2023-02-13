@@ -18,7 +18,7 @@ import {CURRENCY_NOT_ALLOWED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../con
 import {MockERC20} from "../mock/MockERC20.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract LooksRareProtocolTest is ProtocolBase {
@@ -256,7 +256,7 @@ contract LooksRareProtocolTest is ProtocolBase {
                 globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
+                collectionType: CollectionType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,

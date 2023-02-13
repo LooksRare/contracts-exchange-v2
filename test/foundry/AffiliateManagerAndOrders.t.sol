@@ -18,7 +18,7 @@ import {MockERC20} from "../mock/MockERC20.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
@@ -172,7 +172,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
                 globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
+                collectionType: CollectionType.ERC721,
                 orderNonce: i,
                 collection: address(mockERC721),
                 currency: ETH,

@@ -21,7 +21,7 @@ import {QuoteType} from "../../enums/QuoteType.sol";
 import {BaseStrategy, IStrategy} from "../BaseStrategy.sol";
 
 // Enums
-import {AssetType} from "../../enums/AssetType.sol";
+import {CollectionType} from "../../enums/CollectionType.sol";
 
 /**
  * @title StrategyReservoirCollectionOffer
@@ -29,7 +29,7 @@ import {AssetType} from "../../enums/AssetType.sol";
  *         to create advanced maker bid offers for items in a collection.
  *         The taker must provide the proof that (1) the itemId is not flagged
  *         and (2) the item has not been transferred after a specific time.
- *         This strategy is only available for ERC721 tokens (assetType = 0).
+ *         This strategy is only available for ERC721 tokens (collectionType = 0).
  *         There are two available functions:
  *         1. executeCollectionStrategyWithTakerAsk --> it applies to all itemIds in a collection
  *         2. executeCollectionStrategyWithTakerAskWithProof --> it allows adding merkle proof criteria.
@@ -85,7 +85,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         amounts = makerBid.amounts;
 
         // It can be executed only for 1 itemId and only for ERC721
-        if (amounts.length != 1 || makerBid.assetType != AssetType.ERC721) {
+        if (amounts.length != 1 || makerBid.collectionType != CollectionType.ERC721) {
             revert OrderInvalid();
         }
 
@@ -120,7 +120,7 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         amounts = makerBid.amounts;
 
         // It can be executed only for 1 itemId and only for ERC721
-        if (amounts.length != 1 || makerBid.assetType != AssetType.ERC721) {
+        if (amounts.length != 1 || makerBid.collectionType != CollectionType.ERC721) {
             revert OrderInvalid();
         }
 
@@ -155,7 +155,9 @@ contract StrategyReservoirCollectionOffer is BaseStrategy {
         }
 
         // Amounts length must be 1, amount can only be 1 since only ERC721 can be traded.
-        if (makerBid.amounts.length != 1 || makerBid.amounts[0] != 1 || makerBid.assetType != AssetType.ERC721) {
+        if (
+            makerBid.amounts.length != 1 || makerBid.amounts[0] != 1 || makerBid.collectionType != CollectionType.ERC721
+        ) {
             return (isValid, OrderInvalid.selector);
         }
 

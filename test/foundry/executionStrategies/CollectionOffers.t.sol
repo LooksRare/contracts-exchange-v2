@@ -21,7 +21,7 @@ import {ProtocolBase} from "../ProtocolBase.t.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericConstants.sol";
 
 // Enums
-import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
@@ -136,7 +136,7 @@ contract CollectionOrdersTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -175,7 +175,7 @@ contract CollectionOrdersTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -219,7 +219,7 @@ contract CollectionOrdersTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -260,7 +260,7 @@ contract CollectionOrdersTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -331,7 +331,7 @@ contract CollectionOrdersTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -362,7 +362,7 @@ contract CollectionOrdersTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 3,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -382,7 +382,7 @@ contract CollectionOrdersTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

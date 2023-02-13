@@ -18,10 +18,6 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 // Constants
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConstants.sol";
 
-// Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
-import {QuoteType} from "../../contracts/enums/QuoteType.sol";
-
 contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
     function setUp() public {
         _setUp();

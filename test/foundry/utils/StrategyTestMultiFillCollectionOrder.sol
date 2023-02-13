@@ -11,7 +11,7 @@ import {OrderInvalid} from "../../../contracts/errors/SharedErrors.sol";
 import {BaseStrategy, IStrategy} from "../../../contracts/executionStrategies/BaseStrategy.sol";
 
 // Enums
-import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../../contracts/enums/CollectionType.sol";
 
 contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
     using OrderStructs for OrderStructs.Maker;
@@ -41,7 +41,7 @@ contract StrategyTestMultiFillCollectionOrder is BaseStrategy {
     ) external returns (uint256 price, uint256[] memory itemIds, uint256[] memory amounts, bool isNonceInvalidated) {
         if (msg.sender != LOOKSRARE_PROTOCOL) revert OrderInvalid();
         // Only available for ERC721
-        if (makerBid.assetType != AssetType.ERC721) revert OrderInvalid();
+        if (makerBid.collectionType != CollectionType.ERC721) revert OrderInvalid();
 
         bytes32 orderHash = makerBid.hash();
         uint256 countItemsFilled = countItemsFilledForOrderHash[orderHash];

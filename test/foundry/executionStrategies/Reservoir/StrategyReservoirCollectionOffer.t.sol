@@ -20,7 +20,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/Numeric
 import {StrategyReservoirCollectionOffer} from "../../../../contracts/executionStrategies/Reservoir/StrategyReservoirCollectionOffer.sol";
 
 // Enums
-import {AssetType} from "../../../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../../../contracts/enums/QuoteType.sol";
 
 // Base test
@@ -121,12 +121,12 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _testCollectionOrderRevertsIfItemIdDiffers(true, itemId);
     }
 
-    function testCollectionOrderRevertsIfAssetTypeIsNotERC721() public {
-        _testRevertsIfAssetTypeIsNotERC721(false);
+    function testCollectionOrderRevertsIfCollectionTypeIsNotERC721() public {
+        _testRevertsIfCollectionTypeIsNotERC721(false);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfAssetTypeIsNotERC721() public {
-        _testRevertsIfAssetTypeIsNotERC721(true);
+    function testCollectionOrderWithMerkleTreeRevertsIfCollectionTypeIsNotERC721() public {
+        _testRevertsIfCollectionTypeIsNotERC721(true);
     }
 
     function testCollectionOrdersAmountsInvalid() public {
@@ -170,7 +170,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -220,7 +220,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -247,7 +247,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: 3,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),
@@ -285,7 +285,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -340,7 +340,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -393,7 +393,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -448,7 +448,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -533,7 +533,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -571,7 +571,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function _testRevertsIfAssetTypeIsNotERC721(bool withMerkleTreeCriteria) public {
+    function _testRevertsIfCollectionTypeIsNotERC721(bool withMerkleTreeCriteria) public {
         (
             uint256 forkedBlockNumber,
             uint256 timestamp,
@@ -591,7 +591,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC1155,
+            collectionType: CollectionType.ERC1155,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -646,7 +646,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -749,7 +749,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: collection,
             currency: address(weth),
@@ -791,7 +791,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
             globalNonce: 0,
             subsetNonce: 0,
             strategyId: withMerkleTreeCriteria ? 2 : 1,
-            assetType: AssetType.ERC721,
+            collectionType: CollectionType.ERC721,
             orderNonce: 0,
             collection: address(mockERC721),
             currency: address(weth),

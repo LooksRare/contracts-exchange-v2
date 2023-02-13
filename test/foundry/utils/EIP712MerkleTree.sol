@@ -90,31 +90,31 @@ contract EIP712MerkleTree is Test {
 
     function _getBatchOrderTypehash(uint256 treeHeight) private pure returns (bytes32 batchOrderTypehash) {
         if (treeHeight == 1) {
-            batchOrderTypehash = hex"cbbc55854abc707c09d732e7a51c3a1afc570dbbbd52fc5a98e4405f5379b60a";
+            batchOrderTypehash = hex"9661287f7a4aa4867db46a2453ee15bebac4e8fc25667a58718da658f15de643";
         } else if (treeHeight == 2) {
-            batchOrderTypehash = hex"17a0c314d856b89d3cacb1db1904702847910f15e9092b28cfa5ef32ae2b851b";
+            batchOrderTypehash = hex"a54ab330ea9e1dfccee2b86f3666989e7fbd479704416c757c8de8e820142a08";
         } else if (treeHeight == 3) {
-            batchOrderTypehash = hex"73d811d61eeec3b062bc4e79135b198acd0036360931714173b6d31e8da1838d";
+            batchOrderTypehash = hex"93390f5d45ede9dea305f16aec86b2472af4f823851637f1b7019ad0775cea49";
         } else if (treeHeight == 4) {
-            batchOrderTypehash = hex"9a418ad3a5100c9f4baf19fa46c9863f0cfe8e47ed76281e0b31cf59db8f0d7a";
+            batchOrderTypehash = hex"9dda2c8358da895e43d574bb15954ce5727b22e923a2d8f28261f297bce42f0b";
         } else if (treeHeight == 5) {
-            batchOrderTypehash = hex"added5faf1d2f37945d7b637b2c838e38814d49c683d79e665d2996f4a2b1ace";
+            batchOrderTypehash = hex"92dc717124e161262f9d10c7079e7d54dc51271893fba54aa4a0f270fecdcc98";
         } else if (treeHeight == 6) {
-            batchOrderTypehash = hex"ec13b4bc83cfc2d7885d4f0c3cacb5b70d6e85c746f307e63b382deaa1d72e0d";
+            batchOrderTypehash = hex"ce02aee5a7a35d40d974463c4c6e5534954fb07a7e7bc966fee268a15337bfd8";
         } else if (treeHeight == 7) {
-            batchOrderTypehash = hex"4d13a175331d7cb26822d3f8a43ff58d186b0d7199bbc4a8f3d6bd424fe9329f";
+            batchOrderTypehash = hex"f7a65efd167a18f7091b2bb929d687dd94503cf0a43620487055ed7d6b727559";
         } else if (treeHeight == 8) {
-            batchOrderTypehash = hex"06a7cb7b48e9ae3539ba1e484c81abb2618e41ccdc3825b2057a5fd22a17b447";
+            batchOrderTypehash = hex"def24acacad1318b664520f7c10e8bc6d1e7f6f6f7c8b031e70624ceb42266a6";
         } else if (treeHeight == 9) {
-            batchOrderTypehash = hex"b7a574557d8026c2a7da2f7b5494254ca1367ae18b2118ccdbb6f2f6fe3d1a61";
+            batchOrderTypehash = hex"4cb4080dc4e7bae88b4dc4307ad5117fa4f26195998a1b5f40368809d7f4c7f2";
         } else if (treeHeight == 10) {
-            batchOrderTypehash = hex"8660a645605d92be3fca6dd485f2662e51c0cd2295a59b3db32bf713fbb81ee4";
+            batchOrderTypehash = hex"f8b1f864164d8d6e0b45f1399bd711223117a4ab0b057a9c2d7779e86a7c88db";
         } else if (treeHeight == 11) {
-            batchOrderTypehash = hex"9a3ce74af1cf5f60b4762d883e0f75912ccffd3a5a75d18399d9273faed739fb";
+            batchOrderTypehash = hex"4787f505db237e03a7193c312d5159add8a5705278e1c7dcf92ab87126cbe490";
         } else if (treeHeight == 12) {
-            batchOrderTypehash = hex"06195feea862ccec6fab4646f653db6df0ea88e1312269e92c502071c7f57c16";
+            batchOrderTypehash = hex"7a6517e5a16c56b29947b57b748aa91736987376e1a366d948e7a802a9df3431";
         } else if (treeHeight == 13) {
-            batchOrderTypehash = hex"0aa2f1d0d9d5bfd8e18b7fa947f3957ab4283e016dbec7aa4406586fbfabeb85";
+            batchOrderTypehash = hex"35806d347e9929042ce209d143da48f100f0ff0cbdb1fde68cf13af8059d79df";
         }
     }
 }

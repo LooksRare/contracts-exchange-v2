@@ -19,7 +19,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 import {EIP712MerkleTree} from "./utils/EIP712MerkleTree.sol";
 
 // Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
@@ -276,7 +276,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
+                collectionType: CollectionType.ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: ETH,
@@ -295,7 +295,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
+                collectionType: CollectionType.ERC721,
                 orderNonce: i, // incremental
                 collection: address(mockERC721),
                 currency: address(weth),

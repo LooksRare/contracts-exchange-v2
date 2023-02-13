@@ -10,7 +10,7 @@ import {TransferManager} from "./TransferManager.sol";
 import {OrderStructs} from "./libraries/OrderStructs.sol";
 
 // Enums
-import {AssetType} from "./enums/AssetType.sol";
+import {CollectionType} from "./enums/CollectionType.sol";
 
 /**
  * @title TransferSelectorNFT
@@ -40,7 +40,7 @@ contract TransferSelectorNFT is ExecutionManager, PackableReentrancyGuard {
     /**
      * @notice This function is internal and used to transfer non-fungible tokens.
      * @param collection Collection address
-     * @param assetType Asset type (e.g. 0 = ERC721, 1 = ERC1155)
+     * @param collectionType Asset type (e.g. 0 = ERC721, 1 = ERC1155)
      * @param sender Sender address
      * @param recipient Recipient address
      * @param itemIds Array of itemIds
@@ -48,15 +48,15 @@ contract TransferSelectorNFT is ExecutionManager, PackableReentrancyGuard {
      */
     function _transferNFT(
         address collection,
-        AssetType assetType,
+        CollectionType collectionType,
         address sender,
         address recipient,
         uint256[] memory itemIds,
         uint256[] memory amounts
     ) internal {
-        if (assetType == AssetType.ERC721) {
+        if (collectionType == CollectionType.ERC721) {
             transferManager.transferItemsERC721(collection, sender, recipient, itemIds, amounts);
-        } else if (assetType == AssetType.ERC1155) {
+        } else if (collectionType == CollectionType.ERC1155) {
             transferManager.transferItemsERC1155(collection, sender, recipient, itemIds, amounts);
         }
     }

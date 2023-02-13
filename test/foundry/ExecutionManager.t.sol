@@ -19,10 +19,6 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 // Strategies
 import {StrategyChainlinkFloor} from "../../contracts/executionStrategies/Chainlink/StrategyChainlinkFloor.sol";
 
-// Enums
-import {AssetType} from "../../contracts/enums/AssetType.sol";
-import {QuoteType} from "../../contracts/enums/QuoteType.sol";
-
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     function setUp() public {
         _setUp();

@@ -20,43 +20,43 @@ contract BatchOrderTypehashRegistryTest is Test {
         bytes32 root = hex"6942000000000000000000000000000000000000000000000000000000000000";
         assertEq(
             registry.hashBatchOrder(root, 1),
-            hex"33c657401cb4cc9871013e0f76f5281e0d120ebe79a7df082ef23f819c88a713"
+            hex"8f0c85a215cff55fe39cf62ee7a1e0b5205a8ade02ff12ffee9ece02d626ffc3"
         );
         assertEq(
             registry.hashBatchOrder(root, 2),
-            hex"f512f08b1484881bfeee2fff62ec8ab82802924cf7d60935f439c51ec4c36137"
+            hex"f04a7d8a4688cf084b00b51ed583de7e5a19e59b073635e00a45a474899e89ec"
         );
         assertEq(
             registry.hashBatchOrder(root, 3),
-            hex"8526a9764b20d57713475efc2cd5510a66ca8c42cffac8ac53a11b92902f4d2e"
+            hex"56ef3bb8c564d19cfe494776934aa5e7ed84c41ae609d5f10e726f76281dd30b"
         );
         assertEq(
             registry.hashBatchOrder(root, 4),
-            hex"10d2d11a4c31f70fe46acd8bb3da553a486eeb19ca16e142a2cfbf5ad44db13c"
+            hex"2b0cb021eacab73e36d9ac9a04c1cf58589ff5bb4dc0d9b88ec29f67358ca812"
         );
         assertEq(
             registry.hashBatchOrder(root, 5),
-            hex"a0e3c51d5b4c0161ef05090b23f65dc9a0a1eeeb41ca7d8273072bd219971736"
+            hex"253b3cc8d591a8b01fc8967cefe3ac3d0e078b884d96aa589f1ffd4536921bbb"
         );
         assertEq(
             registry.hashBatchOrder(root, 6),
-            hex"0ba773da36db5b6d707566fed81f0467735faa607baa1935879234461aa2a67d"
+            hex"7e4c4a2c5806fc4765bca325e8b78ccf9633bd1c7643144a56210293daefcbca"
         );
         assertEq(
             registry.hashBatchOrder(root, 7),
-            hex"c6ac7b53bdac5ffacb36b16446b2c42b79b5ae7507cdbe8b7003cdcf5a7cd6b4"
+            hex"e8e39cebe7137f0fadf6b88ba611044ac79c0168444eab66ca53bddd0c5fb717"
         );
         assertEq(
             registry.hashBatchOrder(root, 8),
-            hex"a1b41ffa9ef16d44f213995f30fbc1b5c7b9f2295422690d1b50adcb5b8ef074"
+            hex"6e02f123509255ed381c7552de5e2ac1c1ea401a23e026e2452f01b70564affb"
         );
         assertEq(
             registry.hashBatchOrder(root, 9),
-            hex"572bca919a81f64902ca93574858cc79353e5cc73cc3b8b0b1c7c65e45df07d6"
+            hex"7eeb4a7fe4655841fdd66f8ecfcf6cd261d50eafabbaebb10f63f5fe84ddddc9"
         );
         assertEq(
             registry.hashBatchOrder(root, 10),
-            hex"e7dee9a17322f61bfe28d8937543ad6efa464090d9699b49e84b0ce9a9850fff"
+            hex"a96dee8b7b88deda5d50b55f641ca08c1ee00825eeb1db7a324f392fa0b8bb83"
         );
     }
 
@@ -69,7 +69,7 @@ contract BatchOrderTypehashRegistryTest is Test {
             "uint256 subsetNonce,"
             "uint256 orderNonce,"
             "uint256 strategyId,"
-            "uint8 assetType,"
+            "uint8 collectionType,"
             "address collection,"
             "address currency,"
             "address signer,"

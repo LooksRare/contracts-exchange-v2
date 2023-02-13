@@ -29,7 +29,7 @@ import "../constants/ValidationCodeConstants.sol";
 import {MAX_CALLDATA_PROOF_LENGTH, ONE_HUNDRED_PERCENT_IN_BP} from "../constants/NumericConstants.sol";
 
 // Enums
-import {AssetType} from "../enums/AssetType.sol";
+import {CollectionType} from "../enums/CollectionType.sol";
 import {QuoteType} from "../enums/QuoteType.sol";
 
 /**
@@ -211,14 +211,14 @@ contract OrderValidatorV2A {
         } else {
             validationCodes[5] = _checkValidityMakerAskNFTAssets(
                 makerOrder.collection,
-                makerOrder.assetType,
+                makerOrder.collectionType,
                 makerOrder.signer,
                 itemIds,
                 amounts
             );
         }
 
-        validationCodes[6] = _checkIfPotentialInvalidAssetTypes(makerOrder.collection, makerOrder.assetType);
+        validationCodes[6] = _checkIfPotentialInvalidCollectionTypes(makerOrder.collection, makerOrder.collectionType);
 
         if (makerOrder.quoteType == QuoteType.Bid) {
             validationCodes[7] = ORDER_EXPECTED_TO_BE_VALID;
@@ -345,26 +345,26 @@ contract OrderValidatorV2A {
     /**
      * @notice This function is used to check if the asset type may be potentially invalid.
      * @param collection Address of the collection
-     * @param assetType Asset type in the maker order
+     * @param collectionType Asset type in the maker order
      * @return validationCode Validation code
      * @dev This function may return false positives.
      *      (i.e. assets that are tradable but do not implement the proper interfaceId).
      *      If ERC165 is not implemented, it will revert.
      */
-    function _checkIfPotentialInvalidAssetTypes(
+    function _checkIfPotentialInvalidCollectionTypes(
         address collection,
-        AssetType assetType
+        CollectionType collectionType
     ) internal view returns (uint256 validationCode) {
-        if (assetType == AssetType.ERC721) {
+        if (collectionType == CollectionType.ERC721) {
             bool isERC721 = IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_1) ||
                 IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
 
             if (!isERC721) {
-                return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC721;
+                return POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721;
             }
-        } else if (assetType == AssetType.ERC1155) {
+        } else if (collectionType == CollectionType.ERC1155) {
             if (!IERC165(collection).supportsInterface(ERC1155_INTERFACE_ID)) {
-                return POTENTIAL_INVALID_ASSET_TYPE_SHOULD_BE_ERC1155;
+                return POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155;
             }
         }
     }
@@ -396,7 +396,7 @@ contract OrderValidatorV2A {
     /**
      * @notice This function verifies the validity of NFT assets (approvals, balances, and others).
      * @param collection Collection address
-     * @param assetType Asset type
+     * @param collectionType Asset type
      * @param user User address
      * @param itemIds Array of item ids
      * @param amounts Array of amounts
@@ -404,7 +404,7 @@ contract OrderValidatorV2A {
      */
     function _checkValidityMakerAskNFTAssets(
         address collection,
-        AssetType assetType,
+        CollectionType collectionType,
         address user,
         uint256[] memory itemIds,
         uint256[] memory amounts
@@ -415,9 +415,9 @@ contract OrderValidatorV2A {
             return validationCode;
         }
 
-        if (assetType == AssetType.ERC721) {
+        if (collectionType == CollectionType.ERC721) {
             validationCode = _checkValidityERC721AndEquivalents(collection, user, itemIds);
-        } else if (assetType == AssetType.ERC1155) {
+        } else if (collectionType == CollectionType.ERC1155) {
             validationCode = _checkValidityERC1155(collection, user, itemIds, amounts);
         }
     }
@@ -766,7 +766,11 @@ contract OrderValidatorV2A {
             amounts = makerAsk.amounts;
             price = makerAsk.price;
 
-            validationCode = _getOrderValidationCodeForStandardStrategy(makerAsk.assetType, itemIds.length, amounts);
+            validationCode = _getOrderValidationCodeForStandardStrategy(
+                makerAsk.collectionType,
+                itemIds.length,
+                amounts
+            );
         } else {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
@@ -798,7 +802,11 @@ contract OrderValidatorV2A {
             amounts = makerBid.amounts;
             price = makerBid.price;
 
-            validationCode = _getOrderValidationCodeForStandardStrategy(makerBid.assetType, itemIds.length, amounts);
+            validationCode = _getOrderValidationCodeForStandardStrategy(
+                makerBid.collectionType,
+                itemIds.length,
+                amounts
+            );
         } else {
             // @dev It should ideally be adjusted by real price
             //      amounts and itemIds are not used since most non-native maker bids won't target a single item
@@ -828,7 +836,7 @@ contract OrderValidatorV2A {
     }
 
     function _getOrderValidationCodeForStandardStrategy(
-        AssetType assetType,
+        CollectionType collectionType,
         uint256 expectedLength,
         uint256[] memory amounts
     ) private pure returns (uint256 validationCode) {
@@ -842,7 +850,7 @@ contract OrderValidatorV2A {
                     validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                 }
 
-                if (assetType == AssetType.ERC721 && amount != 1) {
+                if (collectionType == CollectionType.ERC721 && amount != 1) {
                     validationCode = MAKER_ORDER_INVALID_STANDARD_SALE;
                 }
 

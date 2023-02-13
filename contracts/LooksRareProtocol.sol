@@ -368,7 +368,7 @@ contract LooksRareProtocol is
         _transferToAskRecipientAndCreatorIfAny(recipients, feeAmounts, makerBid.currency, signer);
 
         emit TakerAsk(
-            SignatureParameters({
+            NonceInvalidationParameters({
                 orderHash: orderHash,
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: isNonceInvalidated
@@ -445,7 +445,7 @@ contract LooksRareProtocol is
         );
 
         emit TakerBid(
-            SignatureParameters({
+            NonceInvalidationParameters({
                 orderHash: orderHash,
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: isNonceInvalidated

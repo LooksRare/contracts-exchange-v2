@@ -190,6 +190,100 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
+    function testTakerBidMultipleOrdersSignedERC721MerkleProofWrongPosition(
+        uint256 numberOrders,
+        uint256 orderIndex
+    ) public {
+        _assertMerkleTreeAssumptions(numberOrders, orderIndex);
+
+        mockERC721.batchMint(makerUser, numberOrders);
+
+        OrderStructs.Maker[] memory makerAsks = _createBatchMakerAsks(numberOrders);
+
+        (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) = eip712MerkleTree.sign(
+            makerUserPK,
+            makerAsks,
+            orderIndex
+        );
+
+        // Swap every node's position
+        OrderStructs.MerkleTreeNode[] memory proof = merkleTree.proof;
+        for (uint256 i; i < proof.length; i++) {
+            if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Left) {
+                proof[i].position = OrderStructs.MerkleTreeNodePosition.Right;
+            } else {
+                proof[i].position = OrderStructs.MerkleTreeNodePosition.Left;
+            }
+        }
+
+        OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
+
+        // Verify invalidity of maker ask order
+        _assertMakerOrderReturnValidationCodeWithMerkleTree(
+            makerAskToExecute,
+            signature,
+            merkleTree,
+            ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE
+        );
+
+        vm.prank(takerUser);
+        vm.expectRevert(MerkleProofInvalid.selector);
+        looksRareProtocol.executeTakerBid{value: price}(
+            _genericTakerOrder(),
+            makerAskToExecute,
+            signature,
+            merkleTree,
+            _EMPTY_AFFILIATE
+        );
+    }
+
+    function testTakerAskMultipleOrdersSignedERC721MerkleProofWrongPosition(
+        uint256 numberOrders,
+        uint256 orderIndex
+    ) public {
+        _assertMerkleTreeAssumptions(numberOrders, orderIndex);
+
+        mockERC721.batchMint(takerUser, numberOrders);
+
+        OrderStructs.Maker[] memory makerBids = _createBatchMakerBids(numberOrders);
+
+        (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) = eip712MerkleTree.sign(
+            makerUserPK,
+            makerBids,
+            orderIndex
+        );
+
+        // Swap every node's position
+        OrderStructs.MerkleTreeNode[] memory proof = merkleTree.proof;
+        for (uint256 i; i < proof.length; i++) {
+            if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Left) {
+                proof[i].position = OrderStructs.MerkleTreeNodePosition.Right;
+            } else {
+                proof[i].position = OrderStructs.MerkleTreeNodePosition.Left;
+            }
+        }
+
+        OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
+
+        // Verify invalidity of maker bid order
+        _assertMakerOrderReturnValidationCodeWithMerkleTree(
+            makerBidToExecute,
+            signature,
+            merkleTree,
+            ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE
+        );
+
+        vm.prank(takerUser);
+        vm.expectRevert(MerkleProofInvalid.selector);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBidToExecute,
+            signature,
+            merkleTree,
+            _EMPTY_AFFILIATE
+        );
+    }
+
     function testTakerBidRevertsIfProofTooLarge() public {
         uint256 testProofLengthUpTo = MAX_CALLDATA_PROOF_LENGTH + 3;
         mockERC721.batchMint(makerUser, 2 ** testProofLengthUpTo);

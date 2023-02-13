@@ -10,12 +10,12 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  */
 interface ILooksRareProtocol {
     /**
-     * @notice This struct contains signature parameters and the nonce invalidation status.
+     * @notice This struct contains an order nonce's invalidation status and the order hash that triggered the status change.
      * @param orderHash Maker order hash
      * @param orderNonce Order nonce
      * @param isNonceInvalidated Whether this transaction invalidated the maker user's order nonce at the protocol level
      */
-    struct SignatureParameters {
+    struct NonceInvalidationParameters {
         bytes32 orderHash;
         uint256 orderNonce;
         bool isNonceInvalidated;
@@ -42,7 +42,7 @@ interface ILooksRareProtocol {
 
     /**
      * @notice It is emitted when a taker ask transaction is completed.
-     * @param signatureParameters Struct about signature parameters
+     * @param nonceInvalidationParameters Struct about nonce invalidation parameters
      * @param askUser Address of the ask user
      * @param bidUser Address of the bid user
      * @param strategyId Id of the strategy
@@ -59,7 +59,7 @@ interface ILooksRareProtocol {
      *        feeAmounts[2] Protocol fee amount prior to adjustment for a potential affiliate payment
      */
     event TakerAsk(
-        SignatureParameters signatureParameters,
+        NonceInvalidationParameters nonceInvalidationParameters,
         address askUser, // taker (initiates the transaction)
         address bidUser, // maker (receives the NFT)
         uint256 strategyId,
@@ -73,7 +73,7 @@ interface ILooksRareProtocol {
 
     /**
      * @notice It is emitted when a taker bid transaction is completed.
-     * @param signatureParameters Struct about signature parameters
+     * @param nonceInvalidationParameters Struct about nonce invalidation parameters
      * @param bidUser Address of the bid user
      * @param bidRecipient Address of the recipient of the bid
      * @param strategyId Id of the strategy
@@ -90,7 +90,7 @@ interface ILooksRareProtocol {
      *        feeAmounts[2] Protocol fee amount prior to adjustment for a potential affiliate payment
      */
     event TakerBid(
-        SignatureParameters signatureParameters,
+        NonceInvalidationParameters nonceInvalidationParameters,
         address bidUser, // taker (initiates the transaction)
         address bidRecipient, // taker (receives the NFT)
         uint256 strategyId,

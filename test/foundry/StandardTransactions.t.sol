@@ -57,7 +57,7 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerBid(
-            SignatureParameters({
+            NonceInvalidationParameters({
                 orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
@@ -124,7 +124,7 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerBid(
-            SignatureParameters({
+            NonceInvalidationParameters({
                 orderHash: _computeOrderHash(makerAsk),
                 orderNonce: makerAsk.orderNonce,
                 isNonceInvalidated: true
@@ -187,7 +187,7 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerAsk(
-            SignatureParameters({
+            NonceInvalidationParameters({
                 orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true
@@ -246,7 +246,7 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
 
         emit TakerAsk(
-            SignatureParameters({
+            NonceInvalidationParameters({
                 orderHash: _computeOrderHash(makerBid),
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: true

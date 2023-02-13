@@ -17,6 +17,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericCon
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
     uint256 private constant price = 1 ether; // Fixed price of sale
@@ -31,35 +32,12 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyMultiFillCollectionOrder = new StrategyTestMultiFillCollectionOrder(address(looksRareProtocol));
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            true,
-            address(strategyMultiFillCollectionOrder)
-        );
+        _addStrategy(address(strategyMultiFillCollectionOrder), selector, true);
     }
 
     function testNewStrategy() public {
         _setUpNewStrategy();
-        (
-            bool strategyIsActive,
-            uint16 strategyStandardProtocolFee,
-            uint16 strategyMinTotalFee,
-            uint16 strategyMaxProtocolFee,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selector);
-        assertTrue(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyMultiFillCollectionOrder));
+        _assertStrategyAttributes(address(strategyMultiFillCollectionOrder), selector, true);
     }
 
     /**
@@ -77,9 +55,9 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amountsToFill;
 
-        // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
             assetType: AssetType.ERC721,
@@ -87,7 +65,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemIds: itemIds,
             amounts: amounts
         });
@@ -167,9 +145,9 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amountsToFill;
 
-        // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1, // Multi-fill bid offer
             assetType: AssetType.ERC721,
@@ -177,7 +155,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemIds: itemIds,
             amounts: amounts
         });
@@ -196,13 +174,16 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
             mockERC721.mint(takerUser, itemIds[0]);
 
-            // Prepare the taker ask
-            OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
             // It should revert if strategy is not available
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
-            looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+            looksRareProtocol.executeTakerAsk(
+                _genericTakerOrder(),
+                makerBid,
+                signature,
+                _EMPTY_MERKLE_TREE,
+                _EMPTY_AFFILIATE
+            );
         }
     }
 }

@@ -30,14 +30,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyItemIdsRange = new StrategyItemIdsRange();
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            true,
-            address(strategyItemIdsRange)
-        );
+        _addStrategy(address(strategyItemIdsRange), selector, true);
     }
 
     function _offeredAmounts(uint256 length, uint256 amount) private pure returns (uint256[] memory offeredAmounts) {
@@ -53,8 +46,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     ) private returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
         uint256 mid = (lowerBound + upperBound) / 2;
 
-        newMakerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        newMakerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -62,7 +56,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemIds: new uint256[](0),
             amounts: new uint256[](0)
         });
@@ -94,23 +88,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
     function testNewStrategy() public {
         _setUpNewStrategy();
-        (
-            bool strategyIsActive,
-            uint16 strategyStandardProtocolFee,
-            uint16 strategyMinTotalFee,
-            uint16 strategyMaxProtocolFee,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selector);
-        assertTrue(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyItemIdsRange));
+        _assertStrategyAttributes(address(strategyItemIdsRange), selector, true);
     }
 
     function testTokenIdsRangeERC721(uint256 lowerBound, uint256 upperBound) public {
@@ -154,8 +132,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _setUpUsers();
         _setUpNewStrategy();
 
-        OrderStructs.Maker memory makerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC1155,
@@ -163,7 +142,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC1155),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemIds: new uint256[](0),
             amounts: new uint256[](0)
         });
@@ -235,7 +214,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -328,7 +307,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerBid);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -459,7 +438,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         // Valid, taker struct validation only happens during execution
         _assertOrderIsValid(makerBid);
         // but... the OrderValidator catches this
-        _doesMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_NOT_ACTIVE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_NOT_ACTIVE);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         vm.prank(takerUser);
@@ -469,8 +448,9 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
     function testInvalidSelector() public {
         _setUpNewStrategy();
 
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -478,7 +458,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
+            price: 1 ether,
             itemId: 0
         });
 

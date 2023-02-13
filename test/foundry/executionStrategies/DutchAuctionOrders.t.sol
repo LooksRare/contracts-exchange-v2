@@ -33,14 +33,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
     function _setUpNewStrategy() private asPrankedUser(_owner) {
         strategyDutchAuction = new StrategyDutchAuction();
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            false,
-            address(strategyDutchAuction)
-        );
+        _addStrategy(address(strategyDutchAuction), selector, false);
     }
 
     function _createMakerAskAndTakerBid(
@@ -67,9 +60,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             }
         }
 
-        // Prepare the order hash
-        newMakerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        newMakerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -77,7 +70,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: endPrice,
+            price: endPrice,
             itemId: 1
         });
 
@@ -93,24 +86,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
     function testNewStrategy() public {
         _setUpNewStrategy();
-
-        (
-            bool strategyIsActive,
-            uint16 strategyStandardProtocolFee,
-            uint16 strategyMinTotalFee,
-            uint16 strategyMaxProtocolFee,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selector);
-        assertFalse(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyDutchAuction));
+        _assertStrategyAttributes(address(strategyDutchAuction), selector, false);
     }
 
     function _fuzzAssumptions(
@@ -223,7 +199,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -288,7 +264,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         _assertOrderIsValid(makerAsk);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
 
         vm.prank(takerUser);
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
@@ -310,7 +286,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -332,7 +308,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -358,7 +334,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         bytes4 errorSelector = _assertOrderIsInvalid(makerAsk);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(AmountInvalid.selector);
         vm.prank(takerUser);
@@ -369,7 +345,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         signature = _signMakerOrder(makerAsk, makerUserPK);
 
         errorSelector = _assertOrderIsInvalid(makerAsk);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -379,8 +355,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testWrongQuoteType() public {
         _setUpNewStrategy();
 
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -388,8 +365,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
-            itemId: 0
+            price: 1 ether,
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerBid, selector);
@@ -401,8 +378,9 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
     function testInvalidSelector() public {
         _setUpNewStrategy();
 
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -410,8 +388,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: 1 ether,
-            itemId: 0
+            price: 1 ether,
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyDutchAuction.isMakerOrderValid(makerAsk, bytes4(0));

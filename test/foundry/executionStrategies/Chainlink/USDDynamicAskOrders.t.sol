@@ -21,6 +21,7 @@ import {ProtocolBase} from "../../ProtocolBase.t.sol";
 
 // Enums
 import {AssetType} from "../../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../../contracts/enums/QuoteType.sol";
 
 contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     StrategyChainlinkUSDDynamicAsk public strategyUSDDynamicAsk;
@@ -50,15 +51,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             address(weth),
             0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419 // Mainnet address of the Chainlink price feed
         );
-
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selector,
-            false,
-            address(strategyUSDDynamicAsk)
-        );
+        _addStrategy(address(strategyUSDDynamicAsk), selector, false);
     }
 
     function _createMakerAskAndTakerBid(
@@ -83,9 +76,9 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             }
         }
 
-        // Prepare the order hash
-        newMakerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        newMakerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -93,7 +86,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: 0.99 ether,
+            price: 0.99 ether,
             itemId: 1
         });
 
@@ -105,23 +98,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testNewStrategy() public {
-        (
-            bool strategyIsActive,
-            uint16 strategyStandardProtocolFee,
-            uint16 strategyMinTotalFee,
-            uint16 strategyMaxProtocolFee,
-            bytes4 strategySelector,
-            bool strategyIsMakerBid,
-            address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selector);
-        assertFalse(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyUSDDynamicAsk));
+        _assertStrategyAttributes(address(strategyUSDDynamicAsk), selector, false);
     }
 
     function testMaxLatency() public {
@@ -296,7 +273,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         bytes4 errorSelector = PriceNotRecentEnough.selector;
 
         _assertOrderIsInvalid(makerAsk, errorSelector);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         vm.prank(takerUser);
@@ -365,8 +342,9 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testWrongQuoteType() public {
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -374,8 +352,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: 1 ether,
-            itemId: 0
+            price: 1 ether,
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerBid, selector);
@@ -422,7 +400,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Valid, taker struct validation only happens during execution
         _assertOrderIsInvalid(makerAsk, OrderInvalid.selector);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -463,7 +441,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.updateStrategy(1, false, _standardProtocolFeeBp, _minTotalFeeBp);
 
         _assertOrderIsValid(makerAsk);
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_NOT_ACTIVE);
 
         vm.expectRevert(abi.encodeWithSelector(IExecutionManager.StrategyNotAvailable.selector, 1));
         vm.prank(takerUser);
@@ -472,8 +450,9 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
     }
 
     function testInvalidSelector() public {
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -481,8 +460,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: 1 ether,
-            itemId: 0
+            price: 1 ether,
+            itemId: 420
         });
 
         (bool orderIsValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, bytes4(0));

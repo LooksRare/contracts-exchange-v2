@@ -37,10 +37,7 @@ contract BundleTransactionsTest is ProtocolBase {
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        for (uint256 i; i < makerBid.itemIds.length; i++) {
-            // Maker user has received all the assets in the bundle
-            assertEq(mockERC721.ownerOf(makerBid.itemIds[i]), makerUser);
-        }
+        _assertMockERC721Ownership(makerBid.itemIds, makerUser);
 
         _assertSuccessfulTakerAskNoRoyalties(makerBid);
     }
@@ -100,10 +97,7 @@ contract BundleTransactionsTest is ProtocolBase {
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        for (uint256 i; i < makerBid.itemIds.length; i++) {
-            // Maker user has received all the assets in the bundle
-            assertEq(mockERC721.ownerOf(makerBid.itemIds[i]), makerUser);
-        }
+        _assertMockERC721Ownership(makerBid.itemIds, makerUser);
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
@@ -151,10 +145,7 @@ contract BundleTransactionsTest is ProtocolBase {
             _EMPTY_AFFILIATE
         );
 
-        for (uint256 i; i < makerAsk.itemIds.length; i++) {
-            // Taker user has received all the assets in the bundle
-            assertEq(mockERC721.ownerOf(makerAsk.itemIds[i]), takerUser);
-        }
+        _assertMockERC721Ownership(makerAsk.itemIds, takerUser);
 
         _assertSuccessfulTakerBidNoRoyalties(makerAsk);
     }
@@ -225,10 +216,7 @@ contract BundleTransactionsTest is ProtocolBase {
             _EMPTY_AFFILIATE
         );
 
-        for (uint256 i; i < makerAsk.itemIds.length; i++) {
-            // Taker user has received all the assets in the bundle
-            assertEq(mockERC721.ownerOf(makerAsk.itemIds[i]), takerUser);
-        }
+        _assertMockERC721Ownership(makerAsk.itemIds, takerUser);
 
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);

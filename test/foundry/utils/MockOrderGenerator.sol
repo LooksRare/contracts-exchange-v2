@@ -12,20 +12,17 @@ import {ProtocolHelpers} from "../utils/ProtocolHelpers.sol";
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract MockOrderGenerator is ProtocolHelpers {
     function _createMockMakerAskAndTakerBid(
         address collection
     ) internal view returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
-        AssetType assetType = AssetType.ERC721;
+        AssetType assetType = _getAssetType(collection);
 
-        // If ERC1155, adjust asset type
-        if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = AssetType.ERC1155;
-        }
-
-        newMakerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        newMakerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
@@ -33,8 +30,8 @@ contract MockOrderGenerator is ProtocolHelpers {
             collection: collection,
             currency: ETH,
             signer: makerUser,
-            minPrice: 1 ether,
-            itemId: 0
+            price: 1 ether,
+            itemId: 420
         });
 
         newTakerBid = OrderStructs.Taker(takerUser, abi.encode());
@@ -44,14 +41,11 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         address currency
     ) internal view returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
-        AssetType assetType = AssetType.ERC721;
-        // If ERC1155, adjust asset type
-        if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = AssetType.ERC1155;
-        }
+        AssetType assetType = _getAssetType(collection);
 
-        newMakerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        newMakerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
@@ -59,8 +53,8 @@ contract MockOrderGenerator is ProtocolHelpers {
             collection: collection,
             currency: currency,
             signer: makerUser,
-            maxPrice: 1 ether,
-            itemId: 0
+            price: 1 ether,
+            itemId: 420
         });
 
         newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());
@@ -70,27 +64,13 @@ contract MockOrderGenerator is ProtocolHelpers {
         address collection,
         uint256 numberTokens
     ) internal view returns (OrderStructs.Maker memory newMakerAsk, OrderStructs.Taker memory newTakerBid) {
-        AssetType assetType = AssetType.ERC721;
+        AssetType assetType = _getAssetType(collection);
 
-        // If ERC1155, adjust asset type
-        if (IERC165(collection).supportsInterface(0xd9b67a26)) {
-            assetType = AssetType.ERC1155;
-        }
+        (uint256[] memory itemIds, uint256[] memory amounts) = _setBundleItemIdsAndAmounts(assetType, numberTokens);
 
-        uint256[] memory itemIds = new uint256[](numberTokens);
-        uint256[] memory amounts = new uint256[](numberTokens);
-
-        for (uint256 i; i < itemIds.length; i++) {
-            itemIds[i] = i;
-            if (assetType != AssetType.ERC1155) {
-                amounts[i] = 1;
-            } else {
-                amounts[i] = 1 + i;
-            }
-        }
-
-        newMakerAsk = _createMultiItemMakerAskOrder({
-            askNonce: 0,
+        newMakerAsk = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
             assetType: assetType,
@@ -98,7 +78,7 @@ contract MockOrderGenerator is ProtocolHelpers {
             collection: collection,
             currency: ETH,
             signer: makerUser,
-            minPrice: 1 ether,
+            price: 1 ether,
             itemIds: itemIds,
             amounts: amounts
         });
@@ -111,15 +91,43 @@ contract MockOrderGenerator is ProtocolHelpers {
         address currency,
         uint256 numberTokens
     ) internal view returns (OrderStructs.Maker memory newMakerBid, OrderStructs.Taker memory newTakerAsk) {
-        AssetType assetType = AssetType.ERC721;
+        AssetType assetType = _getAssetType(collection);
+
+        (uint256[] memory itemIds, uint256[] memory amounts) = _setBundleItemIdsAndAmounts(assetType, numberTokens);
+
+        newMakerBid = _createMultiItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
+            subsetNonce: 0,
+            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+            assetType: assetType,
+            orderNonce: 0,
+            collection: collection,
+            currency: currency,
+            signer: makerUser,
+            price: 1 ether,
+            itemIds: itemIds,
+            amounts: amounts
+        });
+
+        newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());
+    }
+
+    function _getAssetType(address collection) private view returns (AssetType assetType) {
+        assetType = AssetType.ERC721;
 
         // If ERC1155, adjust asset type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
             assetType = AssetType.ERC1155;
         }
+    }
 
-        uint256[] memory itemIds = new uint256[](numberTokens);
-        uint256[] memory amounts = new uint256[](numberTokens);
+    function _setBundleItemIdsAndAmounts(
+        AssetType assetType,
+        uint256 numberTokens
+    ) private pure returns (uint256[] memory itemIds, uint256[] memory amounts) {
+        itemIds = new uint256[](numberTokens);
+        amounts = new uint256[](numberTokens);
 
         for (uint256 i; i < itemIds.length; i++) {
             itemIds[i] = i;
@@ -129,21 +137,5 @@ contract MockOrderGenerator is ProtocolHelpers {
                 amounts[i] = 1 + i;
             }
         }
-
-        newMakerBid = _createMultiItemMakerBidOrder({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: assetType,
-            orderNonce: 0,
-            collection: collection,
-            currency: currency,
-            signer: makerUser,
-            maxPrice: 1 ether,
-            itemIds: itemIds,
-            amounts: amounts
-        });
-
-        newTakerAsk = OrderStructs.Taker(takerUser, abi.encode());
     }
 }

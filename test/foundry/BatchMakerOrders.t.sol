@@ -20,6 +20,7 @@ import {EIP712MerkleTree} from "./utils/EIP712MerkleTree.sol";
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract BatchMakerOrdersTest is ProtocolBase {
     uint256 private constant price = 1.2222 ether; // Fixed price of sale
@@ -44,8 +45,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderIndex
         );
 
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
         OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
 
         // Verify validity
@@ -54,7 +53,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         // Execute taker bid transaction
         vm.prank(takerUser);
         looksRareProtocol.executeTakerBid{value: price}(
-            takerBid,
+            _genericTakerOrder(),
             makerAskToExecute,
             signature,
             merkleTree,
@@ -89,8 +88,6 @@ contract BatchMakerOrdersTest is ProtocolBase {
             orderIndex
         );
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
         OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
 
         // Verify validity
@@ -98,7 +95,13 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBidToExecute, signature, merkleTree, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBidToExecute,
+            signature,
+            merkleTree,
+            _EMPTY_AFFILIATE
+        );
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(orderIndex), makerUser);
@@ -129,12 +132,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes32 tamperedRoot = bytes32(uint256(merkleTree.root) + 1);
         merkleTree.root = tamperedRoot;
 
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
         OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
 
         // Verify invalidity of maker ask order
-        _doesMakerOrderReturnValidationCodeWithMerkleTree(
+        _assertMakerOrderReturnValidationCodeWithMerkleTree(
             makerAskToExecute,
             signature,
             merkleTree,
@@ -144,7 +145,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         vm.prank(takerUser);
         vm.expectRevert(MerkleProofInvalid.selector);
         looksRareProtocol.executeTakerBid{value: price}(
-            takerBid,
+            _genericTakerOrder(),
             makerAskToExecute,
             signature,
             merkleTree,
@@ -168,12 +169,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
         bytes32 tamperedRoot = bytes32(uint256(merkleTree.root) + 1);
         merkleTree.root = tamperedRoot;
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
         OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
 
         // Verify invalidity of maker bid order
-        _doesMakerOrderReturnValidationCodeWithMerkleTree(
+        _assertMakerOrderReturnValidationCodeWithMerkleTree(
             makerBidToExecute,
             signature,
             merkleTree,
@@ -182,7 +181,13 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         vm.prank(takerUser);
         vm.expectRevert(MerkleProofInvalid.selector);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBidToExecute, signature, merkleTree, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBidToExecute,
+            signature,
+            merkleTree,
+            _EMPTY_AFFILIATE
+        );
     }
 
     function testTakerBidRevertsIfProofTooLarge() public {
@@ -202,12 +207,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 orderIndex
             );
 
-            // Prepare the taker bid
-            OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
             OrderStructs.Maker memory makerAskToExecute = makerAsks[orderIndex];
 
             // Verify validity
-            _doesMakerOrderReturnValidationCodeWithMerkleTree(
+            _assertMakerOrderReturnValidationCodeWithMerkleTree(
                 makerAskToExecute,
                 signature,
                 merkleTree,
@@ -217,7 +220,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, proofLength));
             looksRareProtocol.executeTakerBid{value: price}(
-                takerBid,
+                _genericTakerOrder(),
                 makerAskToExecute,
                 signature,
                 merkleTree,
@@ -243,12 +246,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 orderIndex
             );
 
-            // Prepare the taker bid
-            OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
             OrderStructs.Maker memory makerBidToExecute = makerBids[orderIndex];
 
             // Verify validity
-            _doesMakerOrderReturnValidationCodeWithMerkleTree(
+            _assertMakerOrderReturnValidationCodeWithMerkleTree(
                 makerBidToExecute,
                 signature,
                 merkleTree,
@@ -258,7 +259,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
             vm.prank(takerUser);
             vm.expectRevert(abi.encodeWithSelector(MerkleProofTooLarge.selector, proofLength));
             looksRareProtocol.executeTakerBid{value: price}(
-                takerAsk,
+                _genericTakerOrder(),
                 makerBidToExecute,
                 signature,
                 merkleTree,
@@ -270,9 +271,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
     function _createBatchMakerAsks(uint256 numberOrders) private view returns (OrderStructs.Maker[] memory makerAsks) {
         makerAsks = new OrderStructs.Maker[](numberOrders);
         for (uint256 i; i < numberOrders; i++) {
-            // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -280,7 +281,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price,
+                price: price,
                 itemId: i
             });
         }
@@ -289,9 +290,9 @@ contract BatchMakerOrdersTest is ProtocolBase {
     function _createBatchMakerBids(uint256 numberOrders) private view returns (OrderStructs.Maker[] memory makerBids) {
         makerBids = new OrderStructs.Maker[](numberOrders);
         for (uint256 i; i < numberOrders; i++) {
-            // Prepare the order hash
-            makerBids[i] = _createSingleItemMakerBidOrder({
-                bidNonce: 0,
+            makerBids[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -299,7 +300,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: address(weth),
                 signer: makerUser,
-                maxPrice: price,
+                price: price,
                 itemId: i
             });
         }

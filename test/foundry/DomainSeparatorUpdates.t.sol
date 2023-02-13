@@ -14,6 +14,7 @@ import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract DomainSeparatorUpdatesTest is ProtocolBase {
     function setUp() public {
@@ -46,8 +47,6 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         vm.assume(newChainId != block.chainid);
 
         _setUpUsers();
-        uint256 itemId = 42;
-        uint256 price = 2 ether;
 
         // ChainId update
         vm.chainId(newChainId);
@@ -56,30 +55,18 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         vm.prank(_owner);
         looksRareProtocol.updateDomainSeparator();
 
-        // Mint asset
-        mockERC721.mint(makerUser, itemId);
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
-        // Prepare the orders and signature
-        (
-            OrderStructs.Maker memory makerAsk,
-            OrderStructs.Taker memory takerBid,
-            bytes memory signature
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                minPrice: price,
-                itemId: itemId
-            });
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
+
+        // Mint asset
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         vm.prank(takerUser);
         vm.expectRevert(SignatureEOAInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: price}(
+        looksRareProtocol.executeTakerBid{value: makerAsk.price}(
             takerBid,
             makerAsk,
             signature,
@@ -93,36 +80,21 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
 
         _setUpUsers();
 
-        uint256 itemId = 42;
-        uint256 price = 2 ether;
-
         // ChainId update
         vm.chainId(newChainId);
 
-        // Mint asset
-        mockERC721.mint(makerUser, itemId);
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
-        // Prepare the orders and signature
-        (
-            OrderStructs.Maker memory makerAsk,
-            OrderStructs.Taker memory takerBid,
-            bytes memory signature
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                minPrice: price,
-                itemId: itemId
-            });
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
+
+        // Mint asset
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         vm.prank(takerUser);
         vm.expectRevert(ILooksRareProtocol.ChainIdInvalid.selector);
-        looksRareProtocol.executeTakerBid{value: price}(
+        looksRareProtocol.executeTakerBid{value: makerAsk.price}(
             takerBid,
             makerAsk,
             signature,

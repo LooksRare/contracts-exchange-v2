@@ -20,6 +20,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     CreatorFeeManagerWithRoyalties public creatorFeeManagerWithRoyalties;
@@ -59,83 +60,66 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_newCreatorRoyaltyFee);
 
-        uint256 price = 1 ether; // Fixed price of sale
-        uint256 itemId = 0;
-
-        // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: price,
-            itemId: itemId
-        });
+        (OrderStructs.Maker memory makerBid, ) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
-
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         _assertValidMakerOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
 
         // Taker user has received the asset
-        assertEq(mockERC721.ownerOf(itemId), makerUser);
+        assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
         _assertSuccessfulTakerAsk(makerBid);
     }
 
     function testCreatorRoyaltiesGetPaidForERC2981() public {
-        uint256 itemId = 0;
-        uint256 price = 1 ether; // Fixed price of sale
-
         _setUpUsers();
 
-        // Adjust ERC721 with royalties
-        mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(itemId, _royaltyRecipient, _newCreatorRoyaltyFee);
+        (OrderStructs.Maker memory makerBid, ) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721WithRoyalties),
+            address(weth)
+        );
 
-        // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721WithRoyalties),
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: price,
-            itemId: itemId
-        });
+        // Adjust ERC721 with royalties
+        mockERC721WithRoyalties.addCustomRoyaltyInformationForTokenId(
+            makerBid.itemIds[0],
+            _royaltyRecipient,
+            _newCreatorRoyaltyFee
+        );
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
-        mockERC721WithRoyalties.mint(takerUser, itemId);
-
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        mockERC721WithRoyalties.mint(takerUser, makerBid.itemIds[0]);
 
         _assertValidMakerOrder(makerBid, signature);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
 
         // Taker user has received the asset
-        assertEq(mockERC721WithRoyalties.ownerOf(itemId), makerUser);
+        assertEq(mockERC721WithRoyalties.ownerOf(makerBid.itemIds[0]), makerUser);
         _assertSuccessfulTakerAsk(makerBid);
     }
 
@@ -167,10 +151,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Execute taker ask transaction
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        for (uint256 i; i < makerBid.itemIds.length; i++) {
-            // Maker user has received all the assets in the bundle
-            assertEq(mockERC721.ownerOf(makerBid.itemIds[i]), makerUser);
-        }
+        _assertMockERC721Ownership(makerBid.itemIds, makerUser);
 
         _assertSuccessfulTakerAskBundle(makerBid);
     }
@@ -248,7 +229,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         // Taker user action should revert
         vm.prank(takerUser);
@@ -273,7 +254,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         vm.prank(takerUser);
         vm.expectRevert(
@@ -317,7 +298,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             );
         }
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, BUNDLE_ERC2981_NOT_SUPPORTED);
 
         // Taker user action should revert
         vm.prank(takerUser);
@@ -338,64 +319,41 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         // Adjust royalties
         _setUpRoyaltiesRegistry(_creatorRoyaltyFeeTooHigh);
 
-        uint256 price = 1 ether; // Fixed price of sale
-        uint256 itemId = 0;
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
-        (
-            OrderStructs.Maker memory makerBid,
-            OrderStructs.Taker memory takerAsk,
-            bytes memory signature
-        ) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-                bidNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                maxPrice: price,
-                itemId: itemId
-            });
-
-        _doesMakerOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, CREATOR_FEE_TOO_HIGH);
 
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // 2. Maker ask
-        itemId = 1; // The itemId changes as it is already minted before
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
+        mockERC721.mint(makerUser, 1);
 
-        // Prepare the orders and signature
-        OrderStructs.Maker memory makerAsk;
-        OrderStructs.Taker memory takerBid;
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        // The itemId changes as it is already minted before
+        makerAsk.itemIds[0] = 1;
 
-        (makerAsk, takerBid, signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            minPrice: price,
-            itemId: itemId
-        });
+        signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, CREATOR_FEE_TOO_HIGH);
 
         vm.expectRevert(IExecutionManager.CreatorFeeBpTooHigh.selector);
         vm.prank(takerUser);
 
-        looksRareProtocol.executeTakerBid{value: price}(
+        looksRareProtocol.executeTakerBid{value: 1 ether}(
             takerBid,
             makerAsk,
             signature,

@@ -21,6 +21,7 @@ import {StrategyChainlinkFloor} from "../../contracts/executionStrategies/Chainl
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManager {
     function setUp() public {
@@ -92,7 +93,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         // Maker bid is valid if its start time is within 5 minutes into the future
         vm.warp(makerBid.startTime - 5 minutes);
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, TOO_EARLY_TO_EXECUTE_ORDER);
 
         // Maker bid is invalid if its start time is not within 5 minutes into the future
         vm.warp(makerBid.startTime - 5 minutes - 1 seconds);
@@ -115,7 +116,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         vm.warp(block.timestamp);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, TOO_LATE_TO_EXECUTE_ORDER);
 
         vm.warp(block.timestamp + 1 seconds);
         vm.expectRevert(OutsideOfTimeRange.selector);
@@ -136,7 +137,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.endTime = block.timestamp;
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, START_TIME_GREATER_THAN_END_TIME);
 
         vm.expectRevert(OutsideOfTimeRange.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -152,7 +153,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -172,7 +173,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerBid.itemIds = itemIds;
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -190,7 +191,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: makerAsk.price}(
@@ -217,7 +218,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         makerAsk.itemIds = itemIds;
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerBid{value: makerAsk.price}(
@@ -246,30 +247,21 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(strategy)
         );
 
-        uint256 itemId = 0;
-        uint256 price = 1 ether;
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.strategyId = 1; // Fake strategy
+
+        bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
-        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid, bytes memory signature) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: 1, // Fake strategy
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            minPrice: price,
-            itemId: itemId
-        });
-
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_INVALID_QUOTE_TYPE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, STRATEGY_INVALID_QUOTE_TYPE);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForStrategy.selector);
-        looksRareProtocol.executeTakerBid{value: price}(
+        looksRareProtocol.executeTakerBid{value: makerAsk.price}(
             takerBid,
             makerAsk,
             signature,
@@ -296,27 +288,18 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
             address(strategy)
         );
 
-        uint256 itemId = 0;
-        uint256 price = 1 ether;
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
+        makerBid.strategyId = 1; // Fake strategy
+
+        bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Mint asset to ask user
-        mockERC721.mint(takerUser, itemId);
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
-        // Prepare the order hash
-        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk, bytes memory signature) = _createSingleItemMakerBidAndTakerAskOrderAndSignature({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: 1, // Fake strategy
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: price,
-            itemId: itemId
-        });
-
-        _doesMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_INVALID_QUOTE_TYPE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, STRATEGY_INVALID_QUOTE_TYPE);
 
         vm.prank(takerUser);
         vm.expectRevert(IExecutionManager.NoSelectorForStrategy.selector);

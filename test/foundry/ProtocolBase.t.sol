@@ -41,24 +41,24 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     WETH public weth;
 
-    function _doesMakerOrderReturnValidationCode(
+    function _assertMakerOrderReturnValidationCode(
         OrderStructs.Maker memory makerOrder,
         bytes memory signature,
         uint256 expectedValidationCode
     ) internal {
-        _doesMakerOrderReturnValidationCode(makerOrder, signature, _EMPTY_MERKLE_TREE, expectedValidationCode);
+        _assertMakerOrderReturnValidationCode(makerOrder, signature, _EMPTY_MERKLE_TREE, expectedValidationCode);
     }
 
-    function _doesMakerOrderReturnValidationCodeWithMerkleTree(
+    function _assertMakerOrderReturnValidationCodeWithMerkleTree(
         OrderStructs.Maker memory makerOrder,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree,
         uint256 expectedValidationCode
     ) internal {
-        _doesMakerOrderReturnValidationCode(makerOrder, signature, merkleTree, expectedValidationCode);
+        _assertMakerOrderReturnValidationCode(makerOrder, signature, merkleTree, expectedValidationCode);
     }
 
-    function _doesMakerOrderReturnValidationCode(
+    function _assertMakerOrderReturnValidationCode(
         OrderStructs.Maker memory makerOrder,
         bytes memory signature,
         OrderStructs.MerkleTree memory merkleTree,
@@ -192,6 +192,51 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         vm.startPrank(_royaltyRecipient);
         weth.deposit{value: _initialWETHBalanceRoyaltyRecipient}();
         vm.stopPrank();
+    }
+
+    function _genericTakerOrder() internal pure returns (OrderStructs.Taker memory takerOrder) {
+        takerOrder = OrderStructs.Taker(takerUser, abi.encode());
+    }
+
+    function _addStrategy(address strategy, bytes4 selector, bool isMakerBid) internal {
+        looksRareProtocol.addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            selector,
+            isMakerBid,
+            strategy
+        );
+    }
+
+    function _assertStrategyAttributes(
+        address expectedStrategyAddress,
+        bytes4 expectedSelector,
+        bool expectedIsMakerBid
+    ) internal {
+        (
+            bool strategyIsActive,
+            uint16 strategyStandardProtocolFee,
+            uint16 strategyMinTotalFee,
+            uint16 strategyMaxProtocolFee,
+            bytes4 strategySelector,
+            bool strategyIsMakerBid,
+            address strategyImplementation
+        ) = looksRareProtocol.strategyInfo(1);
+
+        assertTrue(strategyIsActive);
+        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
+        assertEq(strategyMinTotalFee, _minTotalFeeBp);
+        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
+        assertEq(strategySelector, expectedSelector);
+        assertEq(strategyIsMakerBid, expectedIsMakerBid);
+        assertEq(strategyImplementation, expectedStrategyAddress);
+    }
+
+    function _assertMockERC721Ownership(uint256[] memory itemIds, address owner) internal {
+        for (uint256 i; i < itemIds.length; i++) {
+            assertEq(mockERC721.ownerOf(itemIds[i]), owner);
+        }
     }
 
     /**

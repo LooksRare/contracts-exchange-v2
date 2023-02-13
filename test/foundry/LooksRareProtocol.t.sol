@@ -19,6 +19,7 @@ import {MockERC20} from "../mock/MockERC20.sol";
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract LooksRareProtocolTest is ProtocolBase {
     // Fixed price of sale
@@ -35,24 +36,13 @@ contract LooksRareProtocolTest is ProtocolBase {
 
     function testCannotTradeIfInvalidAmounts() public {
         _setUpUsers();
-        uint256 itemId = 0;
+
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
-
-        // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            minPrice: price,
-            itemId: itemId
-        });
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         // 1. Amount = 0
         makerAsk.amounts[0] = 0;
@@ -60,10 +50,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         // Sign order
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
-
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(OrderInvalid.selector);
@@ -81,7 +68,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         // Sign order
         signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, MAKER_ORDER_INVALID_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -96,33 +83,20 @@ contract LooksRareProtocolTest is ProtocolBase {
 
     function testCannotTradeIfCurrencyInvalid() public {
         _setUpUsers();
-        uint256 itemId = 0;
+
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.currency = address(mockERC20);
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
-
-        // Prepare the order hash
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(mockERC20),
-            signer: makerUser,
-            minPrice: price,
-            itemId: itemId
-        });
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
         // Verify validity of maker ask order
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_ALLOWED);
-
-        // Prepare the taker bid
-        OrderStructs.Taker memory takerBid = OrderStructs.Taker(takerUser, abi.encode());
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, CURRENCY_NOT_ALLOWED);
 
         vm.prank(takerUser);
         vm.expectRevert(CurrencyInvalid.selector);
@@ -167,33 +141,19 @@ contract LooksRareProtocolTest is ProtocolBase {
     }
 
     function testCannotTradeIfETHIsUsedForMakerBid() public {
-        uint256 itemId = 0;
-
-        // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: makerUser,
-            maxPrice: price,
-            itemId: itemId
-        });
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            ETH
+        );
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         // Verify maker bid order
-        _doesMakerOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_ALLOWED);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_ALLOWED);
 
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
-
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
@@ -203,49 +163,30 @@ contract LooksRareProtocolTest is ProtocolBase {
 
     function testCannotTradeIfInvalidQuoteType() public {
         // 1. QuoteType = BID but executeTakerBid
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            maxPrice: price,
-            itemId: 0
-        });
+        (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
+            address(mockERC721),
+            address(weth)
+        );
 
         // Sign order
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        // Prepare a generic taker
-        OrderStructs.Taker memory taker = OrderStructs.Taker(takerUser, abi.encode());
-
         vm.prank(takerUser);
         vm.expectRevert(QuoteTypeInvalid.selector);
-        looksRareProtocol.executeTakerBid(taker, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerBid(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // 2. QuoteType = ASK but executeTakerAsk
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: makerUser,
-            minPrice: price,
-            itemId: 0
-        });
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
+        makerAsk.currency = address(weth);
 
         // Sign order
         signature = _signMakerOrder(makerAsk, makerUserPK);
 
         vm.prank(takerUser);
         vm.expectRevert(QuoteTypeInvalid.selector);
-        looksRareProtocol.executeTakerAsk(taker, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
     function testUpdateETHGasLimitForTransfer() public asPrankedUser(_owner) {
@@ -271,28 +212,13 @@ contract LooksRareProtocolTest is ProtocolBase {
 
     function testCannotCallRestrictedExecuteTakerBid() public {
         _setUpUsers();
-        uint256 itemId = 0;
+
+        (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
+            address(mockERC721)
+        );
 
         // Mint asset
-        mockERC721.mint(makerUser, itemId);
-
-        // Prepare the orders and signature
-        (
-            OrderStructs.Maker memory makerAsk,
-            OrderStructs.Taker memory takerBid,
-
-        ) = _createSingleItemMakerAskAndTakerBidOrderAndSignature({
-                askNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                assetType: AssetType.ERC721,
-                orderNonce: 0,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                minPrice: price,
-                itemId: itemId
-            });
+        mockERC721.mint(makerUser, makerAsk.itemIds[0]);
 
         vm.prank(takerUser);
         vm.expectRevert(CallerInvalid.selector);
@@ -325,9 +251,9 @@ contract LooksRareProtocolTest is ProtocolBase {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
-            // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -335,7 +261,7 @@ contract LooksRareProtocolTest is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: makerUser,
-                minPrice: price, // Fixed
+                price: price, // Fixed
                 itemId: i // (0, 1, etc.)
             });
 
@@ -346,7 +272,7 @@ contract LooksRareProtocolTest is ProtocolBase {
             // Sign order
             signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
+            takerBids[i] = _genericTakerOrder();
         }
 
         // Other execution parameters

@@ -19,6 +19,7 @@ import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCod
 
 // Enums
 import {AssetType} from "../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 /**
  * @dev ERC1271Wallet recovers a signature's signer using ECDSA. If it matches the mock wallet's
@@ -26,7 +27,6 @@ import {AssetType} from "../../contracts/enums/AssetType.sol";
  */
 contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
-    uint256 private constant itemId = 0;
     bytes private constant _EMPTY_SIGNATURE = new bytes(0);
 
     function setUp() public {
@@ -57,7 +57,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
             _EMPTY_AFFILIATE
         );
 
-        assertEq(mockERC721.ownerOf(itemId), takerUser);
+        assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
     }
 
     function testTakerBidInvalidSignature() public {
@@ -72,7 +72,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         transferManager.grantApprovals(operators);
         vm.stopPrank();
 
-        _doesMakerOrderReturnValidationCode(makerAsk, signature, SIGNATURE_INVALID_EIP1271);
+        _assertMakerOrderReturnValidationCode(makerAsk, signature, SIGNATURE_INVALID_EIP1271);
 
         vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
@@ -123,7 +123,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        assertEq(mockERC721.ownerOf(itemId), address(wallet));
+        assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), address(wallet));
     }
 
     function testTakerAskInvalidSignature() public {
@@ -138,7 +138,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         vm.prank(address(wallet));
         weth.approve(address(looksRareProtocol), price);
 
-        _doesMakerOrderReturnValidationCode(makerBid, signature, SIGNATURE_INVALID_EIP1271);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, SIGNATURE_INVALID_EIP1271);
 
         vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
@@ -254,49 +254,19 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
     function _takerBidSetup(
         address signer
     ) private returns (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) {
+        (makerAsk, takerBid) = _createMockMakerAskAndTakerBid(address(mockERC721));
+        makerAsk.signer = signer;
         // Mint asset
-        mockERC721.mint(signer, itemId);
-
-        // Prepare the order hash
-        makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: ETH,
-            signer: signer,
-            minPrice: price,
-            itemId: itemId
-        });
-
-        // Prepare the taker bid
-        takerBid = OrderStructs.Taker(takerUser, abi.encode());
+        mockERC721.mint(signer, makerAsk.itemIds[0]);
     }
 
     function _takerAskSetup(
         address signer
     ) private returns (OrderStructs.Taker memory takerAsk, OrderStructs.Maker memory makerBid) {
-        // Prepare the order hash
-        makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
-            subsetNonce: 0,
-            strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-            assetType: AssetType.ERC721,
-            orderNonce: 0,
-            collection: address(mockERC721),
-            currency: address(weth),
-            signer: signer,
-            maxPrice: price,
-            itemId: itemId
-        });
-
+        (makerBid, takerAsk) = _createMockMakerBidAndTakerAsk(address(mockERC721), address(weth));
+        makerBid.signer = signer;
         // Mint asset
-        mockERC721.mint(takerUser, itemId);
-
-        // Prepare the taker ask
-        takerAsk = OrderStructs.Taker(takerUser, abi.encode());
+        mockERC721.mint(takerUser, makerBid.itemIds[0]);
     }
 
     function _multipleTakerBidsSetup(
@@ -318,9 +288,9 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
             // Mint asset
             mockERC721.mint(signer, i);
 
-            // Prepare the order hash
-            makerAsks[i] = _createSingleItemMakerAskOrder({
-                askNonce: 0,
+            makerAsks[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Ask,
+                globalNonce: 0,
                 subsetNonce: 0,
                 strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
                 assetType: AssetType.ERC721,
@@ -328,13 +298,13 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
                 collection: address(mockERC721),
                 currency: ETH,
                 signer: signer,
-                minPrice: price,
+                price: price,
                 itemId: i // 0, 1, etc.
             });
 
             signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
-            takerBids[i] = OrderStructs.Taker(takerUser, abi.encode());
+            takerBids[i] = _genericTakerOrder();
         }
 
         // Other execution parameters

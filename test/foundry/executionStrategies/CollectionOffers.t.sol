@@ -22,6 +22,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../contracts/constants/NumericCon
 
 // Enums
 import {AssetType} from "../../../contracts/enums/AssetType.sol";
+import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract CollectionOrdersTest is ProtocolBase {
     StrategyCollectionOffer public strategyCollectionOffer;
@@ -38,27 +39,13 @@ contract CollectionOrdersTest is ProtocolBase {
 
     function _setUpNewStrategies() private asPrankedUser(_owner) {
         strategyCollectionOffer = new StrategyCollectionOffer();
-
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selectorNoProof,
-            true,
-            address(strategyCollectionOffer)
-        );
-
-        looksRareProtocol.addStrategy(
-            _standardProtocolFeeBp,
-            _minTotalFeeBp,
-            _maxProtocolFeeBp,
-            selectorWithProof,
-            true,
-            address(strategyCollectionOffer)
-        );
+        _addStrategy(address(strategyCollectionOffer), selectorNoProof, true);
+        _addStrategy(address(strategyCollectionOffer), selectorWithProof, true);
     }
 
     function testNewStrategies() public {
+        _assertStrategyAttributes(address(strategyCollectionOffer), selectorNoProof, true);
+
         (
             bool strategyIsActive,
             uint16 strategyStandardProtocolFee,
@@ -67,24 +54,6 @@ contract CollectionOrdersTest is ProtocolBase {
             bytes4 strategySelector,
             bool strategyIsMakerBid,
             address strategyImplementation
-        ) = looksRareProtocol.strategyInfo(1);
-
-        assertTrue(strategyIsActive);
-        assertEq(strategyStandardProtocolFee, _standardProtocolFeeBp);
-        assertEq(strategyMinTotalFee, _minTotalFeeBp);
-        assertEq(strategyMaxProtocolFee, _maxProtocolFeeBp);
-        assertEq(strategySelector, selectorNoProof);
-        assertTrue(strategyIsMakerBid);
-        assertEq(strategyImplementation, address(strategyCollectionOffer));
-
-        (
-            strategyIsActive,
-            strategyStandardProtocolFee,
-            strategyMinTotalFee,
-            strategyMaxProtocolFee,
-            strategySelector,
-            strategyIsMakerBid,
-            strategyImplementation
         ) = looksRareProtocol.strategyInfo(2);
 
         assertTrue(strategyIsActive);
@@ -114,7 +83,7 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, false);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -125,7 +94,7 @@ contract CollectionOrdersTest is ProtocolBase {
         signature = _signMakerOrder(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, true);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(OrderInvalid.selector);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
@@ -148,7 +117,7 @@ contract CollectionOrdersTest is ProtocolBase {
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
         _assertOrderIsInvalid(makerBid, false);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -162,9 +131,9 @@ contract CollectionOrdersTest is ProtocolBase {
     function testTakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
 
-        // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -172,7 +141,7 @@ contract CollectionOrdersTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -201,9 +170,9 @@ contract CollectionOrdersTest is ProtocolBase {
     function testTakerAskCollectionOrderWithMerkleTreeERC721() public {
         _setUpUsers();
 
-        // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -211,7 +180,7 @@ contract CollectionOrdersTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -245,9 +214,9 @@ contract CollectionOrdersTest is ProtocolBase {
         vm.assume(itemIdSold > 5);
         _setUpUsers();
 
-        // Prepare the order hash
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -255,7 +224,7 @@ contract CollectionOrdersTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0 // Not used
         });
 
@@ -286,8 +255,9 @@ contract CollectionOrdersTest is ProtocolBase {
     function testInvalidAmounts() public {
         _setUpUsers();
 
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 1,
             assetType: AssetType.ERC721,
@@ -295,7 +265,7 @@ contract CollectionOrdersTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0
         });
 
@@ -306,7 +276,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.amounts[0] = 0;
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
         _assertOrderIsInvalid(makerBid, false);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -316,7 +286,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.amounts[0] = 2;
         signature = _signMakerOrder(makerBid, makerUserPK);
         _assertOrderIsInvalid(makerBid, false);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -338,7 +308,7 @@ contract CollectionOrdersTest is ProtocolBase {
         takerAsk.additionalParameters = abi.encode(itemIdInMerkleTree, proof);
 
         _assertOrderIsInvalid(makerBid, true);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -348,7 +318,7 @@ contract CollectionOrdersTest is ProtocolBase {
         makerBid.amounts[0] = 2;
         signature = _signMakerOrder(makerBid, makerUserPK);
         _assertOrderIsInvalid(makerBid, true);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(AmountInvalid.selector);
@@ -356,8 +326,9 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testMerkleRootLengthIsNot32() public {
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -365,26 +336,30 @@ contract CollectionOrdersTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0
         });
 
         bytes memory signature = _signMakerOrder(makerBid, makerUserPK);
 
-        // Prepare the taker ask
-        OrderStructs.Taker memory takerAsk = OrderStructs.Taker(takerUser, abi.encode());
-
         _assertOrderIsInvalid(makerBid, true);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.prank(takerUser);
         vm.expectRevert(); // It should revert without data (since the root cannot be extracted since the additionalParameters length is 0)
-        looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
+        looksRareProtocol.executeTakerAsk(
+            _genericTakerOrder(),
+            makerBid,
+            signature,
+            _EMPTY_MERKLE_TREE,
+            _EMPTY_AFFILIATE
+        );
     }
 
     function testInvalidSelector() public {
-        OrderStructs.Maker memory makerBid = _createSingleItemMakerBidOrder({
-            bidNonce: 0,
+        OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Bid,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 3,
             assetType: AssetType.ERC721,
@@ -392,7 +367,7 @@ contract CollectionOrdersTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            maxPrice: price,
+            price: price,
             itemId: 0
         });
 
@@ -402,8 +377,9 @@ contract CollectionOrdersTest is ProtocolBase {
     }
 
     function testWrongQuoteType() public {
-        OrderStructs.Maker memory makerAsk = _createSingleItemMakerAskOrder({
-            askNonce: 0,
+        OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
+            quoteType: QuoteType.Ask,
+            globalNonce: 0,
             subsetNonce: 0,
             strategyId: 2,
             assetType: AssetType.ERC721,
@@ -411,7 +387,7 @@ contract CollectionOrdersTest is ProtocolBase {
             collection: address(mockERC721),
             currency: address(weth),
             signer: makerUser,
-            minPrice: price,
+            price: price,
             itemId: 0
         });
 

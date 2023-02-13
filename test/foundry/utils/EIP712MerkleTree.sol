@@ -78,7 +78,7 @@ contract EIP712MerkleTree is Test {
         signature = abi.encodePacked(r, s, v);
     }
 
-    function _getBatchOrderTypehash(uint256 treeHeight) private view returns (bytes32 batchOrderTypehash) {
+    function _getBatchOrderTypehash(uint256 treeHeight) private pure returns (bytes32 batchOrderTypehash) {
         if (treeHeight == 1) {
             batchOrderTypehash = hex"cbbc55854abc707c09d732e7a51c3a1afc570dbbbd52fc5a98e4405f5379b60a";
         } else if (treeHeight == 2) {

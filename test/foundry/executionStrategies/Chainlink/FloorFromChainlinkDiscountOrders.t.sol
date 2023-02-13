@@ -31,7 +31,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = PriceFeedNotAvailable.selector;
 
         _assertOrderIsInvalid(makerBid, errorSelector);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -56,7 +56,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         vm.warp(latencyViolationTimestamp);
 
         _assertOrderIsInvalid(makerBid, errorSelector);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -77,7 +77,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = ChainlinkPriceInvalid.selector;
 
         _assertOrderIsInvalid(makerBid, errorSelector);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -85,7 +85,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         aggregator.setAnswer(-1);
 
         _assertOrderIsInvalid(makerBid, errorSelector);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -105,7 +105,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = OrderInvalid.selector;
 
         _assertOrderIsInvalid(makerBid, errorSelector);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -128,7 +128,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = OrderInvalid.selector;
 
         _assertOrderIsInvalid(makerBid, errorSelector);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_PERMANENTLY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(AmountInvalid.selector);
         _executeTakerAsk(takerAsk, makerBid, signature);
@@ -169,7 +169,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         bytes4 errorSelector = CurrencyInvalid.selector;
 
         _assertOrderIsInvalid(makerBid, errorSelector);
-        _doesMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
+        _assertMakerOrderReturnValidationCode(makerBid, signature, MAKER_ORDER_TEMPORARILY_INVALID_NON_STANDARD_SALE);
 
         vm.expectRevert(errorSelector);
         _executeTakerAsk(takerAsk, makerBid, signature);

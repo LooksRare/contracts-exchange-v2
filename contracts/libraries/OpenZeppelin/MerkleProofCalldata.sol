@@ -30,19 +30,15 @@ library MerkleProofCalldata {
 
         for (uint256 i = 0; i < length; ) {
             if (proof[i].position == OrderStructs.MerkleTreeNodePosition.Left) {
-                computedHash = _hashPair(proof[i].value, computedHash);
+                computedHash = _efficientHash(proof[i].value, computedHash);
             } else {
-                computedHash = _hashPair(computedHash, proof[i].value);
+                computedHash = _efficientHash(computedHash, proof[i].value);
             }
             unchecked {
                 ++i;
             }
         }
         return computedHash;
-    }
-
-    function _hashPair(bytes32 a, bytes32 b) private pure returns (bytes32) {
-        return _efficientHash(a, b);
     }
 
     function _efficientHash(bytes32 a, bytes32 b) private pure returns (bytes32 value) {

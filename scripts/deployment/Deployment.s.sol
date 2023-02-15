@@ -18,7 +18,7 @@ import {IImmutableCreate2Factory} from "../../contracts/interfaces/IImmutableCre
 // Other contracts
 import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 
-contract DeploymentNoCreate2 is Script {
+contract Deployment is Script {
     IImmutableCreate2Factory private constant IMMUTABLE_CREATE2_FACTORY =
         IImmutableCreate2Factory(0x0000000000FFe8B47B3e2130213B802212439497);
 

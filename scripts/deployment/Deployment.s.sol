@@ -4,9 +4,6 @@ pragma solidity 0.8.17;
 // Scripting tool
 import {Script} from "../../lib/forge-std/src/Script.sol";
 
-// WETH
-import {WETH} from "solmate/src/tokens/WETH.sol";
-
 // Core contracts
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
@@ -18,7 +15,7 @@ import {IImmutableCreate2Factory} from "../../contracts/interfaces/IImmutableCre
 // Other contracts
 import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 
-contract DeploymentNoCreate2 is Script {
+contract Deployment is Script {
     IImmutableCreate2Factory private constant IMMUTABLE_CREATE2_FACTORY =
         IImmutableCreate2Factory(0x0000000000FFe8B47B3e2130213B802212439497);
 
@@ -30,17 +27,18 @@ contract DeploymentNoCreate2 is Script {
     // Royalty fee registry
     address public royaltyFeeRegistry;
 
-    function _run() internal {
-        uint256 chainId = block.chainId;
+    function run() external {
+        uint256 chainId = block.chainid;
+        uint256 deployerPrivateKey;
 
         if (chainId == 1) {
-            weth = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2;
+            weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
             royaltyFeeRegistry = 0x55010472a93921a117aAD9b055c141060c8d8022;
-            uint256 deployerPrivateKey = vm.envUint("MAINNET_KEY");
+            deployerPrivateKey = vm.envUint("MAINNET_KEY");
         } else if (chainId == 5) {
-            weth = 0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6;
+            weth = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
             royaltyFeeRegistry = 0x12405dB79325D06a973aD913D6e9BdA1343cD526;
-            uint256 deployerPrivateKey = vm.envUint("GOERLI_KEY");
+            deployerPrivateKey = vm.envUint("GOERLI_KEY");
         } else {
             revert ChainIdInvalid(chainId);
         }

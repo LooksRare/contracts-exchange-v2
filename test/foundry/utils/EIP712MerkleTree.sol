@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import "../../../contracts/BatchOrderTypehashRegistry.sol";
-import "../../../contracts/libraries/OrderStructs.sol";
+// Forge test
+import {Test} from "forge-std/Test.sol";
+
+// Libraries
+import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
+import {MathForLog2} from "../../../contracts/libraries/OpenZeppelin/MathForLog2.sol";
 
 // Interfaces
 import "../../../contracts/LooksRareProtocol.sol";
 
-// Libraries
-import {OrderStructs} from "../../../contracts/libraries/OrderStructs.sol";
-import {Test} from "forge-std/Test.sol";
-import {Math} from "../../../contracts/libraries/OpenZeppelin/Math.sol";
+// Others
 import {MerkleWithPosition} from "./MerkleWithPosition.sol";
 
 // Constants
@@ -31,7 +32,7 @@ contract EIP712MerkleTree is Test {
         uint256 makerOrderIndex
     ) external returns (bytes memory signature, OrderStructs.MerkleTree memory merkleTree) {
         uint256 bidCount = makerOrders.length;
-        uint256 treeHeight = Math.log2(bidCount);
+        uint256 treeHeight = MathForLog2.log2(bidCount);
         if (2 ** treeHeight != bidCount || treeHeight == 0) {
             treeHeight += 1;
         }

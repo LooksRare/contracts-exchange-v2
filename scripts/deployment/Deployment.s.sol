@@ -4,9 +4,6 @@ pragma solidity 0.8.17;
 // Scripting tool
 import {Script} from "../../lib/forge-std/src/Script.sol";
 
-// WETH
-import {WETH} from "solmate/src/tokens/WETH.sol";
-
 // Core contracts
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";

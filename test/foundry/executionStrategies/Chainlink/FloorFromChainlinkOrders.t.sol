@@ -9,7 +9,7 @@ import {OrderStructs} from "../../../../contracts/libraries/OrderStructs.sol";
 import {IStrategyManager} from "../../../../contracts/interfaces/IStrategyManager.sol";
 
 // Errors and constants
-import {FunctionSelectorInvalid} from "../../../../contracts/errors/SharedErrors.sol";
+import {FunctionSelectorInvalid, QuoteTypeInvalid} from "../../../../contracts/errors/SharedErrors.sol";
 import {DecimalsInvalid, PriceFeedAlreadySet} from "../../../../contracts/errors/ChainlinkErrors.sol";
 import {ONE_HUNDRED_PERCENT_IN_BP} from "../../../../contracts/constants/NumericConstants.sol";
 
@@ -85,6 +85,44 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
     function testSetPriceFeedNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
+    }
+
+    function testQuoteTypeInvalid() public {
+        OrderStructs.Maker memory maker;
+
+        // 1. Maker bid, but function selector is for maker ask
+        maker.quoteType = QuoteType.Bid;
+
+        (bool orderIsValid, bytes4 errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(
+            maker,
+            StrategyChainlinkFloor.executeBasisPointsPremiumStrategyWithTakerBid.selector
+        );
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, QuoteTypeInvalid.selector);
+
+        (orderIsValid, errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(
+            maker,
+            StrategyChainlinkFloor.executeFixedPremiumStrategyWithTakerBid.selector
+        );
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, QuoteTypeInvalid.selector);
+
+        // 2. Maker ask, but function selector is for maker bid
+        maker.quoteType = QuoteType.Ask;
+
+        (orderIsValid, errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(
+            maker,
+            StrategyChainlinkFloor.executeBasisPointsDiscountCollectionOfferStrategyWithTakerAsk.selector
+        );
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, QuoteTypeInvalid.selector);
+
+        (orderIsValid, errorSelector) = strategyFloorFromChainlink.isMakerOrderValid(
+            maker,
+            StrategyChainlinkFloor.executeFixedDiscountCollectionOfferStrategyWithTakerAsk.selector
+        );
+        assertFalse(orderIsValid);
+        assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
     function testInvalidSelector() public {

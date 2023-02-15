@@ -353,7 +353,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
         OrderStructs.Maker calldata makerOrder
     ) private view returns (bool isValid, bytes4 errorSelector) {
         if (makerOrder.quoteType != QuoteType.Ask) {
-            revert QuoteTypeInvalid();
+            return (isValid, QuoteTypeInvalid.selector);
         }
 
         if (makerOrder.currency != address(0)) {
@@ -384,7 +384,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
         bytes4 functionSelector
     ) private view returns (bool isValid, bytes4 errorSelector) {
         if (makerOrder.quoteType != QuoteType.Bid) {
-            revert QuoteTypeInvalid();
+            return (isValid, QuoteTypeInvalid.selector);
         }
 
         if (makerOrder.currency != WETH) {

@@ -28,7 +28,7 @@ contract Deployment is Script {
     address public royaltyFeeRegistry;
 
     function _run() internal {
-        uint256 chainId = block.chainId;
+        uint256 chainId = block.chainid;
         uint256 deployerPrivateKey;
 
         if (chainId == 1) {

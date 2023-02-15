@@ -41,8 +41,8 @@ import {QuoteType} from "../enums/QuoteType.sol";
  *         3. Nonce related issues (e.g., nonce executed or cancelled)
  *         4. Signature related issues and merkle tree parameters
  *         5. Timestamp related issues (e.g., order expired)
- *         6. Asset related issues for ERC20/ERC721/ERC1155 (approvals and balances)
- *         7. Asset type suggestions
+ *         6. Fungible asset related issues for ERC20/ERC721/ERC1155 (approvals and balances)
+ *         7. Collection-type suggestions
  *         8. Transfer manager related issues
  *         9. Creator fee related issues (e.g., creator fee too high, ERC2981 bundles)
  * @dev This version does not handle strategies with partial fills.
@@ -230,7 +230,17 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function is internal and verifies the validity of nonces for maker order.
+     * @notice This function is private and is used to adjust the protocol parameters.
+     */
+    function _deriveProtocolParameters() private {
+        domainSeparator = looksRareProtocol.domainSeparator();
+        creatorFeeManager = looksRareProtocol.creatorFeeManager();
+        maxCreatorFeeBp = looksRareProtocol.maxCreatorFeeBp();
+        royaltyFeeRegistry = creatorFeeManager.royaltyFeeRegistry();
+    }
+
+    /**
+     * @notice This function is private and verifies the validity of nonces for maker order.
      * @param makerSigner Address of the maker signer
      * @param globalNonce Global nonce
      * @param orderNonce Order nonce
@@ -245,7 +255,7 @@ contract OrderValidatorV2A {
         uint256 orderNonce,
         uint256 subsetNonce,
         bytes32 orderHash
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         // 1. Check subset nonce
         if (looksRareProtocol.userSubsetNonce(makerSigner, subsetNonce)) {
             return USER_SUBSET_NONCE_CANCELLED;
@@ -274,7 +284,7 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function is internal and verifies the validity of the currency and strategy.
+     * @notice This function is private and verifies the validity of the currency and strategy.
      * @param quoteType Quote type
      * @param currency Address of the currency
      * @param strategyId Strategy id
@@ -284,7 +294,7 @@ contract OrderValidatorV2A {
         QuoteType quoteType,
         address currency,
         uint256 strategyId
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         // 1. Verify whether the currency is allowed
         if (!looksRareProtocol.isCurrencyAllowed(currency)) {
             return CURRENCY_NOT_ALLOWED;
@@ -325,7 +335,7 @@ contract OrderValidatorV2A {
     function _checkValidityTimestamps(
         uint256 startTime,
         uint256 endTime
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         // @dev It is possible for startTime to be equal to endTime.
         // If so, the execution only succeeds when the startTime = endTime = block.timestamp.
         // For order invalidation, if the call succeeds, it is already too late for later execution since the
@@ -343,18 +353,18 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function is used to check if the asset type may be potentially invalid.
+     * @notice This function is private and checks if the collection type may be potentially invalid.
      * @param collection Address of the collection
-     * @param collectionType Asset type in the maker order
+     * @param collectionType Collection type in the maker order
      * @return validationCode Validation code
      * @dev This function may return false positives.
-     *      (i.e. assets that are tradable but do not implement the proper interfaceId).
+     *      (i.e. collections that are tradable but do not implement the proper interfaceId).
      *      If ERC165 is not implemented, it will revert.
      */
     function _checkIfPotentialInvalidCollectionTypes(
         address collection,
         CollectionType collectionType
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         if (collectionType == CollectionType.ERC721) {
             bool isERC721 = IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_1) ||
                 IERC165(collection).supportsInterface(ERC721_INTERFACE_ID_2);
@@ -381,7 +391,7 @@ contract OrderValidatorV2A {
         address currency,
         address user,
         uint256 price
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         if (currency != address(0)) {
             if (IERC20(currency).balanceOf(user) < price) {
                 return ERC20_BALANCE_INFERIOR_TO_PRICE;
@@ -396,7 +406,7 @@ contract OrderValidatorV2A {
     /**
      * @notice This function verifies the validity of NFT assets (approvals, balances, and others).
      * @param collection Collection address
-     * @param collectionType Asset type
+     * @param collectionType Collection type
      * @param user User address
      * @param itemIds Array of item ids
      * @param amounts Array of amounts
@@ -408,7 +418,7 @@ contract OrderValidatorV2A {
         address user,
         uint256[] memory itemIds,
         uint256[] memory amounts
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         validationCode = _checkIfItemIdsDiffer(itemIds);
 
         if (validationCode != ORDER_EXPECTED_TO_BE_VALID) {
@@ -434,7 +444,7 @@ contract OrderValidatorV2A {
         address collection,
         address user,
         uint256[] memory itemIds
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         // 1. Verify itemId is owned by user and catch revertion if ERC721 ownerOf fails
         uint256 length = itemIds.length;
 
@@ -503,7 +513,7 @@ contract OrderValidatorV2A {
         address user,
         uint256[] memory itemIds,
         uint256[] memory amounts
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         // 1. Verify each itemId is owned by user and catch revertion if ERC1155 ownerOf fails
         address[] memory users = new address[](1);
         users[0] = user;
@@ -559,38 +569,6 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function checks if the same itemId is repeated
-     *         in an array of item ids.
-     * @param itemIds Array of item ids
-     * @dev This is for bundles.
-     *      For example,
-     *      if itemIds = [1,2,1], it will return SAME_ITEM_ID_IN_BUNDLE.
-     * @return validationCode Validation code
-     */
-    function _checkIfItemIdsDiffer(uint256[] memory itemIds) internal pure returns (uint256 validationCode) {
-        uint256 length = itemIds.length;
-
-        // Only check if length of array is greater than 1
-        if (length > 1) {
-            for (uint256 i = 0; i < length - 1; ) {
-                for (uint256 j = i + 1; j < length; ) {
-                    if (itemIds[i] == itemIds[j]) {
-                        return SAME_ITEM_ID_IN_BUNDLE;
-                    }
-
-                    unchecked {
-                        ++j;
-                    }
-                }
-
-                unchecked {
-                    ++i;
-                }
-            }
-        }
-    }
-
-    /**
      * @notice This function verifies the validity of a Merkle proof and the order hash.
      * @param merkleTree Merkle tree struct
      * @param orderHash Order hash
@@ -603,7 +581,7 @@ contract OrderValidatorV2A {
         bytes32 orderHash,
         bytes calldata signature,
         address signer
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         if (merkleTree.proof.length != 0) {
             if (merkleTree.proof.length > MAX_CALLDATA_PROOF_LENGTH) {
                 return MERKLE_PROOF_PROOF_TOO_LARGE;
@@ -631,7 +609,7 @@ contract OrderValidatorV2A {
         address collection,
         uint256 price,
         uint256[] memory itemIds
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         (bool status, bytes memory data) = address(creatorFeeManager).staticcall(
             abi.encodeCall(ICreatorFeeManager.viewCreatorFeeInfo, (collection, price, itemIds))
         );
@@ -661,7 +639,7 @@ contract OrderValidatorV2A {
         bytes32 computedHash,
         bytes calldata makerSignature,
         address signer
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         return
             _validateSignature(
                 keccak256(abi.encodePacked("\x19\x01", domainSeparator, computedHash)),
@@ -681,7 +659,7 @@ contract OrderValidatorV2A {
         bytes32 hash,
         bytes calldata signature,
         address signer
-    ) internal view returns (uint256 validationCode) {
+    ) private view returns (uint256 validationCode) {
         // Logic if EOA
         if (signer.code.length == 0) {
             bytes32 r;
@@ -744,7 +722,7 @@ contract OrderValidatorV2A {
      * @param user Address of the user
      * @return validationCode Validation code
      */
-    function _checkValidityTransferManagerApprovals(address user) internal view returns (uint256 validationCode) {
+    function _checkValidityTransferManagerApprovals(address user) private view returns (uint256 validationCode) {
         if (!transferManager.hasUserApprovedOperator(user, address(looksRareProtocol))) {
             return NO_TRANSFER_MANAGER_APPROVAL_BY_USER_FOR_EXCHANGE;
         }
@@ -756,11 +734,7 @@ contract OrderValidatorV2A {
 
     function _checkValidityMakerAskItemIdsAndAmountsAndPrice(
         OrderStructs.Maker memory makerAsk
-    )
-        internal
-        view
-        returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price)
-    {
+    ) private view returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price) {
         if (makerAsk.strategyId == 0) {
             itemIds = makerAsk.itemIds;
             amounts = makerAsk.amounts;
@@ -792,11 +766,7 @@ contract OrderValidatorV2A {
 
     function _checkValidityMakerBidItemIdsAndAmountsAndPrice(
         OrderStructs.Maker memory makerBid
-    )
-        internal
-        view
-        returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price)
-    {
+    ) private view returns (uint256 validationCode, uint256[] memory itemIds, uint256[] memory amounts, uint256 price) {
         if (makerBid.strategyId == 0) {
             itemIds = makerBid.itemIds;
             amounts = makerBid.amounts;
@@ -826,13 +796,34 @@ contract OrderValidatorV2A {
     }
 
     /**
-     * @notice This function is internal and is used to adjust the protocol parameters.
+     * @notice This function checks if the same itemId is repeated
+     *         in an array of item ids.
+     * @param itemIds Array of item ids
+     * @dev This is for bundles.
+     *      For example, if itemIds = [1,2,1], it will return SAME_ITEM_ID_IN_BUNDLE.
+     * @return validationCode Validation code
      */
-    function _deriveProtocolParameters() internal {
-        domainSeparator = looksRareProtocol.domainSeparator();
-        creatorFeeManager = looksRareProtocol.creatorFeeManager();
-        maxCreatorFeeBp = looksRareProtocol.maxCreatorFeeBp();
-        royaltyFeeRegistry = creatorFeeManager.royaltyFeeRegistry();
+    function _checkIfItemIdsDiffer(uint256[] memory itemIds) private pure returns (uint256 validationCode) {
+        uint256 length = itemIds.length;
+
+        // Only check if length of array is greater than 1
+        if (length > 1) {
+            for (uint256 i = 0; i < length - 1; ) {
+                for (uint256 j = i + 1; j < length; ) {
+                    if (itemIds[i] == itemIds[j]) {
+                        return SAME_ITEM_ID_IN_BUNDLE;
+                    }
+
+                    unchecked {
+                        ++j;
+                    }
+                }
+
+                unchecked {
+                    ++i;
+                }
+            }
+        }
     }
 
     function _getOrderValidationCodeForStandardStrategy(

@@ -10,7 +10,8 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
  */
 interface ILooksRareProtocol {
     /**
-     * @notice This struct contains an order nonce's invalidation status and the order hash that triggered the status change.
+     * @notice This struct contains an order nonce's invalidation status
+     *         and the order hash that triggered the status change.
      * @param orderHash Maker order hash
      * @param orderNonce Order nonce
      * @param isNonceInvalidated Whether this transaction invalidated the maker user's order nonce at the protocol level

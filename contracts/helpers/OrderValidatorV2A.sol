@@ -10,7 +10,7 @@ import {IERC1271} from "@looksrare/contracts-libs/contracts/interfaces/generic/I
 
 // Libraries
 import {OrderStructs} from "../libraries/OrderStructs.sol";
-import {MerkleProofCalldata} from "../libraries/OpenZeppelin/MerkleProofCalldata.sol";
+import {MerkleProofCalldataWithNodes} from "../libraries/OpenZeppelin/MerkleProofCalldataWithNodes.sol";
 
 // Interfaces
 import {ICreatorFeeManager} from "../interfaces/ICreatorFeeManager.sol";
@@ -609,7 +609,7 @@ contract OrderValidatorV2A {
                 return MERKLE_PROOF_PROOF_TOO_LARGE;
             }
 
-            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
+            if (!MerkleProofCalldataWithNodes.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 return ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE;
             }
 

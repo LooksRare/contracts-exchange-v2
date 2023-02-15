@@ -118,7 +118,7 @@ uint256 constant ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE = 401;
 
 /**
  * @dev The merkle proof is too large to be verified according.
- *      There is a proof's size limit defined in the MerkleProofCalldata.
+ *      There is a proof's size limit defined in the MerkleProofCalldataWithNodes.
  *      It cannot become valid with the current merkle proof and root.
  */
 uint256 constant MERKLE_PROOF_PROOF_TOO_LARGE = 402;

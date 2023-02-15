@@ -8,7 +8,7 @@ import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // OpenZeppelin's library (adjusted) for verifying Merkle proofs
-import {MerkleProofCalldata} from "./libraries/OpenZeppelin/MerkleProofCalldata.sol";
+import {MerkleProofCalldataWithNodes} from "./libraries/OpenZeppelin/MerkleProofCalldataWithNodes.sol";
 
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
@@ -633,7 +633,7 @@ contract LooksRareProtocol is
                 revert MerkleProofTooLarge(proofLength);
             }
 
-            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
+            if (!MerkleProofCalldataWithNodes.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 revert MerkleProofInvalid();
             }
 

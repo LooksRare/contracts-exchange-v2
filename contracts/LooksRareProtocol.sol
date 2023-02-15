@@ -96,8 +96,8 @@ contract LooksRareProtocol is
 
     /**
      * @notice This variable is used as the gas limit for a ETH transfer.
-     *         If a standard ETH transfer fails within this gas limit, ETH will get wrapped to WETH and transfer
-     *         to the original recipient.
+     *         If a standard ETH transfer fails within this gas limit, ETH will get wrapped to WETH
+     *         and transferred to the initial recipient.
      */
     uint256 private _gasLimitETHTransfer = 2_300;
 

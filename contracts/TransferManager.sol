@@ -19,8 +19,8 @@ import {CollectionType} from "./enums/CollectionType.sol";
 /**
  * @title TransferManager
  * @notice This contract provides the transfer functions for ERC721/ERC1155 for contracts that require them.
- *         Asset type "0" refers to ERC721 transfer functions.
- *         Asset type "1" refers to ERC1155 transfer functions.
+ *         Collection type "0" refers to ERC721 transfer functions.
+ *         Collection type "1" refers to ERC1155 transfer functions.
  * @dev "Safe" transfer functions for ERC721 are not implemented since they come with added gas costs
  *       to verify if the recipient is a contract as it requires verifying the receiver interface is valid.
  * @author LooksRare protocol team (👀,💎)

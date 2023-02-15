@@ -122,7 +122,7 @@ contract MockOrderGenerator is ProtocolHelpers {
     function _getCollectionType(address collection) private view returns (CollectionType collectionType) {
         collectionType = CollectionType.ERC721;
 
-        // If ERC1155, adjust asset type
+        // If ERC1155, adjust the collection type
         if (IERC165(collection).supportsInterface(0xd9b67a26)) {
             collectionType = CollectionType.ERC1155;
         }

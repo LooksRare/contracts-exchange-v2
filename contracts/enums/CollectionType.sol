@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 /**
- * @notice CollectionType is used in OrderStructs.Maker's collectionType to determine the asset type being traded.
+ * @notice CollectionType is used in OrderStructs.Maker's collectionType to determine the collection type being traded.
  */
 enum CollectionType {
     ERC721,

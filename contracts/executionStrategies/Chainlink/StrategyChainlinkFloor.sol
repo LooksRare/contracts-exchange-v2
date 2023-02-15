@@ -55,7 +55,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      * @return price The final execution price
      * @return itemIds The final item ids to be traded
-     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any collection type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired premium amount in ETH
      *      from the floor price as the additionalParameters.
@@ -80,7 +80,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      * @param makerAsk Maker ask struct (maker ask-specific parameters for the execution)
      * @return price The final execution price
      * @return itemIds The final item ids to be traded
-     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any collection type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired premium basis points
      *      from the floor price as the additionalParameters.
@@ -105,7 +105,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      * @return price The final execution price
      * @return itemIds The final item ids to be traded
-     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any collection type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount amount in ETH
      *      from the floor price as the additionalParameters.
@@ -130,7 +130,7 @@ contract StrategyChainlinkFloor is BaseStrategy, BaseStrategyChainlinkMultiplePr
      * @param makerBid Maker bid struct (maker bid-specific parameters for the execution)
      * @return price The final execution price
      * @return itemIds The final item ids to be traded
-     * @return amounts The corresponding amounts for each item id. It should always be 1 for any asset type.
+     * @return amounts The corresponding amounts for each item id. It should always be 1 for any collection type.
      * @return isNonceInvalidated Whether the order's nonce will be invalidated after executing the order
      * @dev The client has to provide the bidder's desired discount basis points
      *      from the floor price as the additionalParameters.

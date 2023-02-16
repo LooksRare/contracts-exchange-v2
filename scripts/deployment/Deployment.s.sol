@@ -81,16 +81,7 @@ contract Deployment is Script {
         LooksRareProtocol(looksRareProtocolAddress).updateCreatorFeeManager(address(creatorFeeManager));
 
         // @dev Transfer 1 wei
-        looksRareProtocolAddress.transfer(1);
-
-        console.log("TransferManager address:");
-        console.log(transferManagerAddress);
-        console.log("LooksRareProtocol address:");
-        console.log(looksRareProtocolAddress);
-        console.log("CreatorFeeManagerWithRebates address:");
-        console.log(address(creatorFeeManager));
-        console.log("OrderValidatorV2A address:");
-        console.log(address(orderValidatorV2A));
+        payable(looksRareProtocolAddress).transfer(1);
         vm.stopBroadcast();
     }
 }

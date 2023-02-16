@@ -75,13 +75,13 @@ contract Deployment is Script {
         OrderValidatorV2A orderValidatorV2A = new OrderValidatorV2A(looksRareProtocolAddress);
 
         // 5. Other operations
-        transferManager.allowOperator(address(looksRareProtocol));
-        looksRareProtocol.updateCurrencyStatus(address(0), true);
-        looksRareProtocol.updateCurrencyStatus(weth, true);
-        looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
+        TransferManager(transferManagerAddress).allowOperator(looksRareProtocolAddress);
+        LooksRareProtocol(looksRareProtocolAddress).updateCurrencyStatus(address(0), true);
+        LooksRareProtocol(looksRareProtocolAddress).updateCurrencyStatus(weth, true);
+        LooksRareProtocol(looksRareProtocolAddress).updateCreatorFeeManager(address(creatorFeeManager));
 
         // @dev Transfer 1 wei
-        address(looksRareProtocol).transfer(1);
+        looksRareProtocolAddress.transfer(1);
 
         console.log("TransferManager address:");
         console.log(transferManagerAddress);

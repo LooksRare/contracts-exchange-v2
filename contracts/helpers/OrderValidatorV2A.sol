@@ -41,7 +41,7 @@ import {QuoteType} from "../enums/QuoteType.sol";
  *         3. Nonce related issues (e.g., nonce executed or cancelled)
  *         4. Signature related issues and merkle tree parameters
  *         5. Timestamp related issues (e.g., order expired)
- *         6. Fungible asset related issues for ERC20/ERC721/ERC1155 (approvals and balances)
+ *         6. Asset-related issues for ERC20/ERC721/ERC1155 (approvals and balances)
  *         7. Collection-type suggestions
  *         8. Transfer manager related issues
  *         9. Creator fee related issues (e.g., creator fee too high, ERC2981 bundles)
@@ -619,10 +619,10 @@ contract OrderValidatorV2A {
             return BUNDLE_ERC2981_NOT_SUPPORTED;
         }
 
-        (address creator, uint256 creatorFee) = abi.decode(data, (address, uint256));
+        (address creator, uint256 creatorFeeAmount) = abi.decode(data, (address, uint256));
 
         if (creator != address(0)) {
-            if (creatorFee * ONE_HUNDRED_PERCENT_IN_BP > (price * uint256(maxCreatorFeeBp))) {
+            if (creatorFeeAmount * ONE_HUNDRED_PERCENT_IN_BP > (price * uint256(maxCreatorFeeBp))) {
                 return CREATOR_FEE_TOO_HIGH;
             }
         }

@@ -549,9 +549,9 @@ contract LooksRareProtocol is
         }
 
         // @dev There is no check for address(0), if the creator recipient is address(0), the fee is set to 0
-        uint256 creatorFee = feeAmounts[1];
-        if (creatorFee != 0) {
-            _transferFungibleTokens(currency, bidUser, recipients[1], creatorFee);
+        uint256 creatorFeeAmount = feeAmounts[1];
+        if (creatorFeeAmount != 0) {
+            _transferFungibleTokens(currency, bidUser, recipients[1], creatorFeeAmount);
         }
     }
 

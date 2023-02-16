@@ -26,11 +26,11 @@ interface ICreatorFeeManager {
      * @param price Transaction price
      * @param itemIds Array of item ids
      * @return creator Creator address
-     * @return creatorFee Creator fee amount
+     * @return creatorFeeAmount Creator fee amount
      */
     function viewCreatorFeeInfo(
         address collection,
         uint256 price,
         uint256[] memory itemIds
-    ) external view returns (address creator, uint256 creatorFee);
+    ) external view returns (address creator, uint256 creatorFeeAmount);
 }

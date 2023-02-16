@@ -48,9 +48,9 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
         address collection,
         uint256 price,
         uint256[] memory itemIds
-    ) external view returns (address creator, uint256 creatorFee) {
+    ) external view returns (address creator, uint256 creatorFeeAmount) {
         // Check if there is a royalty info in the system
-        (creator, creatorFee) = royaltyFeeRegistry.royaltyInfo(collection, price);
+        (creator, creatorFeeAmount) = royaltyFeeRegistry.royaltyInfo(collection, price);
 
         if (creator == address(0)) {
             if (IERC2981(collection).supportsInterface(IERC2981.royaltyInfo.selector)) {
@@ -59,11 +59,11 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
                 for (uint256 i; i < length; ) {
                     try IERC2981(collection).royaltyInfo(itemIds[i], price) returns (
                         address newCreator,
-                        uint256 newCreatorFee
+                        uint256 newCreatorFeeAmount
                     ) {
                         if (i == 0) {
                             creator = newCreator;
-                            creatorFee = newCreatorFee;
+                            creatorFeeAmount = newCreatorFeeAmount;
 
                             unchecked {
                                 ++i;
@@ -71,7 +71,7 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
                             continue;
                         }
 
-                        if (newCreator != creator || newCreatorFee != creatorFee) {
+                        if (newCreator != creator || newCreatorFeeAmount != creatorFeeAmount) {
                             revert BundleEIP2981NotAllowed(collection);
                         }
                     } catch {
@@ -80,7 +80,7 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
                         // 0 royalty.
                         // If the first call reverts, even if creator is address(0), subsequent
                         // successful calls will still revert above with BundleEIP2981NotAllowed
-                        // because newCreator/newCreatorFee will be different from creator/creatorFee.
+                        // because newCreator/newCreatorFeeAmount will be different from creator/creatorFeeAmount.
                         if (creator != address(0)) {
                             revert BundleEIP2981NotAllowed(collection);
                         }

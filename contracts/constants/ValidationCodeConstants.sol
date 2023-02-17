@@ -46,7 +46,7 @@ uint256 constant STRATEGY_NOT_ACTIVE = 113;
  */
 
 /**
- * @dev The maker order is permanently invalid for a standard sale (e.g. invalid asset type or amounts)
+ * @dev The maker order is permanently invalid for a standard sale (e.g. invalid collection type or amounts)
  *      This maker order cannot become valid again.
  */
 uint256 constant MAKER_ORDER_INVALID_STANDARD_SALE = 201;
@@ -118,7 +118,7 @@ uint256 constant ORDER_HASH_PROOF_NOT_IN_MERKLE_TREE = 401;
 
 /**
  * @dev The merkle proof is too large to be verified according.
- *      There is a proof's size limit defined in the MerkleProofCalldata.
+ *      There is a proof's size limit defined in the MerkleProofCalldataWithNodes.
  *      It cannot become valid with the current merkle proof and root.
  */
 uint256 constant MERKLE_PROOF_PROOF_TOO_LARGE = 402;
@@ -263,13 +263,13 @@ uint256 constant ERC1155_NO_APPROVAL_FOR_ALL = 634;
  */
 
 /**
- * @dev The asset type specified in the order seems incorrect.
+ * @dev The collection type specified in the order seems incorrect.
  *      It is expected to be collectionType = 0.
  */
 uint256 constant POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721 = 701;
 
 /**
- * @dev The asset type specified in the order seems incorrect.
+ * @dev The collection type specified in the order seems incorrect.
  *      It is expected to be collectionType = 1.
  */
 uint256 constant POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155 = 702;

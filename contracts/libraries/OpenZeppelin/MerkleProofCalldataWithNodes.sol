@@ -1,21 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+// Libraries
 import {OrderStructs} from "../../libraries/OrderStructs.sol";
 
 /**
- * @title MerkleProofCalldata
+ * @title MerkleProofCalldataWithNodes
  * @notice This library is adjusted from the work of OpenZeppelin.
  *         It is based on the 4.7.0 (utils/cryptography/MerkleProof.sol).
  * @author OpenZeppelin (adjusted by LooksRare)
  */
-library MerkleProofCalldata {
+library MerkleProofCalldataWithNodes {
     /**
      * @notice This returns true if a `leaf` can be proved to be a part of a Merkle tree defined by `root`.
      *         For this, a `proof` must be provided, containing sibling hashes on the branch from the leaf to the
      *         root of the tree. Each pair of leaves and each pair of pre-images are assumed to be sorted.
      */
-    function verifyCalldata(OrderStructs.MerkleTreeNode[] calldata proof, bytes32 root, bytes32 leaf) internal pure returns (bool) {
+    function verifyCalldata(
+        OrderStructs.MerkleTreeNode[] calldata proof,
+        bytes32 root,
+        bytes32 leaf
+    ) internal pure returns (bool) {
         return processProofCalldata(proof, leaf) == root;
     }
 
@@ -24,7 +29,10 @@ library MerkleProofCalldata {
      *         A `proof` is valid if and only if the rebuilt hash matches the root of the tree.
      *         When processing the proof, the pairs of leafs & pre-images are assumed to be sorted.
      */
-    function processProofCalldata(OrderStructs.MerkleTreeNode[] calldata proof, bytes32 leaf) internal pure returns (bytes32) {
+    function processProofCalldata(
+        OrderStructs.MerkleTreeNode[] calldata proof,
+        bytes32 leaf
+    ) internal pure returns (bytes32) {
         bytes32 computedHash = leaf;
         uint256 length = proof.length;
 

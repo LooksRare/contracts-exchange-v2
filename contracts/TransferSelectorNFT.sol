@@ -40,7 +40,7 @@ contract TransferSelectorNFT is ExecutionManager, PackableReentrancyGuard {
     /**
      * @notice This function is internal and used to transfer non-fungible tokens.
      * @param collection Collection address
-     * @param collectionType Asset type (e.g. 0 = ERC721, 1 = ERC1155)
+     * @param collectionType Collection type (e.g. 0 = ERC721, 1 = ERC1155)
      * @param sender Sender address
      * @param recipient Recipient address
      * @param itemIds Array of itemIds

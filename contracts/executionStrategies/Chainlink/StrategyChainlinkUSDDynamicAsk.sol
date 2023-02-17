@@ -27,7 +27,7 @@ import {BaseStrategyChainlinkPriceLatency} from "./BaseStrategyChainlinkPriceLat
 contract StrategyChainlinkUSDDynamicAsk is BaseStrategy, BaseStrategyChainlinkPriceLatency {
     /**
      * @dev It is possible to call priceFeed.decimals() to get the decimals,
-     *      but we want to save gas so it's hard coded instead.
+     *      but to save gas, it is hard coded instead.
      */
     uint256 public constant ETH_USD_PRICE_FEED_DECIMALS = 1e8;
 

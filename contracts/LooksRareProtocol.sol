@@ -8,7 +8,7 @@ import {LowLevelWETH} from "@looksrare/contracts-libs/contracts/lowLevelCallers/
 import {LowLevelERC20Transfer} from "@looksrare/contracts-libs/contracts/lowLevelCallers/LowLevelERC20Transfer.sol";
 
 // OpenZeppelin's library (adjusted) for verifying Merkle proofs
-import {MerkleProofCalldata} from "./libraries/OpenZeppelin/MerkleProofCalldata.sol";
+import {MerkleProofCalldataWithNodes} from "./libraries/OpenZeppelin/MerkleProofCalldataWithNodes.sol";
 
 // Libraries
 import {OrderStructs} from "./libraries/OrderStructs.sol";
@@ -96,8 +96,8 @@ contract LooksRareProtocol is
 
     /**
      * @notice This variable is used as the gas limit for a ETH transfer.
-     *         If a standard ETH transfer fails within this gas limit, ETH will get wrapped to WETH and transfer
-     *         to the original recipient.
+     *         If a standard ETH transfer fails within this gas limit, ETH will get wrapped to WETH
+     *         and transferred to the initial recipient.
      */
     uint256 private _gasLimitETHTransfer = 2_300;
 
@@ -549,9 +549,9 @@ contract LooksRareProtocol is
         }
 
         // @dev There is no check for address(0), if the creator recipient is address(0), the fee is set to 0
-        uint256 creatorFee = feeAmounts[1];
-        if (creatorFee != 0) {
-            _transferFungibleTokens(currency, bidUser, recipients[1], creatorFee);
+        uint256 creatorFeeAmount = feeAmounts[1];
+        if (creatorFeeAmount != 0) {
+            _transferFungibleTokens(currency, bidUser, recipients[1], creatorFeeAmount);
         }
     }
 
@@ -633,7 +633,7 @@ contract LooksRareProtocol is
                 revert MerkleProofTooLarge(proofLength);
             }
 
-            if (!MerkleProofCalldata.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
+            if (!MerkleProofCalldataWithNodes.verifyCalldata(merkleTree.proof, merkleTree.root, orderHash)) {
                 revert MerkleProofInvalid();
             }
 

@@ -6,13 +6,12 @@ import {MerkleProofTooLarge} from "./errors/SharedErrors.sol";
 
 /**
  * @title BatchOrderTypehashRegistry
- * @notice The BatchOrderTypehashRegistry generates batch order hash which is then
- *         used to compute the digest for signature verification.
+ * @notice The contract generates the batch order hash that is used to compute the digest for signature verification.
  * @author LooksRare protocol team (👀,💎)
  */
 contract BatchOrderTypehashRegistry {
     /**
-     * @dev hashBatchOrder hashes the concatenation of batch order typehash and merkle root.
+     * @notice This function returns the hash of the concatenation of batch order type hash and merkle root.
      * @param root Merkle root
      * @param proofLength Merkle proof length
      * @return batchOrderHash The batch order hash

@@ -81,7 +81,7 @@ contract SandboxTest is ProtocolBase {
         vm.prank(takerUser);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
-        // Adjust asset type and sign order again
+        // Adjust the collection type and sign order again
         makerBid.collectionType = CollectionType.ERC1155;
         signature = _signMakerOrder(makerBid, makerUserPK);
 
@@ -134,7 +134,7 @@ contract SandboxTest is ProtocolBase {
             _EMPTY_AFFILIATE
         );
 
-        // Adjust asset type and sign order again
+        // Adjust the collection type and sign order again
         makerAsk.collectionType = CollectionType.ERC1155;
         signature = _signMakerOrder(makerAsk, makerUserPK);
 

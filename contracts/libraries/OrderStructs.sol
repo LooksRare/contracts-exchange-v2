@@ -22,7 +22,7 @@ library OrderStructs {
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
      * @param strategyId Strategy id
-     * @param collectionType Asset type (i.e. 0 = ERC721, 1 = ERC1155)
+     * @param collectionType Collection type (i.e. 0 = ERC721, 1 = ERC1155)
      * @param collection Collection address
      * @param currency Currency address (@dev address(0) = ETH)
      * @param signer Signer address

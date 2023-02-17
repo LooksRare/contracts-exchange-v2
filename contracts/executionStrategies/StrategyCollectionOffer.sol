@@ -7,11 +7,11 @@ import {OrderStructs} from "../libraries/OrderStructs.sol";
 // OpenZeppelin's library for verifying Merkle proofs
 import {MerkleProofMemory} from "../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
-// Shared errors
-import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid, QuoteTypeInvalid} from "../errors/SharedErrors.sol";
-
 // Enums
 import {QuoteType} from "../enums/QuoteType.sol";
+
+// Shared errors
+import {OrderInvalid, FunctionSelectorInvalid, MerkleProofInvalid, QuoteTypeInvalid} from "../errors/SharedErrors.sol";
 
 // Base strategy contracts
 import {BaseStrategy, IStrategy} from "./BaseStrategy.sol";

@@ -76,7 +76,7 @@ contract CreatorFeeManagerWithRoyalties is ICreatorFeeManager {
                         }
                     } catch {
                         // If creator address is not 0, that means there was at least 1
-                        // successful call. If all royaltyInfo calls fail, we should assume
+                        // successful call. If all royaltyInfo calls fail, it should assume
                         // 0 royalty.
                         // If the first call reverts, even if creator is address(0), subsequent
                         // successful calls will still revert above with BundleEIP2981NotAllowed

@@ -10,18 +10,16 @@ import {OrderStructs} from "../../libraries/OrderStructs.sol";
 // OpenZeppelin's library for verifying Merkle proofs
 import {MerkleProofMemory} from "../../libraries/OpenZeppelin/MerkleProofMemory.sol";
 
+// Enums
+import {CollectionType} from "../../enums/CollectionType.sol";
+import {QuoteType} from "../../enums/QuoteType.sol";
+
 // Errors
 import {FunctionSelectorInvalid, MerkleProofInvalid, OrderInvalid, QuoteTypeInvalid} from "../../errors/SharedErrors.sol";
 import {ItemIdFlagged, ItemTransferredTooRecently, LastTransferTimeInvalid, MessageIdInvalid, SignatureExpired, TransferCooldownPeriodTooHigh} from "../../errors/ReservoirErrors.sol";
 
-// Enums
-import {QuoteType} from "../../enums/QuoteType.sol";
-
 // Base strategy contracts
 import {BaseStrategy, IStrategy} from "../BaseStrategy.sol";
-
-// Enums
-import {CollectionType} from "../../enums/CollectionType.sol";
 
 /**
  * @title StrategyReservoirCollectionOffer

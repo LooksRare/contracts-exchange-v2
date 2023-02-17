@@ -5,7 +5,7 @@ pragma solidity 0.8.17;
  * @author OpenZeppelin (last updated v4.8.0) (utils/math/Math.sol)
  * @dev Standard math utilities missing in the Solidity language.
  */
-library MathForLog2 {
+library MathLib {
     /**
      * @dev Return the log in base 2, rounded down, of a positive value.
      * Returns 0 if given 0.

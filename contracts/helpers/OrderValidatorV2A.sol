@@ -50,7 +50,6 @@ import {QuoteType} from "../enums/QuoteType.sol";
  */
 contract OrderValidatorV2A {
     using OrderStructs for OrderStructs.Maker;
-    using OrderStructs for OrderStructs.MerkleTree;
 
     /**
      * @notice ERC721 potential interfaceId.

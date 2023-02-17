@@ -17,7 +17,6 @@ import {QuoteType} from "../../../contracts/enums/QuoteType.sol";
 
 contract ProtocolHelpers is TestHelpers, TestParameters {
     using OrderStructs for OrderStructs.Maker;
-    using OrderStructs for OrderStructs.MerkleTree;
 
     bytes32 internal _domainSeparator;
 

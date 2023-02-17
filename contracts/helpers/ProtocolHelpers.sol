@@ -17,7 +17,6 @@ import {LooksRareProtocol} from "../LooksRareProtocol.sol";
  */
 contract ProtocolHelpers {
     using OrderStructs for OrderStructs.Maker;
-    using OrderStructs for OrderStructs.MerkleTree;
 
     // Encoding prefix for EIP-712 signatures
     string internal constant _ENCODING_PREFIX = "\x19\x01";

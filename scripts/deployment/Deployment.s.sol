@@ -71,14 +71,15 @@ contract Deployment is Script {
         // 3. Deploy CreatorFeeManagerWithRebates
         CreatorFeeManagerWithRebates creatorFeeManager = new CreatorFeeManagerWithRebates(royaltyFeeRegistry);
 
-        // 4. Deploy OrderValidatorV2A
-        OrderValidatorV2A orderValidatorV2A = new OrderValidatorV2A(looksRareProtocolAddress);
-
-        // 5. Other operations
+        // 4. Other operations
         TransferManager(transferManagerAddress).allowOperator(looksRareProtocolAddress);
         LooksRareProtocol(looksRareProtocolAddress).updateCurrencyStatus(address(0), true);
         LooksRareProtocol(looksRareProtocolAddress).updateCurrencyStatus(weth, true);
         LooksRareProtocol(looksRareProtocolAddress).updateCreatorFeeManager(address(creatorFeeManager));
+
+        // 5. Deploy OrderValidatorV2A, this needs to happen after updateCreatorFeeManager
+        //    as the order validator calls creator fee manager to retrieve the royalty fee registry
+        new OrderValidatorV2A(looksRareProtocolAddress);
 
         // @dev Transfer 1 wei
         payable(looksRareProtocolAddress).transfer(1);

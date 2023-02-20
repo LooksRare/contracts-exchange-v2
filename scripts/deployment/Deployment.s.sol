@@ -81,8 +81,6 @@ contract Deployment is Script {
         //    as the order validator calls creator fee manager to retrieve the royalty fee registry
         new OrderValidatorV2A(looksRareProtocolAddress);
 
-        // @dev Transfer 1 wei
-        payable(looksRareProtocolAddress).transfer(1);
         vm.stopBroadcast();
     }
 }

@@ -8,6 +8,7 @@ import {Script} from "../../lib/forge-std/src/Script.sol";
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {CreatorFeeManagerWithRebates} from "../../contracts/CreatorFeeManagerWithRebates.sol";
+import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
 
 // Create2 factory interface
 import {IImmutableCreate2Factory} from "../../contracts/interfaces/IImmutableCreate2Factory.sol";
@@ -80,6 +81,12 @@ contract Deployment is Script {
         // 5. Deploy OrderValidatorV2A, this needs to happen after updateCreatorFeeManager
         //    as the order validator calls creator fee manager to retrieve the royalty fee registry
         new OrderValidatorV2A(looksRareProtocolAddress);
+
+        // 6. Deploy StrategyCollectionOffer
+        IMMUTABLE_CREATE2_FACTORY.safeCreate2({
+            salt: vm.envBytes32("STRATEGY_COLLECTION_OFFER_SALT"),
+            initializationCode: type(StrategyCollectionOffer).creationCode
+        });
 
         vm.stopBroadcast();
     }

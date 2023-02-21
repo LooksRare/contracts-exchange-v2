@@ -28,6 +28,10 @@ contract Deployment is Script {
     // Royalty fee registry
     address public royaltyFeeRegistry;
 
+    uint16 internal constant _standardProtocolFeeBp = uint16(150);
+    uint16 internal constant _minTotalFeeBp = uint16(200);
+    uint16 internal constant _maxProtocolFeeBp = uint16(300);
+
     function run() external {
         uint256 chainId = block.chainid;
         uint256 deployerPrivateKey;
@@ -83,10 +87,28 @@ contract Deployment is Script {
         new OrderValidatorV2A(looksRareProtocolAddress);
 
         // 6. Deploy StrategyCollectionOffer
-        IMMUTABLE_CREATE2_FACTORY.safeCreate2({
+        address strategyCollectionOfferAddress = IMMUTABLE_CREATE2_FACTORY.safeCreate2({
             salt: vm.envBytes32("STRATEGY_COLLECTION_OFFER_SALT"),
             initializationCode: type(StrategyCollectionOffer).creationCode
         });
+
+        LooksRareProtocol(looksRareProtocolAddress).addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector,
+            true,
+            strategyCollectionOfferAddress
+        );
+
+        LooksRareProtocol(looksRareProtocolAddress).addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector,
+            true,
+            strategyCollectionOfferAddress
+        );
 
         vm.stopBroadcast();
     }

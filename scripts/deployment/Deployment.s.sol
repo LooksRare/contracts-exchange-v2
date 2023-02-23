@@ -8,6 +8,7 @@ import {Script} from "../../lib/forge-std/src/Script.sol";
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
 import {CreatorFeeManagerWithRebates} from "../../contracts/CreatorFeeManagerWithRebates.sol";
+import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
 
 // Create2 factory interface
 import {IImmutableCreate2Factory} from "../../contracts/interfaces/IImmutableCreate2Factory.sol";
@@ -26,6 +27,10 @@ contract Deployment is Script {
 
     // Royalty fee registry
     address public royaltyFeeRegistry;
+
+    uint16 internal constant _standardProtocolFeeBp = uint16(150);
+    uint16 internal constant _minTotalFeeBp = uint16(200);
+    uint16 internal constant _maxProtocolFeeBp = uint16(300);
 
     function run() external {
         uint256 chainId = block.chainid;
@@ -71,17 +76,40 @@ contract Deployment is Script {
         // 3. Deploy CreatorFeeManagerWithRebates
         CreatorFeeManagerWithRebates creatorFeeManager = new CreatorFeeManagerWithRebates(royaltyFeeRegistry);
 
-        // 4. Deploy OrderValidatorV2A
-        OrderValidatorV2A orderValidatorV2A = new OrderValidatorV2A(looksRareProtocolAddress);
-
-        // 5. Other operations
+        // 4. Other operations
         TransferManager(transferManagerAddress).allowOperator(looksRareProtocolAddress);
         LooksRareProtocol(looksRareProtocolAddress).updateCurrencyStatus(address(0), true);
         LooksRareProtocol(looksRareProtocolAddress).updateCurrencyStatus(weth, true);
         LooksRareProtocol(looksRareProtocolAddress).updateCreatorFeeManager(address(creatorFeeManager));
 
-        // @dev Transfer 1 wei
-        payable(looksRareProtocolAddress).transfer(1);
+        // 5. Deploy OrderValidatorV2A, this needs to happen after updateCreatorFeeManager
+        //    as the order validator calls creator fee manager to retrieve the royalty fee registry
+        new OrderValidatorV2A(looksRareProtocolAddress);
+
+        // 6. Deploy StrategyCollectionOffer
+        address strategyCollectionOfferAddress = IMMUTABLE_CREATE2_FACTORY.safeCreate2({
+            salt: vm.envBytes32("STRATEGY_COLLECTION_OFFER_SALT"),
+            initializationCode: type(StrategyCollectionOffer).creationCode
+        });
+
+        LooksRareProtocol(looksRareProtocolAddress).addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector,
+            true,
+            strategyCollectionOfferAddress
+        );
+
+        LooksRareProtocol(looksRareProtocolAddress).addStrategy(
+            _standardProtocolFeeBp,
+            _minTotalFeeBp,
+            _maxProtocolFeeBp,
+            StrategyCollectionOffer.executeCollectionStrategyWithTakerAskWithProof.selector,
+            true,
+            strategyCollectionOfferAddress
+        );
+
         vm.stopBroadcast();
     }
 }

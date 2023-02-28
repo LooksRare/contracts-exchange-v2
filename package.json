@@ -1,6 +1,6 @@
 {
   "name": "contracts-exchange-v2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "LooksRare exchange protocol smart contracts (v2)",
   "author": "LooksRare",
   "license": "MIT",

@@ -36,6 +36,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
+    "compile": "hardhat compile",
     "compile:forge": "FOUNDRY_PROFILE=local forge build",
     "compile:hardhat": "hardhat compile --force",
     "generate:docs": "rm -f -R docs && hardhat docgen",

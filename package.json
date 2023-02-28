@@ -31,7 +31,12 @@
     "/test/mock/MockRoyaltyFeeRegistry.sol",
     "inheritance-contracts.svg"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "scripts": {
+    "compile": "hardhat compile",
     "compile:forge": "FOUNDRY_PROFILE=local forge build",
     "compile:hardhat": "hardhat compile --force",
     "generate:docs": "rm -f -R docs && hardhat docgen",
@@ -39,6 +44,7 @@
     "format:write": "prettier --write '**/*.{js,jsx,ts,tsx,sol,json,yaml,md}'",
     "lint": "eslint '**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky install",
+    "prepublishOnly": "yarn compile",
     "release": "hardhat export-abi && release-it",
     "test:forge:gas:coverage": "FOUNDRY_PROFILE=local forge test --gas-report",
     "test:forge": "FOUNDRY_PROFILE=local forge test -vv",

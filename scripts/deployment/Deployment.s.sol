@@ -28,9 +28,9 @@ contract Deployment is Script {
     // Royalty fee registry
     address public royaltyFeeRegistry;
 
-    uint16 internal constant _standardProtocolFeeBp = uint16(150);
-    uint16 internal constant _minTotalFeeBp = uint16(200);
-    uint16 internal constant _maxProtocolFeeBp = uint16(300);
+    uint16 internal constant _standardProtocolFeeBp = uint16(25);
+    uint16 internal constant _minTotalFeeBp = uint16(50);
+    uint16 internal constant _maxProtocolFeeBp = uint16(200);
 
     function run() external {
         uint256 chainId = block.chainid;

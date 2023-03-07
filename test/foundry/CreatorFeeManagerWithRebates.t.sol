@@ -238,8 +238,8 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
             weth.balanceOf(_owner),
             _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
         );
-        // Taker ask user receives 98% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
+        // Taker ask user receives 99.5% of the whole price
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             weth.balanceOf(_royaltyRecipient),

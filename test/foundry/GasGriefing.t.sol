@@ -46,7 +46,7 @@ contract GasGriefingTest is ProtocolBase {
 
         bytes memory signature;
 
-        uint256 sellerProceed = (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP;
+        uint256 sellerProceed = (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP;
 
         vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: false, checkData: true});
         emit Deposit(address(looksRareProtocol), sellerProceed);
@@ -68,7 +68,7 @@ contract GasGriefingTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 98% of the whole price (2%)
+        // Maker ask user receives 99.5% of the whole price (0.5%)
         assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceed);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
@@ -112,7 +112,7 @@ contract GasGriefingTest is ProtocolBase {
         // Other execution parameters
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-        uint256 sellerProceedPerItem = (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP;
+        uint256 sellerProceedPerItem = (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP;
 
         vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: false, checkData: true});
         emit Deposit(address(looksRareProtocol), sellerProceedPerItem);
@@ -139,7 +139,7 @@ contract GasGriefingTest is ProtocolBase {
         }
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
-        // Maker ask user receives 98% of the whole price (2% protocol)
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceedPerItem * numberPurchases);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);

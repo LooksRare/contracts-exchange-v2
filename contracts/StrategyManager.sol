@@ -32,15 +32,15 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
     constructor(address _owner) CurrencyManager(_owner) {
         strategyInfo[0] = Strategy({
             isActive: true,
-            standardProtocolFeeBp: 150,
-            minTotalFeeBp: 200,
-            maxProtocolFeeBp: 300,
+            standardProtocolFeeBp: 25,
+            minTotalFeeBp: 50,
+            maxProtocolFeeBp: 200,
             selector: bytes4(0),
             isMakerBid: false,
             implementation: address(0)
         });
 
-        emit NewStrategy(0, 150, 200, 300, bytes4(0), false, address(0));
+        emit NewStrategy(0, 25, 50, 200, bytes4(0), false, address(0));
     }
 
     /**

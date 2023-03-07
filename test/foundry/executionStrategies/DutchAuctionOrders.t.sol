@@ -158,8 +158,8 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), 0, "taker balance incorrect");
-        // Maker ask user receives 98% of the whole price (2% protocol)
-        uint256 protocolFee = (executionPrice * 200) / ONE_HUNDRED_PERCENT_IN_BP;
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
+        uint256 protocolFee = (executionPrice * 50) / ONE_HUNDRED_PERCENT_IN_BP;
         assertEq(
             weth.balanceOf(makerUser),
             _initialWETHBalanceUser + (executionPrice - protocolFee),

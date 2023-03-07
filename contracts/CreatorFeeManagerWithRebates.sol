@@ -20,7 +20,7 @@ contract CreatorFeeManagerWithRebates is ICreatorFeeManager {
     /**
      * @notice Standard royalty fee (in basis point).
      */
-    uint256 public constant STANDARD_ROYALTY_FEE_BP = 50;
+    uint256 public constant STANDARD_ROYALTY_FEE_BP = 25;
 
     /**
      * @notice Royalty fee registry interface.

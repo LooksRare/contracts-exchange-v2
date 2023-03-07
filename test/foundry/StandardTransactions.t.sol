@@ -327,10 +327,10 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
-        // Maker ask user receives 98% of the whole price (2% protocol)
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
-            _initialETHBalanceUser + ((price * 9_800) * numberPurchases) / ONE_HUNDRED_PERCENT_IN_BP
+            _initialETHBalanceUser + ((price * 9_950) * numberPurchases) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
@@ -429,10 +429,10 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * 1.4 ether));
-        // Maker ask user receives 98% of the whole price (2% protocol)
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
-            _initialETHBalanceUser + ((1.4 ether * 9_800) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
+            _initialETHBalanceUser + ((1.4 ether * 9_950) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
@@ -515,7 +515,7 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemId), buyer);
         // Buyer pays the whole price
         assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - price);
-        // Seller receives 98% of the whole price
+        // Seller receives 99.5% of the whole price
         assertEq(weth.balanceOf(seller), _initialWETHBalanceUser + expectedFees[0]);
         // Owner receives 1.5% of the whole price
         assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + expectedFees[2]);
@@ -532,7 +532,7 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemId), buyer);
         // Buyer pays the whole price
         assertEq(address(buyer).balance, _initialETHBalanceUser - price);
-        // Seller receives 98% of the whole price (2%)
+        // Seller receives 99.5% of the whole price (0.5%)
         assertEq(address(seller).balance, _initialETHBalanceUser + expectedFees[0]);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);

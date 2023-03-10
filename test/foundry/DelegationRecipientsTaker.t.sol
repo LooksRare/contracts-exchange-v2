@@ -3,6 +3,7 @@ pragma solidity 0.8.17;
 
 // Libraries and interfaces
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
+import {CreatorFeeManagerWithRoyalties} from "../../contracts/CreatorFeeManagerWithRoyalties.sol";
 
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -13,6 +14,11 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 contract DelegationRecipientsTakerTest is ProtocolBase {
     function setUp() public {
         _setUp();
+        CreatorFeeManagerWithRoyalties creatorFeeManager = new CreatorFeeManagerWithRoyalties(
+            address(royaltyFeeRegistry)
+        );
+        vm.prank(_owner);
+        looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
     }
 
     // Fixed price of sale
@@ -77,9 +83,9 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Random recipient user receives 98% of the whole price and taker user receives nothing.
+        // Random recipient user receives 99.5% of the whole price and taker user receives nothing.
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser);
-        assertEq(weth.balanceOf(randomRecipientSaleProceeds), (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
+        assertEq(weth.balanceOf(randomRecipientSaleProceeds), (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             weth.balanceOf(_royaltyRecipient),
@@ -154,8 +160,8 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), randomRecipientNFT);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 98% of the whole price (2%)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
+        // Maker ask user receives 99.5% of the whole price
+        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             address(_royaltyRecipient).balance,

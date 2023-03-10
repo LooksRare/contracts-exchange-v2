@@ -447,8 +447,8 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(tokenId), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
+        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }

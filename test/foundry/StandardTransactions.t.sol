@@ -5,6 +5,8 @@ pragma solidity 0.8.17;
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {LengthsInvalid} from "../../contracts/errors/SharedErrors.sol";
 
+import {CreatorFeeManagerWithRoyalties} from "../../contracts/CreatorFeeManagerWithRoyalties.sol";
+
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
@@ -19,9 +21,15 @@ contract StandardTransactionsTest is ProtocolBase {
     error ERC721TransferFromFail();
 
     uint256 private constant itemId = 420;
+    uint16 private constant NEW_ROYALTY_FEE = uint16(50);
 
     function setUp() public {
         _setUp();
+        CreatorFeeManagerWithRoyalties creatorFeeManager = new CreatorFeeManagerWithRoyalties(
+            address(royaltyFeeRegistry)
+        );
+        vm.prank(_owner);
+        looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
     }
 
     /**
@@ -30,7 +38,7 @@ contract StandardTransactionsTest is ProtocolBase {
     function testTakerBidERC721WithRoyaltiesFromRegistry(uint256 price) public {
         vm.assume(price <= 2 ether);
         _setUpUsers();
-        _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
+        _setupRegistryRoyalties(address(mockERC721), NEW_ROYALTY_FEE);
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
             address(mockERC721)
@@ -46,7 +54,7 @@ contract StandardTransactionsTest is ProtocolBase {
         _assertValidMakerOrder(makerAsk, signature);
 
         // Arrays for events
-        uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: _standardRoyaltyFee});
+        uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: NEW_ROYALTY_FEE});
         address[2] memory expectedRecipients;
 
         expectedRecipients[0] = makerUser;
@@ -158,7 +166,7 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.assume(price <= 2 ether);
 
         _setUpUsers();
-        _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
+        _setupRegistryRoyalties(address(mockERC721), NEW_ROYALTY_FEE);
 
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
@@ -175,7 +183,7 @@ contract StandardTransactionsTest is ProtocolBase {
         mockERC721.mint(takerUser, makerBid.itemIds[0]);
 
         // Arrays for events
-        uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: _standardRoyaltyFee});
+        uint256[3] memory expectedFees = _calculateExpectedFees({price: price, royaltyFeeBp: NEW_ROYALTY_FEE});
         address[2] memory expectedRecipients;
 
         expectedRecipients[0] = takerUser;
@@ -327,10 +335,10 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
-        // Maker ask user receives 98% of the whole price (2% protocol)
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
-            _initialETHBalanceUser + ((price * 9_800) * numberPurchases) / ONE_HUNDRED_PERCENT_IN_BP
+            _initialETHBalanceUser + ((price * 9_950) * numberPurchases) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
@@ -429,10 +437,10 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * 1.4 ether));
-        // Maker ask user receives 98% of the whole price (2% protocol)
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
-            _initialETHBalanceUser + ((1.4 ether * 9_800) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
+            _initialETHBalanceUser + ((1.4 ether * 9_950) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
@@ -515,7 +523,7 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemId), buyer);
         // Buyer pays the whole price
         assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - price);
-        // Seller receives 98% of the whole price
+        // Seller receives 99.5% of the whole price
         assertEq(weth.balanceOf(seller), _initialWETHBalanceUser + expectedFees[0]);
         // Owner receives 1.5% of the whole price
         assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + expectedFees[2]);
@@ -532,7 +540,7 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(itemId), buyer);
         // Buyer pays the whole price
         assertEq(address(buyer).balance, _initialETHBalanceUser - price);
-        // Seller receives 98% of the whole price (2%)
+        // Seller receives 99.5% of the whole price
         assertEq(address(seller).balance, _initialETHBalanceUser + expectedFees[0]);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);

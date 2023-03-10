@@ -46,8 +46,8 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
      */
     function testOwnerCanDiscontinueStrategy() public asPrankedUser(_owner) {
         uint256 strategyId = 0;
-        uint16 standardProtocolFeeBp = 249;
-        uint16 minTotalFeeBp = 250;
+        uint16 standardProtocolFeeBp = 100;
+        uint16 minTotalFeeBp = 200;
         bool isActive = false;
 
         vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
@@ -101,7 +101,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     function testOwnerCanChangeStrategyProtocolFees() public asPrankedUser(_owner) {
         uint256 strategyId = 0;
         uint16 newStandardProtocolFeeBp = 100;
-        uint16 newMinTotalFeeBp = 265;
+        uint16 newMinTotalFeeBp = 200;
         bool isActive = true;
 
         vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});

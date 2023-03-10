@@ -7,7 +7,7 @@ import {Script} from "../../lib/forge-std/src/Script.sol";
 // Core contracts
 import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
-import {CreatorFeeManagerWithRebates} from "../../contracts/CreatorFeeManagerWithRebates.sol";
+import {CreatorFeeManagerZero} from "../../contracts/CreatorFeeManagerZero.sol";
 import {StrategyCollectionOffer} from "../../contracts/executionStrategies/StrategyCollectionOffer.sol";
 
 // Create2 factory interface
@@ -28,9 +28,9 @@ contract Deployment is Script {
     // Royalty fee registry
     address public royaltyFeeRegistry;
 
-    uint16 internal constant _standardProtocolFeeBp = uint16(150);
-    uint16 internal constant _minTotalFeeBp = uint16(200);
-    uint16 internal constant _maxProtocolFeeBp = uint16(300);
+    uint16 internal constant _standardProtocolFeeBp = uint16(50);
+    uint16 internal constant _minTotalFeeBp = uint16(50);
+    uint16 internal constant _maxProtocolFeeBp = uint16(200);
 
     function run() external {
         uint256 chainId = block.chainid;
@@ -73,8 +73,8 @@ contract Deployment is Script {
             )
         });
 
-        // 3. Deploy CreatorFeeManagerWithRebates
-        CreatorFeeManagerWithRebates creatorFeeManager = new CreatorFeeManagerWithRebates(royaltyFeeRegistry);
+        // 3. Deploy CreatorFeeManagerZero
+        CreatorFeeManagerZero creatorFeeManager = new CreatorFeeManagerZero(royaltyFeeRegistry);
 
         // 4. Other operations
         TransferManager(transferManagerAddress).allowOperator(looksRareProtocolAddress);

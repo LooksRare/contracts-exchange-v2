@@ -82,8 +82,8 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         assertEq(mockERC721.ownerOf(1), takerUser);
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 9.8 ether);
-        // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.604 ether);
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.751 ether);
     }
 
     function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceLessThanMinPrice() public {
@@ -113,7 +113,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
 
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 9.9 ether);
-        // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.702 ether);
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.8505 ether);
     }
 }

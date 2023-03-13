@@ -97,11 +97,6 @@ contract OrderValidatorV2A {
     LooksRareProtocol public looksRareProtocol;
 
     /**
-     * @notice Royalty fee registry.
-     */
-    IRoyaltyFeeRegistry public royaltyFeeRegistry;
-
-    /**
      * @notice TransferManager
      */
     TransferManager public transferManager;
@@ -235,7 +230,6 @@ contract OrderValidatorV2A {
         domainSeparator = looksRareProtocol.domainSeparator();
         creatorFeeManager = looksRareProtocol.creatorFeeManager();
         maxCreatorFeeBp = looksRareProtocol.maxCreatorFeeBp();
-        royaltyFeeRegistry = creatorFeeManager.royaltyFeeRegistry();
     }
 
     /**
@@ -609,20 +603,22 @@ contract OrderValidatorV2A {
         uint256 price,
         uint256[] memory itemIds
     ) private view returns (uint256 validationCode) {
-        (bool status, bytes memory data) = address(creatorFeeManager).staticcall(
-            abi.encodeCall(ICreatorFeeManager.viewCreatorFeeInfo, (collection, price, itemIds))
-        );
+        if (address(creatorFeeManager) != address(0)) {
+            (bool status, bytes memory data) = address(creatorFeeManager).staticcall(
+                abi.encodeCall(ICreatorFeeManager.viewCreatorFeeInfo, (collection, price, itemIds))
+            );
 
-        // The only path possible (to revert) in the fee manager is the bundle being not supported.
-        if (!status) {
-            return BUNDLE_ERC2981_NOT_SUPPORTED;
-        }
+            // The only path possible (to revert) in the fee manager is the bundle being not supported.
+            if (!status) {
+                return BUNDLE_ERC2981_NOT_SUPPORTED;
+            }
 
-        (address creator, uint256 creatorFeeAmount) = abi.decode(data, (address, uint256));
+            (address creator, uint256 creatorFeeAmount) = abi.decode(data, (address, uint256));
 
-        if (creator != address(0)) {
-            if (creatorFeeAmount * ONE_HUNDRED_PERCENT_IN_BP > (price * uint256(maxCreatorFeeBp))) {
-                return CREATOR_FEE_TOO_HIGH;
+            if (creator != address(0)) {
+                if (creatorFeeAmount * ONE_HUNDRED_PERCENT_IN_BP > (price * uint256(maxCreatorFeeBp))) {
+                    return CREATOR_FEE_TOO_HIGH;
+                }
             }
         }
     }

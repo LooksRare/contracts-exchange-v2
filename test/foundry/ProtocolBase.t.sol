@@ -12,7 +12,6 @@ import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRarePr
 import {TransferManager} from "../../contracts/TransferManager.sol";
 
 // Other contracts
-import {CreatorFeeManagerZero} from "../../contracts/CreatorFeeManagerZero.sol";
 import {OrderValidatorV2A} from "../../contracts/helpers/OrderValidatorV2A.sol";
 
 // Mock files
@@ -36,7 +35,6 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     LooksRareProtocol public looksRareProtocol;
     TransferManager public transferManager;
     MockRoyaltyFeeRegistry public royaltyFeeRegistry;
-    CreatorFeeManagerZero public creatorFeeManager;
     OrderValidatorV2A public orderValidator;
 
     WETH public weth;
@@ -165,7 +163,6 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
         transferManager = new TransferManager(_owner);
         royaltyFeeRegistry = new MockRoyaltyFeeRegistry(_owner, 9500);
-        creatorFeeManager = new CreatorFeeManagerZero(address(royaltyFeeRegistry));
         looksRareProtocol = new LooksRareProtocol(_owner, _owner, address(transferManager), address(weth));
         mockERC721WithRoyalties = new MockERC721WithRoyalties(_royaltyRecipient, _standardRoyaltyFee);
 
@@ -173,7 +170,6 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         transferManager.allowOperator(address(looksRareProtocol));
         looksRareProtocol.updateCurrencyStatus(ETH, true);
         looksRareProtocol.updateCurrencyStatus(address(weth), true);
-        looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
 
         // Fetch domain separator and store it as one of the operators
         _domainSeparator = looksRareProtocol.domainSeparator();

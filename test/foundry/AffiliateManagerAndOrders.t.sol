@@ -130,7 +130,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 98% of the whole price (2% protocol)
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
             _initialETHBalanceUser + (price * (ONE_HUNDRED_PERCENT_IN_BP - _minTotalFeeBp)) / ONE_HUNDRED_PERCENT_IN_BP
@@ -230,10 +230,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * price));
-        // Maker ask user receives 98% of the whole price (2% protocol)
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
-            _initialETHBalanceUser + ((price * 9_800) * (numberPurchases - 1)) / ONE_HUNDRED_PERCENT_IN_BP
+            _initialETHBalanceUser +
+                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * (numberPurchases - 1)) /
+                ONE_HUNDRED_PERCENT_IN_BP
         );
         // Affiliate user receives 20% of protocol fee
         assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
@@ -282,8 +284,11 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 98% of whole price (protocol fee)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_800) / ONE_HUNDRED_PERCENT_IN_BP);
+        // Taker ask user receives 99.5% of whole price (protocol fee)
+        assertEq(
+            weth.balanceOf(takerUser),
+            _initialWETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // Affiliate user receives 20% of protocol fee
         assertEq(weth.balanceOf(_affiliate), _initialWETHBalanceAffiliate + expectedAffiliateFeeAmount);
         // Owner receives 80% of protocol fee

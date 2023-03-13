@@ -120,8 +120,8 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
-        // Taker ask user receives 98% of the whole price (2% protocol fee)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
+        // Taker ask user receives 99.5% of the whole price (0.5% protocol fee)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.995 ether);
     }
 
     function testTokenIdsRangeERC1155(uint256 lowerBound, uint256 upperBound) public {
@@ -180,8 +180,8 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 1 ether);
-        // Taker ask user receives 98% of the whole price (2% protocol fee)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.98 ether);
+        // Taker ask user receives 99.5% of the whole price (0.5% protocol fee)
+        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 0.995 ether);
     }
 
     function testInvalidMakerBidAdditionalParameters() public {

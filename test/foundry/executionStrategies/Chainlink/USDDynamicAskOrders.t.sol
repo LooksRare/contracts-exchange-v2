@@ -157,8 +157,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(mockERC721.ownerOf(1), takerUser);
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 1 ether);
-        // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.98 ether);
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.995 ether);
     }
 
     function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {
@@ -183,8 +183,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 0.99 ether);
-        // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.9702 ether);
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.98505 ether);
     }
 
     // This tests that we can handle fractions
@@ -212,8 +212,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Taker bid user pays the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 0.5 ether);
-        // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.49 ether);
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.4975 ether);
     }
 
     function testUSDDynamicAskBidderOverpaid() public {
@@ -251,8 +251,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(mockERC721.ownerOf(1), takerUser);
         // Taker bid user pays the whole price, but without overpaying
         assertEq(address(takerUser).balance, initialETHBalanceTakerUser - 1 ether - 1);
-        // Maker ask user receives 98% of the whole price (2% protocol)
-        assertEq(address(makerUser).balance, initialETHBalanceMakerUser + 0.98 ether);
+        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(address(makerUser).balance, initialETHBalanceMakerUser + 0.995 ether);
     }
 
     function testOraclePriceNotRecentEnough() public {

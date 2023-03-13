@@ -85,7 +85,10 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         // Random recipient user receives 99.5% of the whole price and taker user receives nothing.
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser);
-        assertEq(weth.balanceOf(randomRecipientSaleProceeds), (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
+        assertEq(
+            weth.balanceOf(randomRecipientSaleProceeds),
+            (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             weth.balanceOf(_royaltyRecipient),
@@ -161,7 +164,10 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
         // Maker ask user receives 99.5% of the whole price
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
+        assertEq(
+            address(makerUser).balance,
+            _initialETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             address(_royaltyRecipient).balance,

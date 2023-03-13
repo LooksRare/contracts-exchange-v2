@@ -28,6 +28,8 @@ abstract contract TestParameters is Test {
     uint16 internal constant _maxProtocolFeeBp = uint16(200);
     uint16 internal constant _standardRoyaltyFee = uint16(0);
 
+    uint256 internal constant _sellerProceedBpWithStandardProtocolFeeBp = 9_950;
+
     // Public/Private keys for maker/taker user
     uint256 internal constant makerUserPK = 1;
     uint256 internal constant takerUserPK = 2;

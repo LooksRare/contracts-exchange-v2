@@ -112,7 +112,10 @@ contract BundleTransactionsTest is ProtocolBase {
             _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Taker ask user receives 99.5% of the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
+        assertEq(
+            weth.balanceOf(takerUser),
+            _initialWETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
@@ -231,7 +234,10 @@ contract BundleTransactionsTest is ProtocolBase {
             _initialETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Maker ask user receives 99.5% of the whole price
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
+        assertEq(
+            address(makerUser).balance,
+            _initialETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -251,7 +257,10 @@ contract BundleTransactionsTest is ProtocolBase {
             _initialWETHBalanceOwner + (price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Taker ask user receives 99.5% of the whole price (no royalties are paid)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
+        assertEq(
+            weth.balanceOf(takerUser),
+            _initialWETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
@@ -269,7 +278,10 @@ contract BundleTransactionsTest is ProtocolBase {
             _initialETHBalanceOwner + (price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Maker ask user receives 99.5% of the whole price (no royalties are paid)
-        assertEq(address(makerUser).balance, _initialETHBalanceUser + (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP);
+        assertEq(
+            address(makerUser).balance,
+            _initialETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
+        );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed

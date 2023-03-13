@@ -46,7 +46,7 @@ contract GasGriefingTest is ProtocolBase {
 
         bytes memory signature;
 
-        uint256 sellerProceed = (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP;
+        uint256 sellerProceed = (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
 
         vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: false, checkData: true});
         emit Deposit(address(looksRareProtocol), sellerProceed);
@@ -112,7 +112,7 @@ contract GasGriefingTest is ProtocolBase {
         // Other execution parameters
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
-        uint256 sellerProceedPerItem = (price * 9_950) / ONE_HUNDRED_PERCENT_IN_BP;
+        uint256 sellerProceedPerItem = (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
 
         vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: false, checkData: true});
         emit Deposit(address(looksRareProtocol), sellerProceedPerItem);

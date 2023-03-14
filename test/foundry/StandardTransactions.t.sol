@@ -505,6 +505,228 @@ contract StandardTransactionsTest is ProtocolBase {
         );
     }
 
+    /**
+     * Three ERC721 are sold through 3 taker asks in one transaction with non-atomicity.
+     */
+    function testThreeTakerAsksERC721() public {
+        uint256 price = 0.015 ether;
+        _setUpUsers();
+
+        uint256 numberPurchases = 3;
+
+        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases);
+        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
+        bytes[] memory signatures = new bytes[](numberPurchases);
+
+        for (uint256 i; i < numberPurchases; i++) {
+            // Mint asset
+            mockERC721.mint(takerUser, i);
+
+            makerBids[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                collectionType: CollectionType.ERC721,
+                orderNonce: i,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                price: price, // Fixed
+                itemId: i // (0, 1, etc.)
+            });
+
+            // Sign order
+            signatures[i] = _signMakerOrder(makerBids[i], makerUserPK);
+
+            takerAsks[i] = _genericTakerOrder();
+        }
+
+        // Other execution parameters
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(
+            takerAsks,
+            makerBids,
+            signatures,
+            merkleTrees,
+            _EMPTY_AFFILIATE,
+            false
+        );
+
+        for (uint256 i; i < numberPurchases; i++) {
+            // Maker user has received the asset
+            assertEq(mockERC721.ownerOf(i), makerUser);
+            // Verify the nonce is marked as executed
+            assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        }
+
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - (numberPurchases * price));
+        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(
+            weth.balanceOf(takerUser),
+            _initialWETHBalanceUser +
+                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * numberPurchases) /
+                ONE_HUNDRED_PERCENT_IN_BP
+        );
+    }
+
+    /**
+     * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
+     */
+    function testThreeTakerAsksERC721OneFails() public {
+        _setUpUsers();
+
+        uint256 numberPurchases = 3;
+        uint256 faultyTokenId = numberPurchases - 1;
+
+        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases);
+        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
+        bytes[] memory signatures = new bytes[](numberPurchases);
+
+        for (uint256 i; i < numberPurchases; i++) {
+            // Mint asset
+            mockERC721.mint(takerUser, i);
+
+            makerBids[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                collectionType: CollectionType.ERC721,
+                orderNonce: i,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                price: 1.4 ether, // Fixed
+                itemId: i // (0, 1, etc.)
+            });
+
+            // Sign order
+            signatures[i] = _signMakerOrder(makerBids[i], makerUserPK);
+
+            takerAsks[i] = _genericTakerOrder();
+        }
+
+        // Transfer tokenId = 2 to random user
+        address randomUser = address(55);
+        vm.prank(takerUser);
+        mockERC721.transferFrom(takerUser, randomUser, faultyTokenId);
+
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+
+        /**
+         * 1. The whole purchase fails if execution is atomic
+         */
+        {
+            // Other execution parameters
+
+            vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
+            vm.prank(takerUser);
+            looksRareProtocol.executeMultipleTakerAsks(
+                takerAsks,
+                makerBids,
+                signatures,
+                merkleTrees,
+                _EMPTY_AFFILIATE,
+                true
+            );
+        }
+
+        /**
+         * 2. The whole purchase doesn't fail if execution is not-atomic
+         */
+        {
+            vm.prank(takerUser);
+            looksRareProtocol.executeMultipleTakerAsks(
+                takerAsks,
+                makerBids,
+                signatures,
+                merkleTrees,
+                _EMPTY_AFFILIATE,
+                false
+            );
+        }
+
+        for (uint256 i; i < faultyTokenId; i++) {
+            // Maker user has received the first two assets
+            assertEq(mockERC721.ownerOf(i), makerUser);
+            // Verify the first two nonces are marked as executed
+            assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        }
+
+        // Taker user has not received the asset
+        assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
+        // Verify the nonce is NOT marked as executed
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
+        // Maker bid user pays the whole price
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - ((numberPurchases - 1) * 1.4 ether));
+        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
+        assertEq(
+            weth.balanceOf(takerUser),
+            _initialWETHBalanceUser +
+                ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberPurchases - 1)) /
+                ONE_HUNDRED_PERCENT_IN_BP
+        );
+    }
+
+    function testThreeTakerAsksERC721LengthsInvalid() public {
+        _setUpUsers();
+
+        uint256 numberPurchases = 3;
+
+        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
+        bytes[] memory signatures = new bytes[](numberPurchases);
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+
+        // 1. Invalid maker asks length
+        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases - 1);
+
+        vm.expectRevert(LengthsInvalid.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(
+            takerAsks,
+            makerBids,
+            signatures,
+            merkleTrees,
+            _EMPTY_AFFILIATE,
+            false
+        );
+
+        // 2. Invalid signatures length
+        makerBids = new OrderStructs.Maker[](numberPurchases);
+        signatures = new bytes[](numberPurchases - 1);
+
+        vm.expectRevert(LengthsInvalid.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(
+            takerAsks,
+            makerBids,
+            signatures,
+            merkleTrees,
+            _EMPTY_AFFILIATE,
+            false
+        );
+
+        // 3. Invalid merkle trees length
+        signatures = new bytes[](numberPurchases);
+        merkleTrees = new OrderStructs.MerkleTree[](numberPurchases - 1);
+
+        vm.expectRevert(LengthsInvalid.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(
+            takerAsks,
+            makerBids,
+            signatures,
+            merkleTrees,
+            _EMPTY_AFFILIATE,
+            false
+        );
+    }
+
     function _calculateExpectedFees(
         uint256 price,
         uint256 royaltyFeeBp

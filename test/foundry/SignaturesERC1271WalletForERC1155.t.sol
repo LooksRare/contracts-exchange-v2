@@ -16,7 +16,7 @@ import {MaliciousOnERC1155ReceivedTheThirdTimeERC1271Wallet} from "./utils/Malic
 import {MaliciousIsValidSignatureERC1271Wallet} from "./utils/MaliciousIsValidSignatureERC1271Wallet.sol";
 
 // Errors
-import {SignatureERC1271Invalid} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
+import {SignatureERC1271Invalid, SignatureEOAInvalid} from "@looksrare/contracts-libs/contracts/errors/SignatureCheckerErrors.sol";
 import {ERC1155SafeTransferFromFail, ERC1155SafeBatchTransferFromFail} from "@looksrare/contracts-libs/contracts/errors/LowLevelErrors.sol";
 import {SIGNATURE_INVALID_EIP1271} from "../../contracts/constants/ValidationCodeConstants.sol";
 
@@ -355,6 +355,68 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         assertEq(mockERC1155.balanceOf(address(maliciousERC1271Wallet), numberOfPurchases - 1), 0);
     }
 
+    function testExecuteMultipleTakerAsks() public {
+        ERC1271Wallet wallet = new ERC1271Wallet(address(takerUser));
+
+        (
+            OrderStructs.Maker[] memory makerBids,
+            OrderStructs.Taker[] memory takerAsks,
+            OrderStructs.MerkleTree[] memory merkleTrees,
+            bytes[] memory signatures
+        ) = _multipleTakerAsksSetup(address(wallet));
+
+        vm.startPrank(address(wallet));
+        mockERC1155.setApprovalForAll(address(transferManager), true);
+        transferManager.grantApprovals(operators);
+        vm.stopPrank();
+
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(
+            takerAsks,
+            makerBids,
+            signatures,
+            merkleTrees,
+            _EMPTY_AFFILIATE,
+            false
+        );
+
+        for (uint256 i; i < numberOfPurchases; i++) {
+            assertEq(mockERC1155.balanceOf(address(wallet), i), 1);
+        }
+    }
+
+    function testExecuteMultipleTakerAsksInvalidSignatures() public {
+        ERC1271Wallet wallet = new ERC1271Wallet(address(takerUser));
+
+        (
+            OrderStructs.Maker[] memory makerBids,
+            OrderStructs.Taker[] memory takerAsks,
+            OrderStructs.MerkleTree[] memory merkleTrees,
+            bytes[] memory signatures
+        ) = _multipleTakerAsksSetup(address(wallet));
+
+        // Signed by a different private key
+        for (uint256 i; i < signatures.length; i++) {
+            signatures[i] = _signMakerOrder(makerBids[i], takerUserPK);
+        }
+
+        vm.startPrank(address(wallet));
+        mockERC1155.setApprovalForAll(address(transferManager), true);
+        transferManager.grantApprovals(operators);
+        vm.stopPrank();
+
+        vm.expectRevert(SignatureEOAInvalid.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(
+            takerAsks,
+            makerBids,
+            signatures,
+            merkleTrees,
+            _EMPTY_AFFILIATE,
+            false
+        );
+    }
+
     function _takerBidSetup(
         address signer
     ) private returns (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) {
@@ -473,6 +535,48 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
             signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
 
             takerBids[i] = _genericTakerOrder();
+        }
+
+        // Other execution parameters
+        merkleTrees = new OrderStructs.MerkleTree[](numberOfPurchases);
+    }
+
+    function _multipleTakerAsksSetup(
+        address seller
+    )
+        private
+        returns (
+            OrderStructs.Maker[] memory makerBids,
+            OrderStructs.Taker[] memory takerAsks,
+            OrderStructs.MerkleTree[] memory merkleTrees,
+            bytes[] memory signatures
+        )
+    {
+        makerBids = new OrderStructs.Maker[](numberOfPurchases);
+        takerAsks = new OrderStructs.Taker[](numberOfPurchases);
+        signatures = new bytes[](numberOfPurchases);
+
+        for (uint256 i; i < numberOfPurchases; i++) {
+            // Mint asset
+            mockERC1155.mint(seller, i, 1);
+
+            makerBids[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                collectionType: CollectionType.ERC1155,
+                orderNonce: i,
+                collection: address(mockERC1155),
+                currency: address(weth),
+                signer: makerUser,
+                price: price,
+                itemId: i // 0, 1, etc.
+            });
+
+            signatures[i] = _signMakerOrder(makerBids[i], makerUserPK);
+
+            takerAsks[i] = _genericTakerOrder();
         }
 
         // Other execution parameters

@@ -235,6 +235,10 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         }
     }
 
+    function _boolFlagsArray() internal pure returns (bool[2] memory flags) {
+        flags[0] = true;
+    }
+
     /**
      * NOTE: It inherits from ILooksRareProtocol, so it
      *       needs to at least define the functions below.
@@ -263,4 +267,13 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         address affiliate,
         bool isAtomic
     ) external payable {}
+
+    function executeMultipleTakerAsks(
+        OrderStructs.Taker[] calldata takerAsks,
+        OrderStructs.Maker[] calldata makerBids,
+        bytes[] calldata makerSignatures,
+        OrderStructs.MerkleTree[] calldata merkleTrees,
+        address affiliate,
+        bool isAtomic
+    ) external {}
 }

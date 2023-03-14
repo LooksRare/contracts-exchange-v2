@@ -22,6 +22,8 @@ import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
+    address private constant RANDOM_USER = address(55);
+
     function setUp() public {
         _setUp();
     }
@@ -190,11 +192,9 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             takerBids[i] = _genericTakerOrder();
         }
 
-        // Transfer tokenId=2 to random user
-        address randomUser = address(55);
-
+        // Transfer tokenId=7 to random user
         vm.prank(makerUser);
-        mockERC721.transferFrom(makerUser, randomUser, faultyTokenId);
+        mockERC721.transferFrom(makerUser, RANDOM_USER, faultyTokenId);
 
         // Other execution parameters
         OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
@@ -218,14 +218,14 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         );
 
         for (uint256 i; i < faultyTokenId; i++) {
-            // Taker user has received the first two assets
+            // Taker user has received the first seven assets
             assertEq(mockERC721.ownerOf(i), takerUser);
-            // Verify the first two nonces are marked as executed
+            // Verify the first seven nonces are marked as executed
             assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
 
         // Taker user has not received the asset
-        assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
+        assertEq(mockERC721.ownerOf(faultyTokenId), RANDOM_USER);
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
@@ -249,6 +249,106 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         );
         // Only 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
+    }
+
+    /**
+     * Multiple takerAsks match makerBid orders. Protocol fee is set, no royalties, affiliate is set.
+     */
+    function testMultipleTakerAsksERC721WithAffiliateButWithoutRoyalty() public {
+        _setUpUsers();
+        _setUpAffiliate();
+
+        uint256 numberPurchases = 8;
+        uint256 faultyTokenId = numberPurchases - 1;
+
+        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases);
+        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
+        bytes[] memory signatures = new bytes[](numberPurchases);
+
+        for (uint256 i; i < numberPurchases; i++) {
+            // Mint asset
+            mockERC721.mint(takerUser, i);
+
+            makerBids[i] = _createSingleItemMakerOrder({
+                quoteType: QuoteType.Bid,
+                globalNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                collectionType: CollectionType.ERC721,
+                orderNonce: i,
+                collection: address(mockERC721),
+                currency: address(weth),
+                signer: makerUser,
+                price: price,
+                itemId: i // (0, 1, etc.)
+            });
+
+            // Sign order
+            signatures[i] = _signMakerOrder(makerBids[i], makerUserPK);
+
+            // Verify validity of maker bid order
+            _assertValidMakerOrder(makerBids[i], signatures[i]);
+
+            takerAsks[i] = _genericTakerOrder();
+        }
+
+        // Transfer tokenId=7 to random user
+        vm.prank(takerUser);
+        mockERC721.transferFrom(takerUser, RANDOM_USER, faultyTokenId);
+
+        // Other execution parameters
+        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+
+        uint256 perTradeExpectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
+
+        // Execute taker bid transaction
+        vm.prank(takerUser);
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        emit AffiliatePayment(_affiliate, address(weth), perTradeExpectedAffiliateFeeAmount);
+        looksRareProtocol.executeMultipleTakerAsks(takerAsks, makerBids, signatures, merkleTrees, _affiliate, false);
+
+        for (uint256 i; i < faultyTokenId; i++) {
+            assertEq(mockERC721.ownerOf(i), makerUser, "Maker user should have received the first seven assets");
+            assertEq(
+                looksRareProtocol.userOrderNonce(makerUser, i),
+                MAGIC_VALUE_ORDER_NONCE_EXECUTED,
+                "The first seven nonces should be marked as executed"
+            );
+        }
+
+        assertEq(mockERC721.ownerOf(faultyTokenId), RANDOM_USER, "Maker user should not have received the asset");
+        assertEq(
+            looksRareProtocol.userOrderNonce(makerUser, faultyTokenId),
+            bytes32(0),
+            "The nonce should not be marked as executed"
+        );
+        uint256 totalCost = (numberPurchases - 1) * price;
+        assertEq(
+            weth.balanceOf(makerUser),
+            _initialWETHBalanceUser - totalCost,
+            "Maker bid user should pay the whole price"
+        );
+        assertEq(
+            weth.balanceOf(takerUser),
+            _initialWETHBalanceUser +
+                (totalCost * _sellerProceedBpWithStandardProtocolFeeBp) /
+                ONE_HUNDRED_PERCENT_IN_BP,
+            "Taker ask user should receive 99.5% of the whole price (0.5% protocol)"
+        );
+        assertEq(
+            weth.balanceOf(_affiliate),
+            _initialWETHBalanceAffiliate + perTradeExpectedAffiliateFeeAmount * (numberPurchases - 1),
+            "Affiliate user should receive 20% of protocol fee"
+        );
+        assertEq(
+            weth.balanceOf(_owner),
+            _initialWETHBalanceOwner +
+                (totalCost * _minTotalFeeBp) /
+                ONE_HUNDRED_PERCENT_IN_BP -
+                perTradeExpectedAffiliateFeeAmount *
+                (numberPurchases - 1),
+            "Owner should receive 80% of protocol fee"
+        );
     }
 
     /**

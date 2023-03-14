@@ -129,18 +129,14 @@ contract LooksRareProtocol is
         address affiliate
     ) external nonReentrant {
         address currency = makerBid.currency;
-
-        // Verify whether the currency is allowed and is not ETH (address(0))
-        if (!isCurrencyAllowed[currency] || currency == address(0)) {
-            revert CurrencyInvalid();
-        }
+        _verifyMakerBidCurrency(currency);
 
         address signer = makerBid.signer;
         bytes32 orderHash = makerBid.hash();
         _verifyMerkleProofOrOrderHash(merkleTree, orderHash, makerSignature, signer);
 
         // Execute the transaction and fetch protocol fee amount
-        uint256 totalProtocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, orderHash);
+        uint256 totalProtocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
 
         // Pay protocol fee (and affiliate fee if any)
         _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, totalProtocolFeeAmount);
@@ -188,12 +184,7 @@ contract LooksRareProtocol is
         bool isAtomic
     ) external payable nonReentrant {
         uint256 length = takerBids.length;
-        if (
-            length == 0 ||
-            (makerAsks.length ^ length) | (makerSignatures.length ^ length) | (merkleTrees.length ^ length) != 0
-        ) {
-            revert LengthsInvalid();
-        }
+        _verifyMatchingLengths(makerAsks.length, length, makerSignatures.length, merkleTrees.length);
 
         // Verify whether the currency at index = 0 is allowed for trading
         address currency = makerAsks[0].currency;
@@ -293,6 +284,109 @@ contract LooksRareProtocol is
     }
 
     /**
+     * @notice This function is used to do a non-atomic matching in the context of a batch taker ask.
+     * @param takerAsk Taker ask struct
+     * @param makerBid Maker bid struct
+     * @param sender Sender address (i.e. the initial msg sender)
+     * @param orderHash Hash of the maker bid order
+     * @return protocolFeeAmount Protocol fee amount
+     * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
+     */
+    function restrictedExecuteTakerAsk(
+        OrderStructs.Taker calldata takerAsk,
+        OrderStructs.Maker calldata makerBid,
+        address sender,
+        bytes32 orderHash
+    ) external returns (uint256 protocolFeeAmount) {
+        if (msg.sender != address(this)) {
+            revert CallerInvalid();
+        }
+
+        protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, sender, orderHash);
+    }
+
+    /**
+     * @inheritdoc ILooksRareProtocol
+     */
+    function executeMultipleTakerAsks(
+        OrderStructs.Taker[] calldata takerAsks,
+        OrderStructs.Maker[] calldata makerBids,
+        bytes[] calldata makerSignatures,
+        OrderStructs.MerkleTree[] calldata merkleTrees,
+        address affiliate,
+        bool isAtomic
+    ) external nonReentrant {
+        uint256 length = takerAsks.length;
+        _verifyMatchingLengths(makerBids.length, length, makerSignatures.length, merkleTrees.length);
+
+        // Verify whether the currency at index = 0 is allowed for trading
+        address currency = makerBids[0].currency;
+        _verifyMakerBidCurrency(currency);
+
+        {
+            // If atomic, it uses the executeTakerAsk function.
+            // If not atomic, it uses a catch/revert pattern with external function.
+            if (isAtomic) {
+                for (uint256 i; i < length; ) {
+                    OrderStructs.Maker calldata makerBid = makerBids[i];
+
+                    // Verify the currency is the same
+                    if (i != 0) {
+                        if (makerBid.currency != currency) {
+                            revert CurrencyInvalid();
+                        }
+                    }
+
+                    OrderStructs.Taker calldata takerAsk = takerAsks[i];
+                    bytes32 orderHash = makerBid.hash();
+
+                    {
+                        address signer = makerBid.signer;
+                        _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
+
+                        // Execute the transaction and add protocol fee
+                        uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
+                        _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+
+                        unchecked {
+                            ++i;
+                        }
+                    }
+                }
+            } else {
+                for (uint256 i; i < length; ) {
+                    OrderStructs.Maker calldata makerBid = makerBids[i];
+
+                    // Verify the currency is the same
+                    if (i != 0) {
+                        if (makerBid.currency != currency) {
+                            revert CurrencyInvalid();
+                        }
+                    }
+
+                    OrderStructs.Taker calldata takerAsk = takerAsks[i];
+                    bytes32 orderHash = makerBid.hash();
+
+                    {
+                        address signer = makerBid.signer;
+                        _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
+
+                        try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
+                            uint256 protocolFeeAmount
+                        ) {
+                            _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+                        } catch {}
+
+                        unchecked {
+                            ++i;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * @notice This function allows the owner to update the domain separator (if possible).
      * @dev Only callable by owner. If there is a fork of the network with a new chainId,
      *      it allows the owner to reset the domain separator for the new chain id.
@@ -325,12 +419,14 @@ contract LooksRareProtocol is
      * @notice This function is internal and is used to execute a taker ask (against a maker bid).
      * @param takerAsk Taker ask order struct
      * @param makerBid Maker bid order struct
+     * @param sender Sender of the transaction (i.e. msg.sender)
      * @param orderHash Hash of the maker bid order
      * @return protocolFeeAmount Protocol fee amount
      */
     function _executeTakerAsk(
         OrderStructs.Taker calldata takerAsk,
         OrderStructs.Maker calldata makerBid,
+        address sender,
         bytes32 orderHash
     ) internal returns (uint256) {
         if (makerBid.quoteType != QuoteType.Bid) {
@@ -356,13 +452,13 @@ contract LooksRareProtocol is
             address[2] memory recipients,
             uint256[3] memory feeAmounts,
             bool isNonceInvalidated
-        ) = _executeStrategyForTakerOrder(takerAsk, makerBid, msg.sender);
+        ) = _executeStrategyForTakerOrder(takerAsk, makerBid, sender);
 
         // Order nonce status is updated
         _updateUserOrderNonce(isNonceInvalidated, signer, makerBid.orderNonce, orderHash);
 
         // Taker action goes first
-        _transferNFT(makerBid.collection, makerBid.collectionType, msg.sender, signer, itemIds, amounts);
+        _transferNFT(makerBid.collection, makerBid.collectionType, sender, signer, itemIds, amounts);
 
         // Maker action goes second
         _transferToAskRecipientAndCreatorIfAny(recipients, feeAmounts, makerBid.currency, signer);
@@ -373,7 +469,7 @@ contract LooksRareProtocol is
                 orderNonce: makerBid.orderNonce,
                 isNonceInvalidated: isNonceInvalidated
             }),
-            msg.sender,
+            sender,
             signer,
             makerBid.strategyId,
             makerBid.currency,
@@ -641,5 +737,32 @@ contract LooksRareProtocol is
         }
 
         _computeDigestAndVerify(orderHash, signature, signer);
+    }
+
+    function _verifyMatchingLengths(
+        uint256 makerOrdersLength,
+        uint256 takerOrdersLength,
+        uint256 makerSignaturesLength,
+        uint256 merkleTreesLength
+    ) private pure {
+        if (
+            makerOrdersLength == 0 ||
+            (makerOrdersLength ^ takerOrdersLength) |
+                (makerOrdersLength ^ makerSignaturesLength) |
+                (makerOrdersLength ^ merkleTreesLength) !=
+            0
+        ) {
+            revert LengthsInvalid();
+        }
+    }
+
+    /**
+     * @notice Verify whether the currency is allowed and is not ETH (address(0))
+     * @param currency Maker bid currency
+     */
+    function _verifyMakerBidCurrency(address currency) private view {
+        if (!isCurrencyAllowed[currency] || currency == address(0)) {
+            revert CurrencyInvalid();
+        }
     }
 }

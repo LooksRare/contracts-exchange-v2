@@ -117,27 +117,19 @@ contract LooksRareProtocolTest is ProtocolBase {
         takerBids[0] = takerBid;
         signatures[0] = signature;
 
-        vm.prank(takerUser);
-        vm.expectRevert(CurrencyInvalid.selector);
-        looksRareProtocol.executeMultipleTakerBids{value: price}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            true // Atomic
-        );
-
-        vm.prank(takerUser);
-        vm.expectRevert(CurrencyInvalid.selector);
-        looksRareProtocol.executeMultipleTakerBids{value: price}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            false // Non-atomic
-        );
+        bool[2] memory boolFlags = _boolFlagsArray();
+        for (uint256 i; i < boolFlags.length; i++) {
+            vm.prank(takerUser);
+            vm.expectRevert(CurrencyInvalid.selector);
+            looksRareProtocol.executeMultipleTakerBids{value: price}(
+                takerBids,
+                makerAsks,
+                signatures,
+                merkleTrees,
+                _EMPTY_AFFILIATE,
+                boolFlags[i]
+            );
+        }
     }
 
     function testCannotTradeIfETHIsUsedForMakerBid() public {

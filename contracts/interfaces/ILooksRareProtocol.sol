@@ -173,4 +173,23 @@ interface ILooksRareProtocol {
         address affiliate,
         bool isAtomic
     ) external payable;
+
+    /**
+     * @notice This function allows a user to batch sell with an array of taker asks (against an array of maker bids).
+     * @param takerAsks Array of taker ask structs
+     * @param makerBids Array of maker bid structs
+     * @param makerSignatures Array of maker signatures
+     * @param merkleTrees Array of merkle tree structs if the signature contains multiple maker orders
+     * @param affiliate Affiliate address
+     * @param isAtomic Whether the execution should be atomic
+     *        i.e. whether it should revert if 1 or more transactions fail
+     */
+    function executeMultipleTakerAsks(
+        OrderStructs.Taker[] calldata takerAsks,
+        OrderStructs.Maker[] calldata makerBids,
+        bytes[] calldata makerSignatures,
+        OrderStructs.MerkleTree[] calldata merkleTrees,
+        address affiliate,
+        bool isAtomic
+    ) external;
 }

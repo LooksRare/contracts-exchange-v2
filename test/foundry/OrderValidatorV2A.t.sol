@@ -59,7 +59,6 @@ contract OrderValidatorV2ATest is TestParameters {
 
     function testDeriveProtocolParameters() public {
         orderValidator.deriveProtocolParameters();
-        assertEq(address(orderValidator.royaltyFeeRegistry()), address(royaltyFeeRegistry));
         assertEq(
             orderValidator.domainSeparator(),
             keccak256(

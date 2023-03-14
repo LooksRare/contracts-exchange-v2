@@ -58,7 +58,11 @@ contract Deployment is Script {
             )
         });
 
-        // 2. Deploy LooksRareProtocol
+        // 2. Transfer 1 wei to LooksRareProtocol before it is deployed.
+        //    It cannot receive ETH after it is deployed.
+        payable(0x0000000000E655fAe4d56241588680F86E3b2377).transfer(1 wei);
+
+        // 3. Deploy LooksRareProtocol
         address looksRareProtocolAddress = IMMUTABLE_CREATE2_FACTORY.safeCreate2({
             salt: vm.envBytes32("LOOKSRARE_PROTOCOL_SALT"),
             initializationCode: abi.encodePacked(
@@ -72,16 +76,16 @@ contract Deployment is Script {
             )
         });
 
-        // 3. Other operations
+        // 4. Other operations
         TransferManager(transferManagerAddress).allowOperator(looksRareProtocolAddress);
         LooksRareProtocol(looksRareProtocolAddress).updateCurrencyStatus(address(0), true);
         LooksRareProtocol(looksRareProtocolAddress).updateCurrencyStatus(weth, true);
 
-        // 4. Deploy OrderValidatorV2A, this needs to happen after updateCreatorFeeManager
+        // 5. Deploy OrderValidatorV2A, this needs to happen after updateCreatorFeeManager
         //    as the order validator calls creator fee manager to retrieve the royalty fee registry
         new OrderValidatorV2A(looksRareProtocolAddress);
 
-        // 5. Deploy StrategyCollectionOffer
+        // 6. Deploy StrategyCollectionOffer
         address strategyCollectionOfferAddress = IMMUTABLE_CREATE2_FACTORY.safeCreate2({
             salt: vm.envBytes32("STRATEGY_COLLECTION_OFFER_SALT"),
             initializationCode: type(StrategyCollectionOffer).creationCode

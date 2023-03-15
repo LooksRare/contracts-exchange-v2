@@ -161,15 +161,13 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
-            makerAsks[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -184,20 +182,19 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             });
 
             // Sign order
-            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
 
             // Verify validity of maker ask order
-            _assertValidMakerOrder(makerAsks[i], signatures[i]);
-
-            takerBids[i] = _genericTakerOrder();
+            _assertValidMakerOrder(batchExecutionParameters[i].maker, batchExecutionParameters[i].makerSignature);
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
 
         // Transfer tokenId=7 to random user
         vm.prank(makerUser);
         mockERC721.transferFrom(makerUser, RANDOM_USER, faultyTokenId);
-
-        // Other execution parameters
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(
             (numberPurchases - 1) * price * _minTotalFeeBp,
@@ -207,12 +204,9 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         // Execute taker bid transaction
         vm.prank(takerUser);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit AffiliatePayment(_affiliate, makerAsks[0].currency, expectedAffiliateFeeAmount);
+        emit AffiliatePayment(_affiliate, ETH, expectedAffiliateFeeAmount);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+            batchExecutionParameters,
             _affiliate,
             false
         );

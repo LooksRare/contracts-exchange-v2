@@ -284,15 +284,13 @@ contract StandardTransactionsTest is ProtocolBase {
 
         uint256 numberPurchases = 3;
 
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
-            makerAsks[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -307,21 +305,17 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
-
-            takerBids[i] = _genericTakerOrder();
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
-
-        // Other execution parameters
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+            batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
@@ -355,15 +349,13 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 numberPurchases = 3;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
             mockERC721.mint(makerUser, i);
 
-            makerAsks[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -378,9 +370,11 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
-
-            takerBids[i] = _genericTakerOrder();
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
 
         // Transfer tokenId = 2 to random user
@@ -391,40 +385,24 @@ contract StandardTransactionsTest is ProtocolBase {
         /**
          * 1. The whole purchase fails if execution is atomic
          */
-        {
-            // Other execution parameters
-            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
-
-            vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
-            vm.prank(takerUser);
-            looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberPurchases}(
-                takerBids,
-                makerAsks,
-                signatures,
-                merkleTrees,
-                _EMPTY_AFFILIATE,
-                true
-            );
-        }
+        vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberPurchases}(
+            batchExecutionParameters,
+            _EMPTY_AFFILIATE,
+            true
+        );
 
         /**
          * 2. The whole purchase doesn't fail if execution is not-atomic
          */
-        {
-            // Other execution parameters
-            OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
-
-            vm.prank(takerUser);
-            // Execute taker bid transaction
-            looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberPurchases}(
-                takerBids,
-                makerAsks,
-                signatures,
-                merkleTrees,
-                _EMPTY_AFFILIATE,
-                false
-            );
-        }
+        vm.prank(takerUser);
+        // Execute taker bid transaction
+        looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberPurchases}(
+            batchExecutionParameters,
+            _EMPTY_AFFILIATE,
+            false
+        );
 
         for (uint256 i; i < faultyTokenId; i++) {
             // Taker user has received the first two assets
@@ -453,56 +431,10 @@ contract StandardTransactionsTest is ProtocolBase {
     function testThreeTakerBidsERC721LengthsInvalid() public {
         _setUpUsers();
 
-        uint256 price = 1.12121111111 ether;
-        uint256 numberPurchases = 3;
-
-        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
-
-        // 1. Invalid maker asks length
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases - 1);
-
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](0);
         vm.expectRevert(LengthsInvalid.selector);
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            false
-        );
-
-        // 2. Invalid signatures length
-        makerAsks = new OrderStructs.Maker[](numberPurchases);
-        signatures = new bytes[](numberPurchases - 1);
-
-        vm.expectRevert(LengthsInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            false
-        );
-
-        // 3. Invalid merkle trees length
-        signatures = new bytes[](numberPurchases);
-        merkleTrees = new OrderStructs.MerkleTree[](numberPurchases - 1);
-
-        vm.expectRevert(LengthsInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            false
-        );
+        looksRareProtocol.executeMultipleTakerBids(batchExecutionParameters, _EMPTY_AFFILIATE, false);
     }
 
     /**
@@ -645,6 +577,15 @@ contract StandardTransactionsTest is ProtocolBase {
                 ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberPurchases - 1)) /
                 ONE_HUNDRED_PERCENT_IN_BP
         );
+    }
+
+    function testThreeTakerAsksERC721LengthsInvalid() public {
+        _setUpUsers();
+
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](0);
+        vm.expectRevert(LengthsInvalid.selector);
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
     }
 
     function _calculateExpectedFees(

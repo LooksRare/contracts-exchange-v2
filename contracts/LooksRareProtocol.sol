@@ -176,23 +176,17 @@ contract LooksRareProtocol is
      * @inheritdoc ILooksRareProtocol
      */
     function executeMultipleTakerBids(
-        OrderStructs.Taker[] calldata takerBids,
-        OrderStructs.Maker[] calldata makerAsks,
-        bytes[] calldata makerSignatures,
-        OrderStructs.MerkleTree[] calldata merkleTrees,
+        BatchExecutionParameters[] calldata batchExecutionParameters,
         address affiliate,
         bool isAtomic
     ) external payable nonReentrant {
-        uint256 length = takerBids.length;
-        if (
-            length == 0 ||
-            (length ^ makerAsks.length) | (length ^ makerSignatures.length) | (length ^ merkleTrees.length) != 0
-        ) {
+        uint256 length = batchExecutionParameters.length;
+        if (length == 0) {
             revert LengthsInvalid();
         }
 
         // Verify whether the currency at index = 0 is allowed for trading
-        address currency = makerAsks[0].currency;
+        address currency = batchExecutionParameters[0].maker.currency;
         if (!isCurrencyAllowed[currency]) {
             revert CurrencyInvalid();
         }
@@ -204,7 +198,7 @@ contract LooksRareProtocol is
         // If not atomic, it uses a catch/revert pattern with external function.
         if (isAtomic) {
             for (uint256 i; i < length; ) {
-                OrderStructs.Maker calldata makerAsk = makerAsks[i];
+                OrderStructs.Maker calldata makerAsk = batchExecutionParameters[i].maker;
 
                 // Verify the currency is the same
                 if (i != 0) {
@@ -213,10 +207,15 @@ contract LooksRareProtocol is
                     }
                 }
 
-                OrderStructs.Taker calldata takerBid = takerBids[i];
+                OrderStructs.Taker calldata takerBid = batchExecutionParameters[i].taker;
                 bytes32 orderHash = makerAsk.hash();
 
-                _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
+                _verifyMerkleProofOrOrderHash(
+                    batchExecutionParameters[i].merkleTree,
+                    orderHash,
+                    batchExecutionParameters[i].makerSignature,
+                    makerAsk.signer
+                );
 
                 // Execute the transaction and add protocol fee
                 totalProtocolFeeAmount += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
@@ -227,7 +226,7 @@ contract LooksRareProtocol is
             }
         } else {
             for (uint256 i; i < length; ) {
-                OrderStructs.Maker calldata makerAsk = makerAsks[i];
+                OrderStructs.Maker calldata makerAsk = batchExecutionParameters[i].maker;
 
                 // Verify the currency is the same
                 if (i != 0) {
@@ -236,10 +235,15 @@ contract LooksRareProtocol is
                     }
                 }
 
-                OrderStructs.Taker calldata takerBid = takerBids[i];
+                OrderStructs.Taker calldata takerBid = batchExecutionParameters[i].taker;
                 bytes32 orderHash = makerAsk.hash();
 
-                _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], makerAsk.signer);
+                _verifyMerkleProofOrOrderHash(
+                    batchExecutionParameters[i].merkleTree,
+                    orderHash,
+                    batchExecutionParameters[i].makerSignature,
+                    makerAsk.signer
+                );
 
                 try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
                     uint256 protocolFeeAmount
@@ -312,11 +316,14 @@ contract LooksRareProtocol is
         address affiliate,
         bool isAtomic
     ) external nonReentrant {
+        uint256 length = batchExecutionParameters.length;
+        if (length == 0) {
+            revert LengthsInvalid();
+        }
+
         // Verify whether the currency at index = 0 is allowed for trading
         address currency = batchExecutionParameters[0].maker.currency;
         _verifyMakerBidCurrency(currency);
-
-        uint256 length = batchExecutionParameters.length;
 
         // If atomic, it uses the executeTakerAsk function.
         // If not atomic, it uses a catch/revert pattern with external function.

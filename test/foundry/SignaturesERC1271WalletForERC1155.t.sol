@@ -230,12 +230,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
     function testExecuteMultipleTakerBids() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
 
-        (
-            OrderStructs.Maker[] memory makerAsks,
-            OrderStructs.Taker[] memory takerBids,
-            OrderStructs.MerkleTree[] memory merkleTrees,
-            bytes[] memory signatures
-        ) = _multipleTakerBidsSetup(address(wallet));
+        BatchExecutionParameters[] memory batchExecutionParameters = _multipleTakerBidsSetup(address(wallet));
 
         vm.startPrank(address(wallet));
         mockERC1155.setApprovalForAll(address(transferManager), true);
@@ -244,10 +239,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+            batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
@@ -260,16 +252,14 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
     function testExecuteMultipleTakerBidsInvalidSignatures() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
 
-        (
-            OrderStructs.Maker[] memory makerAsks,
-            OrderStructs.Taker[] memory takerBids,
-            OrderStructs.MerkleTree[] memory merkleTrees,
-            bytes[] memory signatures
-        ) = _multipleTakerBidsSetup(address(wallet));
+        BatchExecutionParameters[] memory batchExecutionParameters = _multipleTakerBidsSetup(address(wallet));
 
         // Signed by a different private key
-        for (uint256 i; i < signatures.length; i++) {
-            signatures[i] = _signMakerOrder(makerAsks[i], takerUserPK);
+        for (uint256 i; i < batchExecutionParameters.length; i++) {
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                takerUserPK
+            );
         }
 
         vm.startPrank(address(wallet));
@@ -280,10 +270,7 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+            batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
@@ -296,20 +283,14 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         _setUpUser(address(maliciousERC1271Wallet));
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 
-        (
-            OrderStructs.Maker[] memory makerAsks,
-            OrderStructs.Taker[] memory takerBids,
-            OrderStructs.MerkleTree[] memory merkleTrees,
-            bytes[] memory signatures
-        ) = _multipleTakerBidsSetup(address(maliciousERC1271Wallet));
+        BatchExecutionParameters[] memory batchExecutionParameters = _multipleTakerBidsSetup(
+            address(maliciousERC1271Wallet)
+        );
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+            batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
@@ -326,24 +307,16 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
         _setUpUser(makerUser);
         maliciousERC1271Wallet.setFunctionToReenter(MaliciousERC1271Wallet.FunctionToReenter.ExecuteMultipleTakerBids);
 
-        (
-            OrderStructs.Maker[] memory makerAsks,
-            OrderStructs.Taker[] memory takerBids,
-            OrderStructs.MerkleTree[] memory merkleTrees,
-            bytes[] memory signatures
-        ) = _multipleTakerBidsSetup(makerUser);
+        BatchExecutionParameters[] memory batchExecutionParameters = _multipleTakerBidsSetup(makerUser);
 
         // Set the NFT recipient as the ERC1271 wallet to trigger onERC1155Received
         for (uint256 i; i < numberOfPurchases; i++) {
-            takerBids[i].recipient = address(maliciousERC1271Wallet);
+            batchExecutionParameters[i].taker.recipient = address(maliciousERC1271Wallet);
         }
 
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+            batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
@@ -480,24 +453,14 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
 
     function _multipleTakerBidsSetup(
         address signer
-    )
-        private
-        returns (
-            OrderStructs.Maker[] memory makerAsks,
-            OrderStructs.Taker[] memory takerBids,
-            OrderStructs.MerkleTree[] memory merkleTrees,
-            bytes[] memory signatures
-        )
-    {
-        makerAsks = new OrderStructs.Maker[](numberOfPurchases);
-        takerBids = new OrderStructs.Taker[](numberOfPurchases);
-        signatures = new bytes[](numberOfPurchases);
+    ) private returns (BatchExecutionParameters[] memory batchExecutionParameters) {
+        batchExecutionParameters = new BatchExecutionParameters[](numberOfPurchases);
 
         for (uint256 i; i < numberOfPurchases; i++) {
             // Mint asset
             mockERC1155.mint(signer, i, 1);
 
-            makerAsks[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -511,13 +474,12 @@ contract SignaturesERC1271WalletForERC1155Test is ProtocolBase {
                 itemId: i // 0, 1, etc.
             });
 
-            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
-
-            takerBids[i] = _genericTakerOrder();
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
-
-        // Other execution parameters
-        merkleTrees = new OrderStructs.MerkleTree[](numberOfPurchases);
     }
 
     function _multipleTakerAsksSetup(

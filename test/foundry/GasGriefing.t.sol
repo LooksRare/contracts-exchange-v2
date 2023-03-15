@@ -84,15 +84,13 @@ contract GasGriefingTest is ProtocolBase {
     function testThreeTakerBidsGasGriefing() public {
         uint256 numberPurchases = 3;
 
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
             mockERC721.mint(gasGriefer, i);
 
-            makerAsks[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -106,11 +104,8 @@ contract GasGriefingTest is ProtocolBase {
                 itemId: i // (0, 1, etc.)
             });
 
-            takerBids[i] = _genericTakerOrder();
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
-
-        // Other execution parameters
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         uint256 sellerProceedPerItem = (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
 
@@ -123,10 +118,7 @@ contract GasGriefingTest is ProtocolBase {
         vm.prank(takerUser);
         // Execute taker bid transaction
         looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+            batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );

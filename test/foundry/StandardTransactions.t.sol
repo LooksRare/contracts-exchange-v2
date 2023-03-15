@@ -539,21 +539,15 @@ contract StandardTransactionsTest is ProtocolBase {
         /**
          * 1. The whole purchase fails if execution is atomic
          */
-        {
-            // Other execution parameters
-
-            vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
-            vm.prank(takerUser);
-            looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, true);
-        }
+        vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, true);
 
         /**
          * 2. The whole purchase doesn't fail if execution is not-atomic
          */
-        {
-            vm.prank(takerUser);
-            looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
-        }
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
 
         for (uint256 i; i < faultyTokenId; i++) {
             // Maker user has received the first two assets

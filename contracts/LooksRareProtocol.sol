@@ -323,64 +323,58 @@ contract LooksRareProtocol is
         address currency = makerBids[0].currency;
         _verifyMakerBidCurrency(currency);
 
-        {
-            // If atomic, it uses the executeTakerAsk function.
-            // If not atomic, it uses a catch/revert pattern with external function.
-            if (isAtomic) {
-                for (uint256 i; i < length; ) {
-                    OrderStructs.Maker calldata makerBid = makerBids[i];
+        // If atomic, it uses the executeTakerAsk function.
+        // If not atomic, it uses a catch/revert pattern with external function.
+        if (isAtomic) {
+            for (uint256 i; i < length; ) {
+                OrderStructs.Maker calldata makerBid = makerBids[i];
 
-                    // Verify the currency is the same
-                    if (i != 0) {
-                        if (makerBid.currency != currency) {
-                            revert CurrencyInvalid();
-                        }
-                    }
-
-                    OrderStructs.Taker calldata takerAsk = takerAsks[i];
-                    bytes32 orderHash = makerBid.hash();
-
-                    {
-                        address signer = makerBid.signer;
-                        _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
-
-                        // Execute the transaction and add protocol fee
-                        uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
-                        _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
-
-                        unchecked {
-                            ++i;
-                        }
+                // Verify the currency is the same
+                if (i != 0) {
+                    if (makerBid.currency != currency) {
+                        revert CurrencyInvalid();
                     }
                 }
-            } else {
-                for (uint256 i; i < length; ) {
-                    OrderStructs.Maker calldata makerBid = makerBids[i];
 
-                    // Verify the currency is the same
-                    if (i != 0) {
-                        if (makerBid.currency != currency) {
-                            revert CurrencyInvalid();
-                        }
+                OrderStructs.Taker calldata takerAsk = takerAsks[i];
+                bytes32 orderHash = makerBid.hash();
+
+                address signer = makerBid.signer;
+                _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
+
+                // Execute the transaction and add protocol fee
+                uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
+                _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+
+                unchecked {
+                    ++i;
+                }
+            }
+        } else {
+            for (uint256 i; i < length; ) {
+                OrderStructs.Maker calldata makerBid = makerBids[i];
+
+                // Verify the currency is the same
+                if (i != 0) {
+                    if (makerBid.currency != currency) {
+                        revert CurrencyInvalid();
                     }
+                }
 
-                    OrderStructs.Taker calldata takerAsk = takerAsks[i];
-                    bytes32 orderHash = makerBid.hash();
+                OrderStructs.Taker calldata takerAsk = takerAsks[i];
+                bytes32 orderHash = makerBid.hash();
 
-                    {
-                        address signer = makerBid.signer;
-                        _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
+                address signer = makerBid.signer;
+                _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
 
-                        try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
-                            uint256 protocolFeeAmount
-                        ) {
-                            _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
-                        } catch {}
+                try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
+                    uint256 protocolFeeAmount
+                ) {
+                    _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+                } catch {}
 
-                        unchecked {
-                            ++i;
-                        }
-                    }
+                unchecked {
+                    ++i;
                 }
             }
         }

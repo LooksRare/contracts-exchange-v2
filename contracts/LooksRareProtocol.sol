@@ -214,16 +214,14 @@ contract LooksRareProtocol is
                 makerAsk.signer
             );
 
-            try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
-                uint256 protocolFeeAmount
-            ) {
-                totalProtocolFeeAmount += protocolFeeAmount;
-            } catch (bytes memory err) {
-                if (isAtomic) {
-                    assembly {
-                        revert(add(32, err), mload(err))
-                    }
-                }
+            if (isAtomic) {
+                totalProtocolFeeAmount += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
+            } else {
+                try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
+                    uint256 protocolFeeAmount
+                ) {
+                    totalProtocolFeeAmount += protocolFeeAmount;
+                } catch {}
             }
 
             unchecked {
@@ -320,16 +318,15 @@ contract LooksRareProtocol is
                 signer
             );
 
-            try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
-                uint256 protocolFeeAmount
-            ) {
+            if (isAtomic) {
+                uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
                 _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
-            } catch (bytes memory err) {
-                if (isAtomic) {
-                    assembly {
-                        revert(add(32, err), mload(err))
-                    }
-                }
+            } else {
+                try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
+                    uint256 protocolFeeAmount
+                ) {
+                    _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+                } catch {}
             }
 
             unchecked {

@@ -194,66 +194,40 @@ contract LooksRareProtocol is
         // Initialize protocol fee amount
         uint256 totalProtocolFeeAmount;
 
-        // If atomic, it uses the executeTakerBid function.
-        // If not atomic, it uses a catch/revert pattern with external function.
-        if (isAtomic) {
-            for (uint256 i; i < length; ) {
-                OrderStructs.Maker calldata makerAsk = batchExecutionParameters[i].maker;
+        for (uint256 i; i < length; ) {
+            OrderStructs.Maker calldata makerAsk = batchExecutionParameters[i].maker;
 
-                // Verify the currency is the same
-                if (i != 0) {
-                    if (makerAsk.currency != currency) {
-                        revert CurrencyInvalid();
-                    }
-                }
-
-                OrderStructs.Taker calldata takerBid = batchExecutionParameters[i].taker;
-                bytes32 orderHash = makerAsk.hash();
-
-                _verifyMerkleProofOrOrderHash(
-                    batchExecutionParameters[i].merkleTree,
-                    orderHash,
-                    batchExecutionParameters[i].makerSignature,
-                    makerAsk.signer
-                );
-
-                // Execute the transaction and add protocol fee
-                totalProtocolFeeAmount += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
-
-                unchecked {
-                    ++i;
+            // Verify the currency is the same
+            if (i != 0) {
+                if (makerAsk.currency != currency) {
+                    revert CurrencyInvalid();
                 }
             }
-        } else {
-            for (uint256 i; i < length; ) {
-                OrderStructs.Maker calldata makerAsk = batchExecutionParameters[i].maker;
 
-                // Verify the currency is the same
-                if (i != 0) {
-                    if (makerAsk.currency != currency) {
-                        revert CurrencyInvalid();
+            OrderStructs.Taker calldata takerBid = batchExecutionParameters[i].taker;
+            bytes32 orderHash = makerAsk.hash();
+
+            _verifyMerkleProofOrOrderHash(
+                batchExecutionParameters[i].merkleTree,
+                orderHash,
+                batchExecutionParameters[i].makerSignature,
+                makerAsk.signer
+            );
+
+            try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
+                uint256 protocolFeeAmount
+            ) {
+                totalProtocolFeeAmount += protocolFeeAmount;
+            } catch (bytes memory err) {
+                if (isAtomic) {
+                    assembly {
+                        revert(add(32, err), mload(err))
                     }
                 }
+            }
 
-                OrderStructs.Taker calldata takerBid = batchExecutionParameters[i].taker;
-                bytes32 orderHash = makerAsk.hash();
-
-                _verifyMerkleProofOrOrderHash(
-                    batchExecutionParameters[i].merkleTree,
-                    orderHash,
-                    batchExecutionParameters[i].makerSignature,
-                    makerAsk.signer
-                );
-
-                try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
-                    uint256 protocolFeeAmount
-                ) {
-                    totalProtocolFeeAmount += protocolFeeAmount;
-                } catch {}
-
-                unchecked {
-                    ++i;
-                }
+            unchecked {
+                ++i;
             }
         }
 
@@ -325,69 +299,41 @@ contract LooksRareProtocol is
         address currency = batchExecutionParameters[0].maker.currency;
         _verifyMakerBidCurrency(currency);
 
-        // If atomic, it uses the executeTakerAsk function.
-        // If not atomic, it uses a catch/revert pattern with external function.
-        if (isAtomic) {
-            for (uint256 i; i < length; ) {
-                OrderStructs.Maker calldata makerBid = batchExecutionParameters[i].maker;
+        for (uint256 i; i < length; ) {
+            OrderStructs.Maker calldata makerBid = batchExecutionParameters[i].maker;
 
-                // Verify the currency is the same
-                if (i != 0) {
-                    if (makerBid.currency != currency) {
-                        revert CurrencyInvalid();
-                    }
-                }
-
-                OrderStructs.Taker calldata takerAsk = batchExecutionParameters[i].taker;
-                bytes32 orderHash = makerBid.hash();
-
-                address signer = makerBid.signer;
-                _verifyMerkleProofOrOrderHash(
-                    batchExecutionParameters[i].merkleTree,
-                    orderHash,
-                    batchExecutionParameters[i].makerSignature,
-                    signer
-                );
-
-                // Execute the transaction and add protocol fee
-                uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
-                _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
-
-                unchecked {
-                    ++i;
+            // Verify the currency is the same
+            if (i != 0) {
+                if (makerBid.currency != currency) {
+                    revert CurrencyInvalid();
                 }
             }
-        } else {
-            for (uint256 i; i < length; ) {
-                OrderStructs.Maker calldata makerBid = batchExecutionParameters[i].maker;
 
-                // Verify the currency is the same
-                if (i != 0) {
-                    if (makerBid.currency != currency) {
-                        revert CurrencyInvalid();
+            OrderStructs.Taker calldata takerAsk = batchExecutionParameters[i].taker;
+            bytes32 orderHash = makerBid.hash();
+
+            address signer = makerBid.signer;
+            _verifyMerkleProofOrOrderHash(
+                batchExecutionParameters[i].merkleTree,
+                orderHash,
+                batchExecutionParameters[i].makerSignature,
+                signer
+            );
+
+            try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
+                uint256 protocolFeeAmount
+            ) {
+                _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+            } catch (bytes memory err) {
+                if (isAtomic) {
+                    assembly {
+                        revert(add(32, err), mload(err))
                     }
                 }
+            }
 
-                OrderStructs.Taker calldata takerAsk = batchExecutionParameters[i].taker;
-                bytes32 orderHash = makerBid.hash();
-
-                address signer = makerBid.signer;
-                _verifyMerkleProofOrOrderHash(
-                    batchExecutionParameters[i].merkleTree,
-                    orderHash,
-                    batchExecutionParameters[i].makerSignature,
-                    signer
-                );
-
-                try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
-                    uint256 protocolFeeAmount
-                ) {
-                    _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
-                } catch {}
-
-                unchecked {
-                    ++i;
-                }
+            unchecked {
+                ++i;
             }
         }
     }

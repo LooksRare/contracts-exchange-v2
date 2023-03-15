@@ -76,7 +76,7 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
 
         uint256 numberPurchases = 2;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = _batchExecutionSetUp(
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             price,
             numberPurchases,
             QuoteType.Bid

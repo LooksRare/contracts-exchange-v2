@@ -198,7 +198,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         takerOrder = OrderStructs.Taker(takerUser, abi.encode());
     }
 
-    function _batchExecutionSetUp(
+    function _batchERC721ExecutionSetUp(
         uint256 price,
         uint256 numberPurchases,
         QuoteType quoteType

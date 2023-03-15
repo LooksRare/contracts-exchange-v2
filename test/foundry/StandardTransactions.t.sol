@@ -284,7 +284,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         uint256 numberPurchases = 3;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = _batchExecutionSetUp(
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             price,
             numberPurchases,
             QuoteType.Ask
@@ -327,7 +327,7 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 numberPurchases = 3;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = _batchExecutionSetUp(
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             1.4 ether,
             numberPurchases,
             QuoteType.Ask
@@ -401,7 +401,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         uint256 numberPurchases = 3;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = _batchExecutionSetUp(
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             price,
             numberPurchases,
             QuoteType.Bid
@@ -438,7 +438,7 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 numberPurchases = 3;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = _batchExecutionSetUp(
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             1.4 ether,
             numberPurchases,
             QuoteType.Bid

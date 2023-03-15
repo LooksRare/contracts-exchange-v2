@@ -217,7 +217,7 @@ contract LooksRareProtocol is
             if (isAtomic) {
                 totalProtocolFeeAmount += _executeTakerBid(takerBid, makerAsk, msg.sender, orderHash);
             } else {
-                try this.restrictedExecuteTakerBid(takerBid, makerAsk, msg.sender, orderHash) returns (
+                try this.restrictedExecuteTakerOrder(takerBid, makerAsk, msg.sender, orderHash) returns (
                     uint256 protocolFeeAmount
                 ) {
                     totalProtocolFeeAmount += protocolFeeAmount;
@@ -238,40 +238,28 @@ contract LooksRareProtocol is
 
     /**
      * @notice This function is used to do a non-atomic matching in the context of a batch taker bid.
-     * @param takerBid Taker bid struct
-     * @param makerAsk Maker ask struct
+     * @param takerOrder Taker order struct
+     * @param makerOrder Maker order struct
      * @param sender Sender address (i.e. the initial msg sender)
      * @param orderHash Hash of the maker ask order
      * @return protocolFeeAmount Protocol fee amount
      * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
      */
-    function restrictedExecuteTakerBid(
-        OrderStructs.Taker calldata takerBid,
-        OrderStructs.Maker calldata makerAsk,
+    function restrictedExecuteTakerOrder(
+        OrderStructs.Taker calldata takerOrder,
+        OrderStructs.Maker calldata makerOrder,
         address sender,
         bytes32 orderHash
     ) external returns (uint256 protocolFeeAmount) {
-        _verifyMsgSenderToBeSelf();
-        protocolFeeAmount = _executeTakerBid(takerBid, makerAsk, sender, orderHash);
-    }
+        if (msg.sender != address(this)) {
+            revert CallerInvalid();
+        }
 
-    /**
-     * @notice This function is used to do a non-atomic matching in the context of a batch taker ask.
-     * @param takerAsk Taker ask struct
-     * @param makerBid Maker bid struct
-     * @param sender Sender address (i.e. the initial msg sender)
-     * @param orderHash Hash of the maker bid order
-     * @return protocolFeeAmount Protocol fee amount
-     * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
-     */
-    function restrictedExecuteTakerAsk(
-        OrderStructs.Taker calldata takerAsk,
-        OrderStructs.Maker calldata makerBid,
-        address sender,
-        bytes32 orderHash
-    ) external returns (uint256 protocolFeeAmount) {
-        _verifyMsgSenderToBeSelf();
-        protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, sender, orderHash);
+        if (makerOrder.quoteType == QuoteType.Bid) {
+            protocolFeeAmount = _executeTakerAsk(takerOrder, makerOrder, sender, orderHash);
+        } else if (makerOrder.quoteType == QuoteType.Ask) {
+            protocolFeeAmount = _executeTakerBid(takerOrder, makerOrder, sender, orderHash);
+        }
     }
 
     /**
@@ -316,7 +304,7 @@ contract LooksRareProtocol is
                 uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
                 _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
             } else {
-                try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
+                try this.restrictedExecuteTakerOrder(takerAsk, makerBid, msg.sender, orderHash) returns (
                     uint256 protocolFeeAmount
                 ) {
                     _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
@@ -689,12 +677,6 @@ contract LooksRareProtocol is
     function _verifyMakerBidCurrency(address currency) private view {
         if (!isCurrencyAllowed[currency] || currency == address(0)) {
             revert CurrencyInvalid();
-        }
-    }
-
-    function _verifyMsgSenderToBeSelf() private view {
-        if (msg.sender != address(this)) {
-            revert CallerInvalid();
         }
     }
 }

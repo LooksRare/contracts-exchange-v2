@@ -55,7 +55,7 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
 
         vm.prank(takerUser);
         vm.expectRevert(CallerInvalid.selector);
-        looksRareProtocol.restrictedExecuteTakerAsk(takerAsk, makerBid, takerUser, _computeOrderHash(makerBid));
+        looksRareProtocol.restrictedExecuteTakerOrder(takerAsk, makerBid, takerUser, _computeOrderHash(makerBid));
     }
 
     /**

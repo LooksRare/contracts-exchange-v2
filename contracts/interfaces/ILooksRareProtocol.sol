@@ -22,6 +22,13 @@ interface ILooksRareProtocol {
         bool isNonceInvalidated;
     }
 
+    /**
+     * @notice This struct is used in executeMultipleTakerAsks and executeMultipleTakerBids.
+     * @param taker Taker order
+     * @param maker Maker order
+     * @param makerSignature Maker order signature
+     * @param merkleTree Maker order merkle tree (if any)
+     */
     struct BatchExecutionParameters {
         OrderStructs.Taker taker;
         OrderStructs.Maker maker;

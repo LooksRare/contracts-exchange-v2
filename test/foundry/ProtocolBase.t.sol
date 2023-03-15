@@ -200,13 +200,13 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     function _batchERC721ExecutionSetUp(
         uint256 price,
-        uint256 numberPurchases,
+        uint256 numberOfPurhcases,
         QuoteType quoteType
     ) internal returns (BatchExecutionParameters[] memory batchExecutionParameters) {
-        batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
+        batchExecutionParameters = new BatchExecutionParameters[](numberOfPurhcases);
         address currency;
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurhcases; i++) {
             // Mint asset
             if (quoteType == QuoteType.Bid) {
                 mockERC721.mint(takerUser, i);

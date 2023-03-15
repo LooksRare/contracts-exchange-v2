@@ -159,36 +159,11 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
-
-        for (uint256 i; i < numberPurchases; i++) {
-            // Mint asset
-            mockERC721.mint(makerUser, i);
-
-            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
-                quoteType: QuoteType.Ask,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                collectionType: CollectionType.ERC721,
-                orderNonce: i,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                price: price,
-                itemId: i // (0, 1, etc.)
-            });
-
-            // Sign order
-            batchExecutionParameters[i].makerSignature = _signMakerOrder(
-                batchExecutionParameters[i].maker,
-                makerUserPK
-            );
-
-            // Verify validity of maker ask order
-            _assertValidMakerOrder(batchExecutionParameters[i].maker, batchExecutionParameters[i].makerSignature);
-            batchExecutionParameters[i].taker = _genericTakerOrder();
-        }
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchExecutionSetUp(
+            price,
+            numberPurchases,
+            QuoteType.Ask
+        );
 
         // Transfer tokenId=7 to random user
         vm.prank(makerUser);
@@ -253,37 +228,11 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
-
-        for (uint256 i; i < numberPurchases; i++) {
-            // Mint asset
-            mockERC721.mint(takerUser, i);
-
-            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
-                quoteType: QuoteType.Bid,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                collectionType: CollectionType.ERC721,
-                orderNonce: i,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                price: price,
-                itemId: i // (0, 1, etc.)
-            });
-
-            // Sign order
-            batchExecutionParameters[i].makerSignature = _signMakerOrder(
-                batchExecutionParameters[i].maker,
-                makerUserPK
-            );
-
-            // Verify validity of maker bid order
-            _assertValidMakerOrder(batchExecutionParameters[i].maker, batchExecutionParameters[i].makerSignature);
-
-            batchExecutionParameters[i].taker = _genericTakerOrder();
-        }
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchExecutionSetUp(
+            price,
+            numberPurchases,
+            QuoteType.Bid
+        );
 
         // Transfer tokenId=7 to random user
         vm.prank(takerUser);

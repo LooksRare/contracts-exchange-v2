@@ -76,38 +76,12 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
 
         uint256 numberPurchases = 2;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
-
-        for (uint256 i; i < numberPurchases; i++) {
-            // Mint asset
-            mockERC721.mint(takerUser, i);
-
-            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
-                quoteType: QuoteType.Bid,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                collectionType: CollectionType.ERC721,
-                orderNonce: i,
-                collection: address(mockERC721),
-                currency: address(weth),
-                signer: makerUser,
-                price: price, // Fixed
-                itemId: i // (0, 1, etc.)
-            });
-
-            if (i == 1) {
-                batchExecutionParameters[i].maker.currency = address(mockERC20);
-            }
-
-            // Sign order
-            batchExecutionParameters[i].makerSignature = _signMakerOrder(
-                batchExecutionParameters[i].maker,
-                makerUserPK
-            );
-
-            batchExecutionParameters[i].taker = _genericTakerOrder();
-        }
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchExecutionSetUp(
+            price,
+            numberPurchases,
+            QuoteType.Bid
+        );
+        batchExecutionParameters[1].maker.currency = address(mockERC20);
 
         vm.prank(takerUser);
         vm.expectRevert(CurrencyInvalid.selector);

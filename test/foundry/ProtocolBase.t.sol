@@ -7,6 +7,10 @@ import {WETH} from "solmate/src/tokens/WETH.sol";
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
+// Enums
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
+
 // Core contracts
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
@@ -192,6 +196,48 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
 
     function _genericTakerOrder() internal pure returns (OrderStructs.Taker memory takerOrder) {
         takerOrder = OrderStructs.Taker(takerUser, abi.encode());
+    }
+
+    function _batchExecutionSetUp(
+        uint256 price,
+        uint256 numberPurchases,
+        QuoteType quoteType
+    ) internal returns (BatchExecutionParameters[] memory batchExecutionParameters) {
+        batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
+        address currency;
+
+        for (uint256 i; i < numberPurchases; i++) {
+            // Mint asset
+            if (quoteType == QuoteType.Bid) {
+                mockERC721.mint(takerUser, i);
+                currency = address(weth);
+            } else if (quoteType == QuoteType.Ask) {
+                mockERC721.mint(makerUser, i);
+            }
+
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
+                quoteType: quoteType,
+                globalNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                collectionType: CollectionType.ERC721,
+                orderNonce: i,
+                collection: address(mockERC721),
+                currency: currency,
+                signer: makerUser,
+                price: price,
+                itemId: i // (0, 1, etc.)
+            });
+
+            // Sign order
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
+            batchExecutionParameters[i].taker = _genericTakerOrder();
+
+            _assertValidMakerOrder(batchExecutionParameters[i].maker, batchExecutionParameters[i].makerSignature);
+        }
     }
 
     function _addStrategy(address strategy, bytes4 selector, bool isMakerBid) internal {

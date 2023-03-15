@@ -514,15 +514,13 @@ contract StandardTransactionsTest is ProtocolBase {
 
         uint256 numberPurchases = 3;
 
-        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
             mockERC721.mint(takerUser, i);
 
-            makerBids[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Bid,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -537,24 +535,16 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMakerOrder(makerBids[i], makerUserPK);
-
-            takerAsks[i] = _genericTakerOrder();
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
-
-        // Other execution parameters
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerAsks(
-            takerAsks,
-            makerBids,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            false
-        );
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Maker user has received the asset
@@ -583,15 +573,13 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 numberPurchases = 3;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
             mockERC721.mint(takerUser, i);
 
-            makerBids[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Bid,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -606,17 +594,17 @@ contract StandardTransactionsTest is ProtocolBase {
             });
 
             // Sign order
-            signatures[i] = _signMakerOrder(makerBids[i], makerUserPK);
-
-            takerAsks[i] = _genericTakerOrder();
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
 
         // Transfer tokenId = 2 to random user
         address randomUser = address(55);
         vm.prank(takerUser);
         mockERC721.transferFrom(takerUser, randomUser, faultyTokenId);
-
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         /**
          * 1. The whole purchase fails if execution is atomic
@@ -626,14 +614,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
             vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
             vm.prank(takerUser);
-            looksRareProtocol.executeMultipleTakerAsks(
-                takerAsks,
-                makerBids,
-                signatures,
-                merkleTrees,
-                _EMPTY_AFFILIATE,
-                true
-            );
+            looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, true);
         }
 
         /**
@@ -641,14 +622,7 @@ contract StandardTransactionsTest is ProtocolBase {
          */
         {
             vm.prank(takerUser);
-            looksRareProtocol.executeMultipleTakerAsks(
-                takerAsks,
-                makerBids,
-                signatures,
-                merkleTrees,
-                _EMPTY_AFFILIATE,
-                false
-            );
+            looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
         }
 
         for (uint256 i; i < faultyTokenId; i++) {
@@ -670,60 +644,6 @@ contract StandardTransactionsTest is ProtocolBase {
             _initialWETHBalanceUser +
                 ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberPurchases - 1)) /
                 ONE_HUNDRED_PERCENT_IN_BP
-        );
-    }
-
-    function testThreeTakerAsksERC721LengthsInvalid() public {
-        _setUpUsers();
-
-        uint256 numberPurchases = 3;
-
-        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
-
-        // 1. Invalid maker asks length
-        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases - 1);
-
-        vm.expectRevert(LengthsInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerAsks(
-            takerAsks,
-            makerBids,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            false
-        );
-
-        // 2. Invalid signatures length
-        makerBids = new OrderStructs.Maker[](numberPurchases);
-        signatures = new bytes[](numberPurchases - 1);
-
-        vm.expectRevert(LengthsInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerAsks(
-            takerAsks,
-            makerBids,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            false
-        );
-
-        // 3. Invalid merkle trees length
-        signatures = new bytes[](numberPurchases);
-        merkleTrees = new OrderStructs.MerkleTree[](numberPurchases - 1);
-
-        vm.expectRevert(LengthsInvalid.selector);
-        vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerAsks(
-            takerAsks,
-            makerBids,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            false
         );
     }
 

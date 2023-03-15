@@ -9,6 +9,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Interfaces
 import {IAffiliateManager} from "../../contracts/interfaces/IAffiliateManager.sol";
+import {ILooksRareProtocol} from "../../contracts/interfaces/ILooksRareProtocol.sol";
 
 // Mocks and other tests
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -260,15 +261,13 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         uint256 numberPurchases = 8;
         uint256 faultyTokenId = numberPurchases - 1;
 
-        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
             mockERC721.mint(takerUser, i);
 
-            makerBids[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Bid,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -283,20 +282,20 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             });
 
             // Sign order
-            signatures[i] = _signMakerOrder(makerBids[i], makerUserPK);
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
 
             // Verify validity of maker bid order
-            _assertValidMakerOrder(makerBids[i], signatures[i]);
+            _assertValidMakerOrder(batchExecutionParameters[i].maker, batchExecutionParameters[i].makerSignature);
 
-            takerAsks[i] = _genericTakerOrder();
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
 
         // Transfer tokenId=7 to random user
         vm.prank(takerUser);
         mockERC721.transferFrom(takerUser, RANDOM_USER, faultyTokenId);
-
-        // Other execution parameters
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         uint256 perTradeExpectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
 
@@ -304,7 +303,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         vm.prank(takerUser);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit AffiliatePayment(_affiliate, address(weth), perTradeExpectedAffiliateFeeAmount);
-        looksRareProtocol.executeMultipleTakerAsks(takerAsks, makerBids, signatures, merkleTrees, _affiliate, false);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _affiliate, false);
 
         for (uint256 i; i < faultyTokenId; i++) {
             assertEq(mockERC721.ownerOf(i), makerUser, "Maker user should have received the first seven assets");

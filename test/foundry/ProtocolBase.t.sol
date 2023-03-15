@@ -269,10 +269,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     ) external payable {}
 
     function executeMultipleTakerAsks(
-        OrderStructs.Taker[] calldata takerAsks,
-        OrderStructs.Maker[] calldata makerBids,
-        bytes[] calldata makerSignatures,
-        OrderStructs.MerkleTree[] calldata merkleTrees,
+        BatchExecutionParameters[] calldata batchExecutionParameters,
         address affiliate,
         bool isAtomic
     ) external {}

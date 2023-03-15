@@ -76,15 +76,13 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
 
         uint256 numberPurchases = 2;
 
-        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
 
         for (uint256 i; i < numberPurchases; i++) {
             // Mint asset
             mockERC721.mint(takerUser, i);
 
-            makerBids[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Bid,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -99,28 +97,21 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
             });
 
             if (i == 1) {
-                makerBids[i].currency = address(mockERC20);
+                batchExecutionParameters[i].maker.currency = address(mockERC20);
             }
 
             // Sign order
-            signatures[i] = _signMakerOrder(makerBids[i], makerUserPK);
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
 
-            takerAsks[i] = _genericTakerOrder();
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
-
-        // Other execution parameters
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         vm.prank(takerUser);
         vm.expectRevert(CurrencyInvalid.selector);
-        looksRareProtocol.executeMultipleTakerAsks(
-            takerAsks,
-            makerBids,
-            signatures,
-            merkleTrees,
-            _EMPTY_AFFILIATE,
-            isAtomic
-        );
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, isAtomic);
     }
 
     function _testCannotTradeIfCurrencyInvalid(address currency) private {
@@ -140,27 +131,17 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
         // Verify validity of maker ask order
         _assertMakerOrderReturnValidationCode(makerBid, signature, CURRENCY_NOT_ALLOWED);
 
-        OrderStructs.Maker[] memory makerBids = new OrderStructs.Maker[](1);
-        OrderStructs.Taker[] memory takerAsks = new OrderStructs.Taker[](1);
-        bytes[] memory signatures = new bytes[](1);
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](1);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](1);
 
-        makerBids[0] = makerBid;
-        takerAsks[0] = takerAsk;
-        signatures[0] = signature;
+        batchExecutionParameters[0].maker = makerBid;
+        batchExecutionParameters[0].taker = takerAsk;
+        batchExecutionParameters[0].makerSignature = signature;
 
         bool[2] memory boolFlags = _boolFlagsArray();
         for (uint256 i; i < boolFlags.length; i++) {
             vm.prank(takerUser);
             vm.expectRevert(CurrencyInvalid.selector);
-            looksRareProtocol.executeMultipleTakerAsks(
-                takerAsks,
-                makerBids,
-                signatures,
-                merkleTrees,
-                _EMPTY_AFFILIATE,
-                boolFlags[i]
-            );
+            looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, boolFlags[i]);
         }
     }
 }

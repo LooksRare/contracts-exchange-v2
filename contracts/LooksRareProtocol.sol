@@ -184,7 +184,12 @@ contract LooksRareProtocol is
         bool isAtomic
     ) external payable nonReentrant {
         uint256 length = takerBids.length;
-        _verifyMatchingLengths(makerAsks.length, length, makerSignatures.length, merkleTrees.length);
+        if (
+            length == 0 ||
+            (length ^ makerAsks.length) | (length ^ makerSignatures.length) | (length ^ merkleTrees.length) != 0
+        ) {
+            revert LengthsInvalid();
+        }
 
         // Verify whether the currency at index = 0 is allowed for trading
         address currency = makerAsks[0].currency;
@@ -303,25 +308,21 @@ contract LooksRareProtocol is
      * @inheritdoc ILooksRareProtocol
      */
     function executeMultipleTakerAsks(
-        OrderStructs.Taker[] calldata takerAsks,
-        OrderStructs.Maker[] calldata makerBids,
-        bytes[] calldata makerSignatures,
-        OrderStructs.MerkleTree[] calldata merkleTrees,
+        BatchExecutionParameters[] calldata batchExecutionParameters,
         address affiliate,
         bool isAtomic
     ) external nonReentrant {
-        uint256 length = takerAsks.length;
-        _verifyMatchingLengths(makerBids.length, length, makerSignatures.length, merkleTrees.length);
-
         // Verify whether the currency at index = 0 is allowed for trading
-        address currency = makerBids[0].currency;
+        address currency = batchExecutionParameters[0].maker.currency;
         _verifyMakerBidCurrency(currency);
+
+        uint256 length = batchExecutionParameters.length;
 
         // If atomic, it uses the executeTakerAsk function.
         // If not atomic, it uses a catch/revert pattern with external function.
         if (isAtomic) {
             for (uint256 i; i < length; ) {
-                OrderStructs.Maker calldata makerBid = makerBids[i];
+                OrderStructs.Maker calldata makerBid = batchExecutionParameters[i].maker;
 
                 // Verify the currency is the same
                 if (i != 0) {
@@ -330,11 +331,16 @@ contract LooksRareProtocol is
                     }
                 }
 
-                OrderStructs.Taker calldata takerAsk = takerAsks[i];
+                OrderStructs.Taker calldata takerAsk = batchExecutionParameters[i].taker;
                 bytes32 orderHash = makerBid.hash();
 
                 address signer = makerBid.signer;
-                _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
+                _verifyMerkleProofOrOrderHash(
+                    batchExecutionParameters[i].merkleTree,
+                    orderHash,
+                    batchExecutionParameters[i].makerSignature,
+                    signer
+                );
 
                 // Execute the transaction and add protocol fee
                 uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
@@ -346,7 +352,7 @@ contract LooksRareProtocol is
             }
         } else {
             for (uint256 i; i < length; ) {
-                OrderStructs.Maker calldata makerBid = makerBids[i];
+                OrderStructs.Maker calldata makerBid = batchExecutionParameters[i].maker;
 
                 // Verify the currency is the same
                 if (i != 0) {
@@ -355,11 +361,16 @@ contract LooksRareProtocol is
                     }
                 }
 
-                OrderStructs.Taker calldata takerAsk = takerAsks[i];
+                OrderStructs.Taker calldata takerAsk = batchExecutionParameters[i].taker;
                 bytes32 orderHash = makerBid.hash();
 
                 address signer = makerBid.signer;
-                _verifyMerkleProofOrOrderHash(merkleTrees[i], orderHash, makerSignatures[i], signer);
+                _verifyMerkleProofOrOrderHash(
+                    batchExecutionParameters[i].merkleTree,
+                    orderHash,
+                    batchExecutionParameters[i].makerSignature,
+                    signer
+                );
 
                 try this.restrictedExecuteTakerAsk(takerAsk, makerBid, msg.sender, orderHash) returns (
                     uint256 protocolFeeAmount
@@ -725,23 +736,6 @@ contract LooksRareProtocol is
         }
 
         _computeDigestAndVerify(orderHash, signature, signer);
-    }
-
-    function _verifyMatchingLengths(
-        uint256 makerOrdersLength,
-        uint256 takerOrdersLength,
-        uint256 makerSignaturesLength,
-        uint256 merkleTreesLength
-    ) private pure {
-        if (
-            makerOrdersLength == 0 ||
-            (makerOrdersLength ^ takerOrdersLength) |
-                (makerOrdersLength ^ makerSignaturesLength) |
-                (makerOrdersLength ^ merkleTreesLength) !=
-            0
-        ) {
-            revert LengthsInvalid();
-        }
     }
 
     /**

@@ -58,13 +58,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         looksRareProtocol.updateAffiliateController(_owner);
 
         // 2. NewAffiliateProgramStatus
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit NewAffiliateProgramStatus(true);
-        looksRareProtocol.updateAffiliateProgramStatus(true);
-
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit NewAffiliateProgramStatus(false);
-        looksRareProtocol.updateAffiliateProgramStatus(false);
+        bool[2] memory boolFlags = _boolFlagsArray();
+        for (uint256 i; i < boolFlags.length; i++) {
+            vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+            emit NewAffiliateProgramStatus(boolFlags[i]);
+            looksRareProtocol.updateAffiliateProgramStatus(boolFlags[i]);
+        }
 
         // 3. NewAffiliateRate
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});

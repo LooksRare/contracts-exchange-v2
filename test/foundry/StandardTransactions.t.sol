@@ -378,9 +378,8 @@ contract StandardTransactionsTest is ProtocolBase {
         }
 
         // Transfer tokenId = 2 to random user
-        address randomUser = address(55);
         vm.prank(makerUser);
-        mockERC721.transferFrom(makerUser, randomUser, faultyTokenId);
+        mockERC721.transferFrom(makerUser, _randomUser, faultyTokenId);
 
         /**
          * 1. The whole purchase fails if execution is atomic
@@ -412,7 +411,7 @@ contract StandardTransactionsTest is ProtocolBase {
         }
 
         // Taker user has not received the asset
-        assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
+        assertEq(mockERC721.ownerOf(faultyTokenId), _randomUser);
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
@@ -534,9 +533,8 @@ contract StandardTransactionsTest is ProtocolBase {
         }
 
         // Transfer tokenId = 2 to random user
-        address randomUser = address(55);
         vm.prank(takerUser);
-        mockERC721.transferFrom(takerUser, randomUser, faultyTokenId);
+        mockERC721.transferFrom(takerUser, _randomUser, faultyTokenId);
 
         /**
          * 1. The whole purchase fails if execution is atomic
@@ -565,7 +563,7 @@ contract StandardTransactionsTest is ProtocolBase {
         }
 
         // Taker user has not received the asset
-        assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
+        assertEq(mockERC721.ownerOf(faultyTokenId), _randomUser);
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Maker bid user pays the whole price

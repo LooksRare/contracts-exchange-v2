@@ -23,8 +23,6 @@ import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
-    address private constant RANDOM_USER = address(55);
-
     function setUp() public {
         _setUp();
     }
@@ -194,7 +192,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Transfer tokenId=7 to random user
         vm.prank(makerUser);
-        mockERC721.transferFrom(makerUser, RANDOM_USER, faultyTokenId);
+        mockERC721.transferFrom(makerUser, _randomUser, faultyTokenId);
 
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(
             (numberPurchases - 1) * price * _minTotalFeeBp,
@@ -219,7 +217,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         }
 
         // Taker user has not received the asset
-        assertEq(mockERC721.ownerOf(faultyTokenId), RANDOM_USER);
+        assertEq(mockERC721.ownerOf(faultyTokenId), _randomUser);
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
@@ -289,7 +287,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Transfer tokenId=7 to random user
         vm.prank(takerUser);
-        mockERC721.transferFrom(takerUser, RANDOM_USER, faultyTokenId);
+        mockERC721.transferFrom(takerUser, _randomUser, faultyTokenId);
 
         uint256 perTradeExpectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
 
@@ -308,7 +306,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             );
         }
 
-        assertEq(mockERC721.ownerOf(faultyTokenId), RANDOM_USER, "Maker user should not have received the asset");
+        assertEq(mockERC721.ownerOf(faultyTokenId), _randomUser, "Maker user should not have received the asset");
         assertEq(
             looksRareProtocol.userOrderNonce(makerUser, faultyTokenId),
             bytes32(0),

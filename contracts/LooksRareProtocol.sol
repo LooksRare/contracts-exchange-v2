@@ -251,10 +251,7 @@ contract LooksRareProtocol is
         address sender,
         bytes32 orderHash
     ) external returns (uint256 protocolFeeAmount) {
-        if (msg.sender != address(this)) {
-            revert CallerInvalid();
-        }
-
+        _verifyMsgSenderToBeSelf();
         protocolFeeAmount = _executeTakerBid(takerBid, makerAsk, sender, orderHash);
     }
 
@@ -273,10 +270,7 @@ contract LooksRareProtocol is
         address sender,
         bytes32 orderHash
     ) external returns (uint256 protocolFeeAmount) {
-        if (msg.sender != address(this)) {
-            revert CallerInvalid();
-        }
-
+        _verifyMsgSenderToBeSelf();
         protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, sender, orderHash);
     }
 
@@ -695,6 +689,12 @@ contract LooksRareProtocol is
     function _verifyMakerBidCurrency(address currency) private view {
         if (!isCurrencyAllowed[currency] || currency == address(0)) {
             revert CurrencyInvalid();
+        }
+    }
+
+    function _verifyMsgSenderToBeSelf() private view {
+        if (msg.sender != address(this)) {
+            revert CallerInvalid();
         }
     }
 }

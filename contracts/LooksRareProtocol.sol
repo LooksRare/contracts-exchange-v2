@@ -237,32 +237,6 @@ contract LooksRareProtocol is
     }
 
     /**
-     * @notice This function is used to do a non-atomic matching in the context of a batch taker bid.
-     * @param takerOrder Taker order struct
-     * @param makerOrder Maker order struct
-     * @param sender Sender address (i.e. the initial msg sender)
-     * @param orderHash Hash of the maker ask order
-     * @return protocolFeeAmount Protocol fee amount
-     * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
-     */
-    function restrictedExecuteTakerOrder(
-        OrderStructs.Taker calldata takerOrder,
-        OrderStructs.Maker calldata makerOrder,
-        address sender,
-        bytes32 orderHash
-    ) external returns (uint256 protocolFeeAmount) {
-        if (msg.sender != address(this)) {
-            revert CallerInvalid();
-        }
-
-        if (makerOrder.quoteType == QuoteType.Bid) {
-            protocolFeeAmount = _executeTakerAsk(takerOrder, makerOrder, sender, orderHash);
-        } else if (makerOrder.quoteType == QuoteType.Ask) {
-            protocolFeeAmount = _executeTakerBid(takerOrder, makerOrder, sender, orderHash);
-        }
-    }
-
-    /**
      * @inheritdoc ILooksRareProtocol
      */
     function executeMultipleTakerAsks(
@@ -314,6 +288,32 @@ contract LooksRareProtocol is
             unchecked {
                 ++i;
             }
+        }
+    }
+
+    /**
+     * @notice This function is used to do a non-atomic matching in the context of a batch taker bid.
+     * @param takerOrder Taker order struct
+     * @param makerOrder Maker order struct
+     * @param sender Sender address (i.e. the initial msg sender)
+     * @param orderHash Hash of the maker ask order
+     * @return protocolFeeAmount Protocol fee amount
+     * @dev This function is only callable by this contract. It is used for non-atomic batch order matching.
+     */
+    function restrictedExecuteTakerOrder(
+        OrderStructs.Taker calldata takerOrder,
+        OrderStructs.Maker calldata makerOrder,
+        address sender,
+        bytes32 orderHash
+    ) external returns (uint256 protocolFeeAmount) {
+        if (msg.sender != address(this)) {
+            revert CallerInvalid();
+        }
+
+        if (makerOrder.quoteType == QuoteType.Bid) {
+            protocolFeeAmount = _executeTakerAsk(takerOrder, makerOrder, sender, orderHash);
+        } else if (makerOrder.quoteType == QuoteType.Ask) {
+            protocolFeeAmount = _executeTakerBid(takerOrder, makerOrder, sender, orderHash);
         }
     }
 

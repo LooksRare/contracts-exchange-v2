@@ -420,13 +420,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - (numberOfPurchases * price));
-        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            weth.balanceOf(takerUser),
-            _initialWETHBalanceUser +
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * numberOfPurchases) /
-                ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
     }
 
     /**

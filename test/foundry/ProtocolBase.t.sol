@@ -281,6 +281,14 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         }
     }
 
+    function _assertSellerReceivedWETHAfterStandardProtocolFee(address seller, uint256 totalValue) internal {
+        assertEq(
+            weth.balanceOf(seller),
+            _initialWETHBalanceUser + (totalValue * _sellerProceedBpWithStandardProtocolFeeBp) / 10_000,
+            "Seller should receive 99.5% of the whole price (0.5% protocol)"
+        );
+    }
+
     function _boolFlagsArray() internal pure returns (bool[2] memory flags) {
         flags[0] = true;
     }

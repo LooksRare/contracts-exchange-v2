@@ -253,6 +253,8 @@ contract LooksRareProtocol is
         address currency = batchExecutionParameters[0].maker.currency;
         _verifyMakerBidCurrency(currency);
 
+        address currentBidder = batchExecutionParameters[0].maker.signer;
+        uint256 accumulatedProtocolFee;
         for (uint256 i; i < length; ) {
             OrderStructs.Maker calldata makerBid = batchExecutionParameters[i].maker;
 
@@ -276,13 +278,43 @@ contract LooksRareProtocol is
 
             if (isAtomic) {
                 uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
-                _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+                if (signer != currentBidder) {
+                    _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
+                    currentBidder = signer;
+                    accumulatedProtocolFee = protocolFeeAmount;
+                } else if (i == length - 1) {
+                    _payProtocolFeeAndAffiliateFee(
+                        currency,
+                        currentBidder,
+                        affiliate,
+                        accumulatedProtocolFee + protocolFeeAmount
+                    );
+                } else {
+                    accumulatedProtocolFee += protocolFeeAmount;
+                }
             } else {
                 try this.restrictedExecuteTakerOrder(takerAsk, makerBid, msg.sender, orderHash) returns (
                     uint256 protocolFeeAmount
                 ) {
-                    _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
-                } catch {}
+                    if (signer != currentBidder) {
+                        _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
+                        currentBidder = signer;
+                        accumulatedProtocolFee = protocolFeeAmount;
+                    } else if (i == length - 1) {
+                        _payProtocolFeeAndAffiliateFee(
+                            currency,
+                            currentBidder,
+                            affiliate,
+                            accumulatedProtocolFee + protocolFeeAmount
+                        );
+                    } else {
+                        accumulatedProtocolFee += protocolFeeAmount;
+                    }
+                } catch {
+                    if (i == length - 1) {
+                        _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
+                    }
+                }
             }
 
             unchecked {

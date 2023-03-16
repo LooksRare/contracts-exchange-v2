@@ -230,12 +230,15 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         vm.prank(takerUser);
         mockERC721.transferFrom(takerUser, _randomUser, faultyTokenId);
 
-        uint256 perTradeExpectedAffiliateFeeAmount = _calculateAffiliateFee(price * _minTotalFeeBp, _affiliateRate);
+        uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(
+            price * (numberOfPurchases - 1) * _minTotalFeeBp,
+            _affiliateRate
+        );
 
         // Execute taker bid transaction
         vm.prank(takerUser);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit AffiliatePayment(_affiliate, address(weth), perTradeExpectedAffiliateFeeAmount);
+        emit AffiliatePayment(_affiliate, address(weth), expectedAffiliateFeeAmount);
         looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _affiliate, false);
 
         for (uint256 i; i < faultyTokenId; i++) {
@@ -258,7 +261,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, totalCost);
         assertEq(
             weth.balanceOf(_affiliate),
-            _initialWETHBalanceAffiliate + perTradeExpectedAffiliateFeeAmount * (numberOfPurchases - 1),
+            _initialWETHBalanceAffiliate + expectedAffiliateFeeAmount,
             "Affiliate user should receive 20% of protocol fee"
         );
         assertEq(
@@ -266,8 +269,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             _initialWETHBalanceOwner +
                 (totalCost * _minTotalFeeBp) /
                 ONE_HUNDRED_PERCENT_IN_BP -
-                perTradeExpectedAffiliateFeeAmount *
-                (numberOfPurchases - 1),
+                expectedAffiliateFeeAmount,
             "Owner should receive 80% of protocol fee"
         );
     }

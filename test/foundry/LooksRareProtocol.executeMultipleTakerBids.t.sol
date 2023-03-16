@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-// LooksRare unopinionated libraries
-import {IOwnableTwoSteps} from "@looksrare/contracts-libs/contracts/interfaces/IOwnableTwoSteps.sol";
-
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
@@ -11,14 +8,13 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
 // Shared errors
-import {AmountInvalid, CallerInvalid, CurrencyInvalid, OrderInvalid, QuoteTypeInvalid} from "../../contracts/errors/SharedErrors.sol";
-import {CURRENCY_NOT_ALLOWED, MAKER_ORDER_INVALID_STANDARD_SALE} from "../../contracts/constants/ValidationCodeConstants.sol";
+import {CallerInvalid, CurrencyInvalid} from "../../contracts/errors/SharedErrors.sol";
+import {CURRENCY_NOT_ALLOWED} from "../../contracts/constants/ValidationCodeConstants.sol";
 
 // Other mocks and utils
 import {MockERC20} from "../mock/MockERC20.sol";
 
 // Enums
-import {CollectionType} from "../../contracts/enums/CollectionType.sol";
 import {QuoteType} from "../../contracts/enums/QuoteType.sol";
 
 contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {

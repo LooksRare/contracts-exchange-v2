@@ -237,8 +237,7 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
     function _assertSuccessfulTakerAsk(OrderStructs.Maker memory makerBid) private {
         uint256 price = makerBid.price;
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         assertEq(
             weth.balanceOf(_owner),
             _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP,

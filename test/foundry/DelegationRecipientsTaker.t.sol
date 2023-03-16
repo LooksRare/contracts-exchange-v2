@@ -81,8 +81,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         // Random recipient user receives 99.5% of the whole price and taker user receives nothing.
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser);
         assertEq(

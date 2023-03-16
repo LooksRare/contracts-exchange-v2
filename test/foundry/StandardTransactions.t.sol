@@ -454,15 +454,8 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(mockERC721.ownerOf(faultyTokenId), _randomUser);
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - ((numberOfPurchases - 1) * price));
-        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            weth.balanceOf(takerUser),
-            _initialWETHBalanceUser +
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * (numberOfPurchases - 1)) /
-                ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertBuyerPaidWETH(makerUser, price * (numberOfPurchases - 1));
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * (numberOfPurchases - 1));
     }
 
     function testThreeTakerAsksERC721LengthsInvalid() public {
@@ -494,8 +487,7 @@ contract StandardTransactionsTest is ProtocolBase {
     ) private {
         // Buyer has received the asset
         assertEq(mockERC721.ownerOf(itemId), buyer);
-        // Buyer pays the whole price
-        assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(buyer, price);
         // Seller receives 99.5% of the whole price
         assertEq(weth.balanceOf(seller), _initialWETHBalanceUser + expectedFees[0]);
         // Owner receives 1.5% of the whole price

@@ -237,8 +237,7 @@ contract BundleTransactionsTest is ProtocolBase {
     function _assertSuccessfulTakerAskNoRoyalties(OrderStructs.Maker memory makerBid) private {
         uint256 price = makerBid.price;
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         // Royalty recipient receives no royalty
         assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient);
         // Owner receives protocol fee

@@ -155,10 +155,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 1 ether);
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.995 ether);
+        _assertBuyerPaidWETH(takerUser, 1 ether);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(makerUser, 1 ether);
     }
 
     function testUSDDynamicAskUSDValueLessThanMinAcceptedEthValue() public {
@@ -181,10 +179,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
 
-        // Taker bid user pays the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 0.99 ether);
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.98505 ether);
+        _assertBuyerPaidWETH(takerUser, 0.99 ether);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(makerUser, 0.99 ether);
     }
 
     // This tests that we can handle fractions
@@ -210,10 +206,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
 
-        // Taker bid user pays the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 0.5 ether);
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 0.4975 ether);
+        _assertBuyerPaidWETH(takerUser, 0.5 ether);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(makerUser, 0.5 ether);
     }
 
     function testUSDDynamicAskBidderOverpaid() public {

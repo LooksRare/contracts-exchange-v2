@@ -361,8 +361,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     function _assertSuccessfulTakerAsk(OrderStructs.Maker memory makerBid) private {
         uint256 price = makerBid.price;
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         // Owner receives 2% of the whole price
         assertEq(
             weth.balanceOf(_owner),
@@ -382,8 +381,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
     function _assertSuccessfulTakerAskBundle(OrderStructs.Maker memory makerBid) private {
         uint256 price = makerBid.price;
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         // Royalty recipient receives royalties
         assertEq(
             weth.balanceOf(_royaltyRecipient),

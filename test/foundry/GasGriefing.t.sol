@@ -67,8 +67,7 @@ contract GasGriefingTest is ProtocolBase {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
         _assertBuyerPaidETH(takerUser, price);
-        // Maker ask user receives 99.5% of the whole price
-        assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceed);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(gasGriefer, price);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
             _royaltyRecipient.balance,

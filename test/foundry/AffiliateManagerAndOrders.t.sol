@@ -131,14 +131,14 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _assertBuyerPaidETH(takerUser, price);
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
-            address(makerUser).balance,
+            makerUser.balance,
             _initialETHBalanceUser + (price * (ONE_HUNDRED_PERCENT_IN_BP - _minTotalFeeBp)) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Affiliate user receives 20% of protocol fee
-        assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
+        assertEq(_affiliate.balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
         // Owner receives 80% of protocol fee
         assertEq(
-            address(_owner).balance,
+            _owner.balance,
             _initialETHBalanceOwner +
                 ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount)
         );
@@ -197,10 +197,10 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _assertBuyerPaidETH(takerUser, price * (numberOfPurchases - 1) + 1);
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price * (numberOfPurchases - 1));
         // Affiliate user receives 20% of protocol fee
-        assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
+        assertEq(_affiliate.balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
         // Owner receives 80% of protocol fee
         assertEq(
-            address(_owner).balance,
+            _owner.balance,
             _initialETHBalanceOwner +
                 (((numberOfPurchases - 1) * (price * _minTotalFeeBp)) /
                     ONE_HUNDRED_PERCENT_IN_BP -

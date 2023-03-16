@@ -317,11 +317,12 @@ contract StandardTransactionsTest is ProtocolBase {
     function testThreeTakerBidsERC721OneFails() public {
         _setUpUsers();
 
+        uint256 price = 1.4 ether;
         uint256 numberOfPurchases = 3;
         uint256 faultyTokenId = numberOfPurchases - 1;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
-            1.4 ether,
+            price,
             numberOfPurchases,
             QuoteType.Ask
         );
@@ -335,7 +336,7 @@ contract StandardTransactionsTest is ProtocolBase {
          */
         vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberOfPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             true
@@ -346,7 +347,7 @@ contract StandardTransactionsTest is ProtocolBase {
          */
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberOfPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
@@ -364,8 +365,8 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberOfPurchases - 1) * 1.4 ether));
-        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, 1.4 ether * (numberOfPurchases - 1));
+        assertEq(takerUser.balance, _initialETHBalanceUser - 1 - ((numberOfPurchases - 1) * price));
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price * (numberOfPurchases - 1));
         // 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
     }
@@ -417,9 +418,10 @@ contract StandardTransactionsTest is ProtocolBase {
 
         uint256 numberOfPurchases = 3;
         uint256 faultyTokenId = numberOfPurchases - 1;
+        uint256 price = 1.4 ether;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
-            1.4 ether,
+            price,
             numberOfPurchases,
             QuoteType.Bid
         );
@@ -453,12 +455,12 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - ((numberOfPurchases - 1) * 1.4 ether));
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - ((numberOfPurchases - 1) * price));
         // Taker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             weth.balanceOf(takerUser),
             _initialWETHBalanceUser +
-                ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberOfPurchases - 1)) /
+                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * (numberOfPurchases - 1)) /
                 ONE_HUNDRED_PERCENT_IN_BP
         );
     }
@@ -509,11 +511,10 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256[3] memory expectedFees
     ) private {
         assertEq(mockERC721.ownerOf(itemId), buyer);
-        // Buyer pays the whole price
-        assertEq(address(buyer).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(buyer, price);
         // Seller receives 99.5% of the whole price
-        assertEq(address(seller).balance, _initialETHBalanceUser + expectedFees[0]);
+        assertEq(seller.balance, _initialETHBalanceUser + expectedFees[0]);
         // Royalty recipient receives 0.5% of the whole price
-        assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);
+        assertEq(_royaltyRecipient.balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);
     }
 }

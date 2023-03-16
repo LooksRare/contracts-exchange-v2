@@ -288,7 +288,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     }
 
     function _assertBuyerPaidWETH(address buyer, uint256 totalValue) internal {
-        assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - totalValue, "Buyer should pay for the whole price");
+        assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - totalValue, BUYER_COST_MISMATCH_ERROR);
     }
 
     string private constant SELLER_PROCEED_MISMATCH_ERROR =

@@ -230,9 +230,6 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
 
-        uint256 initialETHBalanceTakerUser = address(takerUser).balance;
-        uint256 initialETHBalanceMakerUser = address(makerUser).balance;
-
         (bool isValid, bytes4 errorSelector) = strategyUSDDynamicAsk.isMakerOrderValid(makerAsk, selector);
         assertTrue(isValid);
         assertEq(errorSelector, _EMPTY_BYTES4);
@@ -249,10 +246,8 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
-        // Taker bid user pays the whole price, but without overpaying
-        assertEq(address(takerUser).balance, initialETHBalanceTakerUser - 1 ether - 1);
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(address(makerUser).balance, initialETHBalanceMakerUser + 0.995 ether);
+        _assertBuyerPaidETH(takerUser, 1 ether + 1);
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, 1 ether);
     }
 
     function testOraclePriceNotRecentEnough() public {

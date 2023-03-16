@@ -219,12 +219,12 @@ contract BundleTransactionsTest is ProtocolBase {
         _assertBuyerPaidETH(takerUser, price);
         // Royalty recipient receives the royalties
         assertEq(
-            address(_royaltyRecipient).balance,
+            _royaltyRecipient.balance,
             _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Owner receives protocol fee
         assertEq(
-            address(_owner).balance,
+            _owner.balance,
             _initialETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
         );
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
@@ -256,12 +256,9 @@ contract BundleTransactionsTest is ProtocolBase {
 
         _assertBuyerPaidETH(takerUser, price);
         // Royalty recipient receives no royalty
-        assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient);
+        assertEq(_royaltyRecipient.balance, _initialETHBalanceRoyaltyRecipient);
         // Owner receives protocol fee
-        assertEq(
-            address(_owner).balance,
-            _initialETHBalanceOwner + (price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        assertEq(_owner.balance, _initialETHBalanceOwner + (price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP);
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);

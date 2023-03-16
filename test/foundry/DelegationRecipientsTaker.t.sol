@@ -165,7 +165,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
-            address(_royaltyRecipient).balance,
+            _royaltyRecipient.balance,
             _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // No leftover in the balance of the contract

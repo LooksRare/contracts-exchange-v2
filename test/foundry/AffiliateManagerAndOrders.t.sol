@@ -197,13 +197,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberOfPurchases - 1) * price));
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser +
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * (numberOfPurchases - 1)) /
-                ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price * (numberOfPurchases - 1));
         // Affiliate user receives 20% of protocol fee
         assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
         // Owner receives 80% of protocol fee
@@ -262,11 +256,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             "The nonce should not be marked as executed"
         );
         uint256 totalCost = (numberOfPurchases - 1) * price;
-        assertEq(
-            weth.balanceOf(makerUser),
-            _initialWETHBalanceUser - totalCost,
-            "Maker bid user should pay the whole price"
-        );
+        _assertBuyerPaidWETH(makerUser, totalCost);
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, totalCost);
         assertEq(
             weth.balanceOf(_affiliate),
@@ -315,8 +305,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
         // Affiliate user receives 20% of protocol fee
         assertEq(weth.balanceOf(_affiliate), _initialWETHBalanceAffiliate + expectedAffiliateFeeAmount);

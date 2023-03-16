@@ -307,13 +307,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberOfPurchases * price));
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser +
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * numberOfPurchases) /
-                ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price * numberOfPurchases);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }
@@ -372,13 +366,7 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
         assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberOfPurchases - 1) * 1.4 ether));
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser +
-                ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberOfPurchases - 1)) /
-                ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, 1.4 ether * (numberOfPurchases - 1));
         // 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
     }
@@ -418,8 +406,7 @@ contract StandardTransactionsTest is ProtocolBase {
             assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - (numberOfPurchases * price));
+        _assertBuyerPaidWETH(makerUser, price * numberOfPurchases);
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
     }
 

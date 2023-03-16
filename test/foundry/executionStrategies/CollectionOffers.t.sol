@@ -445,8 +445,7 @@ contract CollectionOrdersTest is ProtocolBase {
     function _assertSuccessfulTakerAsk(OrderStructs.Maker memory makerBid, uint256 tokenId) private {
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(tokenId), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);

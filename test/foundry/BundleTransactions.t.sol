@@ -99,8 +99,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         _assertMockERC721Ownership(makerBid.itemIds, makerUser);
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         // Royalty recipient receives royalties
         assertEq(
             weth.balanceOf(_royaltyRecipient),
@@ -229,11 +228,7 @@ contract BundleTransactionsTest is ProtocolBase {
             address(_owner).balance,
             _initialETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
         );
-        // Maker ask user receives 99.5% of the whole price
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -269,11 +264,7 @@ contract BundleTransactionsTest is ProtocolBase {
             address(_owner).balance,
             _initialETHBalanceOwner + (price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
         );
-        // Maker ask user receives 99.5% of the whole price (no royalties are paid)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed

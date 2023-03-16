@@ -89,8 +89,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(0), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
         // Verify the nonce is not marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), _computeOrderHash(makerBid));

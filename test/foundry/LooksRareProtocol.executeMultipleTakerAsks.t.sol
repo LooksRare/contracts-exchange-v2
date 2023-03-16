@@ -70,11 +70,11 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
         vm.prank(_owner);
         looksRareProtocol.updateCurrencyStatus(address(weth), true);
 
-        uint256 numberPurchases = 2;
+        uint256 numberOfPurchases = 2;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             price,
-            numberPurchases,
+            numberOfPurchases,
             QuoteType.Bid
         );
         batchExecutionParameters[1].maker.currency = address(mockERC20);

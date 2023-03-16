@@ -282,23 +282,23 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 price = 0.015 ether;
         _setUpUsers();
 
-        uint256 numberPurchases = 3;
+        uint256 numberOfPurchases = 3;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             price,
-            numberPurchases,
+            numberOfPurchases,
             QuoteType.Ask
         );
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             // Taker user has received the asset
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the nonce is marked as executed
@@ -306,12 +306,12 @@ contract StandardTransactionsTest is ProtocolBase {
         }
 
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberOfPurchases * price));
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
             _initialETHBalanceUser +
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * numberPurchases) /
+                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * numberOfPurchases) /
                 ONE_HUNDRED_PERCENT_IN_BP
         );
         // No leftover in the balance of the contract
@@ -324,12 +324,12 @@ contract StandardTransactionsTest is ProtocolBase {
     function testThreeTakerBidsERC721OneFails() public {
         _setUpUsers();
 
-        uint256 numberPurchases = 3;
-        uint256 faultyTokenId = numberPurchases - 1;
+        uint256 numberOfPurchases = 3;
+        uint256 faultyTokenId = numberOfPurchases - 1;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             1.4 ether,
-            numberPurchases,
+            numberOfPurchases,
             QuoteType.Ask
         );
 
@@ -342,7 +342,7 @@ contract StandardTransactionsTest is ProtocolBase {
          */
         vm.expectRevert(abi.encodeWithSelector(ERC721TransferFromFail.selector));
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             true
@@ -353,7 +353,7 @@ contract StandardTransactionsTest is ProtocolBase {
          */
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: 1.4 ether * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
@@ -371,12 +371,12 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * 1.4 ether));
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberOfPurchases - 1) * 1.4 ether));
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
             _initialETHBalanceUser +
-                ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberPurchases - 1)) /
+                ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberOfPurchases - 1)) /
                 ONE_HUNDRED_PERCENT_IN_BP
         );
         // 1 wei left in the balance of the contract
@@ -399,11 +399,11 @@ contract StandardTransactionsTest is ProtocolBase {
         uint256 price = 0.015 ether;
         _setUpUsers();
 
-        uint256 numberPurchases = 3;
+        uint256 numberOfPurchases = 3;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             price,
-            numberPurchases,
+            numberOfPurchases,
             QuoteType.Bid
         );
 
@@ -411,7 +411,7 @@ contract StandardTransactionsTest is ProtocolBase {
         vm.prank(takerUser);
         looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             // Maker user has received the asset
             assertEq(mockERC721.ownerOf(i), makerUser);
             // Verify the nonce is marked as executed
@@ -419,12 +419,12 @@ contract StandardTransactionsTest is ProtocolBase {
         }
 
         // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - (numberPurchases * price));
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - (numberOfPurchases * price));
         // Taker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             weth.balanceOf(takerUser),
             _initialWETHBalanceUser +
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * numberPurchases) /
+                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * numberOfPurchases) /
                 ONE_HUNDRED_PERCENT_IN_BP
         );
     }
@@ -435,12 +435,12 @@ contract StandardTransactionsTest is ProtocolBase {
     function testThreeTakerAsksERC721OneFails() public {
         _setUpUsers();
 
-        uint256 numberPurchases = 3;
-        uint256 faultyTokenId = numberPurchases - 1;
+        uint256 numberOfPurchases = 3;
+        uint256 faultyTokenId = numberOfPurchases - 1;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             1.4 ether,
-            numberPurchases,
+            numberOfPurchases,
             QuoteType.Bid
         );
 
@@ -473,12 +473,12 @@ contract StandardTransactionsTest is ProtocolBase {
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - ((numberPurchases - 1) * 1.4 ether));
+        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - ((numberOfPurchases - 1) * 1.4 ether));
         // Taker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             weth.balanceOf(takerUser),
             _initialWETHBalanceUser +
-                ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberPurchases - 1)) /
+                ((1.4 ether * _sellerProceedBpWithStandardProtocolFeeBp) * (numberOfPurchases - 1)) /
                 ONE_HUNDRED_PERCENT_IN_BP
         );
     }

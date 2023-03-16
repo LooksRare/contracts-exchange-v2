@@ -156,12 +156,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _setUpUsers();
         _setUpAffiliate();
 
-        uint256 numberPurchases = 8;
-        uint256 faultyTokenId = numberPurchases - 1;
+        uint256 numberOfPurchases = 8;
+        uint256 faultyTokenId = numberOfPurchases - 1;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             price,
-            numberPurchases,
+            numberOfPurchases,
             QuoteType.Ask
         );
 
@@ -170,7 +170,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         mockERC721.transferFrom(makerUser, _randomUser, faultyTokenId);
 
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(
-            (numberPurchases - 1) * price * _minTotalFeeBp,
+            (numberOfPurchases - 1) * price * _minTotalFeeBp,
             _affiliateRate
         );
 
@@ -178,7 +178,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         vm.prank(takerUser);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit AffiliatePayment(_affiliate, ETH, expectedAffiliateFeeAmount);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
             _affiliate,
             false
@@ -196,12 +196,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * price));
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberOfPurchases - 1) * price));
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
             _initialETHBalanceUser +
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * (numberPurchases - 1)) /
+                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * (numberOfPurchases - 1)) /
                 ONE_HUNDRED_PERCENT_IN_BP
         );
         // Affiliate user receives 20% of protocol fee
@@ -210,7 +210,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(
             address(_owner).balance,
             _initialETHBalanceOwner +
-                (((numberPurchases - 1) * (price * _minTotalFeeBp)) /
+                (((numberOfPurchases - 1) * (price * _minTotalFeeBp)) /
                     ONE_HUNDRED_PERCENT_IN_BP -
                     expectedAffiliateFeeAmount)
         );
@@ -225,12 +225,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _setUpUsers();
         _setUpAffiliate();
 
-        uint256 numberPurchases = 8;
-        uint256 faultyTokenId = numberPurchases - 1;
+        uint256 numberOfPurchases = 8;
+        uint256 faultyTokenId = numberOfPurchases - 1;
 
         BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
             price,
-            numberPurchases,
+            numberOfPurchases,
             QuoteType.Bid
         );
 
@@ -261,7 +261,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
             bytes32(0),
             "The nonce should not be marked as executed"
         );
-        uint256 totalCost = (numberPurchases - 1) * price;
+        uint256 totalCost = (numberOfPurchases - 1) * price;
         assertEq(
             weth.balanceOf(makerUser),
             _initialWETHBalanceUser - totalCost,
@@ -276,7 +276,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         );
         assertEq(
             weth.balanceOf(_affiliate),
-            _initialWETHBalanceAffiliate + perTradeExpectedAffiliateFeeAmount * (numberPurchases - 1),
+            _initialWETHBalanceAffiliate + perTradeExpectedAffiliateFeeAmount * (numberOfPurchases - 1),
             "Affiliate user should receive 20% of protocol fee"
         );
         assertEq(
@@ -285,7 +285,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
                 (totalCost * _minTotalFeeBp) /
                 ONE_HUNDRED_PERCENT_IN_BP -
                 perTradeExpectedAffiliateFeeAmount *
-                (numberPurchases - 1),
+                (numberOfPurchases - 1),
             "Owner should receive 80% of protocol fee"
         );
     }

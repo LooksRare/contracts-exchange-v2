@@ -161,7 +161,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, _EMPTY_SIGNATURE, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    uint256 private constant numberPurchases = 3;
+    uint256 private constant numberOfPurchases = 3;
 
     function testExecuteMultipleTakerBids() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
@@ -174,13 +174,13 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         vm.stopPrank();
 
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             assertEq(mockERC721.ownerOf(i), takerUser);
         }
     }
@@ -205,7 +205,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
 
         vm.expectRevert(SignatureERC1271Invalid.selector);
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
@@ -225,7 +225,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
 
         vm.expectRevert(IReentrancyGuard.ReentrancyFail.selector);
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
@@ -253,9 +253,9 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
     function _multipleTakerBidsSetup(
         address signer
     ) private returns (BatchExecutionParameters[] memory batchExecutionParameters) {
-        batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
+        batchExecutionParameters = new BatchExecutionParameters[](numberOfPurchases);
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             // Mint asset
             mockERC721.mint(signer, i);
 

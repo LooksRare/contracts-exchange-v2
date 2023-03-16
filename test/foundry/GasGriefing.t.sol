@@ -82,11 +82,11 @@ contract GasGriefingTest is ProtocolBase {
     }
 
     function testThreeTakerBidsGasGriefing() public {
-        uint256 numberPurchases = 3;
+        uint256 numberOfPurchases = 3;
 
-        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberOfPurchases);
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             // Mint asset
             mockERC721.mint(gasGriefer, i);
 
@@ -117,22 +117,22 @@ contract GasGriefingTest is ProtocolBase {
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             // Taker user has received the asset
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the nonce is marked as executed
             assertEq(looksRareProtocol.userOrderNonce(gasGriefer, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
         // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
+        assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberOfPurchases * price));
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceedPerItem * numberPurchases);
+        assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceedPerItem * numberOfPurchases);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }

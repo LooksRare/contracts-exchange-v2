@@ -305,8 +305,7 @@ contract StandardTransactionsTest is ProtocolBase {
             assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
 
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberOfPurchases * price));
+        _assertBuyerPaidETH(takerUser, price * numberOfPurchases);
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price * numberOfPurchases);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);

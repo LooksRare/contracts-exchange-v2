@@ -128,8 +128,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
             address(makerUser).balance,
@@ -195,8 +194,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(mockERC721.ownerOf(faultyTokenId), _randomUser);
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberOfPurchases - 1) * price));
+        _assertBuyerPaidETH(takerUser, price * (numberOfPurchases - 1) + 1);
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price * (numberOfPurchases - 1));
         // Affiliate user receives 20% of protocol fee
         assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);

@@ -216,8 +216,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         _assertMockERC721Ownership(makerAsk.itemIds, takerUser);
 
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         // Royalty recipient receives the royalties
         assertEq(
             address(_royaltyRecipient).balance,
@@ -255,8 +254,7 @@ contract BundleTransactionsTest is ProtocolBase {
     function _assertSuccessfulTakerBidNoRoyalties(OrderStructs.Maker memory makerAsk) private {
         uint256 price = makerAsk.price;
 
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         // Royalty recipient receives no royalty
         assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient);
         // Owner receives protocol fee

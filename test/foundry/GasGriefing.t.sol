@@ -66,8 +66,7 @@ contract GasGriefingTest is ProtocolBase {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         // Maker ask user receives 99.5% of the whole price
         assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceed);
         // Royalty recipient receives 0.5% of the whole price
@@ -129,8 +128,7 @@ contract GasGriefingTest is ProtocolBase {
             // Verify the nonce is marked as executed
             assertEq(looksRareProtocol.userOrderNonce(gasGriefer, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberOfPurchases * price));
+        _assertBuyerPaidETH(takerUser, price * numberOfPurchases);
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceedPerItem * numberOfPurchases);
         // No leftover in the balance of the contract

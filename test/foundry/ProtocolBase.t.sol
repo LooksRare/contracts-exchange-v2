@@ -281,23 +281,32 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         }
     }
 
+    string private constant BUYER_COST_MISMATCH_ERROR = "Buyer should pay for the whole price";
+
+    function _assertBuyerPaidETH(address buyer, uint256 totalValue) internal {
+        assertEq(buyer.balance, _initialETHBalanceUser - totalValue, BUYER_COST_MISMATCH_ERROR);
+    }
+
     function _assertBuyerPaidWETH(address buyer, uint256 totalValue) internal {
         assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - totalValue, "Buyer should pay for the whole price");
     }
+
+    string private constant SELLER_PROCEED_MISMATCH_ERROR =
+        "Seller should receive 99.5% of the whole price (0.5% protocol)";
 
     function _assertSellerReceivedWETHAfterStandardProtocolFee(address seller, uint256 totalValue) internal {
         assertEq(
             weth.balanceOf(seller),
             _initialWETHBalanceUser + (totalValue * _sellerProceedBpWithStandardProtocolFeeBp) / 10_000,
-            "Seller should receive 99.5% of the whole price (0.5% protocol)"
+            SELLER_PROCEED_MISMATCH_ERROR
         );
     }
 
     function _assertSellerReceivedETHAfterStandardProtocolFee(address seller, uint256 totalValue) internal {
         assertEq(
-            address(seller).balance,
+            seller.balance,
             _initialETHBalanceUser + (totalValue * _sellerProceedBpWithStandardProtocolFeeBp) / 10_000,
-            "Seller should receive 99.5% of the whole price (0.5% protocol)"
+            SELLER_PROCEED_MISMATCH_ERROR
         );
     }
 

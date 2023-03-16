@@ -62,8 +62,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(orderIndex), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);

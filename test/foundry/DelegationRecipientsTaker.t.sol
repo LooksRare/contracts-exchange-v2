@@ -161,8 +161,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
 
         // Random recipient user has received the asset
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), randomRecipientNFT);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(

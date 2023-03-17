@@ -276,18 +276,20 @@ contract LooksRareProtocol is
                 signer
             );
 
+            bool isLastBid = i == length - 1;
+
             if (isAtomic) {
                 uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
                 if (signer != currentBidder) {
                     _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
 
-                    if (i == length - 1) {
+                    if (isLastBid) {
                         _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
                     } else {
                         currentBidder = signer;
                         accumulatedProtocolFee = protocolFeeAmount;
                     }
-                } else if (i == length - 1) {
+                } else if (isLastBid) {
                     _payProtocolFeeAndAffiliateFee(
                         currency,
                         currentBidder,
@@ -304,13 +306,13 @@ contract LooksRareProtocol is
                     if (signer != currentBidder) {
                         _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
 
-                        if (i == length - 1) {
+                        if (isLastBid) {
                             _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
                         } else {
                             currentBidder = signer;
                             accumulatedProtocolFee = protocolFeeAmount;
                         }
-                    } else if (i == length - 1) {
+                    } else if (isLastBid) {
                         _payProtocolFeeAndAffiliateFee(
                             currency,
                             currentBidder,
@@ -321,7 +323,7 @@ contract LooksRareProtocol is
                         accumulatedProtocolFee += protocolFeeAmount;
                     }
                 } catch {
-                    if (i == length - 1) {
+                    if (isLastBid) {
                         _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
                     }
                 }

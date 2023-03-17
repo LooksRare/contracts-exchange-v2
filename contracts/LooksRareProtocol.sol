@@ -290,6 +290,7 @@ contract LooksRareProtocol is
                         accumulatedProtocolFee = protocolFeeAmount;
                     }
                 } else if (isLastBid) {
+                    /** @dev This also covers the case where length == 1 */
                     _payProtocolFeeAndAffiliateFee(
                         currency,
                         currentBidder,
@@ -313,6 +314,7 @@ contract LooksRareProtocol is
                             accumulatedProtocolFee = protocolFeeAmount;
                         }
                     } else if (isLastBid) {
+                        /** @dev This also covers the case where length == 1 */
                         _payProtocolFeeAndAffiliateFee(
                             currency,
                             currentBidder,

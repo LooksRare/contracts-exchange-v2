@@ -450,7 +450,15 @@ contract StandardTransactionsTest is ProtocolBase {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
     }
 
-    function testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSigner() public {
+    function testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSignerAtomic() public {
+        _testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSigner(true);
+    }
+
+    function testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSignerNonAtomic() public {
+        _testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSigner(false);
+    }
+
+    function _testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSigner(bool isAtomic) private {
         uint256 price = 0.015 ether;
         _setUpUsers();
 
@@ -475,7 +483,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, isAtomic);
 
         address makerOne = vm.addr(3);
         // Maker user has received the asset

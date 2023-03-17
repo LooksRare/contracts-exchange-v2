@@ -410,6 +410,46 @@ contract StandardTransactionsTest is ProtocolBase {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
     }
 
+    function testThreeTakerAsksERC721DifferentSignerForEachBid() public {
+        uint256 price = 0.015 ether;
+        _setUpUsers();
+
+        uint256 numberOfPurchases = 3;
+
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
+            price,
+            numberOfPurchases,
+            QuoteType.Bid
+        );
+
+        for (uint256 i; i < batchExecutionParameters.length; i++) {
+            uint256 privateKey = i + 3;
+            address signer = vm.addr(privateKey);
+
+            deal(address(weth), signer, _initialWETHBalanceUser);
+            vm.prank(signer);
+            weth.approve(address(looksRareProtocol), price);
+
+            batchExecutionParameters[i].maker.signer = signer;
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(batchExecutionParameters[i].maker, privateKey);
+        }
+
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
+
+        for (uint256 i; i < numberOfPurchases; i++) {
+            address maker = vm.addr(i + 3);
+            // Maker user has received the asset
+            assertEq(mockERC721.ownerOf(i), maker);
+            // Verify the nonce is marked as executed
+            assertEq(looksRareProtocol.userOrderNonce(maker, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+            _assertBuyerPaidWETH(maker, price);
+        }
+
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
+    }
+
     /**
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */

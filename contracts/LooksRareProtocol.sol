@@ -282,6 +282,10 @@ contract LooksRareProtocol is
                     _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
                     currentBidder = signer;
                     accumulatedProtocolFee = protocolFeeAmount;
+
+                    if (i == length - 1) {
+                        _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
+                    }
                 } else if (i == length - 1) {
                     _payProtocolFeeAndAffiliateFee(
                         currency,
@@ -300,6 +304,10 @@ contract LooksRareProtocol is
                         _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
                         currentBidder = signer;
                         accumulatedProtocolFee = protocolFeeAmount;
+
+                        if (i == length - 1) {
+                            _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
+                        }
                     } else if (i == length - 1) {
                         _payProtocolFeeAndAffiliateFee(
                             currency,

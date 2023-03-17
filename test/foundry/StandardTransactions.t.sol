@@ -410,7 +410,15 @@ contract StandardTransactionsTest is ProtocolBase {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
     }
 
-    function testThreeTakerAsksERC721DifferentSignerForEachBid() public {
+    function testThreeTakerAsksERC721DifferentSignerForEachBidAtomic() public {
+        _testThreeTakerAsksERC721DifferentSignerForEachBid(true);
+    }
+
+    function testThreeTakerAsksERC721DifferentSignerForEachBidNonAtomic() public {
+        _testThreeTakerAsksERC721DifferentSignerForEachBid(false);
+    }
+
+    function _testThreeTakerAsksERC721DifferentSignerForEachBid(bool isAtomic) public {
         uint256 price = 0.015 ether;
         _setUpUsers();
 
@@ -436,7 +444,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, isAtomic);
 
         for (uint256 i; i < numberOfPurchases; i++) {
             address maker = vm.addr(i + 3);

@@ -280,11 +280,12 @@ contract LooksRareProtocol is
                 uint256 protocolFeeAmount = _executeTakerAsk(takerAsk, makerBid, msg.sender, orderHash);
                 if (signer != currentBidder) {
                     _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
-                    currentBidder = signer;
-                    accumulatedProtocolFee = protocolFeeAmount;
 
                     if (i == length - 1) {
-                        _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
+                        _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+                    } else {
+                        currentBidder = signer;
+                        accumulatedProtocolFee = protocolFeeAmount;
                     }
                 } else if (i == length - 1) {
                     _payProtocolFeeAndAffiliateFee(
@@ -302,11 +303,12 @@ contract LooksRareProtocol is
                 ) {
                     if (signer != currentBidder) {
                         _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
-                        currentBidder = signer;
-                        accumulatedProtocolFee = protocolFeeAmount;
 
                         if (i == length - 1) {
-                            _payProtocolFeeAndAffiliateFee(currency, currentBidder, affiliate, accumulatedProtocolFee);
+                            _payProtocolFeeAndAffiliateFee(currency, signer, affiliate, protocolFeeAmount);
+                        } else {
+                            currentBidder = signer;
+                            accumulatedProtocolFee = protocolFeeAmount;
                         }
                     } else if (i == length - 1) {
                         _payProtocolFeeAndAffiliateFee(

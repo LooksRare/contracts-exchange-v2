@@ -450,6 +450,51 @@ contract StandardTransactionsTest is ProtocolBase {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
     }
 
+    function testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSigner() public {
+        uint256 price = 0.015 ether;
+        _setUpUsers();
+
+        uint256 numberOfPurchases = 3;
+
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
+            price,
+            numberOfPurchases,
+            QuoteType.Bid
+        );
+
+        // 1st signer != 2nd/3rd signer
+        uint256 privateKey = 3;
+        address signer = vm.addr(privateKey);
+
+        deal(address(weth), signer, _initialWETHBalanceUser);
+        vm.prank(signer);
+        weth.approve(address(looksRareProtocol), price);
+
+        batchExecutionParameters[0].maker.signer = signer;
+        batchExecutionParameters[0].makerSignature = _signMakerOrder(batchExecutionParameters[0].maker, privateKey);
+
+        // Execute taker ask transaction
+        vm.prank(takerUser);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
+
+        address makerOne = vm.addr(3);
+        // Maker user has received the asset
+        assertEq(mockERC721.ownerOf(0), makerOne);
+        // Verify the nonce is marked as executed
+        assertEq(looksRareProtocol.userOrderNonce(makerOne, 0), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        _assertBuyerPaidWETH(makerOne, price);
+
+        // Maker user has received the assets
+        assertEq(mockERC721.ownerOf(1), makerUser);
+        assertEq(mockERC721.ownerOf(2), makerUser);
+        // Verify the nonce is marked as executed
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 1), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        assertEq(looksRareProtocol.userOrderNonce(makerUser, 2), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
+        _assertBuyerPaidWETH(makerUser, price * 2);
+
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
+    }
+
     /**
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */

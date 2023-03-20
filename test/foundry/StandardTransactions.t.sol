@@ -59,25 +59,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerBid(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerAsk),
-                orderNonce: makerAsk.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            takerUser,
-            makerAsk.strategyId,
-            makerAsk.currency,
-            makerAsk.collection,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        _expectTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -126,25 +108,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerBid(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerAsk),
-                orderNonce: makerAsk.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            takerUser,
-            makerAsk.strategyId,
-            makerAsk.currency,
-            makerAsk.collection,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        _expectTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -313,5 +277,29 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(seller.balance, _initialETHBalanceUser + expectedFees[0]);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(_royaltyRecipient.balance, _initialETHBalanceRoyaltyRecipient + expectedFees[1]);
+    }
+
+    function _expectTakerBidEvent(
+        OrderStructs.Maker memory makerAsk,
+        address[2] memory expectedRecipients,
+        uint256[3] memory expectedFees
+    ) private {
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        emit TakerBid(
+            NonceInvalidationParameters({
+                orderHash: _computeOrderHash(makerAsk),
+                orderNonce: makerAsk.orderNonce,
+                isNonceInvalidated: true
+            }),
+            takerUser,
+            takerUser,
+            makerAsk.strategyId,
+            makerAsk.currency,
+            makerAsk.collection,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            expectedRecipients,
+            expectedFees
+        );
     }
 }

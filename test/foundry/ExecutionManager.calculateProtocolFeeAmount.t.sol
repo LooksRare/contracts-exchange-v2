@@ -61,11 +61,11 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
         address[2] memory expectedRecipients;
 
         expectedRecipients[0] = makerUser;
-        expectedRecipients[1] = address(0);
+        expectedRecipients[1] = _royaltyRecipient;
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        // _assertTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
+        _assertTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,

@@ -59,24 +59,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerAsk(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerBid),
-                orderNonce: makerBid.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            makerUser,
-            makerBid.strategyId,
-            makerBid.currency,
-            makerBid.collection,
-            makerBid.itemIds,
-            makerBid.amounts,
-            expectedRecipients,
-            expectedFees
-        );
+        _expectTakerAskEvent(makerBid, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset

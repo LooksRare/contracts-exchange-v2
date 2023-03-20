@@ -152,26 +152,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerAsk(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerBid),
-                orderNonce: makerBid.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            makerUser,
-            makerBid.strategyId,
-            makerBid.currency,
-            makerBid.collection,
-            makerBid.itemIds,
-            makerBid.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        _expectTakerAskEvent(makerBid, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         _assertSuccessfulExecutionThroughWETH(makerUser, takerUser, price, expectedFees);
@@ -212,25 +193,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerAsk(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerBid),
-                orderNonce: makerBid.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            makerUser,
-            makerBid.strategyId,
-            makerBid.currency,
-            makerBid.collection,
-            makerBid.itemIds,
-            makerBid.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        _expectTakerAskEvent(makerBid, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         _assertSuccessfulExecutionThroughWETH(makerUser, takerUser, price, expectedFees);
@@ -298,6 +261,30 @@ contract StandardTransactionsTest is ProtocolBase {
             makerAsk.collection,
             makerAsk.itemIds,
             makerAsk.amounts,
+            expectedRecipients,
+            expectedFees
+        );
+    }
+
+    function _expectTakerAskEvent(
+        OrderStructs.Maker memory makerBid,
+        address[2] memory expectedRecipients,
+        uint256[3] memory expectedFees
+    ) private {
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        emit TakerAsk(
+            NonceInvalidationParameters({
+                orderHash: _computeOrderHash(makerBid),
+                orderNonce: makerBid.orderNonce,
+                isNonceInvalidated: true
+            }),
+            takerUser,
+            makerUser,
+            makerBid.strategyId,
+            makerBid.currency,
+            makerBid.collection,
+            makerBid.itemIds,
+            makerBid.amounts,
             expectedRecipients,
             expectedFees
         );

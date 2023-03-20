@@ -59,7 +59,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        _expectTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
+        _assertTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -108,7 +108,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        _expectTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
+        _assertTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -152,7 +152,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        _expectTakerAskEvent(makerBid, expectedRecipients, expectedFees);
+        _assertTakerAskEvent(makerBid, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         _assertSuccessfulExecutionThroughWETH(makerUser, takerUser, price, expectedFees);
@@ -193,7 +193,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        _expectTakerAskEvent(makerBid, expectedRecipients, expectedFees);
+        _assertTakerAskEvent(makerBid, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         _assertSuccessfulExecutionThroughWETH(makerUser, takerUser, price, expectedFees);

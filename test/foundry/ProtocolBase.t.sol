@@ -314,7 +314,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         flags[0] = true;
     }
 
-    function _expectTakerBidEvent(
+    function _assertTakerBidEvent(
         OrderStructs.Maker memory makerAsk,
         address[2] memory expectedRecipients,
         uint256[3] memory expectedFees
@@ -338,7 +338,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         );
     }
 
-    function _expectTakerAskEvent(
+    function _assertTakerAskEvent(
         OrderStructs.Maker memory makerBid,
         address[2] memory expectedRecipients,
         uint256[3] memory expectedFees

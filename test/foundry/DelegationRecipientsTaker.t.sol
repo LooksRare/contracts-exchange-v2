@@ -59,7 +59,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
         expectedFees[0] = price - (expectedFees[1] + expectedFees[2]);
 
         vm.prank(takerUser);
-        _expectTakerAskEvent(makerBid, expectedRecipients, expectedFees);
+        _assertTakerAskEvent(makerBid, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         // Taker user has received the asset

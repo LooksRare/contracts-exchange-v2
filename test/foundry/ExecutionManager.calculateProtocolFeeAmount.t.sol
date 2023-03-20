@@ -96,15 +96,20 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
     ) private {
         assertEq(mockERC721.ownerOf(itemId), buyer);
         _assertBuyerPaidETH(buyer, price);
-        // Seller receives 99% of the whole price
-        assertEq(seller.balance, _initialETHBalanceUser + expectedFees[0], "wrong seller balance");
-        // Royalty recipient receives 0.1% of the whole price
+        assertEq(
+            seller.balance,
+            _initialETHBalanceUser + expectedFees[0],
+            "Seller should receive 99% of the whole price"
+        );
         assertEq(
             _royaltyRecipient.balance,
             _initialETHBalanceRoyaltyRecipient + expectedFees[1],
-            "wrong royalty balance"
+            "Royalty recipient should receive 0.1% of the whole price"
         );
-        // Protocol fee recipient receives 0.9% of the whole price
-        assertEq(_owner.balance, _initialETHBalanceOwner + expectedFees[2], "wrong protocol fee recipient balance");
+        assertEq(
+            _owner.balance,
+            _initialETHBalanceOwner + expectedFees[2],
+            "Protocol fee recipient receives 0.9% of the whole price"
+        );
     }
 }

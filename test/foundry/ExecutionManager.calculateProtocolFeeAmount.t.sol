@@ -16,6 +16,7 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 
 contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecutionManager, IStrategyManager {
     uint256 private constant ROYALTY_FEE_BP = 10;
+    uint256 private constant MIN_TOTAL_FEE_BP = 100;
 
     function setUp() public {
         _setUp();
@@ -30,7 +31,7 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
             strategyId: 0,
             isActive: true,
             newStandardProtocolFeeBp: uint16(50),
-            newMinTotalFeeBp: uint16(100)
+            newMinTotalFeeBp: uint16(MIN_TOTAL_FEE_BP)
         });
         _setupRegistryRoyalties(address(mockERC721), ROYALTY_FEE_BP);
     }
@@ -120,7 +121,7 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
 
     function _calculateExpectedFees(uint256 price) private pure returns (uint256[3] memory expectedFees) {
         expectedFees[1] = (price * ROYALTY_FEE_BP) / ONE_HUNDRED_PERCENT_IN_BP;
-        expectedFees[2] = (price * 100) / ONE_HUNDRED_PERCENT_IN_BP - expectedFees[1];
+        expectedFees[2] = (price * MIN_TOTAL_FEE_BP) / ONE_HUNDRED_PERCENT_IN_BP - expectedFees[1];
         expectedFees[0] = price - expectedFees[1] - expectedFees[2];
     }
 

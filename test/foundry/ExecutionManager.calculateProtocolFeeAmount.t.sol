@@ -6,6 +6,8 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 import {IExecutionManager} from "../../contracts/interfaces/IExecutionManager.sol";
 import {IStrategyManager} from "../../contracts/interfaces/IStrategyManager.sol";
 
+import {CreatorFeeManagerWithRoyalties} from "../../contracts/CreatorFeeManagerWithRoyalties.sol";
+
 // Base test
 import {ProtocolBase} from "./ProtocolBase.t.sol";
 
@@ -15,6 +17,11 @@ import {ONE_HUNDRED_PERCENT_IN_BP} from "../../contracts/constants/NumericConsta
 contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecutionManager, IStrategyManager {
     function setUp() public {
         _setUp();
+        CreatorFeeManagerWithRoyalties creatorFeeManager = new CreatorFeeManagerWithRoyalties(
+            address(royaltyFeeRegistry)
+        );
+        vm.prank(_owner);
+        looksRareProtocol.updateCreatorFeeManager(address(creatorFeeManager));
     }
 
     function test_calculateProtocolFeeAmount_ProtocolFeeAmountPlusCreatorFeeAmountLessThanMinTotalFeeAmount(
@@ -29,6 +36,7 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
             newStandardProtocolFeeBp: uint16(50),
             newMinTotalFeeBp: uint16(100)
         });
+        _setupRegistryRoyalties(address(mockERC721), 10);
 
         _setUpUsers();
 
@@ -56,25 +64,7 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerBid(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerAsk),
-                orderNonce: makerAsk.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            takerUser,
-            makerAsk.strategyId,
-            makerAsk.currency,
-            makerAsk.collection,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        // _assertTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -92,8 +82,9 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
     }
 
     function _calculateExpectedFees(uint256 price) private pure returns (uint256[3] memory expectedFees) {
-        expectedFees[2] = (price * 100) / ONE_HUNDRED_PERCENT_IN_BP;
-        expectedFees[0] = price - expectedFees[2];
+        expectedFees[1] = (price * 10) / ONE_HUNDRED_PERCENT_IN_BP;
+        expectedFees[2] = (price * 100) / ONE_HUNDRED_PERCENT_IN_BP - expectedFees[1];
+        expectedFees[0] = price - expectedFees[1] - expectedFees[2];
     }
 
     function _assertSuccessfulExecutionThroughETH(
@@ -106,8 +97,14 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
         assertEq(mockERC721.ownerOf(itemId), buyer);
         _assertBuyerPaidETH(buyer, price);
         // Seller receives 99% of the whole price
-        assertEq(seller.balance, _initialETHBalanceUser + expectedFees[0]);
-        // Protocol fee recipient receives 1% of the whole price
-        assertEq(_owner.balance, _initialETHBalanceOwner + expectedFees[2]);
+        assertEq(seller.balance, _initialETHBalanceUser + expectedFees[0], "wrong seller balance");
+        // Royalty recipient receives 0.1% of the whole price
+        assertEq(
+            _royaltyRecipient.balance,
+            _initialETHBalanceRoyaltyRecipient + expectedFees[1],
+            "wrong royalty balance"
+        );
+        // Protocol fee recipient receives 0.9% of the whole price
+        assertEq(_owner.balance, _initialETHBalanceOwner + expectedFees[2], "wrong protocol fee recipient balance");
     }
 }

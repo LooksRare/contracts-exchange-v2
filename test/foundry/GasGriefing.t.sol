@@ -66,13 +66,11 @@ contract GasGriefingTest is ProtocolBase {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 99.5% of the whole price
-        assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceed);
+        _assertBuyerPaidETH(takerUser, price);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(gasGriefer, price);
         // Royalty recipient receives 0.5% of the whole price
         assertEq(
-            address(_royaltyRecipient).balance,
+            _royaltyRecipient.balance,
             _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // No leftover in the balance of the contract
@@ -82,17 +80,15 @@ contract GasGriefingTest is ProtocolBase {
     }
 
     function testThreeTakerBidsGasGriefing() public {
-        uint256 numberPurchases = 3;
+        uint256 numberOfPurchases = 3;
 
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberOfPurchases);
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             // Mint asset
             mockERC721.mint(gasGriefer, i);
 
-            makerAsks[i] = _createSingleItemMakerOrder({
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
                 quoteType: QuoteType.Ask,
                 globalNonce: 0,
                 subsetNonce: 0,
@@ -106,11 +102,8 @@ contract GasGriefingTest is ProtocolBase {
                 itemId: i // (0, 1, etc.)
             });
 
-            takerBids[i] = _genericTakerOrder();
+            batchExecutionParameters[i].taker = _genericTakerOrder();
         }
-
-        // Other execution parameters
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
 
         uint256 sellerProceedPerItem = (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP;
 
@@ -122,25 +115,21 @@ contract GasGriefingTest is ProtocolBase {
 
         vm.prank(takerUser);
         // Execute taker bid transaction
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
+            batchExecutionParameters,
             _EMPTY_AFFILIATE,
             false
         );
 
-        for (uint256 i; i < numberPurchases; i++) {
+        for (uint256 i; i < numberOfPurchases; i++) {
             // Taker user has received the asset
             assertEq(mockERC721.ownerOf(i), takerUser);
             // Verify the nonce is marked as executed
             assertEq(looksRareProtocol.userOrderNonce(gasGriefer, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - (numberPurchases * price));
+        _assertBuyerPaidETH(takerUser, price * numberOfPurchases);
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceedPerItem * numberPurchases);
+        assertEq(weth.balanceOf(gasGriefer), _initialWETHBalanceUser + sellerProceedPerItem * numberOfPurchases);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
     }

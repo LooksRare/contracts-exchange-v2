@@ -67,10 +67,8 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(42), makerUser);
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.5 ether);
-        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.4525 ether);
+        _assertBuyerPaidWETH(makerUser, 9.5 ether);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, 9.5 ether);
     }
 
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedPriceLessThanMaxPrice() public {
@@ -94,10 +92,9 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(42), makerUser);
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 9.4 ether);
-        // Taker ask user receives 97% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + 9.353 ether);
+        uint256 price = 9.4 ether;
+        _assertBuyerPaidWETH(makerUser, price);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
     }
 
     function testFloorFromChainlinkDiscountFixedAmountDesiredDiscountedAmountGreaterThanFloorPrice() public {

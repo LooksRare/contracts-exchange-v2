@@ -79,18 +79,8 @@ contract BatchMakerCollectionOrdersTest is ProtocolBase {
         }
 
         uint256 totalValue = price * numberOrders;
-        assertEq(
-            weth.balanceOf(makerUser),
-            _initialWETHBalanceUser - totalValue,
-            "Maker bid user should pay the whole price"
-        );
-        assertEq(
-            weth.balanceOf(takerUser),
-            _initialWETHBalanceUser +
-                (totalValue * _sellerProceedBpWithStandardProtocolFeeBp) /
-                ONE_HUNDRED_PERCENT_IN_BP,
-            "Taker ask user should receive 99.5% of the whole price (0.5% protocol)"
-        );
+        _assertBuyerPaidWETH(makerUser, totalValue);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, totalValue);
     }
 
     function _createBatchMakerBids(uint256 numberOrders) private view returns (OrderStructs.Maker[] memory makerBids) {

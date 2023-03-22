@@ -7,6 +7,10 @@ import {WETH} from "solmate/src/tokens/WETH.sol";
 // Libraries
 import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
+// Enums
+import {QuoteType} from "../../contracts/enums/QuoteType.sol";
+import {CollectionType} from "../../contracts/enums/CollectionType.sol";
+
 // Core contracts
 import {LooksRareProtocol, ILooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
 import {TransferManager} from "../../contracts/TransferManager.sol";
@@ -194,6 +198,48 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         takerOrder = OrderStructs.Taker(takerUser, abi.encode());
     }
 
+    function _batchERC721ExecutionSetUp(
+        uint256 price,
+        uint256 numberOfPurhcases,
+        QuoteType quoteType
+    ) internal returns (BatchExecutionParameters[] memory batchExecutionParameters) {
+        batchExecutionParameters = new BatchExecutionParameters[](numberOfPurhcases);
+        address currency;
+
+        for (uint256 i; i < numberOfPurhcases; i++) {
+            // Mint asset
+            if (quoteType == QuoteType.Bid) {
+                mockERC721.mint(takerUser, i);
+                currency = address(weth);
+            } else if (quoteType == QuoteType.Ask) {
+                mockERC721.mint(makerUser, i);
+            }
+
+            batchExecutionParameters[i].maker = _createSingleItemMakerOrder({
+                quoteType: quoteType,
+                globalNonce: 0,
+                subsetNonce: 0,
+                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
+                collectionType: CollectionType.ERC721,
+                orderNonce: i,
+                collection: address(mockERC721),
+                currency: currency,
+                signer: makerUser,
+                price: price,
+                itemId: i // (0, 1, etc.)
+            });
+
+            // Sign order
+            batchExecutionParameters[i].makerSignature = _signMakerOrder(
+                batchExecutionParameters[i].maker,
+                makerUserPK
+            );
+            batchExecutionParameters[i].taker = _genericTakerOrder();
+
+            _assertValidMakerOrder(batchExecutionParameters[i].maker, batchExecutionParameters[i].makerSignature);
+        }
+    }
+
     function _addStrategy(address strategy, bytes4 selector, bool isMakerBid) internal {
         looksRareProtocol.addStrategy(
             _standardProtocolFeeBp,
@@ -235,6 +281,39 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         }
     }
 
+    string private constant BUYER_COST_MISMATCH_ERROR = "Buyer should pay for the whole price";
+
+    function _assertBuyerPaidETH(address buyer, uint256 totalValue) internal {
+        assertEq(buyer.balance, _initialETHBalanceUser - totalValue, BUYER_COST_MISMATCH_ERROR);
+    }
+
+    function _assertBuyerPaidWETH(address buyer, uint256 totalValue) internal {
+        assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - totalValue, BUYER_COST_MISMATCH_ERROR);
+    }
+
+    string private constant SELLER_PROCEED_MISMATCH_ERROR =
+        "Seller should receive 99.5% of the whole price (0.5% protocol)";
+
+    function _assertSellerReceivedWETHAfterStandardProtocolFee(address seller, uint256 totalValue) internal {
+        assertEq(
+            weth.balanceOf(seller),
+            _initialWETHBalanceUser + (totalValue * _sellerProceedBpWithStandardProtocolFeeBp) / 10_000,
+            SELLER_PROCEED_MISMATCH_ERROR
+        );
+    }
+
+    function _assertSellerReceivedETHAfterStandardProtocolFee(address seller, uint256 totalValue) internal {
+        assertEq(
+            seller.balance,
+            _initialETHBalanceUser + (totalValue * _sellerProceedBpWithStandardProtocolFeeBp) / 10_000,
+            SELLER_PROCEED_MISMATCH_ERROR
+        );
+    }
+
+    function _boolFlagsArray() internal pure returns (bool[2] memory flags) {
+        flags[0] = true;
+    }
+
     /**
      * NOTE: It inherits from ILooksRareProtocol, so it
      *       needs to at least define the functions below.
@@ -256,11 +335,14 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
     ) external payable {}
 
     function executeMultipleTakerBids(
-        OrderStructs.Taker[] calldata takerBids,
-        OrderStructs.Maker[] calldata makerAsks,
-        bytes[] calldata makerSignatures,
-        OrderStructs.MerkleTree[] calldata merkleTrees,
+        BatchExecutionParameters[] calldata batchExecutionParameters,
         address affiliate,
         bool isAtomic
     ) external payable {}
+
+    function executeMultipleTakerAsks(
+        BatchExecutionParameters[] calldata batchExecutionParameters,
+        address affiliate,
+        bool isAtomic
+    ) external {}
 }

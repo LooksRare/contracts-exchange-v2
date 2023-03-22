@@ -62,13 +62,8 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(orderIndex), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertBuyerPaidETH(takerUser, price);
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -108,13 +103,8 @@ contract BatchMakerOrdersTest is ProtocolBase {
 
         // Maker user has received the asset
         assertEq(mockERC721.ownerOf(orderIndex), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            weth.balanceOf(takerUser),
-            _initialWETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertBuyerPaidWETH(makerUser, price);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
         // Verify the nonce is marked as executed
         assertEq(
             looksRareProtocol.userOrderNonce(makerUser, makerBidToExecute.orderNonce),

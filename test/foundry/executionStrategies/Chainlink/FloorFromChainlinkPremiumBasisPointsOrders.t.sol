@@ -81,10 +81,9 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 9.797 ether);
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.748015 ether);
+        uint256 price = 9.797 ether;
+        _assertBuyerPaidWETH(takerUser, price);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(makerUser, price);
     }
 
     function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceLessThanMinPrice() public {
@@ -97,7 +96,8 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
             premium: premium
         });
 
-        makerAsk.price = 9.8 ether;
+        uint256 price = 9.8 ether;
+        makerAsk.price = price;
         takerBid.additionalParameters = abi.encode(makerAsk.price);
 
         bytes memory signature = _signMakerOrder(makerAsk, makerUserPK);
@@ -113,9 +113,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(1), takerUser);
 
-        // Taker bid user pays the whole price
-        assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser - 9.8 ether);
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser + 9.751 ether);
+        _assertBuyerPaidWETH(takerUser, price);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(makerUser, price);
     }
 }

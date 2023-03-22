@@ -9,6 +9,7 @@ import {OrderStructs} from "../../contracts/libraries/OrderStructs.sol";
 
 // Interfaces
 import {IAffiliateManager} from "../../contracts/interfaces/IAffiliateManager.sol";
+import {ILooksRareProtocol} from "../../contracts/interfaces/ILooksRareProtocol.sol";
 
 // Mocks and other tests
 import {ProtocolBase} from "./ProtocolBase.t.sol";
@@ -56,13 +57,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         looksRareProtocol.updateAffiliateController(_owner);
 
         // 2. NewAffiliateProgramStatus
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit NewAffiliateProgramStatus(true);
-        looksRareProtocol.updateAffiliateProgramStatus(true);
-
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit NewAffiliateProgramStatus(false);
-        looksRareProtocol.updateAffiliateProgramStatus(false);
+        bool[2] memory boolFlags = _boolFlagsArray();
+        for (uint256 i; i < boolFlags.length; i++) {
+            vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+            emit NewAffiliateProgramStatus(boolFlags[i]);
+            looksRareProtocol.updateAffiliateProgramStatus(boolFlags[i]);
+        }
 
         // 3. NewAffiliateRate
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
@@ -128,15 +128,14 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         // Maker ask user receives 99.5% of the whole price (0.5% protocol)
         assertEq(
-            address(makerUser).balance,
+            makerUser.balance,
             _initialETHBalanceUser + (price * (ONE_HUNDRED_PERCENT_IN_BP - _minTotalFeeBp)) / ONE_HUNDRED_PERCENT_IN_BP
         );
         // Affiliate user receives 20% of protocol fee
-        assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
+        assertEq(_affiliate.balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
         assertEq(
             address(protocolFeeRecipient).balance,
             ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount),
@@ -155,98 +154,121 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         _setUpUsers();
         _setUpAffiliate();
 
-        uint256 numberPurchases = 8;
-        uint256 faultyTokenId = numberPurchases - 1;
+        uint256 numberOfPurchases = 8;
+        uint256 faultyTokenId = numberOfPurchases - 1;
 
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](numberPurchases);
-        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](numberPurchases);
-        bytes[] memory signatures = new bytes[](numberPurchases);
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
+            price,
+            numberOfPurchases,
+            QuoteType.Ask
+        );
 
-        for (uint256 i; i < numberPurchases; i++) {
-            // Mint asset
-            mockERC721.mint(makerUser, i);
-
-            makerAsks[i] = _createSingleItemMakerOrder({
-                quoteType: QuoteType.Ask,
-                globalNonce: 0,
-                subsetNonce: 0,
-                strategyId: STANDARD_SALE_FOR_FIXED_PRICE_STRATEGY,
-                collectionType: CollectionType.ERC721,
-                orderNonce: i,
-                collection: address(mockERC721),
-                currency: ETH,
-                signer: makerUser,
-                price: price,
-                itemId: i // (0, 1, etc.)
-            });
-
-            // Sign order
-            signatures[i] = _signMakerOrder(makerAsks[i], makerUserPK);
-
-            // Verify validity of maker ask order
-            _assertValidMakerOrder(makerAsks[i], signatures[i]);
-
-            takerBids[i] = _genericTakerOrder();
-        }
-
-        // Transfer tokenId=2 to random user
-        address randomUser = address(55);
-
+        // Transfer tokenId=7 to random user
         vm.prank(makerUser);
-        mockERC721.transferFrom(makerUser, randomUser, faultyTokenId);
-
-        // Other execution parameters
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](numberPurchases);
+        mockERC721.transferFrom(makerUser, _randomUser, faultyTokenId);
 
         uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(
-            (numberPurchases - 1) * price * _minTotalFeeBp,
+            (numberOfPurchases - 1) * price * _minTotalFeeBp,
             _affiliateRate
         );
 
         // Execute taker bid transaction
         vm.prank(takerUser);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-        emit AffiliatePayment(_affiliate, makerAsks[0].currency, expectedAffiliateFeeAmount);
-        looksRareProtocol.executeMultipleTakerBids{value: price * numberPurchases}(
-            takerBids,
-            makerAsks,
-            signatures,
-            merkleTrees,
+        emit AffiliatePayment(_affiliate, ETH, expectedAffiliateFeeAmount);
+        looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
+            batchExecutionParameters,
             _affiliate,
             false
         );
 
         for (uint256 i; i < faultyTokenId; i++) {
-            // Taker user has received the first two assets
+            // Taker user has received the first seven assets
             assertEq(mockERC721.ownerOf(i), takerUser);
-            // Verify the first two nonces are marked as executed
+            // Verify the first seven nonces are marked as executed
             assertEq(looksRareProtocol.userOrderNonce(makerUser, i), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
         }
 
         // Taker user has not received the asset
-        assertEq(mockERC721.ownerOf(faultyTokenId), randomUser);
+        assertEq(mockERC721.ownerOf(faultyTokenId), _randomUser);
         // Verify the nonce is NOT marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, faultyTokenId), bytes32(0));
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - 1 - ((numberPurchases - 1) * price));
-        // Maker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser +
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) * (numberPurchases - 1)) /
-                ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertBuyerPaidETH(takerUser, price * (numberOfPurchases - 1) + 1);
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price * (numberOfPurchases - 1));
         // Affiliate user receives 20% of protocol fee
-        assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
+        assertEq(_affiliate.balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
         assertEq(
             address(protocolFeeRecipient).balance,
-            (((numberPurchases - 1) * (price * _minTotalFeeBp)) /
+            (((numberOfPurchases - 1) * (price * _minTotalFeeBp)) /
                 ONE_HUNDRED_PERCENT_IN_BP -
                 expectedAffiliateFeeAmount),
             "ProtocolFeeRecipient should receive 80% of protocol fee"
         );
         // Only 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
+    }
+
+    /**
+     * Multiple takerAsks match makerBid orders. Protocol fee is set, no royalties, affiliate is set.
+     */
+    function testMultipleTakerAsksERC721WithAffiliateButWithoutRoyalty() public {
+        _setUpUsers();
+        _setUpAffiliate();
+
+        uint256 numberOfPurchases = 8;
+        uint256 faultyTokenId = numberOfPurchases - 1;
+
+        BatchExecutionParameters[] memory batchExecutionParameters = _batchERC721ExecutionSetUp(
+            price,
+            numberOfPurchases,
+            QuoteType.Bid
+        );
+
+        // Transfer tokenId=7 to random user
+        vm.prank(takerUser);
+        mockERC721.transferFrom(takerUser, _randomUser, faultyTokenId);
+
+        uint256 totalCost = price * (numberOfPurchases - 1);
+        uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(
+            totalCost * _minTotalFeeBp,
+            _affiliateRate
+        );
+
+        // Execute taker bid transaction
+        vm.prank(takerUser);
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        emit AffiliatePayment(_affiliate, address(weth), expectedAffiliateFeeAmount);
+        looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _affiliate, false);
+
+        for (uint256 i; i < faultyTokenId; i++) {
+            assertEq(mockERC721.ownerOf(i), makerUser, "Maker user should have received the first seven assets");
+            assertEq(
+                looksRareProtocol.userOrderNonce(makerUser, i),
+                MAGIC_VALUE_ORDER_NONCE_EXECUTED,
+                "The first seven nonces should be marked as executed"
+            );
+        }
+
+        assertEq(mockERC721.ownerOf(faultyTokenId), _randomUser, "Maker user should not have received the asset");
+        assertEq(
+            looksRareProtocol.userOrderNonce(makerUser, faultyTokenId),
+            bytes32(0),
+            "The nonce should not be marked as executed"
+        );
+        _assertBuyerPaidWETH(makerUser, totalCost);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, totalCost);
+        assertEq(
+            weth.balanceOf(_affiliate),
+            _initialWETHBalanceAffiliate + expectedAffiliateFeeAmount,
+            "Affiliate user should receive 20% of protocol fee"
+        );
+        assertEq(
+            weth.balanceOf(address(protocolFeeRecipient)),
+            (totalCost * _minTotalFeeBp) /
+            ONE_HUNDRED_PERCENT_IN_BP -
+            expectedAffiliateFeeAmount,
+            "Owner should receive 80% of protocol fee"
+        );
     }
 
     /**
@@ -280,13 +302,8 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 99.5% of whole price (protocol fee)
-        assertEq(
-            weth.balanceOf(takerUser),
-            _initialWETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertBuyerPaidWETH(makerUser, price);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
         // Affiliate user receives 20% of protocol fee
         assertEq(weth.balanceOf(_affiliate), _initialWETHBalanceAffiliate + expectedAffiliateFeeAmount);
         assertEq(

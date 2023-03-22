@@ -89,13 +89,8 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
 
         // Taker user has received the asset
         assertEq(mockERC721.ownerOf(0), makerUser);
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            weth.balanceOf(takerUser),
-            _initialWETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertBuyerPaidWETH(makerUser, price);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
         // Verify the nonce is not marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), _computeOrderHash(makerBid));
 
@@ -127,15 +122,8 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(mockERC721.ownerOf(2), makerUser);
         assertEq(mockERC721.ownerOf(3), makerUser);
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - 4 * price);
-        // Taker ask user receives 99.5% of the whole price (0.5% protocol)
-        assertEq(
-            weth.balanceOf(secondTakerUser),
-            _initialWETHBalanceUser +
-                3 *
-                ((price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP)
-        );
+        _assertBuyerPaidWETH(makerUser, price * 4);
+        _assertSellerReceivedWETHAfterStandardProtocolFee(secondTakerUser, price * 3);
         // Verify the nonce is now marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }

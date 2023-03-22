@@ -18,6 +18,7 @@ abstract contract TestParameters is Test {
     address internal constant _transferrer = address(100);
     address internal constant _royaltyRecipient = address(22);
     address internal constant _affiliate = address(2);
+    address internal constant _randomUser = address(55);
 
     // Currencies
     address internal constant ETH = address(0);

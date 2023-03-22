@@ -99,8 +99,7 @@ contract BundleTransactionsTest is ProtocolBase {
 
         _assertMockERC721Ownership(makerBid.itemIds, makerUser);
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         // Royalty recipient receives royalties
         assertEq(
             weth.balanceOf(_royaltyRecipient),
@@ -111,11 +110,7 @@ contract BundleTransactionsTest is ProtocolBase {
             (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP,
             "ProtocolFeeRecipient should receive protocol fee"
         );
-        // Taker ask user receives 99.5% of the whole price
-        assertEq(
-            weth.balanceOf(takerUser),
-            _initialWETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
@@ -221,11 +216,10 @@ contract BundleTransactionsTest is ProtocolBase {
 
         _assertMockERC721Ownership(makerAsk.itemIds, takerUser);
 
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         // Royalty recipient receives the royalties
         assertEq(
-            address(_royaltyRecipient).balance,
+            _royaltyRecipient.balance,
             _initialETHBalanceRoyaltyRecipient + (price * _standardRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
         assertEq(
@@ -233,11 +227,7 @@ contract BundleTransactionsTest is ProtocolBase {
             (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP,
             "ProtocolFeeRecipient should receive protocol fee"
         );
-        // Maker ask user receives 99.5% of the whole price
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed
@@ -247,8 +237,7 @@ contract BundleTransactionsTest is ProtocolBase {
     function _assertSuccessfulTakerAskNoRoyalties(OrderStructs.Maker memory makerBid) private {
         uint256 price = makerBid.price;
 
-        // Maker bid user pays the whole price
-        assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
+        _assertBuyerPaidWETH(makerUser, price);
         // Royalty recipient receives no royalty
         assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient);
         assertEq(
@@ -256,11 +245,7 @@ contract BundleTransactionsTest is ProtocolBase {
             (price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP,
             "ProtocolFeeRecipient should receive protocol fee"
         );
-        // Taker ask user receives 99.5% of the whole price (no royalties are paid)
-        assertEq(
-            weth.balanceOf(takerUser),
-            _initialWETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
@@ -268,20 +253,15 @@ contract BundleTransactionsTest is ProtocolBase {
     function _assertSuccessfulTakerBidNoRoyalties(OrderStructs.Maker memory makerAsk) private {
         uint256 price = makerAsk.price;
 
-        // Taker bid user pays the whole price
-        assertEq(address(takerUser).balance, _initialETHBalanceUser - price);
+        _assertBuyerPaidETH(takerUser, price);
         // Royalty recipient receives no royalty
-        assertEq(address(_royaltyRecipient).balance, _initialETHBalanceRoyaltyRecipient);
+        assertEq(_royaltyRecipient.balance, _initialETHBalanceRoyaltyRecipient);
         assertEq(
             address(protocolFeeRecipient).balance,
             (price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP,
             "ProtocolFeeRecipient should receive protocol fee"
         );
-        // Maker ask user receives 99.5% of the whole price (no royalties are paid)
-        assertEq(
-            address(makerUser).balance,
-            _initialETHBalanceUser + (price * _sellerProceedBpWithStandardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP
-        );
+        _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, price);
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
         // Verify the nonce is marked as executed

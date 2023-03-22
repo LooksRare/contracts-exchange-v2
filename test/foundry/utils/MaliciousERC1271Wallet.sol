@@ -58,11 +58,8 @@ abstract contract MaliciousERC1271Wallet {
     }
 
     function _executeMultipleTakerBids() internal {
-        OrderStructs.Taker[] memory takerBids = new OrderStructs.Taker[](2);
-        OrderStructs.Maker[] memory makerAsks = new OrderStructs.Maker[](2);
-        bytes[] memory signatures = new bytes[](2);
-        OrderStructs.MerkleTree[] memory merkleTrees = new OrderStructs.MerkleTree[](2);
-
-        looksRareProtocol.executeMultipleTakerBids(takerBids, makerAsks, signatures, merkleTrees, address(this), false);
+        ILooksRareProtocol.BatchExecutionParameters[]
+            memory batchExecutionParameters = new ILooksRareProtocol.BatchExecutionParameters[](2);
+        looksRareProtocol.executeMultipleTakerBids(batchExecutionParameters, address(this), false);
     }
 }

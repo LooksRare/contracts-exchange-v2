@@ -23,6 +23,20 @@ interface ILooksRareProtocol {
     }
 
     /**
+     * @notice This struct is used in executeMultipleTakerAsks and executeMultipleTakerBids.
+     * @param taker Taker order
+     * @param maker Maker order
+     * @param makerSignature Maker order signature
+     * @param merkleTree Maker order merkle tree (if any)
+     */
+    struct BatchExecutionParameters {
+        OrderStructs.Taker taker;
+        OrderStructs.Maker maker;
+        bytes makerSignature;
+        OrderStructs.MerkleTree merkleTree;
+    }
+
+    /**
      * @notice It is emitted when there is an affiliate fee paid.
      * @param affiliate Affiliate address
      * @param currency Address of the currency
@@ -157,20 +171,27 @@ interface ILooksRareProtocol {
 
     /**
      * @notice This function allows a user to batch buy with an array of taker bids (against an array of maker asks).
-     * @param takerBids Array of taker bid structs
-     * @param makerAsks Array of maker ask structs
-     * @param makerSignatures Array of maker signatures
-     * @param merkleTrees Array of merkle tree structs if the signature contains multiple maker orders
+     * @param batchExecutionParameters Array of BatchExecutionParameters structs
      * @param affiliate Affiliate address
      * @param isAtomic Whether the execution should be atomic
      *        i.e. whether it should revert if 1 or more transactions fail
      */
     function executeMultipleTakerBids(
-        OrderStructs.Taker[] calldata takerBids,
-        OrderStructs.Maker[] calldata makerAsks,
-        bytes[] calldata makerSignatures,
-        OrderStructs.MerkleTree[] calldata merkleTrees,
+        BatchExecutionParameters[] calldata batchExecutionParameters,
         address affiliate,
         bool isAtomic
     ) external payable;
+
+    /**
+     * @notice This function allows a user to batch sell with an array of taker asks (against an array of maker bids).
+     * @param batchExecutionParameters Array of BatchExecutionParameters structs
+     * @param affiliate Affiliate address
+     * @param isAtomic Whether the execution should be atomic
+     *        i.e. whether it should revert if 1 or more transactions fail
+     */
+    function executeMultipleTakerAsks(
+        BatchExecutionParameters[] calldata batchExecutionParameters,
+        address affiliate,
+        bool isAtomic
+    ) external;
 }

@@ -358,7 +358,9 @@ contract LooksRareProtocol is
 
         if (makerOrder.quoteType == QuoteType.Bid) {
             protocolFeeAmount = _executeTakerAsk(takerOrder, makerOrder, sender, orderHash);
-        } else if (makerOrder.quoteType == QuoteType.Ask) {
+        } else {
+            // If we introduce a new quote type one day, we need to make sure the `else` statement
+            // is updated to `else if (makerOrder.quoteType == QuoteType.Ask)`
             protocolFeeAmount = _executeTakerBid(takerOrder, makerOrder, sender, orderHash);
         }
     }

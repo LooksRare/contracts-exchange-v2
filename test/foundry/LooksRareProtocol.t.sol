@@ -34,7 +34,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         mockERC20 = new MockERC20();
     }
 
-    function testCannotTradeIfInvalidAmounts() public {
+    function test_Trade_RevertIf_InvalidAmounts() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
@@ -81,7 +81,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         );
     }
 
-    function testCannotTradeIfETHIsUsedForMakerBid() public {
+    function test_Trade_RevertIf_ETHIsUsedForMakerBid() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             ETH
@@ -102,7 +102,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotTradeIfInvalidQuoteType() public {
+    function test_Trade_RevertIf_InvalidQuoteType() public {
         // 1. QuoteType = BID but executeTakerBid
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
@@ -130,14 +130,14 @@ contract LooksRareProtocolTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testUpdateETHGasLimitForTransfer() public asPrankedUser(_owner) {
+    function test_UpdateETHGasLimitForTransfer() public asPrankedUser(_owner) {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewGasLimitETHTransfer(10_000);
         looksRareProtocol.updateETHGasLimitForTransfer(10_000);
         assertEq(uint256(vm.load(address(looksRareProtocol), bytes32(uint256(14)))), 10_000);
     }
 
-    function testUpdateETHGasLimitForTransferRevertsIfTooLow() public asPrankedUser(_owner) {
+    function test_UpdateETHGasLimitForTransfer_RevertIf_TooLow() public asPrankedUser(_owner) {
         uint256 newGasLimitETHTransfer = 2_300;
         vm.expectRevert(NewGasLimitETHTransferTooLow.selector);
         looksRareProtocol.updateETHGasLimitForTransfer(newGasLimitETHTransfer - 1);
@@ -146,7 +146,7 @@ contract LooksRareProtocolTest is ProtocolBase {
         assertEq(uint256(vm.load(address(looksRareProtocol), bytes32(uint256(14)))), newGasLimitETHTransfer);
     }
 
-    function testUpdateETHGasLimitForTransferNotOwner() public {
+    function test_UpdateETHGasLimitForTransfer_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateETHGasLimitForTransfer(10_000);
     }

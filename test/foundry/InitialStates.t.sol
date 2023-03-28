@@ -15,7 +15,7 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
     /**
      * Verify initial post-deployment states are as expected
      */
-    function testInitialStates() public {
+    function test_InitialStates() public {
         assertEq(looksRareProtocol.owner(), _owner);
         assertEq(looksRareProtocol.protocolFeeRecipient(), address(protocolFeeRecipient));
         assertEq(address(looksRareProtocol.transferManager()), address(transferManager));

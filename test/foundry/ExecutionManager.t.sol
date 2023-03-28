@@ -25,7 +25,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
     }
 
     function test_UpdateCreatorFeeManager() public asPrankedUser(_owner) {
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewCreatorFeeManager(address(1));
         looksRareProtocol.updateCreatorFeeManager(address(1));
         assertEq(address(looksRareProtocol.creatorFeeManager()), address(1));
@@ -38,7 +38,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
 
     function testFuzz_UpdateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
         vm.assume(newMaxCreatorFeeBp <= 2_500);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
         looksRareProtocol.updateMaxCreatorFeeBp(newMaxCreatorFeeBp);
         assertEq(looksRareProtocol.maxCreatorFeeBp(), newMaxCreatorFeeBp);
@@ -56,7 +56,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
     }
 
     function test_UpdateProtocolFeeRecipient() public asPrankedUser(_owner) {
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewProtocolFeeRecipient(address(1));
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
         assertEq(looksRareProtocol.protocolFeeRecipient(), address(1));

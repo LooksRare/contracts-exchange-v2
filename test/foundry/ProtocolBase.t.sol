@@ -327,7 +327,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         address[2] memory expectedRecipients,
         uint256[3] memory expectedFees
     ) internal {
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit TakerBid(
             NonceInvalidationParameters({
                 orderHash: _computeOrderHash(makerAsk),
@@ -351,7 +351,7 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         address[2] memory expectedRecipients,
         uint256[3] memory expectedFees
     ) internal {
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit TakerAsk(
             NonceInvalidationParameters({
                 orderHash: _computeOrderHash(makerBid),

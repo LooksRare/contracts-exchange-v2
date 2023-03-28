@@ -23,13 +23,13 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
 
     function test_UpdateCurrencyStatus() public asPrankedUser(_owner) {
         // Set to true
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit CurrencyStatusUpdated(address(mockERC20), true);
         currencyManager.updateCurrencyStatus(address(mockERC20), true);
         assertTrue(currencyManager.isCurrencyAllowed(address(mockERC20)));
 
         // Set to false
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit CurrencyStatusUpdated(address(mockERC20), false);
         currencyManager.updateCurrencyStatus(address(mockERC20), false);
         assertFalse(currencyManager.isCurrencyAllowed(address(mockERC20)));

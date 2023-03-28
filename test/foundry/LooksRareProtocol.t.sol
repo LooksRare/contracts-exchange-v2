@@ -131,7 +131,7 @@ contract LooksRareProtocolTest is ProtocolBase {
     }
 
     function test_UpdateETHGasLimitForTransfer() public asPrankedUser(_owner) {
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewGasLimitETHTransfer(10_000);
         looksRareProtocol.updateETHGasLimitForTransfer(10_000);
         assertEq(uint256(vm.load(address(looksRareProtocol), bytes32(uint256(14)))), 10_000);

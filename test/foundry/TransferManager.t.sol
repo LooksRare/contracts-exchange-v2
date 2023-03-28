@@ -43,14 +43,14 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         address[] memory approvedOperators = new address[](1);
         approvedOperators[0] = _transferrer;
 
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit ApprovalsGranted(user, approvedOperators);
         transferManager.grantApprovals(approvedOperators);
     }
 
     function _allowOperator(address transferrer) private {
         vm.prank(_owner);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit OperatorAllowed(transferrer);
         transferManager.allowOperator(transferrer);
     }
@@ -306,7 +306,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
         // 1. User revokes the operator
         vm.prank(_sender);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit ApprovalsRemoved(_sender, operators);
         transferManager.revokeApprovals(operators);
 
@@ -323,7 +323,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         // 2. Sender grants again approvals but owner removes the operators
         _grantApprovals(_sender);
         vm.prank(_owner);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit OperatorRemoved(_transferrer);
         transferManager.removeOperator(_transferrer);
 
@@ -338,7 +338,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
         // 1. User revokes the operator
         vm.prank(_sender);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit ApprovalsRemoved(_sender, operators);
         transferManager.revokeApprovals(operators);
 
@@ -355,7 +355,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         // 2. Sender grants again approvals but owner removes the operators
         _grantApprovals(_sender);
         vm.prank(_owner);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit OperatorRemoved(_transferrer);
         transferManager.removeOperator(_transferrer);
 
@@ -370,7 +370,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
 
         // 1. User revokes the operator
         vm.prank(_sender);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit ApprovalsRemoved(_sender, operators);
         transferManager.revokeApprovals(operators);
 
@@ -383,7 +383,7 @@ contract TransferManagerTest is ITransferManager, TestHelpers, TestParameters {
         // 2. Sender grants again approvals but owner removes the operators
         _grantApprovals(_sender);
         vm.prank(_owner);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit OperatorRemoved(_transferrer);
         transferManager.removeOperator(_transferrer);
 

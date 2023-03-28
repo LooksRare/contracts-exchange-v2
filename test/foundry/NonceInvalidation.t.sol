@@ -43,7 +43,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         subsetNonces[0] = subsetNonce;
 
         vm.prank(makerUser);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit SubsetNoncesCancelled(makerUser, subsetNonces);
         looksRareProtocol.cancelSubsetNonces(subsetNonces);
 
@@ -77,7 +77,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 newAskNonce = 0 + quasiRandomNumber;
 
         vm.prank(makerUser);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewBidAskNonces(makerUser, 0, newAskNonce);
         looksRareProtocol.incrementBidAskNonces(false, true);
 
@@ -121,7 +121,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256 newBidNonce = 0 + quasiRandomNumber;
 
         vm.prank(makerUser);
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewBidAskNonces(makerUser, newBidNonce, 0);
         looksRareProtocol.incrementBidAskNonces(true, false);
 
@@ -307,7 +307,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         uint256[] memory orderNonces = new uint256[](2);
         orderNonces[0] = nonceOne;
         orderNonces[1] = nonceTwo;
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit OrderNoncesCancelled(makerUser, orderNonces);
         looksRareProtocol.cancelOrderNonces(orderNonces);
 

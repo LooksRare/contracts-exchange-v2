@@ -52,20 +52,20 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
     function test_EventsAreEmittedAsExpected() public asPrankedUser(_owner) {
         // 1. NewAffiliateController
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewAffiliateController(_owner);
         looksRareProtocol.updateAffiliateController(_owner);
 
         // 2. NewAffiliateProgramStatus
         bool[2] memory boolFlags = _boolFlagsArray();
         for (uint256 i; i < boolFlags.length; i++) {
-            vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+            vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
             emit NewAffiliateProgramStatus(boolFlags[i]);
             looksRareProtocol.updateAffiliateProgramStatus(boolFlags[i]);
         }
 
         // 3. NewAffiliateRate
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewAffiliateRate(takerUser, 30);
         looksRareProtocol.updateAffiliateRate(takerUser, 30);
     }
@@ -122,7 +122,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit AffiliatePayment(_affiliate, makerAsk.currency, expectedAffiliateFeeAmount);
         looksRareProtocol.executeTakerBid{value: price}(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _affiliate);
 
@@ -175,7 +175,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit AffiliatePayment(_affiliate, ETH, expectedAffiliateFeeAmount);
         looksRareProtocol.executeMultipleTakerBids{value: price * numberOfPurchases}(
             batchExecutionParameters,
@@ -237,7 +237,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit AffiliatePayment(_affiliate, address(weth), expectedAffiliateFeeAmount);
         looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _affiliate, false);
 
@@ -299,7 +299,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit AffiliatePayment(_affiliate, makerBid.currency, expectedAffiliateFeeAmount);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _affiliate);
 

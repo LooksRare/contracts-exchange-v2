@@ -50,7 +50,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         uint16 minTotalFeeBp = 200;
         bool isActive = false;
 
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit StrategyUpdated(strategyId, isActive, standardProtocolFeeBp, minTotalFeeBp);
         looksRareProtocol.updateStrategy(strategyId, isActive, standardProtocolFeeBp, minTotalFeeBp);
 
@@ -81,7 +81,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         bool isMakerBid = true;
         address implementation = address(strategy);
 
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit NewStrategy(
             strategyId,
             _standardProtocolFeeBp,
@@ -104,7 +104,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         uint16 newMinTotalFeeBp = 200;
         bool isActive = true;
 
-        vm.expectEmit({checkTopic1: false, checkTopic2: false, checkTopic3: false, checkData: true});
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true});
         emit StrategyUpdated(strategyId, isActive, newStandardProtocolFeeBp, newMinTotalFeeBp);
         looksRareProtocol.updateStrategy(strategyId, isActive, newStandardProtocolFeeBp, newMinTotalFeeBp);
 

@@ -59,25 +59,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerBid(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerAsk),
-                orderNonce: makerAsk.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            takerUser,
-            makerAsk.strategyId,
-            makerAsk.currency,
-            makerAsk.collection,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        _assertTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -126,25 +108,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker bid transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerBid(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerAsk),
-                orderNonce: makerAsk.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            takerUser,
-            makerAsk.strategyId,
-            makerAsk.currency,
-            makerAsk.collection,
-            makerAsk.itemIds,
-            makerAsk.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        _assertTakerBidEvent(makerAsk, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerBid{value: price}(
             takerBid,
             makerAsk,
@@ -188,26 +152,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerAsk(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerBid),
-                orderNonce: makerBid.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            makerUser,
-            makerBid.strategyId,
-            makerBid.currency,
-            makerBid.collection,
-            makerBid.itemIds,
-            makerBid.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        _assertTakerAskEvent(makerBid, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         _assertSuccessfulExecutionThroughWETH(makerUser, takerUser, price, expectedFees);
@@ -248,25 +193,7 @@ contract StandardTransactionsTest is ProtocolBase {
 
         // Execute taker ask transaction
         vm.prank(takerUser);
-        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
-
-        emit TakerAsk(
-            NonceInvalidationParameters({
-                orderHash: _computeOrderHash(makerBid),
-                orderNonce: makerBid.orderNonce,
-                isNonceInvalidated: true
-            }),
-            takerUser,
-            makerUser,
-            makerBid.strategyId,
-            makerBid.currency,
-            makerBid.collection,
-            makerBid.itemIds,
-            makerBid.amounts,
-            expectedRecipients,
-            expectedFees
-        );
-
+        _assertTakerAskEvent(makerBid, expectedRecipients, expectedFees);
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
 
         _assertSuccessfulExecutionThroughWETH(makerUser, takerUser, price, expectedFees);

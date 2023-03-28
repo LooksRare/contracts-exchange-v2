@@ -36,7 +36,6 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
      * Three ERC721 are sold through 3 taker bids in one transaction with non-atomicity.
      */
     function testThreeTakerBidsERC721() public {
-        uint256 price = 0.015 ether;
         _setUpUsers();
 
         uint256 numberOfPurchases = 3;

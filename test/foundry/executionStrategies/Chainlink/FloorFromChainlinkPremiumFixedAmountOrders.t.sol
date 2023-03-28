@@ -22,7 +22,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         super.setUp();
     }
 
-    function testInactiveStrategy() public {
+    function test_InactiveStrategy() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -40,7 +40,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanMinPrice() public {
+    function test_FloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloorFromChainlink = StrategyChainlinkFloor(implementation);
 
@@ -52,7 +52,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         _testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceEqualToMinPrice() public {
+    function test_FloorFromChainlinkPremiumFixedAmountDesiredSalePriceEqualToMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloorFromChainlink = StrategyChainlinkFloor(implementation);
 
@@ -84,7 +84,7 @@ contract FloorFromChainlinkPremiumFixedAmountOrdersTest is FloorFromChainlinkPre
         _assertSellerReceivedWETHAfterStandardProtocolFee(makerUser, 9.8 ether);
     }
 
-    function testFloorFromChainlinkPremiumFixedAmountDesiredSalePriceLessThanMinPrice() public {
+    function test_FloorFromChainlinkPremiumFixedAmountDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloorFromChainlink = StrategyChainlinkFloor(implementation);
 

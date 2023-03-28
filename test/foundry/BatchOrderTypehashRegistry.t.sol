@@ -15,7 +15,7 @@ contract BatchOrderTypehashRegistryInheriter is BatchOrderTypehashRegistry {
 }
 
 contract BatchOrderTypehashRegistryTest is Test {
-    function testHash() public {
+    function test_Hash() public {
         BatchOrderTypehashRegistryInheriter registry = new BatchOrderTypehashRegistryInheriter();
         bytes32 root = hex"6942000000000000000000000000000000000000000000000000000000000000";
         assertEq(
@@ -60,7 +60,7 @@ contract BatchOrderTypehashRegistryTest is Test {
         );
     }
 
-    function testGetTypehash() public {
+    function test_GetTypehash() public {
         BatchOrderTypehashRegistryInheriter registry = new BatchOrderTypehashRegistryInheriter();
         bytes memory makerOrderString = bytes(
             "Maker("
@@ -133,7 +133,7 @@ contract BatchOrderTypehashRegistryTest is Test {
         );
     }
 
-    function testGetTypehashMerkleProofTooLarge(uint256 height) public {
+    function test_GetTypehashMerkleProofTooLarge(uint256 height) public {
         vm.assume(height > 10);
 
         BatchOrderTypehashRegistryInheriter registry = new BatchOrderTypehashRegistryInheriter();

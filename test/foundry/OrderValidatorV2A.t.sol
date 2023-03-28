@@ -57,7 +57,7 @@ contract OrderValidatorV2ATest is TestParameters {
         orderValidator = new OrderValidatorV2A(address(looksRareProtocol));
     }
 
-    function testDeriveProtocolParameters() public {
+    function test_DeriveProtocolParameters() public {
         orderValidator.deriveProtocolParameters();
         assertEq(
             orderValidator.domainSeparator(),
@@ -76,7 +76,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(orderValidator.maxCreatorFeeBp(), 1_000);
     }
 
-    function testMakerAskStrategyNotImplemented() public {
+    function test_MakerAskStrategyNotImplemented() public {
         OrderStructs.Maker memory makerAsk;
         makerAsk.quoteType = QuoteType.Ask;
         makerAsk.strategyId = 1;
@@ -88,7 +88,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[0], STRATEGY_NOT_IMPLEMENTED);
     }
 
-    function testMakerBidStrategyNotImplemented() public {
+    function test_MakerBidStrategyNotImplemented() public {
         OrderStructs.Maker memory makerBid;
         makerBid.quoteType = QuoteType.Bid;
         address currency = address(1); // it cannot be 0
@@ -103,7 +103,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[0], STRATEGY_NOT_IMPLEMENTED);
     }
 
-    function testMakerAskLooksRareProtocolIsNotAWhitelistedOperator() public {
+    function test_MakerAskLooksRareProtocolIsNotAWhitelistedOperator() public {
         OrderStructs.Maker memory makerAsk;
         makerAsk.quoteType = QuoteType.Ask;
         makerAsk.signer = makerUser;
@@ -128,7 +128,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[7], TRANSFER_MANAGER_APPROVAL_REVOKED_BY_OWNER_FOR_EXCHANGE);
     }
 
-    function testMakerAskWrongCollectionTypeERC721() public {
+    function test_MakerAskWrongCollectionTypeERC721() public {
         OrderStructs.Maker memory makerAsk;
         makerAsk.quoteType = QuoteType.Ask;
         makerAsk.collectionType = CollectionType.ERC721;
@@ -141,7 +141,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[6], POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721);
     }
 
-    function testMakerBidWrongCollectionTypeERC721() public {
+    function test_MakerBidWrongCollectionTypeERC721() public {
         OrderStructs.Maker memory makerBid;
         makerBid.quoteType = QuoteType.Bid;
         makerBid.collectionType = CollectionType.ERC721;
@@ -154,11 +154,11 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[6], POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC721);
     }
 
-    function testMakerBidZeroAmount() public {
+    function test_MakerBidZeroAmount() public {
         _testMakerBidERC721InvalidAmount(0);
     }
 
-    function testMakerBidERC721AmountNotEqualToOne() public {
+    function test_MakerBidERC721AmountNotEqualToOne() public {
         _testMakerBidERC721InvalidAmount(2);
     }
 
@@ -181,7 +181,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[1], MAKER_ORDER_INVALID_STANDARD_SALE);
     }
 
-    function testMakerBidMissingIsValidSignature() public {
+    function test_MakerBidMissingIsValidSignature() public {
         OrderStructs.Maker memory makerBid;
         // This contract does not have isValidSignature implemented
         makerBid.quoteType = QuoteType.Bid;
@@ -196,7 +196,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[3], MISSING_IS_VALID_SIGNATURE_FUNCTION_EIP1271);
     }
 
-    function testMakerAskWrongCollectionTypeERC1155() public {
+    function test_MakerAskWrongCollectionTypeERC1155() public {
         OrderStructs.Maker memory makerAsk;
         makerAsk.collectionType = CollectionType.ERC1155;
         makerAsk.collection = address(new MockERC1155SupportsNoInterface());
@@ -208,7 +208,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[6], POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155);
     }
 
-    function testMakerBidWrongCollectionTypeERC1155() public {
+    function test_MakerBidWrongCollectionTypeERC1155() public {
         OrderStructs.Maker memory makerBid;
         makerBid.quoteType = QuoteType.Bid;
         makerBid.collectionType = CollectionType.ERC1155;
@@ -221,7 +221,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[6], POTENTIAL_INVALID_COLLECTION_TYPE_SHOULD_BE_ERC1155);
     }
 
-    function testMakerBidInsufficientERC20Allowance() public {
+    function test_MakerBidInsufficientERC20Allowance() public {
         OrderStructs.Maker memory makerBid;
         makerBid.quoteType = QuoteType.Bid;
         MockERC20 mockERC20 = new MockERC20();
@@ -246,7 +246,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[5], ERC20_APPROVAL_INFERIOR_TO_PRICE);
     }
 
-    function testMakerAskERC721NotAllTokensAreApproved() public {
+    function test_MakerAskERC721NotAllTokensAreApproved() public {
         MockERC721 mockERC721 = new MockERC721();
         mockERC721.mint(makerUser, 0);
         mockERC721.mint(makerUser, 1);
@@ -280,7 +280,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[5], ERC721_NO_APPROVAL_FOR_ALL_OR_ITEM_ID);
     }
 
-    function testMakerAskDoesNotOwnERC721() public {
+    function test_MakerAskDoesNotOwnERC721() public {
         OrderStructs.Maker memory makerAsk;
         makerAsk.quoteType = QuoteType.Ask;
         makerAsk.collectionType = CollectionType.ERC721;
@@ -301,11 +301,11 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[5], ERC721_ITEM_ID_NOT_IN_BALANCE);
     }
 
-    function testMakerAskERC1155BalanceInferiorToAmountThroughBalanceOfBatch() public {
+    function test_MakerAskERC1155BalanceInferiorToAmountThroughBalanceOfBatch() public {
         _testMakerAskERC1155BalanceInferiorToAmount(true);
     }
 
-    function testMakerAskERC1155BalanceInferiorToAmountThroughBalanceOf() public {
+    function test_MakerAskERC1155BalanceInferiorToAmountThroughBalanceOf() public {
         _testMakerAskERC1155BalanceInferiorToAmount(false);
     }
 
@@ -339,7 +339,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[5], ERC1155_BALANCE_OF_ITEM_ID_INFERIOR_TO_AMOUNT);
     }
 
-    function testMakerAskERC1155BalanceOfDoesNotExist() public {
+    function test_MakerAskERC1155BalanceOfDoesNotExist() public {
         MockERC1155WithoutAnyBalanceOf mockERC1155 = new MockERC1155WithoutAnyBalanceOf();
 
         OrderStructs.Maker memory makerAsk;
@@ -362,7 +362,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[5], ERC1155_BALANCE_OF_DOES_NOT_EXIST);
     }
 
-    function testMakerAskERC1155IsApprovedForAllDoesNotExist() public {
+    function test_MakerAskERC1155IsApprovedForAllDoesNotExist() public {
         MockERC1155WithoutIsApprovedForAll mockERC1155 = new MockERC1155WithoutIsApprovedForAll();
         mockERC1155.mint({to: makerUser, tokenId: 0, amount: 1});
 
@@ -386,7 +386,7 @@ contract OrderValidatorV2ATest is TestParameters {
         assertEq(validationCodes[5], ERC1155_IS_APPROVED_FOR_ALL_DOES_NOT_EXIST);
     }
 
-    function testMakerAskERC1155IsApprovedForAllReturnsFalse() public {
+    function test_MakerAskERC1155IsApprovedForAllReturnsFalse() public {
         MockERC1155 mockERC1155 = new MockERC1155();
         mockERC1155.mint({to: makerUser, tokenId: 0, amount: 1});
 

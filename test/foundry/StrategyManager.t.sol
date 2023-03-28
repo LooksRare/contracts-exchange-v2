@@ -44,7 +44,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
      * Owner can discontinue strategy
      */
-    function testOwnerCanDiscontinueStrategy() public asPrankedUser(_owner) {
+    function test_OwnerCanDiscontinueStrategy() public asPrankedUser(_owner) {
         uint256 strategyId = 0;
         uint16 standardProtocolFeeBp = 100;
         uint16 minTotalFeeBp = 200;
@@ -73,7 +73,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         assertEq(strategyImplementation, address(0));
     }
 
-    function testNewStrategyEventIsEmitted() public asPrankedUser(_owner) {
+    function test_NewStrategyEventIsEmitted() public asPrankedUser(_owner) {
         StrategyCollectionOffer strategy = new StrategyCollectionOffer();
 
         uint256 strategyId = 1;
@@ -98,7 +98,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
      * Owner can change protocol fee information
      */
-    function testOwnerCanChangeStrategyProtocolFees() public asPrankedUser(_owner) {
+    function test_OwnerCanChangeStrategyProtocolFees() public asPrankedUser(_owner) {
         uint256 strategyId = 0;
         uint16 newStandardProtocolFeeBp = 100;
         uint16 newMinTotalFeeBp = 200;
@@ -130,7 +130,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
      * Owner functions for strategy updates revert as expected under multiple revertion scenarios
      */
-    function testOwnerRevertionsForInvalidParametersUpdateStrategy() public asPrankedUser(_owner) {
+    function test_OwnerRevertionsForInvalidParametersUpdateStrategy() public asPrankedUser(_owner) {
         (
             ,
             uint16 currentStandardProtocolFee,
@@ -161,7 +161,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
      * Owner functions for strategy additions revert as expected under multiple revertion scenarios
      */
-    function testOwnerRevertionsForInvalidParametersAddStrategy() public asPrankedUser(_owner) {
+    function test_OwnerRevertionsForInvalidParametersAddStrategy() public asPrankedUser(_owner) {
         uint16 standardProtocolFeeBp = 250;
         uint16 minTotalFeeBp = 300;
         uint16 maxProtocolFeeBp = 300;
@@ -204,12 +204,12 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testAddStrategyNoSelector() public asPrankedUser(_owner) {
+    function test_AddStrategyNoSelector() public asPrankedUser(_owner) {
         vm.expectRevert(IStrategyManager.StrategyHasNoSelector.selector);
         _addStrategy(address(0), _EMPTY_BYTES4, true);
     }
 
-    function testAddStrategyNotV2Strategy() public asPrankedUser(_owner) {
+    function test_AddStrategyNotV2Strategy() public asPrankedUser(_owner) {
         bytes4 randomSelector = StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
 
         // 1. EOA
@@ -227,12 +227,12 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         _addStrategy(address(falseStrategy), randomSelector, true);
     }
 
-    function testAddStrategyNotOwner() public {
+    function test_AddStrategyNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         _addStrategy(address(0), _EMPTY_BYTES4, true);
     }
 
-    function testUpdateStrategyNotOwner() public {
+    function test_UpdateStrategyNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateStrategy(0, false, 299, 100);
     }

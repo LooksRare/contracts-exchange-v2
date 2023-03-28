@@ -84,7 +84,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         newTakerBid = OrderStructs.Taker(takerUser, abi.encode(startPrice));
     }
 
-    function testNewStrategy() public {
+    function test_NewStrategy() public {
         _setUpNewStrategy();
         _assertStrategyAttributes(address(strategyDutchAuction), selector, false);
     }
@@ -114,7 +114,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         executionPrice = startPrice - discount;
     }
 
-    function testDutchAuction(
+    function test_DutchAuction(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,
@@ -167,7 +167,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testStartPriceTooLow(
+    function test_StartPriceTooLow(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,
@@ -206,7 +206,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testTakerBidTooLow(
+    function test_TakerBidTooLow(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,
@@ -246,7 +246,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testInactiveStrategy() public {
+    function test_InactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -271,7 +271,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testZeroItemIdsLength() public {
+    function test_ZeroItemIdsLength() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -293,7 +293,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testItemIdsAndAmountsLengthMismatch() public {
+    function test_ItemIdsAndAmountsLengthMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -315,7 +315,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testInvalidAmounts() public {
+    function test_InvalidAmounts() public {
         _setUpUsers();
         _setUpNewStrategy();
 
@@ -352,7 +352,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongQuoteType() public {
+    function test_WrongQuoteType() public {
         _setUpNewStrategy();
 
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
@@ -375,7 +375,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
-    function testInvalidSelector() public {
+    function test_InvalidSelector() public {
         _setUpNewStrategy();
 
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({

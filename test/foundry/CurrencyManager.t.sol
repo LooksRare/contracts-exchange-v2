@@ -21,7 +21,7 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
         mockERC20 = new MockERC20();
     }
 
-    function testUpdateCurrencyStatus() public asPrankedUser(_owner) {
+    function test_UpdateCurrencyStatus() public asPrankedUser(_owner) {
         // Set to true
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit CurrencyStatusUpdated(address(mockERC20), true);
@@ -35,7 +35,7 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
         assertFalse(currencyManager.isCurrencyAllowed(address(mockERC20)));
     }
 
-    function testUpdateCurrencyStatusNotOwner() public {
+    function test_UpdateCurrencyStatusNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         currencyManager.updateCurrencyStatus(address(mockERC20), true);
     }

@@ -51,7 +51,7 @@ contract SandboxTest is ProtocolBase {
      *         This test verifies that only collectionType = 1 works.
      *         It is for taker ask (matching maker bid).
      */
-    function testTakerAskCannotTransferSandboxWithERC721CollectionTypeButERC1155CollectionTypeWorks() public {
+    function test_TakerAskCannotTransferSandboxWithERC721CollectionTypeButERC1155CollectionTypeWorks() public {
         // Taker user is the one selling the item
         _setUpApprovalsForSandbox(takerUser);
         uint256 itemId = _transferItemIdToUser(takerUser);
@@ -98,7 +98,7 @@ contract SandboxTest is ProtocolBase {
      *         This test verifies that only collectionType = 1 works.
      *         It is for taker bid (matching maker ask).
      */
-    function testTakerBidCannotTransferSandboxWithERC721CollectionTypeButERC1155CollectionTypeWorks() public {
+    function test_TakerBidCannotTransferSandboxWithERC721CollectionTypeButERC1155CollectionTypeWorks() public {
         // Maker user is the one selling the item
         _setUpApprovalsForSandbox(makerUser);
         uint256 itemId = _transferItemIdToUser(makerUser);

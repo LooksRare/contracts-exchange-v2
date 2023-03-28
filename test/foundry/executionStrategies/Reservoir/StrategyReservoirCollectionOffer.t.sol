@@ -43,7 +43,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
     uint256 private constant price = 1 ether; // Fixed price of sale
     uint256 private constant defaultTransferCooldownPeriod = 1 hours; // Default transfer cooldown period
 
-    function testNewStrategies() public {
+    function test_NewStrategies() public {
         _setUp();
         _setUpNewStrategies();
 
@@ -71,81 +71,81 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         }
     }
 
-    function testCollectionOrderRevertsIfItemIsFlagged() public {
+    function test_CollectionOrderRevertsIfItemIsFlagged() public {
         _testRevertsIfItemIsFlagged(false);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfItemIsFlagged() public {
+    function test_CollectionOrderWithMerkleTreeRevertsIfItemIsFlagged() public {
         _testRevertsIfItemIsFlagged(true);
     }
 
-    function testCollectionOrderWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough() public {
+    function test_CollectionOrderWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough() public {
         _testWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough(false);
     }
 
-    function testCollectionOrderWithMerkleTreeWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough() public {
+    function test_CollectionOrderWithMerkleTreeWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough() public {
         _testWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough(true);
     }
 
-    function testCollectionOrderRevertsIfLastTransferTimeIsZero() public {
+    function test_CollectionOrderRevertsIfLastTransferTimeIsZero() public {
         _testRevertsIfLastTransferTimeIsZero(false);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfLastTransferTimeIsZero() public {
+    function test_CollectionOrderWithMerkleTreeRevertsIfLastTransferTimeIsZero() public {
         _testRevertsIfLastTransferTimeIsZero(true);
     }
 
-    function testCollectionOrderRevertsIfSignatureExpires() public {
+    function test_CollectionOrderRevertsIfSignatureExpires() public {
         _testRevertsIfSignatureExpires(false);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfSignatureExpires() public {
+    function test_CollectionOrderWithMerkleTreeRevertsIfSignatureExpires() public {
         _testRevertsIfSignatureExpires(true);
     }
 
-    function testCollectionOrderRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh() public {
+    function test_CollectionOrderRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh() public {
         _testRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh(false);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh()
+    function test_CollectionOrderWithMerkleTreeRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh()
         public
     {
         _testRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh(true);
     }
 
-    function testCollectionOrderRevertsIfItemIdDiffers(uint16 itemId) public {
+    function test_CollectionOrderRevertsIfItemIdDiffers(uint16 itemId) public {
         _testCollectionOrderRevertsIfItemIdDiffers(false, itemId);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfItemIdDiffers(uint16 itemId) public {
+    function test_CollectionOrderWithMerkleTreeRevertsIfItemIdDiffers(uint16 itemId) public {
         _testCollectionOrderRevertsIfItemIdDiffers(true, itemId);
     }
 
-    function testCollectionOrderRevertsIfCollectionTypeIsNotERC721() public {
+    function test_CollectionOrderRevertsIfCollectionTypeIsNotERC721() public {
         _testRevertsIfCollectionTypeIsNotERC721(false);
     }
 
-    function testCollectionOrderWithMerkleTreeRevertsIfCollectionTypeIsNotERC721() public {
+    function test_CollectionOrderWithMerkleTreeRevertsIfCollectionTypeIsNotERC721() public {
         _testRevertsIfCollectionTypeIsNotERC721(true);
     }
 
-    function testCollectionOrdersAmountsInvalid() public {
+    function test_CollectionOrdersAmountsInvalid() public {
         _testAmountsInvalid(false);
     }
 
-    function testCollectionOrdersWithMerkleTreeAmountsInvalid() public {
+    function test_CollectionOrdersWithMerkleTreeAmountsInvalid() public {
         _testAmountsInvalid(true);
     }
 
-    function testCollectionOrdersAdditionalParametersLengthInvalid() public {
+    function test_CollectionOrdersAdditionalParametersLengthInvalid() public {
         _testAdditionalParametersLengthInvalid(false);
     }
 
-    function testCollectionOrdersWithMerkleTreeAdditionalParametersLengthInvalid() public {
+    function test_CollectionOrdersWithMerkleTreeAdditionalParametersLengthInvalid() public {
         _testAdditionalParametersLengthInvalid(true);
     }
 
-    function testCollectionOrdersWithMerkleTreeRevertsWithInvalidMerkleProof(uint16 randomItemId) public {
+    function test_CollectionOrdersWithMerkleTreeRevertsWithInvalidMerkleProof(uint16 randomItemId) public {
         uint256 numberOfItemsInMerkleTree = 1000;
 
         // 420 is the itemId that is from the Reservoir's data
@@ -211,7 +211,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testWrongQuoteType() public {
+    function test_WrongQuoteType() public {
         _setUp();
         _setUpNewStrategies();
 
@@ -238,7 +238,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
-    function testInvalidSelector() public {
+    function test_InvalidSelector() public {
         _setUp();
         _setUpNewStrategies();
 

@@ -50,7 +50,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         orderValidator.deriveProtocolParameters();
     }
 
-    function testCreatorRoyaltiesGetPaidForRoyaltyFeeManager() public {
+    function test_CreatorRoyaltiesGetPaidForRoyaltyFeeManager() public {
         _setUpUsers();
 
         // Adjust royalties
@@ -81,7 +81,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _assertSuccessfulTakerAsk(makerBid);
     }
 
-    function testCreatorRoyaltiesGetPaidForERC2981() public {
+    function test_CreatorRoyaltiesGetPaidForERC2981() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerBid, ) = _createMockMakerBidAndTakerAsk(
@@ -119,7 +119,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _assertSuccessfulTakerAsk(makerBid);
     }
 
-    function testCreatorRoyaltiesGetPaidForRoyaltyFeeManagerWithBundles() public {
+    function test_CreatorRoyaltiesGetPaidForRoyaltyFeeManagerWithBundles() public {
         _setUpUsers();
 
         // Adjust royalties
@@ -152,7 +152,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _assertSuccessfulTakerAskBundle(makerBid);
     }
 
-    function testCreatorRoyaltiesGetPaidForERC2981WithBundles() public {
+    function test_CreatorRoyaltiesGetPaidForERC2981WithBundles() public {
         _setUpUsers();
 
         uint256 numberItemsInBundle = 5;
@@ -192,7 +192,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _assertSuccessfulTakerAskBundle(makerBid);
     }
 
-    function testCreatorRoyaltiesRevertForEIP2981WithBundlesIfInfoDiffer() public {
+    function test_CreatorRoyaltiesRevertForEIP2981WithBundlesIfInfoDiffer() public {
         _setUpUsers();
 
         uint256 numberItemsInBundle = 5;
@@ -263,7 +263,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCreatorRoyaltiesRevertForEIP2981WithBundlesIfAtLeastOneCallReverts(uint256 revertIndex) public {
+    function test_CreatorRoyaltiesRevertForEIP2981WithBundlesIfAtLeastOneCallReverts(uint256 revertIndex) public {
         _setUpUsers();
 
         uint256 numberItemsInBundle = 5;
@@ -308,7 +308,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCreatorRoyaltiesRevertIfFeeHigherThanLimit() public {
+    function test_CreatorRoyaltiesRevertIfFeeHigherThanLimit() public {
         _setUpUsers();
         uint256 _creatorRoyaltyFeeTooHigh = looksRareProtocol.maxCreatorFeeBp() + 1;
 

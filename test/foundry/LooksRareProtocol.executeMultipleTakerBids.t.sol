@@ -35,7 +35,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
     /**
      * Three ERC721 are sold through 3 taker bids in one transaction with non-atomicity.
      */
-    function testThreeTakerBidsERC721() public {
+    function test_ThreeTakerBidsERC721() public {
         _setUpUsers();
 
         uint256 numberOfPurchases = 3;
@@ -70,7 +70,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
     /**
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */
-    function testThreeTakerBidsERC721OneFails() public {
+    function test_ThreeTakerBidsERC721OneFails() public {
         _setUpUsers();
 
         uint256 numberOfPurchases = 3;
@@ -126,7 +126,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
         assertEq(address(looksRareProtocol).balance, 1);
     }
 
-    function testThreeTakerBidsERC721LengthsInvalid() public {
+    function test_ThreeTakerBidsERC721LengthsInvalid() public {
         _setUpUsers();
 
         BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](0);
@@ -135,7 +135,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
         looksRareProtocol.executeMultipleTakerBids(batchExecutionParameters, _EMPTY_AFFILIATE, false);
     }
 
-    function testCannotTradeIfCurrencyInvalid() public {
+    function test_CannotTradeIfCurrencyInvalid() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
@@ -179,7 +179,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
         }
     }
 
-    function testCannotCallRestrictedExecuteTakerBid() public {
+    function test_CannotCallRestrictedExecuteTakerBid() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
@@ -197,11 +197,11 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
     /**
      * Cannot execute two or more taker bids if the currencies are different
      */
-    function testCannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsAtomic() public {
+    function test_CannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsAtomic() public {
         _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(true);
     }
 
-    function testCannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsNonAtomic() public {
+    function test_CannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsNonAtomic() public {
         _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(false);
     }
 

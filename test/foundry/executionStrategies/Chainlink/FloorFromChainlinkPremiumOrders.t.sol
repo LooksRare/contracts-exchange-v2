@@ -24,7 +24,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         super.setUp();
     }
 
-    function testFloorFromChainlinkPremiumAdditionalParametersNotProvided() public {
+    function test_FloorFromChainlinkPremiumAdditionalParametersNotProvided() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -45,7 +45,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumPriceFeedNotAvailable() public {
+    function test_FloorFromChainlinkPremiumPriceFeedNotAvailable() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -61,7 +61,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumOraclePriceNotRecentEnough() public {
+    function test_FloorFromChainlinkPremiumOraclePriceNotRecentEnough() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -86,7 +86,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumChainlinkPriceLessThanOrEqualToZero() public {
+    function test_FloorFromChainlinkPremiumChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -111,7 +111,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumMakerAskItemIdsLengthNotOne() public {
+    function test_FloorFromChainlinkPremiumMakerAskItemIdsLengthNotOne() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -131,7 +131,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumMakerAskAmountsLengthNotOne() public {
+    function test_FloorFromChainlinkPremiumMakerAskAmountsLengthNotOne() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -151,7 +151,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumMakerAskAmountNotOne() public {
+    function test_FloorFromChainlinkPremiumMakerAskAmountNotOne() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -171,7 +171,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumBidTooLow() public {
+    function test_FloorFromChainlinkPremiumBidTooLow() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -190,7 +190,7 @@ abstract contract FloorFromChainlinkPremiumOrdersTest is FloorFromChainlinkOrder
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumCurrencyInvalid() public {
+    function test_FloorFromChainlinkPremiumCurrencyInvalid() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });

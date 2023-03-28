@@ -43,7 +43,7 @@ contract BatchMakerCollectionOrdersTest is ProtocolBase {
         eip712MerkleTree = new EIP712MerkleTree(looksRareProtocol);
     }
 
-    function testTakerAskMultipleOrdersSignedERC721(uint256 numberOrders) public {
+    function test_TakerAskMultipleOrdersSignedERC721(uint256 numberOrders) public {
         vm.assume(numberOrders > 0 && numberOrders <= 10);
 
         mockERC721.batchMint(takerUser, numberOrders);

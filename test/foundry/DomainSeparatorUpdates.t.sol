@@ -17,7 +17,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         _setUp();
     }
 
-    function testUpdateDomainSeparator(uint64 newChainId) public asPrankedUser(_owner) {
+    function test_UpdateDomainSeparator(uint64 newChainId) public asPrankedUser(_owner) {
         vm.assume(newChainId != block.chainid);
 
         vm.chainId(newChainId);
@@ -39,7 +39,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testCannotTradeIfDomainSeparatorHasBeenUpdated(uint64 newChainId) public {
+    function test_CannotTradeIfDomainSeparatorHasBeenUpdated(uint64 newChainId) public {
         vm.assume(newChainId != block.chainid);
 
         _setUpUsers();
@@ -71,7 +71,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testCannotTradeIfChainIdHasChanged(uint64 newChainId) public {
+    function test_CannotTradeIfChainIdHasChanged(uint64 newChainId) public {
         vm.assume(newChainId != block.chainid);
 
         _setUpUsers();
@@ -99,12 +99,12 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testUpdateDomainSeparatorSameDomainSeparator() public asPrankedUser(_owner) {
+    function test_UpdateDomainSeparatorSameDomainSeparator() public asPrankedUser(_owner) {
         vm.expectRevert(SameDomainSeparator.selector);
         looksRareProtocol.updateDomainSeparator();
     }
 
-    function testUpdateDomainSeparatorNotOwner() public {
+    function test_UpdateDomainSeparatorNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateDomainSeparator();
     }

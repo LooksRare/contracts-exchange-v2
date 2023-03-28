@@ -15,7 +15,7 @@ contract BundleTransactionsTest is ProtocolBase {
         _setUp();
     }
 
-    function testTakerAskERC721BundleNoRoyalties() public {
+    function test_TakerAskERC721BundleNoRoyalties() public {
         _setUpUsers();
         uint256 numberItemsInBundle = 5;
 
@@ -42,7 +42,7 @@ contract BundleTransactionsTest is ProtocolBase {
         _assertSuccessfulTakerAskNoRoyalties(makerBid);
     }
 
-    function testTakerAskERC1155BundleNoRoyalties() public {
+    function test_TakerAskERC1155BundleNoRoyalties() public {
         _setUpUsers();
         uint256 numberItemsInBundle = 5;
 
@@ -72,7 +72,7 @@ contract BundleTransactionsTest is ProtocolBase {
         _assertSuccessfulTakerAskNoRoyalties(makerBid);
     }
 
-    function testTakerAskERC721BundleWithRoyaltiesFromRegistry() public {
+    function test_TakerAskERC721BundleWithRoyaltiesFromRegistry() public {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
         uint256 numberItemsInBundle = 5;
@@ -115,7 +115,7 @@ contract BundleTransactionsTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function testTakerBidERC721BundleNoRoyalties() public {
+    function test_TakerBidERC721BundleNoRoyalties() public {
         _setUpUsers();
         uint256 numberItemsInBundle = 5;
 
@@ -148,7 +148,7 @@ contract BundleTransactionsTest is ProtocolBase {
         _assertSuccessfulTakerBidNoRoyalties(makerAsk);
     }
 
-    function testTakerBidERC1155BundleNoRoyalties() public {
+    function test_TakerBidERC1155BundleNoRoyalties() public {
         _setUpUsers();
         uint256 numberItemsInBundle = 5;
 
@@ -184,7 +184,7 @@ contract BundleTransactionsTest is ProtocolBase {
         _assertSuccessfulTakerBidNoRoyalties(makerAsk);
     }
 
-    function testTakerBidERC721BundleWithRoyaltiesFromRegistry() public {
+    function test_TakerBidERC721BundleWithRoyaltiesFromRegistry() public {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
         uint256 numberItemsInBundle = 5;

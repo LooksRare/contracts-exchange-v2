@@ -32,7 +32,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         eip712MerkleTree = new EIP712MerkleTree(looksRareProtocol);
     }
 
-    function testTakerBidMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
+    function test_TakerBidMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
         _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
         mockERC721.batchMint(makerUser, numberOrders);
@@ -73,7 +73,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testTakerAskMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
+    function test_TakerAskMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
         _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
         mockERC721.batchMint(takerUser, numberOrders);
@@ -112,7 +112,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testTakerBidMultipleOrdersSignedERC721MerkleProofInvalid(uint256 numberOrders, uint256 orderIndex) public {
+    function test_TakerBidMultipleOrdersSignedERC721MerkleProofInvalid(
+        uint256 numberOrders,
+        uint256 orderIndex
+    ) public {
         _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
         mockERC721.batchMint(makerUser, numberOrders);
@@ -149,7 +152,10 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testTakerAskMultipleOrdersSignedERC721MerkleProofInvalid(uint256 numberOrders, uint256 orderIndex) public {
+    function test_TakerAskMultipleOrdersSignedERC721MerkleProofInvalid(
+        uint256 numberOrders,
+        uint256 orderIndex
+    ) public {
         _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
         mockERC721.batchMint(takerUser, numberOrders);
@@ -186,7 +192,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testTakerBidMultipleOrdersSignedERC721MerkleProofWrongPosition(
+    function test_TakerBidMultipleOrdersSignedERC721MerkleProofWrongPosition(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -233,7 +239,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testTakerAskMultipleOrdersSignedERC721MerkleProofWrongPosition(
+    function test_TakerAskMultipleOrdersSignedERC721MerkleProofWrongPosition(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -280,7 +286,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testTakerBidRevertsIfProofTooLarge() public {
+    function test_TakerBidRevertsIfProofTooLarge() public {
         uint256 testProofLengthUpTo = MAX_CALLDATA_PROOF_LENGTH + 3;
         mockERC721.batchMint(makerUser, 2 ** testProofLengthUpTo);
 
@@ -319,7 +325,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         }
     }
 
-    function testTakerAskRevertsIfProofTooLarge() public {
+    function test_TakerAskRevertsIfProofTooLarge() public {
         uint256 testProofLengthUpTo = MAX_CALLDATA_PROOF_LENGTH + 3;
         mockERC721.batchMint(takerUser, 2 ** testProofLengthUpTo);
 

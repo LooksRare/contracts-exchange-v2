@@ -50,7 +50,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         weth.deposit{value: _initialWETHBalanceAffiliate}();
     }
 
-    function testEventsAreEmittedAsExpected() public asPrankedUser(_owner) {
+    function test_EventsAreEmittedAsExpected() public asPrankedUser(_owner) {
         // 1. NewAffiliateController
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewAffiliateController(_owner);
@@ -70,12 +70,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         looksRareProtocol.updateAffiliateRate(takerUser, 30);
     }
 
-    function testCannotUpdateAffiliateRateIfNotAffiliateController() public {
+    function test_CannotUpdateAffiliateRateIfNotAffiliateController() public {
         vm.expectRevert(IAffiliateManager.NotAffiliateController.selector);
         looksRareProtocol.updateAffiliateRate(address(42), 100);
     }
 
-    function testCannotUpdateAffiliateRateIfRateHigherthan10000() public asPrankedUser(_owner) {
+    function test_CannotUpdateAffiliateRateIfRateHigherthan10000() public asPrankedUser(_owner) {
         looksRareProtocol.updateAffiliateController(_owner);
 
         address randomAffiliate = address(42);
@@ -88,12 +88,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(looksRareProtocol.affiliateRates(randomAffiliate), affiliateRateLimitBp);
     }
 
-    function testUpdateAffiliateControllerNotOwner() public {
+    function test_UpdateAffiliateControllerNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateAffiliateController(address(0));
     }
 
-    function testUpdateAffiliateProgramStatusNotOwner() public {
+    function test_UpdateAffiliateProgramStatusNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateAffiliateProgramStatus(false);
     }
@@ -101,7 +101,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
     /**
      * TakerBid matches makerAsk. Protocol fee is set, no royalties, affiliate is set.
      */
-    function testTakerBidERC721WithAffiliateButWithoutRoyalty() public {
+    function test_TakerBidERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
         _setUpAffiliate();
 
@@ -151,7 +151,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
     /**
      * Multiple takerBids match makerAsk orders. Protocol fee is set, no royalties, affiliate is set.
      */
-    function testMultipleTakerBidsERC721WithAffiliateButWithoutRoyalty() public {
+    function test_MultipleTakerBidsERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
         _setUpAffiliate();
 
@@ -213,7 +213,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
     /**
      * Multiple takerAsks match makerBid orders. Protocol fee is set, no royalties, affiliate is set.
      */
-    function testMultipleTakerAsksERC721WithAffiliateButWithoutRoyalty() public {
+    function test_MultipleTakerAsksERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
         _setUpAffiliate();
 
@@ -277,7 +277,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
     /**
      * TakerAsk matches makerBid. Protocol fee is set, no royalties, affiliate is set.
      */
-    function testTakerAskERC721WithAffiliateButWithoutRoyalty() public {
+    function test_TakerAskERC721WithAffiliateButWithoutRoyalty() public {
         _setUpUsers();
         _setUpAffiliate();
 

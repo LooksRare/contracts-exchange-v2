@@ -43,7 +43,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _addStrategy(address(strategyCollectionOffer), selectorWithProof, true);
     }
 
-    function testNewStrategies() public {
+    function test_NewStrategies() public {
         _assertStrategyAttributes(address(strategyCollectionOffer), selectorNoProof, true);
 
         (
@@ -65,7 +65,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyImplementation, address(strategyCollectionOffer));
     }
 
-    function testMakerBidAmountsLengthNotOne() public {
+    function test_MakerBidAmountsLengthNotOne() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
@@ -100,7 +100,7 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testZeroAmount() public {
+    function test_ZeroAmount() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
@@ -128,7 +128,7 @@ contract CollectionOrdersTest is ProtocolBase {
      * Any itemId for ERC721 (where royalties come from the registry) is sold through a collection taker ask using WETH.
      * We use fuzzing to generate the tokenId that is sold.
      */
-    function testTakerAskCollectionOrderERC721(uint256 tokenId) public {
+    function test_TakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
 
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
@@ -167,7 +167,7 @@ contract CollectionOrdersTest is ProtocolBase {
     /**
      * A collection offer with merkle tree criteria
      */
-    function testTakerAskCollectionOrderWithMerkleTreeERC721() public {
+    function test_TakerAskCollectionOrderWithMerkleTreeERC721() public {
         _setUpUsers();
 
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
@@ -210,7 +210,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertSuccessfulTakerAsk(makerBid, itemIdInMerkleTree);
     }
 
-    function testTakerAskCannotExecuteWithInvalidProof(uint256 itemIdSold) public {
+    function test_TakerAskCannotExecuteWithInvalidProof(uint256 itemIdSold) public {
         vm.assume(itemIdSold > 5);
         _setUpUsers();
 
@@ -252,7 +252,7 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testInvalidAmounts() public {
+    function test_InvalidAmounts() public {
         _setUpUsers();
 
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
@@ -325,7 +325,7 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testMerkleRootLengthIsNot32() public {
+    function test_MerkleRootLengthIsNot32() public {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -356,7 +356,7 @@ contract CollectionOrdersTest is ProtocolBase {
         );
     }
 
-    function testInvalidSelector() public {
+    function test_InvalidSelector() public {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -376,7 +376,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
-    function testWrongQuoteType() public {
+    function test_WrongQuoteType() public {
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,

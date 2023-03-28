@@ -31,7 +31,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         super.setUp();
     }
 
-    function testInactiveStrategy() public {
+    function test_InactiveStrategy() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
@@ -50,7 +50,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountBasisPointsDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
+    function test_FloorFromChainlinkDiscountBasisPointsDesiredDiscountedPriceGreaterThanOrEqualToMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 1%, desired price = 9.603 ETH
         // Max price = 9.5 ETH
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
@@ -76,7 +76,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, 9.5 ether);
     }
 
-    function testFloorFromChainlinkDiscountBasisPointsDesiredDiscountedPriceLessThanMaxPrice() public {
+    function test_FloorFromChainlinkDiscountBasisPointsDesiredDiscountedPriceLessThanMaxPrice() public {
         // Floor price = 9.7 ETH, discount = 3%, desired price = 9.409 ETH
         // Max price = 9.5 ETH
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
@@ -101,7 +101,7 @@ contract FloorFromChainlinkDiscountBasisPointsOrdersTest is FloorFromChainlinkDi
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, 9.409 ether);
     }
 
-    function testFloorFromChainlinkDiscountBasisPointsDesiredDiscountBasisPointsGreaterThan10000() public {
+    function test_FloorFromChainlinkDiscountBasisPointsDesiredDiscountBasisPointsGreaterThan10000() public {
         // Floor price = 9.7 ETH, discount = 100%, desired price = 0
         // Max price = 0
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({

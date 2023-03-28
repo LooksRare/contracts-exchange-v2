@@ -24,19 +24,19 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         _setUp();
     }
 
-    function testUpdateCreatorFeeManager() public asPrankedUser(_owner) {
+    function test_UpdateCreatorFeeManager() public asPrankedUser(_owner) {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewCreatorFeeManager(address(1));
         looksRareProtocol.updateCreatorFeeManager(address(1));
         assertEq(address(looksRareProtocol.creatorFeeManager()), address(1));
     }
 
-    function testUpdateCreatorFeeManagerNotOwner() public {
+    function test_UpdateCreatorFeeManagerNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateCreatorFeeManager(address(1));
     }
 
-    function testUpdateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+    function test_UpdateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
         vm.assume(newMaxCreatorFeeBp <= 2_500);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
@@ -44,35 +44,35 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         assertEq(looksRareProtocol.maxCreatorFeeBp(), newMaxCreatorFeeBp);
     }
 
-    function testUpdateMaxCreatorFeeBpNotOwner() public {
+    function test_UpdateMaxCreatorFeeBpNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_500));
     }
 
-    function testUpdateMaxCreatorFeeBpTooHigh(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+    function test_UpdateMaxCreatorFeeBpTooHigh(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
         vm.assume(newMaxCreatorFeeBp > 2_500);
         vm.expectRevert(CreatorFeeBpTooHigh.selector);
         looksRareProtocol.updateMaxCreatorFeeBp(newMaxCreatorFeeBp);
     }
 
-    function testUpdateProtocolFeeRecipient() public asPrankedUser(_owner) {
+    function test_UpdateProtocolFeeRecipient() public asPrankedUser(_owner) {
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewProtocolFeeRecipient(address(1));
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
         assertEq(looksRareProtocol.protocolFeeRecipient(), address(1));
     }
 
-    function testUpdateProtocolFeeRecipientCannotBeNullAddress() public asPrankedUser(_owner) {
+    function test_UpdateProtocolFeeRecipientCannotBeNullAddress() public asPrankedUser(_owner) {
         vm.expectRevert(IExecutionManager.NewProtocolFeeRecipientCannotBeNullAddress.selector);
         looksRareProtocol.updateProtocolFeeRecipient(address(0));
     }
 
-    function testUpdateProtocolFeeRecipientNotOwner() public {
+    function test_UpdateProtocolFeeRecipientNotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
     }
 
-    function testCannotValidateOrderIfTooEarlyToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
+    function test_CannotValidateOrderIfTooEarlyToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
         // 300 because because it is deducted by 5 minutes + 1 second
         vm.assume(timestamp > 300 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
@@ -97,7 +97,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfTooLateToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
+    function test_CannotValidateOrderIfTooLateToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
         vm.assume(timestamp > 0 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
@@ -119,7 +119,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfStartTimeLaterThanEndTime(uint256 timestamp) public asPrankedUser(takerUser) {
+    function test_CannotValidateOrderIfStartTimeLaterThanEndTime(uint256 timestamp) public asPrankedUser(takerUser) {
         vm.assume(timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
@@ -139,7 +139,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfMakerBidItemIdsIsEmpty() public {
+    function test_CannotValidateOrderIfMakerBidItemIdsIsEmpty() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
@@ -155,7 +155,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfMakerBidItemIdsLengthMismatch(
+    function test_CannotValidateOrderIfMakerBidItemIdsLengthMismatch(
         uint256 makerBidItemIdsLength
     ) public asPrankedUser(takerUser) {
         vm.assume(makerBidItemIdsLength > 1 && makerBidItemIdsLength < 100_000);
@@ -175,7 +175,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCannotValidateOrderIfMakerAskItemIdsIsEmpty() public asPrankedUser(takerUser) {
+    function test_CannotValidateOrderIfMakerAskItemIdsIsEmpty() public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
@@ -199,7 +199,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function testCannotValidateOrderIfMakerAskItemIdsLengthMismatch(
+    function test_CannotValidateOrderIfMakerAskItemIdsLengthMismatch(
         uint256 makerAskItemIdsLength
     ) public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
@@ -226,7 +226,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function testCannotExecuteTransactionIfMakerBidWithStrategyForMakerAsk() public {
+    function test_CannotExecuteTransactionIfMakerBidWithStrategyForMakerAsk() public {
         _setUpUsers();
 
         vm.prank(_owner);
@@ -266,7 +266,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function testCannotExecuteTransactionIfMakerAskWithStrategyForMakerBid() public {
+    function test_CannotExecuteTransactionIfMakerAskWithStrategyForMakerBid() public {
         _setUpUsers();
 
         vm.prank(_owner);

@@ -25,7 +25,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order if subset nonce is used
      */
-    function testCannotExecuteOrderIfSubsetNonceIsUsed(uint256 subsetNonce) public {
+    function test_CannotExecuteOrderIfSubsetNonceIsUsed(uint256 subsetNonce) public {
         uint256 itemId = 420;
 
         // Mint asset
@@ -67,7 +67,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order if maker is at a different global ask nonce than signed
      */
-    function testCannotExecuteOrderIfInvalidUserGlobalAskNonce(uint256 userGlobalAskNonce) public {
+    function test_CannotExecuteOrderIfInvalidUserGlobalAskNonce(uint256 userGlobalAskNonce) public {
         uint256 quasiRandomNumber = 54570651553685478358117286254199992264;
         vm.assume(userGlobalAskNonce < quasiRandomNumber);
         // Change block number
@@ -111,7 +111,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order if maker is at a different global bid nonce than signed
      */
-    function testCannotExecuteOrderIfInvalidUserGlobalBidNonce(uint256 userGlobalBidNonce) public {
+    function test_CannotExecuteOrderIfInvalidUserGlobalBidNonce(uint256 userGlobalBidNonce) public {
         uint256 quasiRandomNumber = 54570651553685478358117286254199992264;
         vm.assume(userGlobalBidNonce < quasiRandomNumber);
         // Change block number
@@ -165,7 +165,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order twice
      */
-    function testCannotExecuteAnOrderTwice() public {
+    function test_CannotExecuteAnOrderTwice() public {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
@@ -199,7 +199,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order sharing the same order nonce as another that is being partially filled
      */
-    function testCannotExecuteAnotherOrderAtNonceIfExecutionIsInProgress(uint256 orderNonce) public {
+    function test_CannotExecuteAnotherOrderAtNonceIfExecutionIsInProgress(uint256 orderNonce) public {
         _setUpUsers();
 
         // 0. Add the new strategy
@@ -300,7 +300,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         }
     }
 
-    function testCancelOrderNonces(uint256 nonceOne, uint256 nonceTwo) public asPrankedUser(makerUser) {
+    function test_CancelOrderNonces(uint256 nonceOne, uint256 nonceTwo) public asPrankedUser(makerUser) {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, nonceOne), bytes32(0));
         assertEq(looksRareProtocol.userOrderNonce(makerUser, nonceTwo), bytes32(0));
 
@@ -318,7 +318,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
     /**
      * Cannot execute an order if its nonce has been cancelled
      */
-    function testCannotExecuteAnOrderWhoseNonceIsCancelled(uint256 orderNonce) public {
+    function test_CannotExecuteAnOrderWhoseNonceIsCancelled(uint256 orderNonce) public {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
@@ -362,7 +362,7 @@ contract NonceInvalidationTest is INonceManager, ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testCancelNoncesRevertIfEmptyArrays() public {
+    function test_CancelNoncesRevertIfEmptyArrays() public {
         uint256[] memory nonces = new uint256[](0);
 
         vm.expectRevert(LengthsInvalid.selector);

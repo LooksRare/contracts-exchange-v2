@@ -27,7 +27,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
     /**
      * One ERC721 is sold through a taker ask using WETH and the proceeds of the sale goes to a random recipient.
      */
-    function testTakerAskERC721WithRoyaltiesFromRegistryWithDelegation() public {
+    function test_TakerAskERC721WithRoyaltiesFromRegistryWithDelegation() public {
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
         address randomRecipientSaleProceeds = address(420);
@@ -83,7 +83,7 @@ contract DelegationRecipientsTakerTest is ProtocolBase {
     /**
      * One ERC721 is sold through a taker bid and the NFT transfer goes to a random recipient.
      */
-    function testTakerBidERC721WithRoyaltiesFromRegistryWithDelegation() public {
+    function test_TakerBidERC721WithRoyaltiesFromRegistryWithDelegation() public {
         address randomRecipientNFT = address(420);
 
         _setUpUsers();

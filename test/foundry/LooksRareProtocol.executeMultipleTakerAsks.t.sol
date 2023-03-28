@@ -35,7 +35,7 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
     /**
      * Three ERC721 are sold through 3 taker asks in one transaction with non-atomicity.
      */
-    function testThreeTakerAsksERC721() public {
+    function test_ThreeTakerAsksERC721() public {
         _setUpUsers();
 
         uint256 numberOfPurchases = 3;
@@ -61,11 +61,11 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
     }
 
-    function testThreeTakerAsksERC721DifferentSignerForEachBidAtomic() public {
+    function test_ThreeTakerAsksERC721DifferentSignerForEachBidAtomic() public {
         _testThreeTakerAsksERC721DifferentSignerForEachBid(true);
     }
 
-    function testThreeTakerAsksERC721DifferentSignerForEachBidNonAtomic() public {
+    function test_ThreeTakerAsksERC721DifferentSignerForEachBidNonAtomic() public {
         _testThreeTakerAsksERC721DifferentSignerForEachBid(false);
     }
 
@@ -108,11 +108,11 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * numberOfPurchases);
     }
 
-    function testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSignerAtomic() public {
+    function test_ThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSignerAtomic() public {
         _testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSigner(true);
     }
 
-    function testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSignerNonAtomic() public {
+    function test_ThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSignerNonAtomic() public {
         _testThreeTakerAsksERC721LastSignerIsTheSameAsThePenultimateSigner(false);
     }
 
@@ -163,7 +163,7 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
     /**
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */
-    function testThreeTakerAsksERC721OneFails() public {
+    function test_ThreeTakerAsksERC721OneFails() public {
         _setUpUsers();
 
         uint256 numberOfPurchases = 3;
@@ -207,7 +207,7 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * (numberOfPurchases - 1));
     }
 
-    function testThreeTakerAsksERC721LengthsInvalid() public {
+    function test_ThreeTakerAsksERC721LengthsInvalid() public {
         _setUpUsers();
 
         BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](0);
@@ -216,15 +216,15 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
         looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
     }
 
-    function testCannotTradeIfCurrencyInvalid() public {
+    function test_CannotTradeIfCurrencyInvalid() public {
         _testCannotTradeIfCurrencyInvalid(address(mockERC20));
     }
 
-    function testCannotTradeIfETHIsUsedForMakerBid() public {
+    function test_CannotTradeIfETHIsUsedForMakerBid() public {
         _testCannotTradeIfCurrencyInvalid(ETH);
     }
 
-    function testCannotCallRestrictedExecuteTakerAsk() public {
+    function test_CannotCallRestrictedExecuteTakerAsk() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
@@ -243,11 +243,11 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
     /**
      * Cannot execute two or more taker bids if the currencies are different
      */
-    function testCannotExecuteMultipleTakerAsksIfDifferentCurrenciesIsAtomic() public {
+    function test_CannotExecuteMultipleTakerAsksIfDifferentCurrenciesIsAtomic() public {
         _testCannotExecuteMultipleTakerAsksIfDifferentCurrencies(true);
     }
 
-    function testCannotExecuteMultipleTakerAsksIfDifferentCurrenciesIsNonAtomic() public {
+    function test_CannotExecuteMultipleTakerAsksIfDifferentCurrenciesIsNonAtomic() public {
         _testCannotExecuteMultipleTakerAsksIfDifferentCurrencies(false);
     }
 

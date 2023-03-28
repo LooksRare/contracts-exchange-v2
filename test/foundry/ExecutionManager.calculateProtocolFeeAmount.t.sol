@@ -36,7 +36,9 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
         _setupRegistryRoyalties(address(mockERC721), ROYALTY_FEE_BP);
     }
 
-    function test_executeTakerBid_ProtocolFeeAmountPlusCreatorFeeAmountLessThanMinTotalFeeAmount(uint256 price) public {
+    function testFuzz_executeTakerBid_ProtocolFeeAmountPlusCreatorFeeAmountLessThanMinTotalFeeAmount(
+        uint256 price
+    ) public {
         vm.assume(price > 0 && price <= _initialETHBalanceUser);
 
         _setUpUsers();
@@ -82,7 +84,9 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerAsk.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function test_executeTakerAsk_ProtocolFeeAmountPlusCreatorFeeAmountLessThanMinTotalFeeAmount(uint256 price) public {
+    function testFuzz_executeTakerAsk_ProtocolFeeAmountPlusCreatorFeeAmountLessThanMinTotalFeeAmount(
+        uint256 price
+    ) public {
         vm.assume(price > 0 && price <= _initialWETHBalanceUser);
 
         _setUpUsers();

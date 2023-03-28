@@ -21,7 +21,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         super.setUp();
     }
 
-    function testFloorFromChainlinkDiscountPriceFeedNotAvailable() public {
+    function test_FloorFromChainlinkDiscount_RevertIf_PriceFeedNotAvailable() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
@@ -37,7 +37,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountOraclePriceNotRecentEnough() public {
+    function test_FloorFromChainlinkDiscount_RevertIf_OraclePriceNotRecentEnough() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
@@ -62,7 +62,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountChainlinkPriceLessThanOrEqualToZero() public {
+    function test_FloorFromChainlinkDiscount_RevertIf_ChainlinkPriceLessThanOrEqualToZero() public {
         MockChainlinkAggregator aggregator = new MockChainlinkAggregator();
 
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
@@ -91,7 +91,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountMakerBidAmountsLengthNotOne() public {
+    function test_FloorFromChainlinkDiscount_RevertIf_MakerBidAmountsLengthNotOne() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
@@ -111,7 +111,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountMakerBidAmountNotOne() public {
+    function test_FloorFromChainlinkDiscount_RevertIf_MakerBidAmountNotOne() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
@@ -134,7 +134,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountAskTooHigh() public {
+    function test_FloorFromChainlinkDiscount_RevertIf_AskTooHigh() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });
@@ -153,7 +153,7 @@ abstract contract FloorFromChainlinkDiscountOrdersTest is FloorFromChainlinkOrde
         _executeTakerAsk(takerAsk, makerBid, signature);
     }
 
-    function testFloorFromChainlinkDiscountCurrencyInvalid() public {
+    function test_FloorFromChainlinkDiscount_RevertIf_CurrencyInvalid() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: discount
         });

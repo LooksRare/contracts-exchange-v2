@@ -35,7 +35,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         _addStrategy(address(strategyMultiFillCollectionOrder), selector, true);
     }
 
-    function testNewStrategy() public {
+    function test_NewStrategy() public {
         _setUpNewStrategy();
         _assertStrategyAttributes(address(strategyMultiFillCollectionOrder), selector, true);
     }
@@ -45,7 +45,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
      * First takerUser sells 1 item.
      * Second takerUser sells 3 items.
      */
-    function testMultiFill() public {
+    function test_MultiFill() public {
         _setUpUsers();
         _setUpNewStrategy();
 
@@ -128,7 +128,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function testInactiveStrategy() public {
+    function test_RevertIf_InactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
 

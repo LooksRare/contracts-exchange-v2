@@ -50,24 +50,24 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         _setUpNewStrategy();
     }
 
-    function testNewStrategy() public {
+    function testFork_NewStrategy() public {
         _assertStrategyAttributes(address(strategyFloorFromChainlink), selector, isMakerBid);
     }
 
-    function testMaxLatency() public {
+    function testFork_MaxLatency() public {
         assertEq(strategyFloorFromChainlink.maxLatency(), MAXIMUM_LATENCY);
     }
 
     event PriceFeedUpdated(address indexed collection, address indexed priceFeed);
 
-    function testSetPriceFeed() public asPrankedUser(_owner) {
+    function testFork_SetPriceFeed() public asPrankedUser(_owner) {
         vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: false});
         emit PriceFeedUpdated(address(mockERC721), AZUKI_PRICE_FEED);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         assertEq(strategyFloorFromChainlink.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
     }
 
-    function testSetPriceFeedDecimalsInvalid(uint8 decimals) public asPrankedUser(_owner) {
+    function testForkFuzz_SetPriceFeed_RevertIf_DecimalsInvalid(uint8 decimals) public asPrankedUser(_owner) {
         vm.assume(decimals != 18);
 
         MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
@@ -76,18 +76,18 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(priceFeed));
     }
 
-    function testPriceFeedCannotBeSetTwice() public asPrankedUser(_owner) {
+    function testFork_SetPriceFeed_RevertIf_AlreadySet() public asPrankedUser(_owner) {
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.expectRevert(PriceFeedAlreadySet.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
-    function testSetPriceFeedNotOwner() public {
+    function testFork_SetPriceFeed_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
-    function testQuoteTypeInvalid() public {
+    function testFork_RevertIf_QuoteTypeInvalid() public {
         OrderStructs.Maker memory maker;
 
         // 1. Maker bid, but function selector is for maker ask
@@ -125,7 +125,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
-    function testInvalidSelector() public {
+    function testFork_RevertIf_InvalidSelector() public {
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,

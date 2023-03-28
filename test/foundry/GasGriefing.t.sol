@@ -33,7 +33,7 @@ contract GasGriefingTest is ProtocolBase {
         _setUpUser(takerUser);
     }
 
-    function testTakerBidGasGriefing() public {
+    function test_TakerBidGasGriefing() public {
         _setupRegistryRoyalties(address(mockERC721), _standardRoyaltyFee);
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
@@ -79,7 +79,7 @@ contract GasGriefingTest is ProtocolBase {
         assertEq(looksRareProtocol.userOrderNonce(gasGriefer, makerAsk.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function testThreeTakerBidsGasGriefing() public {
+    function test_ThreeTakerBidsGasGriefing() public {
         uint256 numberOfPurchases = 3;
 
         BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](numberOfPurchases);

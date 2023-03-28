@@ -25,7 +25,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         super.setUp();
     }
 
-    function testInactiveStrategy() public {
+    function test_RevertIf_InactiveStrategy() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });
@@ -44,7 +44,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         _executeTakerBid(takerBid, makerAsk, signature);
     }
 
-    function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanMinPrice() public {
+    function test_FloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -54,7 +54,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         _testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceGreaterThanOrEqualToMinPrice(makerAsk, takerBid);
     }
 
-    function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceEqualToMinPrice() public {
+    function test_FloorFromChainlinkPremiumBasisPointsDesiredSalePriceEqualToMinPrice() public {
         // Floor price = 9.7 ETH, premium = 1%, desired price = 9.797 ETH
         // Min price = 9.7 ETH
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -86,7 +86,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         _assertSellerReceivedWETHAfterStandardProtocolFee(makerUser, price);
     }
 
-    function testFloorFromChainlinkPremiumBasisPointsDesiredSalePriceLessThanMinPrice() public {
+    function test_FloorFromChainlinkPremiumBasisPointsDesiredSalePriceLessThanMinPrice() public {
         (, , , , , , address implementation) = looksRareProtocol.strategyInfo(1);
         strategyFloorFromChainlink = StrategyChainlinkFloor(implementation);
 

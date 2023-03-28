@@ -91,7 +91,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _assertStrategyAttributes(address(strategyItemIdsRange), selector, true);
     }
 
-    function test_TokenIdsRangeERC721(uint256 lowerBound, uint256 upperBound) public {
+    function testFuzz_TokenIdsRangeERC721(uint256 lowerBound, uint256 upperBound) public {
         vm.assume(lowerBound < type(uint128).max && upperBound < type(uint128).max && lowerBound + 1 < upperBound);
 
         uint256 mid = (lowerBound + upperBound) / 2;
@@ -123,7 +123,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
     }
 
-    function test_TokenIdsRangeERC1155(uint256 lowerBound, uint256 upperBound) public {
+    function testFuzz_TokenIdsRangeERC1155(uint256 lowerBound, uint256 upperBound) public {
         vm.assume(lowerBound < type(uint128).max && upperBound < type(uint128).max && lowerBound + 1 < upperBound);
 
         uint256 mid = (lowerBound + upperBound) / 2;

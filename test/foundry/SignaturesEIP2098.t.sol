@@ -20,7 +20,7 @@ contract SignaturesEIP2098Test is ProtocolBase {
         _setUp();
     }
 
-    function test_CanSignValidMakerAskEIP2098(uint256 price, uint256 itemId) public {
+    function testFuzz_CanSignValidMakerAskEIP2098(uint256 price, uint256 itemId) public {
         vm.assume(price <= 2 ether);
 
         _setUpUsers();
@@ -42,7 +42,7 @@ contract SignaturesEIP2098Test is ProtocolBase {
         _assertValidMakerOrder(makerAsk, signature);
     }
 
-    function test_CanSignValidMakerBidEIP2098(uint256 price, uint256 itemId) public {
+    function testFuzz_CanSignValidMakerBidEIP2098(uint256 price, uint256 itemId) public {
         vm.assume(price <= 2 ether);
 
         _setUpUsers();

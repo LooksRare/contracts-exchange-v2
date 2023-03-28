@@ -32,7 +32,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         eip712MerkleTree = new EIP712MerkleTree(looksRareProtocol);
     }
 
-    function test_TakerBidMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
+    function testFuzz_TakerBidMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
         _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
         mockERC721.batchMint(makerUser, numberOrders);
@@ -73,7 +73,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function test_TakerAskMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
+    function testFuzz_TakerAskMultipleOrdersSignedERC721(uint256 numberOrders, uint256 orderIndex) public {
         _assertMerkleTreeAssumptions(numberOrders, orderIndex);
 
         mockERC721.batchMint(takerUser, numberOrders);
@@ -112,7 +112,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function test_TakerBidMultipleOrdersSignedERC721MerkleProofInvalid(
+    function testFuzz_TakerBidMultipleOrdersSignedERC721MerkleProofInvalid(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -152,7 +152,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function test_TakerAskMultipleOrdersSignedERC721MerkleProofInvalid(
+    function testFuzz_TakerAskMultipleOrdersSignedERC721MerkleProofInvalid(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -192,7 +192,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function test_TakerBidMultipleOrdersSignedERC721MerkleProofWrongPosition(
+    function testFuzz_TakerBidMultipleOrdersSignedERC721MerkleProofWrongPosition(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -239,7 +239,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function test_TakerAskMultipleOrdersSignedERC721MerkleProofWrongPosition(
+    function testFuzz_TakerAskMultipleOrdersSignedERC721MerkleProofWrongPosition(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {

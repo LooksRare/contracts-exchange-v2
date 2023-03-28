@@ -17,7 +17,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         _setUp();
     }
 
-    function test_UpdateDomainSeparator(uint64 newChainId) public asPrankedUser(_owner) {
+    function testFuzz_UpdateDomainSeparator(uint64 newChainId) public asPrankedUser(_owner) {
         vm.assume(newChainId != block.chainid);
 
         vm.chainId(newChainId);
@@ -39,7 +39,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function test_CannotTradeIfDomainSeparatorHasBeenUpdated(uint64 newChainId) public {
+    function testFuzz_CannotTradeIfDomainSeparatorHasBeenUpdated(uint64 newChainId) public {
         vm.assume(newChainId != block.chainid);
 
         _setUpUsers();
@@ -71,7 +71,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function test_CannotTradeIfChainIdHasChanged(uint64 newChainId) public {
+    function testFuzz_CannotTradeIfChainIdHasChanged(uint64 newChainId) public {
         vm.assume(newChainId != block.chainid);
 
         _setUpUsers();

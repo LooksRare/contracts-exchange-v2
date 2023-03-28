@@ -114,7 +114,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         executionPrice = startPrice - discount;
     }
 
-    function test_DutchAuction(
+    function testFuzz_DutchAuction(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,
@@ -167,7 +167,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function test_StartPriceTooLow(
+    function testFuzz_StartPriceTooLow(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,
@@ -206,7 +206,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_TakerBidTooLow(
+    function testFuzz_TakerBidTooLow(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,

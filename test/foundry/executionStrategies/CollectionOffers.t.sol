@@ -128,7 +128,7 @@ contract CollectionOrdersTest is ProtocolBase {
      * Any itemId for ERC721 (where royalties come from the registry) is sold through a collection taker ask using WETH.
      * We use fuzzing to generate the tokenId that is sold.
      */
-    function test_TakerAskCollectionOrderERC721(uint256 tokenId) public {
+    function testFuzz_TakerAskCollectionOrderERC721(uint256 tokenId) public {
         _setUpUsers();
 
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
@@ -210,7 +210,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertSuccessfulTakerAsk(makerBid, itemIdInMerkleTree);
     }
 
-    function test_TakerAskCannotExecuteWithInvalidProof(uint256 itemIdSold) public {
+    function testFuzz_TakerAskCannotExecuteWithInvalidProof(uint256 itemIdSold) public {
         vm.assume(itemIdSold > 5);
         _setUpUsers();
 

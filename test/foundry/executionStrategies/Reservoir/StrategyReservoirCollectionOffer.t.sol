@@ -113,11 +113,11 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _testRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh(true);
     }
 
-    function test_CollectionOrderRevertsIfItemIdDiffers(uint16 itemId) public {
+    function testFuzz_CollectionOrderRevertsIfItemIdDiffers(uint16 itemId) public {
         _testCollectionOrderRevertsIfItemIdDiffers(false, itemId);
     }
 
-    function test_CollectionOrderWithMerkleTreeRevertsIfItemIdDiffers(uint16 itemId) public {
+    function testFuzz_CollectionOrderWithMerkleTreeRevertsIfItemIdDiffers(uint16 itemId) public {
         _testCollectionOrderRevertsIfItemIdDiffers(true, itemId);
     }
 
@@ -145,8 +145,8 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _testAdditionalParametersLengthInvalid(true);
     }
 
-    function test_CollectionOrdersWithMerkleTreeRevertsWithInvalidMerkleProof(uint16 randomItemId) public {
-        uint256 numberOfItemsInMerkleTree = 1000;
+    function testFuzz_CollectionOrdersWithMerkleTreeRevertsWithInvalidMerkleProof(uint16 randomItemId) public {
+        uint256 numberOfItemsInMerkleTree = 1_000;
 
         // 420 is the itemId that is from the Reservoir's data
         vm.assume(randomItemId != 420 && randomItemId < numberOfItemsInMerkleTree);

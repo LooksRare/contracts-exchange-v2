@@ -36,7 +36,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateCreatorFeeManager(address(1));
     }
 
-    function test_UpdateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+    function testFuzz_UpdateMaxCreatorFeeBp(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
         vm.assume(newMaxCreatorFeeBp <= 2_500);
         vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
         emit NewMaxCreatorFeeBp(newMaxCreatorFeeBp);
@@ -49,7 +49,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_500));
     }
 
-    function test_UpdateMaxCreatorFeeBpTooHigh(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+    function testFuzz_UpdateMaxCreatorFeeBpTooHigh(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
         vm.assume(newMaxCreatorFeeBp > 2_500);
         vm.expectRevert(CreatorFeeBpTooHigh.selector);
         looksRareProtocol.updateMaxCreatorFeeBp(newMaxCreatorFeeBp);
@@ -72,7 +72,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
     }
 
-    function test_CannotValidateOrderIfTooEarlyToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
+    function testFuzz_CannotValidateOrderIfTooEarlyToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
         // 300 because because it is deducted by 5 minutes + 1 second
         vm.assume(timestamp > 300 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
@@ -97,7 +97,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_CannotValidateOrderIfTooLateToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
+    function testFuzz_CannotValidateOrderIfTooLateToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
         vm.assume(timestamp > 0 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
@@ -119,7 +119,9 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_CannotValidateOrderIfStartTimeLaterThanEndTime(uint256 timestamp) public asPrankedUser(takerUser) {
+    function testFuzz_CannotValidateOrderIfStartTimeLaterThanEndTime(
+        uint256 timestamp
+    ) public asPrankedUser(takerUser) {
         vm.assume(timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
@@ -155,7 +157,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_CannotValidateOrderIfMakerBidItemIdsLengthMismatch(
+    function testFuzz_CannotValidateOrderIfMakerBidItemIdsLengthMismatch(
         uint256 makerBidItemIdsLength
     ) public asPrankedUser(takerUser) {
         vm.assume(makerBidItemIdsLength > 1 && makerBidItemIdsLength < 100_000);
@@ -199,7 +201,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function test_CannotValidateOrderIfMakerAskItemIdsLengthMismatch(
+    function testFuzz_CannotValidateOrderIfMakerAskItemIdsLengthMismatch(
         uint256 makerAskItemIdsLength
     ) public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);

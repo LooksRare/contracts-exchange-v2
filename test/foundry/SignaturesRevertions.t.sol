@@ -24,7 +24,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         _setUp();
     }
 
-    function test_RevertIfSignatureEOAInvalid(uint256 itemId, uint256 price, uint256 randomPK) public {
+    function testFuzz_RevertIfSignatureEOAInvalid(uint256 itemId, uint256 price, uint256 randomPK) public {
         // @dev Private keys 1 and 2 are used for maker/taker users
         vm.assume(randomPK > 2 && randomPK < _MAX_PRIVATE_KEY);
 
@@ -58,7 +58,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         );
     }
 
-    function test_RevertIfInvalidVParameter(uint256 itemId, uint256 price, uint8 v) public {
+    function testFuzz_RevertIfInvalidVParameter(uint256 itemId, uint256 price, uint8 v) public {
         vm.assume(v != 27 && v != 28);
 
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
@@ -96,7 +96,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         );
     }
 
-    function test_RevertIfInvalidSParameter(uint256 itemId, uint256 price, bytes32 s) public {
+    function testFuzz_RevertIfInvalidSParameter(uint256 itemId, uint256 price, bytes32 s) public {
         vm.assume(uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0);
 
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
@@ -134,7 +134,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         );
     }
 
-    function test_RevertIfRecoveredSignerIsNullAddress(uint256 itemId, uint256 price) public {
+    function testFuzz_RevertIfRecoveredSignerIsNullAddress(uint256 itemId, uint256 price) public {
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,
@@ -172,7 +172,7 @@ contract SignaturesRevertionsTest is ProtocolBase {
         );
     }
 
-    function test_RevertIfInvalidSignatureLength(uint256 itemId, uint256 price, uint256 length) public {
+    function testFuzz_RevertIfInvalidSignatureLength(uint256 itemId, uint256 price, uint256 length) public {
         // @dev Getting OutOfGas starting from 16,776,985, probably due to memory cost
         vm.assume(length != 64 && length != 65 && length < 16_776_985);
 

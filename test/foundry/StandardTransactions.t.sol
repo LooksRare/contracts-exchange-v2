@@ -32,7 +32,7 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker bid
      */
-    function test_TakerBidERC721WithRoyaltiesFromRegistry(uint256 price) public {
+    function testFuzz_TakerBidERC721WithRoyaltiesFromRegistry(uint256 price) public {
         vm.assume(price <= 2 ether);
         _setUpUsers();
         _setupRegistryRoyalties(address(mockERC721), NEW_ROYALTY_FEE);
@@ -79,7 +79,7 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 is sold through taker bid. Address zero is specified as the recipient in the taker struct.
      */
-    function test_TakerBidERC721WithAddressZeroSpecifiedAsRecipient(uint256 price) public {
+    function testFuzz_TakerBidERC721WithAddressZeroSpecifiedAsRecipient(uint256 price) public {
         vm.assume(price <= 2 ether);
         _setUpUsers();
 
@@ -123,7 +123,7 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 (where royalties come from the registry) is sold through a taker ask using WETH
      */
-    function test_TakerAskERC721WithRoyaltiesFromRegistry(uint256 price) public {
+    function testFuzz_TakerAskERC721WithRoyaltiesFromRegistry(uint256 price) public {
         vm.assume(price <= 2 ether);
 
         _setUpUsers();
@@ -163,7 +163,7 @@ contract StandardTransactionsTest is ProtocolBase {
     /**
      * One ERC721 is sold through a taker ask using WETH. Address zero is specified as the recipient in the taker struct.
      */
-    function test_TakerAskERC721WithAddressZeroSpecifiedAsRecipient(uint256 price) public {
+    function testFuzz_TakerAskERC721WithAddressZeroSpecifiedAsRecipient(uint256 price) public {
         vm.assume(price <= 2 ether);
         _setUpUsers();
 

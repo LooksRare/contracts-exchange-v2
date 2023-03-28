@@ -67,7 +67,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(strategyFloorFromChainlink.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
     }
 
-    function test_SetPriceFeedDecimalsInvalid(uint8 decimals) public asPrankedUser(_owner) {
+    function testFuzz_SetPriceFeedDecimalsInvalid(uint8 decimals) public asPrankedUser(_owner) {
         vm.assume(decimals != 18);
 
         MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();

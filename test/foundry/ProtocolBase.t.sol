@@ -314,6 +314,54 @@ contract ProtocolBase is MockOrderGenerator, ILooksRareProtocol {
         flags[0] = true;
     }
 
+    function _assertTakerBidEvent(
+        OrderStructs.Maker memory makerAsk,
+        address[2] memory expectedRecipients,
+        uint256[3] memory expectedFees
+    ) internal {
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        emit TakerBid(
+            NonceInvalidationParameters({
+                orderHash: _computeOrderHash(makerAsk),
+                orderNonce: makerAsk.orderNonce,
+                isNonceInvalidated: true
+            }),
+            takerUser,
+            takerUser,
+            makerAsk.strategyId,
+            makerAsk.currency,
+            makerAsk.collection,
+            makerAsk.itemIds,
+            makerAsk.amounts,
+            expectedRecipients,
+            expectedFees
+        );
+    }
+
+    function _assertTakerAskEvent(
+        OrderStructs.Maker memory makerBid,
+        address[2] memory expectedRecipients,
+        uint256[3] memory expectedFees
+    ) internal {
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true});
+        emit TakerAsk(
+            NonceInvalidationParameters({
+                orderHash: _computeOrderHash(makerBid),
+                orderNonce: makerBid.orderNonce,
+                isNonceInvalidated: true
+            }),
+            takerUser,
+            makerUser,
+            makerBid.strategyId,
+            makerBid.currency,
+            makerBid.collection,
+            makerBid.itemIds,
+            makerBid.amounts,
+            expectedRecipients,
+            expectedFees
+        );
+    }
+
     /**
      * NOTE: It inherits from ILooksRareProtocol, so it
      *       needs to at least define the functions below.

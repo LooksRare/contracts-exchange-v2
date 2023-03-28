@@ -99,28 +99,30 @@ contract StrategyManager is IStrategyManager, CurrencyManager {
      * @notice This function allows the owner to update parameters for an existing execution strategy.
      * @param strategyId Strategy id
      * @param isActive Whether the strategy must be active
-     * @param newStandardProtocolFee New standard protocol fee (in basis point)
-     * @param newMinTotalFee New minimum total fee (in basis point)
+     * @param newStandardProtocolFeeBp New standard protocol fee (in basis point)
+     * @param newMinTotalFeeBp New minimum total fee (in basis point)
      * @dev Only callable by owner.
      */
     function updateStrategy(
         uint256 strategyId,
         bool isActive,
-        uint16 newStandardProtocolFee,
-        uint16 newMinTotalFee
+        uint16 newStandardProtocolFeeBp,
+        uint16 newMinTotalFeeBp
     ) external onlyOwner {
         if (strategyId >= _countStrategies) {
             revert StrategyNotUsed();
         }
 
-        if (newMinTotalFee > strategyInfo[strategyId].maxProtocolFeeBp || newStandardProtocolFee > newMinTotalFee) {
+        if (
+            newMinTotalFeeBp > strategyInfo[strategyId].maxProtocolFeeBp || newStandardProtocolFeeBp > newMinTotalFeeBp
+        ) {
             revert StrategyProtocolFeeTooHigh();
         }
 
         strategyInfo[strategyId].isActive = isActive;
-        strategyInfo[strategyId].standardProtocolFeeBp = newStandardProtocolFee;
-        strategyInfo[strategyId].minTotalFeeBp = newMinTotalFee;
+        strategyInfo[strategyId].standardProtocolFeeBp = newStandardProtocolFeeBp;
+        strategyInfo[strategyId].minTotalFeeBp = newMinTotalFeeBp;
 
-        emit StrategyUpdated(strategyId, isActive, newStandardProtocolFee, newMinTotalFee);
+        emit StrategyUpdated(strategyId, isActive, newStandardProtocolFeeBp, newMinTotalFeeBp);
     }
 }

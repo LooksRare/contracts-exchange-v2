@@ -126,7 +126,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
         assertEq(address(looksRareProtocol).balance, 1);
     }
 
-    function test_ThreeTakerBidsERC721LengthsInvalid() public {
+    function test_ThreeTakerBidsERC721_RevertIf_LengthsInvalid() public {
         _setUpUsers();
 
         BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](0);

@@ -71,11 +71,11 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         }
     }
 
-    function testFork_CollectionOrderRevertsIfItemIsFlagged() public {
+    function testFork_CollectionOrder_RevertIf_ItemIsFlagged() public {
         _testRevertsIfItemIsFlagged(false);
     }
 
-    function testFork_CollectionOrderWithMerkleTreeRevertsIfItemIsFlagged() public {
+    function testFork_CollectionOrderWithMerkleTree_RevertIf_ItemIsFlagged() public {
         _testRevertsIfItemIsFlagged(true);
     }
 
@@ -87,57 +87,57 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _testWorksIfItemIsNotFlaggedAndLastTransferIsRecentEnough(true);
     }
 
-    function testFork_CollectionOrderRevertsIfLastTransferTimeIsZero() public {
+    function testFork_CollectionOrder_RevertIf_LastTransferTimeIsZero() public {
         _testRevertsIfLastTransferTimeIsZero(false);
     }
 
-    function testFork_CollectionOrderWithMerkleTreeRevertsIfLastTransferTimeIsZero() public {
+    function testFork_CollectionOrderWithMerkleTree_RevertIf_LastTransferTimeIsZero() public {
         _testRevertsIfLastTransferTimeIsZero(true);
     }
 
-    function testFork_CollectionOrderRevertsIfSignatureExpires() public {
+    function testFork_CollectionOrder_RevertIf_SignatureExpires() public {
         _testRevertsIfSignatureExpires(false);
     }
 
-    function testFork_CollectionOrderWithMerkleTreeRevertsIfSignatureExpires() public {
+    function testFork_CollectionOrderWithMerkleTree_RevertIf_SignatureExpires() public {
         _testRevertsIfSignatureExpires(true);
     }
 
-    function testFork_CollectionOrderRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh() public {
+    function testFork_CollectionOrder_RevertIf_TransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh() public {
         _testRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh(false);
     }
 
-    function testFork_CollectionOrderWithMerkleTreeRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh()
+    function testFork_CollectionOrderWithMerkleTree_RevertIf_TransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh()
         public
     {
         _testRevertsIfTransferWithinCooldownPeriodOrTransferCooldownPeriodTooHigh(true);
     }
 
-    function testForkFuzz_CollectionOrderRevertsIfItemIdDiffers(uint16 itemId) public {
+    function testForkFuzz_CollectionOrder_RevertIf_ItemIdDiffers(uint16 itemId) public {
         _testCollectionOrderRevertsIfItemIdDiffers(false, itemId);
     }
 
-    function testForkFuzz_CollectionOrderWithMerkleTreeRevertsIfItemIdDiffers(uint16 itemId) public {
+    function testForkFuzz_CollectionOrderWithMerkleTree_RevertIf_ItemIdDiffers(uint16 itemId) public {
         _testCollectionOrderRevertsIfItemIdDiffers(true, itemId);
     }
 
-    function testFork_CollectionOrderRevertsIfCollectionTypeIsNotERC721() public {
+    function testFork_CollectionOrder_RevertIf_CollectionTypeIsNotERC721() public {
         _testRevertsIfCollectionTypeIsNotERC721(false);
     }
 
-    function testFork_CollectionOrderWithMerkleTreeRevertsIfCollectionTypeIsNotERC721() public {
+    function testFork_CollectionOrderWithMerkleTree_RevertIf_CollectionTypeIsNotERC721() public {
         _testRevertsIfCollectionTypeIsNotERC721(true);
     }
 
-    function testFork_CollectionOrdersAmountsInvalid() public {
+    function testFork_CollectionOrders_RevertIf_AmountsInvalid() public {
         _testAmountsInvalid(false);
     }
 
-    function testFork_CollectionOrdersWithMerkleTreeAmountsInvalid() public {
+    function testFork_CollectionOrdersWithMerkleTree_RevertIf_AmountsInvalid() public {
         _testAmountsInvalid(true);
     }
 
-    function test_CollectionOrdersAdditionalParametersLengthInvalid() public {
+    function test_CollectionOrders_RevertIf_AdditionalParametersLengthInvalid() public {
         _testAdditionalParametersLengthInvalid(false);
     }
 

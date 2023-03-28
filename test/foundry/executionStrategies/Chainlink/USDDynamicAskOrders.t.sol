@@ -105,7 +105,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(strategyUSDDynamicAsk.maxLatency(), 3_600);
     }
 
-    function testFork_USDDynamicAskChainlinkPriceInvalid() public {
+    function testFork_USDDynamicAsk_RevertIf_ChainlinkPriceInvalid() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,

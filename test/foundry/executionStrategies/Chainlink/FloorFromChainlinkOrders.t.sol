@@ -67,7 +67,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(strategyFloorFromChainlink.priceFeeds(address(mockERC721)), AZUKI_PRICE_FEED);
     }
 
-    function testFuzz_SetPriceFeedDecimalsInvalid(uint8 decimals) public asPrankedUser(_owner) {
+    function testFuzz_SetPriceFeed_RevertIf_DecimalsInvalid(uint8 decimals) public asPrankedUser(_owner) {
         vm.assume(decimals != 18);
 
         MockChainlinkAggregator priceFeed = new MockChainlinkAggregator();
@@ -76,18 +76,18 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), address(priceFeed));
     }
 
-    function test_PriceFeedCannotBeSetTwice() public asPrankedUser(_owner) {
+    function test_SetPriceFeed_RevertIf_AlreadySet() public asPrankedUser(_owner) {
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
         vm.expectRevert(PriceFeedAlreadySet.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
-    function test_SetPriceFeedNotOwner() public {
+    function test_SetPriceFeed_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         strategyFloorFromChainlink.setPriceFeed(address(mockERC721), AZUKI_PRICE_FEED);
     }
 
-    function test_QuoteTypeInvalid() public {
+    function test_RevertIf_QuoteTypeInvalid() public {
         OrderStructs.Maker memory maker;
 
         // 1. Maker bid, but function selector is for maker ask
@@ -125,7 +125,7 @@ abstract contract FloorFromChainlinkOrdersTest is ProtocolBase, IStrategyManager
         assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
-    function test_InvalidSelector() public {
+    function test_RevertIf_InvalidSelector() public {
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,

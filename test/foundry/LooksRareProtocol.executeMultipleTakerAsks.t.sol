@@ -163,7 +163,7 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
     /**
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */
-    function test_ThreeTakerAsksERC721OneFails() public {
+    function test_ThreeTakerAsksERC721_RevertIf_OneFails() public {
         _setUpUsers();
 
         uint256 numberOfPurchases = 3;
@@ -207,7 +207,7 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price * (numberOfPurchases - 1));
     }
 
-    function test_ThreeTakerAsksERC721LengthsInvalid() public {
+    function test_ThreeTakerAsksERC721_RevertIf_LengthsInvalid() public {
         _setUpUsers();
 
         BatchExecutionParameters[] memory batchExecutionParameters = new BatchExecutionParameters[](0);
@@ -216,15 +216,15 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
         looksRareProtocol.executeMultipleTakerAsks(batchExecutionParameters, _EMPTY_AFFILIATE, false);
     }
 
-    function test_CannotTradeIfCurrencyInvalid() public {
+    function test_Trade_RevertIf_CurrencyInvalid() public {
         _testCannotTradeIfCurrencyInvalid(address(mockERC20));
     }
 
-    function test_CannotTradeIfETHIsUsedForMakerBid() public {
+    function test_Trade_RevertIf_ETHIsUsedForMakerBid() public {
         _testCannotTradeIfCurrencyInvalid(ETH);
     }
 
-    function test_CannotCallRestrictedExecuteTakerAsk() public {
+    function test_RestrictedExecuteTakerAsk_RevertIf_NotSelf() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
@@ -243,11 +243,11 @@ contract LooksRareProtocolExecuteMultipleTakerAsksTest is ProtocolBase {
     /**
      * Cannot execute two or more taker bids if the currencies are different
      */
-    function test_CannotExecuteMultipleTakerAsksIfDifferentCurrenciesIsAtomic() public {
+    function test_ExecuteMultipleTakerAsks_RevertIf_DifferentCurrenciesIsAtomic() public {
         _testCannotExecuteMultipleTakerAsksIfDifferentCurrencies(true);
     }
 
-    function test_CannotExecuteMultipleTakerAsksIfDifferentCurrenciesIsNonAtomic() public {
+    function test_ExecuteMultipleTakerAsks_RevertIf_DifferentCurrenciesIsNonAtomic() public {
         _testCannotExecuteMultipleTakerAsksIfDifferentCurrencies(false);
     }
 

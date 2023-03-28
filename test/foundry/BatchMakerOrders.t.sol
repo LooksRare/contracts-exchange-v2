@@ -112,7 +112,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testFuzz_TakerBidMultipleOrdersSignedERC721MerkleProofInvalid(
+    function testFuzz_ExecuteTakerBidMultipleOrdersSignedERC721_RevertIf_MerkleProofInvalid(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -152,7 +152,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testFuzz_TakerAskMultipleOrdersSignedERC721MerkleProofInvalid(
+    function testFuzz_ExecuteTakerAskMultipleOrdersSignedERC721_RevertIf_MerkleProofInvalid(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -192,7 +192,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testFuzz_TakerBidMultipleOrdersSignedERC721MerkleProofWrongPosition(
+    function testFuzz_ExecuteTakerBidMultipleOrdersSignedERC721_RevertIf_MerkleProofWrongPosition(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -239,7 +239,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function testFuzz_TakerAskMultipleOrdersSignedERC721MerkleProofWrongPosition(
+    function testFuzz_ExecuteTakerAskMultipleOrdersSignedERC721_RevertIf_MerkleProofWrongPosition(
         uint256 numberOrders,
         uint256 orderIndex
     ) public {
@@ -286,7 +286,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         );
     }
 
-    function test_TakerBidRevertsIfProofTooLarge() public {
+    function test_ExecuteTakerBid_RevertIf_ProofTooLarge() public {
         uint256 testProofLengthUpTo = MAX_CALLDATA_PROOF_LENGTH + 3;
         mockERC721.batchMint(makerUser, 2 ** testProofLengthUpTo);
 
@@ -325,7 +325,7 @@ contract BatchMakerOrdersTest is ProtocolBase {
         }
     }
 
-    function test_TakerAskRevertsIfProofTooLarge() public {
+    function test_ExecuteTakerAsk_RevertIf_ProofTooLarge() public {
         uint256 testProofLengthUpTo = MAX_CALLDATA_PROOF_LENGTH + 3;
         mockERC721.batchMint(takerUser, 2 ** testProofLengthUpTo);
 

@@ -141,11 +141,11 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         _testAdditionalParametersLengthInvalid(false);
     }
 
-    function test_CollectionOrdersWithMerkleTreeAdditionalParametersLengthInvalid() public {
+    function test_CollectionOrdersWithMerkleTree_RevertIf_AdditionalParametersLengthInvalid() public {
         _testAdditionalParametersLengthInvalid(true);
     }
 
-    function testFuzz_CollectionOrdersWithMerkleTreeRevertsWithInvalidMerkleProof(uint16 randomItemId) public {
+    function testFuzz_CollectionOrdersWithMerkleTree_RevertIf_InvalidMerkleProof(uint16 randomItemId) public {
         uint256 numberOfItemsInMerkleTree = 1_000;
 
         // 420 is the itemId that is from the Reservoir's data
@@ -211,7 +211,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_WrongQuoteType() public {
+    function test_RevertIf_WrongQuoteType() public {
         _setUp();
         _setUpNewStrategies();
 
@@ -238,7 +238,7 @@ contract CollectionOffersWithReservoirTest is ProtocolBase {
         assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
-    function test_InvalidSelector() public {
+    function test_RevertIf_InvalidSelector() public {
         _setUp();
         _setUpNewStrategies();
 

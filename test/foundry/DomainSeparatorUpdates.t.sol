@@ -39,7 +39,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testFuzz_CannotTradeIfDomainSeparatorHasBeenUpdated(uint64 newChainId) public {
+    function testFuzz_ExecuteTakerBid_RevertIf_DomainSeparatorHasBeenUpdated(uint64 newChainId) public {
         vm.assume(newChainId != block.chainid);
 
         _setUpUsers();
@@ -71,7 +71,7 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function testFuzz_CannotTradeIfChainIdHasChanged(uint64 newChainId) public {
+    function testFuzz_ExecuteTakerBid_RevertIf_ChainIdHasChanged(uint64 newChainId) public {
         vm.assume(newChainId != block.chainid);
 
         _setUpUsers();
@@ -99,12 +99,12 @@ contract DomainSeparatorUpdatesTest is ProtocolBase {
         );
     }
 
-    function test_UpdateDomainSeparatorSameDomainSeparator() public asPrankedUser(_owner) {
+    function test_UpdateDomainSeparator_RevertIf_SameDomainSeparator() public asPrankedUser(_owner) {
         vm.expectRevert(SameDomainSeparator.selector);
         looksRareProtocol.updateDomainSeparator();
     }
 
-    function test_UpdateDomainSeparatorNotOwner() public {
+    function test_UpdateDomainSeparator_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateDomainSeparator();
     }

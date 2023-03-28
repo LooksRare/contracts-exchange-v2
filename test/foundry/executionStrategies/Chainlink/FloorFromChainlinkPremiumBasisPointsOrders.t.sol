@@ -25,7 +25,7 @@ contract FloorFromChainlinkPremiumBasisPointsOrdersTest is FloorFromChainlinkPre
         super.setUp();
     }
 
-    function test_InactiveStrategy() public {
+    function test_RevertIf_InactiveStrategy() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             premium: premium
         });

@@ -167,7 +167,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function testFuzz_StartPriceTooLow(
+    function testFuzz_RevertIf_StartPriceTooLow(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,
@@ -206,7 +206,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testFuzz_TakerBidTooLow(
+    function testFuzz_RevertIf_TakerBidTooLow(
         uint256 startPrice,
         uint256 duration,
         uint256 decayPerSecond,
@@ -246,7 +246,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_InactiveStrategy() public {
+    function test_RevertIf_InactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -271,7 +271,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_ZeroItemIdsLength() public {
+    function test_RevertIf_ZeroItemIdsLength() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -293,7 +293,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_ItemIdsAndAmountsLengthMismatch() public {
+    function test_RevertIf_ItemIdsAndAmountsLengthMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
@@ -315,7 +315,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_InvalidAmounts() public {
+    function test_RevertIf_InvalidAmounts() public {
         _setUpUsers();
         _setUpNewStrategy();
 
@@ -352,7 +352,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_WrongQuoteType() public {
+    function test_RevertIf_WrongQuoteType() public {
         _setUpNewStrategy();
 
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
@@ -375,7 +375,7 @@ contract DutchAuctionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
-    function test_InvalidSelector() public {
+    function test_RevertIf_InvalidSelector() public {
         _setUpNewStrategy();
 
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({

@@ -70,7 +70,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
     /**
      * Transaction cannot go through if atomic, goes through if non-atomic (fund returns to buyer).
      */
-    function test_ThreeTakerBidsERC721OneFails() public {
+    function test_ThreeTakerBidsERC721_RevertIf_OneFails() public {
         _setUpUsers();
 
         uint256 numberOfPurchases = 3;
@@ -135,7 +135,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
         looksRareProtocol.executeMultipleTakerBids(batchExecutionParameters, _EMPTY_AFFILIATE, false);
     }
 
-    function test_CannotTradeIfCurrencyInvalid() public {
+    function test_Trade_RevertIf_CurrencyInvalid() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
@@ -179,7 +179,7 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
         }
     }
 
-    function test_CannotCallRestrictedExecuteTakerBid() public {
+    function test_RestrictedExecuteTakerBid_RevertIf_NotSelf() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
@@ -197,11 +197,11 @@ contract LooksRareProtocolExecuteMultipleTakerBidsTest is ProtocolBase {
     /**
      * Cannot execute two or more taker bids if the currencies are different
      */
-    function test_CannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsAtomic() public {
+    function test_ExecuteMultipleTakerBids_RevertIf_DifferentCurrenciesIsAtomic() public {
         _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(true);
     }
 
-    function test_CannotExecuteMultipleTakerBidsIfDifferentCurrenciesIsNonAtomic() public {
+    function test_ExecuteMultipleTakerBids_RevertIf_DifferentCurrenciesIsNonAtomic() public {
         _testCannotExecuteMultipleTakerBidsIfDifferentCurrencies(false);
     }
 

@@ -130,7 +130,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
      * Owner functions for strategy updates revert as expected under multiple revertion scenarios
      */
-    function test_OwnerRevertionsForInvalidParametersUpdateStrategy() public asPrankedUser(_owner) {
+    function test_UpdateStrategy_RevertIf_InvalidParameters() public asPrankedUser(_owner) {
         (
             ,
             uint16 currentStandardProtocolFee,
@@ -161,7 +161,7 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
     /**
      * Owner functions for strategy additions revert as expected under multiple revertion scenarios
      */
-    function test_OwnerRevertionsForInvalidParametersAddStrategy() public asPrankedUser(_owner) {
+    function test_AddStrategy_RevertIf_InvalidParameters() public asPrankedUser(_owner) {
         uint16 standardProtocolFeeBp = 250;
         uint16 minTotalFeeBp = 300;
         uint16 maxProtocolFeeBp = 300;
@@ -204,12 +204,12 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         );
     }
 
-    function test_AddStrategyNoSelector() public asPrankedUser(_owner) {
+    function test_AddStrategy_RevertIf_NoSelector() public asPrankedUser(_owner) {
         vm.expectRevert(IStrategyManager.StrategyHasNoSelector.selector);
         _addStrategy(address(0), _EMPTY_BYTES4, true);
     }
 
-    function test_AddStrategyNotV2Strategy() public asPrankedUser(_owner) {
+    function test_AddStrategy_RevertIf_NotV2Strategy() public asPrankedUser(_owner) {
         bytes4 randomSelector = StrategyCollectionOffer.executeCollectionStrategyWithTakerAsk.selector;
 
         // 1. EOA
@@ -227,12 +227,12 @@ contract StrategyManagerTest is ProtocolBase, IStrategyManager {
         _addStrategy(address(falseStrategy), randomSelector, true);
     }
 
-    function test_AddStrategyNotOwner() public {
+    function test_AddStrategy_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         _addStrategy(address(0), _EMPTY_BYTES4, true);
     }
 
-    function test_UpdateStrategyNotOwner() public {
+    function test_UpdateStrategy_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateStrategy(0, false, 299, 100);
     }

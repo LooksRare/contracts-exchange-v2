@@ -65,7 +65,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(strategyImplementation, address(strategyCollectionOffer));
     }
 
-    function test_MakerBidAmountsLengthNotOne() public {
+    function test_MakerBidAmounts_RevertIf_LengthNotOne() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
@@ -100,7 +100,7 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_ZeroAmount() public {
+    function test_RevertIf_ZeroAmount() public {
         _setUpUsers();
 
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
@@ -210,7 +210,7 @@ contract CollectionOrdersTest is ProtocolBase {
         _assertSuccessfulTakerAsk(makerBid, itemIdInMerkleTree);
     }
 
-    function testFuzz_TakerAskCannotExecuteWithInvalidProof(uint256 itemIdSold) public {
+    function testFuzz_TakerAsk_RevertIf_InvalidProof(uint256 itemIdSold) public {
         vm.assume(itemIdSold > 5);
         _setUpUsers();
 
@@ -252,7 +252,7 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_InvalidAmounts() public {
+    function test_RevertIf_InvalidAmounts() public {
         _setUpUsers();
 
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
@@ -325,7 +325,7 @@ contract CollectionOrdersTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_MerkleRootLengthIsNot32() public {
+    function test_RevertIf_MerkleRootLengthIsNot32() public {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -356,7 +356,7 @@ contract CollectionOrdersTest is ProtocolBase {
         );
     }
 
-    function test_InvalidSelector() public {
+    function test_RevertIf_InvalidSelector() public {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -376,7 +376,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(errorSelector, FunctionSelectorInvalid.selector);
     }
 
-    function test_WrongQuoteType() public {
+    function test_RevertIf_WrongQuoteType() public {
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,

@@ -23,7 +23,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         super.setUp();
     }
 
-    function test_InactiveStrategy() public {
+    function test_RevertIf_InactiveStrategy() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({
             discount: 0.1 ether
         });
@@ -97,7 +97,7 @@ contract FloorFromChainlinkDiscountFixedAmountOrdersTest is FloorFromChainlinkDi
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
     }
 
-    function test_FloorFromChainlinkDiscountFixedAmountDesiredDiscountedAmountGreaterThanFloorPrice() public {
+    function test_FloorFromChainlinkDiscountFixedAmount_RevertIf_DesiredDiscountedAmountGreaterThanFloorPrice() public {
         // Floor price = 9.7 ETH, discount = 9.7 ETH, desired price = 0 ETH
         // Max price = 0 ETH
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk({

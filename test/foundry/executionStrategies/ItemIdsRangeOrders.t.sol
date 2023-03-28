@@ -182,7 +182,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         _assertSellerReceivedWETHAfterStandardProtocolFee(takerUser, price);
     }
 
-    function test_InvalidMakerBidAdditionalParameters() public {
+    function test_RevertIf_InvalidMakerBidAdditionalParameters() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -202,7 +202,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_ZeroDesiredAmount() public {
+    function test_RevertIf_ZeroDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -219,7 +219,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_WrongQuoteType() public {
+    function test_RevertIf_WrongQuoteType() public {
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, ) = _createMakerBidAndTakerAsk(5, 10);
         makerBid.quoteType = QuoteType.Ask;
@@ -230,7 +230,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
-    function test_TakerAskItemIdsAmountsLengthMismatch() public {
+    function test_TakerAsk_RevertIf_ItemIdsAmountsLengthMismatch() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -251,7 +251,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_TakerAskRevertIfAmountIsZeroOrGreaterThanOneERC721() public {
+    function test_TakerAsk_RevertIf_AmountIsZeroOrGreaterThanOneERC721() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -293,7 +293,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_MakerBidItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
+    function test_MakerBid_RevertIf_ItemIdsLowerBandHigherThanOrEqualToUpperBand() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -322,7 +322,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_TakerAskDuplicatedItemIds() public {
+    function test_TakerAsk_RevertIf_DuplicatedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -346,7 +346,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_TakerAskUnsortedItemIds() public {
+    function test_TakerAsk_RevertIf_UnsortedItemIds() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -370,7 +370,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_TakerAskOfferedAmountNotEqualToDesiredAmount() public {
+    function test_TakerAsk_RevertIf_OfferedAmountNotEqualToDesiredAmount() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -393,11 +393,11 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_TakerAskOfferedItemIdTooLow() public {
+    function test_TakerAsk_RevertIf_OfferedItemIdTooLow() public {
         _testTakerAskOfferedItemIdOutOfRange(3, 4);
     }
 
-    function test_TakerAskOfferedItemIdTooHigh() public {
+    function test_TakerAsk_RevertIf_OfferedItemIdTooHigh() public {
         _testTakerAskOfferedItemIdOutOfRange(11, 12);
     }
 
@@ -422,7 +422,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_InactiveStrategy() public {
+    function test_RevertIf_InactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMakerBidAndTakerAsk(5, 10);
@@ -443,7 +443,7 @@ contract ItemIdsRangeOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_InvalidSelector() public {
+    function test_RevertIf_InvalidSelector() public {
         _setUpNewStrategy();
 
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({

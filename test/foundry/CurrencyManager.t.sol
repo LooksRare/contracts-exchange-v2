@@ -35,7 +35,7 @@ contract CurrencyManagerTest is TestHelpers, TestParameters, ICurrencyManager {
         assertFalse(currencyManager.isCurrencyAllowed(address(mockERC20)));
     }
 
-    function test_UpdateCurrencyStatusNotOwner() public {
+    function test_UpdateCurrencyStatus_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         currencyManager.updateCurrencyStatus(address(mockERC20), true);
     }

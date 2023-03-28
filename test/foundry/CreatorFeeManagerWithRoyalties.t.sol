@@ -192,7 +192,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         _assertSuccessfulTakerAskBundle(makerBid);
     }
 
-    function test_CreatorRoyaltiesRevertForEIP2981WithBundlesIfInfoDiffer() public {
+    function test_CreatorRoyalties_RevertIf_EIP2981WithBundlesInfoDiffer() public {
         _setUpUsers();
 
         uint256 numberItemsInBundle = 5;
@@ -263,7 +263,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testFuzz_CreatorRoyaltiesRevertForEIP2981WithBundlesIfAtLeastOneCallReverts(uint256 revertIndex) public {
+    function testFuzz_CreatorRoyalties_RevertIf_EIP2981WithBundlesAtLeastOneCallReverts(uint256 revertIndex) public {
         _setUpUsers();
 
         uint256 numberItemsInBundle = 5;
@@ -308,7 +308,7 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_CreatorRoyaltiesRevertIfFeeHigherThanLimit() public {
+    function test_CreatorRoyalties_RevertIf_FeeHigherThanLimit() public {
         _setUpUsers();
         uint256 _creatorRoyaltyFeeTooHigh = looksRareProtocol.maxCreatorFeeBp() + 1;
 

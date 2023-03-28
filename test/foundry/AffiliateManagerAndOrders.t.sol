@@ -70,12 +70,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         looksRareProtocol.updateAffiliateRate(takerUser, 30);
     }
 
-    function test_CannotUpdateAffiliateRateIfNotAffiliateController() public {
+    function test_UpdateAffiliateRate_RevertIf_NotAffiliateController() public {
         vm.expectRevert(IAffiliateManager.NotAffiliateController.selector);
         looksRareProtocol.updateAffiliateRate(address(42), 100);
     }
 
-    function test_CannotUpdateAffiliateRateIfRateHigherthan10000() public asPrankedUser(_owner) {
+    function test_UpdateAffiliateRate_RevertIf_RateHigherthan10000() public asPrankedUser(_owner) {
         looksRareProtocol.updateAffiliateController(_owner);
 
         address randomAffiliate = address(42);
@@ -88,12 +88,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         assertEq(looksRareProtocol.affiliateRates(randomAffiliate), affiliateRateLimitBp);
     }
 
-    function test_UpdateAffiliateControllerNotOwner() public {
+    function test_UpdateAffiliateController_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateAffiliateController(address(0));
     }
 
-    function test_UpdateAffiliateProgramStatusNotOwner() public {
+    function test_UpdateAffiliateProgramStatus_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateAffiliateProgramStatus(false);
     }

@@ -244,7 +244,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         _assertSellerReceivedETHAfterStandardProtocolFee(makerUser, 1 ether);
     }
 
-    function test_OraclePriceNotRecentEnough() public {
+    function test_RevertIf_OraclePriceNotRecentEnough() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
@@ -269,7 +269,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_CannotExecuteIfNotWETHOrETH() public {
+    function test_Execute_RevertIf_NotWETHOrETH() public {
         MockERC20 fakeCurrency = new MockERC20();
         vm.prank(_owner);
         looksRareProtocol.updateCurrencyStatus(address(fakeCurrency), true);
@@ -294,7 +294,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_ZeroItemIdsLength() public {
+    function test_RevertIf_ZeroItemIdsLength() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 0,
             numberOfAmounts: 0,
@@ -312,7 +312,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_ItemIdsAndAmountsLengthMismatch() public {
+    function test_RevertIf_ItemIdsAndAmountsLengthMismatch() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 2,
@@ -330,7 +330,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_WrongQuoteType() public {
+    function test_RevertIf_WrongQuoteType() public {
         OrderStructs.Maker memory makerBid = _createSingleItemMakerOrder({
             quoteType: QuoteType.Bid,
             globalNonce: 0,
@@ -351,7 +351,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(errorSelector, QuoteTypeInvalid.selector);
     }
 
-    function test_ZeroAmount() public {
+    function test_RevertIf_ZeroAmount() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
@@ -374,7 +374,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_AmountGreaterThanOneForERC721() public {
+    function test_RevertIf_AmountGreaterThanOneForERC721() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
@@ -396,7 +396,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_TakerBidTooLow() public {
+    function test_RevertIf_TakerBidTooLow() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
@@ -417,7 +417,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_InactiveStrategy() public {
+    function test_RevertIf_InactiveStrategy() public {
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMakerAskAndTakerBid({
             numberOfItems: 1,
             numberOfAmounts: 1,
@@ -438,7 +438,7 @@ contract USDDynamicAskOrdersTest is ProtocolBase, IStrategyManager {
         looksRareProtocol.executeTakerBid(takerBid, makerAsk, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_InvalidSelector() public {
+    function test_RevertIf_InvalidSelector() public {
         OrderStructs.Maker memory makerAsk = _createSingleItemMakerOrder({
             quoteType: QuoteType.Ask,
             globalNonce: 0,

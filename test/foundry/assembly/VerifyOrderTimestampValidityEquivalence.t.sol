@@ -61,7 +61,7 @@ contract VerifyOrderTimestampValidityEquivalenceTest is Test {
         assertTrue(nonAssemblyCode.run(startTime, endTime));
     }
 
-    function testFuzz_EquivalenceTooEarly(uint256 startTime, uint256 endTime) public {
+    function testFuzz_Equivalence_RevertIf_TooEarly(uint256 startTime, uint256 endTime) public {
         vm.assume(startTime > 0 && startTime < endTime);
 
         vm.warp(startTime - 1);
@@ -73,7 +73,7 @@ contract VerifyOrderTimestampValidityEquivalenceTest is Test {
         nonAssemblyCode.run(startTime, endTime);
     }
 
-    function testFuzz_EquivalenceTooLate(uint256 startTime, uint256 endTime) public {
+    function testFuzz_Equivalence_RevertIf_TooLate(uint256 startTime, uint256 endTime) public {
         vm.assume(endTime > 0 && endTime < type(uint256).max && startTime < endTime);
 
         vm.warp(endTime + 1);

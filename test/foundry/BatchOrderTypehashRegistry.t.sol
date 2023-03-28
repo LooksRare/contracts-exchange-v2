@@ -133,7 +133,7 @@ contract BatchOrderTypehashRegistryTest is Test {
         );
     }
 
-    function testFuzz_GetTypehashMerkleProofTooLarge(uint256 height) public {
+    function testFuzz_GetTypehash_RevertIf_MerkleProofTooLarge(uint256 height) public {
         vm.assume(height > 10);
 
         BatchOrderTypehashRegistryInheriter registry = new BatchOrderTypehashRegistryInheriter();

@@ -60,7 +60,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         assertEq(mockERC721.ownerOf(makerAsk.itemIds[0]), takerUser);
     }
 
-    function test_TakerBidInvalidSignature() public {
+    function test_TakerBid_RevertIf_InvalidSignature() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _takerBidSetup(address(wallet));
 
@@ -85,7 +85,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         );
     }
 
-    function test_TakerBidReentrancy() public {
+    function test_TakerBid_RevertIf_Reentrancy() public {
         MaliciousIsValidSignatureERC1271Wallet maliciousERC1271Wallet = new MaliciousIsValidSignatureERC1271Wallet(
             address(looksRareProtocol)
         );
@@ -126,7 +126,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         assertEq(mockERC721.ownerOf(makerBid.itemIds[0]), address(wallet));
     }
 
-    function test_TakerAskInvalidSignature() public {
+    function test_TakerAsk_RevertIf_InvalidSignature() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
         (OrderStructs.Taker memory takerAsk, OrderStructs.Maker memory makerBid) = _takerAskSetup(address(wallet));
 
@@ -145,7 +145,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_TakerAskReentrancy() public {
+    function test_TakerAsk_RevertIf_Reentrancy() public {
         MaliciousIsValidSignatureERC1271Wallet maliciousERC1271Wallet = new MaliciousIsValidSignatureERC1271Wallet(
             address(looksRareProtocol)
         );
@@ -185,7 +185,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         }
     }
 
-    function test_ExecuteMultipleTakerBidsInvalidSignatures() public {
+    function test_ExecuteMultipleTakerBids_RevertIf_InvalidSignatures() public {
         ERC1271Wallet wallet = new ERC1271Wallet(address(makerUser));
 
         BatchExecutionParameters[] memory batchExecutionParameters = _multipleTakerBidsSetup(address(wallet));
@@ -212,7 +212,7 @@ contract SignaturesERC1271WalletForERC721Test is ProtocolBase {
         );
     }
 
-    function test_ExecuteMultipleTakerBidsReentrancy() public {
+    function test_ExecuteMultipleTakerBids_RevertIf_Reentrancy() public {
         MaliciousIsValidSignatureERC1271Wallet maliciousERC1271Wallet = new MaliciousIsValidSignatureERC1271Wallet(
             address(looksRareProtocol)
         );

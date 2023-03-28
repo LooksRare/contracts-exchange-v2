@@ -31,7 +31,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         assertEq(address(looksRareProtocol.creatorFeeManager()), address(1));
     }
 
-    function test_UpdateCreatorFeeManagerNotOwner() public {
+    function test_UpdateCreatorFeeManager_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateCreatorFeeManager(address(1));
     }
@@ -44,12 +44,12 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         assertEq(looksRareProtocol.maxCreatorFeeBp(), newMaxCreatorFeeBp);
     }
 
-    function test_UpdateMaxCreatorFeeBpNotOwner() public {
+    function test_UpdateMaxCreatorFeeBp_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateMaxCreatorFeeBp(uint16(2_500));
     }
 
-    function testFuzz_UpdateMaxCreatorFeeBpTooHigh(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
+    function testFuzz_UpdateMaxCreatorFeeBp_RevertIf_TooHigh(uint16 newMaxCreatorFeeBp) public asPrankedUser(_owner) {
         vm.assume(newMaxCreatorFeeBp > 2_500);
         vm.expectRevert(CreatorFeeBpTooHigh.selector);
         looksRareProtocol.updateMaxCreatorFeeBp(newMaxCreatorFeeBp);
@@ -62,17 +62,17 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         assertEq(looksRareProtocol.protocolFeeRecipient(), address(1));
     }
 
-    function test_UpdateProtocolFeeRecipientCannotBeNullAddress() public asPrankedUser(_owner) {
+    function test_UpdateProtocolFeeRecipient_RevertIf_NullAddress() public asPrankedUser(_owner) {
         vm.expectRevert(IExecutionManager.NewProtocolFeeRecipientCannotBeNullAddress.selector);
         looksRareProtocol.updateProtocolFeeRecipient(address(0));
     }
 
-    function test_UpdateProtocolFeeRecipientNotOwner() public {
+    function test_UpdateProtocolFeeRecipient_RevertIf_NotOwner() public {
         vm.expectRevert(IOwnableTwoSteps.NotOwner.selector);
         looksRareProtocol.updateProtocolFeeRecipient(address(1));
     }
 
-    function testFuzz_CannotValidateOrderIfTooEarlyToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
+    function testFuzz_ValidateOrder_RevertIf_TooEarlyToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
         // 300 because because it is deducted by 5 minutes + 1 second
         vm.assume(timestamp > 300 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
@@ -97,7 +97,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testFuzz_CannotValidateOrderIfTooLateToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
+    function testFuzz_ValidateOrder_RevertIf_TooLateToExecute(uint256 timestamp) public asPrankedUser(takerUser) {
         vm.assume(timestamp > 0 && timestamp < type(uint256).max);
         // Change timestamp to avoid underflow issues
         vm.warp(timestamp);
@@ -119,7 +119,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testFuzz_CannotValidateOrderIfStartTimeLaterThanEndTime(
+    function testFuzz_ValidateOrder_RevertIf_StartTimeLaterThanEndTime(
         uint256 timestamp
     ) public asPrankedUser(takerUser) {
         vm.assume(timestamp < type(uint256).max);
@@ -141,7 +141,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_CannotValidateOrderIfMakerBidItemIdsIsEmpty() public {
+    function test_ValidateOrder_RevertIf_MakerBidItemIdsIsEmpty() public {
         (OrderStructs.Maker memory makerBid, OrderStructs.Taker memory takerAsk) = _createMockMakerBidAndTakerAsk(
             address(mockERC721),
             address(weth)
@@ -157,7 +157,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function testFuzz_CannotValidateOrderIfMakerBidItemIdsLengthMismatch(
+    function testFuzz_ValidateOrder_RevertIf_MakerBidItemIdsLengthMismatch(
         uint256 makerBidItemIdsLength
     ) public asPrankedUser(takerUser) {
         vm.assume(makerBidItemIdsLength > 1 && makerBidItemIdsLength < 100_000);
@@ -177,7 +177,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         looksRareProtocol.executeTakerAsk(takerAsk, makerBid, signature, _EMPTY_MERKLE_TREE, _EMPTY_AFFILIATE);
     }
 
-    function test_CannotValidateOrderIfMakerAskItemIdsIsEmpty() public asPrankedUser(takerUser) {
+    function test_ValidateOrder_RevertIf_MakerAskItemIdsIsEmpty() public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
 
         (OrderStructs.Maker memory makerAsk, OrderStructs.Taker memory takerBid) = _createMockMakerAskAndTakerBid(
@@ -201,7 +201,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function testFuzz_CannotValidateOrderIfMakerAskItemIdsLengthMismatch(
+    function testFuzz_ValidateOrder_RevertIf_MakerAskItemIdsLengthMismatch(
         uint256 makerAskItemIdsLength
     ) public asPrankedUser(takerUser) {
         vm.deal(takerUser, 100 ether);
@@ -228,7 +228,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function test_CannotExecuteTransactionIfMakerBidWithStrategyForMakerAsk() public {
+    function test_ExecuteTransaction_RevertIf_MakerBidWithStrategyForMakerAsk() public {
         _setUpUsers();
 
         vm.prank(_owner);
@@ -268,7 +268,7 @@ contract ExecutionManagerTest is ProtocolBase, IExecutionManager, IStrategyManag
         );
     }
 
-    function test_CannotExecuteTransactionIfMakerAskWithStrategyForMakerBid() public {
+    function test_ExecuteTransaction_RevertIf_MakerAskWithStrategyForMakerBid() public {
         _setUpUsers();
 
         vm.prank(_owner);

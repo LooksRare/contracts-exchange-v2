@@ -128,7 +128,7 @@ contract MultiFillCollectionOrdersTest is ProtocolBase, IStrategyManager {
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);
     }
 
-    function test_InactiveStrategy() public {
+    function test_RevertIf_InactiveStrategy() public {
         _setUpUsers();
         _setUpNewStrategy();
 

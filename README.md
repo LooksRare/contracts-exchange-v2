@@ -20,6 +20,13 @@ yarn add @looksrare/contracts-exchange-v2
 npm install @looksrare/contracts-exchange-v2
 ```
 
+## Deployments
+
+| Network  | LooksRareProtocol                                                                                                                 | TransferManager                                                                                                                   | OrderV2AValidator                                                                                                                 |
+| :------- | :-------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| Ethereum | [0x0000000000E655fAe4d56241588680F86E3b2377](https://etherscan.io/address/0x0000000000E655fAe4d56241588680F86E3b2377#code)        | [0x000000000060C4Ca14CfC4325359062ace33Fe3D](https://etherscan.io/address/0x000000000060C4Ca14CfC4325359062ace33Fe3D#code)        | [0x2a784a5b5C8AE0bd738FBc67E4C069dB4F4961B7](https://etherscan.io/address/0x2a784a5b5C8AE0bd738FBc67E4C069dB4F4961B7#code)        |
+| Goerli   | [0x35C2215F2FFe8917B06454eEEaba189877F200cf](https://goerli.etherscan.io/address/0x35C2215F2FFe8917B06454eEEaba189877F200cf#code) | [0xC20E0CeAD98abBBEb626B77efb8Dc1E5D781f90c](https://goerli.etherscan.io/address/0xC20E0CeAD98abBBEb626B77efb8Dc1E5D781f90c#code) | [0x7454Cc9AEB024bcE6A2CDC49ad4733B4D8215fb8](https://goerli.etherscan.io/address/0x7454Cc9AEB024bcE6A2CDC49ad4733B4D8215fb8#code) |
+
 ## NPM package
 
 The NPM package contains the following:

@@ -185,7 +185,7 @@ contract CollectionOrdersTest is ProtocolBase {
         });
 
         uint256 itemIdInMerkleTree = 2;
-        (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
+        (bytes32 merkleRoot, bytes32[] memory proof) = _mintNFTsToOwnerAndGetMerkleRootAndProof({
             owner: takerUser,
             numberOfItemsInMerkleTree: 5,
             itemIdInMerkleTree: itemIdInMerkleTree
@@ -228,7 +228,7 @@ contract CollectionOrdersTest is ProtocolBase {
             itemId: 0 // Not used
         });
 
-        (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
+        (bytes32 merkleRoot, bytes32[] memory proof) = _mintNFTsToOwnerAndGetMerkleRootAndProof({
             owner: takerUser,
             numberOfItemsInMerkleTree: 5,
             // Doesn't matter what itemIdInMerkleTree is as we are are going to tamper with the proof
@@ -295,7 +295,7 @@ contract CollectionOrdersTest is ProtocolBase {
         // 3. Amount is 0 (with merkle proof)
         makerBid.strategyId = 2;
         uint256 itemIdInMerkleTree = 5;
-        (bytes32 merkleRoot, bytes32[] memory proof) = _getMerkleRootAndProof({
+        (bytes32 merkleRoot, bytes32[] memory proof) = _mintNFTsToOwnerAndGetMerkleRootAndProof({
             owner: takerUser,
             numberOfItemsInMerkleTree: 6,
             itemIdInMerkleTree: itemIdInMerkleTree
@@ -419,7 +419,7 @@ contract CollectionOrdersTest is ProtocolBase {
         assertEq(errorSelector, OrderInvalid.selector);
     }
 
-    function _getMerkleRootAndProof(
+    function _mintNFTsToOwnerAndGetMerkleRootAndProof(
         address owner,
         uint256 numberOfItemsInMerkleTree,
         uint256 itemIdInMerkleTree

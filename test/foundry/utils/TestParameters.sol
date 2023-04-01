@@ -21,6 +21,7 @@ abstract contract TestParameters is Test {
 
     // Currencies
     address internal constant ETH = address(0);
+    address internal constant WETH_MAINNET = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     // Generic fee parameters
     uint16 internal constant _standardProtocolFeeBp = uint16(50);

@@ -240,8 +240,8 @@ contract CreatorFeeManagerWithRebatesTest is ProtocolBase {
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
         assertEq(
-            weth.balanceOf(_owner),
-            _initialWETHBalanceOwner + (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP,
+            weth.balanceOf(address(protocolFeeRecipient)),
+            (price * _standardProtocolFeeBp) / ONE_HUNDRED_PERCENT_IN_BP,
             "Protocol fee recipient should receive 0.5% of the whole price"
         );
         assertEq(

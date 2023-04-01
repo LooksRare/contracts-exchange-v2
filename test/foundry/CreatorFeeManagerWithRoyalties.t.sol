@@ -363,10 +363,10 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
 
         // Maker bid user pays the whole price
         assertEq(weth.balanceOf(makerUser), _initialWETHBalanceUser - price);
-        // Owner receives 2% of the whole price
         assertEq(
-            weth.balanceOf(_owner),
-            _initialWETHBalanceOwner + (price * _newProtocolFee) / ONE_HUNDRED_PERCENT_IN_BP
+            weth.balanceOf(address(protocolFeeRecipient)),
+            (price * _newProtocolFee) / ONE_HUNDRED_PERCENT_IN_BP,
+            "ProtocolFeeRecipient should receive 2% of the whole price"
         );
         // Taker ask user receives 95% of the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_500) / ONE_HUNDRED_PERCENT_IN_BP);
@@ -389,10 +389,10 @@ contract CreatorFeeManagerWithRoyaltiesTest is ProtocolBase {
             weth.balanceOf(_royaltyRecipient),
             _initialWETHBalanceRoyaltyRecipient + (price * _newCreatorRoyaltyFee) / ONE_HUNDRED_PERCENT_IN_BP
         );
-        // Owner receives protocol fee
         assertEq(
-            weth.balanceOf(_owner),
-            _initialWETHBalanceOwner + (price * _newProtocolFee) / ONE_HUNDRED_PERCENT_IN_BP
+            weth.balanceOf(address(protocolFeeRecipient)),
+            (price * _newProtocolFee) / ONE_HUNDRED_PERCENT_IN_BP,
+            "ProtocolFeeRecipient should receive protocol fee"
         );
         // Taker ask user receives 95% of the whole price
         assertEq(weth.balanceOf(takerUser), _initialWETHBalanceUser + (price * 9_500) / ONE_HUNDRED_PERCENT_IN_BP);

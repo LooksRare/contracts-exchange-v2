@@ -137,11 +137,10 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         );
         // Affiliate user receives 20% of protocol fee
         assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
-        // Owner receives 80% of protocol fee
         assertEq(
-            address(_owner).balance,
-            _initialETHBalanceOwner +
-                ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount)
+            address(protocolFeeRecipient).balance,
+            ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount),
+            "ProtocolFeeRecipient should receive 80% of protocol fee"
         );
         // No leftover in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 0);
@@ -239,13 +238,12 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         );
         // Affiliate user receives 20% of protocol fee
         assertEq(address(_affiliate).balance, _initialETHBalanceAffiliate + expectedAffiliateFeeAmount);
-        // Owner receives 80% of protocol fee
         assertEq(
-            address(_owner).balance,
-            _initialETHBalanceOwner +
-                (((numberPurchases - 1) * (price * _minTotalFeeBp)) /
-                    ONE_HUNDRED_PERCENT_IN_BP -
-                    expectedAffiliateFeeAmount)
+            address(protocolFeeRecipient).balance,
+            (((numberPurchases - 1) * (price * _minTotalFeeBp)) /
+                ONE_HUNDRED_PERCENT_IN_BP -
+                expectedAffiliateFeeAmount),
+            "ProtocolFeeRecipient should receive 80% of protocol fee"
         );
         // Only 1 wei left in the balance of the contract
         assertEq(address(looksRareProtocol).balance, 1);
@@ -291,11 +289,10 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         );
         // Affiliate user receives 20% of protocol fee
         assertEq(weth.balanceOf(_affiliate), _initialWETHBalanceAffiliate + expectedAffiliateFeeAmount);
-        // Owner receives 80% of protocol fee
         assertEq(
-            weth.balanceOf(_owner),
-            _initialWETHBalanceOwner +
-                ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount)
+            weth.balanceOf(address(protocolFeeRecipient)),
+            ((price * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount),
+            "ProtocolFeeRecipient should receive 80% of protocol fee"
         );
         // Verify the nonce is marked as executed
         assertEq(looksRareProtocol.userOrderNonce(makerUser, makerBid.orderNonce), MAGIC_VALUE_ORDER_NONCE_EXECUTED);

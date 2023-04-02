@@ -529,8 +529,11 @@ contract StandardTransactionsTest is ProtocolBase {
         assertEq(weth.balanceOf(buyer), _initialWETHBalanceUser - price);
         // Seller receives 99.5% of the whole price
         assertEq(weth.balanceOf(seller), _initialWETHBalanceUser + expectedFees[0]);
-        // Owner receives 1.5% of the whole price
-        assertEq(weth.balanceOf(_owner), _initialWETHBalanceOwner + expectedFees[2]);
+        assertEq(
+            weth.balanceOf(address(protocolFeeRecipient)),
+            expectedFees[2],
+            "ProtocolFeeRecipient should receive 1.5% of the whole price"
+        );
         // Royalty recipient receives 0.5% of the whole price
         assertEq(weth.balanceOf(_royaltyRecipient), _initialWETHBalanceRoyaltyRecipient + expectedFees[1]);
     }

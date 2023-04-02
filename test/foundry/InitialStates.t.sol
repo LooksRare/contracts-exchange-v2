@@ -17,7 +17,7 @@ contract InitialStatesTest is ProtocolBase, IStrategyManager {
      */
     function testInitialStates() public {
         assertEq(looksRareProtocol.owner(), _owner);
-        assertEq(looksRareProtocol.protocolFeeRecipient(), _owner);
+        assertEq(looksRareProtocol.protocolFeeRecipient(), address(protocolFeeRecipient));
         assertEq(address(looksRareProtocol.transferManager()), address(transferManager));
         assertEq(looksRareProtocol.WETH(), address(weth));
         assertEq(looksRareProtocol.chainId(), block.chainid);

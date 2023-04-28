@@ -229,10 +229,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         mockERC721.transferFrom(takerUser, _randomUser, faultyTokenId);
 
         uint256 totalCost = price * (numberOfPurchases - 1);
-        uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(
-            totalCost * _minTotalFeeBp,
-            _affiliateRate
-        );
+        uint256 expectedAffiliateFeeAmount = _calculateAffiliateFee(totalCost * _minTotalFeeBp, _affiliateRate);
 
         // Execute taker bid transaction
         vm.prank(takerUser);
@@ -264,9 +261,7 @@ contract AffiliateOrdersTest is ProtocolBase, IAffiliateManager {
         );
         assertEq(
             weth.balanceOf(address(protocolFeeRecipient)),
-            (totalCost * _minTotalFeeBp) /
-            ONE_HUNDRED_PERCENT_IN_BP -
-            expectedAffiliateFeeAmount,
+            (totalCost * _minTotalFeeBp) / ONE_HUNDRED_PERCENT_IN_BP - expectedAffiliateFeeAmount,
             "Owner should receive 80% of protocol fee"
         );
     }

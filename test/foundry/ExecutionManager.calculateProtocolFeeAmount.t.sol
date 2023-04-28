@@ -149,8 +149,8 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
             "Royalty recipient should receive 0.1% of the whole price"
         );
         assertEq(
-            _owner.balance,
-            _initialETHBalanceOwner + expectedFees[2],
+            address(protocolFeeRecipient).balance,
+            expectedFees[2],
             "Protocol fee recipient receives 0.9% of the whole price"
         );
     }
@@ -175,8 +175,8 @@ contract ExecutionManagerCalculateProtocolFeeAmountTest is ProtocolBase, IExecut
             "Royalty recipient should receive 0.1% of the whole price"
         );
         assertEq(
-            weth.balanceOf(_owner),
-            _initialWETHBalanceOwner + expectedFees[2],
+            weth.balanceOf(address(protocolFeeRecipient)),
+            expectedFees[2],
             "Protocol fee recipient should receive 0.9% of the whole price"
         );
     }

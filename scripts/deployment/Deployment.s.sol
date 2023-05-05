@@ -42,7 +42,7 @@ contract Deployment is Script {
         } else if (chainId == 5) {
             weth = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
             royaltyFeeRegistry = 0x12405dB79325D06a973aD913D6e9BdA1343cD526;
-            deployerPrivateKey = vm.envUint("GOERLI_KEY");
+            deployerPrivateKey = vm.envUint("TESTNET_KEY");
         } else {
             revert ChainIdInvalid(chainId);
         }

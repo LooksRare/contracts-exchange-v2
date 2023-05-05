@@ -25,7 +25,11 @@ contract ProtocolFeeRecipientDeployment is Script {
         } else if (chainId == 5) {
             weth = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
             feeSharingSetter = 0x3d1E1521b659b0C942836DeF24dd254aBdEb873b;
-            deployerPrivateKey = vm.envUint("GOERLI_KEY");
+            deployerPrivateKey = vm.envUint("TESTNET_KEY");
+        } else if (chainId == 11155111) {
+            weth = 0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9;
+            feeSharingSetter = 0x8a7c709648160a5A1191D07dfAB316224E4C6b07;
+            deployerPrivateKey = vm.envUint("TESTNET_KEY");
         } else {
             revert ChainIdInvalid(chainId);
         }

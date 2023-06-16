@@ -2,10 +2,10 @@
 pragma solidity 0.8.17;
 
 // Scripting tool
-import {Script} from "../../lib/forge-std/src/Script.sol";
+import {Script} from "../lib/forge-std/src/Script.sol";
 
 // Core contracts
-import {LooksRareProtocol} from "../../contracts/LooksRareProtocol.sol";
+import {LooksRareProtocol} from "../contracts/LooksRareProtocol.sol";
 
 contract AddAffiliate is Script {
     error ChainIdInvalid(uint256 chainId);

@@ -4,7 +4,7 @@ pragma solidity >=0.8.17;
 contract MockSmartWallet {
     address public owner;
 
-    bytes4 internal constant MAGICVALUE = 0x1626ba7e;
+    bytes4 internal constant MAGICVALUE = bytes4(keccak256("isValidSignature(bytes32,bytes)"));
 
     modifier onlyOwner() {
         if (msg.sender != owner) {

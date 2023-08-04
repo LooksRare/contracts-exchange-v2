@@ -21,11 +21,9 @@ contract Deployment is Script {
 
     error ChainIdInvalid(uint256 chainId);
 
-    // WETH
     address public weth;
 
-    // Royalty fee registry
-    address public royaltyFeeRegistry;
+    // address public royaltyFeeRegistry;
 
     uint16 internal constant _standardProtocolFeeBp = uint16(50);
     uint16 internal constant _minTotalFeeBp = uint16(50);
@@ -37,11 +35,14 @@ contract Deployment is Script {
 
         if (chainId == 1) {
             weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-            royaltyFeeRegistry = 0x55010472a93921a117aAD9b055c141060c8d8022;
+            // royaltyFeeRegistry = 0x55010472a93921a117aAD9b055c141060c8d8022;
             deployerPrivateKey = vm.envUint("MAINNET_KEY");
         } else if (chainId == 5) {
             weth = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6;
-            royaltyFeeRegistry = 0x12405dB79325D06a973aD913D6e9BdA1343cD526;
+            // royaltyFeeRegistry = 0x12405dB79325D06a973aD913D6e9BdA1343cD526;
+            deployerPrivateKey = vm.envUint("TESTNET_KEY");
+        } else if (chainId == 11155111) {
+            weth = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
             deployerPrivateKey = vm.envUint("TESTNET_KEY");
         } else {
             revert ChainIdInvalid(chainId);
